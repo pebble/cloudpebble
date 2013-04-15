@@ -4,14 +4,16 @@
 {% block content %}
 <div class="container-fluid">
     <div class="masthead">
-        <h3 class="muted">CloudPebble – {{ project.name }}</h3>
+        <h3 class="muted">CloudPebble – <span class="project-name">{{ project.name }}</span></h3>
     </div>
     <div class="row-fluid">
         <div class="span2">
             <div class="well">
                 <ul class="nav nav-list">
+                    <li class="nav-header">Project</li>
+                    <li><a href="#">Settings</a></li>
+                    <li><a href="#">Compilation</a></li>
                     <li class="nav-header">Source files</li>
-                    <!-- <li class="active"><a href="#">stopwatch.c <i class="icon-edit"></i></a></li> -->
                     <li class="divider" id="end-source-files"></li>
                     <li><a href="#" id="new-source-file"><strong>New file</strong></a></li>
                     <li class="nav-header">Resources</li>
@@ -21,12 +23,8 @@
                     <li><a href="#">DejaVuSans.ttf</a></li>
                     <li><a href="#">DejaVuSans-Bold.ttf</a></li>
                     <li class="divider"></li>
-                    <li><a href="#"><strong>Upload resource</strong></a></li>
+                    <li><a href="#"><strong>New resource</strong></a></li>
                 </ul>
-            </div>
-            <div class="well">
-                <a href="#" id="compile-button" class="btn">Save</a>
-                <a href="#" id="compile-button" class="btn btn-primary">Compile</a>
             </div>
         </div>
         <div class="span10" id="pane-parent">
