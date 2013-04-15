@@ -1,0 +1,16 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>{% block title %}CloudPebble{% endblock %}</title>
+        <link rel="stylesheet" href="{% static 'ide/css/bootstrap.css' %}">
+        {% block head %}{% endblock %}
+    </head>
+    <body>
+        {% block content %}{% endblock %}
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script src="{% static 'ide/js/bootstrap.js' %}"></script>
+        {% block scripts %}{% endblock %}
+    </body>
+</html>

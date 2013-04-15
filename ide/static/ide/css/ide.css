@@ -1,0 +1,7 @@
+.CodeMirror {
+  border: 1px solid #eee;
+  border-radius: 4px;
+  font-family: Menlo, 'Deja Vu Sans Mono', monospace;
+  font-size: 13px;
+  line-height: 18px;
+}
