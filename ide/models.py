@@ -1,5 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
+
+import os
+import os.path
 
 class Project(models.Model):
     APP_WATCHFACE = 0
@@ -30,9 +35,9 @@ class Resource(models.Model):
     file_name = models.CharField(max_length=100)
     character_regex = models.CharField(max_length=100, blank=True)
 
-    def get_local_filename():
-        padded_id = '%03d' % self.id
-        return 'resources/%s/%s/%s' % (padded_id[0], padded_id[1], padded_id)
+    def get_local_filename(self):
+        padded_id = '%05d' % self.id
+        return 'user_data/resources/%s/%s/%s' % (padded_id[0], padded_id[1], padded_id)
 
     local_filename = property(get_local_filename)
 
@@ -43,11 +48,30 @@ class SourceFile(models.Model):
     project = models.ForeignKey(Project)
     file_name = models.CharField(max_length=100)
 
-    def get_local_filename():
-        padded_id = '%03d' % self.id
-        return 'sources/%s/%s/%s' % (padded_id[0], padded_id[1], padded_id)
+    def get_local_filename(self):
+        padded_id = '%05d' % self.id
+        return 'user_data/sources/%s/%s/%s' % (padded_id[0], padded_id[1], padded_id)
+
+    def get_contents(self):
+        try:
+            return open(self.local_filename).read()
+        except IOError:
+            return ''
+
+    def save_file(self, content):
+        if not os.path.exists(os.path.dirname(self.local_filename)):
+            os.makedirs(os.path.dirname(self.local_filename))
+        open(self.local_filename, 'w').write(content)
 
     local_filename = property(get_local_filename)
 
     class Meta:
         unique_together = (('project', 'file_name'))
+
+@receiver(post_delete)
+def delete_file(sender, instance, **kwargs):
+    if sender == SourceFile:
+        try:
+            os.unlink(instance.local_filename)
+        except OSError:
+            pass
