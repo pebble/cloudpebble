@@ -1,0 +1,3 @@
+*.pyc
+user_data/
+dev.db
