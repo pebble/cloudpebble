@@ -17,13 +17,8 @@
                     <li class="divider" id="end-source-files"></li>
                     <li><a href="#" id="new-source-file"><strong>New file</strong></a></li>
                     <li class="nav-header">Resources</li>
-                    <li><a href="#">buttons.png</a></li>
-                    <li><a href="#">stopwatch.png</a></li>
-                    <li class="divider"></li>
-                    <li><a href="#">DejaVuSans.ttf</a></li>
-                    <li><a href="#">DejaVuSans-Bold.ttf</a></li>
-                    <li class="divider"></li>
-                    <li><a href="#"><strong>New resource</strong></a></li>
+                    <li class="hide" id="end-resources"></li>
+                    <li id="sidebar-pane-new-resource"><a href="#"><strong>New resource</strong></a></li>
                 </ul>
             </div>
         </div>
@@ -32,6 +27,66 @@
             </div>
         </div>
     </div>
+</div>
+<!-- Resource editing template -->
+<div id="resource-pane-template" class="hide">
+    <form class="form-horizontal">
+        <div class="alert alert-error hide"></div>
+        <div class="well">
+            <div class="control-group">
+                <label class="control-label" for="edit-resource-type">Resource type</label>
+                <div class="controls">
+                    <select id="edit-resource-type">
+                        <option value="png">PNG image</option>
+                        <option value="png-trans">PNG with transparency</option>
+                        <option value="font">TrueType font</option>
+                        <option value="raw">Raw binary blob</option>
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="edit-resource-file">File</label>
+                <div class="controls">
+                    <input type="file" id="edit-resource-file">
+                    <span class="help-block hide">You can have multiple Pebble resources from a single file (for different sizes, etc.)</span>
+                </div>
+            </div>
+        </div>
+        <div class="control-group well " id="non-font-resource-group">
+            <label class="control-label" for="edit-resource-id">Resource Identifier</label>
+            <div class="controls">
+                <input type="text" class="span4 edit-resource-id" placeholder="IMAGE_EXAMPLE_IDENTIFIER">
+                <span class="help-block">This is used in your code and must be a valid C identifier.</span>
+            </div>
+        </div>
+        <div id="font-resource-group" class="hide">
+            <div class="well font-resource-group-single">
+                <div class="control-group">
+                    <label class="control-label">Resource Identifier</label>
+                    <div class="controls">
+                        <input type="text" class="span4 edit-resource-id" placeholder="FONT_EXAMPLE_BOLD_SUBSET_24">
+                        <span class="help-block">This is used in your code and must be a valid C identifier.<br>
+                            It must end with the desired font size.</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Character Expression</label>
+                    <div class="controls">
+                        <input type="text" class="span4 edit-resource-regex" placeholder="[0-9:. ]">
+                        <span class="help-block">A PCRE regular expression that restricts characters.<br>
+                            If specified, each character will be matched against it individually and only those that match will be included.<br>
+                            If omitted, all characters are included; this may be impractical for large fonts.<br>
+                            If you're unsure, <code>[a-zA-Z0-9:., -]</code> is probably sufficient (indeed, excessive) for most tasks.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="edit-resource-buttons" class="well form-actions">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="button" class="btn hide" id="add-font-resource">Another font resource</button>
+            <button type="button" class="btn btn-danger hide" id="edit-resource-delete">Delete</button>
+        </div>
+    </form>
 </div>
 <!-- Modal text prompt -->
 <div id="modal-text-input" class="modal hide fade" tabindex="-1" role="dialog">

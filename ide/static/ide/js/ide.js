@@ -2,9 +2,10 @@ jquery_csrf_setup();
 
 (function() {
     var project_source_files = {};
+    var project_resources = {};
     var suspended_panes = {};
 
-    function add_source_file(file) {
+    var add_source_file = function(file) {
         var end = $('#end-source-files');
         var link = $('<a href="#"></a>');
         link.text(file.name + ' ');
@@ -17,7 +18,24 @@ jquery_csrf_setup();
         project_source_files[file.name] = file;
     }
 
-    function suspend_active_pane() {
+    var add_resource = function(resource) {
+        var end = $('#end-resources-' + resource.kind);
+        if(!end.length) {
+            // Create an appropriate section
+            var res_end = $('#end-resources');
+            end = $('<li id="end-resources-' + resource.kind + '" class="divider">');
+            res_end.before(end);
+        }
+        var link = $('<a href="#"></a>').text(resource.file_name).click(function() {
+            edit_resource(resource);
+        });
+        var li = $('<li id="sidebar-pane-resource-' + resource.id + '">');
+        li.append(link);
+        end.before(li);
+        project_resources[resource.file_name] = resource;
+    }
+
+    var suspend_active_pane = function() {
         var pane_id = $('#main-pane').data('pane-id');
         if(!pane_id) {
             $('#pane-parent').html('').append($('<div id="main-pane"></div>'));
@@ -39,7 +57,7 @@ jquery_csrf_setup();
         $('#pane-parent').append(empty_pane);
     }
 
-    function destroy_active_pane() {
+    var destroy_active_pane = function() {
         var pane_id = $('#main-pane').data('pane-id');
         $('#pane-parent').html('');
         var list_entry = $('#sidebar-pane-' + pane_id);
@@ -48,7 +66,7 @@ jquery_csrf_setup();
         }
     }
 
-    function restore_suspended_pane(id) {
+    var restore_suspended_pane = function(id) {
         var pane = suspended_panes[id] 
         if(pane) {
             $('#pane-parent').html('').append(pane);
@@ -68,7 +86,7 @@ jquery_csrf_setup();
         return false;
     }
 
-    function edit_source_file(file) {
+    var edit_source_file = function(file) {
         // See if we already had it open.
         suspend_active_pane();
         if(restore_suspended_pane('source-'+file.id)) {
@@ -168,7 +186,238 @@ jquery_csrf_setup();
         });
     }
 
+    var process_resource_form = function(form, is_new, url, callback) {
+        var report_error = function(message) {
+            form.find('.alert:first').removeClass("hide").text(message);
+        }
+        var remove_error = function() {
+            form.find('.alert:first').addClass("hide");
+        }
+        var disable_controls = function() {
+            form.find('input, button, select').attr('disabled', 'disabled');
+        }
+        var enable_controls = function() {
+            if(is_new) {
+                form.find('input, button, select').removeAttr('disabled');
+            } else {
+                form.find('input, button').removeAttr('disabled');
+            }
+        }
 
+        remove_error();
+        var files = form.find('#edit-resource-file').get(0).files;
+        if(is_new) {
+            if(files.length != 1) {
+                report_error("You must upload a file.");
+                return;
+            }
+            var file = files[0];
+            if(!!project_resources[file.name]) {
+                report_error("A resource called '" + file.name + "' already exists in the project.");
+                return;
+            }
+        }
+        var kind = form.find('#edit-resource-type').val();
+        if(files.length == 1) {
+            if((kind == 'png' || kind == 'png-trans') && file.type != "image/png") {
+                report_error("You must upload a PNG image.");
+                return;
+            }
+            if(kind == 'font' && !/\.ttf$/.test(file.name)) {
+                report_error("You must upload a TrueType Font (.ttf)");
+                return;
+            }
+        }
+        var resources = [];
+        if(kind != 'font') {
+            var resource_id = form.find('#non-font-resource-group .edit-resource-id').val();
+            if(resource_id == '' || !validate_resource_id(resource_id)) {
+                report_error("You must provide a valid resource identifier. Use only letters, numbers and underscores.");
+                return;
+            }
+            resources = [{'id': resource_id}];
+        } else {
+            var resource_ids = {};
+            var okay = true;
+            $.each(form.find('.font-resource-group-single'), function(index, value) {
+                value = $(value);
+                var resource_id = value.find('.edit-resource-id').val();
+                var regex = value.find('.edit-resource-regex').val();
+                if(resource_id == '') return true; // continue
+                if(!validate_resource_id(resource_id)) {
+                    report_error("Invalid resource identifier. Use only letters, numbers and underscores.");
+                    okay = false;
+                    return false;
+                }
+                if(!/[0-9]+$/.test(resource_id)) {
+                    report_error("Font resource identifiers must end with the desired font size, e.g. " + resource_id + "_24");
+                    okay = false;
+                    return false;
+                }
+                if(!!resource_ids[resource_id]) {
+                    report_error("You can't have multiple identical identifiers. Please remove or change one.");
+                    okay = false; return;
+                }
+                resource_ids[resource_id] = true;
+                resources.push({'id': resource_id, 'regex': regex});
+            });
+            if(!okay) return;
+            if(resources.length == 0) {
+                report_error("You must specify at least one resource.");
+                return;
+            }
+        }
+        var form_data = new FormData();
+        form_data.append("kind", kind);
+        form_data.append("file", file);
+        form_data.append("resource_ids", JSON.stringify(resources));
+        disable_controls();
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: form_data,
+            processData: false,
+            contentType: false,
+            dataType: 'json',
+            success: function(data) {
+                enable_controls();
+                if(data.success) {
+                    callback(data.file);
+                } else {
+                    report_error(data.error);
+                }
+            }
+        });
+    }
+
+    var edit_resource = function(resource) {
+        suspend_active_pane();
+        if(restore_suspended_pane('resource-' + resource.id)) return;
+        $.getJSON("/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/info", function(data) {
+            console.info(data);
+            if(!data.success) return;
+            var resource = data.resource;
+            var pane = prepare_resource_pane();
+            var list_entry = $('#sidebar-pane-resource-' + resource.id);
+            if(list_entry) {
+                list_entry.addClass('active');
+            }
+
+            $('#main-pane').data('pane-id', 'resource-' + resource.id);
+            pane.find('#edit-resource-type').val(resource.kind).attr('disabled', 'disabled');
+            pane.find('label[for="edit-resource-file"]').text("Replace with new file");
+            pane.find('#edit-resource-file').after($("<span class='help-block'>If specified, this file will replace the current file for this resource, regardless of its filename.</span>"));
+
+            if(resource.kind != 'font') {
+                if(resource.resource_ids.length > 0) {
+                    pane.find('#non-font-resource-group .edit-resource-id').val(resource.resource_ids[0].id);
+                }
+            } else {
+                pane.find('#non-font-resource-group').addClass('hide');
+                var template = pane.find('.font-resource-group-single');
+                template.detach();
+                var parent = $('#font-resource-group').removeClass('hide');
+                console.log(resource.resource_ids);
+                $.each(resource.resource_ids, function(index, value) {
+                    var group = template.clone();
+                    group.find('.edit-resource-id').val(value.id);
+                    group.find('.edit-resource-regex').val(value.regex);
+                    parent.append(group);
+                });
+                pane.find('#add-font-resource').removeClass('hide').click(function() {
+                    var clone = parent.find('.font-resource-group-single:last').clone();
+                    if(!clone.length) {
+                        clone = template.clone();
+                        parent.append(clone);
+                    }
+                });
+            }
+
+            pane.find('#edit-resource-delete').removeClass('hide').click(function() {
+                modal_confirmation_prompt("Do you want to delete " + resource.file_name + "?", "This cannot be undone.", function() {
+                    pane.find('input, button, select').attr('disabled', 'disabled');
+                    $.post("/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/delete", function(data) {
+                        pane.find('input, button, select').removeAttr('disabled');
+                        if(data.success) {
+                            destroy_active_pane();
+                            delete project_resources[resource.file_name];
+                            list_entry.remove();
+                        } else {
+                            alert(data.error);
+                        }
+                    });
+                });
+            });
+
+            var form = pane.find('form');
+            form.submit(function(e) {
+                e.preventDefault();
+                process_resource_form(form, false, "/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/update", function(data) {
+                    // There's not actually anything terribly interesting to do here yet...
+                });
+            });
+
+        });
+    }
+
+    // Set up the resource editing template.
+    var resource_template = $('#resource-pane-template');
+    resource_template.remove();
+
+    var prepare_resource_pane = function() {
+        var template = resource_template.clone();
+        template.removeClass('hide');
+        $('#main-pane').append(template).data('pane-id', 'new-resource');
+
+        template.find('#edit-resource-type').change(function() {
+            if($(this).val() == 'font') {
+                template.find('#non-font-resource-group').addClass('hide');
+                template.find('#font-resource-group').removeClass('hide');
+                template.find('#add-font-resource').removeClass('hide');
+            } else {
+                template.find('#font-resource-group').addClass('hide');
+                template.find('#non-font-resource-group').removeClass('hide');
+                template.find('#add-font-resource').addClass('hide');
+            }
+        });
+
+        template.find('#add-font-resource').click(function() {
+            var clone = template.find('.font-resource-group-single:last').clone();
+            template.find('#font-resource-group').append(clone);
+        });
+        return template;
+    }
+
+    var validate_resource_id = function(id) {
+        if(/[^a-zA-Z0-9_]/.test(id)) {
+            return false;
+        }
+        return true;
+    }
+
+    var create_new_resource = function() {
+        suspend_active_pane();
+        if(restore_suspended_pane('new-resource')) return;
+        var list_entry = $('#sidebar-pane-new-resource');
+        if(list_entry) {
+            list_entry.addClass('active');
+        }
+        var pane = prepare_resource_pane();
+        var form = pane.find('form');
+
+        form.submit(function(e) {
+            e.preventDefault();
+            process_resource_form(form, true, "/ide/project/" + PROJECT_ID + "/create_resource", function(data) {
+                destroy_active_pane();
+                resource_created(data);
+            });
+        });
+    }
+
+    var resource_created = function(resource) {
+        // Add it to our resource list
+        add_resource(resource);
+    }
 
     // Load in project data.
     $.getJSON('/ide/project/' + PROJECT_ID + '/info.json', function(data) {
@@ -178,9 +427,12 @@ jquery_csrf_setup();
         }
 
         // Add source files.
-        console.log(data);
         $.each(data.source_files, function(index, value) {
             add_source_file(value);
+        });
+
+        $.each(data.resources, function(index, value) {
+            add_resource(value);
         });
     });
 
@@ -196,7 +448,6 @@ jquery_csrf_setup();
             } else {
                 resp.disable();
                 $.post("/ide/project/" + PROJECT_ID + "/create_source_file", {'name': value}, function(data) {
-                    console.log(data);
                     if(!data.success) {
                         resp.error(data.error);
                     } else {
@@ -208,7 +459,10 @@ jquery_csrf_setup();
         });
     });
 
-    function modal_text_prompt(title, prompt, placeholder, default_value, callback) {
+    // The add resource button
+    $('#sidebar-pane-new-resource > a').click(create_new_resource);
+
+    var modal_text_prompt =  function(title, prompt, placeholder, default_value, callback) {
         $('#modal-text-input-title').text(title);
         $('#modal-text-input-prompt').text(prompt);
         $('#modal-text-input-value').val(default_value).attr('placeholder', placeholder);
@@ -216,7 +470,6 @@ jquery_csrf_setup();
         $('#modal-text-input').modal();
         $('#modal-text-input-value').removeAttr('disabled');
         $('#modal-text-confirm-button').unbind('click').click(function() {
-            console.log('eep');
             callback($('#modal-text-input-value').val(), {
                 error: function(message) {
                     $('#modal-text-input-value').removeAttr('disabled');
@@ -236,7 +489,7 @@ jquery_csrf_setup();
         });
     }
 
-    function modal_confirmation_prompt(title, prompt, callback) {
+    var modal_confirmation_prompt = function(title, prompt, callback) {
         $('#modal-warning-prompt-title').text(title);
         $('#modal-warning-prompt-warning').text(prompt);
         $('#modal-warning-prompt').modal();

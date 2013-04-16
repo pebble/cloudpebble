@@ -23,17 +23,17 @@ class Project(models.Model):
     class Meta:
         unique_together = (('owner', 'name'),)
 
-class Resource(models.Model):
+class ResourceFile(models.Model):
     project = models.ForeignKey(Project)
     RESOURCE_KINDS = (
-        'raw', 'Binary blob',
-        'png', '1-bit PNG',
-        'png-trans', '1-bit PNG with transparency',
-        'font', 'True-Type Font'
+        ('raw', 'Binary blob'),
+        ('png', '1-bit PNG'),
+        ('png-trans', '1-bit PNG with transparency'),
+        ('font', 'True-Type Font')
     )
-    def_name = models.CharField(max_length=100)
+
     file_name = models.CharField(max_length=100)
-    character_regex = models.CharField(max_length=100, blank=True)
+    kind = models.CharField(max_length=9, choices=RESOURCE_KINDS)
 
     def get_local_filename(self):
         padded_id = '%05d' % self.id
@@ -41,8 +41,27 @@ class Resource(models.Model):
 
     local_filename = property(get_local_filename)
 
+    def save_file(self, stream):
+        if not os.path.exists(os.path.dirname(self.local_filename)):
+            os.makedirs(os.path.dirname(self.local_filename))
+        out = open(self.local_filename, 'wb')
+        for chunk in stream.chunks():
+            out.write(chunk)
+        out.close()
+
+    def get_identifiers(self):
+        return ResourceIdentifier.objects.filter(resource_file=self)
+
     class Meta:
-        unique_together = (('project', 'file_name'), ('project', 'def_name'))
+        unique_together = (('project', 'file_name'),)
+
+class ResourceIdentifier(models.Model):
+    resource_file = models.ForeignKey(ResourceFile)
+    resource_id = models.CharField(max_length=100)
+    character_regex = models.CharField(max_length=100, blank=True, null=True)
+
+    class Meta:
+        unique_together = (('resource_file', 'resource_id'),)
 
 class SourceFile(models.Model):
     project = models.ForeignKey(Project)
@@ -70,7 +89,7 @@ class SourceFile(models.Model):
 
 @receiver(post_delete)
 def delete_file(sender, instance, **kwargs):
-    if sender == SourceFile:
+    if sender == SourceFile or sender == ResourceFile:
         try:
             os.unlink(instance.local_filename)
         except OSError:
