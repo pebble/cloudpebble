@@ -12,7 +12,7 @@
                 <ul class="nav nav-list">
                     <li class="nav-header">Project</li>
                     <li><a href="#">Settings</a></li>
-                    <li><a href="#">Compilation</a></li>
+                    <li id="sidebar-pane-compile"><a href="#">Compilation</a></li>
                     <li class="nav-header">Source files</li>
                     <li class="divider" id="end-source-files"></li>
                     <li><a href="#" id="new-source-file"><strong>New file</strong></a></li>
@@ -87,6 +87,55 @@
             <button type="button" class="btn btn-danger hide" id="edit-resource-delete">Delete</button>
         </div>
     </form>
+</div>
+<!-- Compilation pane -->
+<div id="compilation-pane-template" class="hide">
+    <div id="last-compilation">
+        <h3>Last build</h3>
+        <div class="row">
+            <div class="offset1 span6">
+                <p>Started: <span id="last-compilation-started">April 17, 2013, 11:50 a.m.</span></p>
+                <p id="last-compilation-time">Build time: <span>0.98 seconds</span></p>
+                <p>Status: <span id="last-compilation-status" class="label label-success">Successful</span></p>
+                <p id="last-compilation-pbw" class="hide"><a href="#">Download compiled PBW</a></p>
+                <p id="last-compilation-log" class="hide"><a href="#">Build log</a></p>
+            </div>
+            <div class="span4 hide" id="last-compilation-qr-code">
+                <p><img style="margin-top: -40px;" src="https://chart.googleapis.com/chart?chs=200x200&amp;cht=qr&amp;chl=http://localhost:8000/builds/51498c82138e4b05b407c7f74eff52a4/watchface.pbw&amp;choe=UTF-8"></p>
+            </div>
+        </div>
+        <hr>
+    </div>
+    <p><button class="btn btn-primary" id="compilation-run-build-button">Run build</button></p>
+    <hr>
+    <h3>Build history</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th colspan="2"></th>
+            </tr>
+        </thead>
+        <tbody id="run-build-table">
+        <!--
+            <tr class="success">
+                <td>2</td>
+                <td>April 17, 2013, 11:50 a.m</td>
+                <td>Successful</td>
+                <td><a href="#">pbw</a></td>
+                <td><a href="#">build log</a></td>
+            </tr>
+            <tr class="error">
+                <td>1</td>
+                <td>April 17, 2013, 11:40 a.m</td>
+                <td>Failed</td>
+                <td><a href="#"></a></td>
+                <td><a href="#">build log</a></td>
+            </tr>
+        -->
+    </table>
 </div>
 <!-- Modal text prompt -->
 <div id="modal-text-input" class="modal hide fade" tabindex="-1" role="dialog">

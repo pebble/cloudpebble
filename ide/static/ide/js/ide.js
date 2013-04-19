@@ -114,7 +114,8 @@ jquery_csrf_setup();
                     indentWithTabs: true,
                     mode: PebbleMode,
                     styleActiveLine: true,
-                    value: source
+                    value: source,
+                    theme: 'monokai'
                 });
                 var browserHeight = document.documentElement.clientHeight;
                 code_mirror.getWrapperElement().style.height = (browserHeight - 130) + 'px';
@@ -419,6 +420,111 @@ jquery_csrf_setup();
         add_resource(resource);
     }
 
+    var COMPILE_SUCCESS_STATES = {
+        1: {english: "Pending", cls: "info", label: 'info'},
+        2: {english: "Failed", cls: "error", label: 'important'},
+        3: {english: "Succeeded", cls: "success", label: 'success'}
+    }
+
+    var build_history_row = function(build) {
+        var tr = $('<tr>');
+        tr.append($('<td>' + (build.id === null ? '?' : build.id) + '</td>'));
+        tr.append($('<td>' + format_datetime(build.started) + '</td>'));
+        tr.append($('<td>' + COMPILE_SUCCESS_STATES[build.state].english + '</td>'));
+        tr.append($('<td>' + (build.state == 3 ? ('<a href="/ide/builds/' + build.uuid + '/watchface.pbw">pbw</a>') : ' ') + '</td>'));
+        tr.append($('<td>' + (build.state > 1 ? ('<a href="/ide/builds/' + build.uuid + '/build_log.txt">build log</a>') : ' ' )+ '</td>'));
+        tr.addClass(COMPILE_SUCCESS_STATES[build.state].cls);
+        return tr
+    }
+
+    var update_build_history = function(pane) {
+        $.getJSON('/ide/project/' + PROJECT_ID + '/build/history', function(data) {
+            console.log(data);
+            if(!data.success) {
+                alert("Something went wrong:\n" + data.error); // This should be prettier.
+                destroy_active_pane();
+                return;
+            }
+            if(data.builds.length > 0) {
+                update_last_build(pane, data.builds[0]);
+            } else {
+                update_last_build(pane, null);
+            }
+            pane.find('#run-build-table').html('')
+            $.each(data.builds, function(index, value) {
+                console.log(value);
+                pane.find('#run-build-table').append(build_history_row(value));
+            });
+            if(data.builds.length > 0 && data.builds[0].state == 1) {
+                console.log("Setting timeout.");
+                setTimeout(function() { update_build_history(pane) }, 1000);
+            }
+        });
+    }
+
+    var show_compile_pane = function(resource) {
+        suspend_active_pane();
+        if(restore_suspended_pane("compile")) {
+            return;
+        }
+        $('#sidebar-pane-compile').addClass('active');
+        var main_pane = $('#main-pane');
+        var pane = $('#compilation-pane-template').clone().removeClass('hide');
+        // Get build history
+        update_build_history(pane);
+        pane.find('#compilation-run-build-button').click(function() {
+            var temp_build = {started: (new Date()).toISOString(), finished: null, state: 1, uuid: null, id: null};
+            update_last_build(pane, temp_build);
+            pane.find('#run-build-table').prepend(build_history_row(temp_build));
+            $.post('/ide/project/' + PROJECT_ID + '/build/run', {}, function() {
+                update_build_history(pane);
+            })
+        });
+        main_pane.append(pane);
+        main_pane.data('pane-id','compilation');
+    }
+
+    var update_last_build = function(pane, build) {
+        if(build == null) {
+            pane.find('#last-compilation').addClass('hide');
+            pane.find('#compilation-run-build-button').removeAttr('disabled');
+        } else {
+            pane.find('#last-compilation').removeClass('hide');
+            pane.find('#last-compilation-started').text(format_datetime(build.started));
+            if(build.state > 1) {
+                pane.find('#last-compilation-time').removeClass('hide').find('span').text(format_interval(build.started, build.finished));
+                pane.find('#last-compilation-log').removeClass('hide').find('a').attr('href', '/ide/builds/' + build.uuid + '/watchface.pbw');
+                pane.find('#compilation-run-build-button').removeAttr('disabled');
+                if(build.state == 3) {
+                    pane.find('#last-compilation-pbw').removeClass('hide').find('a').attr('href', '/ide/builds/' + build.uuid + '/build_log.txt');
+                    var url = window.location.origin + '/ide/builds/' + build.uuid + '/watchface.pbw';
+                    pane.find('#last-compilation-qr-code').removeClass('hide').find('img').attr('src', 'https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl='+url+'&choe=UTF-8');
+                }
+            } else {
+                pane.find('#last-compilation-time').addClass('hide');
+                pane.find('#last-compilation-log').addClass('hide');
+                pane.find('#compilation-run-build-button').attr('disabled', 'disabled');
+            }
+            if(build.state != 3) {
+                pane.find('#last-compilation-pbw').addClass('hide');
+                pane.find('#last-compilation-qr-code').addClass('hide');
+            }
+            console.log(build.state);
+            console.log($(('#last-compilation-status')));
+            pane.find('#last-compilation-status').removeClass('label-success label-error label-info').addClass('label-' + COMPILE_SUCCESS_STATES[build.state].label).text(COMPILE_SUCCESS_STATES[build.state].english)
+        }
+    }
+
+    var format_datetime = function(str) {
+        var date = new Date(Date.parse(str.replace(' ', 'T')));
+        return date.toLocaleString();
+    }
+
+    var format_interval = function(s1, s2) {
+        var t = Math.abs(Date.parse(s2.replace(' ','T')) - Date.parse(s1.replace(' ','T'))) / 1000;
+        return t.toFixed(1) + " second" + (t == 1 ? '' : 's');
+    }
+
     // Load in project data.
     $.getJSON('/ide/project/' + PROJECT_ID + '/info.json', function(data) {
         if(!data.success) {
@@ -461,6 +567,7 @@ jquery_csrf_setup();
 
     // The add resource button
     $('#sidebar-pane-new-resource > a').click(create_new_resource);
+    $('#sidebar-pane-compile > a').click(show_compile_pane);
 
     var modal_text_prompt =  function(title, prompt, placeholder, default_value, callback) {
         $('#modal-text-input-title').text(title);

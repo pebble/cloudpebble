@@ -14,5 +14,8 @@ urlpatterns = patterns('',
     url(r'^project/(?P<project_id>\d+)/resource/(?P<resource_id>\d+)/info', views.resource_info, name='resource_info'),
     url(r'^project/(?P<project_id>\d+)/resource/(?P<resource_id>\d+)/delete', views.delete_resource, name='delete_resource'),
     url(r'^project/(?P<project_id>\d+)/resource/(?P<resource_id>\d+)/update', views.update_resource, name='update_resource'),
+    url(r'^project/(?P<project_id>\d+)/build/run', views.compile_project, name='compile_project'),
+    url(r'^project/(?P<project_id>\d+)/build/last', views.last_build, name='get_last_build'),
+    url(r'^project/(?P<project_id>\d+)/build/history', views.build_history, name='get_build_history'),
     url(r'^project/create$', views.create, name='create')
 )

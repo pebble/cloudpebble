@@ -5,6 +5,7 @@ from django.dispatch import receiver
 
 import os
 import os.path
+import uuid
 
 class Project(models.Model):
     APP_WATCHFACE = 0
@@ -17,11 +18,42 @@ class Project(models.Model):
     name = models.CharField(max_length=50)
     app_kind = models.IntegerField(choices=APP_TYPE_CHOICES, default=APP_STANDARD)
     last_modified = models.DateTimeField()
-    last_compiled = models.DateTimeField(null=True, blank=True)
-    last_build_successful = models.BooleanField()
+    
+    #last_build = models.ForeignKey('BuildResult', blank=True, null=True)
 
     class Meta:
         unique_together = (('owner', 'name'),)
+
+class BuildResult(models.Model):
+    STATE_WAITING = 1
+    STATE_FAILED = 2
+    STATE_SUCCEEDED = 3
+    STATE_CHOICES = (
+        (STATE_WAITING, 'Pending'),
+        (STATE_FAILED, 'Failed'),
+        (STATE_SUCCEEDED, 'Succeeded')
+    )
+
+    project = models.ForeignKey(Project, related_name='builds')
+    uuid = models.CharField(max_length=32, default=lambda:uuid.uuid4().hex)
+    state = models.IntegerField(choices=STATE_CHOICES, default=STATE_WAITING)
+    started = models.DateTimeField(auto_now_add=True, db_index=True)
+    finished = models.DateTimeField(blank=True, null=True)
+
+    def get_dir(self):
+        return 'user_data/build_results/%s/%s/%s/' % (self.uuid[0], self.uuid[1], self.uuid)
+
+    def get_pbw_filename(self):
+        return '%s/watchface.pbw' % self.get_dir()
+
+    def get_build_log(self):
+        return '%s/build_log.txt' % self.get_dir()
+
+    pbw = property(get_pbw_filename)
+    build_log = property(get_build_log)
+
+    def run_build(self):
+        run_compile.apply(self.id)
 
 class ResourceFile(models.Model):
     project = models.ForeignKey(Project)

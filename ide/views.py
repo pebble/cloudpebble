@@ -6,7 +6,10 @@ from django.db import IntegrityError, transaction
 from django.views.decorators.http import require_safe, require_POST
 from django.views.decorators.csrf import csrf_protect
 
-from ide.models import Project, SourceFile, ResourceFile, ResourceIdentifier
+from ide.models import Project, SourceFile, ResourceFile, ResourceIdentifier, BuildResult
+from ide.tasks import run_compile
+
+import uuid
 
 @require_safe
 @login_required
@@ -36,8 +39,8 @@ def project_info(request, project_id):
         'name': project.name,
         'kind': project.app_kind,
         'last_modified': str(project.last_modified),
-        'last_compiled': str(project.last_compiled) if project.last_compiled else None,
-        'last_build_successful': project.last_build_successful,
+        'last_compiled': None, # Fix me
+        'last_build_successful': False, # Fix me
         'source_files': [{'name': f.file_name, 'id': f.id} for f in source_files],
         'resources': [{'id': x.id, 'file_name': x.file_name, 'kind': x.kind} for x in resources]
     }
@@ -173,3 +176,50 @@ def update_resource(request, project_id, resource_id):
             "resource_ids": [{'id': x.resource_id, 'regex': x.character_regex} for x in resources]
         }}), content_type="application/json")
 
+@require_POST
+@login_required
+def compile_project(request, project_id):
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    build = BuildResult.objects.create(project=project)
+    run_compile.delay(build.id)
+    return HttpResponse(json.dumps({"success": True, "build_id": build.id}), content_type="application/json")
+
+@require_safe
+@login_required
+def last_build(request, project_id):
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    try:
+        build = project.builds.order_by('-started')[0]
+    except (IndexError, BuildResult.DoesNotExist) as e:
+        return HttpResponse(json.dumps({"success": True, "build": None}), content_type="application/json")
+    else:
+        b = {
+            'uuid': build.uuid,
+            'state': build.state,
+            'started': str(build.started),
+            'finished': str(build.finished) if build.finished else None,
+            'id': build.id
+        }
+        return HttpResponse(json.dumps({"success": True, "build": b}), content_type="application/json")
+
+@require_safe
+@login_required
+def build_history(request, project_id):
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    try:
+        builds = project.builds.order_by('-started')[:10]
+    except (IndexError, BuildResult.DoesNotExist) as e:
+        return HttpResponse(json.dumps({"success": True, "build": None}), content_type="application/json")
+    else:
+        out = []
+        for build in builds:
+            out.append({
+                'uuid': build.uuid,
+                'state': build.state,
+                'started': str(build.started),
+                'finished': str(build.finished) if build.finished else None,
+                'id': build.id
+            })
+        return HttpResponse(json.dumps({"success": True, "builds": out}), content_type="application/json")
+
+    

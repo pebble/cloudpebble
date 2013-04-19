@@ -124,7 +124,8 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-    'ide'
+    'ide',
+    'djcelery'
 )
 
 # A sample logging configuration. The only tangible logging
@@ -155,3 +156,8 @@ LOGGING = {
         },
     }
 }
+
+BROKER_URL = 'amqp://guest:guest@localhost:5672/'
+
+import djcelery
+djcelery.setup_loader()
