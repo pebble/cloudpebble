@@ -1,0 +1,106 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<!-- Yes, this is ripped shamelessly from the Bootstrap examples page. -->
+  <head>
+    <meta charset="utf-8">
+    <title>CloudPebble</title>
+
+    <!-- Le styles -->
+    <link href="{% static 'ide/css/bootstrap.css' %}" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 20px;
+        padding-bottom: 40px;
+      }
+
+      /* Custom container */
+      .container-narrow {
+        margin: 0 auto;
+        max-width: 700px;
+      }
+      .container-narrow > hr {
+        margin: 30px 0;
+      }
+
+      /* Main marketing message and sign up button */
+      .jumbotron {
+        margin: 60px 0;
+        text-align: center;
+      }
+      .jumbotron h1 {
+        font-size: 50px;
+        line-height: 1;
+      }
+      .jumbotron .btn {
+        font-size: 21px;
+        padding: 14px 24px;
+      }
+
+      /* Supporting marketing content */
+      .marketing {
+        margin: 60px 0;
+      }
+      .marketing p + h4 {
+        margin-top: 28px;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <div class="container-narrow">
+
+      <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li class="active"><a href="#">Home</a></li>
+          <li><a href="/ide/">Sign in</a></li>
+        </ul>
+        <h3 class="muted">CloudPebble</h3>
+      </div>
+
+      <hr>
+
+      <div class="jumbotron">
+        <h1>Online Pebble Development</h1>
+        <p class="lead">Write apps without dealing with Linux, virtual machines, compilers, or Python.</p>
+        <a class="btn btn-large btn-success" href="/ide/">Get started</a>
+      </div>
+
+      <hr>
+
+      <div class="row-fluid marketing">
+        <div class="span6">
+          <h4>Nothing to install</h4>
+          <p>Write apps and watchfaces directly in your browser. Skip all the setup instructions!</p>
+
+
+          <h4>Cloudy</h4>
+          <p>It's on the internet! Accessible from anywhere! That's a <em>good</em> thing, right?</p>
+        </div>
+
+        <div class="span6">
+          <h4>No JSON to edit</h4>
+          <p>Resources are managed thorugh a <small>soon-to-be</small> friendly user interface; no need to deal with
+                <tt>resource_map.json</tt>.</p>
+
+          <h4>Mostly unfinished</h4>
+          <p>This site is only barely beginning! There's much more to come.</p>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="footer">
+        <p>&copy; Katharine Berry 2013.</p>
+        <small>This site has no afilliation with Pebble Inc. whatsoever.</small>
+      </div>
+
+    </div> <!-- /container -->
+
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="{% static 'ide/js/bootstrap.js' %}"></script>
+
+  </body>
+</html>

@@ -1,0 +1,37 @@
+{% extends "ide/base.html" %}
+
+{% block content %}
+
+<div class="container">
+    <div class="masthead">
+        <h3 class="muted offset3">CloudPebble</h3>
+    </div>
+    <div class="span6 offset3 well">
+        {% if form.errors %}
+        <div class="alert alert-error">Your username and password didn't match. Please try again.</div>
+        {% endif %}
+
+        <form class="form-horizontal" method="post">
+        {% csrf_token %}
+        <div class="control-group">
+            <label class="control-label">{{ form.username.label_tag }}</label>
+            <div class="controls">
+                {{ form.username }}
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label">{{ form.password.label_tag }}</label>
+            <div class="controls">
+                {{ form.password }}
+            </div>
+        </div>
+        <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Log in</button>
+            <a href="/accounts/register/" class="btn">Create account</a>
+        </div>
+        <input type="hidden" name="next" value="{{ next }}" />
+        </form>
+    </div>
+</div>
+
+{% endblock %}

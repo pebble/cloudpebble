@@ -14,7 +14,7 @@ class Project(models.Model):
     last_modified = models.DateTimeField(auto_now_add=True)
     
     def get_last_build(self):
-        return self.builds.objects.order('-id')[0]
+        return self.builds.order_by('-id')[0]
 
     last_build = property(get_last_build)
 

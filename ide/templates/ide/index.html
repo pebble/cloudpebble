@@ -3,27 +3,28 @@
 {% block content %}
 <div class="container">
     <div class="masthead">
-        <h3 class="muted">CloudPebble</h3>
+        <h3 class="muted offset1">CloudPebble</h3>
     </div>
     <div class="span10 offset1 well">
         {% if my_projects %}
             <table class="table">
                 <thead>
-                    <tr><th>Project</th><th>Kind</th><th>Last modified</th><th>Last compiled</th></tr>
+                    <tr><th>Project</th><th>Last modified</th><th>Last build</th></tr>
                 </thead>
                 <tbody>
                 {% for project in my_projects %}
                     <tr>
                         <td><a href="{% url 'ide:project' project.id %}">{{ project.name }}</a></td>
-                        <td>{{ project.get_app_kind_display }}</td>
                         <td>{{ project.last_modified }}</td>
                         <td>
-                            {% if project.last_compiled %}
-                                {{ project.last_compiled }}
-                                {% if project.last_build_successful %}
+                            {% if project.get_last_build %}
+                                {{ project.last_build.started }}
+                                {% if project.last_build.state == 3 %}
                                     <span class="label label-success">Successful</span>
-                                {% else %}
+                                {% elif project.last_build.state == 2 %}
                                     <span class="label label-important">Failed</span>
+                                {% else %}
+                                    <span class="label label-info">Pending</span>
                                 {% endif %}
                             {% else %}
                                 <span class="muted">Never</span>
