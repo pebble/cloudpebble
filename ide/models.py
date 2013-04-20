@@ -2,24 +2,21 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
+from django.utils.timezone import now
 
 import os
 import os.path
 import uuid
 
 class Project(models.Model):
-    APP_WATCHFACE = 0
-    APP_STANDARD = 1
-    APP_TYPE_CHOICES = (
-        (APP_WATCHFACE, 'Watchface'),
-        (APP_STANDARD, 'Standard')
-    )
     owner = models.ForeignKey(User)
     name = models.CharField(max_length=50)
-    app_kind = models.IntegerField(choices=APP_TYPE_CHOICES, default=APP_STANDARD)
     last_modified = models.DateTimeField()
     
-    #last_build = models.ForeignKey('BuildResult', blank=True, null=True)
+    def get_last_build(self):
+        return self.builds.objects.order('-id')[0]
+
+    last_build = property(get_last_build)
 
     class Meta:
         unique_together = (('owner', 'name'),)
@@ -81,8 +78,16 @@ class ResourceFile(models.Model):
             out.write(chunk)
         out.close()
 
+        self.project.last_modified = now()
+        self.project.save()
+
     def get_identifiers(self):
         return ResourceIdentifier.objects.filter(resource_file=self)
+
+    def save(self, *args, **kwargs):
+        self.project.last_modified = now()
+        self.project.save()
+        super(ResourceFile, self).save(*args, **kwargs)
 
     class Meta:
         unique_together = (('project', 'file_name'),)
@@ -91,6 +96,11 @@ class ResourceIdentifier(models.Model):
     resource_file = models.ForeignKey(ResourceFile)
     resource_id = models.CharField(max_length=100)
     character_regex = models.CharField(max_length=100, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        self.resource_file.project.last_modified = now()
+        self.resource_file.project.save()
+        super(ResourceIdentifier, self).save(*args, **kwargs)
 
     class Meta:
         unique_together = (('resource_file', 'resource_id'),)
@@ -113,6 +123,14 @@ class SourceFile(models.Model):
         if not os.path.exists(os.path.dirname(self.local_filename)):
             os.makedirs(os.path.dirname(self.local_filename))
         open(self.local_filename, 'w').write(content)
+
+        self.project.last_modified = now()
+        self.project.save()
+
+    def save(self, *args, **kwargs):
+        self.project.last_modified = now()
+        self.project.save()
+        super(SourceFile, self).save(*args, **kwargs)
 
     local_filename = property(get_local_filename)
 

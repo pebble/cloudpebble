@@ -481,7 +481,7 @@ jquery_csrf_setup();
             })
         });
         main_pane.append(pane);
-        main_pane.data('pane-id','compilation');
+        main_pane.data('pane-id','compile');
     }
 
     var update_last_build = function(pane, build) {

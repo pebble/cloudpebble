@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError, transaction
 from django.views.decorators.http import require_safe, require_POST
 from django.views.decorators.csrf import csrf_protect
+from django.forms import ModelForm
 
 from ide.models import Project, SourceFile, ResourceFile, ResourceIdentifier, BuildResult
 from ide.tasks import run_compile
@@ -222,4 +223,9 @@ def build_history(request, project_id):
             })
         return HttpResponse(json.dumps({"success": True, "builds": out}), content_type="application/json")
 
-    
+@require_POST
+@login_required
+def create_project(request):
+    name = request.POST['name']
+    project = Project.objects.create(name=name, owner=request.user)
+    return HttpResponse(json.dumps({"success": True, "id": project.id}), content_type="application/json")

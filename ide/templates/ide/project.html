@@ -11,7 +11,7 @@
             <div class="well">
                 <ul class="nav nav-list">
                     <li class="nav-header">Project</li>
-                    <li><a href="#">Settings</a></li>
+                    <!-- <li><a href="#">Settings</a></li> -->
                     <li id="sidebar-pane-compile"><a href="#">Compilation</a></li>
                     <li class="nav-header">Source files</li>
                     <li class="divider" id="end-source-files"></li>
@@ -119,24 +119,38 @@
             </tr>
         </thead>
         <tbody id="run-build-table">
-        <!--
-            <tr class="success">
-                <td>2</td>
-                <td>April 17, 2013, 11:50 a.m</td>
-                <td>Successful</td>
-                <td><a href="#">pbw</a></td>
-                <td><a href="#">build log</a></td>
-            </tr>
-            <tr class="error">
-                <td>1</td>
-                <td>April 17, 2013, 11:40 a.m</td>
-                <td>Failed</td>
-                <td><a href="#"></a></td>
-                <td><a href="#">build log</a></td>
-            </tr>
-        -->
+        </tbody>
     </table>
 </div>
+<!-- Settings template (unused) -->
+<!--
+<div id="project-settings-template" class="hide">
+    <form class="form-horizontal">
+        <div class="alert alert-error hide"></div>
+        <div class="well">
+            <div class="control-group">
+                <label class="control-label" for="settings-name">Project name</label>
+                <div class="controls">
+                    <input type="text" id="settings-name">
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">App type:</label>
+                <div class="controls">
+                    <label class="radio inline">
+                        <input type="radio" id="settings-app-type-watchface" name="settings-app-type" value="watchface"> Watchface
+                    </label>
+                    <label class="radio inline">
+                        <input type="radio" id="settings-app-type-app" name="settings-app-type" value="app"> App
+                    </label>
+                    <span class="help-block">Watchfaces are fullscreen, very low-power, and cannot receive input.<br>
+                        Apps are not usually fullscreen and can receive input.</span>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+-->
 <!-- Modal text prompt -->
 <div id="modal-text-input" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
