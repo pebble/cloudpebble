@@ -431,8 +431,8 @@ jquery_csrf_setup();
         tr.append($('<td>' + (build.id === null ? '?' : build.id) + '</td>'));
         tr.append($('<td>' + format_datetime(build.started) + '</td>'));
         tr.append($('<td>' + COMPILE_SUCCESS_STATES[build.state].english + '</td>'));
-        tr.append($('<td>' + (build.state == 3 ? ('<a href="/ide/builds/' + build.uuid + '/watchface.pbw">pbw</a>') : ' ') + '</td>'));
-        tr.append($('<td>' + (build.state > 1 ? ('<a href="/ide/builds/' + build.uuid + '/build_log.txt">build log</a>') : ' ' )+ '</td>'));
+        tr.append($('<td>' + (build.state == 3 ? ('<a href="'+build.pbw+'">pbw</a>') : ' ') + '</td>'));
+        tr.append($('<td>' + (build.state > 1 ? ('<a href="'+build.log+'">build log</a>') : ' ' )+ '</td>'));
         tr.addClass(COMPILE_SUCCESS_STATES[build.state].cls);
         return tr
     }
@@ -493,11 +493,11 @@ jquery_csrf_setup();
             pane.find('#last-compilation-started').text(format_datetime(build.started));
             if(build.state > 1) {
                 pane.find('#last-compilation-time').removeClass('hide').find('span').text(format_interval(build.started, build.finished));
-                pane.find('#last-compilation-log').removeClass('hide').find('a').attr('href', '/ide/builds/' + build.uuid + '/watchface.pbw');
+                pane.find('#last-compilation-log').removeClass('hide').find('a').attr('href', build.log);
                 pane.find('#compilation-run-build-button').removeAttr('disabled');
                 if(build.state == 3) {
-                    pane.find('#last-compilation-pbw').removeClass('hide').find('a').attr('href', '/ide/builds/' + build.uuid + '/build_log.txt');
-                    var url = window.location.origin + '/ide/builds/' + build.uuid + '/watchface.pbw';
+                    pane.find('#last-compilation-pbw').removeClass('hide').find('a').attr('href', build.pbw);
+                    var url = build.pbw;
                     pane.find('#last-compilation-qr-code').removeClass('hide').find('img').attr('src', 'https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl='+url+'&choe=UTF-8');
                 }
             } else {

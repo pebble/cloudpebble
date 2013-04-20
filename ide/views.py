@@ -198,7 +198,9 @@ def last_build(request, project_id):
             'state': build.state,
             'started': str(build.started),
             'finished': str(build.finished) if build.finished else None,
-            'id': build.id
+            'id': build.id,
+            'pbw': build.pbw_url,
+            'log': build.build_log_url
         }
         return HttpResponse(json.dumps({"success": True, "build": b}), content_type="application/json")
 
@@ -218,7 +220,9 @@ def build_history(request, project_id):
                 'state': build.state,
                 'started': str(build.started),
                 'finished': str(build.finished) if build.finished else None,
-                'id': build.id
+                'id': build.id,
+                'pbw': build.pbw_url,
+                'log': build.build_log_url
             })
         return HttpResponse(json.dumps({"success": True, "builds": out}), content_type="application/json")
 

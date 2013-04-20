@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.utils.timezone import now
+from django.conf import settings
 
 import os
 import os.path
@@ -38,16 +39,28 @@ class BuildResult(models.Model):
     finished = models.DateTimeField(blank=True, null=True)
 
     def get_dir(self):
-        return 'user_data/build_results/%s/%s/%s/' % (self.uuid[0], self.uuid[1], self.uuid)
+        return '%s%s/%s/%s/' % (settings.MEDIA_ROOT, self.uuid[0], self.uuid[1], self.uuid)
+
+    def get_url(self):
+        return '%s%s/%s/%s/' % (settings.MEDIA_URL, self.uuid[0], self.uuid[1], self.uuid)
 
     def get_pbw_filename(self):
-        return '%s/watchface.pbw' % self.get_dir()
+        return '%swatchface.pbw' % self.get_dir()
 
     def get_build_log(self):
-        return '%s/build_log.txt' % self.get_dir()
+        return '%sbuild_log.txt' % self.get_dir()
+
+    def get_pbw_url(self):
+        return '%swatchface.pbw' % self.get_url()
+
+    def get_build_log_url(self):
+        return '%sbuild_log.txt' % self.get_url()
 
     pbw = property(get_pbw_filename)
     build_log = property(get_build_log)
+
+    pbw_url = property(get_pbw_url)
+    build_log_url = property(get_build_log_url)
 
     def run_build(self):
         run_compile.apply(self.id)
