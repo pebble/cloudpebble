@@ -38,7 +38,6 @@ def project_info(request, project_id):
     output = {
         'success': True,
         'name': project.name,
-        'kind': project.app_kind,
         'last_modified': str(project.last_modified),
         'last_compiled': None, # Fix me
         'last_build_successful': False, # Fix me
@@ -227,5 +226,9 @@ def build_history(request, project_id):
 @login_required
 def create_project(request):
     name = request.POST['name']
-    project = Project.objects.create(name=name, owner=request.user)
-    return HttpResponse(json.dumps({"success": True, "id": project.id}), content_type="application/json")
+    try:
+        project = Project.objects.create(name=name, owner=request.user)
+    except IntegrityError as e:
+        return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
+    else:
+        return HttpResponse(json.dumps({"success": True, "id": project.id}), content_type="application/json")

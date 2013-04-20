@@ -28,6 +28,7 @@ def run_compile(build_result):
 
     # Assemble the project somewhere
     base_dir = tempfile.mkdtemp()
+    print "Compiling in %s" % base_dir
     try:
         # Create symbolic links to the original files
         # Source code
@@ -47,27 +48,36 @@ def run_compile(build_result):
             'blob': 'data'
         }
         resource_map = {'friendlyVersion': 'VERSION', 'versionDefName': 'APP_RESOURCES', 'media': []}
-        for f in resources:
-            os.symlink(os.path.abspath(f.local_filename), os.path.join(base_dir, 'resources/src', mapping[f.kind], f.file_name))
-            for resource_id in f.get_identifiers():
-                d = {
-                    'type': f.kind,
-                    'defName': resource_id.resource_id,
-                    'file': os.path.join(mapping[f.kind], f.file_name)
-                }
-                if resource_id.character_regex:
-                    d['characterRegex'] = resource_id.character_regex
-                resource_map['media'].append(d)
+        if len(resources) == 0:
+            print "No resources; adding dummy."
+            resource_map['media'].append({"type":"raw","defName":"DUMMY","file":"resource_map.json"})
+        else:
+            for f in resources:
+                print "Added %s %s" % (f.kind, f.local_filename)
+                os.symlink(os.path.abspath(f.local_filename), os.path.join(base_dir, 'resources/src', mapping[f.kind], f.file_name))
+                for resource_id in f.get_identifiers():
+                    d = {
+                        'type': f.kind,
+                        'defName': resource_id.resource_id,
+                        'file': os.path.join(mapping[f.kind], f.file_name)
+                    }
+                    if resource_id.character_regex:
+                        d['characterRegex'] = resource_id.character_regex
+                    resource_map['media'].append(d)
 
         # Write out the resource map
+        print "Writing out resource map"
         open(os.path.join(base_dir, 'resources/src/resource_map.json'), 'w').write(json.dumps(resource_map))
 
         # Reconstitute the SDK
+        print "Symlinking SDK"
         create_sdk_symlinks(base_dir, os.path.abspath("pebble-sdk/sdk"))
 
         # Build the thing
+        print "Beginning compile"
         os.environ['PATH'] += ':/Users/katharine/projects/cloudpebble/pebble-sdk/arm-cs-tools/bin'
         cwd = os.getcwd()
+        success = False
         try:
             os.chdir(base_dir)
             subprocess.check_output(["./waf", "configure"], stderr=subprocess.STDOUT)
@@ -87,11 +97,15 @@ def run_compile(build_result):
 
             if success:
                 os.rename(temp_file, build_result.pbw)
+                print "Build succeeded."
+            else:
+                print "Build failed."
             open(build_result.build_log, 'w').write(output)
             build_result.state = BuildResult.STATE_SUCCEEDED if success else BuildResult.STATE_FAILED
             build_result.finished = now()
             build_result.save()
     except Exception as e:
+        print "Build failed due to internal error: %s" % e
         build_result.state = BuildResult.STATE_FAILED
         build_result.finished = now()
         try:
@@ -100,4 +114,5 @@ def run_compile(build_result):
             pass
         build_result.save()
     finally:
+        print "Removing temporary directory"
         shutil.rmtree(base_dir)

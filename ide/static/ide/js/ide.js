@@ -526,7 +526,7 @@ jquery_csrf_setup();
     }
 
     // Load in project data.
-    $.getJSON('/ide/project/' + PROJECT_ID + '/info.json', function(data) {
+    $.getJSON('/ide/project/' + PROJECT_ID + '/info', function(data) {
         if(!data.success) {
             alert("Something went wrong:\n" + data.error);
             return;

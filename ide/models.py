@@ -11,7 +11,7 @@ import uuid
 class Project(models.Model):
     owner = models.ForeignKey(User)
     name = models.CharField(max_length=50)
-    last_modified = models.DateTimeField()
+    last_modified = models.DateTimeField(auto_now_add=True)
     
     def get_last_build(self):
         return self.builds.objects.order('-id')[0]
