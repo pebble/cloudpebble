@@ -79,7 +79,7 @@ class ResourceFile(models.Model):
 
     def get_local_filename(self):
         padded_id = '%05d' % self.id
-        return 'user_data/resources/%s/%s/%s' % (padded_id[0], padded_id[1], padded_id)
+        return '%sresources/%s/%s/%s' % (settings.FILE_STORAGE, padded_id[0], padded_id[1], padded_id)
 
     local_filename = property(get_local_filename)
 
@@ -124,7 +124,7 @@ class SourceFile(models.Model):
 
     def get_local_filename(self):
         padded_id = '%05d' % self.id
-        return 'user_data/sources/%s/%s/%s' % (padded_id[0], padded_id[1], padded_id)
+        return '%ssources/%s/%s/%s' % (settings.FILE_STORAGE, padded_id[0], padded_id[1], padded_id)
 
     def get_contents(self):
         try:

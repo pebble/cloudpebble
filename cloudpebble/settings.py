@@ -164,5 +164,7 @@ BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 
 LOGIN_REDIRECT_URL = '/ide/'
 
+FILE_STORAGE = '/Users/katharine/projects/cloudpebble/user_data/'
+
 import djcelery
 djcelery.setup_loader()
