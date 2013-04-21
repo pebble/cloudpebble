@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
     // We should now have no privileges and be jailed.
     // Impose some more limits:
     require(set_limit(RLIMIT_CPU, 10)); // Ten seconds
-    require(set_limit(RLIMIT_NOFILE, 25)); // 25 open files
+    require(set_limit(RLIMIT_NOFILE, 100)); // 100 open files
     require(set_limit(RLIMIT_RSS, 10 * 1024 * 1024)); // 10 MB of memory
     require(set_limit(RLIMIT_FSIZE, 1 * 1024 * 1024)); // 1 MB output files
     // Actually do the build.
