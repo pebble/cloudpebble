@@ -166,5 +166,7 @@ LOGIN_REDIRECT_URL = '/ide/'
 
 FILE_STORAGE = '/Users/katharine/projects/cloudpebble/user_data/'
 
+CHROOT_JAIL = None
+
 import djcelery
 djcelery.setup_loader()
