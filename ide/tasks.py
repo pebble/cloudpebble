@@ -31,13 +31,22 @@ def run_compile(build_result):
     # Assemble the project somewhere
     base_dir = tempfile.mkdtemp(dir=os.path.join(settings.CHROOT_ROOT, 'tmp') if settings.CHROOT_ROOT else None)
     print "Compiling in %s" % base_dir
+
+    try:
+        os.makedirs(build_result.get_dir())
+    except OSError:
+        pass
+
     try:
         # Create symbolic links to the original files
         # Source code
         src_dir = os.path.join(base_dir, 'src')
         os.mkdir(src_dir)
         for f in source_files:
-            os.link(os.path.abspath(f.local_filename), os.path.join(src_dir, f.file_name))
+            abs_target = os.path.abspath(os.path.join(src_dir, f.file_name))
+            if not abs_target.startswith(src_dir):
+                raise Exception, "Suspicious filename: %s" % f.file_name
+            os.link(os.path.abspath(f.local_filename), abs_target)
 
         # Resources
         os.makedirs(os.path.join(base_dir, 'resources/src/images'))
@@ -55,8 +64,12 @@ def run_compile(build_result):
             resource_map['media'].append({"type":"raw","defName":"DUMMY","file":"resource_map.json"})
         else:
             for f in resources:
+                target_dir = os.path.abspath(os.path.join(base_dir, 'resources/src', mapping[f.kind]))
+                abs_target = os.path.abspath(os.path.join(target_dir, f.file_name))
+                if not abs_target.startswith(target_dir):
+                    raise Exception, "Suspicious filename: %s" % f.file_name
                 print "Added %s %s" % (f.kind, f.local_filename)
-                os.link(os.path.abspath(f.local_filename), os.path.join(base_dir, 'resources/src', mapping[f.kind], f.file_name))
+                os.link(os.path.abspath(f.local_filename), abs_target)
                 for resource_id in f.get_identifiers():
                     d = {
                         'type': f.kind,
@@ -77,13 +90,13 @@ def run_compile(build_result):
 
         # Build the thing
         print "Beginning compile"
-        os.environ['PATH'] += ':/Users/katharine/projects/cloudpebble/pebble-sdk/arm-cs-tools/bin'
         cwd = os.getcwd()
         success = False
         try:
             if settings.CHROOT_JAIL is not None:
                 output = subprocess.check_output([settings.CHROOT_JAIL, base_dir[len(settings.CHROOT_ROOT):]], stderr=subprocess.STDOUT)
             else:
+                os.environ['PATH'] += ':/Users/katharine/projects/cloudpebble/pebble-sdk/arm-cs-tools/bin'
                 os.chdir(base_dir)
                 subprocess.check_output(["./waf", "configure"], stderr=subprocess.STDOUT)
                 output = subprocess.check_output(["./waf", "build"], stderr=subprocess.STDOUT)
@@ -95,10 +108,6 @@ def run_compile(build_result):
             temp_file = os.path.join(base_dir, 'build', '%s.pbw' % os.path.basename(base_dir))
         finally:
             os.chdir(cwd)
-            try:
-                os.makedirs(build_result.get_dir())
-            except OSError:
-                pass
 
             if success:
                 os.rename(temp_file, build_result.pbw)

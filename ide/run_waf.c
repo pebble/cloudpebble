@@ -46,14 +46,15 @@ int main(int argc, char** argv) {
     // Actually do the build.
     require(chdir(argv[1]));
     require(setenv("PATH", "/bin:/usr/bin:/sdk/arm-cs-tools/bin", 1));
+    require(setenv("HOME", "/", 1));
 
     int success = system("./waf configure");
     if(success != 0) {
-        return success;
+        return WEXITSTATUS(success);
     }
     success = system("./waf build");
     if(success != 0) {
-        return success;
+        return WEXITSTATUS(success);
     }
     return 0;
 }
