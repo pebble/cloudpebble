@@ -29,7 +29,7 @@ def run_compile(build_result):
     resources = ResourceFile.objects.filter(project=project)
 
     # Assemble the project somewhere
-    base_dir = tempfile.mkdtemp(dir=settings.CHROOT_TMP)
+    base_dir = tempfile.mkdtemp(dir=os.path.join(settings.CHROOT_ROOT, 'tmp') if settings.CHROOT_ROOT else None)
     print "Compiling in %s" % base_dir
     try:
         # Create symbolic links to the original files
@@ -82,7 +82,7 @@ def run_compile(build_result):
         success = False
         try:
             if settings.CHROOT_JAIL is not None:
-                output = subprocess.check_output([settings.CHROOT_JAIL, base_dir], stderr=subprocess.STDOUT)
+                output = subprocess.check_output([settings.CHROOT_JAIL, base_dir[len(settings.CHROOT_ROOT):]], stderr=subprocess.STDOUT)
             else:
                 os.chdir(base_dir)
                 subprocess.check_output(["./waf", "configure"], stderr=subprocess.STDOUT)

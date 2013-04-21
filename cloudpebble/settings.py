@@ -168,7 +168,7 @@ FILE_STORAGE = '/Users/katharine/projects/cloudpebble/user_data/'
 
 CHROOT_JAIL = None
 
-CHROOT_TMP = None
+CHROOT_ROOT = None
 
 import djcelery
 djcelery.setup_loader()
