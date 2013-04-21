@@ -207,12 +207,12 @@ jquery_csrf_setup();
 
         remove_error();
         var files = form.find('#edit-resource-file').get(0).files;
+        var file = (files.length > 0) ? files[0] : null;
         if(is_new) {
             if(files.length != 1) {
                 report_error("You must upload a file.");
                 return;
             }
-            var file = files[0];
             if(!!project_resources[file.name]) {
                 report_error("A resource called '" + file.name + "' already exists in the project.");
                 return;
