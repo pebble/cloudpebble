@@ -29,7 +29,7 @@ def run_compile(build_result):
     resources = ResourceFile.objects.filter(project=project)
 
     # Assemble the project somewhere
-    base_dir = tempfile.mkdtemp()
+    base_dir = tempfile.mkdtemp(dir=settings.CHROOT_TMP)
     print "Compiling in %s" % base_dir
     try:
         # Create symbolic links to the original files
