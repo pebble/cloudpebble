@@ -115,7 +115,15 @@ jquery_csrf_setup();
                     mode: PebbleMode,
                     styleActiveLine: true,
                     value: source,
-                    theme: 'monokai'
+                    theme: 'monokai',
+                    extraKeys: {
+                        'Ctrl-S': function(instance) {
+                            save()
+                        },
+                        'Cmd-S': function(instance) {
+                            save()
+                        }
+                    }
                 });
                 var browserHeight = document.documentElement.clientHeight;
                 code_mirror.getWrapperElement().style.height = (browserHeight - 130) + 'px';
