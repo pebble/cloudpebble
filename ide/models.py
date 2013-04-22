@@ -167,7 +167,7 @@ class SourceFile(models.Model):
     def save_file(self, content):
         if not os.path.exists(os.path.dirname(self.local_filename)):
             os.makedirs(os.path.dirname(self.local_filename))
-        open(self.local_filename, 'w').write(content)
+        open(self.local_filename, 'w').write(content.encode('utf-8'))
 
         self.project.last_modified = now()
         self.project.save()
