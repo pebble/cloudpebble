@@ -232,7 +232,7 @@ jquery_csrf_setup();
                 report_error("You must upload a PNG image.");
                 return;
             }
-            if(kind == 'font' && !/\.ttf$/.test(file.name)) {
+            if(kind == 'font' && !/\.ttf$/i.test(file.name)) {
                 report_error("You must upload a TrueType Font (.ttf)");
                 return;
             }
