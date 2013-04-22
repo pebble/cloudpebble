@@ -75,7 +75,7 @@
                         </optgroup>
                         {% endif %}
                         {% if example_templates %}
-                        <optgroup label="SDK demos">
+                        <optgroup label="Examples">
                             {% for template in example_templates %}
                                 <option value="{{ template.id }}" {%if template.id == default_template_id%}selected="selected"{%endif%}>{{ template.name }}</option>
                             {% endfor %}

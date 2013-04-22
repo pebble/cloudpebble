@@ -36,7 +36,7 @@ class TemplateProject(Project):
     KIND_CHOICES = (
         (KIND_TEMPLATE, 'Template'),
         (KIND_SDK_DEMO, 'SDK Demo'),
-        (KIND_EXAMPLE, 'Example App')
+        (KIND_EXAMPLE, 'Example')
     )
 
     template_kind = models.IntegerField(choices=KIND_CHOICES, db_index=True)
@@ -47,7 +47,7 @@ class TemplateProject(Project):
             new_resource = ResourceFile.objects.create(project=project, file_name=resource.file_name, kind=resource.kind)
             shutil.copy(resource.local_filename, new_resource.local_filename)
             for i in resource.identifiers.all():
-                ResourceIdentifier.objects.create(resource_file=i.resource_file, resource_id=i.resource_id, character_regex=i.character_regex)
+                ResourceIdentifier.objects.create(resource_file=new_resource, resource_id=i.resource_id, character_regex=i.character_regex)
 
         for source_file in self.source_files.all():
             new_file = SourceFile.objects.create(project=project, file_name=source_file.file_name)
