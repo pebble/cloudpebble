@@ -170,5 +170,7 @@ CHROOT_JAIL = None
 
 CHROOT_ROOT = None
 
+DEFAULT_TEMPLATE = None
+
 import djcelery
 djcelery.setup_loader()

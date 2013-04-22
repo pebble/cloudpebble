@@ -1,6 +1,6 @@
 (function() {
     $('#create-project').click(function() {
-        $('#create-project').find('input button').removeAttr('disabled');
+        $('#create-project').find('input button select').removeAttr('disabled');
         $('#project-prompt').modal();
     });
 
@@ -11,15 +11,24 @@
             $('#project-prompt-errors').removeClass('hide').text("You must enter a name.");
             return;
         }
-        $('#create-project').find('input button').attr('disabled', 'disabled');
-        $.post('/ide/project/create', {name: value}, function(data) {
-            console.log(data);
-            if(!data.success) {
-                $('#project-prompt-errors').removeClass('hide').text(data.error);
-            } else {
-                window.location.href = "/ide/project/" + data.id;
+        $('#create-project').find('input button select').attr('disabled', 'disabled');
+        $.post('/ide/project/create', {
+                name: value,
+                template: $('#project-template').val()
+            }, function(data) {
+                console.log(data);
+                if(!data.success) {
+                    $('#project-prompt-errors').removeClass('hide').text(data.error);
+                } else {
+                    window.location.href = "/ide/project/" + data.id;
+                }
             }
-        });
+        );
+    });
+
+    $('form').submit(function (e){
+        e.preventDefault();
+        $('#project-confirm-button').click();
     });
 
     jquery_csrf_setup();

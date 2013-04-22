@@ -7,6 +7,7 @@ from django.conf import settings
 
 import os
 import os.path
+import shutil
 import uuid
 
 class Project(models.Model):
@@ -15,12 +16,43 @@ class Project(models.Model):
     last_modified = models.DateTimeField(auto_now_add=True)
     
     def get_last_build(self):
-        return self.builds.order_by('-id')[0]
+        try:
+            return self.builds.order_by('-id')[0]
+        except IndexError:
+            return None
 
     last_build = property(get_last_build)
 
+    def __unicode__(self):
+        return u"%s" % self.name
+
     class Meta:
         unique_together = (('owner', 'name'),)
+
+class TemplateProject(Project):
+    KIND_TEMPLATE = 1
+    KIND_SDK_DEMO = 2
+    KIND_EXAMPLE = 3
+    KIND_CHOICES = (
+        (KIND_TEMPLATE, 'Template'),
+        (KIND_SDK_DEMO, 'SDK Demo'),
+        (KIND_EXAMPLE, 'Example App')
+    )
+
+    template_kind = models.IntegerField(choices=KIND_CHOICES, db_index=True)
+
+    def copy_into_project(self, project):
+        uuid_string = ", ".join(["0x%02X" % ord(b) for b in uuid.uuid4().bytes])
+        for resource in self.resources.all():
+            new_resource = ResourceFile.objects.create(project=project, file_name=resource.file_name, kind=resource.kind)
+            shutil.copy(resource.local_filename, new_resource.local_filename)
+            for i in resource.identifiers.all():
+                ResourceIdentifier.objects.create(resource_file=i.resource_file, resource_id=i.resource_id, character_regex=i.character_regex)
+
+        for source_file in self.source_files.all():
+            new_file = SourceFile.objects.create(project=project, file_name=source_file.file_name)
+            new_file.save_file(source_file.get_contents().replace("__UUID_GOES_HERE__", uuid_string))
+
 
 class BuildResult(models.Model):
     STATE_WAITING = 1
@@ -66,7 +98,7 @@ class BuildResult(models.Model):
         run_compile.apply(self.id)
 
 class ResourceFile(models.Model):
-    project = models.ForeignKey(Project)
+    project = models.ForeignKey(Project, related_name='resources')
     RESOURCE_KINDS = (
         ('raw', 'Binary blob'),
         ('png', '1-bit PNG'),
@@ -106,7 +138,7 @@ class ResourceFile(models.Model):
         unique_together = (('project', 'file_name'),)
 
 class ResourceIdentifier(models.Model):
-    resource_file = models.ForeignKey(ResourceFile)
+    resource_file = models.ForeignKey(ResourceFile, related_name='identifiers')
     resource_id = models.CharField(max_length=100)
     character_regex = models.CharField(max_length=100, blank=True, null=True)
 
@@ -119,7 +151,7 @@ class ResourceIdentifier(models.Model):
         unique_together = (('resource_file', 'resource_id'),)
 
 class SourceFile(models.Model):
-    project = models.ForeignKey(Project)
+    project = models.ForeignKey(Project, related_name='source_files')
     file_name = models.CharField(max_length=100)
 
     def get_local_filename(self):

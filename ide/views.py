@@ -6,8 +6,9 @@ from django.db import IntegrityError, transaction
 from django.views.decorators.http import require_safe, require_POST
 from django.views.decorators.csrf import csrf_protect
 from django.forms import ModelForm
+from django.conf import settings
 
-from ide.models import Project, SourceFile, ResourceFile, ResourceIdentifier, BuildResult
+from ide.models import Project, SourceFile, ResourceFile, ResourceIdentifier, BuildResult, TemplateProject
 from ide.tasks import run_compile
 
 import uuid
@@ -16,7 +17,13 @@ import uuid
 @login_required
 def index(request):
     my_projects = Project.objects.filter(owner=request.user).order_by('-last_modified')
-    return render(request, 'ide/index.html', {'my_projects': my_projects})
+    return render(request, 'ide/index.html', {
+        'my_projects': my_projects,
+        'sdk_templates': TemplateProject.objects.filter(template_kind=TemplateProject.KIND_TEMPLATE),
+        'example_templates': TemplateProject.objects.filter(template_kind=TemplateProject.KIND_EXAMPLE),
+        'demo_templates': TemplateProject.objects.filter(template_kind=TemplateProject.KIND_SDK_DEMO),
+        'default_template_id': settings.DEFAULT_TEMPLATE
+    })
 
 @require_safe
 @login_required
@@ -230,8 +237,13 @@ def build_history(request, project_id):
 @login_required
 def create_project(request):
     name = request.POST['name']
+    template_id = request.POST.get('template', None)
     try:
-        project = Project.objects.create(name=name, owner=request.user)
+        with transaction.commit_on_success():
+            project = Project.objects.create(name=name, owner=request.user)
+            if template_id is not None and int(template_id) != 0:
+                template = TemplateProject.objects.get(pk=int(template_id))
+                template.copy_into_project(project)
     except IntegrityError as e:
         return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
     else:

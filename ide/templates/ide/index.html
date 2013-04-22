@@ -48,8 +48,43 @@
     </div>
     <div class="modal-body">
         <div id="project-prompt-errors" class="alert alert-error hide"></div>
-        <p id="project-prompt-prompt">Project name:</p>
-        <p><input type="text" id="project-prompt-value"></p>
+        <form class="form-horizontal">
+            <div class="control-group">
+                <label class="control-label" for="project-prompt-value">Project name</label>
+                <div class="controls">
+                    <input type="text" id="project-prompt-value">
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="project-template">Template</label>
+                <div class="controls">
+                    <select id="project-template">
+                        <option value="0">Empty project</option>
+                        {% if sdk_templates %}
+                        <optgroup label="Standard Templates">
+                            {% for template in sdk_templates %}
+                                <option value="{{ template.id }}" {%if template.id == default_template_id%}selected="selected"{%endif%}>{{ template.name }}</option>
+                            {% endfor %}
+                        </optgroup>
+                        {% endif %}
+                        {% if demo_templates %}
+                        <optgroup label="SDK demos">
+                            {% for template in demo_templates %}
+                                <option value="{{ template.id }}" {%if template.id == default_template_id%}selected="selected"{%endif%}>{{ template.name }}</option>
+                            {% endfor %}
+                        </optgroup>
+                        {% endif %}
+                        {% if example_templates %}
+                        <optgroup label="SDK demos">
+                            {% for template in example_templates %}
+                                <option value="{{ template.id }}" {%if template.id == default_template_id%}selected="selected"{%endif%}>{{ template.name }}</option>
+                            {% endfor %}
+                        </optgroup>
+                        {% endif %}
+                    </select>
+                </div>
+            </div>
+        </form>
     </div>
     <div class="modal-footer">
         <button class="btn" data-dismiss="modal">Cancel</button>
