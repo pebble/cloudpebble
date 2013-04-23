@@ -5,3 +5,7 @@
   font-size: 13px;
   line-height: 18px;
 }
+
+.edit-resource-regex {
+  font-family: Menlo, 'Deja Vu Sans Mono', monospace;
+}
