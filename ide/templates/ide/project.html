@@ -11,7 +11,7 @@
             <div class="well">
                 <ul class="nav nav-list">
                     <li class="nav-header">Project</li>
-                    <!-- <li><a href="#">Settings</a></li> -->
+                    <li id="sidebar-pane-settings"><a href="#">Settings</a></li>
                     <li id="sidebar-pane-compile"><a href="#">Compilation</a></li>
                     <li class="nav-header">Source files</li>
                     <li class="divider" id="end-source-files"></li>
@@ -122,9 +122,8 @@
         </tbody>
     </table>
 </div>
-<!-- Settings template (unused) -->
-<!--
-<div id="project-settings-template" class="hide">
+<!-- Settings template -->
+<div id="settings-pane-template" class="hide">
     <form class="form-horizontal">
         <div class="alert alert-error hide"></div>
         <div class="well">
@@ -135,22 +134,37 @@
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label">App type:</label>
+                <label class="control-label" for="settings-name">SDK version</label>
                 <div class="controls">
-                    <label class="radio inline">
-                        <input type="radio" id="settings-app-type-watchface" name="settings-app-type" value="watchface"> Watchface
-                    </label>
-                    <label class="radio inline">
-                        <input type="radio" id="settings-app-type-app" name="settings-app-type" value="app"> App
-                    </label>
-                    <span class="help-block">Watchfaces are fullscreen, very low-power, and cannot receive input.<br>
-                        Apps are not usually fullscreen and can receive input.</span>
+                    <!-- This is so useful! It makes my form slightly less empty and will be used later. -->
+                    <select>
+                        <option value="1">Version 1</option>
+                    </select>
                 </div>
             </div>
         </div>
+        <div class="well">
+            <div class="control-group">
+                <label class="control-label" for="settings-name">App Resources Identifier</label>
+                <div class="controls">
+                    <input type="text" id="settings-version-def-name" placeholder="APP_RESOURCES">
+                    <span class="help-block">
+                        This value must be passed to <code>resource_init_current_app</code> in your code before using any resources.<br>
+                        The standard value is <code>APP_RESOURCES</code>, but you can change it here. It cannot be blank and must be a valid C identifier.<br>
+                        Also known as <tt>versionDefName</tt>.
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="well form-actions">
+            <button id="project-save" class="btn btn-primary">Save changes</button>
+        </div>
+        <div class="well form-actions">
+            <button id="project-delete" class="btn btn-danger">Delete Project</button>
+            <span class="help-inline"><strong>This cannot be undone.</strong></span>
+        </div>
     </form>
 </div>
--->
 <!-- Modal text prompt -->
 <div id="modal-text-input" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">

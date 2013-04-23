@@ -46,8 +46,7 @@ def project_info(request, project_id):
         'success': True,
         'name': project.name,
         'last_modified': str(project.last_modified),
-        'last_compiled': None, # Fix me
-        'last_build_successful': False, # Fix me
+        "version_def_name": project.version_def_name,
         'source_files': [{'name': f.file_name, 'id': f.id} for f in source_files],
         'resources': [{'id': x.id, 'file_name': x.file_name, 'kind': x.kind} for x in resources]
     }
@@ -248,3 +247,31 @@ def create_project(request):
         return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
     else:
         return HttpResponse(json.dumps({"success": True, "id": project.id}), content_type="application/json")
+
+@require_POST
+@login_required
+def save_project_settings(request, project_id):
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    try:
+        new_name = request.POST['name']
+        new_version_def_name = request.POST['version_def_name']
+        project.name = new_name
+        project.version_def_name = new_version_def_name
+        project.save()
+    except IntegrityError as e:
+        return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
+    else:
+        return HttpResponse(json.dumps({"success": True}), content_type="application/json")
+
+@require_POST
+@login_required
+def delete_project(request, project_id):
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    if not bool(request.POST.get('confirm', False)):
+        return HttpResponse(json.dumps({"success": False, "error": "Not confirmed."}), content_type="application/json")
+    try:
+        project.delete()
+    except:
+        return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
+    else:
+        return HttpResponse(json.dumps({"success": True}), content_type="application/json")

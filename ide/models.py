@@ -14,6 +14,7 @@ class Project(models.Model):
     owner = models.ForeignKey(User)
     name = models.CharField(max_length=50)
     last_modified = models.DateTimeField(auto_now_add=True)
+    version_def_name = models.CharField(max_length=50, default="APP_RESOURCES")
     
     def get_last_build(self):
         try:

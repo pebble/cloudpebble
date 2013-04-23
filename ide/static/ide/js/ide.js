@@ -5,6 +5,8 @@ jquery_csrf_setup();
     var project_resources = {};
     var suspended_panes = {};
 
+    var ProjectInfo = {};
+
     var add_source_file = function(file) {
         var end = $('#end-source-files');
         var link = $('<a href="#"></a>');
@@ -533,12 +535,85 @@ jquery_csrf_setup();
         return t.toFixed(1) + " second" + (t == 1 ? '' : 's');
     }
 
+    var show_settings_pane = function() {
+        suspend_active_pane();
+        if(restore_suspended_pane("settings")) {
+            return;
+        }
+        $('#sidebar-pane-settings').addClass('active');
+        var main_pane = $('#main-pane');
+        var pane = settings_template.clone(); // This clone is basically unncessary, since only one such pane can ever exist.
+        var display_error = function(message) {
+            pane.find('.alert').addClass('alert-error').removeClass('hide').text(message);
+        }
+
+        var display_success = function(message) {
+            pane.find('.alert').addClass('alert-success').removeClass('hide').text(message);
+        }
+        
+        pane.find('#settings-name').val(ProjectInfo.name);
+        pane.find('#settings-version-def-name').val(ProjectInfo.version_def_name);
+        pane.find('form').submit(function(e) {e.preventDefault();});
+        pane.find('#project-save').click(function() {
+            var name = pane.find('#settings-name').val();
+            var version_def_name = pane.find('#settings-version-def-name').val();
+
+            if(name.replace(/\s/g, '') == '') {
+                display_error("You must specify a project name");
+                return;
+            }
+
+            if(version_def_name.replace(/\s/g, '') == '') {
+                display_error("You must specify a versionDefName (how about APP_RESOURCES?)");
+                return;
+            }
+
+            pane.find('input, button, select').attr('disabled', 'disabled');
+
+            $.post('/ide/project/' + PROJECT_ID + '/save_settings', {
+                'name': name,
+                'version_def_name': version_def_name
+            }, function(data) {
+                pane.find('input, button, select').removeAttr('disabled');
+                pane.find('.alert').removeClass("alert-success alert-error").addClass("hide");
+                if(data.success) {
+                    ProjectInfo.name = name;
+                    ProjectInfo.version_def_name = version_def_name;
+                    $('.project-name').text(name);
+                    window.document.title = "CloudPebble – " + name;
+                    display_success("Settings saved.");
+                } else {
+                    display_error("Error: " + data.error);
+                }
+            });
+        });
+
+        pane.find('#project-delete').click(function() {
+            modal_confirmation_prompt("Delete Project", "Are you sure you want to delete this project? THIS CANNOT BE UNDONE.", function() {
+                $.post('/ide/project/' + PROJECT_ID + '/delete', {confirm: true}, function(data) {
+                    if(data.success) {
+                        window.location.href = "/ide/";
+                    } else {
+                        display_error("Error: " + data.error);
+                    }
+                })
+            });
+        });
+
+        main_pane.append(pane);
+        main_pane.data('pane-id','settings');
+    }
+
+    var settings_template = $('#settings-pane-template').remove().removeClass('hide');
+
+
     // Load in project data.
     $.getJSON('/ide/project/' + PROJECT_ID + '/info', function(data) {
         if(!data.success) {
             alert("Something went wrong:\n" + data.error);
             return;
         }
+        ProjectInfo = data;
 
         // Add source files.
         $.each(data.source_files, function(index, value) {
@@ -576,6 +651,7 @@ jquery_csrf_setup();
     // The add resource button
     $('#sidebar-pane-new-resource > a').click(create_new_resource);
     $('#sidebar-pane-compile > a').click(show_compile_pane);
+    $('#sidebar-pane-settings > a').click(show_settings_pane);
 
     var modal_text_prompt =  function(title, prompt, placeholder, default_value, callback) {
         $('#modal-text-input-title').text(title);

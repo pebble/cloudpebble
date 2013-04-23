@@ -58,7 +58,7 @@ def run_compile(build_result):
             'font': 'fonts',
             'blob': 'data'
         }
-        resource_map = {'friendlyVersion': 'VERSION', 'versionDefName': 'APP_RESOURCES', 'media': []}
+        resource_map = {'friendlyVersion': 'VERSION', 'versionDefName': project.version_def_name, 'media': []}
         if len(resources) == 0:
             print "No resources; adding dummy."
             resource_map['media'].append({"type":"raw","defName":"DUMMY","file":"resource_map.json"})
