@@ -498,6 +498,7 @@ jquery_csrf_setup();
     var resource_created = function(resource) {
         // Add it to our resource list
         add_resource(resource);
+        edit_resource(resource);
     }
 
     var COMPILE_SUCCESS_STATES = {
