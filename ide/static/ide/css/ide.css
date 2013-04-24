@@ -17,3 +17,15 @@
 .nav-list .popover {
     max-width: 350px;
 }
+
+#sidebar.nav-list > li > a, #sidebar.nav-list .nav-header {
+    margin-right: -20px;
+    margin-left: -20px;
+}
+
+#sidebar.nav-list {
+    padding-left: 0px;
+    padding-right: 0px;
+    margin-top: -10px;
+    margin-bottom: -10px;
+}
