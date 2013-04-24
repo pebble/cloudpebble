@@ -143,9 +143,13 @@ jquery_csrf_setup();
                         }
                     }
                 });
-                var browserHeight = document.documentElement.clientHeight;
-                code_mirror.getWrapperElement().style.height = (browserHeight - 130) + 'px';
-                code_mirror.refresh();
+                var fix_height = function() {
+                    var browserHeight = document.documentElement.clientHeight;
+                    code_mirror.getWrapperElement().style.height = (browserHeight - 130) + 'px';
+                    code_mirror.refresh();
+                }
+                fix_height();
+                $(window).resize(fix_height);
                 pane.data('pane-id', 'source-' + file.id);
                 pane.data('pane-restore-function', function() {
                     code_mirror.refresh();
