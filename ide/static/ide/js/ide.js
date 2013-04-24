@@ -52,7 +52,8 @@ jquery_csrf_setup();
     var suspend_active_pane = function() {
         var pane_id = $('#main-pane').data('pane-id');
         if(!pane_id) {
-            $('#pane-parent').html('').append($('<div id="main-pane"></div>'));
+            $('#main-pane').remove();
+            $('#pane-parent').append($('<div id="main-pane"></div>'));
             return;
         };
         var pane = $('#main-pane');
@@ -73,7 +74,7 @@ jquery_csrf_setup();
 
     var destroy_active_pane = function() {
         var pane_id = $('#main-pane').data('pane-id');
-        $('#pane-parent').html('');
+        $('#main-pane').remove();
         var list_entry = $('#sidebar-pane-' + pane_id);
         if(list_entry) {
             list_entry.removeClass('active');
@@ -83,7 +84,8 @@ jquery_csrf_setup();
     var restore_suspended_pane = function(id) {
         var pane = suspended_panes[id] 
         if(pane) {
-            $('#pane-parent').html('').append(pane);
+            $('#main-pane').remove()
+            $('#pane-parent').append(pane);
             delete suspended_panes[id];
 
             var list_entry = $('#sidebar-pane-' + id);
@@ -106,9 +108,11 @@ jquery_csrf_setup();
         if(restore_suspended_pane('source-'+file.id)) {
             return;
         }
+        $('#progress-pane').removeClass('hide');
 
         // Open it.
         $.getJSON('/ide/project/' + PROJECT_ID + '/source/' + file.id + '/load', function(data) {
+            $('#progress-pane').addClass('hide');
             var pane = $('#main-pane');
             if(!data.success) {
                 var error = $('<div class="alert alert-error"></div>');
@@ -334,7 +338,9 @@ jquery_csrf_setup();
     var edit_resource = function(resource) {
         suspend_active_pane();
         if(restore_suspended_pane('resource-' + resource.id)) return;
+        $('#progress-pane').removeClass('hide');
         $.getJSON("/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/info", function(data) {
+            $('#progress-pane').addClass('hide');
             console.info(data);
             if(!data.success) return;
             var resource = data.resource;
@@ -552,6 +558,8 @@ jquery_csrf_setup();
 
     var update_build_history = function(pane) {
         $.getJSON('/ide/project/' + PROJECT_ID + '/build/history', function(data) {
+            $('#progress-pane').addClass('hide');
+            pane.removeClass('hide');
             if(!data.success) {
                 alert("Something went wrong:\n" + data.error); // This should be prettier.
                 destroy_active_pane();
@@ -577,9 +585,10 @@ jquery_csrf_setup();
         if(restore_suspended_pane("compile")) {
             return;
         }
+        $('#progress-pane').removeClass('hide');
         $('#sidebar-pane-compile').addClass('active');
         var main_pane = $('#main-pane');
-        var pane = $('#compilation-pane-template').clone().removeClass('hide');
+        var pane = $('#compilation-pane-template').clone();
         // Get build history
         update_build_history(pane);
         pane.find('#compilation-run-build-button').click(function() {
@@ -707,6 +716,7 @@ jquery_csrf_setup();
 
     // Load in project data.
     $.getJSON('/ide/project/' + PROJECT_ID + '/info', function(data) {
+        $('#progress-pane').addClass('hide');
         if(!data.success) {
             alert("Something went wrong:\n" + data.error);
             return;
