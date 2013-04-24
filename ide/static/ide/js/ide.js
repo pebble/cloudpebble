@@ -149,6 +149,11 @@ jquery_csrf_setup();
                     }
                 });
 
+                function mark_clean() {
+                    was_clean = true;
+                    $('#sidebar-pane-source-' + file.id).find('a > i').remove();
+                }
+
                 function save() {
                     save_btn.attr('disabled','disabled');
                     delete_btn.attr('disabled','disabled');
@@ -156,8 +161,7 @@ jquery_csrf_setup();
                         save_btn.removeAttr('disabled');
                         delete_btn.removeAttr('disabled');
                         if(data.success) {
-                            was_clean = true;
-                            $('#sidebar-pane-source-' + file.id).find('a > i').remove();
+                            mark_clean();
                         } else {
                             alert(data.error);
                         }
@@ -167,6 +171,7 @@ jquery_csrf_setup();
                 // Add some buttons
                 var button_holder = $('<p style="padding-top: 5px; text-align: right;">');
                 var save_btn = $('<button class="btn btn-primary">Save</button>');
+                var discard_btn = $('<button class="btn" style="margin-right: 20px;">Reload file</button>');
                 var delete_btn = $('<button class="btn btn-danger" style="margin-right: 20px;">Delete</button>');
                 var error_area = $('<div>');
 
@@ -189,8 +194,21 @@ jquery_csrf_setup();
                     });
                 });
 
+                discard_btn.click(function() {
+                    modal_confirmation_prompt(
+                        "Do you want to reload " + file.name + "?",
+                        "This will discard your current changes and revert to the saved version.",
+                        function() {  
+                            destroy_active_pane();
+                            mark_clean();
+                            edit_source_file(file);
+                        }
+                    );
+                });
+
                 button_holder.append(error_area);
                 button_holder.append(delete_btn);
+                button_holder.append(discard_btn);
                 button_holder.append(save_btn);
                 pane.append(button_holder);
             }
