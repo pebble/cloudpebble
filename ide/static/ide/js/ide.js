@@ -708,6 +708,7 @@ jquery_csrf_setup();
                     } else {
                         resp.dismiss();
                         add_source_file(data.file);
+                        edit_source_file(data.file);
                     }
                 });
             }
