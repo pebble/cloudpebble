@@ -48,7 +48,12 @@ def project_info(request, project_id):
         'last_modified': str(project.last_modified),
         "version_def_name": project.version_def_name,
         'source_files': [{'name': f.file_name, 'id': f.id} for f in source_files],
-        'resources': [{'id': x.id, 'file_name': x.file_name, 'kind': x.kind} for x in resources]
+        'resources': [{
+            'id': x.id,
+            'file_name': x.file_name,
+            'kind': x.kind,
+            'identifiers': [y.resource_id for y in x.identifiers.all()]
+        } for x in resources]
     }
 
     return HttpResponse(json.dumps(output), content_type="application/json")
@@ -123,7 +128,8 @@ def create_resource(request, project_id):
             "id": rf.id,
             "kind": rf.kind,
             "file_name": rf.file_name,
-            "resource_ids": [{'id': x.resource_id, 'regex': x.character_regex} for x in resources]
+            "resource_ids": [{'id': x.resource_id, 'regex': x.character_regex} for x in resources],
+            "identifiers": [x.resource_id for x in resources]
         }}), content_type="application/json")
 
 @require_safe
@@ -179,7 +185,8 @@ def update_resource(request, project_id, resource_id):
             "id": resource.id,
             "kind": resource.kind,
             "file_name": resource.file_name,
-            "resource_ids": [{'id': x.resource_id, 'regex': x.character_regex} for x in resources]
+            "resource_ids": [{'id': x.resource_id, 'regex': x.character_regex} for x in resources],
+            "identifiers": [x.resource_id for x in resources]
         }}), content_type="application/json")
 
 @require_POST

@@ -34,7 +34,19 @@ jquery_csrf_setup();
         var li = $('<li id="sidebar-pane-resource-' + resource.id + '">');
         li.append(link);
         end.before(li);
-        project_resources[resource.file_name] = resource;
+        update_resource(resource);
+    }
+
+    var update_resource = function(resource) {        
+        project_resources[resource.file_name] = resource
+        console.log($('#sidebar-pane-resource-' + resource.id));
+        $('#sidebar-pane-resource-' + resource.id).popover('destroy').popover({
+            trigger: 'hover',
+            title: 'Identifier' + (resource.identifiers.length != 1 ? 's' : ''),
+            content: resource.identifiers.join('<br>'),
+            html: true,
+            delay: {show: 250}
+        }).click(function() { $(this).popover('hide')});
     }
 
     var suspend_active_pane = function() {
@@ -444,7 +456,7 @@ jquery_csrf_setup();
             form.submit(function(e) {
                 e.preventDefault();
                 process_resource_form(form, false, "/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/update", function(data) {
-                    // There's not actually anything terribly interesting to do here yet...
+                    // Update any previews we have.
                     if(preview_img) {
                         preview_img.attr('src', preview_img.attr('src').replace(/#e.*$/,'') + '#e' + (++preview_count));
                     }
@@ -458,6 +470,8 @@ jquery_csrf_setup();
                             update_font_preview($(group));
                         });
                     }
+                    // Update our information about the resource.
+                    update_resource(data);
                 });
             });
 

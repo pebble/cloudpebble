@@ -13,3 +13,7 @@
 .resource-download-link {
     margin-left: 180px; /* Matches Bootstrap's form offset. */
 }
+
+.nav-list .popover {
+    max-width: 350px;
+}
