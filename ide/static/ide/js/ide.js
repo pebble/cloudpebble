@@ -638,8 +638,8 @@ jquery_csrf_setup();
     }
 
     var format_interval = function(s1, s2) {
-        var t = Math.abs(Date.parse(s2.replace(' ','T')) - Date.parse(s1.replace(' ','T'))) / 1000;
-        return t.toFixed(1) + " second" + (t == 1 ? '' : 's');
+        var t = Math.round(Math.abs(Date.parse(s2.replace(' ','T')) - Date.parse(s1.replace(' ','T'))) / 1000);
+        return t.toFixed(0) + " second" + (t == 1 ? '' : 's');
     }
 
     var show_settings_pane = function() {
