@@ -310,6 +310,8 @@ jquery_csrf_setup();
             var resource = data.resource;
             var pane = prepare_resource_pane();
             var list_entry = $('#sidebar-pane-resource-' + resource.id);
+            var preview_img = null;
+            var preview_count = 0;
             if(list_entry) {
                 list_entry.addClass('active');
             }
@@ -318,6 +320,46 @@ jquery_csrf_setup();
             pane.find('#edit-resource-type').val(resource.kind).attr('disabled', 'disabled');
             pane.find('label[for="edit-resource-file"]').text("Replace with new file");
             pane.find('#edit-resource-file').after($("<span class='help-block'>If specified, this file will replace the current file for this resource, regardless of its filename.</span>"));
+
+            // Generate a preview.
+            var preview_url = '/ide/project/' + PROJECT_ID + '/resource/' + resource.id +'/get';
+            if(resource.kind == 'png' || resource.kind == 'png-trans') {
+                var div = $('<div class="span4 text-center">');
+                preview_img = $('<img class="img-polaroid">');
+                preview_img.attr('src', preview_url);
+                div.append(preview_img);
+                $('.resource-type-column').removeClass('span12').addClass('span8').before(div);
+            } else if(resource.kind == 'font') {
+                var style = document.createElement('style');
+                ++preview_count;
+                var rule = '@font-face { font-family: "font-preview-' + resource.id + '-' + (preview_count) + '"; src: url(' + preview_url + '#e' + (preview_count) + '); }';
+                style.appendChild(document.createTextNode(rule));
+                $('body').append(style);
+            }
+
+            var update_font_preview = function(group) {
+                group.find('.font-preview').remove();
+                var regex_str = group.find('.edit-resource-regex').val();
+                var id_str = group.find('.edit-resource-id').val();
+                var preview_regex = new RegExp(regex_str ? regex_str : '.', 'g');
+                var row = $('<div class="control-group font-preview"><label class="control-label">Preview</label>');
+                var preview = $('<div class="controls">');
+                var line1 = ('abcdefghijklmnopqrstuvwxyz'.match(preview_regex)||[]).join('');
+                var line2 = ('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.match(preview_regex)||[]).join('');
+                var line3 = ('0123456789'.match(preview_regex) || []).join('');
+                var line4 = ('~!@#$%^& *()_+[]{}\\|;:\'"<>?`'.match(preview_regex)||[]).join('');
+                var font_size = id_str.match(/[0-9]+$/)[0]
+                preview.html(line1 + (line1 ? "<br>" : '') + line2 + (line2 ? "<br>" : '')+ line3 + (line3 ? "<br>" : '')+ line4);
+                // 
+                preview.css({
+                    'font-family': 'font-preview-' + resource.id + '-' + preview_count,
+                    'font-size': font_size * (72 / 175.2) + 'pt',
+                    'line-height': font_size * (72 / 175.2)  + 'pt'
+                });
+                row.append(preview);
+                group.append(row);
+            }
+
 
             if(resource.kind != 'font') {
                 if(resource.resource_ids.length > 0) {
@@ -328,11 +370,14 @@ jquery_csrf_setup();
                 var template = pane.find('.font-resource-group-single');
                 template.detach();
                 var parent = $('#font-resource-group').removeClass('hide');
-                console.log(resource.resource_ids);
                 $.each(resource.resource_ids, function(index, value) {
                     var group = template.clone();
                     group.find('.edit-resource-id').val(value.id);
                     group.find('.edit-resource-regex').val(value.regex);
+                    update_font_preview(group);
+                    group.find('input[type=text]').change(function() {
+                        update_font_preview(group);
+                    })
                     parent.append(group);
                 });
                 pane.find('#add-font-resource').removeClass('hide').click(function() {
@@ -365,6 +410,19 @@ jquery_csrf_setup();
                 e.preventDefault();
                 process_resource_form(form, false, "/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/update", function(data) {
                     // There's not actually anything terribly interesting to do here yet...
+                    if(preview_img) {
+                        preview_img.attr('src', preview_img.attr('src').replace(/#e.*$/,'') + '#e' + (++preview_count));
+                    }
+                    if(resource.kind == 'font') {
+                        var style = document.createElement('style');
+                        ++preview_count;
+                        var rule = '@font-face { font-family: "font-preview-' + resource.id + '-' + (preview_count) + '"; src: url(' + preview_url + '#e' + (preview_count) + '); }';
+                        style.appendChild(document.createTextNode(rule));
+                        $('body').append(style);
+                        $.each(pane.find('.font-resource-group-single'), function(index, group) {
+                            update_font_preview($(group));
+                        });
+                    }
                 });
             });
 
@@ -449,7 +507,6 @@ jquery_csrf_setup();
 
     var update_build_history = function(pane) {
         $.getJSON('/ide/project/' + PROJECT_ID + '/build/history', function(data) {
-            console.log(data);
             if(!data.success) {
                 alert("Something went wrong:\n" + data.error); // This should be prettier.
                 destroy_active_pane();
@@ -462,11 +519,9 @@ jquery_csrf_setup();
             }
             pane.find('#run-build-table').html('')
             $.each(data.builds, function(index, value) {
-                console.log(value);
                 pane.find('#run-build-table').append(build_history_row(value));
             });
             if(data.builds.length > 0 && data.builds[0].state == 1) {
-                console.log("Setting timeout.");
                 setTimeout(function() { update_build_history(pane) }, 1000);
             }
         });
@@ -519,8 +574,6 @@ jquery_csrf_setup();
                 pane.find('#last-compilation-pbw').addClass('hide');
                 pane.find('#last-compilation-qr-code').addClass('hide');
             }
-            console.log(build.state);
-            console.log($(('#last-compilation-status')));
             pane.find('#last-compilation-status').removeClass('label-success label-error label-info').addClass('label-' + COMPILE_SUCCESS_STATES[build.state].label).text(COMPILE_SUCCESS_STATES[build.state].english)
         }
     }

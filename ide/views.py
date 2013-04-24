@@ -275,3 +275,12 @@ def delete_project(request, project_id):
         return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
     else:
         return HttpResponse(json.dumps({"success": True}), content_type="application/json")
+
+@require_safe
+@login_required
+def show_resource(request, project_id, resource_id):
+    resource = get_object_or_404(ResourceFile, pk=resource_id, project__owner=request.user)
+    content_type = {'png': 'image/png', 'png-trans': 'image/png', 'font': 'application/octet-stream', 'raw': 'application/octet-stream'}
+    response = HttpResponse(open(resource.local_filename), content_type=content_type[resource.kind])
+    response['Content-Disposition'] = "attachment; filename=\"%s\"" % resource.file_name
+    return response

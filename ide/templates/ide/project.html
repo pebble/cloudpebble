@@ -34,22 +34,26 @@
     <form class="form-horizontal">
         <div class="alert alert-error hide"></div>
         <div class="well">
-            <div class="control-group">
-                <label class="control-label" for="edit-resource-type">Resource type</label>
-                <div class="controls">
-                    <select id="edit-resource-type">
-                        <option value="png">PNG image</option>
-                        <option value="png-trans">PNG with transparency</option>
-                        <option value="font">TrueType font</option>
-                        <option value="raw">Raw binary blob</option>
-                    </select>
-                </div>
-            </div>
-            <div class="control-group">
-                <label class="control-label" for="edit-resource-file">File</label>
-                <div class="controls">
-                    <input type="file" id="edit-resource-file">
-                    <span class="help-block hide">You can have multiple Pebble resources from a single file (for different sizes, etc.)</span>
+            <div class="row-fluid">
+                <div class="span12 resource-type-column">
+                    <div class="control-group">
+                        <label class="control-label" for="edit-resource-type">Resource type</label>
+                        <div class="controls">
+                            <select id="edit-resource-type">
+                                <option value="png">PNG image</option>
+                                <option value="png-trans">PNG with transparency</option>
+                                <option value="font">TrueType font</option>
+                                <option value="raw">Raw binary blob</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="edit-resource-file">File</label>
+                        <div class="controls">
+                            <input type="file" id="edit-resource-file">
+                            <span class="help-block hide">You can have multiple Pebble resources from a single file (for different sizes, etc.)</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -75,9 +79,9 @@
                     <div class="controls">
                         <input type="text" class="span4 edit-resource-regex" placeholder="[0-9:. ]">
                         <span class="help-block">A PCRE regular expression that restricts characters.<br>
-                            If specified, each character will be matched against it individually and only those that match will be included.<br>
+                           <!-- If specified, each character will be matched against it individually and only those that match will be included.<br>
                             If omitted, all characters are included; this may be impractical for large fonts.<br>
-                            If you're unsure, <code>[a-zA-Z0-9:., -]</code> is probably sufficient (indeed, excessive) for most tasks.</span>
+                            If you're unsure, <code>[a-zA-Z0-9:., -]</code> is probably sufficient (indeed, excessive) for most tasks.--></span>
                     </div>
                 </div>
             </div>
