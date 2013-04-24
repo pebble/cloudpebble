@@ -9,3 +9,7 @@
 .edit-resource-regex {
   font-family: Menlo, 'Deja Vu Sans Mono', monospace;
 }
+
+.resource-download-link {
+    margin-left: 180px; /* Matches Bootstrap's form offset. */
+}

@@ -328,6 +328,11 @@ jquery_csrf_setup();
                 preview_img = $('<img class="img-polaroid">');
                 preview_img.attr('src', preview_url);
                 div.append(preview_img);
+                var dimensions = $('<p class="muted">');
+                preview_img.load(function() {
+                    dimensions.text(preview_img.width() + ' x ' + preview_img.height());
+                });
+                div.append(dimensions);
                 $('.resource-type-column').removeClass('span12').addClass('span8').before(div);
             } else if(resource.kind == 'font') {
                 var style = document.createElement('style');
@@ -336,6 +341,7 @@ jquery_csrf_setup();
                 style.appendChild(document.createTextNode(rule));
                 $('body').append(style);
             }
+            pane.find('.resource-download-link').removeClass('hide').find('a').attr('href', preview_url);
 
             var update_font_preview = function(group) {
                 group.find('.font-preview').remove();
