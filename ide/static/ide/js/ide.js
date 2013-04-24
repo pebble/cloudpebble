@@ -341,7 +341,12 @@ jquery_csrf_setup();
                 group.find('.font-preview').remove();
                 var regex_str = group.find('.edit-resource-regex').val();
                 var id_str = group.find('.edit-resource-id').val();
-                var preview_regex = new RegExp(regex_str ? regex_str : '.', 'g');
+                try {
+                    var preview_regex = new RegExp(regex_str ? regex_str : '.', 'g');
+                    group.find('.font-resource-regex-group').removeClass('error').find('.help-block').text("A PCRE regular expression that restricts characters.");
+                } catch(e) {
+                    group.find('.font-resource-regex-group').addClass('error').find('.help-block').text(e);
+                }
                 var row = $('<div class="control-group font-preview"><label class="control-label">Preview</label>');
                 var preview = $('<div class="controls">');
                 var line1 = ('abcdefghijklmnopqrstuvwxyz'.match(preview_regex)||[]).join('');
@@ -367,25 +372,31 @@ jquery_csrf_setup();
                 }
             } else {
                 pane.find('#non-font-resource-group').addClass('hide');
-                var template = pane.find('.font-resource-group-single');
-                template.detach();
+                var template = pane.find('.font-resource-group-single').detach();
                 var parent = $('#font-resource-group').removeClass('hide');
                 $.each(resource.resource_ids, function(index, value) {
                     var group = template.clone();
+                    group.removeClass('hide').attr('id','');
                     group.find('.edit-resource-id').val(value.id);
                     group.find('.edit-resource-regex').val(value.regex);
                     update_font_preview(group);
-                    group.find('input[type=text]').change(function() {
+                    group.find('input[type=text]').keyup(function() {
                         update_font_preview(group);
-                    })
+                    });
                     parent.append(group);
                 });
                 pane.find('#add-font-resource').removeClass('hide').click(function() {
-                    var clone = parent.find('.font-resource-group-single:last').clone();
+                    var clone = parent.find('.font-resource-group-single:last').clone(false);
                     if(!clone.length) {
-                        clone = template.clone();
-                        parent.append(clone);
+                        clone = template.clone().removeClass('hide').attr('id','');
                     }
+                    parent.append(clone);
+                    
+                    console.log(clone.find('input[type=text]'));
+                    clone.find('input[type=text]').keyup(function() {
+                        console.log(clone);
+                        update_font_preview(clone);
+                    })
                 });
             }
 
@@ -448,11 +459,6 @@ jquery_csrf_setup();
                 template.find('#non-font-resource-group').removeClass('hide');
                 template.find('#add-font-resource').addClass('hide');
             }
-        });
-
-        template.find('#add-font-resource').click(function() {
-            var clone = template.find('.font-resource-group-single:last').clone();
-            template.find('#font-resource-group').append(clone);
         });
         return template;
     }
