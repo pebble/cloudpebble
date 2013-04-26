@@ -20,5 +20,6 @@ urlpatterns = patterns('',
     url(r'^project/(?P<project_id>\d+)/resource/(?P<resource_id>\d+)/get', views.show_resource, name='show_resource'),
     url(r'^project/(?P<project_id>\d+)/build/run', views.compile_project, name='compile_project'),
     url(r'^project/(?P<project_id>\d+)/build/last', views.last_build, name='get_last_build'),
-    url(r'^project/(?P<project_id>\d+)/build/history', views.build_history, name='get_build_history')
+    url(r'^project/(?P<project_id>\d+)/build/history', views.build_history, name='get_build_history'),
+    url(r'^shortlink$', views.get_shortlink, name='get_shortlink')
 )

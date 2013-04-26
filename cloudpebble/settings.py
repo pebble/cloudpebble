@@ -126,8 +126,9 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'ide',
     'auth',
-    'south',
     'root',
+    'qr',
+    'south',
     'djcelery',
     'registration'
 )

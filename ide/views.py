@@ -12,6 +12,7 @@ from ide.models import Project, SourceFile, ResourceFile, ResourceIdentifier, Bu
 from ide.tasks import run_compile
 
 import uuid
+import urllib2
 
 @require_safe
 @login_required
@@ -291,3 +292,14 @@ def show_resource(request, project_id, resource_id):
     response = HttpResponse(open(resource.local_filename), content_type=content_type[resource.kind])
     response['Content-Disposition'] = "attachment; filename=\"%s\"" % resource.file_name
     return response
+
+@require_POST
+def get_shortlink(request):
+    url = request.POST['url']
+    try:
+        r = urllib2.Request('http://api.small.cat/entries', json.dumps({'value': url, 'duration': 60}), headers={'Content-Type': 'application/json'})
+        response = json.loads(urllib2.urlopen(r).read())
+    except urllib2.URLError as e:
+        return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
+    else:
+        return HttpResponse(json.dumps({"success": True, 'url': response['url']}), content_type="application/json")

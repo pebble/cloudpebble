@@ -619,9 +619,19 @@ jquery_csrf_setup();
                 pane.find('#last-compilation-log').removeClass('hide').find('a').attr('href', build.log);
                 pane.find('#compilation-run-build-button').removeAttr('disabled');
                 if(build.state == 3) {
-                    pane.find('#last-compilation-pbw').removeClass('hide').find('a').attr('href', build.pbw);
+                    pane.find('#last-compilation-pbw').removeClass('hide').find('a:first').attr('href', build.pbw);
                     var url = build.pbw;
-                    pane.find('#last-compilation-qr-code').removeClass('hide').find('img').attr('src', 'https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl='+url+'&choe=UTF-8');
+                    pane.find('#last-compilation-qr-code').removeClass('hide').find('img').attr('src', '/qr/?v=' + url);
+                    $('#pbw-shortlink > a').attr('href', '#').text("get short link").unbind('click').click(function() {
+                        $('#pbw-shortlink > a').text("generating…").unbind('click');
+                        $.post("/ide/shortlink", {url: url}, function(data) {
+                            if(data.success) {
+                                $('#pbw-shortlink > a').attr('href', data.url).text(data.url.replace(/^https?:\/\//,''));
+                            } else {
+                                $('#pbw-shortlink > a').text("no shortlink");
+                            }
+                        });
+                    });
                 }
             } else {
                 pane.find('#last-compilation-time').addClass('hide');
