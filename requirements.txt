@@ -1,0 +1,11 @@
+django
+-e hg+https://bitbucket.org/ubernostrum/django-registration#egg=django-registration
+amqp
+celery
+django_celery
+flup
+freetype-py
+MySQL-python
+Pillow
+South
+qrcode
