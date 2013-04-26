@@ -175,3 +175,9 @@ DEFAULT_TEMPLATE = None
 
 import djcelery
 djcelery.setup_loader()
+
+# import local settings
+try:
+    from settings_local import *
+except ImportError:
+    raise
