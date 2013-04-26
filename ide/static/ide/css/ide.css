@@ -29,3 +29,9 @@
     margin-top: -10px;
     margin-bottom: -10px;
 }
+
+#last-compilation-qr-code img {
+    height: 148px;
+    width: 148px;
+    margin-top: -20px;
+}
