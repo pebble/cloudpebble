@@ -27,7 +27,12 @@ CloudPebble.Sidebar = (function() {
 
     var destroy_active_pane = function() {
         var pane_id = $('#main-pane').data('pane-id');
-        $('#main-pane').remove();
+        var pane = $('#main-pane');
+        if(pane.data('pane-destroy-function')) {
+            console.log('o.o');
+            pane.data('pane-destroy-function')(pane);
+        }
+        pane.remove();
         var list_entry = $('#sidebar-pane-' + pane_id);
         if(list_entry) {
             list_entry.removeClass('active');
@@ -55,10 +60,13 @@ CloudPebble.Sidebar = (function() {
         return false;
     }
 
-    var set_main_pane = function(pane, id, restore_function) {
+    var set_main_pane = function(pane, id, restore_function, destroy_function) {
         $('#main-pane').append(pane).data('pane-id', id);
         if(restore_function) {
             $('#main-pane').data('pane-restore-function', restore_function);
+        }
+        if(destroy_function) {
+            $('#main-pane').data('pane-destroy-function', destroy_function);
         }
     }
 
@@ -80,8 +88,8 @@ CloudPebble.Sidebar = (function() {
             }
             return restored;
         },
-        SetActivePane: function(pane, id, restore_function) {
-            set_main_pane(pane, id, restore_function);
+        SetActivePane: function(pane, id, restore_function, destroy_function) {
+            set_main_pane(pane, id, restore_function, destroy_function);
             set_active_menu_entry(id);
         },
         AddResource: function(resource, on_click) {

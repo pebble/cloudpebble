@@ -45,8 +45,17 @@ CloudPebble.Init = function() {
         $.each(data.resources, function(index, value) {
             CloudPebble.Resources.Add(value);
         });
-        
+
         CloudPebble.Editor.Autocomplete.Init();
+    });
+
+    window.addEventListener('beforeunload', function(e) {
+        var u = CloudPebble.Editor.GetUnsavedFiles();
+        if(u > 0) {
+            var confirm = "You have " + u + " unsaved source file" + (u==1?'':'s') + ".\mIf you leave the page, you will lose them.";
+            (e || window.event).returnValue = confirm;
+            return confirm;
+        }
     });
 }
 

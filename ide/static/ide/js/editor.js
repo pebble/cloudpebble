@@ -1,5 +1,6 @@
 CloudPebble.Editor = (function() {
     var project_source_files = {};
+    var unsaved_files = 0;
 
     var add_source_file = function(file) {
         CloudPebble.Sidebar.AddSourceFile(file, function() {
@@ -84,6 +85,10 @@ CloudPebble.Editor = (function() {
                 CloudPebble.Sidebar.SetActivePane(pane, 'source-' + file.id, function() {
                     code_mirror.refresh();
                     code_mirror.focus();
+                }, function() {
+                    if(!was_clean) {
+                        --unsaved_files;
+                    }
                 });
 
                 var was_clean = true;
@@ -91,11 +96,13 @@ CloudPebble.Editor = (function() {
                     if(was_clean) {
                         CloudPebble.Sidebar.SetIcon('source-' + file.id, 'edit');
                         was_clean = false;
+                        ++unsaved_files;
                     }
                 });
 
                 function mark_clean() {
                     was_clean = true;
+                    --unsaved_files;
                     CloudPebble.Sidebar.ClearIcon('source-' + file.id);
                 }
 
@@ -195,6 +202,9 @@ CloudPebble.Editor = (function() {
         },
         Init: function() {
             init();
+        },
+        GetUnsavedFiles: function() {
+            return unsaved_files;
         }
     }
 })();
