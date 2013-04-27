@@ -27,6 +27,7 @@ CloudPebble.Editor = (function() {
             } else {
                 var source = data.source;
                 var pane = $('<div>');
+                var is_autocompleting = false;
                 var code_mirror = CodeMirror(pane[0], {
                     indentUnit: 4,
                     lineNumbers: true,
@@ -48,8 +49,30 @@ CloudPebble.Editor = (function() {
                         'Cmd-S': function(instance) {
                             save()
                         }
+                    },
+                    onKeyEvent: function(cm, e) {
+                        // This is kinda sketchy but seems to basically work.
+                        if(e.type == "keyup") {
+                            // This is a mess.
+                            // The idea is to try and fire whenever we hit a key that could be part of an identifier, except when we're already
+                            // showing an autocomplete prompt, or whenever that key is just noise.
+                            if((e.keyCode >= 65 && e.keyCode <= 90) || (e.keyCode >= 65 && e.keyCode <= 122) || e.keyCode == 8 || (e.keyCode == 189 && e.shiftKey)) {
+                                if(!is_autocompleting || e.which == 8) {
+                                    console.log("autocomplete");
+                                    CodeMirror.commands.autocomplete(cm);
+                                }
+                            }
+                        }
+                        return false;
                     }
                 });
+                code_mirror.on('close', function() {
+                    is_autocompleting = false;
+                });
+                code_mirror.on('shown', function() {
+                    is_autocompleting = true;
+                })
+
                 var fix_height = function() {
                     var browserHeight = document.documentElement.clientHeight;
                     code_mirror.getWrapperElement().style.height = (browserHeight - 130) + 'px';
@@ -138,8 +161,10 @@ CloudPebble.Editor = (function() {
         });
     }
 
-    function init() {   
-        // Nothing?
+    function init() {
+        CodeMirror.commands.autocomplete = function(cm) {
+            CodeMirror.showHint(cm, CloudPebble.Editor.Autocomplete.Complete, {completeSingle: false});
+        }
     }
 
     return {

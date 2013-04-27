@@ -46,6 +46,7 @@ CloudPebble.Settings = (function() {
                     $('.project-name').text(name);
                     window.document.title = "CloudPebble – " + name;
                     display_success("Settings saved.");
+                    CloudPebble.Editor.Autocomplete.Init();
                 } else {
                     display_error("Error: " + data.error);
                 }

@@ -45,6 +45,8 @@ CloudPebble.Init = function() {
         $.each(data.resources, function(index, value) {
             CloudPebble.Resources.Add(value);
         });
+        
+        CloudPebble.Editor.Autocomplete.Init();
     });
 }
 

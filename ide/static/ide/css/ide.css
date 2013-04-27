@@ -6,6 +6,10 @@
   line-height: 18px;
 }
 
+.CodeMirror-hints {
+  font-family: Menlo, 'Deja Vu Sans Mono', monospace;
+}
+
 .edit-resource-regex {
   font-family: Menlo, 'Deja Vu Sans Mono', monospace;
 }

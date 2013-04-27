@@ -11,6 +11,9 @@ CloudPebble.Resources = (function() {
     var update_resource = function(resource) {
         project_resources[resource.file_name] = resource
         CloudPebble.Sidebar.SetPopover('resource-' + resource.id, 'Identifier' + (resource.identifiers.length != 1 ? 's' : ''), resource.identifiers.join('<br>'));
+        // We need to reinitialise the editor, which uses this information.
+        if(CloudPebble.Editor.Autocomplete.IsInitialised())
+            CloudPebble.Editor.Autocomplete.Init();
     }
 
     var process_resource_form = function(form, is_new, url, callback) {
@@ -334,6 +337,15 @@ CloudPebble.Resources = (function() {
         },
         Create: function() {
             create_new_resource();
+        },
+        GetResourceIDs: function() {
+            names = [];
+            $.each(project_resources, function(index, value) {
+                $.each(value.identifiers, function(index, id) {
+                    names.push("RESOURCE_ID_" + id);
+                });
+            });
+            return names;
         }
     };
 })();
