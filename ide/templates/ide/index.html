@@ -1,43 +1,89 @@
 {% extends "ide/base.html" %}
 {% load staticfiles %}
 {% block content %}
-<div class="container">
+<style type="text/css">
+      /* Custom container */
+      .container-narrow {
+        margin: 0 auto;
+        max-width: 800px;
+      }
+      .container-narrow > hr {
+        margin: 30px 0;
+      }
+      </style>
+<div class="container-narrow">
     <div class="masthead">
-        <h3 class="muted offset1">CloudPebble</h3>
+        <ul class="nav nav-pills pull-right">
+          <li class="active"><a>Your Projects</a></li>
+          <li><a href="http://blog.cloudpebble.net/">Blog</a></li>
+        </ul>
+        <h3 class="muted">CloudPebble</h3>
     </div>
-    <div class="span10 offset1 well">
-        {% if my_projects %}
-            <table class="table">
-                <thead>
-                    <tr><th>Project</th><th>Last modified</th><th>Last build</th></tr>
-                </thead>
-                <tbody>
-                {% for project in my_projects %}
-                    <tr>
-                        <td><a href="{% url 'ide:project' project.id %}">{{ project.name }}</a></td>
-                        <td>{{ project.last_modified }}</td>
-                        <td>
-                            {% if project.get_last_build %}
-                                {{ project.last_build.started }}
-                                {% if project.last_build.state == 3 %}
-                                    <span class="label label-success">Successful</span>
-                                {% elif project.last_build.state == 2 %}
-                                    <span class="label label-important">Failed</span>
+    <div class="row-fluid">
+        <div class="span12 well">
+            {% if my_projects %}
+                <table class="table">
+                    <thead>
+                        <tr><th>Project</th><th>Last modified</th><th>Last build</th></tr>
+                    </thead>
+                    <tbody>
+                    {% for project in my_projects %}
+                        <tr>
+                            <td><a href="{% url 'ide:project' project.id %}">{{ project.name }}</a></td>
+                            <td>{{ project.last_modified }}</td>
+                            <td>
+                                {% if project.get_last_build %}
+                                    {{ project.last_build.started }}
+                                    {% if project.last_build.state == 3 %}
+                                        <span class="label label-success">Successful</span>
+                                    {% elif project.last_build.state == 2 %}
+                                        <span class="label label-important">Failed</span>
+                                    {% else %}
+                                        <span class="label label-info">Pending</span>
+                                    {% endif %}
                                 {% else %}
-                                    <span class="label label-info">Pending</span>
+                                    <span class="muted">Never</span>
                                 {% endif %}
-                            {% else %}
-                                <span class="muted">Never</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>You don't have any projects yet.</p>
-        {% endif %}
-        <p><button id="create-project" class="btn">Create Project</button></p>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>You don't have any projects yet.</p>
+            {% endif %}
+            <p><button id="create-project" class="btn">Create Project</button></p>
+        </div>
+    </div>
+    {% if my_projects %}
+    <div class="row-fluid">
+        <div class="span12 well" style="text-align: justify;" id="donations">
+            <p>If CloudPebble is useful to you, please consider donating! Running the site is not free, and
+                development consumes much of my limited free time. Donations serve both to cover actual
+                expenses and encourage me to keep working!</p>
+            <div class="row-fluid" style="padding-top: 10px;">
+                <div class="span6 text-center">
+                <p>You can donate via PayPal:</p>
+                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                    <input type="hidden" name="cmd" value="_s-xclick">
+                    <input type="hidden" name="hosted_button_id" value="KUJCS5LYA22TY">
+                    <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" style="height: 47px; width:147px;" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+                    <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+                </form>
+
+                </div>
+                <div class="span6 text-center">
+                    <p>Or, if you have any, you can send Bitcoins to:<br><br><tt>134chMKdmjce813vDAxdPW9Nhybkp7aLDJ</tt>.</p>
+                </div>
+            </div>
+            <p>Thank you for your support! Please feel free to drop me a note at <a href="mailto:katharine@kathar.in">katharine@kathar.in</a>
+                or comment on <a href="http://forums.getpebble.com/discussion/4745/cloudpebble-net-online-pebble-ide/p1">the Pebble forum</a>.
+                I want to hear from you!</p>
+        </div>
+    </div>
+    {% endif %}
+    <div class="footer muted text-center">
+        <small>CloudPebble has no affiliation with and is not endorsed by Pebble Inc.</small>
     </div>
 </div>
 

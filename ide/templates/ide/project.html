@@ -4,7 +4,11 @@
 {% block content %}
 <div class="container-fluid">
     <div class="masthead">
-        <div class="pull-right"><a href="/ide/">Return to project list</a></div>
+        <ul class="nav nav-pills pull-right">
+          <li class="active"><a>{{ project.name }}</a></li>
+          <li><a href="/ide/">Your Projects</a></li>
+          <li><a href="http://blog.cloudpebble.net/">Blog</a></li>
+        </ul>
         <h3 class="muted">CloudPebble – <span class="project-name">{{ project.name }}</span></h3>
     </div>
     <div class="row-fluid">
