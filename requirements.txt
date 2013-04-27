@@ -9,3 +9,4 @@ MySQL-python
 Pillow
 South
 qrcode
+django-pipeline

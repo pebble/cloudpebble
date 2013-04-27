@@ -100,6 +100,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'pipeline.middleware.MinifyHTMLMiddleware',
 )
 
 ROOT_URLCONF = 'cloudpebble.urls'
@@ -130,7 +131,8 @@ INSTALLED_APPS = (
     'qr',
     'south',
     'djcelery',
-    'registration'
+    'registration',
+    'pipeline'
 )
 
 # A sample logging configuration. The only tangible logging
