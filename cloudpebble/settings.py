@@ -174,6 +174,10 @@ CHROOT_ROOT = None
 
 DEFAULT_TEMPLATE = None
 
+EXPORT_DIRECTORY = '/Users/katharine/projects/cloudpebble/user_data/export/'
+
+EXPORT_ROOT = 'http://localhost:8000/export/'
+
 import djcelery
 djcelery.setup_loader()
 

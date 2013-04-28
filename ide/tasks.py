@@ -11,6 +11,8 @@ import os
 import os.path
 import subprocess
 import shutil
+import zipfile
+import uuid
 
 def create_sdk_symlinks(project_root, sdk_root):
     SDK_LINKS = ["waf", "wscript", "tools", "lib", "pebble_app.ld", "include"]
@@ -130,3 +132,50 @@ def run_compile(build_result):
     finally:
         print "Removing temporary directory"
         shutil.rmtree(base_dir)
+
+@task(acks_late=True)
+def create_archive(project_id):
+    project = Project.objects.get(pk=project_id)
+    source_files = SourceFile.objects.filter(project=project)
+    resources = ResourceFile.objects.filter(project=project)
+    prefix = project.name.replace(' ','_').lower()
+    with tempfile.NamedTemporaryFile(suffix='.zip', delete=False) as temp:
+        filename = temp.name
+        with zipfile.ZipFile(filename, 'w', compression=zipfile.ZIP_DEFLATED) as z:
+            for source in source_files:
+                z.writestr('%s/src/%s' % (prefix, source.file_name), source.get_contents())
+
+            resource_dir_map = {
+                'png': 'images',
+                'png-trans': 'images',
+                'font': 'fonts',
+                'blob': 'data'
+            }
+
+            resource_map = {'friendlyVersion': 'VERSION', 'versionDefName': project.version_def_name, 'media': []}
+            if len(resources) == 0:
+                print "No resources; adding dummy."
+                resource_map['media'].append({"type":"raw","defName":"DUMMY","file":"resource_map.json"})
+            else:
+                for resource in resources:
+                    z.writestr('%s/resources/src/%s/%s' % (prefix, resource_dir_map[resource.kind], resource.file_name), open(resource.local_filename).read())
+
+                    for resource_id in resource.get_identifiers():
+                        d = {
+                            'type': resource.kind,
+                            'defName': resource_id.resource_id,
+                            'file': os.path.join(resource_dir_map[resource.kind], resource.file_name)
+                        }
+                        if resource_id.character_regex:
+                            d['characterRegex'] = resource_id.character_regex
+                        resource_map['media'].append(d)
+
+
+            z.writestr('%s/resources/src/resource_map.json' % prefix, json.dumps(resource_map, indent=4, separators=(',', ': ')))
+
+        # Generate a URL
+        u = uuid.uuid4().hex
+        outfile = '%s%s/%s.zip' % (settings.EXPORT_DIRECTORY, u, prefix)
+        os.makedirs(os.path.dirname(outfile))
+        shutil.copy(filename, outfile)
+        return '%s%s/%s.zip' % (settings.EXPORT_ROOT, u, prefix)

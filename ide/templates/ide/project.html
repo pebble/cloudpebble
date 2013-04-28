@@ -185,10 +185,33 @@
             <button id="project-save" class="btn btn-primary">Save changes</button>
         </div>
         <div class="well form-actions">
+            <button id="project-export-zip" class="btn">Download as zip</button>
+            <span class="help-block">Export your source files and resources to your computer.</span>
+        </div>
+        <div class="well form-actions">
             <button id="project-delete" class="btn btn-danger">Delete Project</button>
             <span class="help-inline"><strong>This cannot be undone.</strong></span>
         </div>
     </form>
+</div>
+<div id="export-progress" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">x</button>
+        <h3>Exporting…</h3>
+    </div>
+    <div class="model-body">
+        <div class="row-fluid" id="export-pending-body">
+            <div class="span10 offset1">
+                <div class="text-center" id="export-progress-text">
+                    <img src="{% static 'ide/img/zip.png' %}" style="height: 200px; width: 200px; margin-top: 10px;">
+                    <div class="progress active">
+                        <div class="bar" style="width: 100%;"></div>
+                    </div>
+                    <p>We're just getting that packaged up for you.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <!-- Modal text prompt -->
 <div id="modal-text-input" class="modal hide fade" tabindex="-1" role="dialog">

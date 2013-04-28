@@ -7,9 +7,10 @@ from django.views.decorators.http import require_safe, require_POST
 from django.views.decorators.csrf import csrf_protect
 from django.forms import ModelForm
 from django.conf import settings
+from celery.result import AsyncResult
 
 from ide.models import Project, SourceFile, ResourceFile, ResourceIdentifier, BuildResult, TemplateProject
-from ide.tasks import run_compile
+from ide.tasks import run_compile, create_archive
 from ide.forms import SettingsForm
 
 import uuid
@@ -319,3 +320,14 @@ def settings_page(request):
 
     return render(request, 'ide/settings.html', {'form': form, 'saved': False})
 
+@login_required
+@require_POST
+def begin_export(request, project_id):
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    result = create_archive.delay(project.id)
+    return HttpResponse(json.dumps({"success": True, 'task_id': result.task_id}), content_type="application/json")
+
+@require_safe
+def check_task(request, task_id):
+    result = AsyncResult(task_id)
+    return HttpResponse(json.dumps({"success": True, 'state': {'status': result.status, 'result': str(result.result)}}), content_type="application/json")

@@ -65,6 +65,46 @@ CloudPebble.Settings = (function() {
             });
         });
 
+        pane.find('#project-export-zip').click(function() {
+            var dialog = $('#export-progress');
+            dialog
+                .modal('show')
+                .find('p')
+                .removeClass("text-error")
+                .text("We're just getting that packed up for you…")
+                .siblings('.progress')
+                .addClass('progress-striped')
+                .removeClass('progress-success progress-danger progress-warning');
+            $.post('/ide/project/' + PROJECT_ID + '/export', {}, function(data) {
+                if(!data.success) {
+                    dialog.find('.progress').removeClass('progress-striped').addClass('progress-danger');
+                    dialog.find('p').addClass('text-error').text("Something went wrong! This is odd; there's no failure mode here.");
+                    return;
+                }
+                var task_id = data.task_id;
+                var check_update = function() {
+                    $.getJSON('/ide/task/' + task_id, function(data) {
+                        if(!data.success) {
+                            dialog.find('.progress').addClass('progress-warning');
+                            dialog.find('p').text("This isn't going too well…");
+                            setTimeout(check_update, 1000);
+                        } else {
+                            if(data.state.status == 'SUCCESS') {
+                                dialog.find('.progress').removeClass('progress-striped').addClass('progress-success');
+                                dialog.find('p').html("<a href='" + data.state.result + "' class='btn btn-primary'>Download</a>");
+                            } else if(data.state.status == 'FAILURE') {
+                                dialog.find('.progress').removeClass('progress-striped').addClass('progress-danger');
+                                dialog.find('p').addClass('text-error').text("Failed. " + data.state.result);
+                            } else {
+                                setTimeout(check_update, 1000);
+                            }
+                        }
+                    });
+                };
+                setTimeout(check_update, 1000);
+            });
+        });
+
         CloudPebble.Sidebar.SetActivePane(pane, 'settings');
     }
 
