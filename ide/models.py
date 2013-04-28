@@ -52,7 +52,6 @@ class UserSettings(models.Model):
     )
 
     THEME_CHOICES = (
-        ('codemirror', 'Standard'),
         ('monokai', 'Monokai (Sublime Text)'),
         ('blackboard', 'Blackboard (TextMate)'),
         ('eclipse', 'Eclipse'),
