@@ -16,7 +16,6 @@
                 name: value,
                 template: $('#project-template').val()
             }, function(data) {
-                console.log(data);
                 if(!data.success) {
                     $('#project-prompt-errors').removeClass('hide').text(data.error);
                 } else {
