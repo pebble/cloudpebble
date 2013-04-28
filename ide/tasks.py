@@ -176,6 +176,7 @@ def create_archive(project_id):
         # Generate a URL
         u = uuid.uuid4().hex
         outfile = '%s%s/%s.zip' % (settings.EXPORT_DIRECTORY, u, prefix)
-        os.makedirs(os.path.dirname(outfile))
+        os.makedirs(os.path.dirname(outfile), 0755)
         shutil.copy(filename, outfile)
+        os.chmod(outfile, 0644)
         return '%s%s/%s.zip' % (settings.EXPORT_ROOT, u, prefix)
