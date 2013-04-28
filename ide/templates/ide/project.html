@@ -6,7 +6,8 @@
     <div class="masthead">
         <ul class="nav nav-pills pull-right">
           <li class="active"><a>{{ project.name }}</a></li>
-          <li><a href="/ide/">Your Projects</a></li>
+          <li><a href="{% url 'ide:index' %}">Your Projects</a></li>
+          <li><a href="{% url 'ide:settings' %}">IDE Settings</a></li>
           <li><a href="http://blog.cloudpebble.net/">Blog</a></li>
         </ul>
         <h3 class="muted">CloudPebble – <span class="project-name">{{ project.name }}</span></h3>
@@ -223,9 +224,15 @@
 {% block scripts %}
 <script type="text/javascript">
 var PROJECT_ID = {{ project.id }};
+var USER_SETTINGS = {
+    theme: "{{ project.owner.settings.theme }}",
+    autocomplete: {{ project.owner.settings.autocomplete }},
+    keybinds: "{{ project.owner.settings.keybinds }}"
+};
 </script>
 <script src="{% static 'ide/codemirror/all.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/codemirror/show-hint.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/codemirror/keybindings.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/csrf.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/cloudpebble.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/sidebar.js' %}" type="text/javascript"></script>
@@ -242,6 +249,6 @@ CloudPebble.Init();
 {% endblock %}
 {% block head %}
 <link rel="stylesheet" href="{% static 'ide/codemirror/codemirror.css' %}">
-<link rel="stylesheet" href="{% static 'ide/codemirror/monokai.css' %}">
+<link rel="stylesheet" href="{% static 'ide/codemirror/themes.css' %}">
 <link rel="stylesheet" href="{% static 'ide/css/ide.css' %}">
 {% endblock %}

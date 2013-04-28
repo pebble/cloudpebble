@@ -39,3 +39,12 @@
     width: 148px;
     margin-top: -20px;
 }
+
+.CodeMirror-dialog input {
+    -webkit-border-radius: 0px !important;
+    -moz-border-radius: 0px !important;
+    border-radius: 0px !important;
+    line-height: normal !important;
+    margin: 0em !important;
+    padding: 0em !important;
+}

@@ -1,5 +1,6 @@
 CloudPebble.Editor = (function() {
     var project_source_files = {};
+    var open_codemirrors = {};
     var unsaved_files = 0;
 
     var add_source_file = function(file) {
@@ -29,7 +30,7 @@ CloudPebble.Editor = (function() {
                 var source = data.source;
                 var pane = $('<div>');
                 var is_autocompleting = false;
-                var code_mirror = CodeMirror(pane[0], {
+                var settings = {
                     indentUnit: 4,
                     lineNumbers: true,
                     autofocus: true,
@@ -42,16 +43,13 @@ CloudPebble.Editor = (function() {
                     mode: CloudPebble.Editor.PebbleMode,
                     styleActiveLine: true,
                     value: source,
-                    theme: 'monokai',
-                    extraKeys: {
-                        'Ctrl-S': function(instance) {
-                            save()
-                        },
-                        'Cmd-S': function(instance) {
-                            save()
-                        }
-                    },
-                    onKeyEvent: function(cm, e) {
+                    theme: USER_SETTINGS.theme,
+                };
+                if(USER_SETTINGS.keybinds != '') {
+                    settings.keyMap = USER_SETTINGS.keybinds;
+                }
+                if(USER_SETTINGS.autocomplete === 1) {
+                    settings.onKeyEvent = function(cm, e) {
                         // This is kinda sketchy but seems to basically work.
                         if(e.type == "keyup") {
                             // This is a mess.
@@ -64,8 +62,15 @@ CloudPebble.Editor = (function() {
                             }
                         }
                         return false;
-                    }
-                });
+                    };
+                } else if(USER_SETTINGS.autocomplete === 2) {
+                    settings.extraKeys = {'Ctrl-Space': 'autocomplete'};
+                }
+                var code_mirror = CodeMirror(pane[0], settings);
+                open_codemirrors[file.id] = code_mirror;
+                code_mirror.cloudpebble_save = function() {
+                    save();
+                }
                 code_mirror.on('close', function() {
                     is_autocompleting = false;
                 });
@@ -88,6 +93,7 @@ CloudPebble.Editor = (function() {
                     if(!was_clean) {
                         --unsaved_files;
                     }
+                    delete open_codemirrors[file.id];
                 });
 
                 var was_clean = true;
@@ -171,7 +177,15 @@ CloudPebble.Editor = (function() {
         CodeMirror.commands.autocomplete = function(cm) {
             CodeMirror.showHint(cm, CloudPebble.Editor.Autocomplete.Complete, {completeSingle: false});
         }
-    }
+        CodeMirror.commands.save = function(cm) {
+            cm.cloudpebble_save();
+        }
+        CodeMirror.commands.saveAll = function(cm) {
+            $.each(open_codemirrors, function(index, value) {
+                value.cloudpebble_save();
+            })
+        }
+     }
 
     return {
         Create: function() {

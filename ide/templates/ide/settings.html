@@ -1,0 +1,66 @@
+{% extends "ide/base.html" %}
+{% load staticfiles %}
+{% block content %}
+<style type="text/css">
+    /* Custom container */
+    .container-narrow {
+        margin: 0 auto;
+        max-width: 800px;
+    }
+    .container-narrow > hr {
+        margin: 30px 0;
+    }
+</style>
+<div class="container-narrow">
+    <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li><a href="/ide/">Your Projects</a></li>
+          <li class="active"><a>IDE Settings</a></li>
+          <li><a href="http://blog.cloudpebble.net/">Blog</a></li>
+        </ul>
+        <h3 class="muted">CloudPebble</h3>
+    </div>
+    <div class="row-fluid">
+        <div class="span12">
+            <h4>Editor settings</h4>
+            <form method="post" class="form-horizontal">
+                {% if saved %}
+                    <div class="alert alert-success">Settings saved!</div>
+                {% endif %}
+                {%csrf_token%}
+                {% for hidden in form.hidden_fields %}
+                {{ hidden }}
+                {% endfor %}
+                {% for field in form.visible_fields %}
+                <div class="control-group">
+                    <label class="control-label" for="id_{{field.html_name}}">{{field.label}}</label>
+                    <div class="controls">
+                        {{ field }}
+                        <span class="help-block hide"></span>
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="form-actions">
+                    <input type="submit" class="btn btn-primary" value="Submit">
+                    <input type="reset" class="btn" value="Reset">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+    // Warn about emacs kinda sucking.
+    $('#id_keybinds').change(function() {
+        if($(this).val() == 'emacs') {
+            $(this)
+                .siblings('.help-block')
+                .text("Note: the emacs mapping is limited, and will not work properly in some browsers (e.g. Chrome) that prevent using certain keys.")
+                .removeClass('hide')
+        } else {
+            $(this).siblings('.help-block').addClass('hide');
+        }
+    });
+</script>
+{% endblock %}

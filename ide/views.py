@@ -10,6 +10,7 @@ from django.conf import settings
 
 from ide.models import Project, SourceFile, ResourceFile, ResourceIdentifier, BuildResult, TemplateProject
 from ide.tasks import run_compile
+from ide.forms import SettingsForm
 
 import uuid
 import urllib2
@@ -303,3 +304,18 @@ def get_shortlink(request):
         return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
     else:
         return HttpResponse(json.dumps({"success": True, 'url': response['url']}), content_type="application/json")
+
+@login_required
+def settings_page(request):
+    settings = request.user.settings
+    if request.method == 'POST':
+        form = SettingsForm(request.POST, instance=settings)
+        if form.is_valid():
+            form.save()
+            return render(request, 'ide/settings.html', {'form': form, 'saved': True})
+
+    else:
+        form = SettingsForm(instance=settings)
+
+    return render(request, 'ide/settings.html', {'form': form, 'saved': False})
+
