@@ -219,9 +219,7 @@ CloudPebble.Resources = (function() {
                     }
                     parent.append(clone);
                     
-                    console.log(clone.find('input[type=text]'));
                     clone.find('input[type=text]').keyup(function() {
-                        console.log(clone);
                         update_font_preview(clone);
                     })
                 });

@@ -59,7 +59,6 @@ CloudPebble.Editor = (function() {
                             // showing an autocomplete prompt, or whenever that key is just noise.
                             if((e.keyCode >= 65 && e.keyCode <= 90) || (e.keyCode >= 65 && e.keyCode <= 122) || e.keyCode == 8 || (e.keyCode == 189 && e.shiftKey)) {
                                 if(!is_autocompleting || e.which == 8) {
-                                    console.log("autocomplete");
                                     CodeMirror.commands.autocomplete(cm);
                                 }
                             }

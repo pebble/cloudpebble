@@ -29,7 +29,6 @@ CloudPebble.Sidebar = (function() {
         var pane_id = $('#main-pane').data('pane-id');
         var pane = $('#main-pane');
         if(pane.data('pane-destroy-function')) {
-            console.log('o.o');
             pane.data('pane-destroy-function')(pane);
         }
         pane.remove();
