@@ -25,7 +25,7 @@
         );
     });
 
-    $('form').submit(function (e){
+    $('#project-prompt form').submit(function (e){
         e.preventDefault();
         $('#project-confirm-button').click();
     });
