@@ -84,7 +84,7 @@ class TemplateProject(Project):
         uuid_string = ", ".join(["0x%02X" % ord(b) for b in uuid.uuid4().bytes])
         for resource in self.resources.all():
             new_resource = ResourceFile.objects.create(project=project, file_name=resource.file_name, kind=resource.kind)
-            shutil.copy(resource.local_filename, new_resource.local_filename)
+            shutil.copy(resource.local_filename, new_resource.get_local_filename(create=True))
             for i in resource.identifiers.all():
                 ResourceIdentifier.objects.create(resource_file=new_resource, resource_id=i.resource_id, character_regex=i.character_regex)
 
@@ -148,9 +148,13 @@ class ResourceFile(models.Model):
     file_name = models.CharField(max_length=100)
     kind = models.CharField(max_length=9, choices=RESOURCE_KINDS)
 
-    def get_local_filename(self):
+    def get_local_filename(self, create=False):
         padded_id = '%05d' % self.id
-        return '%sresources/%s/%s/%s' % (settings.FILE_STORAGE, padded_id[0], padded_id[1], padded_id)
+        filename = '%sresources/%s/%s/%s' % (settings.FILE_STORAGE, padded_id[0], padded_id[1], padded_id)
+        if create:
+            if not os.path.exists(os.path.dirname(filename)):
+                os.makedirs(os.path.dirname(filename))
+        return filename
 
     local_filename = property(get_local_filename)
 
