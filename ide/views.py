@@ -10,11 +10,14 @@ from django.conf import settings
 from celery.result import AsyncResult
 
 from ide.models import Project, SourceFile, ResourceFile, ResourceIdentifier, BuildResult, TemplateProject
-from ide.tasks import run_compile, create_archive
+from ide.tasks import run_compile, create_archive, do_import_archive, do_import_github
 from ide.forms import SettingsForm
 
 import uuid
 import urllib2
+import tempfile
+import os
+import re
 
 @require_safe
 @login_required
@@ -283,7 +286,7 @@ def delete_project(request, project_id):
         return HttpResponse(json.dumps({"success": False, "error": "Not confirmed."}), content_type="application/json")
     try:
         project.delete()
-    except:
+    except Exception as e:
         return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
     else:
         return HttpResponse(json.dumps({"success": True}), content_type="application/json")
@@ -333,3 +336,38 @@ def begin_export(request, project_id):
 def check_task(request, task_id):
     result = AsyncResult(task_id)
     return HttpResponse(json.dumps({"success": True, 'state': {'status': result.status, 'result': str(result.result)}}), content_type="application/json")
+
+@login_required
+@require_POST
+def import_zip(request):
+    zip_file = request.FILES['archive']
+    fd, tempzip = tempfile.mkstemp(suffix='.zip')
+    f = os.fdopen(fd, 'w')
+    for chunk in zip_file.chunks():
+        f.write(chunk)
+    name = request.POST['name']
+    try:
+        project = Project.objects.create(owner=request.user, name=name)
+    except IntegrityError as e:
+        return HttpResponse(json.dumps({"success": False, 'error': str(e)}), content_type="application/json")
+    task = do_import_archive.delay(project.id, tempzip, delete_zip=True, delete_project=True)
+    return HttpResponse(json.dumps({"success": True, 'task_id': task.task_id, 'project_id': project.id}), content_type="application/json")
+
+@login_required
+@require_POST
+def import_github(request):
+    name = request.POST['name']
+    repo = request.POST['repo']
+    match = re.match(r'^(?:https?://)?(?:www\.)?github\.com/([\w.-]+)/([\w.-]+)$', repo)
+    if match is None:
+        return HttpResponse(json.dumps({"success": False, 'error': "Invalid GitHub URL."}), content_type="application/json")
+    github_user = match.group(1)
+    github_project = match.group(2)
+
+    try:
+        project = Project.objects.create(owner=request.user, name=name)
+    except IntegrityError as e:
+        return HttpResponse(json.dumps({"success": False, 'error': str(e)}), content_type="application/json")
+
+    task = do_import_github.delay(project.id, github_user, github_project, delete_project=True)
+    return HttpResponse(json.dumps({"success": True, 'task_id': task.task_id, 'project_id': project.id}), content_type="application/json")

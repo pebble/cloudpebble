@@ -4,6 +4,8 @@ from ide.models import Project, SourceFile, ResourceFile, ResourceIdentifier, Bu
 from django.utils import simplejson as json
 from django.utils.timezone import now
 from django.conf import settings
+from django.core.exceptions import SuspiciousOperation
+from django.db import transaction
 
 
 import tempfile
@@ -13,6 +15,7 @@ import subprocess
 import shutil
 import zipfile
 import uuid
+import urllib2
 
 def create_sdk_symlinks(project_root, sdk_root):
     SDK_LINKS = ["waf", "wscript", "tools", "lib", "pebble_app.ld", "include"]
@@ -184,3 +187,139 @@ def create_archive(project_id):
         shutil.copy(filename, outfile)
         os.chmod(outfile, 0644)
         return '%s%s/%s.zip' % (settings.EXPORT_ROOT, u, prefix)
+
+class NoProjectFoundError(Exception): pass
+
+@task(acks_late=True)
+def do_import_archive(project_id, archive_location, delete_zip=False, delete_project=False):
+    try:
+        project = Project.objects.get(pk=project_id)
+        # archive_location *must not* be a file-like object. We ensure this by string casting.
+        archive_location = str(archive_location)
+        if not zipfile.is_zipfile(archive_location):
+            raise NoProjectFoundError, "The file is not a zip file."
+
+        with zipfile.ZipFile(str(archive_location), 'r') as z:
+            contents = z.infolist()
+            # Requirements:
+            # - Find the folder containing the project. This may or may not be at the root level.
+            # - Read in the source files, resources and resource map.
+            # Observations:
+            # - Legal projects must keep their source in a directory called 'src' containing at least one *.c file.
+            # - Legal projects must have a resource map at resources/src/resource_map.json
+            # Strategy:
+            # - Find the shortest common prefix for 'resources/src/resource_map.json' and 'src/'.
+            #   - This is taken to be the project directory.
+            # - Import every file in 'src/' with the extension .c or .h as a source file
+            # - Parse resource_map.json and import files it references
+            RESOURCE_MAP = 'resources/src/resource_map.json'
+            SRC_DIR = 'src/'
+            counter = 0
+            for base_dir in contents:
+                counter += 1
+                if counter > 200:
+                    raise Exception, "Too many files in zip file."
+                base_dir = base_dir.filename
+                print "base_dir: %s" % base_dir
+                try:
+                    dir_end = base_dir.index(RESOURCE_MAP)
+                except ValueError:
+                    continue
+                else:
+                    if dir_end + len(RESOURCE_MAP) != len(base_dir):
+                        continue
+                print "dir_end: %d" % dir_end
+                base_dir = base_dir[:dir_end]
+                source_counter = 0
+                for source_dir in contents:
+                    source_counter += 1
+                    if source_counter > 200:
+                        raise Exception, "Too many files in zip file."
+                    source_dir = source_dir.filename
+                    print "source_dir: %s" % source_dir
+                    if source_dir[:dir_end] != base_dir:
+                        continue
+                    print "has correct prefix"
+                    if source_dir[-2:] != '.c':
+                        continue
+                    print "has correct suffix"
+                    if source_dir[dir_end:dir_end+len(SRC_DIR)] != SRC_DIR:
+                        continue
+                    print "has correct directory"
+                    break
+                else:
+                    continue
+                break
+            else:
+                raise NoProjectFoundError, "No project found in zip file."
+
+            # Now iterate over the things we found
+            with transaction.commit_on_success():
+                for entry in contents:
+                    filename = entry.filename
+                    if filename[:dir_end] != base_dir:
+                        continue
+                    filename = filename[dir_end:]
+                    if filename == '':
+                        continue
+                    if not os.path.normpath('/SENTINEL_DO_NOT_ACTUALLY_USE_THIS_NAME/%s' % filename).startswith('/SENTINEL_DO_NOT_ACTUALLY_USE_THIS_NAME/'):
+                        raise SuspiciousOperation, "Invalid zip file contents."
+                    if entry.file_size > 5242880: # 5 MB
+                        raise Exception, "Excessively large compressed file."
+                    if filename == RESOURCE_MAP:
+                        # We have a resource map! We can now try importing things from it.
+                        with z.open(entry) as f:
+                            m = json.loads(f.read())
+                        project.version_def_name = m['versionDefName']
+                        resources = {}
+                        for resource in m['media']:
+                            kind = resource['type']
+                            def_name = resource['defName']
+                            file_name = resource['file']
+                            regex = resource.get('characterRegex', None)
+                            tracking = resource.get('trackingAdjust', None)
+                            if file_name not in resources:
+                                resources[file_name] = ResourceFile.objects.create(project=project, file_name=os.path.basename(file_name), kind=kind)
+                                local_filename = resources[file_name].get_local_filename(create=True)
+                                open(local_filename, 'w').write(z.open('%sresources/src/%s' % (base_dir, file_name)).read())
+                            ResourceIdentifier.objects.create(resource_file=resources[file_name], resource_id=def_name, character_regex=regex, tracking=tracking)
+
+                    elif filename.startswith(SRC_DIR):
+                        if (not filename.startswith('.')) and (filename.endswith('.c') or filename.endswith('.h')):
+                            source = SourceFile.objects.create(project=project, file_name=os.path.basename(filename))
+                            with z.open(entry.filename) as f:
+                                source.save_file(f.read().decode('utf-8'))
+                project.save()
+
+        # At this point we're supposed to have successfully created the project.
+        if delete_zip:
+            try:
+                os.unlink(archive_location)
+            except OSError:
+                print "Unable to remove archive at %s." % archive_location
+        return True
+    except:
+        if delete_project:
+            try:
+                Project.objects.get(pk=project_id).delete()
+            except:
+                pass
+        raise
+
+
+@task(acks_late=True)
+def do_import_github(project_id, github_user, github_project, delete_project=False):
+    try:
+        url = "https://github.com/%s/%s/archive/master.zip" % (github_user, github_project)
+        u = urllib2.urlopen(url)
+        with tempfile.NamedTemporaryFile(suffix='.zip') as temp:
+            shutil.copyfileobj(u, temp)
+            temp.flush()
+            return do_import_archive(project_id, temp.name)
+    except:
+        if delete_project:
+            try:
+                Project.objects.get(pk=project_id).delete()
+            except:
+                pass
+        raise

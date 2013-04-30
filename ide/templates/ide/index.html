@@ -53,7 +53,10 @@
             {% else %}
                 <p>You don't have any projects yet.</p>
             {% endif %}
-            <p><button id="create-project" class="btn">Create Project</button></p>
+            <p>
+                <button id="create-project" class="btn">Create Project</button>
+                <button id="import-project" class="btn">Import Project</button>
+            </p>
         </div>
     </div>
     {% if my_projects %}
@@ -136,6 +139,68 @@
     <div class="modal-footer">
         <button class="btn" data-dismiss="modal">Cancel</button>
         <button class="btn btn-primary" id="project-confirm-button">Create</button>
+    </div>
+</div>
+<div id="import-prompt" class="modal hide fade" tabindex="-1" role="dialog">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">x</button>
+        <h3>Import Existing Project</h3>
+    </div>
+    <div class="modal-body">
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#import-zip" data-toggle="tab">Upload Zip</a></li>
+            <li><a href="#import-github" data-toggle="tab">Import from GitHub</a></li>
+        </ul>
+        <div class="tab-content">
+            <div id="import-zip" class="tab-pane active">
+                <div class="errors alert alert-error hide"></div>
+                <form class="form-horizontal">
+                    <div class="control-group">
+                        <label class="control-label" for="import-zip-name">Project name</label>
+                        <div class="controls">
+                            <input type="text" id="import-zip-name">
+                        </div>
+                    </div>
+                    <div class="controls-group">
+                        <label class="control-label">Zip file</label>
+                        <div class="controls">
+                            <input type="file" accept="application/zip,application/x-zip-compressed">
+                            <span class="help-block">This must be a zip file containing a standard Pebble project.</span>
+                        </div>
+                    </div>
+                </form>
+                <div class="progress progress-striped active hide">
+                    <div class="bar" style="width: 100%;"></div>
+                </div>
+            </div>
+            <div id="import-github" class="tab-pane">
+                <div class="alert alert-info">
+                    This is a <em>one-time only</em> import from a public GitHub repo.
+                    There will be no further synchronisation.
+                </div>
+                <div class="errors alert alert-error hide"></div>
+                <form class="form-horizontal">
+                    <div class="control-group">
+                        <label class="control-label" for="import-github-name">Project name</label>
+                        <div class="controls">
+                            <input type="text" id="import-github-name">
+                        </div>
+                    </div>
+                    <div class="controls-group">
+                        <label class="control-label" for="import-github-url">GitHub Project</label>
+                        <div class="controls">
+                            <input type="text" id="import-github-url" placeholder="github.com/Katharine/pebble-stopwatch" pattern="(https?://)?(www\.)?github.com/.+/.+">
+                        </div>
+                    </div>
+                </form>
+                <div class="progress progress-striped active hide">
+                    <div class="bar" style="width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" id="run-import">Import</button>
+        </div>
     </div>
 </div>
 {% endblock %}
