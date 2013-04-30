@@ -122,7 +122,7 @@ def create_resource(request, project_id):
             rf = ResourceFile.objects.create(project=project, file_name=file_name, kind=kind)
             for r in resource_ids:
                 regex = r['regex'] if 'regex' in r else None
-                tracking = int(r['tracking'] if 'tracking' in r else None)
+                tracking = int(r['tracking']) if 'tracking' in r else None
                 resources.append(ResourceIdentifier.objects.create(resource_file=rf, resource_id=r['id'], character_regex=regex, tracking=tracking))
             rf.save_file(request.FILES['file'])
     except Exception as e:
@@ -178,7 +178,7 @@ def update_resource(request, project_id, resource_id):
             ResourceIdentifier.objects.filter(resource_file=resource).delete()
             for r in resource_ids:
                 regex = r['regex'] if 'regex' in r else None
-                tracking = int(r['tracking'] if 'tracking' in r else None)
+                tracking = int(r['tracking']) if 'tracking' in r else None
                 resources.append(ResourceIdentifier.objects.create(resource_file=resource, resource_id=r['id'], character_regex=regex, tracking=tracking))
 
             if 'file' in request.FILES:
