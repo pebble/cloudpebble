@@ -80,6 +80,8 @@ def run_compile(build_result):
                     }
                     if resource_id.character_regex:
                         d['characterRegex'] = resource_id.character_regex
+                    if resource_id.tracking:
+                        d['trackingAdjust'] = resource_id.tracking
                     resource_map['media'].append(d)
 
         # Write out the resource map
@@ -168,6 +170,8 @@ def create_archive(project_id):
                         }
                         if resource_id.character_regex:
                             d['characterRegex'] = resource_id.character_regex
+                        if resource_id.tracking:
+                            d['trackingAdjust'] = resource_id.tracking
                         resource_map['media'].append(d)
 
 

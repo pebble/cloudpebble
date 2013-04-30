@@ -16,6 +16,8 @@ CloudPebble.Resources = (function() {
             CloudPebble.Editor.Autocomplete.Init();
     }
 
+    var PEBBLE_PPI = 175.2;
+
     var process_resource_form = function(form, is_new, url, callback) {
         var report_error = function(message) {
             form.find('.alert:first').removeClass("hide").text(message);
@@ -73,6 +75,7 @@ CloudPebble.Resources = (function() {
                 value = $(value);
                 var resource_id = value.find('.edit-resource-id').val();
                 var regex = value.find('.edit-resource-regex').val();
+                var tracking = parseInt(value.find('.edit-resource-tracking').val() || '0');
                 if(resource_id == '') return true; // continue
                 if(!validate_resource_id(resource_id)) {
                     report_error("Invalid resource identifier. Use only letters, numbers and underscores.");
@@ -86,10 +89,16 @@ CloudPebble.Resources = (function() {
                 }
                 if(!!resource_ids[resource_id]) {
                     report_error("You can't have multiple identical identifiers. Please remove or change one.");
-                    okay = false; return;
+                    okay = false;
+                    return false;
+                }
+                if(tracking != tracking) {
+                    report_error("Tracking must be an integer.");
+                    okay = false;
+                    return false;
                 }
                 resource_ids[resource_id] = true;
-                resources.push({'id': resource_id, 'regex': regex});
+                resources.push({'id': resource_id, 'regex': regex, 'tracking': tracking});
             });
             if(!okay) return;
             if(resources.length == 0) {
@@ -174,6 +183,7 @@ CloudPebble.Resources = (function() {
                 } catch(e) {
                     group.find('.font-resource-regex-group').addClass('error').find('.help-block').text(e);
                 }
+                var tracking = parseInt(group.find('.edit-resource-tracking').val()) || 0;
                 var row = $('<div class="control-group font-preview"><label class="control-label">Preview</label>');
                 var preview = $('<div class="controls">');
                 var line1 = ('abcdefghijklmnopqrstuvwxyz'.match(preview_regex)||[]).join('');
@@ -182,11 +192,16 @@ CloudPebble.Resources = (function() {
                 var line4 = ('~!@#$%^& *()_+[]{}\\|;:\'"<>?`'.match(preview_regex)||[]).join('');
                 var font_size = id_str.match(/[0-9]+$/)[0]
                 preview.html(line1 + (line1 ? "<br>" : '') + line2 + (line2 ? "<br>" : '')+ line3 + (line3 ? "<br>" : '')+ line4);
-                // 
+                // Officially, a CSS pixel is defined as one pixel at 96 dpi.
+                // 96 / PEBBLE_PPI should thus be correct.
+                // We use 'transform' to work around https://bugs.webkit.org/show_bug.cgi?id=20606
                 preview.css({
                     'font-family': 'font-preview-' + resource.id + '-' + preview_count,
-                    'font-size': font_size * (72 / 175.2) + 'pt',
-                    'line-height': font_size * (72 / 175.2)  + 'pt'
+                    'font-size': font_size + 'px',
+                    'line-height': font_size + 'px',
+                    'letter-spacing': tracking + 'px',
+                    'transform': 'scale(' + (96 / PEBBLE_PPI) + ')',
+                    'transform-origin': '0 0'
                 });
                 row.append(preview);
                 group.append(row);
@@ -206,8 +221,9 @@ CloudPebble.Resources = (function() {
                     group.removeClass('hide').attr('id','');
                     group.find('.edit-resource-id').val(value.id);
                     group.find('.edit-resource-regex').val(value.regex);
+                    group.find('.edit-resource-tracking').val(value.tracking || '0')
                     update_font_preview(group);
-                    group.find('input[type=text]').keyup(function() {
+                    group.find('input[type=text], input[type=number]').on('input', function() {
                         update_font_preview(group);
                     });
                     parent.append(group);
@@ -219,9 +235,9 @@ CloudPebble.Resources = (function() {
                     }
                     parent.append(clone);
                     
-                    clone.find('input[type=text]').keyup(function() {
+                    clone.find('input[type=text], input[type=number]').on('input', function() {
                         update_font_preview(clone);
-                    })
+                    });
                 });
             }
 
