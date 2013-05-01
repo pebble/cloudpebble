@@ -381,7 +381,7 @@ def import_zip(request):
 def import_github(request):
     name = request.POST['name']
     repo = request.POST['repo']
-    match = re.match(r'^(?:https?://)?(?:www\.)?github\.com/([\w.-]+)/([\w.-]+)$', repo)
+    match = re.match(r'^(?:https?://)?(?:www\.)?github\.com/([\w.-]+)/([\w.-]+)', repo)
     if match is None:
         return HttpResponse(json.dumps({"success": False, 'error': "Invalid GitHub URL."}), content_type="application/json")
     github_user = match.group(1)

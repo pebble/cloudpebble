@@ -103,7 +103,7 @@
             return;
         }
         // This is identical to the regex used on the server.
-        if(!/^(?:https?:\/\/)?(?:www\.)?github\.com\/([\w.-]+)\/([\w.-]+)$/.test(url)) {
+        if(!/^(?:https?:\/\/)?(?:www\.)?github\.com\/([\w.-]+)\/([\w.-]+)/.test(url)) {
             active_set.find('.errors').removeClass('hide').text("You must specify a complete GitHub project URL");
             return;
         }
