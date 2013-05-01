@@ -10,12 +10,13 @@ import os.path
 import shutil
 import uuid
 
+
 class Project(models.Model):
     owner = models.ForeignKey(User)
     name = models.CharField(max_length=50)
     last_modified = models.DateTimeField(auto_now_add=True)
     version_def_name = models.CharField(max_length=50, default="APP_RESOURCES")
-    
+
     def get_last_build(self):
         try:
             return self.builds.order_by('-id')[0]
@@ -29,6 +30,7 @@ class Project(models.Model):
 
     class Meta:
         unique_together = (('owner', 'name'),)
+
 
 class UserSettings(models.Model):
     user = models.OneToOneField(User, primary_key=True)
@@ -68,6 +70,7 @@ class UserSettings(models.Model):
 
 User.settings = property(lambda self: UserSettings.objects.get_or_create(user=self)[0])
 
+
 class TemplateProject(Project):
     KIND_TEMPLATE = 1
     KIND_SDK_DEMO = 2
@@ -104,7 +107,7 @@ class BuildResult(models.Model):
     )
 
     project = models.ForeignKey(Project, related_name='builds')
-    uuid = models.CharField(max_length=32, default=lambda:uuid.uuid4().hex)
+    uuid = models.CharField(max_length=32, default=lambda: uuid.uuid4().hex)
     state = models.IntegerField(choices=STATE_CHOICES, default=STATE_WAITING)
     started = models.DateTimeField(auto_now_add=True, db_index=True)
     finished = models.DateTimeField(blank=True, null=True)
@@ -133,8 +136,6 @@ class BuildResult(models.Model):
     pbw_url = property(get_pbw_url)
     build_log_url = property(get_build_log_url)
 
-    def run_build(self):
-        run_compile.apply(self.id)
 
 class ResourceFile(models.Model):
     project = models.ForeignKey(Project, related_name='resources')
@@ -180,6 +181,7 @@ class ResourceFile(models.Model):
     class Meta:
         unique_together = (('project', 'file_name'),)
 
+
 class ResourceIdentifier(models.Model):
     resource_file = models.ForeignKey(ResourceFile, related_name='identifiers')
     resource_id = models.CharField(max_length=100)
@@ -193,6 +195,7 @@ class ResourceIdentifier(models.Model):
 
     class Meta:
         unique_together = (('resource_file', 'resource_id'),)
+
 
 class SourceFile(models.Model):
     project = models.ForeignKey(Project, related_name='source_files')
@@ -225,6 +228,7 @@ class SourceFile(models.Model):
 
     class Meta:
         unique_together = (('project', 'file_name'))
+
 
 @receiver(post_delete)
 def delete_file(sender, instance, **kwargs):

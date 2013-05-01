@@ -248,7 +248,7 @@ CloudPebble.Editor.Autocomplete = (function() {
             tree.insert(CloudPebble.ProjectInfo.version_def_name.toLowerCase(), CloudPebble.ProjectInfo.version_def_name);
         }
         is_inited = true;
-    }
+    };
 
     var getCompletions = function(token) {
         var results = tree.search(token.string.toLowerCase(), 15);
@@ -256,7 +256,7 @@ CloudPebble.Editor.Autocomplete = (function() {
             return [];
         }
         return results;
-    }
+    };
 
     var is_inited = false;
 
@@ -264,14 +264,14 @@ CloudPebble.Editor.Autocomplete = (function() {
         Complete: function(editor, options) {
             var token = editor.getTokenAt(editor.getCursor());
             var completions = [];
-            if(token.string != '') {
+            if(token.string !== '') {
                 completions = getCompletions(token);
             }
             return {
                 list: completions,
                 from: Pos(editor.getCursor().line, token.start),
                 to: Pos(editor.getCursor().line, token.end)
-            }
+            };
         },
         Init: function() {
             init();
@@ -279,5 +279,5 @@ CloudPebble.Editor.Autocomplete = (function() {
         IsInitialised: function() {
             return is_inited;
         }
-    }
+    };
 })();

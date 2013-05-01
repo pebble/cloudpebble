@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from StringIO import StringIO
 import qrcode
 
+
 def render(request):
     value = request.GET.get('v', '')
     size = int(request.GET.get('s', 4))

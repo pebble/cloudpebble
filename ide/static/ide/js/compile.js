@@ -3,7 +3,7 @@ CloudPebble.Compile = (function() {
         1: {english: "Pending", cls: "info", label: 'info'},
         2: {english: "Failed", cls: "error", label: 'important'},
         3: {english: "Succeeded", cls: "success", label: 'success'}
-    }
+    };
 
     var build_history_row = function(build) {
         var tr = $('<tr>');
@@ -13,8 +13,8 @@ CloudPebble.Compile = (function() {
         tr.append($('<td>' + (build.state == 3 ? ('<a href="'+build.pbw+'">pbw</a>') : ' ') + '</td>'));
         tr.append($('<td>' + (build.state > 1 ? ('<a href="'+build.log+'">build log</a>') : ' ' )+ '</td>'));
         tr.addClass(COMPILE_SUCCESS_STATES[build.state].cls);
-        return tr
-    }
+        return tr;
+    };
 
     var update_build_history = function(pane) {
         $.getJSON('/ide/project/' + PROJECT_ID + '/build/history', function(data) {
@@ -30,15 +30,15 @@ CloudPebble.Compile = (function() {
             } else {
                 update_last_build(pane, null);
             }
-            pane.find('#run-build-table').html('')
+            pane.find('#run-build-table').html('');
             $.each(data.builds, function(index, value) {
                 pane.find('#run-build-table').append(build_history_row(value));
             });
             if(data.builds.length > 0 && data.builds[0].state == 1) {
-                setTimeout(function() { update_build_history(pane) }, 1000);
+                setTimeout(function() { update_build_history(pane); }, 1000);
             }
         });
-    }
+    };
 
     var show_compile_pane = function() {
         CloudPebble.Sidebar.SuspendActive();
@@ -54,14 +54,14 @@ CloudPebble.Compile = (function() {
             pane.find('#run-build-table').prepend(build_history_row(temp_build));
             $.post('/ide/project/' + PROJECT_ID + '/build/run', {}, function() {
                 update_build_history(pane);
-            })
+            });
         });
         CloudPebble.Sidebar.SetActivePane(pane, 'compile');
         CloudPebble.ProgressBar.Show();
-    }
+    };
 
     var update_last_build = function(pane, build) {
-        if(build == null) {
+        if(build === null) {
             pane.find('#last-compilation').addClass('hide');
             pane.find('#compilation-run-build-button').removeAttr('disabled');
         } else {
@@ -95,9 +95,12 @@ CloudPebble.Compile = (function() {
                 pane.find('#last-compilation-pbw').addClass('hide');
                 pane.find('#last-compilation-qr-code').addClass('hide');
             }
-            pane.find('#last-compilation-status').removeClass('label-success label-error label-info').addClass('label-' + COMPILE_SUCCESS_STATES[build.state].label).text(COMPILE_SUCCESS_STATES[build.state].english)
+            pane.find('#last-compilation-status')
+                .removeClass('label-success label-error label-info')
+                .addClass('label-' + COMPILE_SUCCESS_STATES[build.state].label)
+                .text(COMPILE_SUCCESS_STATES[build.state].english);
         }
-    }
+    };
 
     return {
         Show: function() {
@@ -106,5 +109,5 @@ CloudPebble.Compile = (function() {
         Init: function() {
             // Nothing.
         }
-    }
+    };
 })();

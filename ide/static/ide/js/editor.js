@@ -9,7 +9,7 @@ CloudPebble.Editor = (function() {
         });
 
         project_source_files[file.name] = file;
-    }
+    };
 
     var edit_source_file = function(file) {
         // See if we already had it open.
@@ -43,9 +43,9 @@ CloudPebble.Editor = (function() {
                     mode: CloudPebble.Editor.PebbleMode,
                     styleActiveLine: true,
                     value: source,
-                    theme: USER_SETTINGS.theme,
+                    theme: USER_SETTINGS.theme
                 };
-                if(USER_SETTINGS.keybinds != '') {
+                if(USER_SETTINGS.keybinds !== '') {
                     settings.keyMap = USER_SETTINGS.keybinds;
                 }
                 if(USER_SETTINGS.autocomplete === 1) {
@@ -70,19 +70,19 @@ CloudPebble.Editor = (function() {
                 open_codemirrors[file.id] = code_mirror;
                 code_mirror.cloudpebble_save = function() {
                     save();
-                }
+                };
                 code_mirror.on('close', function() {
                     is_autocompleting = false;
                 });
                 code_mirror.on('shown', function() {
                     is_autocompleting = true;
-                })
+                });
 
                 var fix_height = function() {
                     var browserHeight = document.documentElement.clientHeight;
                     code_mirror.getWrapperElement().style.height = (browserHeight - 130) + 'px';
                     code_mirror.refresh();
-                }
+                };
                 fix_height();
                 $(window).resize(fix_height);
 
@@ -105,13 +105,13 @@ CloudPebble.Editor = (function() {
                     }
                 });
 
-                function mark_clean() {
+                var mark_clean = function() {
                     was_clean = true;
                     --unsaved_files;
                     CloudPebble.Sidebar.ClearIcon('source-' + file.id);
-                }
+                };
 
-                function save() {
+                var save = function() {
                     save_btn.attr('disabled','disabled');
                     delete_btn.attr('disabled','disabled');
                     $.post("/ide/project/" + PROJECT_ID + "/source/" + file.id + "/save", {'content': code_mirror.getValue()}, function(data) {
@@ -123,7 +123,7 @@ CloudPebble.Editor = (function() {
                             alert(data.error);
                         }
                     });
-                }
+                };
 
                 // Add some buttons
                 var button_holder = $('<p style="padding-top: 5px; text-align: right;">');
@@ -155,7 +155,7 @@ CloudPebble.Editor = (function() {
                     CloudPebble.Prompts.Confirm(
                         "Do you want to reload " + file.name + "?",
                         "This will discard your current changes and revert to the saved version.",
-                        function() {  
+                        function() {
                             CloudPebble.Sidebar.DestroyActive();
                             mark_clean();
                             edit_source_file(file);
@@ -171,26 +171,26 @@ CloudPebble.Editor = (function() {
                 code_mirror.refresh();
             }
         });
-    }
+    };
 
     function init() {
         CodeMirror.commands.autocomplete = function(cm) {
             CodeMirror.showHint(cm, CloudPebble.Editor.Autocomplete.Complete, {completeSingle: false});
-        }
+        };
         CodeMirror.commands.save = function(cm) {
             cm.cloudpebble_save();
-        }
+        };
         CodeMirror.commands.saveAll = function(cm) {
             $.each(open_codemirrors, function(index, value) {
                 value.cloudpebble_save();
-            })
-        }
+            });
+        };
      }
 
     return {
         Create: function() {
             CloudPebble.Prompts.Prompt("New Source File", "Enter a name for the new file", "somefile.c", '', function(value, resp) {
-               if(value == '') {
+               if(value === '') {
                     resp.error("You must specify a filename.");
                 } else if(!(/\.h$/.test(value) || /\.c$/.test(value))) {
                     resp.error("Source files must end in .c or .h");
@@ -219,5 +219,5 @@ CloudPebble.Editor = (function() {
         GetUnsavedFiles: function() {
             return unsaved_files;
         }
-    }
+    };
 })();

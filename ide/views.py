@@ -5,7 +5,6 @@ from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError, transaction
 from django.views.decorators.http import require_safe, require_POST
 from django.views.decorators.csrf import csrf_protect
-from django.forms import ModelForm
 from django.conf import settings
 from celery.result import AsyncResult
 
@@ -13,11 +12,11 @@ from ide.models import Project, SourceFile, ResourceFile, ResourceIdentifier, Bu
 from ide.tasks import run_compile, create_archive, do_import_archive, do_import_github
 from ide.forms import SettingsForm
 
-import uuid
 import urllib2
 import tempfile
 import os
 import re
+
 
 @require_safe
 @login_required
@@ -31,16 +30,19 @@ def index(request):
         'default_template_id': settings.DEFAULT_TEMPLATE
     })
 
+
 @require_safe
 @login_required
 def project(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     return render(request, 'ide/project.html', {'project': project})
 
+
 @require_safe
 @login_required
 def create(request):
     return render(request, 'ide/create.html')
+
 
 @require_safe
 @login_required
@@ -64,6 +66,7 @@ def project_info(request, project_id):
 
     return HttpResponse(json.dumps(output), content_type="application/json")
 
+
 @require_POST
 @login_required
 def create_source_file(request, project_id):
@@ -74,6 +77,7 @@ def create_source_file(request, project_id):
         return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
     else:
         return HttpResponse(json.dumps({"success": True, "file": {"id": f.id, "name": f.file_name}}), content_type="application/json")
+
 
 @require_safe
 @csrf_protect
@@ -88,6 +92,7 @@ def load_source_file(request, project_id, file_id):
     else:
         return HttpResponse(json.dumps({"success": True, "source": content}), content_type="application/json")
 
+
 @require_POST
 @login_required
 def save_source_file(request, project_id, file_id):
@@ -100,6 +105,7 @@ def save_source_file(request, project_id, file_id):
     else:
         return HttpResponse(json.dumps({"success": True}), content_type="application/json")
 
+
 @require_POST
 @login_required
 def delete_source_file(request, project_id, file_id):
@@ -111,6 +117,7 @@ def delete_source_file(request, project_id, file_id):
         return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
     else:
         return HttpResponse(json.dumps({"success": True}), content_type="application/json")
+
 
 @require_POST
 @login_required
@@ -139,10 +146,11 @@ def create_resource(request, project_id):
             "identifiers": [x.resource_id for x in resources]
         }}), content_type="application/json")
 
+
 @require_safe
 @login_required
 def resource_info(request, project_id, resource_id):
-    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    get_object_or_404(Project, pk=project_id, owner=request.user)
     resource = get_object_or_404(ResourceFile, pk=resource_id)
     resources = resource.get_identifiers()
     return HttpResponse(json.dumps({
@@ -155,6 +163,7 @@ def resource_info(request, project_id, resource_id):
         }
     }), content_type="application/json")
 
+
 @require_POST
 @login_required
 def delete_resource(request, project_id, resource_id):
@@ -166,6 +175,7 @@ def delete_resource(request, project_id, resource_id):
         return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
     else:
         return HttpResponse(json.dumps({"success": True}), content_type="application/json")
+
 
 @require_POST
 @login_required
@@ -197,6 +207,7 @@ def update_resource(request, project_id, resource_id):
             "identifiers": [x.resource_id for x in resources]
         }}), content_type="application/json")
 
+
 @require_POST
 @login_required
 def compile_project(request, project_id):
@@ -204,6 +215,7 @@ def compile_project(request, project_id):
     build = BuildResult.objects.create(project=project)
     run_compile.delay(build.id)
     return HttpResponse(json.dumps({"success": True, "build_id": build.id}), content_type="application/json")
+
 
 @require_safe
 @login_required
@@ -225,13 +237,14 @@ def last_build(request, project_id):
         }
         return HttpResponse(json.dumps({"success": True, "build": b}), content_type="application/json")
 
+
 @require_safe
 @login_required
 def build_history(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     try:
         builds = project.builds.order_by('-started')[:10]
-    except (IndexError, BuildResult.DoesNotExist) as e:
+    except (IndexError, BuildResult.DoesNotExist):
         return HttpResponse(json.dumps({"success": True, "build": None}), content_type="application/json")
     else:
         out = []
@@ -246,6 +259,7 @@ def build_history(request, project_id):
                 'log': build.build_log_url
             })
         return HttpResponse(json.dumps({"success": True, "builds": out}), content_type="application/json")
+
 
 @require_POST
 @login_required
@@ -263,6 +277,7 @@ def create_project(request):
     else:
         return HttpResponse(json.dumps({"success": True, "id": project.id}), content_type="application/json")
 
+
 @require_POST
 @login_required
 def save_project_settings(request, project_id):
@@ -278,6 +293,7 @@ def save_project_settings(request, project_id):
     else:
         return HttpResponse(json.dumps({"success": True}), content_type="application/json")
 
+
 @require_POST
 @login_required
 def delete_project(request, project_id):
@@ -291,6 +307,7 @@ def delete_project(request, project_id):
     else:
         return HttpResponse(json.dumps({"success": True}), content_type="application/json")
 
+
 @require_safe
 @login_required
 def show_resource(request, project_id, resource_id):
@@ -299,6 +316,7 @@ def show_resource(request, project_id, resource_id):
     response = HttpResponse(open(resource.local_filename), content_type=content_type[resource.kind])
     response['Content-Disposition'] = "attachment; filename=\"%s\"" % resource.file_name
     return response
+
 
 @require_POST
 def get_shortlink(request):
@@ -310,6 +328,7 @@ def get_shortlink(request):
         return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
     else:
         return HttpResponse(json.dumps({"success": True, 'url': response['url']}), content_type="application/json")
+
 
 @login_required
 def settings_page(request):
@@ -325,6 +344,7 @@ def settings_page(request):
 
     return render(request, 'ide/settings.html', {'form': form, 'saved': False})
 
+
 @login_required
 @require_POST
 def begin_export(request, project_id):
@@ -332,10 +352,12 @@ def begin_export(request, project_id):
     result = create_archive.delay(project.id)
     return HttpResponse(json.dumps({"success": True, 'task_id': result.task_id}), content_type="application/json")
 
+
 @require_safe
 def check_task(request, task_id):
     result = AsyncResult(task_id)
     return HttpResponse(json.dumps({"success": True, 'state': {'status': result.status, 'result': str(result.result)}}), content_type="application/json")
+
 
 @login_required
 @require_POST
@@ -352,6 +374,7 @@ def import_zip(request):
         return HttpResponse(json.dumps({"success": False, 'error': str(e)}), content_type="application/json")
     task = do_import_archive.delay(project.id, tempzip, delete_zip=True, delete_project=True)
     return HttpResponse(json.dumps({"success": True, 'task_id': task.task_id, 'project_id': project.id}), content_type="application/json")
+
 
 @login_required
 @require_POST

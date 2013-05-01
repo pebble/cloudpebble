@@ -16,6 +16,8 @@ import shutil
 import zipfile
 import uuid
 import urllib2
+import re
+
 
 def create_sdk_symlinks(project_root, sdk_root):
     SDK_LINKS = ["waf", "wscript", "tools", "lib", "pebble_app.ld", "include"]
@@ -25,6 +27,7 @@ def create_sdk_symlinks(project_root, sdk_root):
 
     os.symlink(os.path.join(sdk_root, os.path.join("resources", "wscript")),
                os.path.join(project_root, os.path.join("resources", "wscript")))
+
 
 @task(ignore_result=True, acks_late=True)
 def run_compile(build_result):
@@ -50,7 +53,7 @@ def run_compile(build_result):
         for f in source_files:
             abs_target = os.path.abspath(os.path.join(src_dir, f.file_name))
             if not abs_target.startswith(src_dir):
-                raise Exception, "Suspicious filename: %s" % f.file_name
+                raise Exception("Suspicious filename: %s" % f.file_name)
             os.link(os.path.abspath(f.local_filename), abs_target)
 
         # Resources
@@ -66,13 +69,13 @@ def run_compile(build_result):
         resource_map = {'friendlyVersion': 'VERSION', 'versionDefName': project.version_def_name, 'media': []}
         if len(resources) == 0:
             print "No resources; adding dummy."
-            resource_map['media'].append({"type":"raw","defName":"DUMMY","file":"resource_map.json"})
+            resource_map['media'].append({"type": "raw", "defName": "DUMMY", "file": "resource_map.json"})
         else:
             for f in resources:
                 target_dir = os.path.abspath(os.path.join(base_dir, 'resources/src', mapping[f.kind]))
                 abs_target = os.path.abspath(os.path.join(target_dir, f.file_name))
                 if not abs_target.startswith(target_dir):
-                    raise Exception, "Suspicious filename: %s" % f.file_name
+                    raise Exception("Suspicious filename: %s" % f.file_name)
                 print "Added %s %s" % (f.kind, f.local_filename)
                 os.link(os.path.abspath(f.local_filename), abs_target)
                 for resource_id in f.get_identifiers():
@@ -138,12 +141,13 @@ def run_compile(build_result):
         print "Removing temporary directory"
         shutil.rmtree(base_dir)
 
+
 @task(acks_late=True)
 def create_archive(project_id):
     project = Project.objects.get(pk=project_id)
     source_files = SourceFile.objects.filter(project=project)
     resources = ResourceFile.objects.filter(project=project)
-    prefix = project.name.replace(' ','_').lower()
+    prefix = re.sub(r'[^\w]+', '_', project.name).strip('_').lower()
     with tempfile.NamedTemporaryFile(suffix='.zip', delete=False) as temp:
         filename = temp.name
         with zipfile.ZipFile(filename, 'w', compression=zipfile.ZIP_DEFLATED) as z:
@@ -160,7 +164,7 @@ def create_archive(project_id):
             resource_map = {'friendlyVersion': 'VERSION', 'versionDefName': project.version_def_name, 'media': []}
             if len(resources) == 0:
                 print "No resources; adding dummy."
-                resource_map['media'].append({"type":"raw","defName":"DUMMY","file":"resource_map.json"})
+                resource_map['media'].append({"type": "raw", "defName": "DUMMY", "file": "resource_map.json"})
             else:
                 for resource in resources:
                     z.writestr('%s/resources/src/%s/%s' % (prefix, resource_dir_map[resource.kind], resource.file_name), open(resource.local_filename).read())
@@ -177,7 +181,6 @@ def create_archive(project_id):
                             d['trackingAdjust'] = resource_id.tracking
                         resource_map['media'].append(d)
 
-
             z.writestr('%s/resources/src/resource_map.json' % prefix, json.dumps(resource_map, indent=4, separators=(',', ': ')))
 
         # Generate a URL
@@ -188,7 +191,10 @@ def create_archive(project_id):
         os.chmod(outfile, 0644)
         return '%s%s/%s.zip' % (settings.EXPORT_ROOT, u, prefix)
 
-class NoProjectFoundError(Exception): pass
+
+class NoProjectFoundError(Exception):
+    pass
+
 
 @task(acks_late=True)
 def do_import_archive(project_id, archive_location, delete_zip=False, delete_project=False):
@@ -197,7 +203,7 @@ def do_import_archive(project_id, archive_location, delete_zip=False, delete_pro
         # archive_location *must not* be a file-like object. We ensure this by string casting.
         archive_location = str(archive_location)
         if not zipfile.is_zipfile(archive_location):
-            raise NoProjectFoundError, "The file is not a zip file."
+            raise NoProjectFoundError("The file is not a zip file.")
 
         with zipfile.ZipFile(str(archive_location), 'r') as z:
             contents = z.infolist()
@@ -218,7 +224,7 @@ def do_import_archive(project_id, archive_location, delete_zip=False, delete_pro
             for base_dir in contents:
                 counter += 1
                 if counter > 200:
-                    raise Exception, "Too many files in zip file."
+                    raise Exception("Too many files in zip file.")
                 base_dir = base_dir.filename
                 print "base_dir: %s" % base_dir
                 try:
@@ -234,7 +240,7 @@ def do_import_archive(project_id, archive_location, delete_zip=False, delete_pro
                 for source_dir in contents:
                     source_counter += 1
                     if source_counter > 200:
-                        raise Exception, "Too many files in zip file."
+                        raise Exception("Too many files in zip file.")
                     source_dir = source_dir.filename
                     print "source_dir: %s" % source_dir
                     if source_dir[:dir_end] != base_dir:
@@ -251,7 +257,7 @@ def do_import_archive(project_id, archive_location, delete_zip=False, delete_pro
                     continue
                 break
             else:
-                raise NoProjectFoundError, "No project found in zip file."
+                raise NoProjectFoundError("No project found in zip file.")
 
             # Now iterate over the things we found
             with transaction.commit_on_success():
@@ -263,9 +269,10 @@ def do_import_archive(project_id, archive_location, delete_zip=False, delete_pro
                     if filename == '':
                         continue
                     if not os.path.normpath('/SENTINEL_DO_NOT_ACTUALLY_USE_THIS_NAME/%s' % filename).startswith('/SENTINEL_DO_NOT_ACTUALLY_USE_THIS_NAME/'):
-                        raise SuspiciousOperation, "Invalid zip file contents."
-                    if entry.file_size > 5242880: # 5 MB
-                        raise Exception, "Excessively large compressed file."
+                        raise SuspiciousOperation("Invalid zip file contents.")
+                    if entry.file_size > 5242880:  # 5 MB
+                        raise Exception("Excessively large compressed file.")
+
                     if filename == RESOURCE_MAP:
                         # We have a resource map! We can now try importing things from it.
                         with z.open(entry) as f:

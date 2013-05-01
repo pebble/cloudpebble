@@ -9,12 +9,12 @@ CloudPebble.Settings = (function() {
         var pane = settings_template.clone(); // This clone is basically unncessary, since only one such pane can ever exist.
         var display_error = function(message) {
             pane.find('.alert').addClass('alert-error').removeClass('hide').text(message);
-        }
+        };
 
         var display_success = function(message) {
             pane.find('.alert').addClass('alert-success').removeClass('hide').text(message);
-        }
-        
+        };
+
         pane.find('#settings-name').val(CloudPebble.ProjectInfo.name);
         pane.find('#settings-version-def-name').val(CloudPebble.ProjectInfo.version_def_name);
         pane.find('form').submit(function(e) {e.preventDefault();});
@@ -22,12 +22,12 @@ CloudPebble.Settings = (function() {
             var name = pane.find('#settings-name').val();
             var version_def_name = pane.find('#settings-version-def-name').val();
 
-            if(name.replace(/\s/g, '') == '') {
+            if(name.replace(/\s/g, '') === '') {
                 display_error("You must specify a project name");
                 return;
             }
 
-            if(version_def_name.replace(/\s/g, '') == '') {
+            if(version_def_name.replace(/\s/g, '') === '') {
                 display_error("You must specify a versionDefName (how about APP_RESOURCES?)");
                 return;
             }
@@ -61,7 +61,7 @@ CloudPebble.Settings = (function() {
                     } else {
                         display_error("Error: " + data.error);
                     }
-                })
+                });
             });
         });
 
@@ -106,7 +106,7 @@ CloudPebble.Settings = (function() {
         });
 
         CloudPebble.Sidebar.SetActivePane(pane, 'settings');
-    }
+    };
 
     return {
         Show: function() {
@@ -115,5 +115,5 @@ CloudPebble.Settings = (function() {
         Init: function() {
             settings_template = $('#settings-pane-template').remove().removeClass('hide');
         }
-    }
+    };
 })();

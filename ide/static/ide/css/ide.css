@@ -28,8 +28,8 @@
 }
 
 #sidebar.nav-list {
-    padding-left: 0px;
-    padding-right: 0px;
+    padding-left: 0;
+    padding-right: 0;
     margin-top: -10px;
     margin-bottom: -10px;
 }
@@ -41,10 +41,10 @@
 }
 
 .CodeMirror-dialog input {
-    -webkit-border-radius: 0px !important;
-    -moz-border-radius: 0px !important;
-    border-radius: 0px !important;
+    -webkit-border-radius: 0 !important;
+    -moz-border-radius: 0 !important;
+    border-radius: 0 !important;
     line-height: normal !important;
-    margin: 0em !important;
-    padding: 0em !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }

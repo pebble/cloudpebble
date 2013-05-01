@@ -6,35 +6,35 @@ CloudPebble.Resources = (function() {
             edit_resource(resource);
         });
         update_resource(resource);
-    }
+    };
 
     var update_resource = function(resource) {
-        project_resources[resource.file_name] = resource
+        project_resources[resource.file_name] = resource;
         CloudPebble.Sidebar.SetPopover('resource-' + resource.id, 'Identifier' + (resource.identifiers.length != 1 ? 's' : ''), resource.identifiers.join('<br>'));
         // We need to reinitialise the editor, which uses this information.
         if(CloudPebble.Editor.Autocomplete.IsInitialised())
             CloudPebble.Editor.Autocomplete.Init();
-    }
+    };
 
     var PEBBLE_PPI = 175.2;
 
     var process_resource_form = function(form, is_new, url, callback) {
         var report_error = function(message) {
             form.find('.alert:first').removeClass("hide").text(message);
-        }
+        };
         var remove_error = function() {
             form.find('.alert:first').addClass("hide");
-        }
+        };
         var disable_controls = function() {
             form.find('input, button, select').attr('disabled', 'disabled');
-        }
+        };
         var enable_controls = function() {
             if(is_new) {
                 form.find('input, button, select').removeAttr('disabled');
             } else {
                 form.find('input, button').removeAttr('disabled');
             }
-        }
+        };
 
         remove_error();
         var files = form.find('#edit-resource-file').get(0).files;
@@ -63,7 +63,7 @@ CloudPebble.Resources = (function() {
         var resources = [];
         if(kind != 'font') {
             var resource_id = form.find('#non-font-resource-group .edit-resource-id').val();
-            if(resource_id == '' || !validate_resource_id(resource_id)) {
+            if(resource_id === '' || !validate_resource_id(resource_id)) {
                 report_error("You must provide a valid resource identifier. Use only letters, numbers and underscores.");
                 return;
             }
@@ -75,8 +75,8 @@ CloudPebble.Resources = (function() {
                 value = $(value);
                 var resource_id = value.find('.edit-resource-id').val();
                 var regex = value.find('.edit-resource-regex').val();
-                var tracking = parseInt(value.find('.edit-resource-tracking').val() || '0');
-                if(resource_id == '') return true; // continue
+                var tracking = parseInt(value.find('.edit-resource-tracking').val() || '0', 10);
+                if(resource_id === '') return true; // continue
                 if(!validate_resource_id(resource_id)) {
                     report_error("Invalid resource identifier. Use only letters, numbers and underscores.");
                     okay = false;
@@ -101,7 +101,7 @@ CloudPebble.Resources = (function() {
                 resources.push({'id': resource_id, 'regex': regex, 'tracking': tracking});
             });
             if(!okay) return;
-            if(resources.length == 0) {
+            if(resources.length === 0) {
                 report_error("You must specify at least one resource.");
                 return;
             }
@@ -127,7 +127,7 @@ CloudPebble.Resources = (function() {
                 }
             }
         });
-    }
+    };
 
     var edit_resource = function(resource) {
         CloudPebble.Sidebar.SuspendActive();
@@ -177,20 +177,21 @@ CloudPebble.Resources = (function() {
                 group.find('.font-preview').remove();
                 var regex_str = group.find('.edit-resource-regex').val();
                 var id_str = group.find('.edit-resource-id').val();
+                var preview_regex = new RegExp('');
                 try {
-                    var preview_regex = new RegExp(regex_str ? regex_str : '.', 'g');
+                    preview_regex = new RegExp(regex_str ? regex_str : '.', 'g');
                     group.find('.font-resource-regex-group').removeClass('error').find('.help-block').text("A PCRE regular expression that restricts characters.");
                 } catch(e) {
                     group.find('.font-resource-regex-group').addClass('error').find('.help-block').text(e);
                 }
-                var tracking = parseInt(group.find('.edit-resource-tracking').val()) || 0;
+                var tracking = parseInt(group.find('.edit-resource-tracking').val(), 10) || 0;
                 var row = $('<div class="control-group font-preview"><label class="control-label">Preview</label>');
                 var preview = $('<div class="controls">');
                 var line1 = ('abcdefghijklmnopqrstuvwxyz'.match(preview_regex)||[]).join('');
                 var line2 = ('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.match(preview_regex)||[]).join('');
                 var line3 = ('0123456789'.match(preview_regex) || []).join('');
                 var line4 = ('~!@#$%^& *()_+[]{}\\|;:\'"<>?`'.match(preview_regex)||[]).join('');
-                var font_size = id_str.match(/[0-9]+$/)[0]
+                var font_size = id_str.match(/[0-9]+$/)[0];
                 preview.html(line1 + (line1 ? "<br>" : '') + line2 + (line2 ? "<br>" : '')+ line3 + (line3 ? "<br>" : '')+ line4);
                 // Officially, a CSS pixel is defined as one pixel at 96 dpi.
                 // 96 / PEBBLE_PPI should thus be correct.
@@ -205,7 +206,7 @@ CloudPebble.Resources = (function() {
                 });
                 row.append(preview);
                 group.append(row);
-            }
+            };
 
 
             if(resource.kind != 'font') {
@@ -221,7 +222,7 @@ CloudPebble.Resources = (function() {
                     group.removeClass('hide').attr('id','');
                     group.find('.edit-resource-id').val(value.id);
                     group.find('.edit-resource-regex').val(value.regex);
-                    group.find('.edit-resource-tracking').val(value.tracking || '0')
+                    group.find('.edit-resource-tracking').val(value.tracking || '0');
                     update_font_preview(group);
                     group.find('input[type=text], input[type=number]').on('input', function() {
                         update_font_preview(group);
@@ -234,7 +235,7 @@ CloudPebble.Resources = (function() {
                         clone = template.clone().removeClass('hide').attr('id','');
                     }
                     parent.append(clone);
-                    
+
                     clone.find('input[type=text], input[type=number]').on('input', function() {
                         update_font_preview(clone);
                     });
@@ -281,7 +282,7 @@ CloudPebble.Resources = (function() {
             });
 
         });
-    }
+    };
 
     var prepare_resource_pane = function() {
         var template = resource_template.clone();
@@ -299,14 +300,14 @@ CloudPebble.Resources = (function() {
             }
         });
         return template;
-    }
+    };
 
     var validate_resource_id = function(id) {
         if(/[^a-zA-Z0-9_]/.test(id)) {
             return false;
         }
         return true;
-    }
+    };
 
     var create_new_resource = function() {
         CloudPebble.Sidebar.SuspendActive();
@@ -323,13 +324,13 @@ CloudPebble.Resources = (function() {
         });
 
         CloudPebble.Sidebar.SetActivePane(pane, 'new-resource');
-    }
+    };
 
     var resource_created = function(resource) {
         // Add it to our resource list
         add_resource(resource);
         edit_resource(resource);
-    }
+    };
 
     var resource_template = null;
 
@@ -337,7 +338,7 @@ CloudPebble.Resources = (function() {
         // Set up the resource editing template.
         resource_template = $('#resource-pane-template');
         resource_template.remove();
-    }
+    };
 
     return {
         Add: function(resource) {

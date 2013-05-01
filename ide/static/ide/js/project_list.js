@@ -7,7 +7,7 @@
     $('#project-confirm-button').click(function() {
         var value = $('#project-prompt-value').val();
         $('project-prompt-errors').addClass("hide");
-        if(value == '') {
+        if(value === '') {
             $('#project-prompt-errors').removeClass('hide').text("You must enter a name.");
             return;
         }
@@ -33,7 +33,7 @@
     var enable_import_controls = function() {
         $('#import-prompt').find('input, button').removeAttr('disabled');
         $('#import-prompt').find('.nav > li').removeClass('disabled').find('a').attr('data-toggle', 'tab');
-    }
+    };
 
     var handle_import_progress = function(active_set, task_id, project_id) {
         var check = function() {

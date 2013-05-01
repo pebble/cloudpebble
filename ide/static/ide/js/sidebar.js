@@ -8,7 +8,7 @@ CloudPebble.Sidebar = (function() {
             $('#main-pane').remove();
             $('#pane-parent').append($('<div id="main-pane"></div>'));
             return;
-        };
+        }
         var pane = $('#main-pane');
 
         var suspend_function = pane.data('pane-suspend-function');
@@ -23,7 +23,7 @@ CloudPebble.Sidebar = (function() {
         // Create a new empty one.
         var empty_pane = $('<div id="main-pane"></div>');
         $('#pane-parent').append(empty_pane);
-    }
+    };
 
     var destroy_active_pane = function() {
         var pane_id = $('#main-pane').data('pane-id');
@@ -36,12 +36,12 @@ CloudPebble.Sidebar = (function() {
         if(list_entry) {
             list_entry.removeClass('active');
         }
-    }
+    };
 
     var restore_suspended_pane = function(id) {
-        var pane = suspended_panes[id] 
+        var pane = suspended_panes[id] ;
         if(pane) {
-            $('#main-pane').remove()
+            $('#main-pane').remove();
             $('#pane-parent').append(pane);
             delete suspended_panes[id];
 
@@ -57,7 +57,7 @@ CloudPebble.Sidebar = (function() {
             return true;
         }
         return false;
-    }
+    };
 
     var set_main_pane = function(pane, id, restore_function, destroy_function) {
         $('#main-pane').append(pane).data('pane-id', id);
@@ -67,11 +67,11 @@ CloudPebble.Sidebar = (function() {
         if(destroy_function) {
             $('#main-pane').data('pane-destroy-function', destroy_function);
         }
-    }
+    };
 
     var set_active_menu_entry = function(id) {
         $('#sidebar-pane-' + id).addClass('active');
-    }
+    };
 
     return {
         SuspendActive: function() {
@@ -121,11 +121,11 @@ CloudPebble.Sidebar = (function() {
         SetIcon: function(pane_id, icon) {
             var a = $('#sidebar-pane-' + pane_id).find('a');
             var i = a.find('i');
-            if(i.length == 0) {
+            if(i.length === 0) {
                 i = $('<i>');
                 a.append(i);
             }
-            
+
             a.find('i').removeClass().addClass('icon-' + icon);
         },
         ClearIcon: function(pane_id) {
@@ -144,7 +144,7 @@ CloudPebble.Sidebar = (function() {
                 content: content,
                 html: true,
                 delay: {show: 250}
-            }).click(function() { $(this).popover('hide')});
+            }).click(function() { $(this).popover('hide'); });
         }
     };
 })();

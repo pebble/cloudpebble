@@ -15,7 +15,7 @@ CloudPebble.ProgressBar = (function() {
         Hide: function() {
             hide();
         }
-    }
+    };
 })();
 
 CloudPebble.ProjectInfo = {};
@@ -57,7 +57,7 @@ CloudPebble.Init = function() {
             return confirm;
         }
     });
-}
+};
 
 CloudPebble.Prompts = {
     Prompt: function(title, prompt, placeholder, default_value, callback) {
@@ -95,7 +95,7 @@ CloudPebble.Prompts = {
             callback();
         });
     }
-}
+};
 
 CloudPebble.Utils = {
     FormatDatetime: function(str) {
@@ -106,4 +106,4 @@ CloudPebble.Utils = {
         var t = Math.round(Math.abs(Date.parse(s2.replace(' ','T')) - Date.parse(s1.replace(' ','T'))) / 1000);
         return t.toFixed(0) + " second" + (t == 1 ? '' : 's');
     }
-}
+};
