@@ -14,7 +14,7 @@
 <div class="container-narrow">
     <div class="masthead">
         <ul class="nav nav-pills pull-right">
-          <li><a href="/ide/">Your Projects</a></li>
+          <li><a href="{% url 'ide:index' %}">Your Projects</a></li>
           <li class="active"><a>IDE Settings</a></li>
           <li><a href="http://blog.cloudpebble.net/">Blog</a></li>
         </ul>
@@ -49,14 +49,15 @@
     </div>
     <div class="row-fluid">
         <div class="span12 well">
+            <form action="{% url 'ide:remove_github_auth' %}" method="post" id="unlink-form">{%csrf_token%}</form>
             {% if github and github.token %}
             <img src="{{ github.avatar }}" class="img-rounded" style="height: 100px; width: 100px; float: left; margin-right: 10px;">
             <h4>{{ github.username }}</h4>
             <p>You have linked your GitHub account.<br>
-            If you want, you can <a href="/ide/settings/github/start">re-authenticate</a> or <a href="/ide/settings/github/unlink">un-link</a> your account.</p>
+            If you want, you can <a href="{% url 'ide:start_github_auth' %}">re-authenticate</a> or <a id="unlink-btn" href="{% url 'ide:remove_github_auth' %}">un-link</a> your account.</p>
             {% else %}
             <h4>GitHub integration</h4>
-            <a href="/ide/settings/github/start">Link your GitHub account.</a>
+            <a href="{% url 'ide:start_github_auth' %}">Link your GitHub account.</a>
             {% endif %}
             <hr>
             <p>Connecting your GitHub account enables you to connect your projects to GitHub repositories.</p>
@@ -76,6 +77,10 @@
         } else {
             $(this).siblings('.help-block').addClass('hide');
         }
+    });
+    $('#unlink-btn').click(function(e) {
+        e.preventDefault();
+        $('#unlink-form').submit();
     });
 </script>
 {% endblock %}
