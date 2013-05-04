@@ -5,7 +5,7 @@ celery
 django_celery
 flup
 freetype-py
-MySQL-python
+psycopg2
 Pillow
 South
 qrcode

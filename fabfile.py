@@ -1,9 +1,9 @@
 from fabric.api import *
 from fabric.contrib.console import confirm
 
-env.hosts = ['pwdb.kathar.in']
+env.hosts = ['app.cloudpebble.net']
 env.project_root = '/home/cloudpebble/web/cloudpebble'
-env.virtualenv = '/home/cloudpebble/cloudpebble'
+env.virtualenv = '/home/cloudpebble/virtualenv'
 env.app_user = 'cloudpebble'
 
 
