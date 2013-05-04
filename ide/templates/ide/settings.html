@@ -47,6 +47,21 @@
             </form>
         </div>
     </div>
+    <div class="row-fluid">
+        <div class="span12 well">
+            {% if github and github.token %}
+            <img src="{{ github.avatar }}" class="img-rounded" style="height: 100px; width: 100px; float: left; margin-right: 10px;">
+            <h4>{{ github.username }}</h4>
+            <p>You have linked your GitHub account.<br>
+            If you want, you can <a href="/ide/settings/github/start">re-authenticate</a> or <a href="/ide/settings/github/unlink">un-link</a> your account.</p>
+            {% else %}
+            <h4>GitHub integration</h4>
+            <a href="/ide/settings/github/start">Link your GitHub account.</a>
+            {% endif %}
+            <hr>
+            <p>Connecting your GitHub account enables you to connect your projects to GitHub repositories.</p>
+        </div>
+    </div>
 </div>
 {% endblock %}
 {% block scripts %}

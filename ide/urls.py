@@ -26,6 +26,9 @@ urlpatterns = patterns(
     url(r'^task/(?P<task_id>[0-9a-f-]{32,36})', views.check_task, name='check_task'),
     url(r'^shortlink$', views.get_shortlink, name='get_shortlink'),
     url(r'^settings$', views.settings_page, name='settings'),
+    url(r'^settings/github/start$', views.start_github_auth, name='start_github_auth'),
+    url(r'^settings/github/callback$', views.complete_github_auth, name='complete_github_auth'),
+    url(r'^settings/github/unlink$', views.remove_github_auth, name='remove_github_auth'),
     url(r'^import/zip', views.import_zip, name='import_zip'),
     url(r'^import/github', views.import_github, name='import_github')
 )

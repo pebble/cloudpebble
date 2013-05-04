@@ -70,6 +70,12 @@ class UserSettings(models.Model):
 
 User.settings = property(lambda self: UserSettings.objects.get_or_create(user=self)[0])
 
+class UserGithub(models.Model):
+    user = models.OneToOneField(User, primary_key=True, related_name='github')
+    token = models.CharField(max_length=50, null=True, blank=True)
+    nonce = models.CharField(max_length=32, null=True, blank=True)
+    username = models.CharField(max_length=50, null=True, blank=True)
+    avatar = models.CharField(max_length=255, null=True, blank=True)
 
 class TemplateProject(Project):
     KIND_TEMPLATE = 1
