@@ -1,7 +1,7 @@
 from celery import task
 
 from ide.models import Project, SourceFile, ResourceFile, ResourceIdentifier, BuildResult
-from ide.git import git_auth_check
+from ide.git import git_auth_check, get_github
 from django.utils import simplejson as json
 from django.utils.timezone import now
 from django.conf import settings
@@ -341,6 +341,10 @@ def git_sha(content):
     return hashlib.sha1('blob %d\x00%s' % (len(content), content)).hexdigest()
 
 
+def git_blob(repo, sha):
+    return base64.b64decode(repo.get_git_blob(sha).content)
+
+
 @git_auth_check
 def github_push(user, commit_message, repo_name, project):
     g = Github(user.github.token, client_id=settings.GITHUB_CLIENT_ID, client_secret=settings.GITHUB_CLIENT_SECRET)
@@ -388,8 +392,8 @@ def github_push(user, commit_message, repo_name, project):
 
     # Now try handling resource files.
     resources = project.resources.all()
-    remote_sha_path = root + 'resources/src/resource_map.json'
-    remote_map_sha = next_tree[remote_sha_path]._InputGitTreeElement__sha if remote_sha_path in next_tree else None
+    remote_map_path = root + 'resources/src/resource_map.json'
+    remote_map_sha = next_tree[remote_map_path]._InputGitTreeElement__sha if remote_map_path in next_tree else None
 
     resource_root = root + "resources/src/"
     for res in resources:
@@ -410,7 +414,7 @@ def github_push(user, commit_message, repo_name, project):
 
     our_res_dict = generate_resource_dict(project, resources)
     if remote_map_sha is not None:
-        their_res_dict = json.loads(base64.b64decode(repo.get_git_blob(remote_map_sha).content))
+        their_res_dict = json.loads(git_blob(repo, remote_map_sha))
     else:
         their_res_dict = {'friendlyVersion': 'VERSION', 'versionDefName': '', 'media': []}
     if our_res_dict != their_res_dict:
@@ -424,11 +428,11 @@ def github_push(user, commit_message, repo_name, project):
                 print "Deleted resource: %s" % repo_path
                 del next_tree[repo_path]
 
-        if remote_sha_path in next_tree:
-            next_tree[remote_sha_path]._InputGitTreeElement__sha = NotSet
-            next_tree[remote_sha_path]._InputGitTreeElement__content = resource_dict_to_json(our_res_dict)
+        if remote_map_path in next_tree:
+            next_tree[remote_map_path]._InputGitTreeElement__sha = NotSet
+            next_tree[remote_map_path]._InputGitTreeElement__content = resource_dict_to_json(our_res_dict)
         else:
-            next_tree[remote_sha_path] = InputGitTreeElement(path=remote_sha_path, mode='100644', type='blob', content=resource_dict_to_json(our_res_dict))
+            next_tree[remote_map_path] = InputGitTreeElement(path=remote_map_path, mode='100644', type='blob', content=resource_dict_to_json(our_res_dict))
 
     # Commit the new tree.
     if has_changed:
@@ -456,7 +460,63 @@ def github_push(user, commit_message, repo_name, project):
     return False
 
 
+@git_auth_check
+def github_pull(user, project):
+    g = get_github(user)
+    repo_name = project.github_repo
+    if repo_name is None:
+        raise Exception("No GitHub repo defined.")
+    repo = g.get_repo(repo_name)
+    branch = repo.get_branch(repo.master_branch)
+
+    if project.github_last_commit == branch.commit.sha:
+        # Nothing to do.
+        return False
+
+    commit = repo.get_git_commit(branch.commit.sha)
+    tree = repo.get_git_tree(commit.tree.sha, recursive=True)
+
+    paths = {x.path: x for x in tree.tree}
+
+    root = find_project_root(paths)
+
+    # First try finding the resource map so we don't fail out part-done later.
+    # TODO: transaction support for file contents would be nice...
+    resource_root = root + 'resources/src/'
+    remote_map_path = resource_root + 'resource_map.json'
+    if remote_map_path not in paths:
+        raise Exception("resource_map.json not found.")
+    remote_map_sha = paths[remote_map_path].sha
+    remote_map = json.loads(git_blob(repo, remote_map_sha))
+
+    for resource in remote_map['media']:
+        path = resource_root + resource['file']
+        if path not in paths:
+            raise Exception("Resource %s not found in repo." % path)
+
+    # Now we grab the zip.
+    zip_url = repo.get_archive_link('zipball', repo.master_branch)
+    u = urllib2.urlopen(zip_url)
+    with tempfile.NamedTemporaryFile(suffix='.zip') as temp:
+        shutil.copyfileobj(u, temp)
+        temp.flush()
+        # And wipe the project!
+        project.source_files.all().delete()
+        project.resources.all().delete()
+        import_result = do_import_archive(project.id, temp.name)
+        project.github_last_commit = branch.commit.sha
+        project.github_last_sync = now()
+        project.save()
+        return import_result
+
+
 @task
 def do_github_push(project_id, commit_message):
     project = Project.objects.select_related('owner__github').get(pk=project_id)
     return github_push(project.owner, commit_message, project.github_repo, project)
+
+
+@task
+def do_github_pull(project_id):
+    project = Project.objects.select_related('owner__github').get(pk=project_id)
+    return github_pull(project.owner, project)

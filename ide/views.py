@@ -9,16 +9,18 @@ from django.conf import settings
 from celery.result import AsyncResult
 
 from ide.models import Project, SourceFile, ResourceFile, ResourceIdentifier, BuildResult, TemplateProject, UserGithub
-from ide.tasks import run_compile, create_archive, do_import_archive, do_import_github, do_github_push
+from ide.tasks import run_compile, create_archive, do_import_archive, do_import_github, do_github_push, do_github_pull
 from ide.forms import SettingsForm
 import ide.git
 
-import urllib2, urllib, base64
+import urllib2
+import urllib
+import base64
 import tempfile
 import os
 import re
 import uuid
-from github import Github, BadCredentialsException, UnknownObjectException
+from github import UnknownObjectException
 
 
 @require_safe
@@ -477,6 +479,14 @@ def github_push(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     commit_message = request.POST['commit_message']
     task = do_github_push.delay(project.id, commit_message)
+    return HttpResponse(json.dumps({"success": True, 'task_id': task.task_id}), content_type="application/json")
+
+
+@login_required
+@require_POST
+def github_pull(request, project_id):
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    task = do_github_pull.delay(project.id)
     return HttpResponse(json.dumps({"success": True, 'task_id': task.task_id}), content_type="application/json")
 
 

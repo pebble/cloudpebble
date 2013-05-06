@@ -52,6 +52,7 @@ CloudPebble.GitHub = (function() {
                 }
                 if(data.updated) {
                     show_alert('success', "Repo location updated.");
+                    CloudPebble.ProjectInfo.github.repo = new_repo;
                     return;
                 }
                 if(!data.exists) {
@@ -96,6 +97,7 @@ CloudPebble.GitHub = (function() {
                     prompt.find('.alert').removeClass('alert-warning').addClass('alert-error').text(data.error);
                 } else {
                     pane.find('#github-repo').value(data.repo);
+                    CloudPebble.ProjectInfo.github.repo = new_repo;
                     prompt.modal('hide');
                 }
             });
@@ -104,6 +106,12 @@ CloudPebble.GitHub = (function() {
             $('#github-commit-prompt').modal().find('.alert, .progress').addClass('hide');
             $('#github-commit-prompt').find('input[type=text], textarea').val('');
             $('#github-commit-prompt').focus();
+        });
+
+        pane.find('#github-pull-btn').click(function() {
+            var prompt = $('#github-pull-prompt').modal();
+            prompt.find(".running").addClass('hide');
+            prompt.find(".close, .dire-warning, .modal-footer").removeClass("hide");
         });
 
         var poll_commit_status = function(task_id) {
@@ -125,6 +133,34 @@ CloudPebble.GitHub = (function() {
                         }
                     } else {
                         setTimeout(function() { poll_commit_status(task_id); }, 1000);
+                    }
+                }
+            });
+        };
+
+        var poll_pull_status = function(task_id) {
+            $.getJSON('/ide/task/' + task_id, function(data) {
+                if(data.success) {
+                    var state = data.state;
+                    if(state.status == 'SUCCESS' || state.status == 'FAILURE') {
+                        enable_all();
+                        var prompt = $('#github-pull-prompt').modal('hide');
+                        if(state.status == 'SUCCESS') {
+                            if(state.result) {
+                                show_alert('success', "Pulled successfully.");
+                                alert("Pull completed successfully.");
+                                // *NASTY HACK: Make sure it doesn't think we have unsaved files, thereby
+                                // preventing page reload.
+                                CloudPebble.Editor.GetUnsavedFiles = function() { return 0; };
+                                window.location.reload(true);
+                            } else {
+                                show_alert('success', "Pull completed: Nothing to pull.");
+                            }
+                        } else {
+                            show_alert('error', 'Error: ' + state.result);
+                        }
+                    } else {
+                        setTimeout(function() { poll_pull_status(task_id); }, 1000);
                     }
                 }
             });
@@ -154,6 +190,22 @@ CloudPebble.GitHub = (function() {
                 }
                 var task = data.task_id;
                 poll_commit_status(task);
+            });
+        });
+
+        $('#github-pull-prompt-confirm').click(function() {
+            disable_all();
+            var prompt = $('#github-pull-prompt');
+            prompt.find(".close, .dire-warning, .modal-footer").addClass("hide");
+            prompt.find(".running").removeClass('hide');
+            $.post('/ide/project/' + PROJECT_ID + '/github/pull', function(data) {
+                if(!data.success) {
+                    enable_all();
+                    show_alert('error', "Pull failed: " + data.error);
+                    return;
+                }
+                var task = data.task_id;
+                poll_pull_status(task);
             });
         });
 

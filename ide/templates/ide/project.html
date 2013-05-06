@@ -234,8 +234,9 @@
             </div>
         </form>
     </div>
-    <div class="well needs-repo">
+    <div class="well needs-repo" style="padding-left: 198px;">
         <button class="btn" id="github-push-btn" disabled>Push New Commit</button>
+        <button class="btn" id="github-pull-btn" disabled>Pull Latest Commit</button>
     </div>
 </div>
 <!-- Create new repo prompt -->
@@ -299,6 +300,29 @@
             <input type="submit" class="btn btn-primary" value="Commit">
         </div>
     </form>
+</div>
+<!-- Pull confirmation/progress -->
+<div id="github-pull-prompt" class="modal hide fade" tabindex="-1" role="dialog">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">x</button>
+        <h3>Pull Latest Commit</h3>
+    </div>
+    <div class="modal-body">
+        <div class="dire-warning">
+            <p>Are you sure you want to pull the latest commit? Doing so will <em>overwrite</em> everything currently in your project.</p>
+            <p>There will be no further warnings and no opportunity to merge. This cannot be undone.</p>
+        </div>
+        <div class="running hide">
+            <p>Pulling latest commit from GitHub…</p>
+            <div class="progress progress-striped active">
+                <div class="bar" style="width: 100%;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Cancel</button>
+        <button class="btn btn-danger" id="github-pull-prompt-confirm">Pull</button>
+    </div>
 </div>
 <!-- Modal text prompt -->
 <div id="modal-text-input" class="modal hide fade" tabindex="-1" role="dialog">

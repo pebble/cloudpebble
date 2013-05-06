@@ -26,6 +26,7 @@ urlpatterns = patterns(
     url(r'^project/(?P<project_id>\d+)/github/repo$', views.set_project_repo, name='set_project_repo'),
     url(r'^project/(?P<project_id>\d+)/github/repo/create$', views.create_project_repo, name='create_project_repo'),
     url(r'^project/(?P<project_id>\d+)/github/commit$', views.github_push, name='github_push'),
+    url(r'^project/(?P<project_id>\d+)/github/pull$', views.github_pull, name='github_pull'),
     url(r'^task/(?P<task_id>[0-9a-f-]{32,36})', views.check_task, name='check_task'),
     url(r'^shortlink$', views.get_shortlink, name='get_shortlink'),
     url(r'^settings$', views.settings_page, name='settings'),
