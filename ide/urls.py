@@ -28,6 +28,7 @@ urlpatterns = patterns(
     url(r'^project/(?P<project_id>\d+)/github/commit$', views.github_push, name='github_push'),
     url(r'^project/(?P<project_id>\d+)/github/pull$', views.github_pull, name='github_pull'),
     url(r'^project/(?P<project_id>\d+)/github/push_hook$', views.github_hook, name='github_hook'),
+    url(r'^project/(?P<project_id>\d+)/status\.png$', views.build_status, name='build_status'),
     url(r'^task/(?P<task_id>[0-9a-f-]{32,36})', views.check_task, name='check_task'),
     url(r'^shortlink$', views.get_shortlink, name='get_shortlink'),
     url(r'^settings$', views.settings_page, name='settings'),

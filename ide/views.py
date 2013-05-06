@@ -3,6 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadReque
 from django.utils import simplejson as json
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError, transaction
+from django.db.models import Q
 from django.views.decorators.http import require_safe, require_POST
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.conf import settings
@@ -607,3 +608,15 @@ def github_hook(request, project_id):
         hooked_commit.delay(project_id, push_info['after'])
 
     return HttpResponse('ok')
+
+@require_safe
+def build_status(request, project_id):
+    project = get_object_or_404(Project, pk=project_id)
+    try:
+        last_build = BuildResult.objects.order_by('-id').filter(~Q(state=BuildResult.STATE_WAITING), project=project)[0]
+    except IndexError:
+        return HttpResponseRedirect(settings.STATIC_URL + '/ide/img/status/error.png')
+    if last_build.state == BuildResult.STATE_SUCCEEDED:
+        return HttpResponseRedirect(settings.STATIC_URL + '/ide/img/status/passing.png')
+    else:
+        return HttpResponseRedirect(settings.STATIC_URL + '/ide/img/status/failing.png')
