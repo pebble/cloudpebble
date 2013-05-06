@@ -64,7 +64,7 @@ def run_compile(build_result):
             'png': 'images',
             'png-trans': 'images',
             'font': 'fonts',
-            'blob': 'data'
+            'raw': 'data'
         }
         resource_map = {'friendlyVersion': 'VERSION', 'versionDefName': project.version_def_name, 'media': []}
         if len(resources) == 0:
@@ -158,7 +158,7 @@ def create_archive(project_id):
                 'png': 'images',
                 'png-trans': 'images',
                 'font': 'fonts',
-                'blob': 'data'
+                'raw': 'data'
             }
 
             resource_map = {'friendlyVersion': 'VERSION', 'versionDefName': project.version_def_name, 'media': []}
