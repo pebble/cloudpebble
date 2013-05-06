@@ -510,7 +510,7 @@ def set_project_repo(request, project_id):
     try:
         g_repo = g.get_repo(repo)
     except UnknownObjectException:
-        return HttpResponse(json.dumps({"success": False, 'error': "No such repo."}), content_type="application/json")
+        return HttpResponse(json.dumps({"success": True, 'exists': False, 'access': False, 'updated': False}), content_type="application/json")
 
     with transaction.commit_on_success():
         if repo != project.github_repo:

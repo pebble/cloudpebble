@@ -103,9 +103,10 @@ CloudPebble.GitHub = (function() {
                 if(!data.success) {
                     prompt.find('.alert').removeClass('alert-warning').addClass('alert-error').text(data.error);
                 } else {
-                    pane.find('#github-repo').value(data.repo);
+                    pane.find('#github-repo').val(data.repo);
                     CloudPebble.ProjectInfo.github.repo = new_repo;
                     prompt.modal('hide');
+                    enable_all();
                 }
             });
         });
