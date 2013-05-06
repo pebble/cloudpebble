@@ -9,14 +9,16 @@ from django.conf import settings
 from celery.result import AsyncResult
 
 from ide.models import Project, SourceFile, ResourceFile, ResourceIdentifier, BuildResult, TemplateProject, UserGithub
-from ide.tasks import run_compile, create_archive, do_import_archive, do_import_github
+from ide.tasks import run_compile, create_archive, do_import_archive, do_import_github, do_github_push
 from ide.forms import SettingsForm
+import ide.git
 
 import urllib2, urllib, base64
 import tempfile
 import os
 import re
 import uuid
+from github import Github, BadCredentialsException, UnknownObjectException
 
 
 @require_safe
@@ -55,14 +57,19 @@ def project_info(request, project_id):
         'success': True,
         'name': project.name,
         'last_modified': str(project.last_modified),
-        "version_def_name": project.version_def_name,
+        'version_def_name': project.version_def_name,
         'source_files': [{'name': f.file_name, 'id': f.id} for f in source_files],
         'resources': [{
             'id': x.id,
             'file_name': x.file_name,
             'kind': x.kind,
             'identifiers': [y.resource_id for y in x.identifiers.all()]
-        } for x in resources]
+        } for x in resources],
+        'github': {
+            'repo': "github.com/%s" % project.github_repo if project.github_repo is not None else None,
+            'last_sync': str(project.github_last_sync) if project.github_last_sync is not None else None,
+            'last_commit': project.github_last_commit
+        }
     }
 
     return HttpResponse(json.dumps(output), content_type="application/json")
@@ -362,7 +369,16 @@ def begin_export(request, project_id):
 @require_safe
 def check_task(request, task_id):
     result = AsyncResult(task_id)
-    return HttpResponse(json.dumps({"success": True, 'state': {'status': result.status, 'result': str(result.result)}}), content_type="application/json")
+    return HttpResponse(json.dumps(
+        {
+            "success": True,
+            'state':
+            {
+                'status': result.status,
+                'result': result.result if result.status == 'SUCCESS' else str(result.result)
+            }
+        }),
+        content_type="application/json")
 
 
 @login_required
@@ -453,3 +469,64 @@ def complete_github_auth(request):
 
     user_github.save()
     return HttpResponseRedirect('/ide/settings')
+
+
+@login_required
+@require_POST
+def github_push(request, project_id):
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    commit_message = request.POST['commit_message']
+    task = do_github_push.delay(project.id, commit_message)
+    return HttpResponse(json.dumps({"success": True, 'task_id': task.task_id}), content_type="application/json")
+
+
+@login_required
+@require_POST
+def set_project_repo(request, project_id):
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    repo = request.POST['repo']
+    if repo == '':
+        project.github_repo = None
+        project.github_last_sync = None
+        project.github_last_commit = None
+        project.save()
+        return HttpResponse(json.dumps({"success": True, 'exists': True, 'access': True, 'updated': True}), content_type="application/json")
+    repo = ide.git.url_to_repo(repo)
+    if repo is None:
+        return HttpResponse(json.dumps({"success": False, 'error': "Invalid repo URL."}), content_type="application/json")
+    repo = '%s/%s' % repo
+
+    if not ide.git.git_verify_tokens(request.user):
+        return HttpResponse(json.dumps({"success": False, 'error': "No GitHub tokens on file."}), content_type="application/json")
+
+    try:
+        has_access = ide.git.check_repo_access(request.user, repo)
+    except UnknownObjectException:
+        return HttpResponse(json.dumps({"success": True, 'exists': False, 'access': False, 'updated': False}), content_type="application/json")
+
+    if has_access:
+        project.github_repo = repo
+        project.github_last_sync = None
+        project.github_last_commit = None
+        project.save()
+
+    return HttpResponse(json.dumps({"success": True, 'exists': True, 'access': has_access, 'updated': has_access}), content_type="application/json")
+
+
+@login_required
+@require_POST
+def create_project_repo(request, project_id):
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    repo = request.POST['repo']
+    description = request.POST['description']
+    try:
+        repo = ide.git.create_repo(request.user, repo, description)
+    except Exception as e:
+        return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
+    else:
+        project.github_repo = repo.full_name
+        project.github_last_sync = None
+        project.github_last_commit = None
+        project.save()
+
+    return HttpResponse(json.dumps({"success": True, "repo": repo.html_url}), content_type="application/json")

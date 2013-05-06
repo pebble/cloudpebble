@@ -1,6 +1,7 @@
 from celery import task
 
 from ide.models import Project, SourceFile, ResourceFile, ResourceIdentifier, BuildResult
+from ide.git import git_auth_check
 from django.utils import simplejson as json
 from django.utils.timezone import now
 from django.conf import settings
@@ -17,6 +18,11 @@ import zipfile
 import uuid
 import urllib2
 import re
+import hashlib
+from github import Github, BadCredentialsException
+from github.InputGitTreeElement import InputGitTreeElement
+from github.GithubObject import NotSet
+import base64
 
 
 def create_sdk_symlinks(project_root, sdk_root):
@@ -60,19 +66,13 @@ def run_compile(build_result):
         os.makedirs(os.path.join(base_dir, 'resources/src/images'))
         os.makedirs(os.path.join(base_dir, 'resources/src/fonts'))
         os.makedirs(os.path.join(base_dir, 'resources/src/data'))
-        mapping = {
-            'png': 'images',
-            'png-trans': 'images',
-            'font': 'fonts',
-            'blob': 'data'
-        }
         resource_map = {'friendlyVersion': 'VERSION', 'versionDefName': project.version_def_name, 'media': []}
         if len(resources) == 0:
             print "No resources; adding dummy."
             resource_map['media'].append({"type": "raw", "defName": "DUMMY", "file": "resource_map.json"})
         else:
             for f in resources:
-                target_dir = os.path.abspath(os.path.join(base_dir, 'resources/src', mapping[f.kind]))
+                target_dir = os.path.abspath(os.path.join(base_dir, 'resources/src', ResourceFile.DIR_MAP[f.kind]))
                 abs_target = os.path.abspath(os.path.join(target_dir, f.file_name))
                 if not abs_target.startswith(target_dir):
                     raise Exception("Suspicious filename: %s" % f.file_name)
@@ -82,7 +82,7 @@ def run_compile(build_result):
                     d = {
                         'type': f.kind,
                         'defName': resource_id.resource_id,
-                        'file': os.path.join(mapping[f.kind], f.file_name)
+                        'file': f.path
                     }
                     if resource_id.character_regex:
                         d['characterRegex'] = resource_id.character_regex
@@ -142,6 +142,35 @@ def run_compile(build_result):
         shutil.rmtree(base_dir)
 
 
+def generate_resource_dict(project, resources):
+    resource_map = {'friendlyVersion': 'VERSION', 'versionDefName': project.version_def_name, 'media': []}
+    if len(resources) == 0:
+        print "No resources; adding dummy."
+        resource_map['media'].append({"type": "raw", "defName": "DUMMY", "file": "resource_map.json"})
+    else:
+        for resource in resources:
+            for resource_id in resource.get_identifiers():
+                d = {
+                    'type': resource.kind,
+                    'defName': resource_id.resource_id,
+                    'file': resource.path
+                }
+                if resource_id.character_regex:
+                    d['characterRegex'] = resource_id.character_regex
+                if resource_id.tracking:
+                    d['trackingAdjust'] = resource_id.tracking
+                resource_map['media'].append(d)
+    return resource_map
+
+
+def resource_dict_to_json(d):
+    return json.dumps(d, indent=4, separators=(',', ': ')) + "\n"
+
+
+def generate_resource_map(project, resources):
+    return resource_dict_to_json(generate_resource_dict(project, resources))
+
+
 @task(acks_late=True)
 def create_archive(project_id):
     project = Project.objects.get(pk=project_id)
@@ -154,34 +183,12 @@ def create_archive(project_id):
             for source in source_files:
                 z.writestr('%s/src/%s' % (prefix, source.file_name), source.get_contents())
 
-            resource_dir_map = {
-                'png': 'images',
-                'png-trans': 'images',
-                'font': 'fonts',
-                'blob': 'data'
-            }
+            for resource in resources:
+                z.writestr('%s/resources/src/%s' % (prefix, resource.path), open(resource.local_filename).read())
 
-            resource_map = {'friendlyVersion': 'VERSION', 'versionDefName': project.version_def_name, 'media': []}
-            if len(resources) == 0:
-                print "No resources; adding dummy."
-                resource_map['media'].append({"type": "raw", "defName": "DUMMY", "file": "resource_map.json"})
-            else:
-                for resource in resources:
-                    z.writestr('%s/resources/src/%s/%s' % (prefix, resource_dir_map[resource.kind], resource.file_name), open(resource.local_filename).read())
+            resource_map = generate_resource_map(project, resources)
 
-                    for resource_id in resource.get_identifiers():
-                        d = {
-                            'type': resource.kind,
-                            'defName': resource_id.resource_id,
-                            'file': os.path.join(resource_dir_map[resource.kind], resource.file_name)
-                        }
-                        if resource_id.character_regex:
-                            d['characterRegex'] = resource_id.character_regex
-                        if resource_id.tracking:
-                            d['trackingAdjust'] = resource_id.tracking
-                        resource_map['media'].append(d)
-
-            z.writestr('%s/resources/src/resource_map.json' % prefix, json.dumps(resource_map, indent=4, separators=(',', ': ')))
+            z.writestr('%s/resources/src/resource_map.json' % prefix, resource_map)
 
         # Generate a URL
         u = uuid.uuid4().hex
@@ -194,6 +201,34 @@ def create_archive(project_id):
 
 class NoProjectFoundError(Exception):
     pass
+
+
+def find_project_root(contents):
+    RESOURCE_MAP = 'resources/src/resource_map.json'
+    SRC_DIR = 'src/'
+    for base_dir in contents:
+        try:
+            dir_end = base_dir.index(RESOURCE_MAP)
+        except ValueError:
+            continue
+        else:
+            if dir_end + len(RESOURCE_MAP) != len(base_dir):
+                continue
+        base_dir = base_dir[:dir_end]
+        for source_dir in contents:
+            if source_dir[:dir_end] != base_dir:
+                continue
+            if source_dir[-2:] != '.c':
+                continue
+            if source_dir[dir_end:dir_end+len(SRC_DIR)] != SRC_DIR:
+                continue
+            break
+        else:
+            continue
+        break
+    else:
+        raise Exception("No project root found.")
+    return base_dir
 
 
 @task(acks_late=True)
@@ -220,44 +255,12 @@ def do_import_archive(project_id, archive_location, delete_zip=False, delete_pro
             # - Parse resource_map.json and import files it references
             RESOURCE_MAP = 'resources/src/resource_map.json'
             SRC_DIR = 'src/'
-            counter = 0
-            for base_dir in contents:
-                counter += 1
-                if counter > 200:
-                    raise Exception("Too many files in zip file.")
-                base_dir = base_dir.filename
-                print "base_dir: %s" % base_dir
-                try:
-                    dir_end = base_dir.index(RESOURCE_MAP)
-                except ValueError:
-                    continue
-                else:
-                    if dir_end + len(RESOURCE_MAP) != len(base_dir):
-                        continue
-                print "dir_end: %d" % dir_end
-                base_dir = base_dir[:dir_end]
-                source_counter = 0
-                for source_dir in contents:
-                    source_counter += 1
-                    if source_counter > 200:
-                        raise Exception("Too many files in zip file.")
-                    source_dir = source_dir.filename
-                    print "source_dir: %s" % source_dir
-                    if source_dir[:dir_end] != base_dir:
-                        continue
-                    print "has correct prefix"
-                    if source_dir[-2:] != '.c':
-                        continue
-                    print "has correct suffix"
-                    if source_dir[dir_end:dir_end+len(SRC_DIR)] != SRC_DIR:
-                        continue
-                    print "has correct directory"
-                    break
-                else:
-                    continue
-                break
-            else:
-                raise NoProjectFoundError("No project found in zip file.")
+            if len(contents) > 200:
+                raise Exception("Too many files in zip file.")
+            file_list = [x.name for x in contents]
+
+            base_dir = find_project_root(file_list)
+            dir_end = len(base_dir)
 
             # Now iterate over the things we found
             with transaction.commit_on_success():
@@ -330,3 +333,128 @@ def do_import_github(project_id, github_user, github_project, delete_project=Fal
             except:
                 pass
         raise
+
+
+def git_sha(content):
+    return hashlib.sha1('blob %d\x00%s' % (len(content), content)).hexdigest()
+
+
+@git_auth_check
+def github_push(user, commit_message, repo_name, project):
+    g = Github(user.github.token, client_id=settings.GITHUB_CLIENT_ID, client_secret=settings.GITHUB_CLIENT_SECRET)
+    repo = g.get_repo(repo_name)
+    branch = repo.get_branch(repo.master_branch)
+    commit = repo.get_git_commit(branch.commit.sha)
+    tree = repo.get_git_tree(commit.tree.sha, recursive=True)
+
+    paths = [x.path for x in tree.tree]
+
+    next_tree = {x.path: InputGitTreeElement(path=x.path, mode=x.mode, type=x.type, sha=x.sha) for x in tree.tree}
+
+    try:
+        root = find_project_root(paths)
+    except:
+        root = ''
+
+    src_root = root + 'src/'
+    project_sources = project.source_files.all()
+    has_changed = False
+    for source in project_sources:
+        repo_path = src_root + source.file_name
+        if repo_path not in next_tree:
+            has_changed = True
+            next_tree[repo_path] = InputGitTreeElement(path=repo_path, mode='100644', type='blob', content=source.get_contents())
+            print "New file: %s" % repo_path
+        else:
+            sha = next_tree[repo_path]._InputGitTreeElement__sha
+            our_content = source.get_contents()
+            expected_sha = git_sha(our_content)
+            if expected_sha != sha:
+                print "Updated file: %s" % repo_path
+                next_tree[repo_path]._InputGitTreeElement__sha = NotSet
+                next_tree[repo_path]._InputGitTreeElement__content = our_content
+                has_changed = True
+
+    expected_source_files = [src_root + x.file_name for x in project_sources]
+    for path in next_tree.keys():
+        if not path.startswith(src_root):
+            continue
+        if path not in expected_source_files:
+            del next_tree[path]
+            print "Deleted file: %s" % path
+            has_changed = True
+
+    # Now try handling resource files.
+    resources = project.resources.all()
+    remote_sha_path = root + 'resources/src/resource_map.json'
+    remote_map_sha = next_tree[remote_sha_path]._InputGitTreeElement__sha if remote_sha_path in next_tree else None
+
+    resource_root = root + "resources/src/"
+    for res in resources:
+        repo_path = resource_root + res.path
+        if repo_path in next_tree:
+            content = res.get_contents()
+            if git_sha(content) != next_tree[repo_path]._InputGitTreeElement__sha:
+                print "Changed resource: %s" % repo_path
+                has_changed = True
+                blob = repo.create_git_blob(base64.b64encode(content), 'base64')
+                print "Created blob %s" % blob.sha
+                next_tree[repo_path]._InputGitTreeElement__sha = blob.sha
+        else:
+            print "New resource: %s" % repo_path
+            blob = repo.create_git_blob(base64.b64encode(res.get_contents()), 'base64')
+            print "Created blob %s" % blob.sha
+            next_tree[repo_path] = InputGitTreeElement(path=repo_path, mode='100644', type='blob', sha=blob.sha)
+
+    our_res_dict = generate_resource_dict(project, resources)
+    if remote_map_sha is not None:
+        their_res_dict = json.loads(base64.b64decode(repo.get_git_blob(remote_map_sha).content))
+    else:
+        their_res_dict = {'friendlyVersion': 'VERSION', 'versionDefName': '', 'media': []}
+    if our_res_dict != their_res_dict:
+        print "Resources mismatch."
+        has_changed = True
+        # Try removing things that we've deleted, if any
+        to_remove = set(x['file'] for x in their_res_dict['media']) - set(x['file'] for x in our_res_dict['media'])
+        for path in to_remove:
+            repo_path = resource_root + path
+            if repo_path in next_tree:
+                print "Deleted resource: %s" % repo_path
+                del next_tree[repo_path]
+
+        if remote_sha_path in next_tree:
+            next_tree[remote_sha_path]._InputGitTreeElement__sha = NotSet
+            next_tree[remote_sha_path]._InputGitTreeElement__content = resource_dict_to_json(our_res_dict)
+        else:
+            next_tree[remote_sha_path] = InputGitTreeElement(path=remote_sha_path, mode='100644', type='blob', content=resource_dict_to_json(our_res_dict))
+
+    # Commit the new tree.
+    if has_changed:
+        print "Has changed; committing"
+        # GitHub seems to choke if we pass the raw directory nodes off to it,
+        # so we delete those.
+        for x in next_tree.keys():
+            if next_tree[x]._InputGitTreeElement__mode == '040000':
+                del next_tree[x]
+                print "removing subtree node %s" % x
+
+        print [x._InputGitTreeElement__mode for x in next_tree.values()]
+        git_tree = repo.create_git_tree(next_tree.values())
+        print "Created tree %s" % git_tree.sha
+        git_commit = repo.create_git_commit(commit_message, git_tree, [commit])
+        print "Created commit %s" % git_commit.sha
+        git_ref = repo.get_git_ref('heads/%s' % repo.master_branch)
+        git_ref.edit(git_commit.sha)
+        print "Updated ref %s" % git_ref.ref
+        project.github_last_commit = git_commit.sha
+        project.github_last_sync = now()
+        project.save()
+        return True
+
+    return False
+
+
+@task
+def do_github_push(project_id, commit_message):
+    project = Project.objects.select_related('owner__github').get(pk=project_id)
+    return github_push(project.owner, commit_message, project.github_repo, project)

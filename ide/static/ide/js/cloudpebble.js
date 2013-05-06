@@ -27,6 +27,7 @@ CloudPebble.Init = function() {
     CloudPebble.Resources.Init();
     CloudPebble.Sidebar.Init();
     CloudPebble.Settings.Init();
+    CloudPebble.GitHub.Init();
 
     // Load in project data.
     $.getJSON('/ide/project/' + PROJECT_ID + '/info', function(data) {

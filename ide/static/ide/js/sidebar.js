@@ -135,6 +135,7 @@ CloudPebble.Sidebar = (function() {
             $('#sidebar-pane-new-resource > a').click(CloudPebble.Resources.Create);
             $('#sidebar-pane-compile > a').click(CloudPebble.Compile.Show);
             $('#sidebar-pane-settings > a').click(CloudPebble.Settings.Show);
+            $('#sidebar-pane-github > a').click(CloudPebble.GitHub.Show);
             $('#new-source-file').click(CloudPebble.Editor.Create);
         },
         SetPopover: function(pane_id, title, content) {

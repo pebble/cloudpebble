@@ -17,6 +17,10 @@ class Project(models.Model):
     last_modified = models.DateTimeField(auto_now_add=True)
     version_def_name = models.CharField(max_length=50, default="APP_RESOURCES")
 
+    github_repo = models.CharField(max_length=100, blank=True, null=True)
+    github_last_sync = models.DateTimeField(blank=True, null=True)
+    github_last_commit = models.CharField(max_length=40, blank=True, null=True)
+
     def get_last_build(self):
         try:
             return self.builds.order_by('-id')[0]
@@ -176,6 +180,9 @@ class ResourceFile(models.Model):
         self.project.last_modified = now()
         self.project.save()
 
+    def get_contents(self):
+        return open(self.local_filename).read()
+
     def get_identifiers(self):
         return ResourceIdentifier.objects.filter(resource_file=self)
 
@@ -183,6 +190,18 @@ class ResourceFile(models.Model):
         self.project.last_modified = now()
         self.project.save()
         super(ResourceFile, self).save(*args, **kwargs)
+
+    DIR_MAP = {
+        'png': 'images',
+        'png-trans': 'images',
+        'font': 'fonts',
+        'blob': 'data'
+    }
+
+    def get_path(self):
+        return '%s/%s' % (self.DIR_MAP[self.kind], self.file_name)
+
+    path = property(get_path)
 
     class Meta:
         unique_together = (('project', 'file_name'),)

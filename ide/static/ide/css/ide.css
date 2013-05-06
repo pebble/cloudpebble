@@ -48,3 +48,17 @@
     margin: 0 !important;
     padding: 0 !important;
 }
+
+.modal form {
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.modal .form textarea, .modal .form input[type=text] {
+    width: 515px;
+}
+
+.form label {
+    font-weight: bold;
+}
+

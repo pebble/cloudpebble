@@ -9,3 +9,4 @@ psycopg2
 Pillow
 South
 qrcode
+pygithub==1.14.2
