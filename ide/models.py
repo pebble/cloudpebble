@@ -195,7 +195,7 @@ class ResourceFile(models.Model):
         'png': 'images',
         'png-trans': 'images',
         'font': 'fonts',
-        'blob': 'data'
+        'raw': 'data'
     }
 
     def get_path(self):

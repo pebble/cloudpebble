@@ -23,6 +23,7 @@ from github import Github, BadCredentialsException
 from github.InputGitTreeElement import InputGitTreeElement
 from github.GithubObject import NotSet
 import base64
+import traceback
 
 
 def create_sdk_symlinks(project_root, sdk_root):
@@ -130,6 +131,7 @@ def run_compile(build_result):
             build_result.save()
     except Exception as e:
         print "Build failed due to internal error: %s" % e
+        traceback.print_exc()
         build_result.state = BuildResult.STATE_FAILED
         build_result.finished = now()
         try:
@@ -257,7 +259,7 @@ def do_import_archive(project_id, archive_location, delete_zip=False, delete_pro
             SRC_DIR = 'src/'
             if len(contents) > 200:
                 raise Exception("Too many files in zip file.")
-            file_list = [x.name for x in contents]
+            file_list = [x.filename for x in contents]
 
             base_dir = find_project_root(file_list)
             dir_end = len(base_dir)
