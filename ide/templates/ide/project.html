@@ -224,13 +224,26 @@
     <div class="well">
         <form class="form-horizontal" id="github-repo-form">
             <div class="control-group">
-                <label class="control-label" for="settings-name">GitHub Repo</label>
+                <label class="control-label" for="github-repo">GitHub Repo</label>
                 <div class="controls">
                     <input type="text" class="span6" id="github-repo" pattern="(?:https?://|git@|git://)?(?:www\.)?github\.com[/:]([\w.-]+)/([\w.-]+?)(?:\.git|/|$)" placeholder="github.com/{{ project.owner.github.username }}/PebbleFace">
                 </div>
             </div>
+            <div class="control-group">
+                <label class="control-label" for="github-repo-hook">Automatically pull changes</label>
+                <div class="controls">
+                    <input type="checkbox" id="github-repo-hook">
+                    <span class="help-block dire-warning">If you enable this, the contents of this project <em>will be overwritten</em> every time you push to your repo from elsewhere, <em>without prompting you</em>.</span>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="github-repo-build">Automatically build after pulling</label>
+                <div class="controls">
+                    <input type="checkbox" id="github-repo-build">
+                </div>
+            </div>
             <div class="form-actions">
-                <input type="submit" class="btn btn-primary" value="Set Repo">
+                <input type="submit" class="btn btn-primary" value="Save">
             </div>
         </form>
     </div>
@@ -258,7 +271,7 @@
             </div>
         </div>
         <div class="control-group">
-            <label class="control-label" for="github-repo-description">Description (optional)</label>
+            <label class="control-label" for="github-repo-description">Description <span class="muted">(optional)</span></label>
             <div class="controls">
                 <input type="text" id="github-repo-description" class="span4">
             </div>

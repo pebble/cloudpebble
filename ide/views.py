@@ -4,12 +4,12 @@ from django.utils import simplejson as json
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError, transaction
 from django.views.decorators.http import require_safe, require_POST
-from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.conf import settings
 from celery.result import AsyncResult
 
 from ide.models import Project, SourceFile, ResourceFile, ResourceIdentifier, BuildResult, TemplateProject, UserGithub
-from ide.tasks import run_compile, create_archive, do_import_archive, do_import_github, do_github_push, do_github_pull
+from ide.tasks import run_compile, create_archive, do_import_archive, do_import_github, do_github_push, do_github_pull, hooked_commit
 from ide.forms import SettingsForm
 import ide.git
 
@@ -70,7 +70,9 @@ def project_info(request, project_id):
         'github': {
             'repo': "github.com/%s" % project.github_repo if project.github_repo is not None else None,
             'last_sync': str(project.github_last_sync) if project.github_last_sync is not None else None,
-            'last_commit': project.github_last_commit
+            'last_commit': project.github_last_commit,
+            'auto_build': project.github_hook_build,
+            'auto_pull': project.github_hook_uuid is not None
         }
     }
 
@@ -495,32 +497,75 @@ def github_pull(request, project_id):
 def set_project_repo(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     repo = request.POST['repo']
-    if repo == '':
-        project.github_repo = None
-        project.github_last_sync = None
-        project.github_last_commit = None
-        project.save()
-        return HttpResponse(json.dumps({"success": True, 'exists': True, 'access': True, 'updated': True}), content_type="application/json")
+    auto_pull = bool(int(request.POST['auto_pull']))
+    auto_build = bool(int(request.POST['auto_build']))
+
     repo = ide.git.url_to_repo(repo)
     if repo is None:
         return HttpResponse(json.dumps({"success": False, 'error': "Invalid repo URL."}), content_type="application/json")
     repo = '%s/%s' % repo
 
-    if not ide.git.git_verify_tokens(request.user):
-        return HttpResponse(json.dumps({"success": False, 'error': "No GitHub tokens on file."}), content_type="application/json")
-
+    g = ide.git.get_github(request.user)
     try:
-        has_access = ide.git.check_repo_access(request.user, repo)
+        g_repo = g.get_repo(repo)
     except UnknownObjectException:
-        return HttpResponse(json.dumps({"success": True, 'exists': False, 'access': False, 'updated': False}), content_type="application/json")
+        return HttpResponse(json.dumps({"success": False, 'error': "No such repo."}), content_type="application/json")
 
-    if has_access:
-        project.github_repo = repo
-        project.github_last_sync = None
-        project.github_last_commit = None
+    with transaction.commit_on_success():
+        if repo != project.github_repo:
+            if project.github_hook_uuid:
+                try:
+                    remove_hooks(g.get_repo(project.github_repo), project.github_hook_uuid)
+                except:
+                    pass
+
+            # Just clear the repo if none specified.
+            if repo == '':
+                project.github_repo = None
+                project.github_last_sync = None
+                project.github_last_commit = None
+                project.github_hook_uuid = None
+                project.save()
+                return HttpResponse(json.dumps({"success": True, 'exists': True, 'access': True, 'updated': True}), content_type="application/json")
+
+            if not ide.git.git_verify_tokens(request.user):
+                return HttpResponse(json.dumps({"success": False, 'error': "No GitHub tokens on file."}), content_type="application/json")
+
+            try:
+                has_access = ide.git.check_repo_access(request.user, repo)
+            except UnknownObjectException:
+                return HttpResponse(json.dumps({"success": True, 'exists': False, 'access': False, 'updated': False}), content_type="application/json")
+
+            if has_access:
+                project.github_repo = repo
+                project.github_last_sync = None
+                project.github_last_commit = None
+                project.github_hook_uuid = None
+            else:
+                return HttpResponse(json.dumps({"success": True, 'exists': True, 'access': True, 'updated': True}), content_type="application/json")
+
+
+        if auto_pull and project.github_hook_uuid is None:
+            # Generate a new hook UUID
+            project.github_hook_uuid = uuid.uuid4().hex
+            # Set it up
+            try:
+                g_repo.create_hook('web', {'url': settings.GITHUB_HOOK_TEMPLATE % {'project': project.id, 'key': project.github_hook_uuid}, 'content_type': 'form'}, ['push'], True)
+            except Exception as e:
+                return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
+        elif not auto_pull:
+            if project.github_hook_uuid is not None:
+                try:
+                    remove_hooks(g_repo, project.github_hook_uuid)
+                except:
+                    pass
+                project.github_hook_uuid = None
+
+        project.github_hook_build = auto_build
+
         project.save()
 
-    return HttpResponse(json.dumps({"success": True, 'exists': True, 'access': has_access, 'updated': has_access}), content_type="application/json")
+    return HttpResponse(json.dumps({"success": True, 'exists': True, 'access': True, 'updated': True}), content_type="application/json")
 
 
 @login_required
@@ -540,3 +585,25 @@ def create_project_repo(request, project_id):
         project.save()
 
     return HttpResponse(json.dumps({"success": True, "repo": repo.html_url}), content_type="application/json")
+
+
+def remove_hooks(repo, s):
+    hooks = list(repo.get_hooks())
+    for hook in hooks:
+        if hook.name != 'web':
+            continue
+        if s in hook.config['url']:
+            hook.delete()
+
+
+@csrf_exempt
+@require_POST
+def github_hook(request, project_id):
+    hook_uuid = request.GET['key']
+    project = get_object_or_404(Project, pk=project_id, github_hook_uuid=hook_uuid)
+
+    push_info = json.loads(request.POST['payload'])
+    if push_info['ref'] == 'refs/heads/%s' % push_info['repository']['master_branch']:
+        hooked_commit.delay(project_id, push_info['after'])
+
+    return HttpResponse('ok')

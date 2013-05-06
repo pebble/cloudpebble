@@ -38,12 +38,15 @@ CloudPebble.GitHub = (function() {
             e.preventDefault();
             clear_alert();
             var new_repo = pane.find('#github-repo').val();
-            if(new_repo === CloudPebble.ProjectInfo.github.repo || !new_repo && !CloudPebble.ProjectInfo.github.repo) {
+            var auto_pull = pane.find('#github-repo-hook').prop('checked');
+            var auto_build = pane.find('#github-repo-build').prop('checked');
+            if((new_repo === CloudPebble.ProjectInfo.github.repo || !new_repo && !CloudPebble.ProjectInfo.github.repo) &&
+                auto_pull === CloudPebble.ProjectInfo.github.auto_pull && auto_build === CloudPebble.ProjectInfo.github.auto_build) {
                 show_alert('success', "Updated repo (nothing changed).");
                 return;
             }
             disable_all();
-            $.post('/ide/project/' + PROJECT_ID + '/github/repo', {repo: new_repo}, function(data) {
+            $.post('/ide/project/' + PROJECT_ID + '/github/repo', {repo: new_repo, auto_pull: auto_pull ? '1' : '0', auto_build: auto_build ? '1' : '0'}, function(data) {
                 enable_all();
                 if(!data.success) {
                     disable_needy();
@@ -51,8 +54,10 @@ CloudPebble.GitHub = (function() {
                     return;
                 }
                 if(data.updated) {
-                    show_alert('success', "Repo location updated.");
+                    show_alert('success', "Updated repo.");
                     CloudPebble.ProjectInfo.github.repo = new_repo;
+                    CloudPebble.ProjectInfo.github.auto_pull = auto_pull;
+                    CloudPebble.ProjectInfo.github.auto_build = auto_build;
                     return;
                 }
                 if(!data.exists) {
@@ -80,6 +85,8 @@ CloudPebble.GitHub = (function() {
             pane.find('#github-repo').val(CloudPebble.ProjectInfo.github.repo);
             enable_needy();
         }
+        pane.find('#github-repo-hook').prop('checked', CloudPebble.ProjectInfo.github.auto_pull);
+        pane.find('#github-repo-build').prop('checked', CloudPebble.ProjectInfo.github.auto_build);
 
 
         var prompt = $('#github-new-repo-prompt');
@@ -215,6 +222,10 @@ CloudPebble.GitHub = (function() {
     return {
         Init: function() {
             github_template = $('#github-template').remove().removeClass('hide');
+            if(!USER_SETTINGS.github) {
+                $('#sidebar-pane-github').addClass('disabled');
+                CloudPebble.Sidebar.SetPopover('github', '', 'GitHub integration can be enabled in your user settings by linking a GitHub account.')
+            }
         },
         Show: function() {
             show_github_pane();

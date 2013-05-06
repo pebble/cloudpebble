@@ -20,6 +20,8 @@ class Project(models.Model):
     github_repo = models.CharField(max_length=100, blank=True, null=True)
     github_last_sync = models.DateTimeField(blank=True, null=True)
     github_last_commit = models.CharField(max_length=40, blank=True, null=True)
+    github_hook_uuid = models.CharField(max_length=32, blank=True, null=True)
+    github_hook_build = models.BooleanField(default=False)
 
     def get_last_build(self):
         try:

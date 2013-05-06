@@ -520,3 +520,20 @@ def do_github_push(project_id, commit_message):
 def do_github_pull(project_id):
     project = Project.objects.select_related('owner__github').get(pk=project_id)
     return github_pull(project.owner, project)
+
+
+@task
+def hooked_commit(project_id, target_commit):
+    project = Project.objects.select_related('owner__github').get(pk=project_id)
+    did_something = False
+    print "Comparing %s versus %s" % (project.github_last_commit, target_commit)
+    if project.github_last_commit != target_commit:
+        github_pull(project.owner, project)
+        did_something = True
+
+    if project.github_hook_build:
+        build = BuildResult.objects.create(project=project)
+        run_compile(build.id)
+        did_something = True
+
+    return did_something

@@ -181,6 +181,8 @@ EXPORT_ROOT = 'http://localhost:8000/export/'
 GITHUB_CLIENT_ID = '15c3418f8f5c0f956ed8'
 GITHUB_CLIENT_SECRET = '06e9f765f00016a79a38599fbd858990b23b8afe'
 
+GITHUB_HOOK_TEMPLATE = 'http://putnam.kathar.in:8000/ide/project/%(project)d/github/push_hook?key=%(key)s'
+
 import djcelery
 djcelery.setup_loader()
 

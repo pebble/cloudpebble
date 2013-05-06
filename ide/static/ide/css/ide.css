@@ -62,3 +62,6 @@
     font-weight: bold;
 }
 
+.help-block.dire-warning {
+    color: rgb(185, 74, 72);
+}
