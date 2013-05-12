@@ -65,3 +65,7 @@
 .help-block.dire-warning {
     color: rgb(185, 74, 72);
 }
+
+.img-polaroid.img-dimmer {
+    background-color: #ddd;
+}

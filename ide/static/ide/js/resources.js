@@ -155,7 +155,7 @@ CloudPebble.Resources = (function() {
             var preview_url = '/ide/project/' + PROJECT_ID + '/resource/' + resource.id +'/get';
             if(resource.kind == 'png' || resource.kind == 'png-trans') {
                 var div = $('<div class="span4 text-center">');
-                preview_img = $('<img class="img-polaroid">');
+                preview_img = $('<img class="img-polaroid img-dimmer">');
                 preview_img.attr('src', preview_url);
                 div.append(preview_img);
                 var dimensions = $('<p class="muted">');
