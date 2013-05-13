@@ -40,19 +40,24 @@ CloudPebble.Compile = (function() {
         });
     };
 
+    var pane = null;
+    var init = function() {
+        pane = $('#compilation-pane-template').clone();
+    };
+
     var show_compile_pane = function() {
         CloudPebble.Sidebar.SuspendActive();
         if(CloudPebble.Sidebar.Restore("compile")) {
             return;
         }
-        var pane = $('#compilation-pane-template').clone();
         // Get build history
         update_build_history(pane);
         pane.find('#compilation-run-build-button').click(function() {
             var temp_build = {started: (new Date()).toISOString(), finished: null, state: 1, uuid: null, id: null};
             update_last_build(pane, temp_build);
             pane.find('#run-build-table').prepend(build_history_row(temp_build));
-            $.post('/ide/project/' + PROJECT_ID + '/build/run', {}, function() {
+            var optimisation = $('#build-optimisation').val();
+            $.post('/ide/project/' + PROJECT_ID + '/build/run', {optimisation: optimisation}, function() {
                 update_build_history(pane);
             });
         });
@@ -107,7 +112,10 @@ CloudPebble.Compile = (function() {
             show_compile_pane();
         },
         Init: function() {
-            // Nothing.
+            init();
+        },
+        SetOptimisation: function(opt) {
+            pane.find('#build-optimisation').val(opt);
         }
     };
 })();

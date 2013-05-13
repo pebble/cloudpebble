@@ -136,7 +136,27 @@
         </div>
         <hr>
     </div>
-    <p><button class="btn btn-primary" id="compilation-run-build-button">Run build</button></p>
+        <form class="form-inline">
+    <div class="row-fluid">
+            <div class="span2">
+                <div class="control-group">
+                    <button class="btn btn-primary" id="compilation-run-build-button">Run build</button>
+                </div>
+            </div>
+            <div class="span10">
+                <div class="control-group">
+                    <div class="controls">
+                        <label class="control-label">Optimisation:</label>
+                        <select id="build-optimisation">
+                            {% for option in project.OPTIMISATION_CHOICES %}
+                                <option value="{{ option.0 }}"{% if option.0 == project.optimisation %}selected{% endif%}>{{ option.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+    </div>
+        </form>
     <hr>
     <h3>Build history</h3>
     <table class="table">
@@ -164,10 +184,20 @@
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label" for="settings-name">SDK version</label>
+                <label class="control-label" for="settings-optimisation">Default optimisation</label>
+                <div class="controls">
+                    <select id="settings-optimisation">
+                        {% for option in project.OPTIMISATION_CHOICES %}
+                            <option value="{{ option.0 }}"{% if option.0 == project.optimisation %}selected{% endif%}>{{ option.1 }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="settings-sdk-version">SDK version</label>
                 <div class="controls">
                     <!-- This is so useful! It makes my form slightly less empty and will be used later. -->
-                    <select>
+                    <select id="settings-sdk-version">
                         <option value="1">Version 1</option>
                     </select>
                 </div>

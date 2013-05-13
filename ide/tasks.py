@@ -37,11 +37,13 @@ def create_sdk_symlinks(project_root, sdk_root):
 
 
 @task(ignore_result=True, acks_late=True)
-def run_compile(build_result):
+def run_compile(build_result, optimisation=None):
     build_result = BuildResult.objects.get(pk=build_result)
     project = build_result.project
     source_files = SourceFile.objects.filter(project=project)
     resources = ResourceFile.objects.filter(project=project)
+    if optimisation is None:
+        optimisation = project.optimisation
 
     # Assemble the project somewhere
     base_dir = tempfile.mkdtemp(dir=os.path.join(settings.CHROOT_ROOT, 'tmp') if settings.CHROOT_ROOT else None)
@@ -109,7 +111,7 @@ def run_compile(build_result):
             else:
                 os.environ['PATH'] += ':/Users/katharine/projects/cloudpebble/pebble-sdk/arm-cs-tools/bin'
                 os.chdir(base_dir)
-                subprocess.check_output(["./waf", "configure"], stderr=subprocess.STDOUT)
+                subprocess.check_output(["./waf", "configure", "-O", optimisation], stderr=subprocess.STDOUT)
                 output = subprocess.check_output(["./waf", "build"], stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             output = e.output

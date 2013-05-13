@@ -61,6 +61,7 @@ def project_info(request, project_id):
         'name': project.name,
         'last_modified': str(project.last_modified),
         'version_def_name': project.version_def_name,
+        'optimisation': project.optimisation,
         'source_files': [{'name': f.file_name, 'id': f.id} for f in source_files],
         'resources': [{
             'id': x.id,
@@ -226,8 +227,9 @@ def update_resource(request, project_id, resource_id):
 def compile_project(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     build = BuildResult.objects.create(project=project)
-    run_compile.delay(build.id)
-    return HttpResponse(json.dumps({"success": True, "build_id": build.id}), content_type="application/json")
+    optimisation = request.POST.get('optimisation', None)
+    task = run_compile.delay(build.id, optimisation)
+    return HttpResponse(json.dumps({"success": True, "build_id": build.id, "task_id": task.task_id}), content_type="application/json")
 
 
 @require_safe
@@ -300,6 +302,7 @@ def save_project_settings(request, project_id):
         new_version_def_name = request.POST['version_def_name']
         project.name = new_name
         project.version_def_name = new_version_def_name
+        project.optimisation = request.POST['optimisation']
         project.save()
     except IntegrityError as e:
         return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")

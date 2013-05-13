@@ -17,6 +17,16 @@ class Project(models.Model):
     last_modified = models.DateTimeField(auto_now_add=True)
     version_def_name = models.CharField(max_length=50, default="APP_RESOURCES")
 
+    OPTIMISATION_CHOICES = (
+        ('0', 'None'),
+        ('1', 'Limited (smaller, faster)'),
+        ('s', 'Aggressive (smaller, faster)'),
+        ('2', 'Aggressive (faster)'),
+        ('3', 'Very aggressive (faster, bigger)'),
+    )
+
+    optimisation = models.CharField(max_length=1, choices=OPTIMISATION_CHOICES, default='0')
+
     github_repo = models.CharField(max_length=100, blank=True, null=True)
     github_last_sync = models.DateTimeField(blank=True, null=True)
     github_last_commit = models.CharField(max_length=40, blank=True, null=True)

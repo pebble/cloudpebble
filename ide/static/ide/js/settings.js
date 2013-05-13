@@ -21,6 +21,7 @@ CloudPebble.Settings = (function() {
         pane.find('#project-save').click(function() {
             var name = pane.find('#settings-name').val();
             var version_def_name = pane.find('#settings-version-def-name').val();
+            var optimisation = pane.find('#settings-optimisation').val();
 
             if(name.replace(/\s/g, '') === '') {
                 display_error("You must specify a project name");
@@ -36,13 +37,16 @@ CloudPebble.Settings = (function() {
 
             $.post('/ide/project/' + PROJECT_ID + '/save_settings', {
                 'name': name,
-                'version_def_name': version_def_name
+                'version_def_name': version_def_name,
+                'optimisation': optimisation
             }, function(data) {
                 pane.find('input, button, select').removeAttr('disabled');
                 pane.find('.alert').removeClass("alert-success alert-error").addClass("hide");
                 if(data.success) {
                     CloudPebble.ProjectInfo.name = name;
                     CloudPebble.ProjectInfo.version_def_name = version_def_name;
+                    CloudPebble.ProjectInfo.optimisation = optimisation;
+                    CloudPebble.Compile.SetOptimisation(optimisation);
                     $('.project-name').text(name);
                     window.document.title = "CloudPebble – " + name;
                     display_success("Settings saved.");
