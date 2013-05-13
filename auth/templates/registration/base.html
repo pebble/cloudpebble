@@ -1,0 +1,23 @@
+{% extends 'ide/base.html' %}
+{% block content %}
+<style type="text/css">
+    /* Custom container */
+    .container-narrow {
+        margin: 0 auto;
+        max-width: 500px;
+    }
+</style>
+<div class="container-narrow">
+    <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li><a href="http://blog.cloudpebble.net/">Blog</a></li>
+        </ul>
+        <h3 class="muted"><a href="/" class="muted">CloudPebble</a></h3>
+    </div>
+    <div class="row-fluid">
+        <div class="span12 well">
+            {% block inner_content %}{% endblock %}
+        </div>
+    </div>
+</div>
+{%endblock%}

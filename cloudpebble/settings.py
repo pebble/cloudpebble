@@ -7,6 +7,8 @@ ADMINS = (
     ('Katharine Berry', 'katharine@kathar.in'),
 )
 
+DEFAULT_FROM_EMAIL = 'CloudPebble <noreply@cloudpebble.net>'
+
 MANAGERS = ADMINS
 
 DATABASES = {

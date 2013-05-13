@@ -1,37 +1,29 @@
-{% extends "ide/base.html" %}
+{% extends "registration/base.html" %}
 
-{% block content %}
+{% block inner_content %}
+    {% if form.errors %}
+    <div class="alert alert-error">Your username and password didn't match. Please try again.</div>
+    {% endif %}
 
-<div class="container">
-    <div class="masthead">
-        <h3 class="muted offset3">CloudPebble</h3>
+    <form class="form-horizontal" method="post" style="margin-bottom: 0px;">
+    {% csrf_token %}
+    <div class="control-group">
+        <label class="control-label">{{ form.username.label_tag }}</label>
+        <div class="controls">
+            {{ form.username }}
+        </div>
     </div>
-    <div class="span6 offset3 well">
-        {% if form.errors %}
-        <div class="alert alert-error">Your username and password didn't match. Please try again.</div>
-        {% endif %}
-
-        <form class="form-horizontal" method="post">
-        {% csrf_token %}
-        <div class="control-group">
-            <label class="control-label">{{ form.username.label_tag }}</label>
-            <div class="controls">
-                {{ form.username }}
-            </div>
+    <div class="control-group">
+        <label class="control-label">{{ form.password.label_tag }}</label>
+        <div class="controls">
+            {{ form.password }}
         </div>
-        <div class="control-group">
-            <label class="control-label">{{ form.password.label_tag }}</label>
-            <div class="controls">
-                {{ form.password }}
-            </div>
-        </div>
-        <div class="form-actions">
-            <button class="btn btn-primary" type="submit">Log in</button>
-            <a href="/accounts/register/" class="btn">Create account</a>
-        </div>
-        <input type="hidden" name="next" value="{{ next }}" />
-        </form>
     </div>
-</div>
-
+    <div class="form-actions" style="margin-bottom: 0px; padding-bottom: 0px;">
+        <p><button class="btn btn-primary" type="submit">Log in</button>
+        <a href="/accounts/register/" class="btn">Create account</a></p>
+        <p style="margin-bottom: 0px;"><a href="{% url 'django.contrib.auth.views.password_reset' %}">Forgotten password?</a></p>
+    </div>
+    <input type="hidden" name="next" value="{{ next }}" />
+    </form>
 {% endblock %}
