@@ -19,10 +19,10 @@ class Project(models.Model):
 
     OPTIMISATION_CHOICES = (
         ('0', 'None'),
-        ('1', 'Limited (smaller, faster)'),
-        ('s', 'Aggressive (smaller, faster)'),
-        ('2', 'Aggressive (faster)'),
-        ('3', 'Very aggressive (faster, bigger)'),
+        ('1', 'Limited'),
+        ('s', 'Prefer smaller'),
+        ('2', 'Prefer faster'),
+        ('3', 'Aggressive (faster, bigger)'),
     )
 
     optimisation = models.CharField(max_length=1, choices=OPTIMISATION_CHOICES, default='0')
