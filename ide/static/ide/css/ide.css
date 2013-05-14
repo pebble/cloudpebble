@@ -69,3 +69,27 @@
 .img-polaroid.img-dimmer {
     background-color: #ddd;
 }
+
+.build-log {
+    color: #999;
+}
+
+.build-log .log-success {
+    color: #468847;
+    font-weight: bold;
+}
+
+.build-log .log-error {
+    color: #b94a48;
+    font-weight: bold;
+}
+
+.build-log .log-note {
+    color: #3a87ad;
+    font-weight: bold;
+}
+
+.build-log .log-warning {
+    color: #c09853;
+    font-weight: bold;
+}

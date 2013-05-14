@@ -286,6 +286,18 @@ def build_history(request, project_id):
         return HttpResponse(json.dumps({"success": True, "builds": out}), content_type="application/json")
 
 
+@require_safe
+@login_required
+def build_log(request, project_id, build_id):
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    build = get_object_or_404(BuildResult, project=project, pk=build_id)
+    try:
+        log = open(build.build_log, 'r').read().decode('utf-8')
+    except Exception as e:
+        return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
+    return HttpResponse(json.dumps({"success": True, "log": log}), content_type="application/json")
+
+
 @require_POST
 @login_required
 def create_project(request):

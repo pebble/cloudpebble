@@ -12,9 +12,48 @@ CloudPebble.Compile = (function() {
         tr.append($('<td>' + COMPILE_SUCCESS_STATES[build.state].english + '</td>'));
         tr.append($('<td>' + (build.size.total !== null ? Math.round(build.size.total / 1024) + ' KiB' : '') + '</td>'));
         tr.append($('<td>' + (build.state == 3 ? ('<a href="'+build.pbw+'">pbw</a>') : ' ') + '</td>'));
-        tr.append($('<td>' + (build.state > 1 ? ('<a href="'+build.log+'">build log</a>') : ' ' )+ '</td>'));
+        // Build log thingy.
+        var td = $('<td>');
+        if(build.state > 1) {
+            var a = $('<a href="'+build.log+'">build log</a>').click(function(e) {
+                if(e.ctrlKey || e.metaKey) return true;
+                e.preventDefault();
+                show_build_log(build.id);
+            });
+            td.append(a);
+        }
+        tr.append(td);
         tr.addClass(COMPILE_SUCCESS_STATES[build.state].cls);
         return tr;
+    };
+
+    var show_build_log = function(build) {
+        $.getJSON('/ide/project/' + PROJECT_ID + '/build/' + build + '/log', function(data) {
+            if(!data.success) {
+                alert("Something went wrong:\n\n" + data.error);
+                return;
+            }
+            CloudPebble.Sidebar.SuspendActive();
+            // Sanitise the HTML.
+            var log = data.log.replace('&', '&amp;').replace('<', '&lt;');
+            // Now do clever things.
+            log = log.replace("\nBuild failed\n", '\n<span class="log-error">Build failed</span>\n');
+            log = log.replace(/(.+\berror:.+)/g, '<span class="log-error">$1</span>');
+            log = log.replace(/(.+\bnote:.+)/g, '<span class="log-note">$1</span>');
+            log = log.replace(/(.+\bwarn(?:ing)?:.+)/g, '<span class="log-warning">$1</span>');
+            log = log.replace(/(.+In function .+)/g, '<span class="log-note">$1</span>');
+            log = log.replace(/(.+' finished successfully \(.+)/g, '<span class="log-success">$1</span>');
+            log = log.replace(/(cc1: .+)/g, '<span class="log-note">$1</span>');
+            log = log.replace(/(cc1: all warnings .+)/g, '<span class="log-warning">$1</span>');
+            log = '<pre class="build-log" style="height: 100%;">' + log + '</pre>';
+            var browserHeight = document.documentElement.clientHeight;
+            log = $(log).css({'height': (browserHeight - 130) + 'px', 'overflow': 'auto'});
+            CloudPebble.Sidebar.SetActivePane(log);
+            // Scroll to the first error, if any.
+            setTimeout(function() { if(log.find('.log-error').length) {
+                log.scrollTop($(log.find('.log-error')[0]).offset().top - log.offset().top + log.scrollTop());
+            }}, 1);
+        });
     };
 
     var update_build_history = function(pane) {
@@ -75,7 +114,11 @@ CloudPebble.Compile = (function() {
             pane.find('#last-compilation-started').text(CloudPebble.Utils.FormatDatetime(build.started));
             if(build.state > 1) {
                 pane.find('#last-compilation-time').removeClass('hide').find('span').text(CloudPebble.Utils.FormatInterval(build.started, build.finished));
-                pane.find('#last-compilation-log').removeClass('hide').find('a').attr('href', build.log);
+                pane.find('#last-compilation-log').removeClass('hide').find('a').attr('href', build.log).off('click').click(function(e) {
+                    if(e.ctrlKey || e.metaKey) return true;
+                    e.preventDefault();
+                    show_build_log(build.id);
+                });
                 pane.find('#compilation-run-build-button').removeAttr('disabled');
                 if(build.state == 3) {
                     pane.find('#last-compilation-pbw').removeClass('hide').find('a:first').attr('href', build.pbw);

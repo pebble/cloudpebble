@@ -111,8 +111,8 @@ def run_compile(build_result, optimisation=None):
             else:
                 os.environ['PATH'] += ':/Users/katharine/projects/cloudpebble/pebble-sdk/arm-cs-tools/bin'
                 os.chdir(base_dir)
-                subprocess.check_output(["./waf", "configure", "-O", optimisation], stderr=subprocess.STDOUT)
-                output = subprocess.check_output(["./waf", "build"], stderr=subprocess.STDOUT)
+                output = subprocess.check_output(["./waf", "configure", "-O", optimisation], stderr=subprocess.STDOUT)
+                output += subprocess.check_output(["./waf", "build"], stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             output = e.output
             success = False
