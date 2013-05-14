@@ -134,6 +134,10 @@ class BuildResult(models.Model):
     started = models.DateTimeField(auto_now_add=True, db_index=True)
     finished = models.DateTimeField(blank=True, null=True)
 
+    total_size = models.IntegerField(blank=True, null=True)
+    binary_size = models.IntegerField(blank=True, null=True)
+    resource_size = models.IntegerField(blank=True, null=True)
+
     def get_dir(self):
         return '%s%s/%s/%s/' % (settings.MEDIA_ROOT, self.uuid[0], self.uuid[1], self.uuid)
 

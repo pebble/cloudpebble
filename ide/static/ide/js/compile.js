@@ -10,6 +10,7 @@ CloudPebble.Compile = (function() {
         tr.append($('<td>' + (build.id === null ? '?' : build.id) + '</td>'));
         tr.append($('<td>' + CloudPebble.Utils.FormatDatetime(build.started) + '</td>'));
         tr.append($('<td>' + COMPILE_SUCCESS_STATES[build.state].english + '</td>'));
+        tr.append($('<td>' + (build.size.total !== null ? Math.round(build.size.total / 1024) + ' KiB' : '') + '</td>'));
         tr.append($('<td>' + (build.state == 3 ? ('<a href="'+build.pbw+'">pbw</a>') : ' ') + '</td>'));
         tr.append($('<td>' + (build.state > 1 ? ('<a href="'+build.log+'">build log</a>') : ' ' )+ '</td>'));
         tr.addClass(COMPILE_SUCCESS_STATES[build.state].cls);
@@ -90,11 +91,27 @@ CloudPebble.Compile = (function() {
                             }
                         });
                     });
+                    if(build.size.total !== null) {
+                        var s = pane.find('#last-compilation-size').removeClass('hide');
+                        s.find('.total').text(Math.round(build.size.total / 1024));
+                        s.find('.res').text(Math.round(build.size.resources / 1024)).removeClass('text-error text-warning');
+                        s.find('.bin').text(Math.round(build.size.binary / 1024)).removeClass('text-error');
+                        if(build.size.resources > 65536) {
+                            if(build.size.resources > 98304)
+                                s.find('.res').addClass('text-error');
+                            else
+                                s.find('.res').addClass('text-warning');
+                        }
+                        if(build.size.binary > 24576) {
+                            s.find('.bin').addClass('text-error');
+                        }
+                    }
                 }
             } else {
                 pane.find('#last-compilation-time').addClass('hide');
                 pane.find('#last-compilation-log').addClass('hide');
                 pane.find('#compilation-run-build-button').attr('disabled', 'disabled');
+                pane.find('#last-compilation-size').addClass('hide');
             }
             if(build.state != 3) {
                 pane.find('#last-compilation-pbw').addClass('hide');

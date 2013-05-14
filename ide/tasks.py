@@ -123,6 +123,17 @@ def run_compile(build_result, optimisation=None):
             os.chdir(cwd)
 
             if success:
+                # Try reading file sizes out of it first.
+                try:
+                    s = os.stat(temp_file)
+                    build_result.total_size = s.st_size
+                    # Now peek into the zip to see the component parts
+                    with zipfile.ZipFile(temp_file, 'r') as z:
+                        build_result.binary_size = z.getinfo('pebble-app.bin').file_size
+                        build_result.resource_size = z.getinfo('app_resources.pbpack').file_size
+                except Exception as e:
+                    print "Couldn't extract filesizes: %s" % e
+
                 os.rename(temp_file, build_result.pbw)
                 print "Build succeeded."
             else:
