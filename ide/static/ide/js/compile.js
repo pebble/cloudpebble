@@ -54,7 +54,7 @@ CloudPebble.Compile = (function() {
         // Get build history
         update_build_history(pane);
         pane.find('#compilation-run-build-button').click(function() {
-            var temp_build = {started: (new Date()).toISOString(), finished: null, state: 1, uuid: null, id: null};
+            var temp_build = {started: (new Date()).toISOString(), finished: null, state: 1, uuid: null, id: null, size: {total: null, binary: null, resources: null}};
             update_last_build(pane, temp_build);
             pane.find('#run-build-table').prepend(build_history_row(temp_build));
             var optimisation = $('#build-optimisation').val();
