@@ -107,7 +107,7 @@ def run_compile(build_result, optimisation=None):
         success = False
         try:
             if settings.CHROOT_JAIL is not None:
-                output = subprocess.check_output([settings.CHROOT_JAIL, base_dir[len(settings.CHROOT_ROOT):]], stderr=subprocess.STDOUT)
+                output = subprocess.check_output([settings.CHROOT_JAIL, base_dir[len(settings.CHROOT_ROOT):], optimisation], stderr=subprocess.STDOUT)
             else:
                 os.environ['PATH'] += ':/Users/katharine/projects/cloudpebble/pebble-sdk/arm-cs-tools/bin'
                 os.chdir(base_dir)

@@ -24,14 +24,18 @@ int set_limit(int resource, rlim_t value) {
 }
 
 int main(int argc, char** argv) {
-    if(argc != 2) {
-        printf("Requires one argument.\n");
+    if(argc < 2 || argc > 3) {
+        printf("Requires one or two arguments.\n");
         return 0;
     }
     uid_t start_uid = getuid();
     if(start_uid == 0) {
         printf("Corwardly refusing to run as root.\n");
         return 1;
+    }
+    char optimise = '0';
+    if(argc == 3) {
+        optimise = argv[2][0];
     }
     require(setuid(0));
     require(chdir(BUILD_JAIL));
@@ -48,7 +52,9 @@ int main(int argc, char** argv) {
     require(setenv("PATH", "/bin:/usr/bin:/sdk/arm-cs-tools/bin", 1));
     require(setenv("HOME", "/", 1));
 
-    int success = system("./waf configure");
+    char final_command[] = "./waf configure -O 0";
+    sprintf(final_command, "./waf configure -O %c", optimise);
+    int success = system(final_command);
     if(success != 0) {
         return WEXITSTATUS(success);
     }
