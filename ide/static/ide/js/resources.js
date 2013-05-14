@@ -10,6 +10,10 @@ CloudPebble.Resources = (function() {
 
     var update_resource = function(resource) {
         project_resources[resource.file_name] = resource;
+        if(resource.kind == 'png-trans' && resource.identifiers.length == 1) {
+            var identifier = resource.identifiers[0];
+            resource.identifiers = [identifier + '_WHITE', identifier + '_BLACK'];
+        }
         CloudPebble.Sidebar.SetPopover('resource-' + resource.id, 'Identifier' + (resource.identifiers.length != 1 ? 's' : ''), resource.identifiers.join('<br>'));
         // We need to reinitialise the editor, which uses this information.
         if(CloudPebble.Editor.Autocomplete.IsInitialised())
