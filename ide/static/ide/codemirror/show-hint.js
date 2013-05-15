@@ -24,7 +24,10 @@ CodeMirror.showHint = function(cm, getHints, options) {
   }
 
   function showHints(data) {
-    if (!data || !data.list.length) return;
+    if (!data || !data.list.length) {
+        CodeMirror.signal(cm, "close");
+        return;
+    }
     var completions = data.list;
     // When there is only one completion, use it directly.
     if (!continued && options.completeSingle !== false && completions.length == 1) {
