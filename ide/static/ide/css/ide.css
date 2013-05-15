@@ -94,19 +94,31 @@
     font-weight: bold;
 }
 
-.cm-s-monokai span.cm-autofilled {
+.cm-s-monokai span.cm-autofilled,
+.cm-s-blackboard span.cm-autofilled,
+.cm-s-solarized.cm-s-dark span.cm-autofilled {
     background-color: #8da9d8;
     color: white;
 }
 
-.cm-s-monokai span.cm-autofilled-start {
+.cm-s-eclipse span.cm-autofilled,
+.cm-s-solarized.cm-s-light span.cm-autofilled {
+    background-color: #e9effa;
+    color: black;
+}
+
+span.cm-autofilled-start  {
     border-top-left-radius: 8px;
     border-bottom-left-radius: 8px;
     padding-left: 5px;
 }
 
-.cm-s-monokai span.cm-autofilled-end {
+span.cm-autofilled-end {
     border-top-right-radius: 8px;
     border-bottom-right-radius: 8px;
     padding-right: 5px;
+}
+
+.CodeMirror-hint-active .muted {
+    color: #ddd;
 }

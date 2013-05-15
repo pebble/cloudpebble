@@ -304,8 +304,9 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
   margin: 0;
   padding: 0 4px;
   border-radius: 2px;
-  max-width: 29em;
+  max-width: 49em;
   overflow: hidden;
+  text-overflow: ellipsis;
   white-space: pre;
   color: black;
   cursor: pointer;
