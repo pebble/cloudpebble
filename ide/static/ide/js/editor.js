@@ -66,6 +66,37 @@ CloudPebble.Editor = (function() {
                 } else if(USER_SETTINGS.autocomplete === 2) {
                     settings.extraKeys = {'Ctrl-Space': 'autocomplete'};
                 }
+                if(USER_SETTINGS.autocomplete !== 0) {
+                    if(!settings.extraKeys) settings.extraKeys = {};
+                    settings.extraKeys['Tab'] = function() {
+                        var marks = code_mirror.getAllMarks();
+                        var cursor = code_mirror.getCursor();
+                        var closest = null;
+                        var closest_mark = null;
+                        var distance = 99999999999; // eh
+                        for (var i = marks.length - 1; i >= 0; i--) {
+                            var mark = marks[i];
+                            var pos = mark.find();
+                            if(pos === undefined) continue;
+                            if(cursor.line >= pos.from.line - 5) {
+                                if(cursor.line < pos.from.line || cursor.ch <= pos.from.ch) {
+                                    var new_distance = 100000 * (pos.from.line - cursor.line) + (pos.from.ch - cursor.ch);
+                                    if(new_distance < distance) {
+                                        closest = pos;
+                                        closest_mark = mark;
+                                        distance = new_distance;
+                                    }
+                                }
+                            }
+                        }
+                        if(closest !== null) {
+                            closest_mark.clear();
+                            code_mirror.setSelection(closest.from, closest.to);
+                        } else {
+                            return CodeMirror.Pass;
+                        }
+                    };
+                }
                 var code_mirror = CodeMirror(pane[0], settings);
                 open_codemirrors[file.id] = code_mirror;
                 code_mirror.cloudpebble_save = function() {

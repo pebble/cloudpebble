@@ -93,3 +93,20 @@
     color: #c09853;
     font-weight: bold;
 }
+
+.cm-s-monokai span.cm-autofilled {
+    background-color: #8da9d8;
+    color: white;
+}
+
+.cm-s-monokai span.cm-autofilled-start {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    padding-left: 5px;
+}
+
+.cm-s-monokai span.cm-autofilled-end {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    padding-right: 5px;
+}

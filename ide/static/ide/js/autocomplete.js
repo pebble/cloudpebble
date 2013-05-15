@@ -2,9 +2,9 @@ CloudPebble.Editor.Autocomplete = (function() {
     var Pos = CodeMirror.Pos;
 
     var functions = [
-        'ARRAY_LENGTH',
-        'IS_SIGNED',
-        'PBL_APP_INFO',
+        ['ARRAY_LENGTH', ['array']],
+        ['IS_SIGNED', ['integer']],
+        ['PBL_APP_INFO', ['uint8_t uuid[16]', 'const char* app_name', 'const char* app_author', 'uint8_t app_version_major', 'uint8_t app_version_minor', 'uint8_t menu_icon_resource', 'PebbleAppFlags flags']],
         'PBL_APP_INFO_SIMPLE',
         'animation_get_context',
         'animation_init',
@@ -241,7 +241,9 @@ CloudPebble.Editor.Autocomplete = (function() {
         var resources = CloudPebble.Resources.GetResourceIDs();
         $.each([functions, types, constants, resources], function(index, list) {
             $.each(list, function(index, value) {
-                tree.insert(value.toLowerCase(), value);
+                if(typeof value == 'string') key = value;
+                else key = value[0];
+                tree.insert(key.toLowerCase(), value);
             });
         });
         if(CloudPebble.ProjectInfo.version_def_name) {
@@ -250,10 +252,53 @@ CloudPebble.Editor.Autocomplete = (function() {
         is_inited = true;
     };
 
+    var expandCompletion = function(cm, data, completion) {
+        //console.log(cm);
+        //console.log(data);
+        //console.log(completion);
+        // Easy part.
+        cm.replaceRange(completion.text, data.from, data.to);
+        // Now we get to figure out where precisely the params should have ended up and fix that.
+        start = data.from.ch + completion.name.length + 1; // +1 for open paren
+        var orig_start = start;
+        $.each(completion.params, function(index, value) {
+            var mark = cm.markText({line: data.from.line, ch:start}, {line: data.from.line, ch:start + value.length}, {
+                className: 'cm-autofilled',
+                inclusiveLeft: false,
+                inclusiveRight: false,
+                atomic: true,
+                startStyle: 'cm-autofilled-start',
+                endStyle: 'cm-autofilled-end'
+            });
+            CodeMirror.on(mark, 'beforeCursorEnter', function() {
+                var pos = mark.find();
+                mark.clear();
+                // Hack because we can't modify editor state from in here.
+                // 50ms because that seems to let us override cursor input, too.
+                setTimeout(function() {cm.setSelection(pos.from, pos.to);}, 50);
+            });
+            start += value.length + 2;
+        });
+        cm.setSelection({ch: orig_start, line: data.from.line});
+    };
+
     var getCompletions = function(token) {
         var results = tree.search(token.string.toLowerCase(), 15);
         if(results.length == 1 && results[0] == token.string) {
             return [];
+        }
+        for (var i = results.length - 1; i >= 0; i--) {
+            if(typeof results[i] == 'string') {
+                results[i] = {text: results[i]};
+                continue;
+            }
+            var result = results[i];
+            results[i] = {
+                text: result[0] + '(' + result[1].join(', ') + ')',
+                params: result[1],
+                name: result[0],
+                hint: expandCompletion
+            };
         }
         return results;
     };
