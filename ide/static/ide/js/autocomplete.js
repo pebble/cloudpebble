@@ -367,14 +367,31 @@ CloudPebble.Editor.Autocomplete = (function() {
         is_inited = true;
     };
 
+    var preventIncludingQuotes = function(cm, selection) {
+        var text = cm.getRange(selection.anchor, selection.head);
+        if((text[0] == "'" && text[text.length-1] == "'") || (text[0] == '"' && text[text.length-1] == '"')) {
+            selection.anchor.ch += 1;
+            selection.head.ch -= 1;
+        }
+        cm.off('beforeSelectionChange', preventIncludingQuotes);
+    };
+
+    var selectPlaceholder = function(cm, pos) {
+        cm.setSelection(pos.from, pos.to);
+        cm.on('beforeSelectionChange', preventIncludingQuotes);
+    };
+
     var expandCompletion = function(cm, data, completion) {
         // Easy part.
         cm.replaceRange(completion.text, data.from, data.to);
         // Now we get to figure out where precisely the params should have ended up and fix that.
         start = data.from.ch + completion.name.length + 1; // +1 for open paren
         var orig_start = start;
+        var first_pos = null;
+        var first_mark = null;
         $.each(completion.params, function(index, value) {
-            var mark = cm.markText({line: data.from.line, ch:start}, {line: data.from.line, ch:start + value.length}, {
+            var p = [{line: data.from.line, ch:start}, {line: data.from.line, ch:start + value.length}];
+            var mark = cm.markText(p[0], p[1], {
                 className: 'cm-autofilled',
                 inclusiveLeft: false,
                 inclusiveRight: false,
@@ -382,16 +399,23 @@ CloudPebble.Editor.Autocomplete = (function() {
                 startStyle: 'cm-autofilled-start',
                 endStyle: 'cm-autofilled-end'
             });
+            if(first_pos === null) first_pos = p;
+            if(first_mark === null) first_mark = mark;
             CodeMirror.on(mark, 'beforeCursorEnter', function() {
                 var pos = mark.find();
                 mark.clear();
                 // Hack because we can't modify editor state from in here.
                 // 50ms because that seems to let us override cursor input, too.
-                setTimeout(function() {cm.setSelection(pos.from, pos.to);}, 50);
+                setTimeout(function() { selectPlaceholder(cm, pos); }, 50);
             });
             start += value.length + 2;
         });
-        cm.setSelection({ch: orig_start, line: data.from.line});
+        if(first_pos === null) {
+            cm.setSelection({ch: orig_start, line: data.from.line});
+        } else {
+            first_mark.clear();
+            cm.setSelection(first_pos[0], first_pos[1]);
+        }
     };
 
     var renderCompletion = function(elt, data, completion) {
@@ -399,9 +423,9 @@ CloudPebble.Editor.Autocomplete = (function() {
         var elem = $('<span>');
         elem.append($('<span class="muted">').append(document.createTextNode(type + ' ')));
         elem.append(document.createTextNode(completion.name));
-        elem.append($('<span class="muted">').append('(' + completion.params.join(', ') + ')'))
+        elem.append($('<span class="muted">').append('(' + completion.params.join(', ') + ')'));
         elt.appendChild(elem[0]);
-    }
+    };
 
     var getCompletions = function(token) {
         var results = tree.search(token.string.toLowerCase(), 15);
@@ -446,6 +470,9 @@ CloudPebble.Editor.Autocomplete = (function() {
         },
         IsInitialised: function() {
             return is_inited;
+        },
+        SelectPlaceholder: function(cm, pos) {
+            selectPlaceholder(cm, pos);
         }
     };
 })();

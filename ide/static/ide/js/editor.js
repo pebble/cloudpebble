@@ -91,7 +91,7 @@ CloudPebble.Editor = (function() {
                         }
                         if(closest !== null) {
                             closest_mark.clear();
-                            code_mirror.setSelection(closest.from, closest.to);
+                            CloudPebble.Editor.Autocomplete.SelectPlaceholder(code_mirror, closest);
                         } else {
                             return CodeMirror.Pass;
                         }
