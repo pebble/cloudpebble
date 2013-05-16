@@ -25,7 +25,7 @@ class Project(models.Model):
         ('3', 'Aggressive (faster, bigger)'),
     )
 
-    optimisation = models.CharField(max_length=1, choices=OPTIMISATION_CHOICES, default='0')
+    optimisation = models.CharField(max_length=1, choices=OPTIMISATION_CHOICES, default='s')
 
     github_repo = models.CharField(max_length=100, blank=True, null=True)
     github_last_sync = models.DateTimeField(blank=True, null=True)
