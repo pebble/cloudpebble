@@ -23,6 +23,15 @@ import re
 import uuid
 from github import UnknownObjectException
 
+def json_response(response=None):
+    if response is None:
+        response = {}
+
+    response["success"] = True
+    return HttpResponse(json.dumps(response), content_type="application/json")
+
+def json_failure(error):
+    return HttpResponse(json.dumps({"success": False, "error": error}), content_type="application/json")
 
 @require_safe
 @login_required
@@ -78,7 +87,7 @@ def project_info(request, project_id):
         }
     }
 
-    return HttpResponse(json.dumps(output), content_type="application/json")
+    return json_response(output)
 
 
 @require_POST
@@ -88,9 +97,9 @@ def create_source_file(request, project_id):
     try:
         f = SourceFile.objects.create(project=project, file_name=request.POST['name'])
     except IntegrityError as e:
-        return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
+        return json_failure(str(e))
     else:
-        return HttpResponse(json.dumps({"success": True, "file": {"id": f.id, "name": f.file_name}}), content_type="application/json")
+        return json_response({"file": {"id": f.id, "name": f.file_name}})
 
 
 @require_safe
@@ -102,9 +111,9 @@ def load_source_file(request, project_id, file_id):
     try:
         content = source_file.get_contents()
     except Exception as e:
-        return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
+        return json_failure(str(e))
     else:
-        return HttpResponse(json.dumps({"success": True, "source": content}), content_type="application/json")
+        return json_response({"success": True, "source": content})
 
 
 @require_POST
@@ -115,9 +124,9 @@ def save_source_file(request, project_id, file_id):
     try:
         source_file.save_file(request.POST['content'])
     except Exception as e:
-        return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
+        return json_failure(str(e))
     else:
-        return HttpResponse(json.dumps({"success": True}), content_type="application/json")
+        return json_response({})
 
 
 @require_POST
@@ -128,9 +137,9 @@ def delete_source_file(request, project_id, file_id):
     try:
         source_file.delete()
     except Exception as e:
-        return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
+        return json_failure(str(e))
     else:
-        return HttpResponse(json.dumps({"success": True}), content_type="application/json")
+        return json_response({})
 
 
 @require_POST
@@ -150,15 +159,15 @@ def create_resource(request, project_id):
                 resources.append(ResourceIdentifier.objects.create(resource_file=rf, resource_id=r['id'], character_regex=regex, tracking=tracking))
             rf.save_file(request.FILES['file'])
     except Exception as e:
-        return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
+        return json_failure(str(e))
     else:
-        return HttpResponse(json.dumps({"success": True, "file": {
+        return json_response({"file": {
             "id": rf.id,
             "kind": rf.kind,
             "file_name": rf.file_name,
             "resource_ids": [{'id': x.resource_id, 'regex': x.character_regex} for x in resources],
             "identifiers": [x.resource_id for x in resources]
-        }}), content_type="application/json")
+        }})
 
 
 @require_safe
@@ -167,15 +176,14 @@ def resource_info(request, project_id, resource_id):
     get_object_or_404(Project, pk=project_id, owner=request.user)
     resource = get_object_or_404(ResourceFile, pk=resource_id)
     resources = resource.get_identifiers()
-    return HttpResponse(json.dumps({
-        'success': True,
+    return json_response({
         'resource': {
             'resource_ids': [{'id': x.resource_id, 'regex': x.character_regex, 'tracking': x.tracking} for x in resources],
             'id': resource.id,
             'file_name': resource.file_name,
             'kind': resource.kind
         }
-    }), content_type="application/json")
+    })
 
 
 @require_POST
@@ -186,9 +194,9 @@ def delete_resource(request, project_id, resource_id):
     try:
         resource.delete()
     except Exception as e:
-        return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
+        return json_failure(str(e))
     else:
-        return HttpResponse(json.dumps({"success": True}), content_type="application/json")
+        return json_response({})
 
 
 @require_POST
@@ -211,15 +219,15 @@ def update_resource(request, project_id, resource_id):
             if 'file' in request.FILES:
                 resource.save_file(request.FILES['file'])
     except Exception as e:
-        return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
+        return json_failure(str(e))
     else:
-        return HttpResponse(json.dumps({"success": True, "file": {
+        return json_response({"file": {
             "id": resource.id,
             "kind": resource.kind,
             "file_name": resource.file_name,
             "resource_ids": [{'id': x.resource_id, 'regex': x.character_regex} for x in resources],
             "identifiers": [x.resource_id for x in resources]
-        }}), content_type="application/json")
+        }})
 
 
 @require_POST
@@ -229,7 +237,7 @@ def compile_project(request, project_id):
     build = BuildResult.objects.create(project=project)
     optimisation = request.POST.get('optimisation', None)
     task = run_compile.delay(build.id, optimisation)
-    return HttpResponse(json.dumps({"success": True, "build_id": build.id, "task_id": task.task_id}), content_type="application/json")
+    return json_response({"build_id": build.id, "task_id": task.task_id})
 
 
 @require_safe
@@ -239,7 +247,7 @@ def last_build(request, project_id):
     try:
         build = project.builds.order_by('-started')[0]
     except (IndexError, BuildResult.DoesNotExist) as e:
-        return HttpResponse(json.dumps({"success": True, "build": None}), content_type="application/json")
+        return json_response({"build": None})
     else:
         b = {
             'uuid': build.uuid,
@@ -255,7 +263,7 @@ def last_build(request, project_id):
                 'resources': build.resource_size
             }
         }
-        return HttpResponse(json.dumps({"success": True, "build": b}), content_type="application/json")
+        return json_response({"build": b})
 
 
 @require_safe
@@ -265,7 +273,7 @@ def build_history(request, project_id):
     try:
         builds = project.builds.order_by('-started')[:10]
     except (IndexError, BuildResult.DoesNotExist):
-        return HttpResponse(json.dumps({"success": True, "build": None}), content_type="application/json")
+        return json_response({"build": None})
     else:
         out = []
         for build in builds:
@@ -283,7 +291,7 @@ def build_history(request, project_id):
                     'resources': build.resource_size
                 }
             })
-        return HttpResponse(json.dumps({"success": True, "builds": out}), content_type="application/json")
+        return json_response({"builds": out})
 
 
 @require_safe
@@ -294,8 +302,8 @@ def build_log(request, project_id, build_id):
     try:
         log = open(build.build_log, 'r').read().decode('utf-8')
     except Exception as e:
-        return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
-    return HttpResponse(json.dumps({"success": True, "log": log}), content_type="application/json")
+        return json_failure(str(e))
+    return json_response({"log": log})
 
 
 @require_POST
@@ -310,9 +318,9 @@ def create_project(request):
                 template = TemplateProject.objects.get(pk=int(template_id))
                 template.copy_into_project(project)
     except IntegrityError as e:
-        return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
+        return json_failure(str(e))
     else:
-        return HttpResponse(json.dumps({"success": True, "id": project.id}), content_type="application/json")
+        return json_response({"id": project.id})
 
 
 @require_POST
@@ -327,9 +335,9 @@ def save_project_settings(request, project_id):
         project.optimisation = request.POST['optimisation']
         project.save()
     except IntegrityError as e:
-        return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
+        return json_failure(str(e))
     else:
-        return HttpResponse(json.dumps({"success": True}), content_type="application/json")
+        return json_response({})
 
 
 @require_POST
@@ -337,13 +345,13 @@ def save_project_settings(request, project_id):
 def delete_project(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     if not bool(request.POST.get('confirm', False)):
-        return HttpResponse(json.dumps({"success": False, "error": "Not confirmed."}), content_type="application/json")
+        return json_failure("Not confirmed")
     try:
         project.delete()
     except Exception as e:
-        return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
+        return json_failure(str(e))
     else:
-        return HttpResponse(json.dumps({"success": True}), content_type="application/json")
+        return json_response({})
 
 
 @require_safe
@@ -363,9 +371,9 @@ def get_shortlink(request):
         r = urllib2.Request('http://api.small.cat/entries', json.dumps({'value': url, 'duration': 60}), headers={'Content-Type': 'application/json'})
         response = json.loads(urllib2.urlopen(r).read())
     except urllib2.URLError as e:
-        return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
+        return json_failure(str(e))
     else:
-        return HttpResponse(json.dumps({"success": True, 'url': response['url']}), content_type="application/json")
+        return json_response({'url': response['url']})
 
 
 @login_required
@@ -393,22 +401,18 @@ def settings_page(request):
 def begin_export(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     result = create_archive.delay(project.id)
-    return HttpResponse(json.dumps({"success": True, 'task_id': result.task_id}), content_type="application/json")
+    return json_response({'task_id': result.task_id})
 
 
 @require_safe
 def check_task(request, task_id):
     result = AsyncResult(task_id)
-    return HttpResponse(json.dumps(
-        {
-            "success": True,
-            'state':
-            {
-                'status': result.status,
-                'result': result.result if result.status == 'SUCCESS' else str(result.result)
-            }
-        }),
-        content_type="application/json")
+    return json_response({
+        'state': {
+            'status': result.status,
+            'result': result.result if result.status == 'SUCCESS' else str(result.result)
+        }
+    })
 
 
 @login_required
@@ -423,9 +427,10 @@ def import_zip(request):
     try:
         project = Project.objects.create(owner=request.user, name=name)
     except IntegrityError as e:
-        return HttpResponse(json.dumps({"success": False, 'error': str(e)}), content_type="application/json")
+        return json_failure(str(e))
     task = do_import_archive.delay(project.id, tempzip, delete_zip=True, delete_project=True)
-    return HttpResponse(json.dumps({"success": True, 'task_id': task.task_id, 'project_id': project.id}), content_type="application/json")
+
+    return json_response({'task_id': task.task_id, 'project_id': project.id})
 
 
 @login_required
@@ -442,10 +447,10 @@ def import_github(request):
     try:
         project = Project.objects.create(owner=request.user, name=name)
     except IntegrityError as e:
-        return HttpResponse(json.dumps({"success": False, 'error': str(e)}), content_type="application/json")
+        return json_failure(str(e))
 
     task = do_import_github.delay(project.id, github_user, github_project, delete_project=True)
-    return HttpResponse(json.dumps({"success": True, 'task_id': task.task_id, 'project_id': project.id}), content_type="application/json")
+    return json_response({'task_id': task.task_id, 'project_id': project.id})
 
 
 @login_required
@@ -507,7 +512,7 @@ def github_push(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     commit_message = request.POST['commit_message']
     task = do_github_push.delay(project.id, commit_message)
-    return HttpResponse(json.dumps({"success": True, 'task_id': task.task_id}), content_type="application/json")
+    return json_response({'task_id': task.task_id})
 
 
 @login_required
@@ -515,7 +520,7 @@ def github_push(request, project_id):
 def github_pull(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     task = do_github_pull.delay(project.id)
-    return HttpResponse(json.dumps({"success": True, 'task_id': task.task_id}), content_type="application/json")
+    return json_response({'task_id': task.task_id})
 
 
 @login_required
@@ -528,14 +533,14 @@ def set_project_repo(request, project_id):
 
     repo = ide.git.url_to_repo(repo)
     if repo is None:
-        return HttpResponse(json.dumps({"success": False, 'error': "Invalid repo URL."}), content_type="application/json")
+        return json_failure("Invalid repo URL.")
     repo = '%s/%s' % repo
 
     g = ide.git.get_github(request.user)
     try:
         g_repo = g.get_repo(repo)
     except UnknownObjectException:
-        return HttpResponse(json.dumps({"success": True, 'exists': False, 'access': False, 'updated': False}), content_type="application/json")
+        return json_response({'exists': False, 'access': False, 'updated': False})
 
     with transaction.commit_on_success():
         if repo != project.github_repo:
@@ -552,15 +557,15 @@ def set_project_repo(request, project_id):
                 project.github_last_commit = None
                 project.github_hook_uuid = None
                 project.save()
-                return HttpResponse(json.dumps({"success": True, 'exists': True, 'access': True, 'updated': True}), content_type="application/json")
+                return json_response({'exists': True, 'access': True, 'updated': True})
 
             if not ide.git.git_verify_tokens(request.user):
-                return HttpResponse(json.dumps({"success": False, 'error': "No GitHub tokens on file."}), content_type="application/json")
+                return json_failure("No GitHub tokens on file.")
 
             try:
                 has_access = ide.git.check_repo_access(request.user, repo)
             except UnknownObjectException:
-                return HttpResponse(json.dumps({"success": True, 'exists': False, 'access': False, 'updated': False}), content_type="application/json")
+                return json_response({'exists': False, 'access': False, 'updated': False})
 
             if has_access:
                 project.github_repo = repo
@@ -568,7 +573,7 @@ def set_project_repo(request, project_id):
                 project.github_last_commit = None
                 project.github_hook_uuid = None
             else:
-                return HttpResponse(json.dumps({"success": True, 'exists': True, 'access': True, 'updated': True}), content_type="application/json")
+                return json_response({'exists': True, 'access': True, 'updated': True})
 
 
         if auto_pull and project.github_hook_uuid is None:
@@ -578,7 +583,7 @@ def set_project_repo(request, project_id):
             try:
                 g_repo.create_hook('web', {'url': settings.GITHUB_HOOK_TEMPLATE % {'project': project.id, 'key': project.github_hook_uuid}, 'content_type': 'form'}, ['push'], True)
             except Exception as e:
-                return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
+                return json_failure(str(e))
         elif not auto_pull:
             if project.github_hook_uuid is not None:
                 try:
@@ -591,7 +596,7 @@ def set_project_repo(request, project_id):
 
         project.save()
 
-    return HttpResponse(json.dumps({"success": True, 'exists': True, 'access': True, 'updated': True}), content_type="application/json")
+    return json_response({'exists': True, 'access': True, 'updated': True})
 
 
 @login_required
@@ -603,14 +608,14 @@ def create_project_repo(request, project_id):
     try:
         repo = ide.git.create_repo(request.user, repo, description)
     except Exception as e:
-        return HttpResponse(json.dumps({"success": False, "error": str(e)}), content_type="application/json")
+        return json_failure(str(e))
     else:
         project.github_repo = repo.full_name
         project.github_last_sync = None
         project.github_last_commit = None
         project.save()
 
-    return HttpResponse(json.dumps({"success": True, "repo": repo.html_url}), content_type="application/json")
+    return json_response({"repo": repo.html_url})
 
 
 def remove_hooks(repo, s):
