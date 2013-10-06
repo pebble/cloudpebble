@@ -48,22 +48,7 @@ CloudPebble.Editor = (function() {
                 if(USER_SETTINGS.keybinds !== '') {
                     settings.keyMap = USER_SETTINGS.keybinds;
                 }
-                if(USER_SETTINGS.autocomplete === 1) {
-                    settings.onKeyEvent = function(cm, e) {
-                        // This is kinda sketchy but seems to basically work.
-                        if(e.type == "keyup") {
-                            // This is a mess.
-                            // The idea is to try and fire whenever we hit a key that could be part of an identifier, except when we're already
-                            // showing an autocomplete prompt, or whenever that key is just noise.
-                            if((e.keyCode >= 65 && e.keyCode <= 90) || (e.keyCode >= 65 && e.keyCode <= 122) || e.keyCode == 8 || (e.keyCode == 189 && e.shiftKey)) {
-                                if(!is_autocompleting || e.which == 8) {
-                                    CodeMirror.commands.autocomplete(cm);
-                                }
-                            }
-                        }
-                        return false;
-                    };
-                } else if(USER_SETTINGS.autocomplete === 2) {
+                if(USER_SETTINGS.autocomplete === 2) {
                     settings.extraKeys = {'Ctrl-Space': 'autocomplete'};
                 }
                 if(USER_SETTINGS.autocomplete !== 0) {
@@ -103,11 +88,19 @@ CloudPebble.Editor = (function() {
                     save();
                 };
                 code_mirror.on('close', function() {
+                    console.log('autocomplete end');
                     is_autocompleting = false;
                 });
                 code_mirror.on('shown', function() {
+                    console.log('autocomplete start');
                     is_autocompleting = true;
                 });
+                if(USER_SETTINGS.autocomplete === 1) {
+                    code_mirror.on('change', function() {
+                        if(!is_autocompleting)
+                            CodeMirror.commands.autocomplete(code_mirror);
+                    });
+                }
 
                 var fix_height = function() {
                     var browserHeight = document.documentElement.clientHeight;

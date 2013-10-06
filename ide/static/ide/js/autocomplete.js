@@ -350,6 +350,7 @@ CloudPebble.Editor.Autocomplete = (function() {
     ];
 
     var tree = null;
+    var mSelectionCallback = null;
 
     var init = function() {
         tree = new RadixTree();
@@ -367,19 +368,45 @@ CloudPebble.Editor.Autocomplete = (function() {
         is_inited = true;
     };
 
-    var preventIncludingQuotes = function(cm, selection) {
+    var preventIncludingQuotes = function(old_selection, expected_text, cm, selection) {
+        cm.off('beforeSelectionChange', mSelectionCallback);
         var text = cm.getRange(selection.anchor, selection.head);
-        if((text[0] == "'" && text[text.length-1] == "'") || (text[0] == '"' && text[text.length-1] == '"')) {
+        var old_text = cm.getRange(old_selection.from, old_selection.to);
+        if(old_text == expected_text) {
+            createMark(cm, old_selection.from, old_selection.to);
+        } else if((text[0] == "'" && text[text.length-1] == "'") || (text[0] == '"' && text[text.length-1] == '"')) {
             selection.anchor.ch += 1;
             selection.head.ch -= 1;
         }
-        cm.off('beforeSelectionChange', preventIncludingQuotes);
     };
 
     var selectPlaceholder = function(cm, pos) {
+        var expected_text = cm.getRange(pos.from, pos.to);
         cm.setSelection(pos.from, pos.to);
-        cm.on('beforeSelectionChange', preventIncludingQuotes);
+        mSelectionCallback = function(cm, selection) {
+            preventIncludingQuotes(pos, expected_text, cm, selection);
+        };
+        cm.on('beforeSelectionChange', mSelectionCallback);
     };
+
+    var createMark = function(cm, from, to) {
+        var mark = cm.markText(from, to, {
+            className: 'cm-autofilled',
+            inclusiveLeft: false,
+            inclusiveRight: false,
+            atomic: true,
+            startStyle: 'cm-autofilled-start',
+            endStyle: 'cm-autofilled-end'
+        });
+        CodeMirror.on(mark, 'beforeCursorEnter', function() {
+            var pos = mark.find();
+            mark.clear();
+            // Hack because we can't modify editor state from in here.
+            // 50ms because that seems to let us override cursor input, too.
+            setTimeout(function() { selectPlaceholder(cm, pos); }, 50);
+        });
+        return mark;
+    }
 
     var expandCompletion = function(cm, data, completion) {
         // Easy part.
@@ -391,30 +418,16 @@ CloudPebble.Editor.Autocomplete = (function() {
         var first_mark = null;
         $.each(completion.params, function(index, value) {
             var p = [{line: data.from.line, ch:start}, {line: data.from.line, ch:start + value.length}];
-            var mark = cm.markText(p[0], p[1], {
-                className: 'cm-autofilled',
-                inclusiveLeft: false,
-                inclusiveRight: false,
-                atomic: true,
-                startStyle: 'cm-autofilled-start',
-                endStyle: 'cm-autofilled-end'
-            });
+            var mark = createMark(cm, p[0], p[1]);
             if(first_pos === null) first_pos = p;
             if(first_mark === null) first_mark = mark;
-            CodeMirror.on(mark, 'beforeCursorEnter', function() {
-                var pos = mark.find();
-                mark.clear();
-                // Hack because we can't modify editor state from in here.
-                // 50ms because that seems to let us override cursor input, too.
-                setTimeout(function() { selectPlaceholder(cm, pos); }, 50);
-            });
             start += value.length + 2;
         });
         if(first_pos === null) {
             cm.setSelection({ch: orig_start, line: data.from.line});
         } else {
             first_mark.clear();
-            cm.setSelection(first_pos[0], first_pos[1]);
+            selectPlaceholder(cm, {from: first_pos[0], to: first_pos[1]});
         }
     };
 
