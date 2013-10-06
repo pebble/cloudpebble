@@ -88,11 +88,9 @@ CloudPebble.Editor = (function() {
                     save();
                 };
                 code_mirror.on('close', function() {
-                    console.log('autocomplete end');
                     is_autocompleting = false;
                 });
                 code_mirror.on('shown', function() {
-                    console.log('autocomplete start');
                     is_autocompleting = true;
                 });
                 if(USER_SETTINGS.autocomplete === 1) {
