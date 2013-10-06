@@ -141,6 +141,7 @@ CloudPebble.Editor = (function() {
                         delete_btn.removeAttr('disabled');
                         if(data.success) {
                             mark_clean();
+                            ga('send', 'event' ,'file', 'save');
                         } else {
                             alert(data.error);
                         }
@@ -170,6 +171,7 @@ CloudPebble.Editor = (function() {
                                 alert(data.error);
                             }
                         });
+                        ga('send', 'event', 'file', 'delete');
                     });
                 });
 
@@ -191,6 +193,9 @@ CloudPebble.Editor = (function() {
                 button_holder.append(save_btn);
                 pane.append(button_holder);
                 code_mirror.refresh();
+
+                // Tell Google
+                ga('send', 'event', 'file', 'open');
             }
         });
     };
@@ -229,6 +234,7 @@ CloudPebble.Editor = (function() {
                             edit_source_file(data.file);
                         }
                     });
+                    ga('send', 'event', 'file', 'create');
                 }
             });
         },

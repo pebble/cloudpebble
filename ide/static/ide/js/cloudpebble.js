@@ -58,6 +58,7 @@ CloudPebble.Init = function() {
             return confirm;
         }
     });
+    ga('send', 'event', 'project', 'open');
 };
 
 CloudPebble.Prompts = {

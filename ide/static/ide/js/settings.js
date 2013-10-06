@@ -6,6 +6,7 @@ CloudPebble.Settings = (function() {
         if(CloudPebble.Sidebar.Restore("settings")) {
             return;
         }
+        ga('send', 'event', 'project', 'load settings');
         var pane = settings_template.clone(); // This clone is basically unncessary, since only one such pane can ever exist.
         var display_error = function(message) {
             pane.find('.alert').addClass('alert-error').removeClass('hide').text(message);
@@ -55,6 +56,8 @@ CloudPebble.Settings = (function() {
                     display_error("Error: " + data.error);
                 }
             });
+
+            ga('send', 'event', 'project', 'save settings');
         });
 
         pane.find('#project-delete').click(function() {
@@ -66,6 +69,7 @@ CloudPebble.Settings = (function() {
                         display_error("Error: " + data.error);
                     }
                 });
+                ga('send', 'event', 'project', 'delete');
             });
         });
 
@@ -107,6 +111,8 @@ CloudPebble.Settings = (function() {
                 };
                 setTimeout(check_update, 1000);
             });
+
+            ga('send', 'event', 'project', 'export', 'zip');
         });
 
         CloudPebble.Sidebar.SetActivePane(pane, 'settings');

@@ -16,9 +16,13 @@ CloudPebble.Compile = (function() {
         var td = $('<td>');
         if(build.state > 1) {
             var a = $('<a href="'+build.log+'">build log</a>').click(function(e) {
-                if(e.ctrlKey || e.metaKey) return true;
+                if(e.ctrlKey || e.metaKey) {
+                    ga('send', 'event', 'build log', 'show', 'external');
+                    return true;
+                }
                 e.preventDefault();
                 show_build_log(build.id);
+                ga('send', 'event', 'build log', 'show', 'in-app');
             });
             td.append(a);
         }
@@ -85,6 +89,7 @@ CloudPebble.Compile = (function() {
         pane = $('#compilation-pane-template').clone();
     };
 
+    var m_build_count = 0;
     var show_compile_pane = function() {
         CloudPebble.Sidebar.SuspendActive();
         if(CloudPebble.Sidebar.Restore("compile")) {
@@ -100,6 +105,7 @@ CloudPebble.Compile = (function() {
             $.post('/ide/project/' + PROJECT_ID + '/build/run', {optimisation: optimisation}, function() {
                 update_build_history(pane);
             });
+            ga('send','event', 'build', 'run', {eventValue: ++m_build_count});
         });
         CloudPebble.Sidebar.SetActivePane(pane, 'compile');
         CloudPebble.ProgressBar.Show();
@@ -115,9 +121,13 @@ CloudPebble.Compile = (function() {
             if(build.state > 1) {
                 pane.find('#last-compilation-time').removeClass('hide').find('span').text(CloudPebble.Utils.FormatInterval(build.started, build.finished));
                 pane.find('#last-compilation-log').removeClass('hide').find('a').attr('href', build.log).off('click').click(function(e) {
-                    if(e.ctrlKey || e.metaKey) return true;
+                    if(e.ctrlKey || e.metaKey) {
+                        ga('send', 'event', 'build log', 'show', 'external');
+                        return true;
+                    }
                     e.preventDefault();
                     show_build_log(build.id);
+                    ga('send', 'event', 'build log', 'show', 'in-app');
                 });
                 pane.find('#compilation-run-build-button').removeAttr('disabled');
                 if(build.state == 3) {
@@ -126,9 +136,12 @@ CloudPebble.Compile = (function() {
                     pane.find('#last-compilation-qr-code').removeClass('hide').find('img').attr('src', '/qr/?v=' + url);
                     $('#pbw-shortlink > a').attr('href', '#').text("get short link").unbind('click').click(function() {
                         $('#pbw-shortlink > a').text("generating…").unbind('click');
+                        ga('send', 'event', 'short link', 'generate');
                         $.post("/ide/shortlink", {url: url}, function(data) {
                             if(data.success) {
-                                $('#pbw-shortlink > a').attr('href', data.url).text(data.url.replace(/^https?:\/\//,''));
+                                $('#pbw-shortlink > a').attr('href', data.url).text(data.url.replace(/^https?:\/\//,'')).click(function() {
+                                    ga('send', 'event', 'short link', 'click');
+                                });
                             } else {
                                 $('#pbw-shortlink > a').text("no shortlink");
                             }

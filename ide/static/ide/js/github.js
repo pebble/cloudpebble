@@ -199,6 +199,7 @@ CloudPebble.GitHub = (function() {
                 var task = data.task_id;
                 poll_commit_status(task);
             });
+            ga('send', 'event', 'github', 'push');
         });
 
         $('#github-pull-prompt-confirm').click(function() {
@@ -215,6 +216,7 @@ CloudPebble.GitHub = (function() {
                 var task = data.task_id;
                 poll_pull_status(task);
             });
+            ga('send', 'event', 'github', 'pull');
         });
 
         CloudPebble.Sidebar.SetActivePane(pane, 'github');

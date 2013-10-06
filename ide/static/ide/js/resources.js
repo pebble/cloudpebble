@@ -131,11 +131,13 @@ CloudPebble.Resources = (function() {
                 }
             }
         });
+        ga('send', 'event', 'resource', 'save');
     };
 
     var edit_resource = function(resource) {
         CloudPebble.Sidebar.SuspendActive();
         if(CloudPebble.Sidebar.Restore('resource-' + resource.id)) return;
+        ga('send', 'event', 'resource', 'open');
 
         CloudPebble.ProgressBar.Show();
         $.getJSON("/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/info", function(data) {
@@ -258,6 +260,7 @@ CloudPebble.Resources = (function() {
                         } else {
                             alert(data.error);
                         }
+                        ga('send', 'event', 'resource', 'delete')
                     });
                 });
             });
@@ -332,6 +335,7 @@ CloudPebble.Resources = (function() {
 
     var resource_created = function(resource) {
         // Add it to our resource list
+        ga('send', 'event', 'resource', 'create');
         add_resource(resource);
         edit_resource(resource);
     };

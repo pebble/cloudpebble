@@ -93,6 +93,7 @@
                 }
             }
         });
+        ga('send', 'event', 'project', 'import', 'zip');
     };
 
     var import_github = function(active_set) {
@@ -118,6 +119,7 @@
                 active_set.find('.progress').addClass('hide');
             }
         });
+        ga('send', 'event', 'project', 'import', 'github');
     };
 
     var run_project_import = function() {
