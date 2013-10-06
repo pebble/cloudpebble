@@ -233,7 +233,9 @@ CloudPebble.Editor.Autocomplete = (function() {
         ['grect_equal', 'bool', ['const GRect *const rect_a', 'const GRect *const rect_b']],
         ['grect_is_empty', 'bool', ['const GRect *const rect']],
         ['grect_standardize', 'void', ['GRect *rect']],
-        ['gsize_equal', 'bool', ['GSize *size_a', 'GSize *size_b']]
+        ['gsize_equal', 'bool', ['GSize *size_a', 'GSize *size_b']],
+        ['gbitmap_init_as_sub_bitmap', 'void', ['GBitmap *sub_bitmap', 'const GBitmap *base_bitmap', 'GRect sub_rect']],
+        ['gbitmap_init_with_data', 'void', ['GBitmap *bitmap', 'const uint8_t *data']]
     ];
 
     var types = [
