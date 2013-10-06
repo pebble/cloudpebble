@@ -202,7 +202,38 @@ CloudPebble.Editor.Autocomplete = (function() {
         ['window_stack_pop', 'Window*', ['bool animated']],
         ['window_stack_pop_all', 'void', ['const bool animated']],
         ['window_stack_push', 'void', ['Window *window', 'bool animated']],
-        ['window_stack_remove', 'Window*', ['Window *window', 'bool animated']]
+        ['window_stack_remove', 'Window*', ['Window *window', 'bool animated']],
+        // New ones!
+        ['app_comm_set_sniff_interval', 'void', ['const SniffInterval interval']],
+        ['rand', 'void', []],
+        ['srand', 'void', ['unsigned int seed']],
+        ['memcpy', 'void*', ['void* dest', 'const void* src', 'size_t n']],
+        ['memmove', 'void*', ['void* dest', 'const void* src', 'size_t n']],
+        ['memset', 'void*', ['void* dest', 'int c', 'size_t n']],
+        ['snprintf', 'char*', ['char *str', 'size_t n', 'const *fmt...']],
+        ['strcat', 'char*', ['char *dest', 'const char *src']],
+        ['strcmp', 'int', ['const char *str1', 'const char *str2']],
+        ['strcpy', 'char*', ['char *dest', 'const char *src']],
+        ['strlen', 'size_t', ['const char *str']],
+        ['strncat', 'char*', ['char *dest', 'const char *src', 'size_t n']],
+        ['strncmp', 'int', ['const char *str1', 'const char *str2', 'size_t n']],
+        ['strncpy', 'char*', ['char *dest', 'const char *src', 'size_t n']],
+        ['time', 'time_t', ['time_t *tloc']],
+        ['time_ms', 'uint16_t', ['time_t *tloc', 'uint16_t *out_ms']],
+        // ['app_log', 'void', ['uint8_t log_level', 'const char *src_filename', 'int src_line_number', 'const char *fmt...']],
+        ['APP_LOG', 'void', ['uint8_t log_level', 'const char *fmt...']],
+        ['graphics_draw_rect', 'void', ['GContext *ctx', 'GRect rect']],
+        ['vibes_cancel', 'void', []],
+        ['menu_layer_get_selected_index', 'MenuIndex', ['MenuLayer *menu_layer']],
+        ['gpoint_equal', 'bool', ['const GPoint *const point_a', 'const GPoint *const point_b']],
+        ['grect_contains_point', 'bool', ['GRect *rect', 'GPoint *point']],
+        ['grect_align', 'void', ['GRect *rect', 'const GRect *inside_rect', 'const GAlign alignment', 'const bool clip']],
+        ['grect_clip', 'void', ['GRect *const rect_to_clip', 'const GRect *const rect_clipper']],
+        ['grect_crop', 'GRect', ['GRect rect', 'const int crop_size_px']],
+        ['grect_equal', 'bool', ['const GRect *const rect_a', 'const GRect *const rect_b']],
+        ['grect_is_empty', 'bool', ['const GRect *const rect']],
+        ['grect_standardize', 'void', ['GRect *rect']],
+        ['gsize_equal', 'bool', ['GSize *size_a', 'GSize *size_b']]
     ];
 
     var types = [
@@ -270,7 +301,9 @@ CloudPebble.Editor.Autocomplete = (function() {
         'WindowButtonEventHandler',
         'WindowHandler',
         'WindowHandlers',
-        'WindowInputHandlers'
+        'WindowInputHandlers',
+        // New ones!
+        'SniffInterval'
     ];
 
     var constants = [
@@ -291,13 +324,13 @@ CloudPebble.Editor.Autocomplete = (function() {
         'DAY_UNIT',
         'FONT_KEY_DROID_SERIF_28_BOLD',
         'FONT_KEY_FONT_FALLBACK',
-        'FONT_KEY_GOTHAM_18_LIGHT_SUBSET',
-        'FONT_KEY_GOTHAM_30_BLACK',
-        'FONT_KEY_GOTHAM_34_LIGHT_SUBSET',
-        'FONT_KEY_GOTHAM_34_MEDIUM_NUMBERS',
-        'FONT_KEY_GOTHAM_42_BOLD',
-        'FONT_KEY_GOTHAM_42_LIGHT',
-        'FONT_KEY_GOTHAM_42_MEDIUM_NUMBERS',
+        'FONT_KEY_BITHAM_18_LIGHT_SUBSET',
+        'FONT_KEY_BITHAM_30_BLACK',
+        'FONT_KEY_BITHAM_34_LIGHT_SUBSET',
+        'FONT_KEY_BITHAM_34_MEDIUM_NUMBERS',
+        'FONT_KEY_BITHAM_42_BOLD',
+        'FONT_KEY_BITHAM_42_LIGHT',
+        'FONT_KEY_BITHAM_42_MEDIUM_NUMBERS',
         'FONT_KEY_GOTHIC_14',
         'FONT_KEY_GOTHIC_14_BOLD',
         'FONT_KEY_GOTHIC_18',
@@ -346,7 +379,18 @@ CloudPebble.Editor.Autocomplete = (function() {
         'SECOND_UNIT',
         'TRIG_MAX_ANGLE',
         'TRIG_MAX_RATIO',
-        'YEAR_UNIT'
+        'YEAR_UNIT',
+        // New ones!
+        'SNIFF_INTERVAL_NORMAL',
+        'SNIFF_INTERVAL_REDUCED',
+        'RAND_MAX',
+        'APP_LOG_LEVEL_ERROR',
+        'APP_LOG_LEVEL_WARNING',
+        'APP_LOG_LEVEL_INFO',
+        'APP_LOG_LEVEL_DEBUG',
+        'APP_LOG_LEVEL_DEBUG_VERBOSE',
+        'GCompOpSet',
+        'APP_TIMER_INVALID_HANDLE'
     ];
 
     var tree = null;
