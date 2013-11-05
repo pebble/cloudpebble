@@ -14,7 +14,8 @@
         $('#create-project').find('input button select').attr('disabled', 'disabled');
         $.post('/ide/project/create', {
                 name: value,
-                template: $('#project-template').val()
+                template: $('#project-template').val(),
+                sdk: $('#project-sdk-version').val()
             }, function(data) {
                 if(!data.success) {
                     $('#project-prompt-errors').removeClass('hide').text(data.error);

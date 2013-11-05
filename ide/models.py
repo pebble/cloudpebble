@@ -23,7 +23,7 @@ class Project(models.Model):
     sdk_version = models.CharField(max_length=10, choices=SDK_VERSIONS, default='1')
 
     # New settings for 2.0
-    app_uuid = models.CharField(max_length=36, blank=True, null=True)
+    app_uuid = models.CharField(max_length=36, blank=True, null=True, default=lambda:str(uuid.uuid4()))
     app_company_name = models.CharField(max_length=100, blank=True, null=True)
     app_short_name = models.CharField(max_length=100, blank=True, null=True)
     app_long_name = models.CharField(max_length=100, blank=True, null=True)

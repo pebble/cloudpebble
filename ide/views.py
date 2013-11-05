@@ -322,7 +322,18 @@ def create_project(request):
     template_id = request.POST.get('template', None)
     try:
         with transaction.commit_on_success():
-            project = Project.objects.create(name=name, owner=request.user)
+            project = Project.objects.create(
+                name=name,
+                owner=request.user,
+                sdk_version=request.POST['sdk'],
+                app_company_name=request.user.username,
+                app_short_name=name,
+                app_long_name=name,
+                app_version_code=1,
+                app_version_label='1.0',
+                app_is_watchface=False,
+                app_capabilities=''
+            )
             if template_id is not None and int(template_id) != 0:
                 template = TemplateProject.objects.get(pk=int(template_id))
                 template.copy_into_project(project)
