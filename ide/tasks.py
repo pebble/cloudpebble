@@ -269,16 +269,34 @@ class NoProjectFoundError(Exception):
 
 def find_project_root(contents):
     RESOURCE_MAP = 'resources/src/resource_map.json'
+    MANIFEST = 'appinfo.json'
     SRC_DIR = 'src/'
+    version = None
     for base_dir in contents:
+        version = None
+        print base_dir
+        # Try finding v2
         try:
-            dir_end = base_dir.index(RESOURCE_MAP)
+            dir_end = base_dir.index(MANIFEST)
+            print dir_end
         except ValueError:
-            continue
-        else:
-            if dir_end + len(RESOURCE_MAP) != len(base_dir):
+            # Try finding v1
+            try:
+                dir_end = base_dir.index(RESOURCE_MAP)
+            except ValueError:
                 continue
+            else:
+                if dir_end + len(RESOURCE_MAP) != len(base_dir):
+                    continue
+                version = '1'
+        else:
+            if dir_end + len(MANIFEST) != len(base_dir):
+                print 'failed'
+                continue
+            version = '2'
+
         base_dir = base_dir[:dir_end]
+        print base_dir
         for source_dir in contents:
             if source_dir[:dir_end] != base_dir:
                 continue
@@ -292,7 +310,7 @@ def find_project_root(contents):
         break
     else:
         raise Exception("No project root found.")
-    return base_dir
+    return (version, base_dir)
 
 
 @task(acks_late=True)
@@ -318,13 +336,15 @@ def do_import_archive(project_id, archive_location, delete_zip=False, delete_pro
             # - Import every file in 'src/' with the extension .c or .h as a source file
             # - Parse resource_map.json and import files it references
             RESOURCE_MAP = 'resources/src/resource_map.json'
+            MANIFEST = 'appinfo.json'
             SRC_DIR = 'src/'
             if len(contents) > 200:
                 raise Exception("Too many files in zip file.")
             file_list = [x.filename for x in contents]
 
-            base_dir = find_project_root(file_list)
+            version, base_dir = find_project_root(file_list)
             dir_end = len(base_dir)
+            project.sdk_version = version
 
             # Now iterate over the things we found
             with transaction.commit_on_success():
@@ -340,22 +360,37 @@ def do_import_archive(project_id, archive_location, delete_zip=False, delete_pro
                     if entry.file_size > 5242880:  # 5 MB
                         raise Exception("Excessively large compressed file.")
 
-                    if filename == RESOURCE_MAP:
+                    if (filename == RESOURCE_MAP and version == '1') or (filename == MANIFEST and version == '2'):
                         # We have a resource map! We can now try importing things from it.
                         with z.open(entry) as f:
                             m = json.loads(f.read())
-                        project.version_def_name = m['versionDefName']
+
+                        if version == '1':
+                            project.version_def_name = m['versionDefName']
+                            media_map = m['media']
+                        elif version == '2':
+                            project.app_uuid = m['uuid']
+                            project.app_short_name = m['shortName']
+                            project.app_long_name = m['longName']
+                            project.app_company_name = m['companyName']
+                            project.app_version_code = m['versionCode']
+                            project.app_version_label = m['versionLabel']
+                            project.app_is_watchface = m.get('watchapp', {}).get('watchface', False)
+                            project.app_capabilities = ','.join(m.get('capabilities', []))
+                            media_map = m['resources']['media']
+
                         resources = {}
-                        for resource in m['media']:
+                        for resource in media_map:
                             kind = resource['type']
-                            def_name = resource['defName']
+                            def_name = resource['defName'] if version == '1' else resource['name']
                             file_name = resource['file']
                             regex = resource.get('characterRegex', None)
                             tracking = resource.get('trackingAdjust', None)
                             if file_name not in resources:
                                 resources[file_name] = ResourceFile.objects.create(project=project, file_name=os.path.basename(file_name), kind=kind)
                                 local_filename = resources[file_name].get_local_filename(create=True)
-                                open(local_filename, 'w').write(z.open('%sresources/src/%s' % (base_dir, file_name)).read())
+                                res_path = 'resources/src' if version == '1' else 'resources'
+                                open(local_filename, 'w').write(z.open('%s%s/%s' % (base_dir, res_path, file_name)).read())
                             ResourceIdentifier.objects.create(resource_file=resources[file_name], resource_id=def_name, character_regex=regex, tracking=tracking)
 
                     elif filename.startswith(SRC_DIR):
