@@ -16,6 +16,23 @@ class Project(models.Model):
     name = models.CharField(max_length=50)
     last_modified = models.DateTimeField(auto_now_add=True)
     version_def_name = models.CharField(max_length=50, default="APP_RESOURCES")
+    SDK_VERSIONS = (
+        ('1', '1.1.2'),
+        ('2', '2.0')
+    )
+    sdk_version = models.CharField(max_length=10, choices=SDK_VERSIONS, default='1')
+
+    # New settings for 2.0
+    app_uuid = models.CharField(max_length=36, blank=True, null=True)
+    app_company_name = models.CharField(max_length=100, blank=True, null=True)
+    app_short_name = models.CharField(max_length=100, blank=True, null=True)
+    app_long_name = models.CharField(max_length=100, blank=True, null=True)
+    app_version_code = models.IntegerField(blank=True, null=True)
+    app_version_label = models.CharField(max_length=40, blank=True, null=True)
+    app_is_watchface = models.BooleanField(default=False)
+    app_capabilities = models.CharField(max_length=255, blank=True, null=True)
+
+    app_capability_list = property(lambda: app_capabilities.split(','))
 
     OPTIMISATION_CHOICES = (
         ('0', 'None'),

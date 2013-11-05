@@ -185,7 +185,7 @@
                     <input type="text" id="settings-name">
                 </div>
             </div>
-            <div class="control-group">
+            <div class="control-group v1-only"{% if project.sdk_version != '2' %}style="display:none;"{%endif%}>
                 <label class="control-label" for="settings-optimisation">Default optimisation</label>
                 <div class="controls">
                     <select id="settings-optimisation">
@@ -198,23 +198,108 @@
             <div class="control-group">
                 <label class="control-label" for="settings-sdk-version">SDK version</label>
                 <div class="controls">
-                    <!-- This is so useful! It makes my form slightly less empty and will be used later. -->
                     <select id="settings-sdk-version">
-                        <option value="1">Version 1.12</option>
+                        {% for version in project.SDK_VERSIONS %}
+                            <option value="{{version.0}}"{% if version.0 == project.sdk_version %}selected{%endif%}>Version {{version.1}}</option>
+                        {% endfor %}
                     </select>
                 </div>
             </div>
         </div>
-        <div class="well">
-            <div class="control-group">
-                <label class="control-label" for="settings-name">App Resources Identifier</label>
-                <div class="controls">
-                    <input type="text" id="settings-version-def-name" placeholder="APP_RESOURCES" pattern="[a-zA-Z_][a-zA-Z0-9_]*">
-                    <span class="help-block">
-                        This value must be passed to <code>resource_init_current_app</code> in your code before using any resources.<br>
-                        The standard value is <code>APP_RESOURCES</code>, but you can change it here. It cannot be blank and must be a valid C identifier.<br>
-                        Also known as <tt>versionDefName</tt>.
-                    </span>
+        <div class="v1-only"{% if project.sdk_version != '1' %} style="display: none;"{%endif%}>
+            <div class="well">
+                <div class="control-group">
+                    <label class="control-label" for="settings-name">App Resources Identifier</label>
+                    <div class="controls">
+                        <input type="text" id="settings-version-def-name" placeholder="APP_RESOURCES" pattern="[a-zA-Z_][a-zA-Z0-9_]*">
+                        <span class="help-block">
+                            This value must be passed to <code>resource_init_current_app</code> in your code before using any resources.<br>
+                            The standard value is <code>APP_RESOURCES</code>, but you can change it here. It cannot be blank and must be a valid C identifier.<br>
+                            Also known as <tt>versionDefName</tt>.
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="v2-only"{% if project.sdk_version != '2' %} style="display: none;"{%endif%}>
+            <div class="well">
+                <div class="control-group">
+                    <label class="control-label" for="settings-app-is-watchface">App kind</label>
+                    <div class="controls">
+                        <select id="settings-app-is-watchface">
+                            <option value="0"{% if not project.is_watchface %}selected{% endif%}>Watch app</option>
+                            <option value="1"{% if project.is_watchface %}selected{% endif%}>Watchface</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="settings-short-name">Short App Name</label>
+                    <div class="controls">
+                        <input type="text" id="settings-short-name" placeholder="Demo App" value="{{project.app_short_name}}">
+                        <span class="help-block">
+                            App's short name. This will appear <strong>on the Pebble watch</strong>.
+                        </span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="settings-long-name">Long App Name</label>
+                    <div class="controls">
+                        <input type="text" id="settings-long-name" placeholder="Demo App" value="{{project.app_long_name}}">
+                        <span class="help-block">
+                            App's short name. This will appear <strong>in the app list on the phone</strong>.
+                        </span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="settings-company-name">Company Name</label>
+                    <div class="controls">
+                        <input type="text" id="settings-company-name" placeholder="Demo Company" value="{{project.app_company_name}}">
+                        <span class="help-block">
+                            Name of the app's developer.
+                        </span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="settings-version-code">Version code</label>
+                    <div class="controls">
+                        <input type="number" id="settings-version-code" placeholder="1" value="{{project.app_version_code}}">
+                        <span class="help-block">
+                            A version number for this app. Each time you make a change to your app, you should increment the version code.
+                            CloudPebble will automatically increment it each time you compile, providing a build number.
+                        </span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="settings-version-label">Version label</label>
+                    <div class="controls">
+                        <input type="text" id="settings-version-label" placeholder="0.1.2" value="{{project.app_version_label}}">
+                        <span class="help-block">
+                            Version label for the app. Typically formatted as Major.Minor.Bugfix
+                        </span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="settings-uuid">App UUID</label>
+                    <div class="controls">
+                        <input type="text" id="settings-uuid" pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" placeholder="00000000-0000-0000-0000-000000000000" value="{{project.app_uuid}}" style="width: 20em;">
+                        <span class="help-block">
+                            A unique identifier for the app.
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="well">
+                <div class="control-group">
+                    <label class="control-label" for="settings-capabilities-location">Uses PebbleKit JS Location</label>
+                    <div class="controls">
+                        <input type="checkbox" id="settings-capabilities-location" {%if 'location' in project.app_capabilities%}checked{%endif%}>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="settings-capabilities-configuration">Uses PebbleKit JS configuration screen</label>
+                    <div class="controls">
+                        <input type="checkbox" id="settings-capabilities-configuration" {%if 'configuration' in project.app_capabilities%}checked{%endif%}>
+                    </div>
                 </div>
             </div>
         </div>

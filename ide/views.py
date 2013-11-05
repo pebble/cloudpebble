@@ -71,6 +71,15 @@ def project_info(request, project_id):
         'last_modified': str(project.last_modified),
         'version_def_name': project.version_def_name,
         'optimisation': project.optimisation,
+        'app_uuid': project.app_uuid or '',
+        'app_company_name': project.app_company_name,
+        'app_short_name': project.app_short_name,
+        'app_long_name': project.app_long_name,
+        'app_version_code': project.app_version_code,
+        'app_version_label': project.app_version_label,
+        'app_is_watchface': project.app_is_watchface,
+        'app_capabilities': project.app_capabilities,
+        'sdk_version': project.sdk_version,
         'source_files': [{'name': f.file_name, 'id': f.id} for f in source_files],
         'resources': [{
             'id': x.id,
@@ -328,11 +337,21 @@ def create_project(request):
 def save_project_settings(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     try:
-        new_name = request.POST['name']
-        new_version_def_name = request.POST['version_def_name']
-        project.name = new_name
-        project.version_def_name = new_version_def_name
-        project.optimisation = request.POST['optimisation']
+        sdk_version = int(request.POST['sdk_version'])
+        project.name = request.POST['name']
+        project.sdk_version = sdk_version
+        if sdk_version == 1:
+            project.version_def_name = request.POST['version_def_name']
+            project.optimisation = request.POST['optimisation']
+        elif sdk_version > 1:
+            project.app_uuid = request.POST['app_uuid']
+            project.app_company_name = request.POST['app_company_name']
+            project.app_short_name = request.POST['app_short_name']
+            project.app_long_name = request.POST['app_long_name']
+            project.app_version_code = int(request.POST['app_version_code'])
+            project.app_version_label = request.POST['app_version_label']
+            project.app_is_watchface = bool(request.POST['app_is_watchface'])
+            project.app_capabilities = request.POST['app_capabilities']
         project.save()
     except IntegrityError as e:
         return json_failure(str(e))
