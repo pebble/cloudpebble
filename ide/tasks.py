@@ -158,8 +158,12 @@ def run_compile(build_result, optimisation=None):
 
 
 def generate_resource_dict(project, resources):
-    resource_map = {'friendlyVersion': 'VERSION', 'versionDefName': project.version_def_name, 'media': []}
-    if len(resources) == 0:
+    resource_map = {'media': []}
+    if project.sdk_version == '1':
+        resource_map['friendlyVersion'] = 'VERSION'
+        resource_map['versionDefName'] = project.version_def_name
+
+    if project.sdk_version == '1' and len(resources) == 0:
         print "No resources; adding dummy."
         resource_map['media'].append({"type": "raw", "defName": "DUMMY", "file": "resource_map.json"})
     else:
@@ -167,9 +171,12 @@ def generate_resource_dict(project, resources):
             for resource_id in resource.get_identifiers():
                 d = {
                     'type': resource.kind,
-                    'defName': resource_id.resource_id,
                     'file': resource.path
                 }
+                if project.sdk_version == '1':
+                    d['defName'] = resource_id.resource_id
+                else:
+                    d['name'] = resource_id.resource_id
                 if resource_id.character_regex:
                     d['characterRegex'] = resource_id.character_regex
                 if resource_id.tracking:
@@ -185,6 +192,42 @@ def resource_dict_to_json(d):
 def generate_resource_map(project, resources):
     return resource_dict_to_json(generate_resource_dict(project, resources))
 
+def generate_v2_manifest(project, resources):
+    manifest = {
+        'uuid': str(project.app_uuid),
+        'shortName': project.app_short_name,
+        'longName': project.app_long_name,
+        'companyName': project.app_company_name,
+        'versionCode': project.app_version_code,
+        'versionLabel': project.app_version_label,
+        'watchapp': {
+            'watchface': project.app_is_watchface
+        },
+        'appKeys': {},
+        'resources': generate_resource_dict(project, resources)
+    }
+    return resource_dict_to_json(manifest)
+
+def generate_wscript_file(project):
+    return """
+#
+# This file is the default set of rules to compile a Pebble project.
+#
+# Feel free to customize this to your needs.
+#
+
+top = '.'
+out = 'build'
+
+def options(ctx):
+  ctx.load('pebble_sdk')
+
+def configure(ctx):
+  ctx.load('pebble_sdk')
+
+def build(ctx):
+  ctx.load('pebble_sdk')
+"""
 
 @task(acks_late=True)
 def create_archive(project_id):
@@ -199,11 +242,17 @@ def create_archive(project_id):
                 z.writestr('%s/src/%s' % (prefix, source.file_name), source.get_contents())
 
             for resource in resources:
-                z.writestr('%s/resources/src/%s' % (prefix, resource.path), open(resource.local_filename).read())
+                res_path = 'resources/src' if project.sdk_version == '1' else 'resources'
+                z.writestr('%s/%s/%s' % (prefix, res_path, resource.path), open(resource.local_filename).read())
 
-            resource_map = generate_resource_map(project, resources)
-
-            z.writestr('%s/resources/src/resource_map.json' % prefix, resource_map)
+            if project.sdk_version == '1':
+                resource_map = generate_resource_map(project, resources)
+                z.writestr('%s/resources/src/resource_map.json' % prefix, resource_map)
+            else:
+                manifest = generate_v2_manifest(project, resources)
+                z.writestr('%s/appinfo.json' % prefix, manifest)
+                # This file is always the same, but needed to build.
+                z.writestr('%s/wscript' % prefix, generate_wscript_file(project))
 
         # Generate a URL
         u = uuid.uuid4().hex
