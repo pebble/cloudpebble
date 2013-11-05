@@ -24,8 +24,8 @@ int set_limit(int resource, rlim_t value) {
 }
 
 int main(int argc, char** argv) {
-    if(argc < 2 || argc > 3) {
-        printf("Requires one or two arguments.\n");
+    if(argc < 3 || argc > 4) {
+        printf("Requires three or four arguments.\n");
         return 0;
     }
     uid_t start_uid = getuid();
@@ -34,9 +34,10 @@ int main(int argc, char** argv) {
         return 1;
     }
     char optimise = '0';
-    if(argc == 3) {
-        optimise = argv[2][0];
+    if(argc == 4) {
+        optimise = argv[3][0];
     }
+    char sdk = argv[1][0];
     require(setuid(0));
     require(chdir(BUILD_JAIL));
     require(chroot(BUILD_JAIL));
@@ -48,19 +49,30 @@ int main(int argc, char** argv) {
     require(set_limit(RLIMIT_RSS, 10 * 1024 * 1024)); // 10 MB of memory
     require(set_limit(RLIMIT_FSIZE, 1 * 1024 * 1024)); // 1 MB output files
     // Actually do the build.
-    require(chdir(argv[1]));
-    require(setenv("PATH", "/bin:/usr/bin:/sdk/arm-cs-tools/bin", 1));
+    require(chdir(argv[2]));
     require(setenv("HOME", "/", 1));
 
-    char final_command[] = "./waf configure -O 0";
-    sprintf(final_command, "./waf configure -O %c", optimise);
-    int success = system(final_command);
-    if(success != 0) {
-        return WEXITSTATUS(success);
-    }
-    success = system("./waf build");
-    if(success != 0) {
-        return WEXITSTATUS(success);
+    if(sdk == '1') {
+        require(setenv("PATH", "/bin:/usr/bin:/sdk/arm-cs-tools/bin", 1));
+        char final_command[] = "./waf configure -O 0";
+        sprintf(final_command, "./waf configure -O %c", optimise);
+        int success = system(final_command);
+        if(success != 0) {
+            return WEXITSTATUS(success);
+        }
+        success = system("./waf build");
+        if(success != 0) {
+            return WEXITSTATUS(success);
+        }
+    } else if(sdk == '2') {
+        require(setenv("PATH", "/bin:/usr/bin:/sdk2/bin", 1));
+        int success = system("pebble build");
+        if(success != 0) {
+            return WEXITSTATUS(success);
+        }
+    } else {
+        printf("Unrecognised SDK version '%c'.\n", sdk);
+        return 1;
     }
     return 0;
 }

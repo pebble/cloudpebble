@@ -66,40 +66,36 @@ def run_compile(build_result, optimisation=None):
             os.link(os.path.abspath(f.local_filename), abs_target)
 
         # Resources
-        os.makedirs(os.path.join(base_dir, 'resources/src/images'))
-        os.makedirs(os.path.join(base_dir, 'resources/src/fonts'))
-        os.makedirs(os.path.join(base_dir, 'resources/src/data'))
-        resource_map = {'friendlyVersion': 'VERSION', 'versionDefName': project.version_def_name, 'media': []}
-        if len(resources) == 0:
-            print "No resources; adding dummy."
-            resource_map['media'].append({"type": "raw", "defName": "DUMMY", "file": "resource_map.json"})
-        else:
-            for f in resources:
-                target_dir = os.path.abspath(os.path.join(base_dir, 'resources/src', ResourceFile.DIR_MAP[f.kind]))
-                abs_target = os.path.abspath(os.path.join(target_dir, f.file_name))
-                if not abs_target.startswith(target_dir):
-                    raise Exception("Suspicious filename: %s" % f.file_name)
-                print "Added %s %s" % (f.kind, f.local_filename)
-                os.link(os.path.abspath(f.local_filename), abs_target)
-                for resource_id in f.get_identifiers():
-                    d = {
-                        'type': f.kind,
-                        'defName': resource_id.resource_id,
-                        'file': f.path
-                    }
-                    if resource_id.character_regex:
-                        d['characterRegex'] = resource_id.character_regex
-                    if resource_id.tracking:
-                        d['trackingAdjust'] = resource_id.tracking
-                    resource_map['media'].append(d)
+        resource_root = 'resources/src' if project.sdk_version == '1' else 'resources'
+        os.makedirs(os.path.join(base_dir, resource_root, 'images'))
+        os.makedirs(os.path.join(base_dir, resource_root, 'fonts'))
+        os.makedirs(os.path.join(base_dir, resource_root, 'data'))
 
-        # Write out the resource map
-        print "Writing out resource map"
-        open(os.path.join(base_dir, 'resources/src/resource_map.json'), 'w').write(json.dumps(resource_map))
+        if project.sdk_version == '1':
+            print "Writing out resource map"
+            resource_dict = generate_resource_dict(project, resources)
+            open(os.path.join(base_dir, resource_root, 'resource_map.json'), 'w').write(json.dumps(resource_dict))
+        else:
+            print "Writing out manifest"
+            manifest_dict = generate_v2_manifest_dict(project, resources)
+            open(os.path.join(base_dir, 'appinfo.json'), 'w').write(json.dumps(manifest_dict))
+
+        for f in resources:
+            target_dir = os.path.abspath(os.path.join(base_dir, resource_root, ResourceFile.DIR_MAP[f.kind]))
+            abs_target = os.path.abspath(os.path.join(target_dir, f.file_name))
+            if not abs_target.startswith(target_dir):
+                raise Exception("Suspicious filename: %s" % f.file_name)
+            print "Added %s %s" % (f.kind, f.local_filename)
+            os.link(os.path.abspath(f.local_filename), abs_target)
+
 
         # Reconstitute the SDK
-        print "Symlinking SDK"
-        create_sdk_symlinks(base_dir, os.path.abspath("pebble-sdk/sdk" if settings.CHROOT_JAIL is None else "/sdk/sdk"))
+        if project.sdk_version == '1':
+            print "Symlinking SDK"
+            create_sdk_symlinks(base_dir, os.path.abspath("pebble-sdk/sdk" if settings.CHROOT_JAIL is None else "/sdk/sdk"))
+        elif project.sdk_version == '2':
+            print "Inserting wscript"
+            open(os.path.join(base_dir, 'wscript'), 'w').write(generate_wscript_file(project))
 
         # Build the thing
         print "Beginning compile"
@@ -107,12 +103,20 @@ def run_compile(build_result, optimisation=None):
         success = False
         try:
             if settings.CHROOT_JAIL is not None:
-                output = subprocess.check_output([settings.CHROOT_JAIL, base_dir[len(settings.CHROOT_ROOT):], optimisation], stderr=subprocess.STDOUT)
+                output = subprocess.check_output([settings.CHROOT_JAIL, project.sdk_version, base_dir[len(settings.CHROOT_ROOT):], optimisation], stderr=subprocess.STDOUT)
             else:
-                os.environ['PATH'] += ':/Users/katharine/projects/cloudpebble/pebble-sdk/arm-cs-tools/bin'
                 os.chdir(base_dir)
-                output = subprocess.check_output(["./waf", "configure", "-O", optimisation], stderr=subprocess.STDOUT)
-                output += subprocess.check_output(["./waf", "build"], stderr=subprocess.STDOUT)
+                if project.sdk_version == '1':
+                    print "Running SDK1 build"
+                    os.environ['PATH'] += ':/Users/katharine/projects/cloudpebble/pebble-sdk/arm-cs-tools/bin'
+                    output = subprocess.check_output(["./waf", "configure", "-O", optimisation], stderr=subprocess.STDOUT)
+                    output += subprocess.check_output(["./waf", "build"], stderr=subprocess.STDOUT)
+                elif project.sdk_version == '2':
+                    print "Running SDK2 build"
+                    os.environ['PATH'] += ':/Users/katharine/pebble-dev/PebbleSDK-2.0.0-DP2.1/bin'
+                    print "Path set"
+                    output = subprocess.check_output(["pebble", "build"], stderr=subprocess.STDOUT)
+                    print "output", output
         except subprocess.CalledProcessError as e:
             output = e.output
             success = False
