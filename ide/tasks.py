@@ -575,18 +575,34 @@ def github_pull(user, project):
 
     paths = {x.path: x for x in tree.tree}
 
-    root = find_project_root(paths)
+    version, root = find_project_root(paths)
 
     # First try finding the resource map so we don't fail out part-done later.
     # TODO: transaction support for file contents would be nice...
-    resource_root = root + 'resources/src/'
-    remote_map_path = resource_root + 'resource_map.json'
-    if remote_map_path not in paths:
-        raise Exception("resource_map.json not found.")
-    remote_map_sha = paths[remote_map_path].sha
-    remote_map = json.loads(git_blob(repo, remote_map_sha))
+    # SDK2
+    resource_root = None
+    media = {}
+    if version == '2':
+        resource_root = root + 'resources/'
+        manifest_path = root + 'appinfo.json'
+        if manifest_path in paths:
+            manifest_sha = paths[manifest_path].sha
+            manifest = json.loads(git_blob(repo, manifest_sha))
+            media = manifest.get('resources', {}).get('media', [])
+        else:
+            raise Exception("appinfo.json not found")
+    else:
+        # SDK1
+        resource_root = root + 'resources/src/'
+        remote_map_path = resource_root + 'resource_map.json'
+        if remote_map_path in paths:
+            remote_map_sha = paths[remote_map_path].sha
+            remote_map = json.loads(git_blob(repo, remote_map_sha))
+            media = remote_map['media']
+        else:
+            raise Exception("resource_map.json not found.")
 
-    for resource in remote_map['media']:
+    for resource in media:
         path = resource_root + resource['file']
         if path not in paths:
             raise Exception("Resource %s not found in repo." % path)
