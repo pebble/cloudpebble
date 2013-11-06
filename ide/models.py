@@ -57,7 +57,7 @@ class Project(models.Model):
     github_repo = models.CharField(max_length=100, blank=True, null=True)
     github_last_sync = models.DateTimeField(blank=True, null=True)
     github_last_commit = models.CharField(max_length=40, blank=True, null=True)
-    github_hook_uuid = models.CharField(max_length=32, blank=True, null=True)
+    github_hook_uuid = models.CharField(max_length=36, blank=True, null=True)
     github_hook_build = models.BooleanField(default=False)
 
     def get_last_build(self):
@@ -126,7 +126,7 @@ User.settings = property(lambda self: UserSettings.objects.get_or_create(user=se
 class UserGithub(models.Model):
     user = models.OneToOneField(User, primary_key=True, related_name='github')
     token = models.CharField(max_length=50, null=True, blank=True)
-    nonce = models.CharField(max_length=32, null=True, blank=True)
+    nonce = models.CharField(max_length=36, null=True, blank=True)
     username = models.CharField(max_length=50, null=True, blank=True)
     avatar = models.CharField(max_length=255, null=True, blank=True)
 
@@ -166,7 +166,7 @@ class BuildResult(models.Model):
     )
 
     project = models.ForeignKey(Project, related_name='builds')
-    uuid = models.CharField(max_length=32, default=lambda:str(uuid.uuid4()))
+    uuid = models.CharField(max_length=36, default=lambda:str(uuid.uuid4()))
     state = models.IntegerField(choices=STATE_CHOICES, default=STATE_WAITING)
     started = models.DateTimeField(auto_now_add=True, db_index=True)
     finished = models.DateTimeField(blank=True, null=True)
