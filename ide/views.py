@@ -56,7 +56,7 @@ def index(request):
 def project(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     if project.app_uuid is None:
-        project.app_uuid = Generate()
+        project.app_uuid = generate_half_uuid()
     if project.app_company_name is None:
         project.app_company_name = request.user.username
     if project.app_short_name is None:
