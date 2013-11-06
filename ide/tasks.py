@@ -433,7 +433,7 @@ def do_import_archive(project_id, archive_location, delete_zip=False, delete_pro
                             tracking = resource.get('trackingAdjust', None)
                             is_menu_icon = resource.get('menuIcon', False)
                             if file_name not in resources:
-                                resources[file_name] = ResourceFile.objects.create(project=project, file_name=os.path.basename(file_name), kind=kind)
+                                resources[file_name] = ResourceFile.objects.create(project=project, file_name=os.path.basename(file_name), kind=kind, is_menu_icon=is_menu_icon)
                                 local_filename = resources[file_name].get_local_filename(create=True)
                                 res_path = 'resources/src' if version == '1' else 'resources'
                                 open(local_filename, 'w').write(z.open('%s%s/%s' % (base_dir, res_path, file_name)).read())
@@ -441,8 +441,7 @@ def do_import_archive(project_id, archive_location, delete_zip=False, delete_pro
                                 resource_file=resources[file_name],
                                 resource_id=def_name,
                                 character_regex=regex,
-                                tracking=tracking,
-                                is_menu_icon=is_menu_icon
+                                tracking=tracking
                             )
 
                     elif filename.startswith(SRC_DIR):
