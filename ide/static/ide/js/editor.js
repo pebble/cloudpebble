@@ -1,4 +1,5 @@
 CloudPebble.Editor = (function() {
+    var THAT_ONE_JS_FILE = 'js/pebble-js-app.js'; // You'll probably want to grep this when adding multiple JS file support.:
     var project_source_files = {};
     var open_codemirrors = {};
     var unsaved_files = 0;
@@ -9,6 +10,11 @@ CloudPebble.Editor = (function() {
         });
 
         project_source_files[file.name] = file;
+        // If we're adding that one JS file, remove the link to add it.
+        // (this arguably intrudes upon the sidebar's domain, but...)
+        if(file.name == THAT_ONE_JS_FILE) {
+            $('#new-js-file').hide();
+        }
     };
 
     var edit_source_file = function(file) {
@@ -27,6 +33,7 @@ CloudPebble.Editor = (function() {
                 error.text("Something went wrong: " + data.error);
                 CloudPebble.Sidebar.SetActivePane(error, '');
             } else {
+                var is_js = file.name.substr(-3) == '.js';
                 var source = data.source;
                 var pane = $('<div>');
                 var is_autocompleting = false;
@@ -40,7 +47,7 @@ CloudPebble.Editor = (function() {
                     //highlightSelectionMatches: true,
                     smartIndent: true,
                     indentWithTabs: true,
-                    mode: CloudPebble.Editor.PebbleMode,
+                    mode: (is_js ? 'javascript' : CloudPebble.Editor.PebbleMode),
                     styleActiveLine: true,
                     value: source,
                     theme: USER_SETTINGS.theme
@@ -48,10 +55,10 @@ CloudPebble.Editor = (function() {
                 if(USER_SETTINGS.keybinds !== '') {
                     settings.keyMap = USER_SETTINGS.keybinds;
                 }
-                if(USER_SETTINGS.autocomplete === 2) {
+                if(!is_js && USER_SETTINGS.autocomplete === 2) {
                     settings.extraKeys = {'Ctrl-Space': 'autocomplete'};
                 }
-                if(USER_SETTINGS.autocomplete !== 0) {
+                if(!is_js && USER_SETTINGS.autocomplete !== 0) {
                     if(!settings.extraKeys) settings.extraKeys = {};
                     settings.extraKeys['Tab'] = function() {
                         var marks = code_mirror.getAllMarks();
@@ -93,7 +100,7 @@ CloudPebble.Editor = (function() {
                 code_mirror.on('shown', function() {
                     is_autocompleting = true;
                 });
-                if(USER_SETTINGS.autocomplete === 1) {
+                if(!is_js && USER_SETTINGS.autocomplete === 1) {
                     code_mirror.on('change', function() {
                         if(!is_autocompleting)
                             CodeMirror.commands.autocomplete(code_mirror);
@@ -167,6 +174,10 @@ CloudPebble.Editor = (function() {
                                 CloudPebble.Sidebar.DestroyActive();
                                 delete project_source_files[file.name];
                                 CloudPebble.Sidebar.Remove('source-' + file.id);
+                                // Restore the add JS button if we just removed it.
+                                if(file.name == THAT_ONE_JS_FILE) {
+                                    $('#new-js-file').show();
+                                }
                             } else {
                                 alert(data.error);
                             }
@@ -235,6 +246,16 @@ CloudPebble.Editor = (function() {
                         }
                     });
                     ga('send', 'event', 'file', 'create');
+                }
+            });
+        },
+        DoJSFile: function() {
+            $.post("/ide/project/" + PROJECT_ID + "/create_source_file", {'name': THAT_ONE_JS_FILE}, function(data) {
+                if(!data.success) {
+                    alert(data.error);
+                } else {
+                    add_source_file(data.file);
+                    edit_source_file(data.file);
                 }
             });
         },

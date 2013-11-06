@@ -22,7 +22,8 @@
                     <li id="sidebar-pane-github" {{%if not github%}class="disabled"{%endif%}><a href="#">GitHub</a></li>
                     <li class="nav-header">Source files</li>
                     <li class="divider" id="end-source-files"></li>
-                    <li><a href="#" id="new-source-file"><strong>New file</strong></a></li>
+                    <li><a href="#" id="new-source-file"><strong>New C file</strong></a></li>
+                    <li><a href="#" id="new-js-file"><strong>New JavaScript file</strong></a></li>
                     <li class="nav-header">Resources</li>
                     <li class="hide" id="end-resources"></li>
                     <li id="sidebar-pane-new-resource"><a href="#"><strong>New resource</strong></a></li>
@@ -289,6 +290,20 @@
                 </div>
             </div>
             <div class="well">
+                <div class="control-group">
+                    <label class="control-label" for="settings-app-keys">PebbleKit JS Message Keys</label>
+                    <div class="controls">
+                        <textarea id="settings-app-keys" style="height: 100px;" placeholder="{}" style="font-family: monospace;">{{project.app_keys}}</textarea>
+                        <div class="help-block">
+                            A JSON mapping from strings to integers used by PebbleKit JS, like this:
+                            <pre style="width: 200px;">
+{
+    "apple": 1,
+    "banana": 2
+}</pre>
+                        </div>
+                    </div>
+                </div>
                 <div class="control-group">
                     <label class="control-label" for="settings-capabilities-location">Uses PebbleKit JS Location</label>
                     <div class="controls">

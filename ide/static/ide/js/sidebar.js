@@ -137,6 +137,7 @@ CloudPebble.Sidebar = (function() {
             $('#sidebar-pane-settings > a').click(CloudPebble.Settings.Show);
             $('#sidebar-pane-github > a').click(CloudPebble.GitHub.Show);
             $('#new-source-file').click(CloudPebble.Editor.Create);
+            $('#new-js-file').click(CloudPebble.Editor.DoJSFile);
         },
         SetPopover: function(pane_id, title, content) {
             $('#sidebar-pane-' + pane_id).popover('destroy').popover({

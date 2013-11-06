@@ -8,12 +8,25 @@ CloudPebble.Settings = (function() {
         }
         ga('send', 'event', 'project', 'load settings');
         var pane = settings_template.clone(); // This clone is basically unncessary, since only one such pane can ever exist.
+
+
+            pane.find('#settings-app-keys').keydown(function(e) {
+                if(e.keyCode == 9) {
+                    var start = $(this).get(0).selectionStart;
+                    $(this).val($(this).val().substring(0, start) + "    " + $(this).val().substring($(this).get(0).selectionEnd));
+                    $(this).get(0).selectionStart = $(this).get(0).selectionEnd = start + 4;
+                    return false;
+                }
+            });
+
         var display_error = function(message) {
+            window.scrollTo(0);
             pane.find('.alert').addClass('alert-error').removeClass('hide').text(message);
             pane.find('input, button, select').removeAttr('disabled');
         };
 
         var display_success = function(message) {
+            window.scrollTo(0);
             pane.find('.alert').addClass('alert-success').removeClass('hide').text(message);
             pane.find('input, button, select').removeAttr('disabled');
         };
@@ -33,6 +46,7 @@ CloudPebble.Settings = (function() {
             var version_label = pane.find('#settings-version-label').val();
             var app_uuid = pane.find('#settings-uuid').val();
             var app_is_watchface = pane.find('#settings-app-is-watchface').val();
+            var app_keys = pane.find('#settings-app-keys').val();
 
             var app_capabilities = [];
             if(pane.find('#settings-capabilities-location').is(':checked')) {
@@ -88,6 +102,21 @@ CloudPebble.Settings = (function() {
                     display_error("You must specify a valid UUID (of the form 00000000-0000-0000-0000-000000000000)");
                     return;
                 }
+                try {
+                    if(app_keys == "") app_keys = "{}";
+                    var parsed_app_keys = JSON.parse(app_keys);
+                    for(var key in parsed_app_keys) {
+                        if(!Object.prototype.hasOwnProperty.call(parsed_app_keys, key)) continue;
+                        var value = parsed_app_keys[key];
+                        if(typeof value != 'number' || value < 0 || (value|0) != value) {
+                            display_error("Value for PebbleKit JS key '" + key + "' is not a non-negative integer.");
+                            return;
+                        }
+                    }
+                } catch(e) {
+                    display_error("Syntax error in PebbleKit JS keys: " + e.message);
+                    return;
+                }
 
                 saved_settings['app_short_name'] = short_name;
                 saved_settings['app_long_name'] = long_name;
@@ -97,6 +126,7 @@ CloudPebble.Settings = (function() {
                 saved_settings['app_uuid'] = app_uuid;
                 saved_settings['app_capabilities'] = app_capabilities;
                 saved_settings['app_is_watchface'] = app_is_watchface
+                saved_settings['app_keys'] = app_keys;
             }
 
             $.post('/ide/project/' + PROJECT_ID + '/save_settings', saved_settings, function(data) {

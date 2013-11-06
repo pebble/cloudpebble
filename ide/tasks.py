@@ -63,6 +63,10 @@ def run_compile(build_result, optimisation=None):
             abs_target = os.path.abspath(os.path.join(src_dir, f.file_name))
             if not abs_target.startswith(src_dir):
                 raise Exception("Suspicious filename: %s" % f.file_name)
+            abs_target_dir = os.path.dirname(abs_target)
+            if not os.path.exists(abs_target_dir):
+                print "Creating directory %s." % abs_target_dir
+                os.makedirs(abs_target_dir)
             os.link(os.path.abspath(f.local_filename), abs_target)
 
         # Resources
@@ -207,7 +211,7 @@ def generate_v2_manifest_dict(project, resources):
         'watchapp': {
             'watchface': project.app_is_watchface
         },
-        'appKeys': {},
+        'appKeys': json.loads(project.app_keys),
         'resources': generate_resource_dict(project, resources)
     }
     return manifest
@@ -384,6 +388,7 @@ def do_import_archive(project_id, archive_location, delete_zip=False, delete_pro
                             project.app_version_label = m['versionLabel']
                             project.app_is_watchface = m.get('watchapp', {}).get('watchface', False)
                             project.app_capabilities = ','.join(m.get('capabilities', []))
+                            project.app_keys = dict_to_pretty_json(m.get('appKeys', {}))
                             media_map = m['resources']['media']
 
                         resources = {}
@@ -401,8 +406,9 @@ def do_import_archive(project_id, archive_location, delete_zip=False, delete_pro
                             ResourceIdentifier.objects.create(resource_file=resources[file_name], resource_id=def_name, character_regex=regex, tracking=tracking)
 
                     elif filename.startswith(SRC_DIR):
-                        if (not filename.startswith('.')) and (filename.endswith('.c') or filename.endswith('.h')):
-                            source = SourceFile.objects.create(project=project, file_name=os.path.basename(filename))
+                        if (not filename.startswith('.')) and (filename.endswith('.c') or filename.endswith('.h') or filename.endswith('js/pebble-js-app.js')):
+                            base_filename = os.path.basename(filename) if not filename.endswith('.js') else 'js/pebble-js-app.js'
+                            source = SourceFile.objects.create(project=project, file_name=base_filename)
                             with z.open(entry.filename) as f:
                                 source.save_file(f.read().decode('utf-8'))
                 project.save()

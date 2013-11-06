@@ -363,6 +363,7 @@ def save_project_settings(request, project_id):
             project.app_version_label = request.POST['app_version_label']
             project.app_is_watchface = bool(request.POST['app_is_watchface'])
             project.app_capabilities = request.POST['app_capabilities']
+            project.app_keys = request.POST['app_keys']
         project.save()
     except IntegrityError as e:
         return json_failure(str(e))

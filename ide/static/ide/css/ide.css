@@ -10,7 +10,7 @@
   font-family: Menlo, 'Deja Vu Sans Mono', monospace;
 }
 
-.edit-resource-regex {
+.edit-resource-regex, #settings-app-keys {
   font-family: Menlo, 'Deja Vu Sans Mono', monospace;
 }
 
