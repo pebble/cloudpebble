@@ -1,5 +1,6 @@
 CloudPebble.Settings = (function() {
     var settings_template = null;
+    var shared_pane = null;
 
     var show_settings_pane = function() {
         CloudPebble.Sidebar.SuspendActive();
@@ -7,8 +8,8 @@ CloudPebble.Settings = (function() {
             return;
         }
         ga('send', 'event', 'project', 'load settings');
-        var pane = settings_template.clone(); // This clone is basically unncessary, since only one such pane can ever exist.
-
+        var pane = settings_template;
+        shared_pane = pane;
 
             pane.find('#settings-app-keys').keydown(function(e) {
                 if(e.keyCode == 9) {
@@ -47,6 +48,7 @@ CloudPebble.Settings = (function() {
             var app_uuid = pane.find('#settings-uuid').val();
             var app_is_watchface = pane.find('#settings-app-is-watchface').val();
             var app_keys = pane.find('#settings-app-keys').val();
+            var menu_icon = pane.find('#settings-menu-image').val();
 
             var app_capabilities = [];
             if(pane.find('#settings-capabilities-location').is(':checked')) {
@@ -127,6 +129,7 @@ CloudPebble.Settings = (function() {
                 saved_settings['app_capabilities'] = app_capabilities;
                 saved_settings['app_is_watchface'] = app_is_watchface
                 saved_settings['app_keys'] = app_keys;
+                saved_settings['menu_icon'] = menu_icon;
             }
 
             $.post('/ide/project/' + PROJECT_ID + '/save_settings', saved_settings, function(data) {
@@ -230,12 +233,36 @@ CloudPebble.Settings = (function() {
         CloudPebble.Sidebar.SetActivePane(pane, 'settings');
     };
 
+    var add_resource = function(resource) {
+        var thing = settings_template.find('#settings-menu-image');
+        var option = $('<option>').attr('value', resource.id).text(resource.file_name);
+        thing.append(option);
+        if(resource.id == CloudPebble.ProjectInfo.menu_icon) {
+            thing.val(resource.id);
+        }
+    };
+
+    var remove_resource = function(resource) {
+        var thing = settings_template.find('#settings-menu-image');
+        thing.find('[value=' + resource.id + ']').remove();
+        if(resource.id == CloudPebble.ProjectInfo.menu_icon) {
+            thing.val('');
+            CloudPebble.ProjectInfo.menu_icon = null;
+        }
+    };
+
     return {
         Show: function() {
             show_settings_pane();
         },
         Init: function() {
             settings_template = $('#settings-pane-template').remove().removeClass('hide');
+        },
+        AddResource: function(resource) {
+            add_resource(resource);
+        },
+        RemoveResource: function(resource) {
+            remove_resource(resource);
         }
     };
 })();

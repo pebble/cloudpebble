@@ -117,7 +117,7 @@ def run_compile(build_result, optimisation=None):
                     output += subprocess.check_output(["./waf", "build"], stderr=subprocess.STDOUT)
                 elif project.sdk_version == '2':
                     print "Running SDK2 build"
-                    os.environ['PATH'] += ':/Users/katharine/pebble-dev/PebbleSDK-2.0.0-DP2.1/bin'
+                    os.environ['PATH'] += ':/Users/katharine/pebble-dev/PebbleSDK-2.0-BETA1-rc1/bin'
                     print "Path set"
                     output = subprocess.check_output(["pebble", "build"], stderr=subprocess.STDOUT)
                     print "output", output
@@ -189,6 +189,8 @@ def generate_resource_dict(project, resources):
                     d['characterRegex'] = resource_id.character_regex
                 if resource_id.tracking:
                     d['trackingAdjust'] = resource_id.tracking
+                if resource.is_menu_icon:
+                    d['menuIcon'] = True
                 resource_map['media'].append(d)
     return resource_map
 
@@ -405,12 +407,19 @@ def do_import_archive(project_id, archive_location, delete_zip=False, delete_pro
                             file_name = resource['file']
                             regex = resource.get('characterRegex', None)
                             tracking = resource.get('trackingAdjust', None)
+                            is_menu_icon = resource.get('menuIcon', False)
                             if file_name not in resources:
                                 resources[file_name] = ResourceFile.objects.create(project=project, file_name=os.path.basename(file_name), kind=kind)
                                 local_filename = resources[file_name].get_local_filename(create=True)
                                 res_path = 'resources/src' if version == '1' else 'resources'
                                 open(local_filename, 'w').write(z.open('%s%s/%s' % (base_dir, res_path, file_name)).read())
-                            ResourceIdentifier.objects.create(resource_file=resources[file_name], resource_id=def_name, character_regex=regex, tracking=tracking)
+                            ResourceIdentifier.objects.create(
+                                resource_file=resources[file_name],
+                                resource_id=def_name,
+                                character_regex=regex,
+                                tracking=tracking,
+                                is_menu_icon=is_menu_icon
+                            )
 
                     elif filename.startswith(SRC_DIR):
                         if (not filename.startswith('.')) and (filename.endswith('.c') or filename.endswith('.h') or filename.endswith('js/pebble-js-app.js')):

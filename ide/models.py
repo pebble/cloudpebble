@@ -11,6 +11,14 @@ import shutil
 import uuid
 
 
+def generate_half_uuid():
+    _uuid = str(uuid.uuid4())
+    if int(_uuid.split('-')[0], 16) > (0xffffffff/2):
+        # Only take uuids from the bottom half of the uuid space
+        bytes = 0xffffffff - int(_uuid[0:8], 16)
+        _uuid = ''.join(["%08x" % bytes, _uuid[8:]])
+    return _uuid
+
 class Project(models.Model):
     owner = models.ForeignKey(User)
     name = models.CharField(max_length=50)
@@ -22,8 +30,9 @@ class Project(models.Model):
     )
     sdk_version = models.CharField(max_length=10, choices=SDK_VERSIONS, default='1')
 
+
     # New settings for 2.0
-    app_uuid = models.CharField(max_length=36, blank=True, null=True, default=lambda:str(uuid.uuid4()))
+    app_uuid = models.CharField(max_length=36, blank=True, null=True, default=generate_half_uuid)
     app_company_name = models.CharField(max_length=100, blank=True, null=True)
     app_short_name = models.CharField(max_length=100, blank=True, null=True)
     app_long_name = models.CharField(max_length=100, blank=True, null=True)
@@ -57,7 +66,14 @@ class Project(models.Model):
         except IndexError:
             return None
 
+    def get_menu_icon(self):
+        try:
+            return self.resources.filter(is_menu_icon=True)[0]
+        except IndexError:
+            return None
+
     last_build = property(get_last_build)
+    menu_icon = property(get_menu_icon)
 
     def __unicode__(self):
         return u"%s" % self.name
@@ -147,7 +163,7 @@ class BuildResult(models.Model):
     )
 
     project = models.ForeignKey(Project, related_name='builds')
-    uuid = models.CharField(max_length=32, default=lambda: uuid.uuid4().hex)
+    uuid = models.CharField(max_length=32, default=lambda:str(uuid.uuid4()))
     state = models.IntegerField(choices=STATE_CHOICES, default=STATE_WAITING)
     started = models.DateTimeField(auto_now_add=True, db_index=True)
     finished = models.DateTimeField(blank=True, null=True)
@@ -192,6 +208,7 @@ class ResourceFile(models.Model):
 
     file_name = models.CharField(max_length=100)
     kind = models.CharField(max_length=9, choices=RESOURCE_KINDS)
+    is_menu_icon = models.BooleanField(default=False)
 
     def get_local_filename(self, create=False):
         padded_id = '%05d' % self.id

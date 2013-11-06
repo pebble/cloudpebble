@@ -6,6 +6,7 @@ CloudPebble.Resources = (function() {
             edit_resource(resource);
         });
         update_resource(resource);
+        CloudPebble.Settings.AddResource(resource);
     };
 
     var update_resource = function(resource) {
@@ -257,6 +258,7 @@ CloudPebble.Resources = (function() {
                             CloudPebble.Sidebar.DestroyActive();
                             delete project_resources[resource.file_name];
                             list_entry.remove();
+                            CloudPebble.Settings.RemoveResource(resource);
                         } else {
                             alert(data.error);
                         }
