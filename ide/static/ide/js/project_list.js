@@ -26,6 +26,15 @@
         );
     });
 
+    $('#project-sdk-version').change(function() {
+        var sdk = $(this).val();
+        if(sdk == '2') {
+            $('#template-holder').hide();
+        } else {
+            $('#template-holder').show();
+        }
+    })
+
     var disable_import_controls = function() {
         $('#import-prompt').find('input, button').attr('disabled', 'disabled');
         $('#import-prompt').find('.nav > li').addClass('disabled').find('a').removeAttr('data-toggle');
