@@ -10,7 +10,7 @@ from django.conf import settings
 from celery.result import AsyncResult
 
 from ide.models import Project, SourceFile, ResourceFile, ResourceIdentifier, BuildResult, TemplateProject, UserGithub, generate_half_uuid
-from ide.tasks import run_compile, create_archive, do_import_archive, do_import_github, do_github_push, do_github_pull, hooked_commit
+from ide.tasks import run_compile, create_archive, do_import_archive, do_import_github, do_github_push, do_github_pull, hooked_commit, export_user_projects
 from ide.forms import SettingsForm
 import ide.git
 
@@ -37,13 +37,18 @@ def json_failure(error):
 @login_required
 def index(request):
     my_projects = Project.objects.filter(owner=request.user).order_by('-last_modified')
-    return render(request, 'ide/index.html', {
-        'my_projects': my_projects,
-        'sdk_templates': TemplateProject.objects.filter(template_kind=TemplateProject.KIND_TEMPLATE),
-        'example_templates': TemplateProject.objects.filter(template_kind=TemplateProject.KIND_EXAMPLE),
-        'demo_templates': TemplateProject.objects.filter(template_kind=TemplateProject.KIND_SDK_DEMO),
-        'default_template_id': settings.DEFAULT_TEMPLATE
-    })
+    if not request.user.settings.accepted_terms:
+        return render(request, 'ide/new-owner.html', {
+            'my_projects': my_projects
+        })
+    else:
+        return render(request, 'ide/index.html', {
+            'my_projects': my_projects,
+            'sdk_templates': TemplateProject.objects.filter(template_kind=TemplateProject.KIND_TEMPLATE),
+            'example_templates': TemplateProject.objects.filter(template_kind=TemplateProject.KIND_EXAMPLE),
+            'demo_templates': TemplateProject.objects.filter(template_kind=TemplateProject.KIND_SDK_DEMO),
+            'default_template_id': settings.DEFAULT_TEMPLATE
+        })
 
 
 @require_safe
@@ -707,3 +712,23 @@ def build_status(request, project_id):
         return HttpResponseRedirect(settings.STATIC_URL + '/ide/img/status/passing.png')
     else:
         return HttpResponseRedirect(settings.STATIC_URL + '/ide/img/status/failing.png')
+
+@login_required
+@require_POST
+def transition_accept(request):
+    user_settings = request.user.settings
+    user_settings.accepted_terms = True
+    user_settings.save()
+    return json_response({})
+
+@login_required
+@require_POST
+def transition_export(request):
+    task = export_user_projects.delay(request.user.id)
+    return json_response({"task_id": task.task_id})
+
+@login_required
+@require_POST
+def transition_delete(request):
+    request.user.delete()
+    return json_response({})

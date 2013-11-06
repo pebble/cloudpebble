@@ -7,6 +7,7 @@ from django.utils.timezone import now
 from django.conf import settings
 from django.core.exceptions import SuspiciousOperation
 from django.db import transaction
+from django.contrib.auth.models import User
 
 
 import tempfile
@@ -249,30 +250,36 @@ def build(ctx):
 
 """
 
+def add_project_to_archive(z, project, prefix=''):
+    source_files = SourceFile.objects.filter(project=project)
+    resources = ResourceFile.objects.filter(project=project)
+    prefix = prefix + re.sub(r'[^\w]+', '_', project.name).strip('_').lower()
+
+    for source in source_files:
+        z.writestr('%s/src/%s' % (prefix, source.file_name), source.get_contents())
+
+    for resource in resources:
+        res_path = 'resources/src' if project.sdk_version == '1' else 'resources'
+        z.writestr('%s/%s/%s' % (prefix, res_path, resource.path), open(resource.local_filename).read())
+
+    if project.sdk_version == '1':
+        resource_map = generate_resource_map(project, resources)
+        z.writestr('%s/resources/src/resource_map.json' % prefix, resource_map)
+    else:
+        manifest = generate_v2_manifest(project, resources)
+        z.writestr('%s/appinfo.json' % prefix, manifest)
+        # This file is always the same, but needed to build.
+        z.writestr('%s/wscript' % prefix, generate_wscript_file(project))
+
+
 @task(acks_late=True)
 def create_archive(project_id):
     project = Project.objects.get(pk=project_id)
-    source_files = SourceFile.objects.filter(project=project)
-    resources = ResourceFile.objects.filter(project=project)
     prefix = re.sub(r'[^\w]+', '_', project.name).strip('_').lower()
     with tempfile.NamedTemporaryFile(suffix='.zip', delete=False) as temp:
         filename = temp.name
         with zipfile.ZipFile(filename, 'w', compression=zipfile.ZIP_DEFLATED) as z:
-            for source in source_files:
-                z.writestr('%s/src/%s' % (prefix, source.file_name), source.get_contents())
-
-            for resource in resources:
-                res_path = 'resources/src' if project.sdk_version == '1' else 'resources'
-                z.writestr('%s/%s/%s' % (prefix, res_path, resource.path), open(resource.local_filename).read())
-
-            if project.sdk_version == '1':
-                resource_map = generate_resource_map(project, resources)
-                z.writestr('%s/resources/src/resource_map.json' % prefix, resource_map)
-            else:
-                manifest = generate_v2_manifest(project, resources)
-                z.writestr('%s/appinfo.json' % prefix, manifest)
-                # This file is always the same, but needed to build.
-                z.writestr('%s/wscript' % prefix, generate_wscript_file(project))
+            add_project_to_archive(z, project)
 
         # Generate a URL
         u = uuid.uuid4().hex
@@ -282,6 +289,23 @@ def create_archive(project_id):
         os.chmod(outfile, 0644)
         return '%s%s/%s.zip' % (settings.EXPORT_ROOT, u, prefix)
 
+@task(acks_late=True)
+def export_user_projects(user_id):
+    user = User.objects.get(pk=user_id)
+    projects = Project.objects.filter(owner=user)
+    with tempfile.NamedTemporaryFile(suffix='.zip', delete=False) as temp:
+        filename = temp.name
+        with zipfile.ZipFile(filename, 'w', compression=zipfile.ZIP_DEFLATED) as z:
+            for project in projects:
+                add_project_to_archive(z, project, prefix='cloudpebble-export/')
+
+        # Generate a URL
+        u = uuid.uuid4().hex
+        outfile = '%s%s/%s.zip' % (settings.EXPORT_DIRECTORY, u, 'cloudpebble-export')
+        os.makedirs(os.path.dirname(outfile), 0755)
+        shutil.copy(filename, outfile)
+        os.chmod(outfile, 0644)
+        return '%s%s/%s.zip' % (settings.EXPORT_ROOT, u, 'cloudpebble-export')
 
 class NoProjectFoundError(Exception):
     pass

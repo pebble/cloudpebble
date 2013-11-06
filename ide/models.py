@@ -118,6 +118,9 @@ class UserSettings(models.Model):
     keybinds = models.CharField(max_length=20, choices=KEYBIND_CHOICES, default=KEYBIND_STANDARD)
     theme = models.CharField(max_length=50, choices=THEME_CHOICES, default='monokai')
 
+    # Used for the Pebble ownership transition, when it was set to False.
+    accepted_terms = models.BooleanField(default=True)
+
 User.settings = property(lambda self: UserSettings.objects.get_or_create(user=self)[0])
 
 class UserGithub(models.Model):

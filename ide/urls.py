@@ -37,5 +37,8 @@ urlpatterns = patterns(
     url(r'^settings/github/callback$', views.complete_github_auth, name='complete_github_auth'),
     url(r'^settings/github/unlink$', views.remove_github_auth, name='remove_github_auth'),
     url(r'^import/zip', views.import_zip, name='import_zip'),
-    url(r'^import/github', views.import_github, name='import_github')
+    url(r'^import/github', views.import_github, name='import_github'),
+    url(r'^transition/accept', views.transition_accept, name='transition_accept'),
+    url(r'^transition/export', views.transition_export, name='transition_export'),
+    url(r'^transition/delete', views.transition_delete, name='transition_delete')
 )
