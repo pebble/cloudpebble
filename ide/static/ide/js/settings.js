@@ -53,7 +53,7 @@ CloudPebble.Settings = (function() {
                 app_capabilities.push('location');
             }
             if(pane.find('#settings-capabilities-configuration').is(':checked')) {
-                app_capabilities.push('configuration');
+                app_capabilities.push('configurable');
             }
             app_capabilities = app_capabilities.join(',');
 
