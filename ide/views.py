@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.conf import settings
 from celery.result import AsyncResult
 
-from ide.models import Project, SourceFile, ResourceFile, ResourceIdentifier, BuildResult, TemplateProject, UserGithub
+from ide.models import Project, SourceFile, ResourceFile, ResourceIdentifier, BuildResult, TemplateProject, UserGithub, generate_half_uuid
 from ide.tasks import run_compile, create_archive, do_import_archive, do_import_github, do_github_push, do_github_pull, hooked_commit
 from ide.forms import SettingsForm
 import ide.git
@@ -50,6 +50,18 @@ def index(request):
 @login_required
 def project(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    if project.app_uuid is None:
+        project.app_uuid = Generate()
+    if project.app_company_name is None:
+        project.app_company_name = request.user.username
+    if project.app_short_name is None:
+        project.app_short_name = project.name
+    if project.app_long_name is None:
+        project.app_long_name = project.app_short_name
+    if project.app_version_code is None:
+        project.app_version_code = 1
+    if project.app_version_label is None:
+        project.app_version_label = '1.0'
     return render(request, 'ide/project.html', {'project': project})
 
 
