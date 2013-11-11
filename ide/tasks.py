@@ -215,7 +215,8 @@ def generate_v2_manifest_dict(project, resources):
             'watchface': project.app_is_watchface
         },
         'appKeys': json.loads(project.app_keys),
-        'resources': generate_resource_dict(project, resources)
+        'resources': generate_resource_dict(project, resources),
+        'capabilities': project.app_capabilities.split(',')
     }
     return manifest
 
