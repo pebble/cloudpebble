@@ -5,3 +5,4 @@ dev.db
 pebble-sdk/
 cloudpebble/settings_local.py
 src/
+.vagrant

@@ -1,20 +1,22 @@
 # Django settings for cloudpebble project.
 
+import os
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    ('Katharine Berry', 'katharine@kathar.in'),
+    ('Administrator', 'example@example.com'),
 )
 
-DEFAULT_FROM_EMAIL = 'CloudPebble <noreply@cloudpebble.net>'
+DEFAULT_FROM_EMAIL = 'CloudPebble <cloudpebble@example.com>'
 
 MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '/Users/katharine/projects/cloudpebble/dev.db',                      # Or path to database file if using sqlite3.
+        'NAME': os.getcwd() + '/dev.db',                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',
@@ -52,12 +54,12 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = '/Users/katharine/projects/cloudpebble/user_data/build_results/'
+MEDIA_ROOT = os.getcwd() + '/user_data/build_results/'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://example.com/media/", "http://media.example.com/"
-MEDIA_URL = 'http://ihack.local:8000/builds/'
+MEDIA_URL = 'http://localhost:8001/builds/'
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
@@ -168,7 +170,7 @@ BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 
 LOGIN_REDIRECT_URL = '/ide/'
 
-FILE_STORAGE = '/Users/katharine/projects/cloudpebble/user_data/'
+FILE_STORAGE = os.getcwd() + '/user_data/'
 
 CHROOT_JAIL = None
 
@@ -176,14 +178,16 @@ CHROOT_ROOT = None
 
 DEFAULT_TEMPLATE = None
 
-EXPORT_DIRECTORY = '/Users/katharine/projects/cloudpebble/user_data/export/'
+EXPORT_DIRECTORY = os.getcwd() + '/user_data/export/'
 
-EXPORT_ROOT = 'http://localhost:8000/export/'
+EXPORT_ROOT = 'http://localhost:8001/export/'
 
 GITHUB_CLIENT_ID = '15c3418f8f5c0f956ed8'
 GITHUB_CLIENT_SECRET = '06e9f765f00016a79a38599fbd858990b23b8afe'
 
-GITHUB_HOOK_TEMPLATE = 'http://putnam.kathar.in:8000/ide/project/%(project)d/github/push_hook?key=%(key)s'
+GITHUB_HOOK_TEMPLATE = 'http://example.com/ide/project/%(project)d/github/push_hook?key=%(key)s'
+
+SDK1_ROOT = '/home/vagrant/sdk1/Pebble/sdk'
 
 import djcelery
 djcelery.setup_loader()
@@ -192,4 +196,5 @@ djcelery.setup_loader()
 try:
     from settings_local import *
 except ImportError:
-    raise
+    print "No local settings overrides."
+    pass

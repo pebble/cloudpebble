@@ -6,7 +6,7 @@ django_celery
 flup
 freetype-py
 psycopg2
-Pillow
+Pillow==2.0.0
 South
 qrcode
 pygithub==1.14.2

@@ -36,6 +36,14 @@ def create_sdk_symlinks(project_root, sdk_root):
     os.symlink(os.path.join(sdk_root, os.path.join("resources", "wscript")),
                os.path.join(project_root, os.path.join("resources", "wscript")))
 
+def link_or_copy(src, dst):
+    try:
+        os.link(src, dst)
+    except OSError as e:
+        if e.errno == 18:
+            shutil.copy(src, dst)
+        else:
+            raise
 
 @task(ignore_result=True, acks_late=True)
 def run_compile(build_result, optimisation=None):
@@ -68,7 +76,7 @@ def run_compile(build_result, optimisation=None):
             if not os.path.exists(abs_target_dir):
                 print "Creating directory %s." % abs_target_dir
                 os.makedirs(abs_target_dir)
-            os.link(os.path.abspath(f.local_filename), abs_target)
+            link_or_copy(os.path.abspath(f.local_filename), abs_target)
 
         # Resources
         resource_root = 'resources/src' if project.sdk_version == '1' else 'resources'
@@ -91,13 +99,13 @@ def run_compile(build_result, optimisation=None):
             if not abs_target.startswith(target_dir):
                 raise Exception("Suspicious filename: %s" % f.file_name)
             print "Added %s %s" % (f.kind, f.local_filename)
-            os.link(os.path.abspath(f.local_filename), abs_target)
+            link_or_copy(os.path.abspath(f.local_filename), abs_target)
 
 
         # Reconstitute the SDK
         if project.sdk_version == '1':
             print "Symlinking SDK"
-            create_sdk_symlinks(base_dir, os.path.abspath("pebble-sdk/sdk" if settings.CHROOT_JAIL is None else "/sdk/sdk"))
+            create_sdk_symlinks(base_dir, os.path.abspath(settings.SDK1_ROOT))
         elif project.sdk_version == '2':
             print "Inserting wscript"
             open(os.path.join(base_dir, 'wscript'), 'w').write(generate_wscript_file(project))
@@ -106,6 +114,7 @@ def run_compile(build_result, optimisation=None):
         print "Beginning compile"
         cwd = os.getcwd()
         success = False
+        output = 'Failed to get output'
         try:
             if settings.CHROOT_JAIL is not None:
                 output = subprocess.check_output([settings.CHROOT_JAIL, project.sdk_version, base_dir[len(settings.CHROOT_ROOT):], optimisation], stderr=subprocess.STDOUT)
@@ -113,13 +122,10 @@ def run_compile(build_result, optimisation=None):
                 os.chdir(base_dir)
                 if project.sdk_version == '1':
                     print "Running SDK1 build"
-                    os.environ['PATH'] += ':/Users/katharine/projects/cloudpebble/pebble-sdk/arm-cs-tools/bin'
-                    output = subprocess.check_output(["./waf", "configure", "-O", optimisation], stderr=subprocess.STDOUT)
+                    output = subprocess.check_output(["./waf", "configure"], stderr=subprocess.STDOUT)
                     output += subprocess.check_output(["./waf", "build"], stderr=subprocess.STDOUT)
                 elif project.sdk_version == '2':
                     print "Running SDK2 build"
-                    os.environ['PATH'] += ':/Users/katharine/pebble-dev/PebbleSDK-2.0-BETA1-rc1/bin'
-                    print "Path set"
                     output = subprocess.check_output(["pebble", "build"], stderr=subprocess.STDOUT)
                     print "output", output
         except subprocess.CalledProcessError as e:
@@ -143,7 +149,7 @@ def run_compile(build_result, optimisation=None):
                 except Exception as e:
                     print "Couldn't extract filesizes: %s" % e
 
-                os.rename(temp_file, build_result.pbw)
+                shutil.move(temp_file, build_result.pbw)
                 print "Build succeeded."
             else:
                 print "Build failed."
