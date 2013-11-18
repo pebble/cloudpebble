@@ -69,7 +69,7 @@ author "Katharine Berry"
 
 start on vagrant-mounted
 # Because if we don't stop before rabbitmq we hang.
-stop on [!2345]
+stop on runlevel [!2345]
 
 setuid vagrant
 setgid vagrant
