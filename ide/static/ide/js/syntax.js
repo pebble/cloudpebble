@@ -181,7 +181,7 @@ CloudPebble.Editor.PebbleMode = {
         'GTextAlignmentLeft': true,
         'GTextAlignmentRight': true,
         'GTextOverflowModeTrailingEllipsis': true,
-        'GTextOverflowModeWrap': true,
+        'GTextOverflowModeWordWrap': true,
         'HOUR_UNIT': true,
         'MINUTE_UNIT': true,
         'MONTH_UNIT': true,
