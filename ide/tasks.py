@@ -134,6 +134,9 @@ def run_compile(build_result, optimisation=None):
         else:
             success = True
             temp_file = os.path.join(base_dir, 'build', '%s.pbw' % os.path.basename(base_dir))
+            if not os.path.exists(temp_file):
+                success = False
+                print "Success was a lie."
         finally:
             os.chdir(cwd)
 
