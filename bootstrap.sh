@@ -35,7 +35,7 @@ popd
 sudo -u vagrant mkdir sdk2
 pushd sdk2
     # Host this ourselves until Pebble stops being silly.
-    wget --progress=bar:force -O sdk.tar.gz http://cloudpebble-vagrant.s3.amazonaws.com/PebbleSDK-2.0-BETA3.tar.gz
+    wget --progress=bar:force -O sdk.tar.gz http://cloudpebble-vagrant.s3.amazonaws.com/PebbleSDK-2.0-BETA4.tar.gz
     sudo -u vagrant tar --strip 1 -xzf sdk.tar.gz
     rm sdk.tar.gz
     sudo -u vagrant ln -s ~/arm-cs-tools arm-cs-tools
