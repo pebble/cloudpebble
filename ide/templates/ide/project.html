@@ -228,8 +228,8 @@
                     <label class="control-label" for="settings-app-is-watchface">App kind</label>
                     <div class="controls">
                         <select id="settings-app-is-watchface">
-                            <option value="0"{% if not project.is_watchface %}selected{% endif%}>Watch app</option>
-                            <option value="1"{% if project.is_watchface %}selected{% endif%}>Watchface</option>
+                            <option value="0"{% if not project.app_is_watchface %}selected{% endif%}>Watch app</option>
+                            <option value="1"{% if project.app_is_watchface %}selected{% endif%}>Watchface</option>
                         </select>
                     </div>
                 </div>
