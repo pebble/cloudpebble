@@ -95,6 +95,9 @@ CloudPebble.Compile = (function() {
             e.preventDefault();
             show_app_logs($('#phone-ip').val());
         });
+        if(navigator.userAgent.indexOf('Firefox') != -1) {
+            pane.find('#firefox-warning').removeClass('hide');
+        }
     };
 
     var m_build_count = 0;
@@ -141,7 +144,7 @@ CloudPebble.Compile = (function() {
                 if(build.state == 3) {
                     pane.find('#last-compilation-pbw').removeClass('hide').find('a:first').attr('href', build.pbw);
                     var url = build.pbw;
-                    if(CloudPebble.ProjectInfo.sdk_version == "2") {
+                    if(CloudPebble.ProjectInfo.sdk_version == "2" && navigator.userAgent.indexOf("Firefox") == -1) {
                         pane.find("#run-on-phone").removeClass('hide');
                         if(localStorage['cp-last-phone-ip']) {
                             pane.find('#phone-ip').val(localStorage['cp-last-phone-ip']);

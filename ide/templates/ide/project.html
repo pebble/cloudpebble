@@ -122,6 +122,18 @@
 <div id="compilation-pane-template" class="hide">
     <div id="last-compilation" class="hide">
         <h3>Last build</h3>
+        <div class="row hide" id="firefox-warning" style="margin-bottom:10px;">
+            <div class="offset1 span9">
+                <div class="alert alert-danger" style="text-align: center;">
+                    <a class="close" data-dismiss="alert" href="#">&times;</a>
+                    Firefox does not support SDK2 automatic deployment and log viewing.<br>
+                    Please try using 
+                        <a href="http://google.com/chrome">Chrome</a>,
+                        <a href="http://apple.com/safari">Safari</a> or
+                        <a href="http://opera.com/">Opera</a>.
+                </div>
+            </div>
+        </div>
         <div class="row">
             <div class="offset1 span6">
                 <p>Started: <span id="last-compilation-started">April 17, 2013, 11:50 a.m.</span></p>
