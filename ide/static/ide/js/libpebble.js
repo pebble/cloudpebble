@@ -24,12 +24,10 @@ Pebble = function(ip, port) {
     this.install_app = function(url) {
         var request = new XMLHttpRequest();
         request.open('get', url, true);
-        console.log(url);
         request.responseType = "arraybuffer";
         request.onload = function(event) {
             var buffer = request.response;
             if(buffer) {
-                console.log("got app");
                 buffer = new Uint8Array(buffer);
                 var final_buffer = new Uint8Array(buffer.length + 1);
                 final_buffer.set(buffer, 1);
@@ -40,17 +38,25 @@ Pebble = function(ip, port) {
         request.send();
     };
 
-    this.start_logging = function() {
+    this.enable_app_logs = function() {
         enable_app_logs();
     };
 
-    this.end_logging = function() {
+    this.disable_app_logs = function() {
         disable_app_logs();
     };
 
     this.close = function() {
-        disable_app_logs();
+        try {
+            disable_app_logs();
+        } catch(e) {
+            // pass.
+        }
         mSocket.close();
+    };
+
+    this.is_connected = function() {
+        return mSocket && mSocket.readyState == WebSocket.OPEN;
     };
 
     var enable_app_logs = function() {
@@ -105,8 +111,6 @@ Pebble = function(ip, port) {
         var command = parts[1];
         var size = parts[0];
         var message = data.subarray(5);
-        console.log("Received socket message: " + command);
-        console.log(data);
         if(command == ENDPOINTS.APP_LOGS) {
             handle_app_log(message);
         }
@@ -118,7 +122,6 @@ Pebble = function(ip, port) {
         var message = bytes_to_string(data.subarray(40, 40+metadata[2]));
         var level = metadata[1];
         var line = metadata[3];
-        console.log("Log message (level " + metadata[1] + ") " + filename + ":" + metadata[3] + ": " + message);
         self.trigger("app_log", level, filename, line, message);
     };
 

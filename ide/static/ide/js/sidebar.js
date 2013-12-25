@@ -5,7 +5,7 @@ CloudPebble.Sidebar = (function() {
     var suspend_active_pane = function() {
         var pane_id = $('#main-pane').data('pane-id');
         if(!pane_id) {
-            $('#main-pane').remove();
+            destroy_active_pane();
             $('#pane-parent').append($('<div id="main-pane"></div>'));
             return;
         }
