@@ -87,6 +87,10 @@ CloudPebble.Compile = (function() {
     var pane = null;
     var init = function() {
         pane = $('#compilation-pane-template').clone();
+        pane.find('#install-on-phone-btn').click(function(e) {
+            e.preventDefault();
+            install_on_watch();
+        });
     };
 
     var m_build_count = 0;
@@ -133,7 +137,14 @@ CloudPebble.Compile = (function() {
                 if(build.state == 3) {
                     pane.find('#last-compilation-pbw').removeClass('hide').find('a:first').attr('href', build.pbw);
                     var url = build.pbw;
-                    pane.find('#last-compilation-qr-code').removeClass('hide').find('img').attr('src', '/qr/?v=' + url);
+                    if(CloudPebble.ProjectInfo.sdk_version == "2") {
+                        pane.find("#run-on-phone").removeClass('hide');
+                        if(localStorage['cp-last-phone-ip']) {
+                            pane.find('#phone-ip').val(localStorage['cp-last-phone-ip']);
+                        }
+                    } else {
+                        pane.find('#last-compilation-qr-code').removeClass('hide').find('img').attr('src', '/qr/?v=' + url);
+                    }
                     $('#pbw-shortlink > a').attr('href', '#').text("get short link").unbind('click').click(function() {
                         $('#pbw-shortlink > a').text("generating…").unbind('click');
                         ga('send', 'event', 'short link', 'generate');
@@ -172,12 +183,52 @@ CloudPebble.Compile = (function() {
             if(build.state != 3) {
                 pane.find('#last-compilation-pbw').addClass('hide');
                 pane.find('#last-compilation-qr-code').addClass('hide');
+                pane.find('#run-on-phone').addClass('hide');
             }
             pane.find('#last-compilation-status')
                 .removeClass('label-success label-error label-info')
                 .addClass('label-' + COMPILE_SUCCESS_STATES[build.state].label)
                 .text(COMPILE_SUCCESS_STATES[build.state].english);
         }
+    };
+
+    var install_on_watch = function() {
+        var ip = $('#phone-ip').val();
+        localStorage['cp-last-phone-ip'] = ip;
+        var modal = $('#phone-install-progress').modal();
+        modal.find('.modal-body > p').text("Installing app on your watch…");
+        modal.find('.btn').addClass('hide');
+        modal.find('.progress').removeClass('progress-danger progress-success').addClass('progress-striped');
+
+        var report_error = function(message) {
+            modal.find('.modal-body > p').text(message);
+            modal.find('.dismiss-btn').removeClass('hide');
+            modal.find('.progress').addClass('progress-danger').removeClass('progress-striped');
+        };
+
+        var pebble;
+        try {
+            pebble = new Pebble(ip);
+        } catch(e) {
+            report_error(message);
+            return;
+        }
+        pebble.on('open', function() {
+            pebble.install_app(pane.find('#last-compilation-pbw > a').attr('href'));
+        });
+        pebble.on('status', function(code) {
+            if(code === 0) {
+                modal.find('.modal-body > p').text("Installed successfully!");
+                modal.find('.btn').removeClass('hide');
+                modal.find('.progress').addClass('progress-success').removeClass('progress-striped');
+            } else {
+                report_error("Installation failed with error code " + code + ". Check your phone for details.");
+            }
+            pebble.close();
+        });
+        pebble.on('error', function(e) {
+            report_error("Installation failed: " + e);
+        });
     };
 
     return {

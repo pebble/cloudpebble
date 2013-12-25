@@ -135,6 +135,23 @@
                 <p style="text-align: center;"><img src=""><br>
                     <span class="muted">Scan to download watchface</span></p>
             </div>
+            <div class="span4 hide" id="run-on-phone">
+                <form class="well well-small">
+                    <div class="control-group" style="text-align: center;">
+                        <label class="control-label" for="phone-ip">Phone IP:</label>
+                        <div class="controls">
+                            <input type="text" id="phone-ip" placeholder="10.0.0.153">
+                        </div>
+                    </div>
+                    <div class="form-actions" style="margin-bottom: 0px; padding-bottom: 0px;text-align: center;">
+                        <div style="">
+                            <button class="btn btn-primary" id="install-on-phone-btn">Install &amp; Run</button>
+                            <button class="btn">View app logs</button>
+                        </div>
+                        <span class="help-block">Requires that the Pebble app be running on your phone with Developer Mode enabled.</span>
+                    </div>
+                </form>
+            </div>
         </div>
         <hr>
     </div>
@@ -480,6 +497,23 @@
         <button class="btn btn-danger" id="github-pull-prompt-confirm">Pull</button>
     </div>
 </div>
+<!-- Phone install progress -->
+<div id="phone-install-progress" class="modal hide fade" tabindex="-1" role="dialog">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">x</button>
+        <h3>Install App</h3>
+    </div>
+    <div class="modal-body">
+        <p>Installing app on your watch…</p>
+        <div class="progress progress-striped active">
+            <div class="bar" style="width: 100%;"></div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button data-dismiss="modal" class="btn hide dismiss-btn">Dismiss</button>
+        <button data-dismiss="modal" class="btn hide logs-btn btn-primary">View logs</button>
+    </div>
+</div>
 <!-- Modal text prompt -->
 <div id="modal-text-input" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
@@ -549,6 +583,7 @@ var USER_SETTINGS = {
 <script src="{% static 'ide/js/resources.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/settings.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/github.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/libpebble.js' %}" type="text/javascript"></script>
 <script type="text/javascript">
 CloudPebble.Init();
 </script>
