@@ -42,6 +42,15 @@ pushd sdk2
     pip install -r requirements.txt
 popd
 
+# Set up CORS on the lighttpd server.
+cat << 'EOF' > /etc/lighttpd/conf-available/20-cors.conf
+server.modules += ("mod_setenv")
+setenv.add-response-header = ("Access-Control-Allow-Origin" => "*")
+
+EOF
+lighttpd-enable-mod cors
+/etc/init.d/lighttpd restart
+
 # Set up some upstart stuff.
 cat << 'EOF' > /etc/init/cloudpebble.conf
 description "cloudpebble server"

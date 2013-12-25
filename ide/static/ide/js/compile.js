@@ -87,6 +87,14 @@ CloudPebble.Compile = (function() {
     var pane = null;
     var init = function() {
         pane = $('#compilation-pane-template').clone();
+        pane.find('#install-on-phone-btn').click(function(e) {
+            e.preventDefault();
+            install_on_watch();
+        });
+        pane.find('#show-app-logs-btn').click(function(e) {
+            e.preventDefault();
+            show_app_logs($('#phone-ip').val());
+        });
     };
 
     var m_build_count = 0;
@@ -133,7 +141,14 @@ CloudPebble.Compile = (function() {
                 if(build.state == 3) {
                     pane.find('#last-compilation-pbw').removeClass('hide').find('a:first').attr('href', build.pbw);
                     var url = build.pbw;
-                    pane.find('#last-compilation-qr-code').removeClass('hide').find('img').attr('src', '/qr/?v=' + url);
+                    if(CloudPebble.ProjectInfo.sdk_version == "2") {
+                        pane.find("#run-on-phone").removeClass('hide');
+                        if(localStorage['cp-last-phone-ip']) {
+                            pane.find('#phone-ip').val(localStorage['cp-last-phone-ip']);
+                        }
+                    } else {
+                        pane.find('#last-compilation-qr-code').removeClass('hide').find('img').attr('src', '/qr/?v=' + url);
+                    }
                     $('#pbw-shortlink > a').attr('href', '#').text("get short link").unbind('click').click(function() {
                         $('#pbw-shortlink > a').text("generating…").unbind('click');
                         ga('send', 'event', 'short link', 'generate');
@@ -172,12 +187,144 @@ CloudPebble.Compile = (function() {
             if(build.state != 3) {
                 pane.find('#last-compilation-pbw').addClass('hide');
                 pane.find('#last-compilation-qr-code').addClass('hide');
+                pane.find('#run-on-phone').addClass('hide');
             }
             pane.find('#last-compilation-status')
                 .removeClass('label-success label-error label-info')
                 .addClass('label-' + COMPILE_SUCCESS_STATES[build.state].label)
                 .text(COMPILE_SUCCESS_STATES[build.state].english);
         }
+    };
+
+    var mPreviousDisplayLogs = [];
+    var mPebble = null;
+    var mLogHolder = null;
+
+    var pebble_connect = function(ip) {
+        if(mPebble) return mPebble;
+        mPebble = new Pebble(ip);
+        mPebble.on('app_log', handle_app_log);
+        return mPebble;
+    };
+
+    var handle_app_log = function(priority, filename, line_number, message) {
+        var log = {
+            priority: priority,
+            filename: filename,
+            line_number: line_number,
+            message: message
+        };
+        mPreviousDisplayLogs.push(log);
+        show_log_line(log);
+    };
+
+    var show_log_line = function(log) {
+        if(mLogHolder) {
+            var display = get_log_label(log.priority) + ' ' + log.filename + ':' + log.line_number + ': ' + log.message + "\n";
+            mLogHolder.append($('<span>').addClass(get_log_class(log.priority)).text(display));
+        }
+    };
+
+    var get_log_class = function(priority) {
+        if(priority < 25) return 'log-error';
+        if(priority < 75) return 'log-warning';
+        if(priority < 150) return 'log-note';
+        if(priority < 225) return 'log-debug';
+        return 'log-verbose';
+    };
+
+    var get_log_label = function(priority) {
+        if(priority < 25) return '[ERROR]';
+        if(priority < 75) return '[WARNING]';
+        if(priority < 150) return '[INFO]';
+        if(priority < 225) return '[DEBUG]';
+        return '[VERBOSE]';
+    };
+
+    var install_on_watch = function() {
+        var ip = $('#phone-ip').val();
+        localStorage['cp-last-phone-ip'] = ip;
+        var modal = $('#phone-install-progress').modal();
+        modal.find('.modal-body > p').text("Installing app on your watch…");
+        modal.find('.btn').addClass('hide');
+        modal.find('.progress').removeClass('progress-danger progress-success').addClass('progress-striped');
+        modal.off('hide');
+
+        var report_error = function(message) {
+            modal.find('.modal-body > p').text(message);
+            modal.find('.dismiss-btn').removeClass('hide');
+            modal.find('.progress').addClass('progress-danger').removeClass('progress-striped');
+        };
+
+        try {
+            mPebble = pebble_connect(ip);
+        } catch(e) {
+            report_error("Failed to create socket.");
+        }
+
+        mPebble.on('open', function() {
+            mPebble.install_app(pane.find('#last-compilation-pbw > a').attr('href'));
+        });
+        mPebble.on('status', function(code) {
+            if(code === 0) {
+                mPreviousDisplayLogs = [];
+                mPebble.enable_app_logs();
+                modal.find('.modal-body > p').text("Installed successfully!");
+                modal.find('.btn').removeClass('hide');
+                modal.find('.logs-btn').off('click').click(function() {
+                    modal.off('hide');
+                    show_app_logs();
+                    modal.modal('hide');
+                });
+                modal.on('hide', stop_logs);
+                modal.find('.progress').addClass('progress-success').removeClass('progress-striped');
+                ga('send', 'event', 'install', 'direct', 'success');
+            } else {
+                report_error("Installation failed with error code " + code + ". Check your phone for details.");
+                ga('send', 'event', 'install', 'direct', 'phone-error');
+                mPebble.close();
+                mPebble = null;
+            }
+        });
+        mPebble.on('error', function(e) {
+            report_error("Installation failed: " + e);
+            ga('send', 'event', 'install', 'direct', 'connection-error');
+            mPebble = null;
+        });
+    };
+
+    var show_app_logs = function(ip) {
+        if(!mPebble || !mPebble.is_connected()) {
+            localStorage['cp-last-phone-ip'] = ip;
+            mPebble = pebble_connect(ip);
+            mPebble.on('open', function() {
+                mPebble.enable_app_logs();
+                if(mLogHolder)
+                    mLogHolder.append($('<span>').addClass('log-success').text("Connected.\n"));
+            });
+        }
+        mPebble.on('close', function() {
+            if(mLogHolder)
+                mLogHolder.append($('<span>').addClass('log-error').text("Disconnected from phone.\n"));
+        });
+        CloudPebble.Sidebar.SuspendActive();
+        if(!mLogHolder) {
+            var browserHeight = document.documentElement.clientHeight;
+            mLogHolder = $('<pre class="build-log">').css({'height': (browserHeight - 130) + 'px', 'overflow': 'auto'});
+        } else {
+            mLogHolder.empty();
+        }
+        _.each(mPreviousDisplayLogs, show_log_line);
+        CloudPebble.Sidebar.SetActivePane(mLogHolder, undefined, undefined, stop_logs);
+    };
+
+    var stop_logs = function() {
+        if(mPebble) {
+            mPebble.close();
+            mPebble = null;
+        }
+        mPreviousDisplayLogs = [];
+        mLogHolder = null;
     };
 
     return {
