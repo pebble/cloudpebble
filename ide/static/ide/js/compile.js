@@ -204,6 +204,7 @@ CloudPebble.Compile = (function() {
         if(mPebble) return mPebble;
         mPebble = new Pebble(ip);
         mPebble.on('app_log', handle_app_log);
+        mPebble.on('phone_log', handle_phone_log);
         return mPebble;
     };
 
@@ -218,6 +219,17 @@ CloudPebble.Compile = (function() {
         show_log_line(log);
     };
 
+    var handle_phone_log = function(message) {
+        var log = {
+            priority: -1,
+            filename: 'pebble-app.js',
+            line_number: '?',
+            message: message
+        };
+        mPreviousDisplayLogs.push(log);
+        show_log_line(log);
+    };
+
     var show_log_line = function(log) {
         if(mLogHolder) {
             var display = get_log_label(log.priority) + ' ' + log.filename + ':' + log.line_number + ': ' + log.message + "\n";
@@ -226,6 +238,7 @@ CloudPebble.Compile = (function() {
     };
 
     var get_log_class = function(priority) {
+        if(priority == -1) return 'log-phone';
         if(priority < 25) return 'log-error';
         if(priority < 75) return 'log-warning';
         if(priority < 150) return 'log-note';
@@ -234,6 +247,7 @@ CloudPebble.Compile = (function() {
     };
 
     var get_log_label = function(priority) {
+        if(priority == -1) return '[PHONE]';
         if(priority < 25) return '[ERROR]';
         if(priority < 75) return '[WARNING]';
         if(priority < 150) return '[INFO]';

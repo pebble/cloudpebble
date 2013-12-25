@@ -105,6 +105,9 @@ Pebble = function(ip, port) {
             console.log("Received status update: ", result);
             self.trigger("status", result[0]);
             return;
+        } else if(origin == 2) {
+            var phone_log = bytes_to_string(data.subarray(1));
+            self.trigger('phone_log', phone_log);
         }
         if(origin !== 0) return;
         var parts = unpack("HH", data.subarray(1, 5));
