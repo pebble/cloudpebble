@@ -461,6 +461,7 @@ CloudPebble.Editor.Autocomplete = (function() {
         ['battery_state_service_unsubscribe', 'void', []],
         ['bitmap_layer_create', 'BitmapLayer*', ['GRect frame']],
         ['bitmap_layer_destroy', 'void', ['BitmapLayer* bitmap_layer']],
+        ['bitmap_layer_get_bitmap', 'const GBitmap*', ['BitmapLayer * bitmap_layer']],
         ['bitmap_layer_get_layer', 'Layer*', ['const BitmapLayer *bitmap_layer']],
         ['bitmap_layer_set_alignment', 'void', ['BitmapLayer *bitmap_layer', 'GAlign alignment']],
         ['bitmap_layer_set_background_color', 'void', ['BitmapLayer *bitmap_layer', 'GColor color']],
