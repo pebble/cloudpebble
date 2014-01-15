@@ -383,6 +383,7 @@ def save_project_settings(request, project_id):
                 project.app_is_watchface = bool(int(request.POST['app_is_watchface']))
                 project.app_capabilities = request.POST['app_capabilities']
                 project.app_keys = request.POST['app_keys']
+                project.app_jshint = bool(int(request.POST['app_jshint']))
 
                 menu_icon = request.POST['menu_icon']
                 if menu_icon != '':
