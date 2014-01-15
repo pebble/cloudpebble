@@ -292,7 +292,7 @@ def generate_wscript_file(project):
 # Feel free to customize this to your needs.
 #
 
-from sh import jshint
+from sh import jshint, ErrorReturnCode_2
 hint = jshint
 
 top = '.'
@@ -307,7 +307,11 @@ def configure(ctx):
     hint = hint.bake(['--config', 'pebble-jshintrc'])
 
 def build(ctx):
-    {{jshint}}
+    if {{jshint}}:
+        try:
+            hint("src/js/pebble-js-app.js")
+        except ErrorReturnCode_2 as e:
+            ctx.fatal("\\nJavaScript linting failed (you can disable this in Project Settings):\\n" + e.stdout)
 
     ctx.load('pebble_sdk')
 
@@ -318,7 +322,7 @@ def build(ctx):
                    js=ctx.path.ant_glob('src/js/**/*.js'))
 
 """
-    return wscript.replace('{{jshint}}', 'hint("src/js/pebble-js-app.js")' if jshint else '')
+    return wscript.replace('{{jshint}}', 'True' if jshint else 'False')
 
 def add_project_to_archive(z, project, prefix=''):
     source_files = SourceFile.objects.filter(project=project)
