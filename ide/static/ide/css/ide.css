@@ -122,3 +122,8 @@ span.cm-autofilled-end {
 .CodeMirror-hint-active .muted {
     color: #ddd;
 }
+
+/* Fix truncated autocomplete introduced when moving to hosted CSS. */
+.CodeMirror-hint {
+    max-width: initial;
+}
