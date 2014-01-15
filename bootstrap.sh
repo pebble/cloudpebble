@@ -5,6 +5,13 @@ apt-get update
 apt-get install -y aptitude
 aptitude install -y python-pip mercurial git python-dev python-psycopg2 rabbitmq-server libmpc libevent-dev lighttpd
 
+# Install node for jshint
+aptitude install -y g++ make python-software-properties
+add-apt-repository -y ppa:chris-lea/node.js
+apt-get update
+aptitude install -y nodejs
+npm install -g jshint
+
 # Make our static server useful.
 ln -s /vagrant/user_data/build_results /var/www/builds 
 ln -s /vagrant/user_data/export /var/www/export

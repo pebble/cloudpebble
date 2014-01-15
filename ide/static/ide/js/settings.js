@@ -48,6 +48,7 @@ CloudPebble.Settings = (function() {
             var app_uuid = pane.find('#settings-uuid').val();
             var app_is_watchface = pane.find('#settings-app-is-watchface').val();
             var app_keys = pane.find('#settings-app-keys').val();
+            var app_jshint = pane.find('#settings-app-jshint').prop("checked") ? 1 : 0;
             var menu_icon = pane.find('#settings-menu-image').val();
 
             var app_capabilities = [];
@@ -129,6 +130,7 @@ CloudPebble.Settings = (function() {
                 saved_settings['app_capabilities'] = app_capabilities;
                 saved_settings['app_is_watchface'] = app_is_watchface
                 saved_settings['app_keys'] = app_keys;
+                saved_settings['app_jshint'] = app_jshint;
                 saved_settings['menu_icon'] = menu_icon;
             }
 
@@ -151,6 +153,7 @@ CloudPebble.Settings = (function() {
                         CloudPebble.ProjectInfo.app_version_label = version_label
                         CloudPebble.ProjectInfo.app_is_watchface = app_is_watchface
                         CloudPebble.ProjectInfo.app_capabilities = app_capabilities
+                        CloudPebble.ProjectInfo.app_jshint = app_jshint
                     }
                     $('.project-name').text(name);
                     window.document.title = "CloudPebble – " + name;

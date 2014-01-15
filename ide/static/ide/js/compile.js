@@ -49,6 +49,9 @@ CloudPebble.Compile = (function() {
             log = log.replace(/(.+' finished successfully \(.+)/g, '<span class="log-success">$1</span>');
             log = log.replace(/(cc1: .+)/g, '<span class="log-note">$1</span>');
             log = log.replace(/(cc1: all warnings .+)/g, '<span class="log-warning">$1</span>');
+            // JavaScript linting failures are errors:
+            log = log.replace(/^(src\/js\/.*)$/gm, '<span class="log-error">$1</span>');
+            log = log.replace(/^(JavaScript linting failed.*)$/gm, '<span class="log-note">$1</span>');
             log = '<pre class="build-log" style="height: 100%;">' + log + '</pre>';
             var browserHeight = document.documentElement.clientHeight;
             log = $(log).css({'height': (browserHeight - 130) + 'px', 'overflow': 'auto'});

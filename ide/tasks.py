@@ -109,6 +109,8 @@ def run_compile(build_result, optimisation=None):
         elif project.sdk_version == '2':
             print "Inserting wscript"
             open(os.path.join(base_dir, 'wscript'), 'w').write(generate_wscript_file(project))
+            print "Inserting jshintrc"
+            open(os.path.join(base_dir, 'pebble-jshintrc'), 'w').write(generate_jshint_file(project))
 
         # Build the thing
         print "Beginning compile"
@@ -232,13 +234,69 @@ def generate_v2_manifest_dict(project, resources):
 def generate_v2_manifest(project, resources):
     return dict_to_pretty_json(generate_v2_manifest_dict(project, resources))
 
-def generate_wscript_file(project):
+def generate_jshint_file(project):
     return """
+/*
+ * Example jshint configuration file for Pebble development.
+ *
+ * Check out the full documentation at http://www.jshint.com/docs/options/
+ */
+{
+  // Declares the existence of the globals available in PebbleKit JS.
+  "globals": {
+    "Pebble": true,
+    "console": true,
+    "XMLHttpRequest": true,
+    "navigator" : true, // For navigator.geolocation
+    "localStorage" : true
+  },
+
+  // Do not mess with standard JavaScript objects (Array, Date, etc)
+  "freeze": true,
+
+  // Do not use eval! Keep this warning turned on (ie: false)
+  "evil": false,
+
+  /*
+   * The options below are more style/developer dependent.
+   * Customize to your liking.
+   */
+
+  // All variables should be in camelcase - too specific for CloudPebble builds to fail
+  // "camelcase": true,
+
+  // Do not allow blocks without { } - too specific for CloudPebble builds to fail.
+  // "curly": true,
+
+  // Prohibits the use of immediate function invocations without wrapping them in parentheses
+  "immed": true,
+
+  // Don't enforce indentation, because it's not worth failing builds over
+  // (especially given our somewhat lacklustre support for it)
+  "indent": false,
+
+  // Do not use a variable before it's defined
+  "latedef": "nofunc",
+
+  // Spot undefined variables
+  "undef": "true",
+
+  // Spot unused variables
+  "unused": "true"
+}
+"""
+
+def generate_wscript_file(project):
+    jshint = project.app_jshint
+    wscript = """
 #
 # This file is the default set of rules to compile a Pebble project.
 #
 # Feel free to customize this to your needs.
 #
+
+from sh import jshint, ErrorReturnCode_2
+hint = jshint
 
 top = '.'
 out = 'build'
@@ -248,8 +306,16 @@ def options(ctx):
 
 def configure(ctx):
     ctx.load('pebble_sdk')
+    global hint
+    hint = hint.bake(['--config', 'pebble-jshintrc'])
 
 def build(ctx):
+    if {{jshint}}:
+        try:
+            hint("src/js/pebble-js-app.js")
+        except ErrorReturnCode_2 as e:
+            ctx.fatal("\\nJavaScript linting failed (you can disable this in Project Settings):\\n" + e.stdout)
+
     ctx.load('pebble_sdk')
 
     ctx.pbl_program(source=ctx.path.ant_glob('src/**/*.c'),
@@ -259,6 +325,7 @@ def build(ctx):
                    js=ctx.path.ant_glob('src/js/**/*.js'))
 
 """
+    return wscript.replace('{{jshint}}', 'True' if jshint else 'False')
 
 def add_project_to_archive(z, project, prefix=''):
     source_files = SourceFile.objects.filter(project=project)
