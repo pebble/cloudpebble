@@ -242,12 +242,14 @@ def generate_jshint_file(project):
  * Check out the full documentation at http://www.jshint.com/docs/options/
  */
 {
-  // Declares the existence of a global 'Pebble' object
-  "globals": { "Pebble" : true },
-
-  // And standard objects (XMLHttpRequest and console)
-  "browser": true,
-  "devel": true,
+  // Declares the existence of the globals available in PebbleKit JS.
+  "globals": {
+    "Pebble": true,
+    "console": true,
+    "XMLHttpRequest": true,
+    "navigator" : true, // For navigator.geolocation
+    "localStorage" : true
+  },
 
   // Do not mess with standard JavaScript objects (Array, Date, etc)
   "freeze": true,
@@ -260,17 +262,18 @@ def generate_jshint_file(project):
    * Customize to your liking.
    */
 
-  // All variables should be in camelcase
-  "camelcase": true,
+  // All variables should be in camelcase - too specific for CloudPebble builds to fail
+  // "camelcase": true,
 
-  // Do not allow blocks without { }
-  "curly": true,
+  // Do not allow blocks without { } - too specific for CloudPebble builds to fail.
+  // "curly": true,
 
   // Prohibits the use of immediate function invocations without wrapping them in parentheses
   "immed": true,
 
-  // Enforce indentation
-  "indent": true,
+  // Don't enforce indentation, because it's not worth failing builds over
+  // (especially given our somewhat lacklustre support for it)
+  "indent": false,
 
   // Do not use a variable before it's defined
   "latedef": "nofunc",
