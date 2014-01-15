@@ -240,6 +240,7 @@ CloudPebble.Compile = (function() {
         if(mLogHolder) {
             var display = get_log_label(log.priority) + ' ' + log.filename + ':' + log.line_number + ': ' + log.message + "\n";
             mLogHolder.append($('<span>').addClass(get_log_class(log.priority)).text(display));
+            mLogHolder[0].scrollTop = mLogHolder[0].scrollHeight;
         }
     };
 
