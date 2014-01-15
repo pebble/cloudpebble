@@ -312,7 +312,7 @@ def configure(ctx):
 def build(ctx):
     if {{jshint}}:
         try:
-            hint("src/js/pebble-js-app.js")
+            hint("src/js/pebble-js-app.js", _tty_out=False) # no tty because there are none in the cloudpebble sandbox.
         except ErrorReturnCode_2 as e:
             ctx.fatal("\\nJavaScript linting failed (you can disable this in Project Settings):\\n" + e.stdout)
 
