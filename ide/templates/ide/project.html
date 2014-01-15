@@ -345,6 +345,12 @@
                     </div>
                 </div>
                 <div class="control-group">
+                    <label class="control-label" for="settings-app-jshint">Check Javascript with jshint before building</label>
+                    <div class="controls">
+                        <input type="checkbox" id="settings-app-jshint" {%if project.app_jshint%}checked{%endif%}>
+                    </div>
+                </div>
+                <div class="control-group">
                     <label class="control-label" for="settings-capabilities-location">Uses PebbleKit JS Location</label>
                     <div class="controls">
                         <input type="checkbox" id="settings-capabilities-location" {%if 'location' in project.app_capabilities%}checked{%endif%}>
