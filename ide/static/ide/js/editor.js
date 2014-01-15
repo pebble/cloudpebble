@@ -89,6 +89,9 @@ CloudPebble.Editor = (function() {
                         }
                     };
                 }
+                if(is_js) {
+                    settings.gutters = ['CodeMirror-linenumbers', 'gutter-hint-warnings'];
+                }
                 var code_mirror = CodeMirror(pane[0], settings);
                 open_codemirrors[file.id] = code_mirror;
                 code_mirror.cloudpebble_save = function() {
@@ -105,6 +108,55 @@ CloudPebble.Editor = (function() {
                         if(!is_autocompleting)
                             CodeMirror.commands.autocomplete(code_mirror);
                     });
+                }
+                if(is_js) {
+                    var warning_lines = [];
+                    var throttled_hint = _.throttle(function() {
+                        // Clear things out, even if jslint is off
+                        // (the user might have just turned it off).
+                        code_mirror.clearGutter('gutter-hint-warnings');
+                        _.each(warning_lines, function(line) {
+                            code_mirror.removeLineClass(line, 'background', 'line-hint-warning');
+                        });
+                        warning_lines = [];
+
+                        // And now bail.
+                        if(!CloudPebble.ProjectInfo.app_jshint) return;
+
+                        var success = JSHINT(code_mirror.getValue(), {
+                            freeze: true,
+                            evil: false,
+                            immed: true,
+                            latedef: "nofunc",
+                            undef: true,
+                            unused: "vars"
+                        }, {
+                            Pebble: true,
+                            console: true,
+                            XMLHttpRequest: true,
+                            navigator: true, // For navigator.geolocation
+                            localStorage: true
+                        });
+                        if(!success) {
+                            _.each(JSHINT.errors, function(error) {
+                                // If there are multiple errors on one line, we'll have already placed a marker here.
+                                // Instead of replacing it with a new one, just update it.
+                                var markers = code_mirror.lineInfo(error.line - 1).gutterMarkers;
+                                if(markers && markers['gutter-hint-warnings']) {
+                                    var marker = $(markers['gutter-hint-warnings']);
+                                    marker.attr('title', marker.attr('title') + "\n" + error.reason);
+                                } else {
+                                    var warning = $('<div class="line-hint-warning"><i class="icon-warning-sign icon-white"></span></div>');
+                                    warning.attr('title', error.reason);
+                                    code_mirror.setGutterMarker(error.line - 1, 'gutter-hint-warnings', warning[0]);
+                                    warning_lines.push(code_mirror.addLineClass(error.line - 1, 'background', 'line-hint-warning'));
+                                }
+                            });
+                        }
+                    }, 1000);
+                    code_mirror.on('change', throttled_hint);
+                    // Make sure we're ready when we start.
+                    throttled_hint();
                 }
 
                 var fix_height = function() {

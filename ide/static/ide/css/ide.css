@@ -127,3 +127,23 @@ span.cm-autofilled-end {
 .CodeMirror-hint {
     max-width: initial;
 }
+
+.gutter-hint-warnings {
+    width: 16px;
+}
+
+.line-hint-warning, .gutter-hint-warning {
+    background-color: #82000b;
+}
+
+.cm-s-eclipse .line-hint-warning,
+.cm-s-solarized.cm-s-light .line-hint-warning {
+    background-color: #FFCBC9;
+}
+
+/* Override white icons on the light themes. */
+.cm-s-eclipse .icon-white,
+.cm-s-solarized.cm-s-light .icon-white{
+    /* We have to hard-code this entire thing from here, unfortunately. */
+    background-image: url(//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/img/glyphicons-halflings.png)
+}

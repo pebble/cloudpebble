@@ -96,6 +96,7 @@ def project_info(request, project_id):
         'app_version_label': project.app_version_label,
         'app_is_watchface': project.app_is_watchface,
         'app_capabilities': project.app_capabilities,
+        'app_jshint': project.app_jshint,
         'menu_icon': project.menu_icon.id if project.menu_icon else None,
         'sdk_version': project.sdk_version,
         'source_files': [{'name': f.file_name, 'id': f.id} for f in source_files],
