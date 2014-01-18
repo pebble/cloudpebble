@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+echo "Replacing ubuntu mirrors with ones that suck less."
+sudo sed -i -e 's#us.archive.ubuntu.com#mirrors.mit.edu#g' /etc/apt/sources.list
+
 apt-get update
 # Install a bunch of things we want
 apt-get install -y aptitude
