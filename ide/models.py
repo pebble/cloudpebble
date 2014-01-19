@@ -56,6 +56,7 @@ class Project(models.Model):
     optimisation = models.CharField(max_length=1, choices=OPTIMISATION_CHOICES, default='s')
 
     github_repo = models.CharField(max_length=100, blank=True, null=True)
+    github_branch = models.CharField(max_length=100, blank=True, null=True)
     github_last_sync = models.DateTimeField(blank=True, null=True)
     github_last_commit = models.CharField(max_length=40, blank=True, null=True)
     github_hook_uuid = models.CharField(max_length=36, blank=True, null=True)

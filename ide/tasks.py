@@ -546,14 +546,18 @@ def do_import_archive(project_id, archive_location, delete_zip=False, delete_pro
 
 
 @task(acks_late=True)
-def do_import_github(project_id, github_user, github_project, delete_project=False):
+def do_import_github(project_id, github_user, github_project, github_branch, delete_project=False):
     try:
-        url = "https://github.com/%s/%s/archive/master.zip" % (github_user, github_project)
-        u = urllib2.urlopen(url)
-        with tempfile.NamedTemporaryFile(suffix='.zip') as temp:
-            shutil.copyfileobj(u, temp)
-            temp.flush()
-            return do_import_archive(project_id, temp.name)
+        url = "https://github.com/%s/%s/archive/%s.zip" % (github_user, github_project, github_branch)
+        if file_exists(url):
+            u = urllib2.urlopen(url)
+            with tempfile.NamedTemporaryFile(suffix='.zip') as temp:
+                shutil.copyfileobj(u, temp)
+                temp.flush()
+                return do_import_archive(project_id, temp.name)
+        else:
+            print "Invalid Branch Name."
+            raise
     except:
         if delete_project:
             try:
@@ -561,6 +565,15 @@ def do_import_github(project_id, github_user, github_project, delete_project=Fal
             except:
                 pass
         raise
+
+def file_exists(url):
+    request = urllib2.Request(url)
+    request.get_method = lambda : 'HEAD'
+    try:
+        response = urllib2.urlopen(request)
+        return True
+    except:
+        return False
 
 
 def git_sha(content):
@@ -576,7 +589,7 @@ def git_blob(repo, sha):
 def github_push(user, commit_message, repo_name, project):
     g = Github(user.github.token, client_id=settings.GITHUB_CLIENT_ID, client_secret=settings.GITHUB_CLIENT_SECRET)
     repo = g.get_repo(repo_name)
-    branch = repo.get_branch(repo.master_branch)
+    branch = repo.get_branch(project.github_branch if project.github_branch is not None else repo.master_branch)
     commit = repo.get_git_commit(branch.commit.sha)
     tree = repo.get_git_tree(commit.tree.sha, recursive=True)
 
@@ -728,7 +741,7 @@ def github_push(user, commit_message, repo_name, project):
         print "Created tree %s" % git_tree.sha
         git_commit = repo.create_git_commit(commit_message, git_tree, [commit])
         print "Created commit %s" % git_commit.sha
-        git_ref = repo.get_git_ref('heads/%s' % repo.master_branch)
+        git_ref = repo.get_git_ref('heads/%s' % project.github_branch if project.github_branch is not None else repo.master_branch)
         git_ref.edit(git_commit.sha)
         print "Updated ref %s" % git_ref.ref
         project.github_last_commit = git_commit.sha
@@ -746,7 +759,8 @@ def github_pull(user, project):
     if repo_name is None:
         raise Exception("No GitHub repo defined.")
     repo = g.get_repo(repo_name)
-    branch = repo.get_branch(repo.master_branch)
+    # If somehow we don't have a branch set, this will use the "master_branch"
+    branch = repo.get_branch(project.github_branch if project.github_branch is not None else repo.master_branch)
 
     if project.github_last_commit == branch.commit.sha:
         # Nothing to do.
@@ -790,7 +804,7 @@ def github_pull(user, project):
             raise Exception("Resource %s not found in repo." % path)
 
     # Now we grab the zip.
-    zip_url = repo.get_archive_link('zipball', repo.master_branch)
+    zip_url = repo.get_archive_link('zipball', project.github_branch if project.github_branch is not None else repo.master_branch)
     u = urllib2.urlopen(zip_url)
     with tempfile.NamedTemporaryFile(suffix='.zip') as temp:
         shutil.copyfileobj(u, temp)
