@@ -108,6 +108,7 @@ def project_info(request, project_id):
         } for x in resources],
         'github': {
             'repo': "github.com/%s" % project.github_repo if project.github_repo is not None else None,
+            'branch': project.github_branch if project.github_branch is not None else None,
             'last_sync': str(project.github_last_sync) if project.github_last_sync is not None else None,
             'last_commit': project.github_last_commit,
             'auto_build': project.github_hook_build,
@@ -502,6 +503,7 @@ def import_zip(request):
 def import_github(request):
     name = request.POST['name']
     repo = request.POST['repo']
+    branch = request.POST['branch']
     match = re.match(r'^(?:https?://|git@|git://)?(?:www\.)?github\.com[/:]([\w.-]+)/([\w.-]+?)(?:\.git|/|$)', repo)
     if match is None:
         return HttpResponse(json.dumps({"success": False, 'error': "Invalid GitHub URL."}), content_type="application/json")
@@ -513,7 +515,7 @@ def import_github(request):
     except IntegrityError as e:
         return json_failure(str(e))
 
-    task = do_import_github.delay(project.id, github_user, github_project, delete_project=True)
+    task = do_import_github.delay(project.id, github_user, github_project, branch, delete_project=True)
     return json_response({'task_id': task.task_id, 'project_id': project.id})
 
 
@@ -592,6 +594,7 @@ def github_pull(request, project_id):
 def set_project_repo(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     repo = request.POST['repo']
+    branch = request.POST['branch']
     auto_pull = bool(int(request.POST['auto_pull']))
     auto_build = bool(int(request.POST['auto_build']))
 
@@ -604,7 +607,9 @@ def set_project_repo(request, project_id):
     try:
         g_repo = g.get_repo(repo)
     except UnknownObjectException:
-        return json_response({'exists': False, 'access': False, 'updated': False})
+        return json_response({'exists': False, 'access': False, 'updated': False, 'branch_exists': False})
+
+    # TODO: Validate the branch...give user option to create one?
 
     with transaction.commit_on_success():
         if repo != project.github_repo:
@@ -617,11 +622,12 @@ def set_project_repo(request, project_id):
             # Just clear the repo if none specified.
             if repo == '':
                 project.github_repo = None
+                project.github_branch = None
                 project.github_last_sync = None
                 project.github_last_commit = None
                 project.github_hook_uuid = None
                 project.save()
-                return json_response({'exists': True, 'access': True, 'updated': True})
+                return json_response({'exists': True, 'access': True, 'updated': True, 'branch_exists': True})
 
             if not ide.git.git_verify_tokens(request.user):
                 return json_failure("No GitHub tokens on file.")
@@ -629,16 +635,19 @@ def set_project_repo(request, project_id):
             try:
                 has_access = ide.git.check_repo_access(request.user, repo)
             except UnknownObjectException:
-                return json_response({'exists': False, 'access': False, 'updated': False})
+                return json_response({'exists': False, 'access': False, 'updated': False, 'branch_exists': False})
 
             if has_access:
                 project.github_repo = repo
+                project.github_branch = branch
                 project.github_last_sync = None
                 project.github_last_commit = None
                 project.github_hook_uuid = None
             else:
-                return json_response({'exists': True, 'access': True, 'updated': True})
+                return json_response({'exists': True, 'access': True, 'updated': True, 'branch_exists': True})
 
+        if branch != project.github_branch:
+            project.github_branch = branch
 
         if auto_pull and project.github_hook_uuid is None:
             # Generate a new hook UUID
@@ -660,7 +669,7 @@ def set_project_repo(request, project_id):
 
         project.save()
 
-    return json_response({'exists': True, 'access': True, 'updated': True})
+    return json_response({'exists': True, 'access': True, 'updated': True, 'branch_exists': True})
 
 
 @login_required
@@ -675,6 +684,7 @@ def create_project_repo(request, project_id):
         return json_failure(str(e))
     else:
         project.github_repo = repo.full_name
+        project.github_branch = "master"
         project.github_last_sync = None
         project.github_last_commit = None
         project.save()
@@ -698,7 +708,7 @@ def github_hook(request, project_id):
     project = get_object_or_404(Project, pk=project_id, github_hook_uuid=hook_uuid)
 
     push_info = json.loads(request.POST['payload'])
-    if push_info['ref'] == 'refs/heads/%s' % push_info['repository']['master_branch']:
+    if push_info['ref'] == 'refs/heads/%s' % (project.github_branch or push_info['repository']['master_branch']):
         hooked_commit.delay(project_id, push_info['after'])
 
     return HttpResponse('ok')

@@ -171,7 +171,7 @@
                             <input type="text" id="import-zip-name">
                         </div>
                     </div>
-                    <div class="controls-group">
+                    <div class="control-group">
                         <label class="control-label">Zip file</label>
                         <div class="controls">
                             <input type="file" accept="application/zip,application/x-zip-compressed">
@@ -196,10 +196,16 @@
                             <input type="text" id="import-github-name">
                         </div>
                     </div>
-                    <div class="controls-group">
+                    <div class="control-group">
                         <label class="control-label" for="import-github-url">GitHub Project</label>
                         <div class="controls">
                             <input class="span4" type="text" id="import-github-url" placeholder="github.com/Katharine/pebble-stopwatch" pattern="(https?://)?(www\.)?github.com/.+/.+">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="import-github-branch">Branch (optional)</label>
+                        <div class="controls">
+                            <input type="text" id="import-github-branch" placeholder="master" />
                         </div>
                     </div>
                 </form>
