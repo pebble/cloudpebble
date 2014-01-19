@@ -20,7 +20,7 @@ import uuid
 import urllib2
 import re
 import hashlib
-from github import Github, BadCredentialsException
+from github import Github, BadCredentialsException, GithubException
 from github.InputGitTreeElement import InputGitTreeElement
 from github.GithubObject import NotSet
 import base64
@@ -556,8 +556,7 @@ def do_import_github(project_id, github_user, github_project, github_branch, del
                 temp.flush()
                 return do_import_archive(project_id, temp.name)
         else:
-            print "Invalid Branch Name."
-            raise
+            raise Exception("The branch '%s' does not exist." % github_branch)
     except:
         if delete_project:
             try:
@@ -589,7 +588,10 @@ def git_blob(repo, sha):
 def github_push(user, commit_message, repo_name, project):
     g = Github(user.github.token, client_id=settings.GITHUB_CLIENT_ID, client_secret=settings.GITHUB_CLIENT_SECRET)
     repo = g.get_repo(repo_name)
-    branch = repo.get_branch(project.github_branch if project.github_branch is not None else repo.master_branch)
+    try:
+        branch = repo.get_branch(project.github_branch if project.github_branch is not None else repo.master_branch)
+    except GithubException:
+        raise Exception("Unable to get branch.")
     commit = repo.get_git_commit(branch.commit.sha)
     tree = repo.get_git_tree(commit.tree.sha, recursive=True)
 
@@ -760,7 +762,11 @@ def github_pull(user, project):
         raise Exception("No GitHub repo defined.")
     repo = g.get_repo(repo_name)
     # If somehow we don't have a branch set, this will use the "master_branch"
-    branch = repo.get_branch(project.github_branch if project.github_branch is not None else repo.master_branch)
+    branch_name = project.github_branch or repo.master_branch
+    try:
+        branch = repo.get_branch(branch_name)
+    except GithubException:
+        raise Exception("Unable to get the branch.")
 
     if project.github_last_commit == branch.commit.sha:
         # Nothing to do.
@@ -804,7 +810,7 @@ def github_pull(user, project):
             raise Exception("Resource %s not found in repo." % path)
 
     # Now we grab the zip.
-    zip_url = repo.get_archive_link('zipball', project.github_branch if project.github_branch is not None else repo.master_branch)
+    zip_url = repo.get_archive_link('zipball', branch_name)
     u = urllib2.urlopen(zip_url)
     with tempfile.NamedTemporaryFile(suffix='.zip') as temp:
         shutil.copyfileobj(u, temp)

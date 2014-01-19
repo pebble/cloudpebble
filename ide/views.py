@@ -708,7 +708,7 @@ def github_hook(request, project_id):
     project = get_object_or_404(Project, pk=project_id, github_hook_uuid=hook_uuid)
 
     push_info = json.loads(request.POST['payload'])
-    if push_info['ref'] == 'refs/heads/%s' % push_info['repository']['master_branch']:
+    if push_info['ref'] == 'refs/heads/%s' % (project.github_branch or push_info['repository']['master_branch']):
         hooked_commit.delay(project_id, push_info['after'])
 
     return HttpResponse('ok')
