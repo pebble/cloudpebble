@@ -5,6 +5,7 @@ Pebble = function(ip, port) {
     var mSocket;
     var mAppLogEnabled = false;
     var mHasConnected = false;
+    var mIncomingImage = null;
 
     _.extend(this, Backbone.Events);
 
@@ -52,7 +53,9 @@ Pebble = function(ip, port) {
         } catch(e) {
             // pass.
         }
-        mSocket.close();
+        if(mSocket)
+            mSocket.close();
+        mSocket = null;
     };
 
     this.is_connected = function() {
@@ -116,6 +119,8 @@ Pebble = function(ip, port) {
         var message = data.subarray(5);
         if(command == ENDPOINTS.APP_LOGS) {
             handle_app_log(message);
+        } else if(command == ENDPOINTS.SCREENSHOT) {
+            handle_screenshot(message);
         }
     };
 
@@ -136,6 +141,85 @@ Pebble = function(ip, port) {
         }
         return chars.join('');
     };
+
+    this.request_screenshot = function() {
+        if(mIncomingImage !== null) {
+            self.trigger('screenshot:error', "Cannot take a screenshot while a previous screenshot is processing.");
+            return;
+        }
+        send_message("SCREENSHOT", "\x00");
+    };
+
+    var handle_screenshot = function(data) {
+        if(mIncomingImage === null) {
+            data = read_screenshot_header(data);
+            if(data === null) {
+                mIncomingImage = null;
+                return;
+            }
+        }
+        mIncomingImage.data.set(data, mIncomingImage.received);
+        mIncomingImage.received += data.length;
+        self.trigger('screenshot:progress', mIncomingImage.received, mIncomingImage.length);
+        if(mIncomingImage.received >= mIncomingImage.length) {
+            self.trigger('screenshot:complete', decode_image(mIncomingImage));
+            mIncomingImage = null;
+        }
+    }
+
+    var decode_image = function(incoming_image) {
+        var canvas = document.createElement('canvas');
+        canvas.setAttribute('width', String(incoming_image.width));
+        canvas.setAttribute('height', String(incoming_image.height));
+        var context = canvas.getContext('2d');
+
+        var image_data = context.createImageData(incoming_image.width, incoming_image.height);
+
+        var expanded_data = new Uint8Array(incoming_image.width * incoming_image.height * 4);
+        for(var i = 0; i < incoming_image.data.length; ++i) {
+            for(var j = 0; j < 8; ++j) {
+                var pixel = (incoming_image.data[i] >> j) & 1;
+                var colour = pixel * 255;
+                var pos = ((i*8)+j)*4;
+                expanded_data[pos+0] = colour;
+                expanded_data[pos+1] = colour;
+                expanded_data[pos+2] = colour;
+                expanded_data[pos+3] = 255; // always fully opaque.
+            }
+        }
+
+        image_data.data.set(expanded_data);
+        context.putImageData(image_data, 0, 0);
+        var image = document.createElement('img');
+        image.src = canvas.toDataURL();
+        return image;
+    }
+
+    var read_screenshot_header = function(data) {
+        var header_data = unpack("BIII", data.subarray(0, 13));
+        var data = data.subarray(13);
+        var response_code = header_data[0];
+        var version = header_data[1];
+        var width = header_data[2];
+        var height = header_data[3];
+        if(response_code !== 0) {
+            self.trigger('screenshot:failed', "Internal watch error.");
+            data = null;
+        }
+        if(version !== 1) {
+            self.trigger('screenshot:failed', "Unrecognised image format.");
+            data = null;
+        }
+        mIncomingImage = {
+            data: new Uint8Array(width*height / 8),
+            version: version,
+            width: width,
+            height: height,
+            length: width * height / 8,
+            received: 0
+        };
+        return data;
+    }
 
     var ENDPOINTS = {
         "TIME": 11,

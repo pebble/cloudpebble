@@ -155,10 +155,11 @@
                             <input type="text" id="phone-ip" placeholder="10.0.0.153">
                         </div>
                     </div>
-                    <div class="form-actions" style="margin-bottom: 0px; padding-bottom: 0px;text-align: center;">
+                    <div class="form-actions" style="margin-bottom: 0; padding-bottom: 0; padding-left:5px; padding-right: 5px; text-align: center;">
                         <div style="">
                             <button class="btn btn-primary" id="install-on-phone-btn">Install &amp; Run</button>
                             <button class="btn" id="show-app-logs-btn">View app logs</button>
+                            <button class="btn" id="screenshot-btn">Screenshot</button>
                         </div>
                         <span class="help-block">Requires that the Pebble app be running on your phone with Developer Mode enabled.</span>
                     </div>
@@ -530,6 +531,22 @@
     <div class="modal-footer">
         <button data-dismiss="modal" class="btn hide dismiss-btn">Dismiss</button>
         <button class="btn hide logs-btn btn-primary">View logs</button>
+    </div>
+</div>
+<!-- Phone screenshot -->
+<div id="phone-screenshot-display" class="modal hide fade" tabindex="-1" role="dialog">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">x</button>
+        <h3>Taking Screenshot</h3>
+    </div>
+    <div class="modal-body">
+        <p>Taking screenshot…</p>
+        <div class="progress progress-striped active">
+            <div class="bar" style="width: 0%;"></div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button data-dismiss="modal" class="btn hide dismiss-btn">Dismiss</button>
     </div>
 </div>
 <!-- Modal text prompt -->

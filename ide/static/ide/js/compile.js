@@ -96,7 +96,11 @@ CloudPebble.Compile = (function() {
         });
         pane.find('#show-app-logs-btn').click(function(e) {
             e.preventDefault();
-            show_app_logs($('#phone-ip').val());
+            show_app_logs();
+        });
+        pane.find('#screenshot-btn').click(function(e) {
+            e.preventDefault();
+            take_screenshot();
         });
         if(navigator.userAgent.indexOf('Firefox') != -1) {
             pane.find('#firefox-warning').removeClass('hide');
@@ -263,8 +267,7 @@ CloudPebble.Compile = (function() {
     };
 
     var install_on_watch = function() {
-        var ip = $('#phone-ip').val();
-        localStorage['cp-last-phone-ip'] = ip;
+        var ip = get_phone_ip();
         var modal = $('#phone-install-progress').modal();
         modal.find('.modal-body > p').text("Installing app on your watch…");
         modal.find('.btn').addClass('hide');
@@ -314,9 +317,9 @@ CloudPebble.Compile = (function() {
         });
     };
 
-    var show_app_logs = function(ip) {
+    var show_app_logs = function() {
         if(!mPebble || !mPebble.is_connected()) {
-            localStorage['cp-last-phone-ip'] = ip;
+            var ip = get_phone_ip();
             mPebble = pebble_connect(ip);
             mPebble.on('open', function() {
                 mPebble.enable_app_logs();
@@ -337,6 +340,67 @@ CloudPebble.Compile = (function() {
         }
         _.each(mPreviousDisplayLogs, show_log_line);
         CloudPebble.Sidebar.SetActivePane(mLogHolder, undefined, undefined, stop_logs);
+    };
+
+    var get_phone_ip = function() {
+        var ip = $('#phone-ip').val();
+        localStorage['cp-last-phone-ip'] = ip;
+        return ip;
+    };
+
+    var take_screenshot = function() {
+        var ip = get_phone_ip();
+        mPebble = new Pebble(ip);
+        var modal = $('#phone-screenshot-display').clone().modal();
+        var finished = false;
+
+        var report_error = function(message) {
+            modal.find('.modal-body > p').text(message);
+            modal.find('.dismiss-btn').removeClass('hide');
+            modal.find('.progress').addClass('progress-danger').removeClass('progress-striped');
+        };
+
+        var report_progress = function(percent) {
+            modal.find('.progress').removeClass('progress-striped').find('.bar').css({width: percent + '%'});
+        }
+
+        mPebble.on('open', function() {
+            mPebble.request_screenshot();
+        });
+
+        mPebble.on('close', function() {
+            if(!finished) {
+                report_error("Disconnected from phone.");
+            }
+        });
+
+        mPebble.on('screenshot:failed', function(reason) {
+            report_error("Screenshot failed: " + reason);
+            mPebble.close();
+        });
+
+        mPebble.on('screenshot:progress', function(received, expected) {
+            report_progress((received / expected) * 100);
+        });
+
+        mPebble.on('screenshot:complete', function(screenshot) {
+            finished = true;
+            $(screenshot).addClass('img-polaroid');
+            modal.find('.modal-body')
+                .empty()
+                .append(screenshot)
+                .append("<p>Right click -> Save Image as...</p>")
+                .css({'text-align': 'center'});
+            modal.find('.dismiss-btn').removeClass('hide');
+            mPebble.close();
+        });
+
+        modal.on('hide', function() {
+            if(mPebble) {
+                mPebble.close();
+                mPebble = null;
+            }
+        });
     };
 
     var stop_logs = function() {
