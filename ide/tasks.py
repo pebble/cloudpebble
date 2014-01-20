@@ -589,7 +589,7 @@ def github_push(user, commit_message, repo_name, project):
     g = Github(user.github.token, client_id=settings.GITHUB_CLIENT_ID, client_secret=settings.GITHUB_CLIENT_SECRET)
     repo = g.get_repo(repo_name)
     try:
-        branch = repo.get_branch(project.github_branch if project.github_branch is not None else repo.master_branch)
+        branch = repo.get_branch(project.github_branch or repo.master_branch)
     except GithubException:
         raise Exception("Unable to get branch.")
     commit = repo.get_git_commit(branch.commit.sha)
@@ -743,7 +743,7 @@ def github_push(user, commit_message, repo_name, project):
         print "Created tree %s" % git_tree.sha
         git_commit = repo.create_git_commit(commit_message, git_tree, [commit])
         print "Created commit %s" % git_commit.sha
-        git_ref = repo.get_git_ref('heads/%s' % project.github_branch if project.github_branch is not None else repo.master_branch)
+        git_ref = repo.get_git_ref('heads/%s' % (project.github_branch or repo.master_branch))
         git_ref.edit(git_commit.sha)
         print "Updated ref %s" % git_ref.ref
         project.github_last_commit = git_commit.sha
