@@ -247,8 +247,9 @@ def generate_jshint_file(project):
     "Pebble": true,
     "console": true,
     "XMLHttpRequest": true,
-    "navigator" : true, // For navigator.geolocation
-    "localStorage" : true
+    "navigator": true, // For navigator.geolocation
+    "localStorage": true,
+    "setTimeout": true
   },
 
   // Do not mess with standard JavaScript objects (Array, Date, etc)

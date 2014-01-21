@@ -137,7 +137,8 @@ CloudPebble.Editor = (function() {
                             console: true,
                             XMLHttpRequest: true,
                             navigator: true, // For navigator.geolocation
-                            localStorage: true
+                            localStorage: true,
+                            setTimeout: true
                         });
                         if(!success) {
                             _.each(JSHINT.errors, function(error) {
