@@ -161,7 +161,7 @@ span.cm-autofilled-end {
 }
 
 
-.CodeMirror.FullScreen .fullscreen-icon.close {
+.CodeMirror.FullScreen .fullscreen-icon {
     background-image: url('../img/fullscreen_close.png');
 }
 
