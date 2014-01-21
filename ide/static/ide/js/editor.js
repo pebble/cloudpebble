@@ -3,6 +3,7 @@ CloudPebble.Editor = (function() {
     var project_source_files = {};
     var open_codemirrors = {};
     var unsaved_files = 0;
+    var is_fullscreen = false;
 
     var add_source_file = function(file) {
         CloudPebble.Sidebar.AddSourceFile(file, function() {
@@ -93,6 +94,7 @@ CloudPebble.Editor = (function() {
                     settings.gutters = ['CodeMirror-linenumbers', 'gutter-hint-warnings'];
                 }
                 var code_mirror = CodeMirror(pane[0], settings);
+                code_mirror.parent_pane = pane;
                 open_codemirrors[file.id] = code_mirror;
                 code_mirror.cloudpebble_save = function() {
                     save();
@@ -160,9 +162,11 @@ CloudPebble.Editor = (function() {
                 }
 
                 var fix_height = function() {
-                    var browserHeight = document.documentElement.clientHeight;
-                    code_mirror.getWrapperElement().style.height = (browserHeight - 130) + 'px';
-                    code_mirror.refresh();
+                    if(!is_fullscreen) {
+                        var browserHeight = document.documentElement.clientHeight;
+                        code_mirror.getWrapperElement().style.height = browserHeight - 130 + 'px';
+                        code_mirror.refresh();
+                    }
                 };
                 fix_height();
                 $(window).resize(fix_height);
@@ -208,7 +212,7 @@ CloudPebble.Editor = (function() {
                 };
 
                 // Add some buttons
-                var button_holder = $('<p style="padding-top: 5px; text-align: right;">');
+                var button_holder = $('<p style="padding-top: 5px; text-align: right;" id="buttons_wrapper">');
                 var save_btn = $('<button class="btn btn-primary">Save</button>');
                 var discard_btn = $('<button class="btn" style="margin-right: 20px;">Reload file</button>');
                 var delete_btn = $('<button class="btn btn-danger" style="margin-right: 20px;">Delete</button>');
@@ -257,6 +261,22 @@ CloudPebble.Editor = (function() {
                 pane.append(button_holder);
                 code_mirror.refresh();
 
+                // Add fullscreen icon and click event
+                var fullscreen_icon = $('<a href="#" class="fullscreen-icon open"></a><span class="fullscreen-icon-tooltip">Toggle Fullscreen</span>');
+                $(code_mirror.getWrapperElement()).append(fullscreen_icon);
+                fullscreen_icon.click(function(e) {
+                    fullscreen(code_mirror, !is_fullscreen);
+                });
+                fullscreen_icon.hover(function() {
+                    $('.fullscreen-icon-tooltip').fadeIn(300);
+                },function() {
+                    $('.fullscreen-icon-tooltip').fadeOut(300);
+                });
+
+                $(document).keyup(function(e) {
+                  if (e.keyCode == 27) { fullscreen(code_mirror, false); }   // Esc exits fullscreen mode
+                });
+
                 // Tell Google
                 ga('send', 'event', 'file', 'open');
             }
@@ -275,6 +295,24 @@ CloudPebble.Editor = (function() {
                 value.cloudpebble_save();
             });
         };
+     }
+
+    function fullscreen(code_mirror, toggle) {
+        if(toggle) {
+            $(code_mirror.getWrapperElement())
+                .addClass('FullScreen')
+                .css({'height': '100%'})
+                .appendTo($('body'));
+        } else {
+            var browserHeight = document.documentElement.clientHeight;
+            var newHeight = (browserHeight - 130) + 'px';
+            $(code_mirror.getWrapperElement())
+                .removeClass('FullScreen')
+                .css({'height' : newHeight})
+                .prependTo(code_mirror.parent_pane);
+        }
+        code_mirror.refresh();
+        is_fullscreen = toggle;
      }
 
     return {

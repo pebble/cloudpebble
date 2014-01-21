@@ -147,3 +147,52 @@ span.cm-autofilled-end {
     /* We have to hard-code this entire thing from here, unfortunately. */
     background-image: url(//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/img/glyphicons-halflings.png)
 }
+
+.fullscreen-icon {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    cursor: pointer;
+    z-index: 3;
+
+    width: 18px;
+    height: 13px;
+    background-image: url('../img/fullscreen_open.png');
+}
+
+
+.CodeMirror.FullScreen .fullscreen-icon.close {
+    background-image: url('../img/fullscreen_close.png');
+}
+
+.fullscreen-fade {
+   opacity: 0.1;
+   transition: opacity .25s ease-in-out;
+   -moz-transition: opacity .25s ease-in-out;
+   -webkit-transition: opacity .25s ease-in-out;
+}
+
+.fullscreen-fade:hover {
+    opacity: 1;
+}
+
+.fullscreen-icon-tooltip {
+    display:none;
+    color: #aaa;
+    position: absolute;
+    right: 20px;
+    width: 120px;
+    top: 7px;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+
+.CodeMirror.FullScreen {
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    position: absolute;
+    border: none;
+    border-radius: 0;
+    z-index: 10000; /* Needs to be greater than 9999... */
+}

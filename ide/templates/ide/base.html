@@ -5,6 +5,10 @@
         <meta charset="utf-8">
         <title>{% block title %}CloudPebble{% endblock %}</title>
         <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap.min.css">
+        <link rel="icon" href="{% static 'ide/img/favicon.png' %}" />
+        <!--[if IE]>
+          <link rel="Shortcut Icon" href="{% static 'ide/img/favicon.ico' %}" />
+        <![endif]-->
         {% block head %}{% endblock %}
     </head>
     <body>
