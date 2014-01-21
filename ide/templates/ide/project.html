@@ -3,7 +3,7 @@
 {% block title %}CloudPebble – {{ project.name }}{% endblock %}
 {% block content %}
 <div class="container-fluid">
-    <div class="masthead">
+    <div class="masthead" id="masthead_wrapper">
         <ul class="nav nav-pills pull-right">
           <li class="active"><a>{{ project.name }}</a></li>
           <li><a href="{% url 'ide:index' %}">Your Projects</a></li>
@@ -13,7 +13,7 @@
         <h3 class="muted">CloudPebble – <span class="project-name">{{ project.name }}</span></h3>
     </div>
     <div class="row-fluid">
-        <div class="span2">
+        <div class="span2" id="sidebar_wrapper">
             <div class="well">
                 <ul class="nav nav-list" id="sidebar">
                     <li class="nav-header">Project</li>
@@ -609,6 +609,7 @@ var USER_SETTINGS = {
 <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/addon/edit/matchbrackets.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/addon/edit/closebrackets.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/addon/hint/show-hint.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/addon/display/fullscreen.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/mode/clike/clike.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/mode/javascript/javascript.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/keymap/emacs.min.js"></script>
@@ -633,6 +634,7 @@ CloudPebble.Init();
 {% block head %}
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/addon/hint/show-hint.min.css">
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/addon/dialog/dialog.min.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/addon/display/fullscreen.min.css">
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/codemirror.min.css">
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/theme/monokai.min.css">
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/theme/eclipse.min.css">

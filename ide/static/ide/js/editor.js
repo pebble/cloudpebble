@@ -3,6 +3,7 @@ CloudPebble.Editor = (function() {
     var project_source_files = {};
     var open_codemirrors = {};
     var unsaved_files = 0;
+    var isFullscreen = false;
 
     var add_source_file = function(file) {
         CloudPebble.Sidebar.AddSourceFile(file, function() {
@@ -161,7 +162,8 @@ CloudPebble.Editor = (function() {
 
                 var fix_height = function() {
                     var browserHeight = document.documentElement.clientHeight;
-                    code_mirror.getWrapperElement().style.height = (browserHeight - 130) + 'px';
+                    //code_mirror.getWrapperElement().style.height = (!isFullscreen ? browserHeight - 130 : browserHeight) + 'px';
+                    code_mirror.getWrapperElement().style.height = browserHeight - 130 + 'px';
                     code_mirror.refresh();
                 };
                 fix_height();
@@ -208,7 +210,7 @@ CloudPebble.Editor = (function() {
                 };
 
                 // Add some buttons
-                var button_holder = $('<p style="padding-top: 5px; text-align: right;">');
+                var button_holder = $('<p style="padding-top: 5px; text-align: right;" id="buttons_wrapper">');
                 var save_btn = $('<button class="btn btn-primary">Save</button>');
                 var discard_btn = $('<button class="btn" style="margin-right: 20px;">Reload file</button>');
                 var delete_btn = $('<button class="btn btn-danger" style="margin-right: 20px;">Delete</button>');
@@ -257,6 +259,22 @@ CloudPebble.Editor = (function() {
                 pane.append(button_holder);
                 code_mirror.refresh();
 
+                // Add fullscreen icon and click event
+                var fullscreen_icon = $('<a href="#" class="fullscreen-icon open"></a><span class="fullscreen-icon-tooltip">Toggle Fullscreen</span>');
+                $('.CodeMirror').append(fullscreen_icon);
+                $('.fullscreen-icon').click(function(e) {
+                    fullscreen(isFullscreen ? false : true);
+                });
+                $('.fullscreen-icon').hover(function() {
+                    $('.fullscreen-icon-tooltip').fadeIn(300);
+                },function() {
+                    $('.fullscreen-icon-tooltip').fadeOut(300);
+                });
+
+                $(document).keyup(function(e) {
+                  if (e.keyCode == 27) { $(fullscreen(false)); }   // Esc exits fullscreen mode
+                });
+
                 // Tell Google
                 ga('send', 'event', 'file', 'open');
             }
@@ -275,6 +293,36 @@ CloudPebble.Editor = (function() {
                 value.cloudpebble_save();
             });
         };
+     }
+
+     function fullscreen(toggle) {
+        var browserHeight = document.documentElement.clientHeight;
+        if(toggle) {
+            $('#masthead_wrapper').hide();
+            $('#sidebar_wrapper').hide();
+            $('#uvTab').hide();
+            $('#pane-parent').css({'top':'0', 'bottom':'0', 'position':'absolute', 'width':'95%'});
+            $('.CodeMirror').css({'border-radius': '0px', 'height':'90%', 'margin-top':'20px', 'border':'none', 'width':'100%'});
+            $('.CodeMirror').parent().css({'top':'0', 'bottom':'0', 'right':'0', 'left':'0', 'position':'absolute', 'width':'100%'});
+            $('body').css('background-color',$('.CodeMirror').css('background-color'));
+            $('#buttons_wrapper').addClass('fullscreen-fade').css({'position':'absolute','bottom':'0', 'right':'20px'});
+            $('.fullscreen-icon').removeClass('open').addClass('close');
+            $('.fullscreen-icon-tooltip').css({'right':'40px'});
+            isFullscreen = true;
+        } else {
+            $('#masthead_wrapper').fadeIn(800);
+            $('#sidebar_wrapper').fadeIn(800);
+            $('#uvTab').fadeIn(800);
+            $('#pane-parent').css({'top':'', 'bottom':'', 'position':'relative', 'width':'','height':''});
+            var newHeight = (browserHeight - 130) + 'px';
+            $('.CodeMirror').css({'border-radius': '4px', 'height': newHeight, 'margin-top':'0', 'border':'1px solid #eee', 'width':''});
+            $('.CodeMirror').parent().css({'top':'', 'bottom':'', 'right':'', 'left':'', 'position':'relative', 'width':''});
+            $('body').css('background-color', '#fff', 'transition');
+            $('#buttons_wrapper').removeClass('fullscreen-fade').css({'position':'relative','bottom':'', 'right':''});
+            $('.fullscreen-icon').removeClass('close').addClass('open');
+            $('.fullscreen-icon-tooltip').css({'right':'20px'});
+            isFullscreen = false;
+        }
      }
 
     return {
