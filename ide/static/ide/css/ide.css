@@ -8,6 +8,7 @@
 
 .CodeMirror-hints {
   font-family: Menlo, 'Deja Vu Sans Mono', monospace;
+  z-index: 10001; /* Needs to be higher than the z-index of .CodeMirror.FullScreen */
 }
 
 .edit-resource-regex, #settings-app-keys {
