@@ -46,8 +46,8 @@ int main(int argc, char** argv) {
     // Impose some more limits:
     require(set_limit(RLIMIT_CPU, 10)); // Ten seconds
     require(set_limit(RLIMIT_NOFILE, 100)); // 100 open files
-    require(set_limit(RLIMIT_RSS, 10 * 1024 * 1024)); // 10 MB of memory
-    require(set_limit(RLIMIT_FSIZE, 1 * 1024 * 1024)); // 1 MB output files
+    require(set_limit(RLIMIT_RSS, 20 * 1024 * 1024)); // 20 MB of memory
+    require(set_limit(RLIMIT_FSIZE, 5 * 1024 * 1024)); // 5 MB output files
     // Actually do the build.
     require(chdir(argv[2]));
     require(setenv("HOME", "/", 1));
