@@ -76,10 +76,11 @@
             return;
         }
         var file = files[0];
-        if(file.type != 'application/zip' && file.type != 'application/x-zip-compressed') {
-            active_set.find('.errors').removeClass('hide').text("You must upload a zip file.");
-            return;
-        }
+        // This check seems to fail on some systems.
+        //if(file.type != 'application/zip' && file.type != 'application/x-zip-compressed') {
+        //    active_set.find('.errors').removeClass('hide').text("You must upload a zip file.");
+        //    return;
+        //}
         disable_import_controls();
         var form_data = new FormData();
         form_data.append('name', name);
