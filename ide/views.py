@@ -314,6 +314,7 @@ def build_history(request, project_id):
                 'id': build.id,
                 'pbw': build.pbw_url,
                 'log': build.build_log_url,
+                'debug': build.debug_info_url,
                 'size': {
                     'total': build.total_size,
                     'binary': build.binary_size,

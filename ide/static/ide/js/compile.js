@@ -113,6 +113,8 @@ CloudPebble.Compile = (function() {
         if(CloudPebble.Sidebar.Restore("compile")) {
             return;
         }
+
+        mCrashAnalyser = new CloudPebble.CrashChecker(CloudPebble.ProjectInfo.app_uuid);
         // Get build history
         update_build_history(pane);
         pane.find('#compilation-run-build-button').click(function() {
@@ -203,12 +205,14 @@ CloudPebble.Compile = (function() {
                 .removeClass('label-success label-error label-info')
                 .addClass('label-' + COMPILE_SUCCESS_STATES[build.state].label)
                 .text(COMPILE_SUCCESS_STATES[build.state].english);
+            mCrashAnalyser.set_debug_info_url(build.debug);
         }
     };
 
     var mPreviousDisplayLogs = [];
     var mPebble = null;
     var mLogHolder = null;
+    var mCrashAnalyser = null;
 
     var pebble_connect = function(ip) {
         if(mPebble) return mPebble;
@@ -242,11 +246,29 @@ CloudPebble.Compile = (function() {
 
     var show_log_line = function(log) {
         if(mLogHolder) {
-            var display = get_log_label(log.priority) + ' ' + log.filename + ':' + log.line_number + ': ' + log.message + "\n";
-            mLogHolder.append($('<span>').addClass(get_log_class(log.priority)).text(display));
-            mLogHolder[0].scrollTop = mLogHolder[0].scrollHeight;
+            var display = get_log_label(log.priority) + ' ' + log.filename + ':' + log.line_number + ': ' + log.message;
+            append_log_html($('<span>').addClass(get_log_class(log.priority)).text(display));
+            mCrashAnalyser.check_line_for_crash(log.message, handle_crash);
         }
     };
+
+    var append_log_html = function(html) {
+        mLogHolder.append(html).append("\n");
+        mLogHolder[0].scrollTop = mLogHolder[0].scrollHeight;
+    };
+
+    var handle_crash = function(is_our_crash, pc, lr) {
+        if(!is_our_crash) {
+            append_log_html("<span class='log-warning'>Different app crashed. Only the active app has debugging information available.</span>");
+            return;
+        }
+        append_log_html($("<span class='log-verbose'>Looking up debug information...</span>"));
+        mCrashAnalyser.find_source_line(pc, function(file, line, fn_name, fn_line) {
+            append_log_html($("<span class='log-error'>").text("Crashed at " + file + ":" + line + ", in " + fn_name + " (" + file + ":" + fn_line + ")."));
+        }, function(why) {
+            append_log_html($("<span class='log-error'>").text(why));
+        })
+    }
 
     var get_log_class = function(priority) {
         if(priority == -1) return 'log-phone';

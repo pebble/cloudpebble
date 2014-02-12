@@ -195,11 +195,20 @@ class BuildResult(models.Model):
     def get_build_log_url(self):
         return '%sbuild_log.txt' % self.get_url()
 
+    def get_debug_info_filename(self):
+        return '%sdebug_info.json' % self.get_dir()
+
+    def get_debug_info_url(self):
+        return '%sdebug_info.json' % self.get_url()
+
     pbw = property(get_pbw_filename)
     build_log = property(get_build_log)
 
     pbw_url = property(get_pbw_url)
     build_log_url = property(get_build_log_url)
+
+    debug_info = property(get_debug_info_filename)
+    debug_info_url = property(get_debug_info_url)
 
 
 class ResourceFile(models.Model):

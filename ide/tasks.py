@@ -26,6 +26,10 @@ from github.GithubObject import NotSet
 import base64
 import traceback
 
+import apptools.addr2lines
+
+apptools.addr2lines.ARM_CS_TOOLS = settings.ARM_CS_TOOLS
+
 
 def create_sdk_symlinks(project_root, sdk_root):
     SDK_LINKS = ["waf", "wscript", "tools", "lib", "pebble_app.ld", "include"]
@@ -153,6 +157,17 @@ def run_compile(build_result, optimisation=None):
                         build_result.resource_size = z.getinfo('app_resources.pbpack').file_size
                 except Exception as e:
                     print "Couldn't extract filesizes: %s" % e
+                # If it's an SDK 2 build, try pulling out debug information.
+                if project.sdk_version == '2':
+                    elf_file = os.path.join(base_dir, 'build', 'pebble-app.elf')
+                    if os.path.exists(elf_file):
+                        try:
+                            debug_info = apptools.addr2lines.create_coalesced_group(elf_file)
+                        except Exception as e:
+                            print "Generating debug info failed."
+                            print traceback.format_exc()
+                        else:
+                            json.dump(debug_info, open(build_result.debug_info, 'w'))
 
                 shutil.move(temp_file, build_result.pbw)
                 print "Build succeeded."

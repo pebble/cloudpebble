@@ -189,6 +189,8 @@ GITHUB_HOOK_TEMPLATE = 'http://example.com/ide/project/%(project)d/github/push_h
 
 SDK1_ROOT = '/home/vagrant/sdk1/Pebble/sdk'
 
+ARM_CS_TOOLS = '/home/vagrant/arm-cs-tools/bin/'
+
 import djcelery
 djcelery.setup_loader()
 
