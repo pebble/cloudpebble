@@ -20,6 +20,7 @@ CloudPebble.CrashChecker = function(app_uuid) {
         var index = _.sortedIndex(lines, [pc], function(x) { return x[0]; }) - 1;
         if(index < 0) {
             failure("pc doesn't point into the user-provided code.");
+            return;
         }
         var line = lines[index][2];
         var file = files[lines[index][1]];
@@ -28,10 +29,12 @@ CloudPebble.CrashChecker = function(app_uuid) {
         var index = _.sortedIndex(functions, [pc], function(x) { return x[0]; }) - 1;
         if(index < 0) {
             failure("pc doesn't point into a user-defined function.");
+            return;
         }
         var fn_info = functions[index];
         if(pc > fn_info[1]) {
             failure("pc doesn't point into a user-defined function.");
+            return;
         }
         
         var fn_name = fn_info[2];
