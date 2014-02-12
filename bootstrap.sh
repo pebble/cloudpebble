@@ -55,6 +55,7 @@ popd
 cat << 'EOF' > /etc/lighttpd/conf-available/20-cors.conf
 server.modules += ("mod_setenv")
 setenv.add-response-header = ("Access-Control-Allow-Origin" => "*")
+setenv.add-response-header += ("Access-Control-Allow-Headers" => "x-requested-with")
 
 EOF
 lighttpd-enable-mod cors
