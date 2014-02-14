@@ -14,8 +14,7 @@
         $('#create-project').find('input button select').attr('disabled', 'disabled');
         $.post('/ide/project/create', {
                 name: value,
-                template: $('#project-template').val(),
-                sdk: $('#project-sdk-version').val()
+                template: $('#project-template').val()
             }, function(data) {
                 if(!data.success) {
                     $('#project-prompt-errors').removeClass('hide').text(data.error);
@@ -25,15 +24,6 @@
             }
         );
     });
-
-    $('#project-sdk-version').change(function() {
-        var sdk = $(this).val();
-        if(sdk == '2') {
-            $('#template-holder').hide();
-        } else {
-            $('#template-holder').show();
-        }
-    })
 
     var disable_import_controls = function() {
         $('#import-prompt').find('input, button').attr('disabled', 'disabled');

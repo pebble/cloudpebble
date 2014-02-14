@@ -87,7 +87,6 @@ def project_info(request, project_id):
         'name': project.name,
         'last_modified': str(project.last_modified),
         'version_def_name': project.version_def_name,
-        'optimisation': project.optimisation,
         'app_uuid': project.app_uuid or '',
         'app_company_name': project.app_company_name,
         'app_short_name': project.app_short_name,
@@ -264,8 +263,7 @@ def update_resource(request, project_id, resource_id):
 def compile_project(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     build = BuildResult.objects.create(project=project)
-    optimisation = request.POST.get('optimisation', None)
-    task = run_compile.delay(build.id, optimisation)
+    task = run_compile.delay(build.id)
     return json_response({"build_id": build.id, "task_id": task.task_id})
 
 
@@ -346,7 +344,7 @@ def create_project(request):
             project = Project.objects.create(
                 name=name,
                 owner=request.user,
-                sdk_version=request.POST['sdk'],
+                sdk_version=2,
                 app_company_name=request.user.username,
                 app_short_name=name,
                 app_long_name=name,
@@ -375,7 +373,6 @@ def save_project_settings(request, project_id):
             project.sdk_version = sdk_version
             if sdk_version == 1:
                 project.version_def_name = request.POST['version_def_name']
-                project.optimisation = request.POST['optimisation']
             elif sdk_version > 1:
                 project.app_uuid = request.POST['app_uuid']
                 project.app_company_name = request.POST['app_company_name']

@@ -118,11 +118,11 @@ CloudPebble.Compile = (function() {
         // Get build history
         update_build_history(pane);
         pane.find('#compilation-run-build-button').click(function() {
+            if(CloudPebble.ProjectInfo.sdk_version == '1') return;
             var temp_build = {started: (new Date()).toISOString(), finished: null, state: 1, uuid: null, id: null, size: {total: null, binary: null, resources: null}};
             update_last_build(pane, temp_build);
             pane.find('#run-build-table').prepend(build_history_row(temp_build));
-            var optimisation = $('#build-optimisation').val();
-            $.post('/ide/project/' + PROJECT_ID + '/build/run', {optimisation: optimisation}, function() {
+            $.post('/ide/project/' + PROJECT_ID + '/build/run', function() {
                 update_build_history(pane);
             });
             ga('send','event', 'build', 'run', {eventValue: ++m_build_count});
@@ -440,9 +440,6 @@ CloudPebble.Compile = (function() {
         },
         Init: function() {
             init();
-        },
-        SetOptimisation: function(opt) {
-            pane.find('#build-optimisation').val(opt);
         }
     };
 })();

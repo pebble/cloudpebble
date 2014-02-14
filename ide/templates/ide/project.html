@@ -170,21 +170,10 @@
     </div>
     <form class="form-inline">
         <div class="row-fluid">
-            <div class="span2">
+            <div class="span12">
                 <div class="control-group">
-                    <button class="btn btn-primary" id="compilation-run-build-button">Run build</button>
-                </div>
-            </div>
-            <div class="span10">
-                <div class="control-group">
-                    <div class="controls">
-                        <label class="control-label">Optimisation:</label>
-                        <select id="build-optimisation">
-                            {% for option in project.OPTIMISATION_CHOICES %}
-                                <option value="{{ option.0 }}"{% if option.0 == project.optimisation %}selected{% endif%}>{{ option.1 }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+                    <button class="btn btn-primary v2-only" style="{% if project.sdk_version != '2' %}display:none;{% endif %}" id="compilation-run-build-button">Run build</button>
+                    <span class="v1-only" style="{% if project.sdk_version != '1' %}display:none;{% endif %}">Building SDK 1 projects is no longer supported.</span>
                 </div>
             </div>
         </div>
@@ -214,16 +203,6 @@
                 <label class="control-label" for="settings-name">Project name</label>
                 <div class="controls">
                     <input type="text" id="settings-name">
-                </div>
-            </div>
-            <div class="control-group v1-only"{% if project.sdk_version != '2' %}style="display:none;"{%endif%}>
-                <label class="control-label" for="settings-optimisation">Default optimisation</label>
-                <div class="controls">
-                    <select id="settings-optimisation">
-                        {% for option in project.OPTIMISATION_CHOICES %}
-                            <option value="{{ option.0 }}"{% if option.0 == project.optimisation %}selected{% endif%}>{{ option.1 }}</option>
-                        {% endfor %}
-                    </select>
                 </div>
             </div>
             <div class="control-group">

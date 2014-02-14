@@ -50,13 +50,17 @@ def link_or_copy(src, dst):
             raise
 
 @task(ignore_result=True, acks_late=True)
-def run_compile(build_result, optimisation=None):
+def run_compile(build_result):
     build_result = BuildResult.objects.get(pk=build_result)
     project = build_result.project
     source_files = SourceFile.objects.filter(project=project)
     resources = ResourceFile.objects.filter(project=project)
-    if optimisation is None:
-        optimisation = project.optimisation
+
+    if project.sdk_version == '1':
+        build_result.state = BuildResult.STATE_FAILED
+        build_result.finished = now()
+        build_result.save()
+        return
 
     # Assemble the project somewhere
     base_dir = tempfile.mkdtemp(dir=os.path.join(settings.CHROOT_ROOT, 'tmp') if settings.CHROOT_ROOT else None)
@@ -83,19 +87,14 @@ def run_compile(build_result, optimisation=None):
             link_or_copy(os.path.abspath(f.local_filename), abs_target)
 
         # Resources
-        resource_root = 'resources/src' if project.sdk_version == '1' else 'resources'
+        resource_root = 'resources'
         os.makedirs(os.path.join(base_dir, resource_root, 'images'))
         os.makedirs(os.path.join(base_dir, resource_root, 'fonts'))
         os.makedirs(os.path.join(base_dir, resource_root, 'data'))
 
-        if project.sdk_version == '1':
-            print "Writing out resource map"
-            resource_dict = generate_resource_dict(project, resources)
-            open(os.path.join(base_dir, resource_root, 'resource_map.json'), 'w').write(json.dumps(resource_dict))
-        else:
-            print "Writing out manifest"
-            manifest_dict = generate_v2_manifest_dict(project, resources)
-            open(os.path.join(base_dir, 'appinfo.json'), 'w').write(json.dumps(manifest_dict))
+        print "Writing out manifest"
+        manifest_dict = generate_v2_manifest_dict(project, resources)
+        open(os.path.join(base_dir, 'appinfo.json'), 'w').write(json.dumps(manifest_dict))
 
         for f in resources:
             target_dir = os.path.abspath(os.path.join(base_dir, resource_root, ResourceFile.DIR_MAP[f.kind]))
@@ -107,14 +106,10 @@ def run_compile(build_result, optimisation=None):
 
 
         # Reconstitute the SDK
-        if project.sdk_version == '1':
-            print "Symlinking SDK"
-            create_sdk_symlinks(base_dir, os.path.abspath(settings.SDK1_ROOT))
-        elif project.sdk_version == '2':
-            print "Inserting wscript"
-            open(os.path.join(base_dir, 'wscript'), 'w').write(generate_wscript_file(project))
-            print "Inserting jshintrc"
-            open(os.path.join(base_dir, 'pebble-jshintrc'), 'w').write(generate_jshint_file(project))
+        print "Inserting wscript"
+        open(os.path.join(base_dir, 'wscript'), 'w').write(generate_wscript_file(project))
+        print "Inserting jshintrc"
+        open(os.path.join(base_dir, 'pebble-jshintrc'), 'w').write(generate_jshint_file(project))
 
         # Build the thing
         print "Beginning compile"
@@ -123,17 +118,12 @@ def run_compile(build_result, optimisation=None):
         output = 'Failed to get output'
         try:
             if settings.CHROOT_JAIL is not None:
-                output = subprocess.check_output([settings.CHROOT_JAIL, project.sdk_version, base_dir[len(settings.CHROOT_ROOT):], optimisation], stderr=subprocess.STDOUT)
+                output = subprocess.check_output([settings.CHROOT_JAIL, project.sdk_version, base_dir[len(settings.CHROOT_ROOT):]], stderr=subprocess.STDOUT)
             else:
                 os.chdir(base_dir)
-                if project.sdk_version == '1':
-                    print "Running SDK1 build"
-                    output = subprocess.check_output(["./waf", "configure"], stderr=subprocess.STDOUT)
-                    output += subprocess.check_output(["./waf", "build"], stderr=subprocess.STDOUT)
-                elif project.sdk_version == '2':
-                    print "Running SDK2 build"
-                    output = subprocess.check_output(["pebble", "build"], stderr=subprocess.STDOUT)
-                    print "output", output
+                print "Running SDK2 build"
+                output = subprocess.check_output(["pebble", "build"], stderr=subprocess.STDOUT)
+                print "output", output
         except subprocess.CalledProcessError as e:
             output = e.output
             success = False
@@ -157,17 +147,16 @@ def run_compile(build_result, optimisation=None):
                         build_result.resource_size = z.getinfo('app_resources.pbpack').file_size
                 except Exception as e:
                     print "Couldn't extract filesizes: %s" % e
-                # If it's an SDK 2 build, try pulling out debug information.
-                if project.sdk_version == '2':
-                    elf_file = os.path.join(base_dir, 'build', 'pebble-app.elf')
-                    if os.path.exists(elf_file):
-                        try:
-                            debug_info = apptools.addr2lines.create_coalesced_group(elf_file)
-                        except Exception as e:
-                            print "Generating debug info failed."
-                            print traceback.format_exc()
-                        else:
-                            json.dump(debug_info, open(build_result.debug_info, 'w'))
+                # Try pulling out debug information.
+                elf_file = os.path.join(base_dir, 'build', 'pebble-app.elf')
+                if os.path.exists(elf_file):
+                    try:
+                        debug_info = apptools.addr2lines.create_coalesced_group(elf_file)
+                    except Exception as e:
+                        print "Generating debug info failed."
+                        print traceback.format_exc()
+                    else:
+                        json.dump(debug_info, open(build_result.debug_info, 'w'))
 
                 shutil.move(temp_file, build_result.pbw)
                 print "Build succeeded."

@@ -38,7 +38,6 @@ CloudPebble.Settings = (function() {
         pane.find('#project-save').click(function() {
             var name = pane.find('#settings-name').val();
             var version_def_name = pane.find('#settings-version-def-name').val();
-            var optimisation = pane.find('#settings-optimisation').val();
             var sdk_version = parseInt(pane.find('#settings-sdk-version').val(), 10);
             var short_name = pane.find('#settings-short-name').val();
             var long_name = pane.find('#settings-long-name').val();
@@ -70,7 +69,6 @@ CloudPebble.Settings = (function() {
 
             var saved_settings = {
                 'name': name,
-                'optimisation': optimisation,
                 sdk_version: sdk_version
             };
 
@@ -142,8 +140,6 @@ CloudPebble.Settings = (function() {
                     CloudPebble.ProjectInfo.sdk_version = sdk_version
                     if(sdk_version == 1) {
                         CloudPebble.ProjectInfo.version_def_name = version_def_name;
-                        CloudPebble.ProjectInfo.optimisation = optimisation;
-                        CloudPebble.Compile.SetOptimisation(optimisation);
                     } else {
                         CloudPebble.ProjectInfo.app_uuid = app_uuid
                         CloudPebble.ProjectInfo.app_company_name = company_name

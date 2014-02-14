@@ -33,10 +33,6 @@ int main(int argc, char** argv) {
         printf("Corwardly refusing to run as root.\n");
         return 1;
     }
-    char optimise = '0';
-    if(argc == 4) {
-        optimise = argv[3][0];
-    }
     char sdk = argv[1][0];
     require(setuid(0));
     require(chdir(BUILD_JAIL));
@@ -53,17 +49,7 @@ int main(int argc, char** argv) {
     require(setenv("HOME", "/", 1));
 
     if(sdk == '1') {
-        require(setenv("PATH", "/bin:/usr/bin:/sdk/arm-cs-tools/bin", 1));
-        char final_command[] = "./waf configure -O 0";
-        sprintf(final_command, "./waf configure -O %c", optimise);
-        int success = system(final_command);
-        if(success != 0) {
-            return WEXITSTATUS(success);
-        }
-        success = system("./waf build");
-        if(success != 0) {
-            return WEXITSTATUS(success);
-        }
+        return 1; // This isn't supported any more.
     } else if(sdk == '2') {
         require(setenv("PATH", "/bin:/usr/bin:/sdk2/bin", 1));
         int success = system("pebble build");
