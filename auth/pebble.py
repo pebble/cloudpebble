@@ -1,5 +1,7 @@
 from social.backends.oauth import BaseOAuth2
 from django.conf import settings
+from ide.models import UserGithub, Project
+
 
 class PebbleOAuth2(BaseOAuth2):
     name = 'pebble'
@@ -22,3 +24,40 @@ class PebbleOAuth2(BaseOAuth2):
             url,
             headers={'Authorization': 'Bearer {0}'.format(access_token)}
         )
+
+def merge_user(strategy, uid, user=None, *args, **kwargs):
+    provider = strategy.backend.name
+    social = strategy.storage.user.get_social_auth(provider, uid)
+    if social:
+        if user and social.user != user:
+            # msg = 'This {0} account is already in use.'.format(provider)
+            # raise AuthAlreadyAssociated(strategy.backend, msg)
+            # Try merging the users.
+            # Do this first, simply because it's both most important and most likely to fail.
+            Project.objects.filter(owner=social.user).update(owner=user)
+            # If one user has GitHub settings and the other doesn't, use them.
+            try:
+                github = UserGithub.objects.get(user=social.user)
+                if github:
+                    if UserGithub.objects.filter(user=user).count() == 0:
+                        github.user = user
+                        github.save()
+            except UserGithub.DoesNotExist:
+                pass
+            # Delete our old social user.
+            social.user.delete()
+            social = None
+
+        elif not user:
+            user = social.user
+    return {'social': social,
+            'user': user,
+            'is_new': user is None,
+            'new_association': False}
+
+def clear_old_login(strategy, uid, user=None, *args, **kwargs):
+    provider = strategy.backend.name
+    social = strategy.storage.user.get_social_auth(provider, uid)
+    if user and social and user == social.user:
+        if user.has_usable_password():
+            user.set_unusable_password()

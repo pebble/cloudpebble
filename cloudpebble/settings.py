@@ -123,6 +123,19 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
+SOCIAL_AUTH_PIPELINE = (
+    'social.pipeline.social_auth.social_details',
+    'social.pipeline.social_auth.social_uid',
+    'social.pipeline.social_auth.auth_allowed',
+    'auth.pebble.merge_user', # formerly social.pipeline.social_auth.social_user
+    'social.pipeline.user.get_username',
+    'social.pipeline.user.create_user',
+    'social.pipeline.social_auth.associate_user',
+    'auth.pebble.clear_old_login',
+    'social.pipeline.social_auth.load_extra_data',
+    'social.pipeline.user.user_details'
+)
+
 SOCIAL_AUTH_PEBBLE_KEY = 'bab3e760ede6e592517682837a054beff83c8a80725d8e13fa122e8e87e99c20'
 SOCIAL_AUTH_PEBBLE_SECRET = '7bf8b96fd736f3a2ac12d472b0703d44503441913626deed86180c0f47dcbb08'
 
