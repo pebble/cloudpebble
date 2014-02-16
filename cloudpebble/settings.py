@@ -193,6 +193,8 @@ BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 
 LOGIN_REDIRECT_URL = '/ide/'
 
+LOGIN_URL = '/login/'
+
 FILE_STORAGE = os.getcwd() + '/user_data/'
 
 CHROOT_JAIL = None
