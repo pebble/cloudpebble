@@ -8,5 +8,6 @@ reg_view = views.IdeRegistrationMissingView.as_view() if settings.SOCIAL_AUTH_PE
 urlpatterns = patterns(
     '',
     url(r'^register/?$', reg_view, name="registration_register"),
+    url(r'^logout/?$', views.logout_view, name="logout"),
     url(r'', include('registration.backends.simple.urls'))
 )
