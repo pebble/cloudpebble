@@ -141,6 +141,8 @@ SOCIAL_AUTH_PEBBLE_SECRET = '7bf8b96fd736f3a2ac12d472b0703d44503441913626deed861
 
 SOCIAL_AUTH_PEBBLE_ROOT_URL = 'http://10.0.0.201:3000/'
 
+SOCIAL_AUTH_PEBBLE_REQUIRED = False
+
 ROOT_URLCONF = 'cloudpebble.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
