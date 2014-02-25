@@ -188,6 +188,9 @@ CloudPebble.Compile = (function() {
                         if(build.size.binary > 24576) {
                             s.find('.bin').addClass('text-error');
                         }
+                        var m = pane.find('#last-compilation-memory').removeClass('hide');
+                        m.find('.free-bytes').text(24576 - build.size.binary);
+                        m.find('.free-pct').text(Math.round((24576 - build.size.binary) / 245.76));
                     }
                 }
             } else {
