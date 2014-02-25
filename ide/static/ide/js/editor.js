@@ -36,6 +36,7 @@ CloudPebble.Editor = (function() {
             } else {
                 var is_js = file.name.substr(-3) == '.js';
                 var source = data.source;
+                var lastModified = data.modified;
                 var pane = $('<div>');
                 var is_autocompleting = false;
                 var settings = {
@@ -247,10 +248,14 @@ CloudPebble.Editor = (function() {
                 var save = function() {
                     save_btn.attr('disabled','disabled');
                     delete_btn.attr('disabled','disabled');
-                    $.post("/ide/project/" + PROJECT_ID + "/source/" + file.id + "/save", {'content': code_mirror.getValue()}, function(data) {
+                    $.post("/ide/project/" + PROJECT_ID + "/source/" + file.id + "/save", {
+                        content: code_mirror.getValue(),
+                        modified: lastModified
+                    }, function(data) {
                         save_btn.removeAttr('disabled');
                         delete_btn.removeAttr('disabled');
                         if(data.success) {
+                            lastModified = data.modified;
                             mark_clean();
                             ga('send', 'event' ,'file', 'save');
                         } else {

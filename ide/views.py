@@ -21,6 +21,8 @@ import tempfile
 import os
 import re
 import uuid
+import datetime
+import time
 from github import UnknownObjectException
 
 def json_response(response=None):
@@ -143,7 +145,11 @@ def load_source_file(request, project_id, file_id):
     except Exception as e:
         return json_failure(str(e))
     else:
-        return json_response({"success": True, "source": content})
+        return json_response({
+            "success": True,
+            "source": content,
+            "modified": time.mktime(source_file.last_modified.utctimetuple())
+        })
 
 
 @require_POST
@@ -152,11 +158,14 @@ def save_source_file(request, project_id, file_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     source_file = get_object_or_404(SourceFile, pk=file_id, project=project)
     try:
+        expected_modification_time = datetime.datetime.fromtimestamp(int(request.POST['modified']))
+        if source_file.last_modified.replace(tzinfo=None, microsecond=0) > expected_modification_time:
+            raise Exception("Could not save: file has been modified since last save.")
         source_file.save_file(request.POST['content'])
     except Exception as e:
         return json_failure(str(e))
     else:
-        return json_response({})
+        return json_response({"modified": time.mktime(source_file.last_modified.utctimetuple())})
 
 
 @require_POST
