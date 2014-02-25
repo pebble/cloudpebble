@@ -156,6 +156,17 @@ class TemplateProject(Project):
             new_file = SourceFile.objects.create(project=project, file_name=source_file.file_name)
             new_file.save_file(source_file.get_contents().replace("__UUID_GOES_HERE__", uuid_string))
 
+        # Copy over relevant project properties.
+        # NOTE: If new, relevant properties are added, they must be copied here.
+        # todo: can we do better than that? Maybe we could reuse the zip import mechanism or something...
+        if self.sdk_version != '1':
+            project.app_capabilities = self.app_capabilities
+            project.app_is_watchface = self.app_is_watchface
+            project.app_keys = self.app_keys
+            project.app_jshint = self.app_jshint
+            project.save()
+
+
 
 class BuildResult(models.Model):
     STATE_WAITING = 1
