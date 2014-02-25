@@ -151,6 +151,17 @@ def load_source_file(request, project_id, file_id):
             "modified": time.mktime(source_file.last_modified.utctimetuple())
         })
 
+@require_safe
+@csrf_protect
+@login_required
+def source_file_is_safe(request, project_id, file_id):
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    source_file = get_object_or_404(SourceFile, pk=file_id, project=project)
+    client_modified = datetime.datetime.fromtimestamp(int(request.GET['modified']))
+    server_modified = source_file.last_modified.replace(tzinfo=None, microsecond=0)
+    is_safe = client_modified >= server_modified
+    return json_response({'safe': is_safe})
+
 
 @require_POST
 @login_required

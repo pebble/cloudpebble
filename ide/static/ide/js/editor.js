@@ -210,6 +210,26 @@ CloudPebble.Editor = (function() {
                     throttled_hint();
                 }
 
+                var check_safe = function() {
+                    $.getJSON('/ide/project/' + PROJECT_ID + '/source/' + file.id + '/is_safe?modified=' + lastModified, function(data) {
+                        if(data.success && !data.safe) {
+                            if(was_clean) {
+                                code_mirror.setOption('readOnly', true);
+                                $.getJSON('/ide/project/' + PROJECT_ID + '/source/' + file.id + '/load', function(data) {
+                                    if(data.success) {
+                                        code_mirror.setValue(data.source);
+                                        lastModified = data.modified;
+                                        was_clean = true; // this will get reset to false by setValue.
+                                    }
+                                    code_mirror.setOption('readOnly', false);
+                                });
+                            } else {
+                                alert("This file has been edited elsewhere; you will not be able to save your changes.");
+                            }
+                        }
+                    });
+                };
+
                 var fix_height = function() {
                     if(!is_fullscreen) {
                         var browserHeight = document.documentElement.clientHeight;
@@ -223,6 +243,7 @@ CloudPebble.Editor = (function() {
                 CloudPebble.Sidebar.SetActivePane(pane, 'source-' + file.id, function() {
                     code_mirror.refresh();
                     code_mirror.focus();
+                    check_safe();
                 }, function() {
                     if(!was_clean) {
                         --unsaved_files;

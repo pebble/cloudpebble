@@ -13,6 +13,7 @@ urlpatterns = patterns(
     url(r'^project/(?P<project_id>\d+)/create_source_file', views.create_source_file, name='create_source_file'),
     url(r'^project/(?P<project_id>\d+)/source/(?P<file_id>\d+)/load', views.load_source_file, name='load_source_file'),
     url(r'^project/(?P<project_id>\d+)/source/(?P<file_id>\d+)/save', views.save_source_file, name='save_source_file'),
+    url(r'^project/(?P<project_id>\d+)/source/(?P<file_id>\d+)/is_safe', views.source_file_is_safe, name='source_file_is_safe'),
     url(r'^project/(?P<project_id>\d+)/source/(?P<file_id>\d+)/delete', views.delete_source_file, name='delete_source_file'),
     url(r'^project/(?P<project_id>\d+)/create_resource', views.create_resource, name='create_resource'),
     url(r'^project/(?P<project_id>\d+)/resource/(?P<resource_id>\d+)/info', views.resource_info, name='resource_info'),
