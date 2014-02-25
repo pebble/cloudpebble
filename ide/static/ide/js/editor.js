@@ -39,7 +39,8 @@ CloudPebble.Editor = (function() {
                 var pane = $('<div>');
                 var is_autocompleting = false;
                 var settings = {
-                    indentUnit: 4,
+                    indentUnit: USER_SETTINGS.tab_width,
+                    tabSize: USER_SETTINGS.tab_width,
                     lineNumbers: true,
                     autofocus: true,
                     electricChars: true,
@@ -47,7 +48,7 @@ CloudPebble.Editor = (function() {
                     autoCloseBrackets: true,
                     //highlightSelectionMatches: true,
                     smartIndent: true,
-                    indentWithTabs: true,
+                    indentWithTabs: !USER_SETTINGS.use_spaces,
                     mode: (is_js ? 'javascript' : CloudPebble.Editor.PebbleMode),
                     styleActiveLine: true,
                     value: source,
@@ -89,6 +90,52 @@ CloudPebble.Editor = (function() {
                             return CodeMirror.Pass;
                         }
                     };
+                }
+                if(USER_SETTINGS.use_spaces) {
+                    var spaces = Array(settings.indentUnit + 1).join(' ');
+                    settings.extraKeys['Tab'] = function(cm) {
+                        if(cm.somethingSelected()) {
+                            // If something is selected we want to indent the entire selection
+                            var start = cm.getCursor("head").line;
+                            var end = cm.getCursor("anchor").line;
+                            // Which way around we get these actually depends on the way the user
+                            // dragged the cursor; we always want start before end.
+                            if(start > end) {
+                                var temp = start;
+                                start = end;
+                                end = temp;
+                            }
+                            for(var line = start; line <= end; ++line) {
+                                cm.replaceRange(spaces, {line: line, ch: 0});
+                            }
+                        } else {
+                            // If it isn't we just indent our cursor.
+                            cm.replaceSelection(spaces, "end", "+input");
+                        }
+                    }
+                    settings.extraKeys['Backspace'] = function(cm) {
+                        // Nothing interesting to do if something's selected.
+                        if(cm.somethingSelected()) return CodeMirror.Pass;
+                        var pos = cm.getCursor();
+                        var content = cm.getRange({line: pos.line, ch:0}, pos);
+                        // We only need to do special handling if the line is blank to this point.
+                        if(content.replace(/\s*/, '') === '') {
+                            // Allow for stray tabs that managed to get in by counting them as an appropriate number
+                            // of spaces.
+                            var ch = content.replace('\t', spaces).length;
+                            if(ch !== 0 && ch % cm.getOption('indentUnit') === 0) {
+                                var start = {line: pos.line, ch: pos.ch};
+                                if(content.charAt(content.length - 1) == '\t') {
+                                    start.ch -= 1;
+                                } else {
+                                    start.ch -= cm.getOption('indentUnit');
+                                }
+                                cm.replaceRange('', start, pos);
+                                return;
+                            }
+                        }
+                        return CodeMirror.Pass;
+                    }
                 }
                 if(is_js) {
                     settings.gutters = ['CodeMirror-linenumbers', 'gutter-hint-warnings'];

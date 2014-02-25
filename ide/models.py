@@ -119,6 +119,8 @@ class UserSettings(models.Model):
     autocomplete = models.IntegerField(choices=AUTOCOMPLETE_CHOICES, default=AUTOCOMPLETE_ALWAYS)
     keybinds = models.CharField(max_length=20, choices=KEYBIND_CHOICES, default=KEYBIND_STANDARD)
     theme = models.CharField(max_length=50, choices=THEME_CHOICES, default='monokai')
+    use_spaces = models.BooleanField(default=True, verbose_name="Indent using spaces")
+    tab_width = models.PositiveSmallIntegerField(default=2)
 
     # Used for the Pebble ownership transition, when it was set to False.
     accepted_terms = models.BooleanField(default=True)
