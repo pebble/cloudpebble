@@ -291,7 +291,7 @@ def generate_jshint_file(project):
 }
 """
 
-def generate_wscript_file(project):
+def generate_wscript_file(project, for_export=False):
     jshint = project.app_jshint
     wscript = """
 #
@@ -330,7 +330,7 @@ def build(ctx):
                    js=ctx.path.ant_glob('src/js/**/*.js'))
 
 """
-    return wscript.replace('{{jshint}}', 'True' if jshint else 'False')
+    return wscript.replace('{{jshint}}', 'True' if jshint and not for_export else 'False')
 
 def add_project_to_archive(z, project, prefix=''):
     source_files = SourceFile.objects.filter(project=project)
@@ -351,7 +351,8 @@ def add_project_to_archive(z, project, prefix=''):
         manifest = generate_v2_manifest(project, resources)
         z.writestr('%s/appinfo.json' % prefix, manifest)
         # This file is always the same, but needed to build.
-        z.writestr('%s/wscript' % prefix, generate_wscript_file(project))
+        z.writestr('%s/wscript' % prefix, generate_wscript_file(project, for_export=True))
+        z.writestr('%s/jshintrc' % prefix, generate_jshint_file(project))
 
 
 @task(acks_late=True)
