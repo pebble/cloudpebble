@@ -21,7 +21,6 @@
     </div>
     <div class="form-actions" style="margin-bottom: 0px; padding-bottom: 0px;">
         <p><button class="btn btn-primary" type="submit">Log in</button>
-        <a href="/accounts/register/" class="btn">Create account</a></p>
         <p style="margin-bottom: 0px;"><a href="{% url 'django.contrib.auth.views.password_reset' %}">Forgotten password?</a></p>
     </div>
     <input type="hidden" name="next" value="{{ next }}" />

@@ -10,3 +10,4 @@ Pillow==2.0.0
 South
 qrcode
 pygithub==1.14.2
+python-social-auth

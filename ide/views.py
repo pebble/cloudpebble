@@ -41,6 +41,8 @@ def index(request):
         return render(request, 'ide/new-owner.html', {
             'my_projects': my_projects
         })
+    elif settings.SOCIAL_AUTH_PEBBLE_REQUIRED and request.user.social_auth.filter(provider='pebble').count() == 0:
+        return render(request, 'registration/merge_account.html')
     else:
         return render(request, 'ide/index.html', {
             'my_projects': my_projects,

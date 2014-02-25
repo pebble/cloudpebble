@@ -25,6 +25,18 @@ DATABASES = {
     }
 }
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+    "django.contrib.auth.context_processors.auth",
+    "django.core.context_processors.debug",
+    "django.core.context_processors.i18n",
+    "django.core.context_processors.media",
+    "django.core.context_processors.static",
+    "django.core.context_processors.tz",
+    "django.contrib.messages.context_processors.messages",
+    "social.apps.django_app.context_processors.backends",
+    "social.apps.django_app.context_processors.login_redirect",
+)
+
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = []
@@ -106,6 +118,31 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
+AUTHENTICATION_BACKENDS = (
+    'auth.pebble.PebbleOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+SOCIAL_AUTH_PIPELINE = (
+    'social.pipeline.social_auth.social_details',
+    'social.pipeline.social_auth.social_uid',
+    'social.pipeline.social_auth.auth_allowed',
+    'auth.pebble.merge_user', # formerly social.pipeline.social_auth.social_user
+    'social.pipeline.user.get_username',
+    'social.pipeline.user.create_user',
+    'social.pipeline.social_auth.associate_user',
+    'auth.pebble.clear_old_login',
+    'social.pipeline.social_auth.load_extra_data',
+    'social.pipeline.user.user_details'
+)
+
+SOCIAL_AUTH_PEBBLE_KEY = 'bab3e760ede6e592517682837a054beff83c8a80725d8e13fa122e8e87e99c20'
+SOCIAL_AUTH_PEBBLE_SECRET = '7bf8b96fd736f3a2ac12d472b0703d44503441913626deed86180c0f47dcbb08'
+
+SOCIAL_AUTH_PEBBLE_ROOT_URL = 'http://10.0.0.201:3000/'
+
+SOCIAL_AUTH_PEBBLE_REQUIRED = False
+
 ROOT_URLCONF = 'cloudpebble.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
@@ -128,6 +165,7 @@ INSTALLED_APPS = (
     #'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    'social.apps.django_app.default',
     'ide',
     'auth',
     'root',
@@ -169,6 +207,8 @@ LOGGING = {
 BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 
 LOGIN_REDIRECT_URL = '/ide/'
+
+LOGIN_URL = '/login/'
 
 FILE_STORAGE = os.getcwd() + '/user_data/'
 
