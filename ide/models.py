@@ -303,6 +303,7 @@ class ResourceIdentifier(models.Model):
 class SourceFile(models.Model):
     project = models.ForeignKey(Project, related_name='source_files')
     file_name = models.CharField(max_length=100)
+    last_modified = models.DateTimeField(blank=True, null=True, auto_now=True)
 
     def get_local_filename(self):
         padded_id = '%05d' % self.id
@@ -319,8 +320,7 @@ class SourceFile(models.Model):
             os.makedirs(os.path.dirname(self.local_filename))
         open(self.local_filename, 'w').write(content.encode('utf-8'))
 
-        self.project.last_modified = now()
-        self.project.save()
+        self.save()
 
     def save(self, *args, **kwargs):
         self.project.last_modified = now()
