@@ -569,10 +569,15 @@
 {% block scripts %}
 <script type="text/javascript">
 var PROJECT_ID = {{ project.id }};
+// Create consistency with Python, which will dump in capitalised booleans here.
+var True = true;
+var False = false;
 var USER_SETTINGS = {
     theme: "{{ project.owner.settings.theme }}",
     autocomplete: {{ project.owner.settings.autocomplete }},
     keybinds: "{{ project.owner.settings.keybinds }}",
+    use_spaces: {{ project.owner.settings.use_spaces }},
+    tab_width: {{ project.owner.settings.tab_width }},
     {% if project.owner.github and project.owner.github.token %}
     github: {
         username: "{{ project.owner.github.username }}",
