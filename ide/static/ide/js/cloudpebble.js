@@ -59,6 +59,10 @@ CloudPebble.Init = function() {
         }
     });
     ga('send', 'event', 'project', 'open');
+    var dimensionValue = 'SOME_DIMENSION_VALUE';
+    ga('set', 'dimension1', USER_ID); // User
+    ga('set', 'dimension2', _.random(1, 2147000000)); // Random page load identifier-ish
+    ga('set', 'dimension3', PROJECT_ID); // Project
 };
 
 CloudPebble.Prompts = {

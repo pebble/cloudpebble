@@ -570,6 +570,7 @@
 {% block scripts %}
 <script type="text/javascript">
 var PROJECT_ID = {{ project.id }};
+var USER_ID = {{ project.owner.id }};
 // Create consistency with Python, which will dump in capitalised booleans here.
 var True = true;
 var False = false;
