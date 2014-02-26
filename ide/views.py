@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.views.decorators.http import require_safe, require_POST
-from django.views.decorators.csrf import csrf_protect, csrf_exempt
+from django.views.decorators.csrf import csrf_protect, csrf_exempt, ensure_csrf_cookie
 from django.conf import settings
 from celery.result import AsyncResult
 
@@ -37,6 +37,7 @@ def json_failure(error):
 
 @require_safe
 @login_required
+@ensure_csrf_cookie
 def index(request):
     my_projects = Project.objects.filter(owner=request.user).order_by('-last_modified')
     if not request.user.settings.accepted_terms:
@@ -57,6 +58,7 @@ def index(request):
 
 @require_safe
 @login_required
+@ensure_csrf_cookie
 def project(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     if project.app_uuid is None:
