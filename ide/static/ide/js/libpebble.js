@@ -85,7 +85,7 @@ Pebble = function(ip, port) {
     var handle_socket_open = function(e) {
         console.log("Socket open");
         mHasConnected = true;
-        ga('send', 'event', 'phone-connection', 'connect', 'success', mIP);
+        ga('send', 'event', 'phone-connect', 'success', mIP);
         self.trigger('open');
     };
 
@@ -95,13 +95,13 @@ Pebble = function(ip, port) {
             console.log("Close was unexpected.");
             if(!mHasConnected) {
                 self.trigger("error", "Connection to the phone failed. Check the IP and that developer mode is active.");
-                ga('send', 'event', 'phone-connection', 'connect', 'failed', mIP);
+                ga('send', 'event', 'phone-connect', 'failed', mIP);
             } else {
                 self.trigger("error", "Connection to the phone was interrupted.");
-                ga('send', 'event', 'phone-connection', 'disconnect', 'dirty', mIP);
+                ga('send', 'event', 'phone-disconnect', 'dirty', mIP);
             }
         } else {
-            ga('send', 'event', 'phone-connection', 'disconnect', 'clean', mIP);
+            ga('send', 'event', 'phone-disconnect', 'clean', mIP);
         }
         self.trigger('close');
     };
