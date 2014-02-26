@@ -58,11 +58,11 @@ CloudPebble.Editor = (function() {
                 if(USER_SETTINGS.keybinds !== '') {
                     settings.keyMap = USER_SETTINGS.keybinds;
                 }
+                if(!settings.extraKeys) settings.extraKeys = {};
                 if(!is_js && USER_SETTINGS.autocomplete === 2) {
                     settings.extraKeys = {'Ctrl-Space': 'autocomplete'};
                 }
                 if(!is_js && USER_SETTINGS.autocomplete !== 0) {
-                    if(!settings.extraKeys) settings.extraKeys = {};
                     settings.extraKeys['Tab'] = function() {
                         var marks = code_mirror.getAllMarks();
                         var cursor = code_mirror.getCursor();
