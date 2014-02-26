@@ -161,16 +161,17 @@ CloudPebble.Compile = (function() {
                     } else {
                         pane.find('#last-compilation-qr-code').removeClass('hide').find('img').attr('src', '/qr/?v=' + url);
                     }
-                    $('#pbw-shortlink > a').attr('href', '#').text("get short link").unbind('click').click(function() {
-                        $('#pbw-shortlink > a').text("generating…").unbind('click');
+                    var shortlink = $('#pbw-shortlink').find('> a');
+                    shortlink.attr('href', '#').text("get short link").unbind('click').click(function() {
+                        shortlink.text("generating…").unbind('click');
                         ga('send', 'event', 'short link', 'generate');
                         $.post("/ide/shortlink", {url: url}, function(data) {
                             if(data.success) {
-                                $('#pbw-shortlink > a').attr('href', data.url).text(data.url.replace(/^https?:\/\//,'')).click(function() {
+                                shortlink.attr('href', data.url).text(data.url.replace(/^https?:\/\//,'')).click(function() {
                                     ga('send', 'event', 'short link', 'click');
                                 });
                             } else {
-                                $('#pbw-shortlink > a').text("no shortlink");
+                                shortlink.text("no shortlink");
                             }
                         });
                     });
@@ -266,11 +267,24 @@ CloudPebble.Compile = (function() {
             return;
         }
         append_log_html($("<span class='log-verbose'>Looking up debug information...</span>"));
-        mCrashAnalyser.find_source_line(pc, function(file, line, fn_name, fn_line) {
-            append_log_html($("<span class='log-error'>").text("Crashed at " + file + ":" + line + ", in " + fn_name + " (" + file + ":" + fn_line + ")."));
-        }, function(why) {
-            append_log_html($("<span class='log-error'>").text(why));
-        })
+        mCrashAnalyser.find_source_lines([pc, lr], function(results) {
+            var pc_result = results[0];
+            var lr_result = results[1];
+            if(pc_result === null) {
+                append_log_html("<span class='log-error'>Crashed inside firmware call.</span>");
+            } else {
+                append_log_html($("<span class='log-error'>")
+                    .text("Crashed at " + pc_result.file + ":" + pc_result.line + ", in " +
+                        pc_result.fn_name + " (starts at " + pc_result.file + ":" + pc_result.fn_line + ")."));
+            }
+            if(lr_result !== null) {
+                if(pc_result === null || (lr_result.fn_name !== pc_result.fn_name)) {
+                    append_log_html($("<span class='log-error'>")
+                        .text("Which was called from " + lr_result.file + ":" + lr_result.line + ", in " +
+                            lr_result.fn_name + " (starts at " + lr_result.file + ":" + lr_result.fn_line + ")."));
+                }
+            }
+        });
     }
 
     var get_log_class = function(priority) {
