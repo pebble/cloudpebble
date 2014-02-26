@@ -94,7 +94,14 @@ CloudPebble.Editor = (function() {
                 }
                 if(USER_SETTINGS.use_spaces) {
                     var spaces = Array(settings.indentUnit + 1).join(' ');
+                    var oldTab = settings.extraKeys['Tab'];
                     settings.extraKeys['Tab'] = function(cm) {
+                        // If we already overrode tab, check that one.
+                        if(oldTab) {
+                            if(oldTab(cm) !== CodeMirror.Pass) {
+                                return;
+                            }
+                        }
                         if(cm.somethingSelected()) {
                             // If something is selected we want to indent the entire selection
                             var start = cm.getCursor("head").line;
@@ -113,7 +120,7 @@ CloudPebble.Editor = (function() {
                             // If it isn't we just indent our cursor.
                             cm.replaceSelection(spaces, "end", "+input");
                         }
-                    }
+                    };
                     settings.extraKeys['Backspace'] = function(cm) {
                         // Nothing interesting to do if something's selected.
                         if(cm.somethingSelected()) return CodeMirror.Pass;
@@ -136,7 +143,7 @@ CloudPebble.Editor = (function() {
                             }
                         }
                         return CodeMirror.Pass;
-                    }
+                    };
                 }
                 if(is_js) {
                     settings.gutters = ['CodeMirror-linenumbers', 'gutter-hint-warnings'];
