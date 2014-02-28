@@ -13,6 +13,7 @@ from ide.models import Project, SourceFile, ResourceFile, ResourceIdentifier, Bu
 from ide.tasks import run_compile, create_archive, do_import_archive, do_import_github, do_github_push, do_github_pull, hooked_commit, export_user_projects
 from ide.forms import SettingsForm
 import ide.git
+from utils.keen_helper import send_keen_event
 
 import urllib2
 import urllib
@@ -73,6 +74,7 @@ def project(request, project_id):
         project.app_version_code = 1
     if project.app_version_label is None:
         project.app_version_label = '1.0'
+    send_keen_event('cloudpebble', 'cloudpebble_open_project', request=request, project=project)
     return render(request, 'ide/project.html', {'project': project})
 
 
@@ -133,6 +135,13 @@ def create_source_file(request, project_id):
     except IntegrityError as e:
         return json_failure(str(e))
     else:
+        send_keen_event('cloudpebble', 'cloudpebble_create_file', data={
+            'data': {
+                'filename': request.POST['name'],
+                'kind': 'source'
+            }
+        }, project=project, request=request)
+
         return json_response({"file": {"id": f.id, "name": f.file_name}})
 
 
@@ -144,6 +153,14 @@ def load_source_file(request, project_id, file_id):
     source_file = get_object_or_404(SourceFile, pk=file_id, project=project)
     try:
         content = source_file.get_contents()
+
+        send_keen_event('cloudpebble', 'cloudpebble_open_file', data={
+            'data': {
+                'filename': source_file.file_name,
+                'kind': 'source'
+            }
+        }, project=project, request=request)
+
     except Exception as e:
         return json_failure(str(e))
     else:
@@ -173,11 +190,26 @@ def save_source_file(request, project_id, file_id):
     try:
         expected_modification_time = datetime.datetime.fromtimestamp(int(request.POST['modified']))
         if source_file.last_modified.replace(tzinfo=None, microsecond=0) > expected_modification_time:
+            send_keen_event('cloudpebble', 'cloudpebble_save_abort_unsafe', data={
+                'data': {
+                    'filename': source_file.file_name,
+                    'kind': 'source'
+                }
+            }, project=project, request=request)
             raise Exception("Could not save: file has been modified since last save.")
         source_file.save_file(request.POST['content'])
+
+
     except Exception as e:
         return json_failure(str(e))
     else:
+        send_keen_event('cloudpebble', 'cloudpebble_save_file', data={
+            'data': {
+                'filename': source_file.file_name,
+                'kind': 'source'
+            }
+        }, project=project, request=request)
+
         return json_response({"modified": time.mktime(source_file.last_modified.utctimetuple())})
 
 
@@ -191,6 +223,12 @@ def delete_source_file(request, project_id, file_id):
     except Exception as e:
         return json_failure(str(e))
     else:
+        send_keen_event('cloudpebble', 'cloudpebble_delete_file', data={
+            'data': {
+                'filename': source_file.file_name,
+                'kind': 'source'
+            }
+        }, project=project, request=request)
         return json_response({})
 
 
@@ -210,9 +248,19 @@ def create_resource(request, project_id):
                 tracking = int(r['tracking']) if 'tracking' in r else None
                 resources.append(ResourceIdentifier.objects.create(resource_file=rf, resource_id=r['id'], character_regex=regex, tracking=tracking))
             rf.save_file(request.FILES['file'])
+
+
     except Exception as e:
         return json_failure(str(e))
     else:
+        send_keen_event('cloudpebble', 'cloudpebble_create_file', data={
+            'data': {
+                'filename': file_name,
+                'kind': 'resource',
+                'resource-kind': kind
+            }
+        }, project=project, request=request)
+
         return json_response({"file": {
             "id": rf.id,
             "kind": rf.kind,
@@ -225,9 +273,18 @@ def create_resource(request, project_id):
 @require_safe
 @login_required
 def resource_info(request, project_id, resource_id):
-    get_object_or_404(Project, pk=project_id, owner=request.user)
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
     resource = get_object_or_404(ResourceFile, pk=resource_id)
     resources = resource.get_identifiers()
+
+    send_keen_event('cloudpebble', 'cloudpebble_open_file', data={
+        'data': {
+            'filename': resource.file_name,
+            'kind': 'resource',
+            'resource-kind': resource.kind
+        }
+    }, project=project, request=request)
+
     return json_response({
         'resource': {
             'resource_ids': [{'id': x.resource_id, 'regex': x.character_regex, 'tracking': x.tracking} for x in resources],
@@ -248,6 +305,14 @@ def delete_resource(request, project_id, resource_id):
     except Exception as e:
         return json_failure(str(e))
     else:
+        send_keen_event('cloudpebble', 'cloudpebble_delete_file', data={
+            'data': {
+                'filename': resource.file_name,
+                'kind': 'resource',
+                'resource-kind': resource.kind
+            }
+        }, project=project, request=request)
+
         return json_response({})
 
 
@@ -273,6 +338,13 @@ def update_resource(request, project_id, resource_id):
     except Exception as e:
         return json_failure(str(e))
     else:
+        send_keen_event('cloudpebble', 'cloudpebble_save_file', data={
+            'data': {
+                'filename': resource.file_name,
+                'kind': 'source'
+            }
+        }, project=project, request=request)
+
         return json_response({"file": {
             "id": resource.id,
             "kind": resource.kind,
@@ -355,6 +427,13 @@ def build_log(request, project_id, build_id):
         log = open(build.build_log, 'r').read().decode('utf-8')
     except Exception as e:
         return json_failure(str(e))
+
+    send_keen_event('cloudpebble', 'cloudpebble_view_build_log', data={
+        'data': {
+            'build_state': build.state
+        }
+    }, project=project, request=request)
+
     return json_response({"log": log})
 
 
@@ -383,6 +462,9 @@ def create_project(request):
     except IntegrityError as e:
         return json_failure(str(e))
     else:
+
+        send_keen_event('cloudpebble', 'cloudpebble_create_project', project=project, request=request)
+
         return json_response({"id": project.id})
 
 
@@ -424,6 +506,8 @@ def save_project_settings(request, project_id):
     except IntegrityError as e:
         return json_failure(str(e))
     else:
+        send_keen_event('cloudpebble', 'cloudpebble_save_project_settings', project=project, request=request)
+
         return json_response({})
 
 
@@ -438,6 +522,7 @@ def delete_project(request, project_id):
     except Exception as e:
         return json_failure(str(e))
     else:
+        send_keen_event('cloudpebble', 'cloudpebble_delete_project', project=project, request=request)
         return json_response({})
 
 
@@ -460,6 +545,9 @@ def get_shortlink(request):
     except urllib2.URLError as e:
         return json_failure(str(e))
     else:
+        send_keen_event('cloudpebble', 'cloudpebble_generate_shortlink', data={
+            'data': {'short_url': response['url']}
+        }, request=request)
         return json_response({'url': response['url']})
 
 
@@ -475,10 +563,13 @@ def settings_page(request):
         form = SettingsForm(request.POST, instance=settings)
         if form.is_valid():
             form.save()
+            send_keen_event('cloudpebble', 'cloudpebble_change_user_settings', request=request)
             return render(request, 'ide/settings.html', {'form': form, 'saved': True, 'github': github})
 
     else:
         form = SettingsForm(instance=settings)
+
+    send_keen_event('cloudpebble', 'cloudpebble_view_user_settings', request=request)
 
     return render(request, 'ide/settings.html', {'form': form, 'saved': False, 'github': github})
 
@@ -551,6 +642,7 @@ def start_github_auth(request):
         user_github = UserGithub.objects.create(user=request.user)
     user_github.nonce = nonce
     user_github.save()
+    send_keen_event('cloudpebble', 'cloudpebble_github_started', request=request)
     return HttpResponseRedirect('https://github.com/login/oauth/authorize?client_id=%s&scope=repo&state=%s' % (settings.GITHUB_CLIENT_ID, nonce))
 
 
@@ -562,6 +654,7 @@ def remove_github_auth(request):
         user_github.delete()
     except UserGithub.DoesNotExist:
         pass
+    send_keen_event('cloudpebble', 'cloudpebble_github_revoked', request=request)
     return HttpResponseRedirect('/ide/settings')
 
 
@@ -591,6 +684,9 @@ def complete_github_auth(request):
     user_github.avatar = result['user']['avatar_url']
 
     user_github.save()
+
+    send_keen_event('cloudpebble', 'cloudpebble_github_linked', request=request, data={'data': {'username': user_github.username}})
+
     return HttpResponseRedirect('/ide/settings')
 
 
@@ -691,6 +787,13 @@ def set_project_repo(request, project_id):
 
         project.save()
 
+    send_keen_event('cloudpebble', 'cloudpebble_project_github_linked', project=project, request=request, data={
+        'data': {
+            'repo': project.github_repo,
+            'branch': project.github_branch
+        }
+    })
+
     return json_response({'exists': True, 'access': True, 'updated': True, 'branch_exists': True})
 
 
@@ -710,6 +813,12 @@ def create_project_repo(request, project_id):
         project.github_last_sync = None
         project.github_last_commit = None
         project.save()
+
+    send_keen_event('cloudpebble', 'cloudpebble_created_github_repo', project=project, request=request, data={
+        'data': {
+            'repo': project.github_repo
+        }
+    })
 
     return json_response({"repo": repo.html_url})
 
@@ -753,6 +862,7 @@ def transition_accept(request):
     user_settings = request.user.settings
     user_settings.accepted_terms = True
     user_settings.save()
+    send_keen_event('cloudpebble', 'cloudpebble_ownership_transition_accepted', request=request)
     return json_response({})
 
 @login_required
@@ -764,5 +874,29 @@ def transition_export(request):
 @login_required
 @require_POST
 def transition_delete(request):
+    send_keen_event('cloudpebble', 'cloudpebble_ownership_transition_declined', request=request)
     request.user.delete()
+    return json_response({})
+
+@login_required
+@require_POST
+def proxy_keen(request, project_id):
+    project = get_object_or_404(Project, pk=project_id)
+
+    acceptable_events = {
+        'app_install_succeeded',
+        'websocket_connection_failed',
+        'app_install_failed',
+        'app_log_view',
+        'sdk_screenshot_success',
+        'sdk_screenshot_failed'
+    }
+
+    event = request.POST['event']
+    if event not in acceptable_events:
+        return json_failure("nope.")
+
+    data = {'data': json.loads(request.POST['data'])} if 'data' in request.POST else None
+
+    send_keen_event(['cloudpebble', 'sdk'], event, project=project, request=request, data=data)
     return json_response({})

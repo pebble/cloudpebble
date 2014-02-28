@@ -231,6 +231,10 @@ SDK1_ROOT = '/home/vagrant/sdk1/Pebble/sdk'
 
 ARM_CS_TOOLS = '/home/vagrant/arm-cs-tools/bin/'
 
+KEEN_PROJECT_ID = None
+KEEN_WRITE_KEY = None
+KEEN_ENABLED = False
+
 import djcelery
 djcelery.setup_loader()
 
