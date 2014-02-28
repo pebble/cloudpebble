@@ -34,9 +34,9 @@ def send_keen_event(collections, event, data=None, request=None, project=None, u
             user = project.owner
 
     if user is not None:
-        data['cloudpebble']['uid'] = user.id
+        data['identity'] = {'cloudpebble_uid': user.id}
         try:
-            data['identity'] = {'user': user.social_auth.get(provider='pebble').uid}
+            data['identity']['user'] = user.social_auth.get(provider='pebble').uid
         except:
             pass
 
