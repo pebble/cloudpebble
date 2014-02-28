@@ -342,9 +342,11 @@ CloudPebble.Compile = (function() {
                 modal.on('hide', stop_logs);
                 modal.find('.progress').addClass('progress-success').removeClass('progress-striped');
                 ga('send', 'event', 'install', 'direct', 'success');
+                CloudPebble.Analytics.addEvent('app_install_succeeded', {target_ip: ip});
             } else {
                 report_error("Installation failed with error code " + code + ". Check your phone for details.");
                 ga('send', 'event', 'install', 'direct', 'phone-error');
+                CloudPebble.Analytics.addEvent('app_install_failed', {target_ip: ip, cause: 'rejected'});
                 mPebble.close();
                 mPebble = null;
             }
@@ -352,6 +354,7 @@ CloudPebble.Compile = (function() {
         mPebble.on('error', function(e) {
             report_error("Installation failed: " + e);
             ga('send', 'event', 'install', 'direct', 'connection-error');
+            CloudPebble.Analytics.addEvent('app_install_failed', {target_ip: ip, cause: 'phone_disconnected'});
             mPebble = null;
         });
     };
@@ -379,6 +382,7 @@ CloudPebble.Compile = (function() {
         }
         _.each(mPreviousDisplayLogs, show_log_line);
         CloudPebble.Sidebar.SetActivePane(mLogHolder, undefined, undefined, stop_logs);
+        CloudPebble.Analytics.addEvent('app_log_view', {target_ip: ip});
     };
 
     var get_phone_ip = function() {
@@ -414,6 +418,7 @@ CloudPebble.Compile = (function() {
         });
 
         mPebble.on('screenshot:failed', function(reason) {
+            CloudPebble.Analytics.addEvent('app_screenshot_failed', {target_ip: ip});
             report_error("Screenshot failed: " + reason);
             mPebble.close();
         });
@@ -432,6 +437,7 @@ CloudPebble.Compile = (function() {
                 .css({'text-align': 'center'});
             modal.find('.dismiss-btn').removeClass('hide');
             mPebble.close();
+            CloudPebble.Analytics.addEvent('app_screenshot_succeeded', {target_ip: ip});
         });
 
         modal.on('hide', function() {

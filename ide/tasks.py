@@ -25,6 +25,8 @@ from github.InputGitTreeElement import InputGitTreeElement
 from github.GithubObject import NotSet
 import base64
 import traceback
+from utils.keen_helper import send_keen_event
+from keen.client import KeenClient
 
 import apptools.addr2lines
 
@@ -160,8 +162,18 @@ def run_compile(build_result):
 
                 shutil.move(temp_file, build_result.pbw)
                 print "Build succeeded."
+                send_keen_event(['cloudpebble', 'sdk'], 'app_build_succeeded', data={
+                    'data': {
+                        'cloudpebble_build_id': build_result.id
+                    }
+                }, project=project)
             else:
                 print "Build failed."
+                send_keen_event(['cloudpebble', 'sdk'], 'app_build_failed', data={
+                    'data': {
+                        'cloudpebble_build_id': build_result.id
+                    }
+                }, project=project)
             open(build_result.build_log, 'w').write(output)
             build_result.state = BuildResult.STATE_SUCCEEDED if success else BuildResult.STATE_FAILED
             build_result.finished = now()
@@ -370,6 +382,9 @@ def create_archive(project_id):
         os.makedirs(os.path.dirname(outfile), 0755)
         shutil.copy(filename, outfile)
         os.chmod(outfile, 0644)
+
+        send_keen_event('cloudpebble', 'cloudpebble_export_project', project=project)
+
         return '%s%s/%s.zip' % (settings.EXPORT_ROOT, u, prefix)
 
 @task(acks_late=True)
@@ -388,6 +403,8 @@ def export_user_projects(user_id):
         os.makedirs(os.path.dirname(outfile), 0755)
         shutil.copy(filename, outfile)
         os.chmod(outfile, 0644)
+
+        send_keen_event('cloudpebble', 'cloudpebble_export_all_projects', user=user)
         return '%s%s/%s.zip' % (settings.EXPORT_ROOT, u, 'cloudpebble-export')
 
 class NoProjectFoundError(Exception):
@@ -534,6 +551,7 @@ def do_import_archive(project_id, archive_location, delete_zip=False, delete_pro
                             with z.open(entry.filename) as f:
                                 source.save_file(f.read().decode('utf-8'))
                 project.save()
+                send_keen_event('cloudpebble', 'cloudpebble_zip_import_succeeded', project=project)
 
         # At this point we're supposed to have successfully created the project.
         if delete_zip:
@@ -542,12 +560,17 @@ def do_import_archive(project_id, archive_location, delete_zip=False, delete_pro
             except OSError:
                 print "Unable to remove archive at %s." % archive_location
         return True
-    except:
+    except Exception as e:
         if delete_project:
             try:
                 Project.objects.get(pk=project_id).delete()
             except:
                 pass
+        send_keen_event('cloudpebble', 'cloudpebble_zip_import_failed', user=user, data={
+            'data': {
+                'reason': e.message
+            }
+        })
         raise
 
 
@@ -563,12 +586,20 @@ def do_import_github(project_id, github_user, github_project, github_branch, del
                 return do_import_archive(project_id, temp.name)
         else:
             raise Exception("The branch '%s' does not exist." % github_branch)
-    except:
+    except Exception as e:
         if delete_project:
             try:
                 Project.objects.get(pk=project_id).delete()
             except:
                 pass
+        send_keen_event('cloudpebble', 'cloudpebble_github_import_failed', user=user, data={
+            'data': {
+                'reason': e.message,
+                'github_user': github_user,
+                'github_project': github_project,
+                'github_branch': github_branch
+            }
+        })
         raise
 
 def file_exists(url):
@@ -757,6 +788,12 @@ def github_push(user, commit_message, repo_name, project):
         project.save()
         return True
 
+    send_keen_event('cloudpebble', 'cloudpebble_github_push', user=user, data={
+        'data': {
+            'repo': project.github_repo
+        }
+    })
+
     return False
 
 
@@ -828,6 +865,13 @@ def github_pull(user, project):
         project.github_last_commit = branch.commit.sha
         project.github_last_sync = now()
         project.save()
+
+        send_keen_event('cloudpebble', 'cloudpebble_github_pull', user=user, data={
+            'data': {
+                'repo': project.github_repo
+            }
+        })
+
         return import_result
 
 
@@ -858,3 +902,7 @@ def hooked_commit(project_id, target_commit):
         did_something = True
 
     return did_something
+
+@task(ignore_result=True)
+def keen_add_events(events):
+    KeenClient(project_id=settings.KEEN_PROJECT_ID, write_key=settings.KEEN_WRITE_KEY).add_events(events)

@@ -23,6 +23,7 @@ urlpatterns = patterns(
     url(r'^project/(?P<project_id>\d+)/build/run', views.compile_project, name='compile_project'),
     url(r'^project/(?P<project_id>\d+)/build/last', views.last_build, name='get_last_build'),
     url(r'^project/(?P<project_id>\d+)/build/history', views.build_history, name='get_build_history'),
+    url(r'^project/(?P<project_id>\d+)/analytics', views.proxy_keen, name='proxy_analytics'),
     url(r'^project/(?P<project_id>\d+)/build/(?P<build_id>\d+)/log', views.build_log, name='get_build_log'),
     url(r'^project/(?P<project_id>\d+)/export', views.begin_export, name='begin_export'),
     url(r'^project/(?P<project_id>\d+)/github/repo$', views.set_project_repo, name='set_project_repo'),

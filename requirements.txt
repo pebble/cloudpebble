@@ -11,3 +11,4 @@ South
 qrcode
 pygithub==1.14.2
 python-social-auth
+keen
