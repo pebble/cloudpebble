@@ -48,6 +48,7 @@ def index(request):
     elif settings.SOCIAL_AUTH_PEBBLE_REQUIRED and request.user.social_auth.filter(provider='pebble').count() == 0:
         return render(request, 'registration/merge_account.html')
     else:
+        send_keen_event('cloudpebble', 'cloudpebble_project_list', request=request)
         return render(request, 'ide/index.html', {
             'my_projects': my_projects,
             'sdk_templates': TemplateProject.objects.filter(template_kind=TemplateProject.KIND_TEMPLATE),
