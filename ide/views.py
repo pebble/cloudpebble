@@ -889,6 +889,7 @@ def proxy_keen(request, project_id):
         'websocket_connection_failed',
         'app_install_failed',
         'app_log_view',
+        'app_logged_crash',
         'sdk_screenshot_success',
         'sdk_screenshot_failed'
     }
