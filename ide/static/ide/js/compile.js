@@ -270,6 +270,17 @@ CloudPebble.Compile = (function() {
         mCrashAnalyser.find_source_lines([pc, lr], function(results) {
             var pc_result = results[0];
             var lr_result = results[1];
+            CloudPebble.Analytics.addEvent('app_logged_crash', {
+                pc: {
+                    pointer: pc,
+                    symbol: pc_result
+                },
+                lr: {
+                    pointer: lr,
+                    symbol: lr_result
+                },
+                did_resolve: !!(pc_result || lr_result)
+            });
             if(pc_result === null) {
                 append_log_html("<span class='log-error'>Crashed inside firmware call.</span>");
             } else {
