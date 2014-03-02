@@ -14,6 +14,7 @@ from ide.tasks import run_compile, create_archive, do_import_archive, do_import_
 from ide.forms import SettingsForm
 import ide.git
 from utils.keen_helper import send_keen_event
+from utils.redis_helper import redis_client
 
 import urllib2
 import urllib
@@ -24,6 +25,7 @@ import re
 import uuid
 import datetime
 import time
+import requests
 from github import UnknownObjectException
 
 def json_response(response=None):
@@ -900,4 +902,65 @@ def proxy_keen(request, project_id):
     data = {'data': json.loads(request.POST['data'])} if 'data' in request.POST else None
 
     send_keen_event(['cloudpebble', 'sdk'], event, project=project, request=request, data=data)
+    return json_response({})
+
+@login_required
+@require_safe
+def list_phones(request):
+    user_key = request.user.social_auth.get(provider='pebble').extra_data['access_token']
+
+    response = requests.get(
+        '{0}/api/v1/me.json'.format(settings.SOCIAL_AUTH_PEBBLE_ROOT_URL),
+        headers={'Authorization': 'Bearer {0}'.format(user_key)},
+        params={'client_id': settings.SOCIAL_AUTH_PEBBLE_KEY})
+
+    if response.status_code != 200:
+        return json_failure(response.reason)
+    else:
+        devices = response.json()['devices']
+        return json_response({'devices': devices})
+
+@login_required
+@require_POST
+def ping_phone(request):
+    user_id = request.user.social_auth.get(provider='pebble').uid
+    device = request.POST['device']
+
+    check_token = uuid.uuid4().hex
+
+    print '{0}/api/v1/users/{1}/devices/{2}/push'.format(settings.SOCIAL_AUTH_PEBBLE_ROOT_URL, user_id, device)
+    print {
+            'admin_token': settings.PEBBLE_AUTH_ADMIN_TOKEN,
+            'message': "Tap to enable developer mode and installs apps from CloudPebble",
+            'custom': json.dumps({
+                'action': 'sdkconnect',
+                'token': check_token
+            })
+        }
+
+    requests.post(
+        '{0}/api/v1/users/{1}/devices/{2}/push'.format(settings.SOCIAL_AUTH_PEBBLE_ROOT_URL, user_id, device),
+        params={
+            'admin_token': settings.PEBBLE_AUTH_ADMIN_TOKEN,
+            'message': "Tap to enable developer mode and installs apps from CloudPebble",
+            'custom': json.dumps({
+                'action': 'sdkconnect',
+                'token': check_token
+            })
+        }
+    )
+
+    return json_response({'token': check_token})
+
+@login_required
+@require_safe
+def check_phone(request, request_id):
+    ip = redis_client.get('phone-ip-{0}'.format(request_id))
+    return json_response({'ip': ip})
+
+@require_POST
+@csrf_exempt
+def update_phone(request):
+    data = json.loads(request.body)
+    redis_client.set('phone-ip-{0}'.format(data['token']), data['ip'], ex=120)
     return json_response({})

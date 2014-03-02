@@ -235,6 +235,8 @@ KEEN_PROJECT_ID = None
 KEEN_WRITE_KEY = None
 KEEN_ENABLED = False
 
+PEBBLE_AUTH_ADMIN_TOKEN = None
+
 import djcelery
 djcelery.setup_loader()
 

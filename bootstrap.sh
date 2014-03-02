@@ -3,10 +3,14 @@
 echo "Replacing ubuntu mirrors with ones that suck less."
 sudo sed -i -e 's#us.archive.ubuntu.com#mirrors.mit.edu#g' /etc/apt/sources.list
 
-apt-get update
+# We need a more recent redis than Ubuntu provides.
+add-apt-repository -y ppa:chris-lea/redis-server
+
 # Install a bunch of things we want
+apt-get update
 apt-get install -y aptitude
-aptitude install -y python-pip mercurial git python-dev python-psycopg2 rabbitmq-server libmpc libevent-dev lighttpd
+aptitude install -y python-pip mercurial git python-dev python-psycopg2 rabbitmq-server libmpc libevent-dev lighttpd redis-server
+
 
 # Install node for jshint
 aptitude install -y g++ make python-software-properties
