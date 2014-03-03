@@ -928,24 +928,16 @@ def ping_phone(request):
 
     check_token = uuid.uuid4().hex
 
-    print '{0}/api/v1/users/{1}/devices/{2}/push'.format(settings.SOCIAL_AUTH_PEBBLE_ROOT_URL, user_id, device)
-    print {
-            'admin_token': settings.PEBBLE_AUTH_ADMIN_TOKEN,
-            'message': "Tap to enable developer mode and installs apps from CloudPebble",
-            'custom': json.dumps({
-                'action': 'sdkconnect',
-                'token': check_token
-            })
-        }
-
     requests.post(
         '{0}/api/v1/users/{1}/devices/{2}/push'.format(settings.SOCIAL_AUTH_PEBBLE_ROOT_URL, user_id, device),
         params={
             'admin_token': settings.PEBBLE_AUTH_ADMIN_TOKEN,
-            'message': "Tap to enable developer mode and installs apps from CloudPebble",
+            # 'silent': True,
+            'message': "Tap to enable developer mode and install apps from CloudPebble.",
             'custom': json.dumps({
-                'action': 'sdkconnect',
-                'token': check_token
+                'action': 'sdk_connect',
+                'token': check_token,
+                'url': '{0}/ide/update_phone'.format(settings.PUBLIC_URL)
             })
         }
     )
@@ -956,11 +948,14 @@ def ping_phone(request):
 @require_safe
 def check_phone(request, request_id):
     ip = redis_client.get('phone-ip-{0}'.format(request_id))
-    return json_response({'ip': ip})
+    if ip is None:
+        return json_response({'pending': True})
+    else:
+        return json_response({'pending': False, 'response': json.loads(ip)})
 
 @require_POST
 @csrf_exempt
 def update_phone(request):
     data = json.loads(request.body)
-    redis_client.set('phone-ip-{0}'.format(data['token']), data['ip'], ex=120)
+    redis_client.set('phone-ip-{0}'.format(data['token']), request.body, ex=120)
     return json_response({})

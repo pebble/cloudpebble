@@ -151,7 +151,7 @@
             </div>
             <div class="span4 hide" id="run-on-phone">
                 <form class="well well-small">
-                    <div class="control-group text-center">
+                    <div class="control-group text-center phone-listing">
                         <label class="control-label" for="phone">Phone:</label>
                         <div class="controls">
                             <select size="1" id="phone">
@@ -160,13 +160,14 @@
                         </div>
                     </div>
                     <!-- Legacy manual entry -->
-                    <div class="control-group text-center hide">
+                    <div class="control-group text-center hide legacy-ip">
                         <label class="control-label" for="phone-ip">Phone IP:</label>
                         <div class="controls">
                             <input type="text" id="phone-ip" placeholder="10.0.0.153">
                         </div>
                     </div>
-                    <p class="text-center" style="margin: 0; font-size: small;"><a href="#">Not there? Enter phone IP manually.</a></p>
+                    <p class="text-center phone-listing" style="margin: 0; font-size: small;"><a href="#" id="show-legacy-link">Not listed? Enter phone IP manually.</a></p>
+                    <p class="text-center legacy-ip hide" style="margin: 0; font-size: small;"><a href="#" id="show-phone-list-link">Show phone list.</a></p>
 
                     <div class="form-actions" style="margin-bottom: 0; padding-bottom: 0; padding-left:5px; padding-right: 5px; text-align: center;">
                         <div style="">
@@ -174,7 +175,7 @@
                             <button class="btn" id="show-app-logs-btn">View app logs</button>
                             <button class="btn" id="screenshot-btn">Screenshot</button>
                         </div>
-                        <span class="help-block hide">Requires that the Pebble app be running on your phone with Developer Mode enabled.</span>
+                        <span class="help-block hide legacy-ip">Requires that the Pebble app be running on your phone with Developer Mode enabled.</span>
                     </div>
                 </form>
             </div>
@@ -521,7 +522,8 @@
         <h3>Waiting for phone</h3>
     </div>
     <div class="modal-body text-center">
-        <p>Please check your phone for notices from the Pebble app.</p>
+        <p class="pending">Please check your phone for notices from the Pebble app.</p>
+        <p class="error text-error"></p>
 {#        <p><a href="#" id="phone-wait-retry">Retry</a></p>#}
         <!--
         <div class="progress progress-striped active">

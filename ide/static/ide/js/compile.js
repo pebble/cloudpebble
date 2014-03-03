@@ -102,6 +102,18 @@ CloudPebble.Compile = (function() {
             e.preventDefault();
             take_screenshot();
         });
+        pane.find('#show-legacy-link').click(function(e) {
+            e.preventDefault();
+            pane.find('.legacy-ip').show();
+            pane.find('.phone-listing').hide();
+            mUsingLegacyIP = true;
+        });
+        pane.find('#show-phone-list-link').click(function(e) {
+            e.preventDefault();
+            pane.find('.phone-listing').show();
+            pane.find('.legacy-ip').hide();
+            mUsingLegacyIP = false;
+        });
         if(navigator.userAgent.indexOf('Firefox') != -1) {
             pane.find('#firefox-warning').removeClass('hide');
         }
@@ -141,12 +153,18 @@ CloudPebble.Compile = (function() {
                     'ios': 'iPhone',
                     'android': 'Android phone'
                 };
+                phone_map = {};
                 _.each(data.devices, function(device) {
                     pane.find('#phone')
                         .append($('<option>')
                             .attr('value', device.id)
                             .text(platform_names[device.type] + ' ' + device.id.substring(20)));
+                    phone_map[device.id] = device;
                 });
+                var last_phone = localStorage['cp-last-picked-phone'];
+                if(last_phone && _.has(phone_map, last_phone)) {
+                    pane.find('#phone').val(last_phone);
+                }
             }
         })
     }
@@ -237,6 +255,7 @@ CloudPebble.Compile = (function() {
     var mPebble = null;
     var mLogHolder = null;
     var mCrashAnalyser = null;
+    var mUsingLegacyIP = false;
     var mPhoneIPs = {};
 
     var pebble_connect = function(ip) {
@@ -415,11 +434,18 @@ CloudPebble.Compile = (function() {
     };
 
     var get_phone_ip = function(callback) {
-        var selected_phone = $('#phone').val();
-        if(mPhoneIPs[selected_phone]) {
-            callback(mPhoneIPs[selected_phone]);
+        if(mUsingLegacyIP) {
+            var ip = pane.find('#phone-ip').val();
+            localStorage['cp-last-phone-ip'] = ip;
+            callback(ip);
         } else {
-            wake_phone(selected_phone, callback);
+            var selected_phone = $('#phone').val();
+            localStorage['cp-last-picked-phone'] = selected_phone;
+            if(mPhoneIPs[selected_phone]) {
+                callback(mPhoneIPs[selected_phone]);
+            } else {
+                wake_phone(selected_phone, callback);
+            }
         }
     };
 
@@ -429,6 +455,8 @@ CloudPebble.Compile = (function() {
     var wake_phone = function(phone_id, callback) {
         mPendingPhoneID = phone_id;
         $('#phone-waiting').modal();
+        $('#phone-waiting').find('.error').hide();
+        $('#phone-waiting').find('.pending').show();
         $.post('/ide/ping_phone', {'device': phone_id}, function(data) {
             mCheckToken = data.token;
             mPendingCallback = callback;
@@ -438,14 +466,22 @@ CloudPebble.Compile = (function() {
 
     var check_for_phone = function() {
         $.getJSON('/ide/check_phone/' + mCheckToken, function(data) {
-            if(data.ip) {
-                console.log("got " + data.ip);
-                mPhoneIPs[mPendingPhoneID] = data.ip;
-                $('#phone-waiting').modal('hide');
-                mPendingCallback(data.ip);
-                mPendingCallback = null;
-            } else {
+            console.log(data);
+            if(data.pending) {
                 setTimeout(check_for_phone, 2000);
+            } else {
+                if(data.response.success) {
+                    var ip = data.response.ip;
+                    console.log("got " + ip);
+                    mPhoneIPs[mPendingPhoneID] = ip;
+                    $('#phone-waiting').modal('hide');
+                    mPendingCallback(ip);
+                    mPendingCallback = null;
+                } else {
+                    console.log("got error response");
+                    $('#phone-waiting').find('.error').show().text(data.response.reason);
+                    $('#phone-waiting').find('.pending').hide();
+                }
             }
         });
     }
