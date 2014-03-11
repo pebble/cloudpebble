@@ -1,0 +1,343 @@
+import base64
+import shutil
+import tempfile
+import urllib2
+from celery import task
+from django.conf import settings
+from django.utils import simplejson as json, simplejson
+from django.utils.timezone import now
+from github.GithubObject import NotSet
+from github import Github, GithubException, InputGitTreeElement
+from ide.git import git_auth_check, get_github
+from ide.models.build import BuildResult
+from ide.models.project import Project
+from ide.tasks import do_import_archive, run_compile
+from ide.utils.git import git_sha, git_blob
+from ide.utils.project import find_project_root
+from ide.utils.sdk import generate_resource_dict, generate_v2_manifest_dict, dict_to_pretty_json, generate_v2_manifest
+from utils.keen_helper import send_keen_event
+
+__author__ = 'katharine'
+
+
+@task(acks_late=True)
+def do_import_github(project_id, github_user, github_project, github_branch, delete_project=False):
+    try:
+        url = "https://github.com/%s/%s/archive/%s.zip" % (github_user, github_project, github_branch)
+        if file_exists(url):
+            u = urllib2.urlopen(url)
+            with tempfile.NamedTemporaryFile(suffix='.zip') as temp:
+                shutil.copyfileobj(u, temp)
+                temp.flush()
+                return do_import_archive(project_id, temp.name)
+        else:
+            raise Exception("The branch '%s' does not exist." % github_branch)
+    except Exception as e:
+        if delete_project:
+            try:
+                Project.objects.get(pk=project_id).delete()
+            except:
+                pass
+        send_keen_event('cloudpebble', 'cloudpebble_github_import_failed', user=user, data={
+            'data': {
+                'reason': e.message,
+                'github_user': github_user,
+                'github_project': github_project,
+                'github_branch': github_branch
+            }
+        })
+        raise
+
+
+def file_exists(url):
+    request = urllib2.Request(url)
+    request.get_method = lambda : 'HEAD'
+    try:
+        response = urllib2.urlopen(request)
+        return True
+    except:
+        return False
+
+
+# SDK2 support has made this function a huge, unmaintainable mess.
+@git_auth_check
+def github_push(user, commit_message, repo_name, project):
+    g = Github(user.github.token, client_id=settings.GITHUB_CLIENT_ID, client_secret=settings.GITHUB_CLIENT_SECRET)
+    repo = g.get_repo(repo_name)
+    try:
+        branch = repo.get_branch(project.github_branch or repo.master_branch)
+    except GithubException:
+        raise Exception("Unable to get branch.")
+    commit = repo.get_git_commit(branch.commit.sha)
+    tree = repo.get_git_tree(commit.tree.sha, recursive=True)
+
+    paths = [x.path for x in tree.tree]
+
+    next_tree = {x.path: InputGitTreeElement(path=x.path, mode=x.mode, type=x.type, sha=x.sha) for x in tree.tree}
+
+    try:
+        remote_version, root = find_project_root(paths)
+    except:
+        remote_version, root = project.sdk_version, ''
+
+    src_root = root + 'src/'
+    project_sources = project.source_files.all()
+    has_changed = False
+    for source in project_sources:
+        repo_path = src_root + source.file_name
+        if repo_path not in next_tree:
+            has_changed = True
+            next_tree[repo_path] = InputGitTreeElement(path=repo_path, mode='100644', type='blob', content=source.get_contents())
+            print "New file: %s" % repo_path
+        else:
+            sha = next_tree[repo_path]._InputGitTreeElement__sha
+            our_content = source.get_contents()
+            expected_sha = git_sha(our_content)
+            if expected_sha != sha:
+                print "Updated file: %s" % repo_path
+                next_tree[repo_path]._InputGitTreeElement__sha = NotSet
+                next_tree[repo_path]._InputGitTreeElement__content = our_content
+                has_changed = True
+
+    expected_source_files = [src_root + x.file_name for x in project_sources]
+    for path in next_tree.keys():
+        if not path.startswith(src_root):
+            continue
+        if path not in expected_source_files:
+            del next_tree[path]
+            print "Deleted file: %s" % path
+            has_changed = True
+
+    # Now try handling resource files.
+
+    resources = project.resources.all()
+
+    old_resource_root = root + ("resources/src/" if remote_version == '1' else 'resources/')
+    new_resource_root = root + ("resources/src/" if project.sdk_version == '1' else 'resources/')
+
+    # Migrate all the resources so we can subsequently ignore the issue.
+    if old_resource_root != new_resource_root:
+        print "moving resources"
+        new_next_tree = next_tree.copy()
+        for path in next_tree:
+            if path.startswith(old_resource_root) and not path.endswith('resource_map.json'):
+                new_path = new_resource_root + path[len(old_resource_root):]
+                print "moving %s to %s" % (path, new_path)
+                next_tree[path]._InputGitTreeElement__path = new_path
+                new_next_tree[new_path] = next_tree[path]
+                del new_next_tree[path]
+        next_tree = new_next_tree
+
+    for res in resources:
+        repo_path = new_resource_root + res.path
+        if repo_path in next_tree:
+            content = res.get_contents()
+            if git_sha(content) != next_tree[repo_path]._InputGitTreeElement__sha:
+                print "Changed resource: %s" % repo_path
+                has_changed = True
+                blob = repo.create_git_blob(base64.b64encode(content), 'base64')
+                print "Created blob %s" % blob.sha
+                next_tree[repo_path]._InputGitTreeElement__sha = blob.sha
+        else:
+            print "New resource: %s" % repo_path
+            blob = repo.create_git_blob(base64.b64encode(res.get_contents()), 'base64')
+            print "Created blob %s" % blob.sha
+            next_tree[repo_path] = InputGitTreeElement(path=repo_path, mode='100644', type='blob', sha=blob.sha)
+
+    # Both of these are used regardless of version
+    remote_map_path = root + 'resources/src/resource_map.json'
+    remote_manifest_path = root + 'appinfo.json'
+
+    if remote_version == '1':
+        remote_map_sha = next_tree[remote_map_path]._InputGitTreeElement__sha if remote_map_path in next_tree else None
+        if remote_map_sha is not None:
+            their_res_dict = json.loads(git_blob(repo, remote_map_sha))
+        else:
+            their_res_dict = {'friendlyVersion': 'VERSION', 'versionDefName': '', 'media': []}
+        their_manifest_dict = {}
+    elif remote_version == '2':
+        remote_manifest_sha = next_tree[remote_manifest_path]._InputGitTreeElement__sha if remote_map_path in next_tree else None
+        if remote_manifest_sha is not None:
+            their_manifest_dict = json.loads(git_blob(repo, remote_manifest_sha))
+            their_res_dict = their_manifest_dict['resources']
+        else:
+            their_manifest_dict = {}
+            their_res_dict = {'media': []}
+
+
+    if project.sdk_version == '1':
+        our_res_dict = generate_resource_dict(project, resources)
+    elif project.sdk_version == '2':
+        our_manifest_dict = generate_v2_manifest_dict(project, resources)
+        our_res_dict = our_manifest_dict['resources']
+
+    if our_res_dict != their_res_dict:
+        print "Resources mismatch."
+        has_changed = True
+        # Try removing things that we've deleted, if any
+        to_remove = set(x['file'] for x in their_res_dict['media']) - set(x['file'] for x in our_res_dict['media'])
+        for path in to_remove:
+            repo_path = new_resource_root + path
+            if repo_path in next_tree:
+                print "Deleted resource: %s" % repo_path
+                del next_tree[repo_path]
+
+        # Update the stored resource map, if applicable.
+        if project.sdk_version == '1':
+            if remote_map_path in next_tree:
+                next_tree[remote_map_path]._InputGitTreeElement__sha = NotSet
+                next_tree[remote_map_path]._InputGitTreeElement__content = dict_to_pretty_json(our_res_dict)
+            else:
+                next_tree[remote_map_path] = InputGitTreeElement(path=remote_map_path, mode='100644', type='blob', content=dict_to_pretty_json(our_res_dict))
+            # Delete the v2 manifest, if one exists
+            if remote_manifest_path in next_tree:
+                del next_tree[remote_manifest_path]
+    # This one is separate because there's more than just the resource map changing.
+    if (project.sdk_version == '2' and their_manifest_dict != our_manifest_dict):
+        if remote_manifest_path in next_tree:
+            next_tree[remote_manifest_path]._InputGitTreeElement__sha = NotSet
+            next_tree[remote_manifest_path]._InputGitTreeElement__content = generate_v2_manifest(project, resources)
+        else:
+            next_tree[remote_manifest_path] = InputGitTreeElement(path=remote_manifest_path, mode='100644', type='blob', content=generate_v2_manifest(project, resources))
+        # Delete the v1 manifest, if one exists
+        if remote_map_path in next_tree:
+            del next_tree[remote_map_path]
+
+
+    # Commit the new tree.
+    if has_changed:
+        print "Has changed; committing"
+        # GitHub seems to choke if we pass the raw directory nodes off to it,
+        # so we delete those.
+        for x in next_tree.keys():
+            if next_tree[x]._InputGitTreeElement__mode == '040000':
+                del next_tree[x]
+                print "removing subtree node %s" % x
+
+        print [x._InputGitTreeElement__mode for x in next_tree.values()]
+        git_tree = repo.create_git_tree(next_tree.values())
+        print "Created tree %s" % git_tree.sha
+        git_commit = repo.create_git_commit(commit_message, git_tree, [commit])
+        print "Created commit %s" % git_commit.sha
+        git_ref = repo.get_git_ref('heads/%s' % (project.github_branch or repo.master_branch))
+        git_ref.edit(git_commit.sha)
+        print "Updated ref %s" % git_ref.ref
+        project.github_last_commit = git_commit.sha
+        project.github_last_sync = now()
+        project.save()
+        return True
+
+    send_keen_event('cloudpebble', 'cloudpebble_github_push', user=user, data={
+        'data': {
+            'repo': project.github_repo
+        }
+    })
+
+    return False
+
+
+@git_auth_check
+def github_pull(user, project):
+    g = get_github(user)
+    repo_name = project.github_repo
+    if repo_name is None:
+        raise Exception("No GitHub repo defined.")
+    repo = g.get_repo(repo_name)
+    # If somehow we don't have a branch set, this will use the "master_branch"
+    branch_name = project.github_branch or repo.master_branch
+    try:
+        branch = repo.get_branch(branch_name)
+    except GithubException:
+        raise Exception("Unable to get the branch.")
+
+    if project.github_last_commit == branch.commit.sha:
+        # Nothing to do.
+        return False
+
+    commit = repo.get_git_commit(branch.commit.sha)
+    tree = repo.get_git_tree(commit.tree.sha, recursive=True)
+
+    paths = {x.path: x for x in tree.tree}
+
+    version, root = find_project_root(paths)
+
+    # First try finding the resource map so we don't fail out part-done later.
+    # TODO: transaction support for file contents would be nice...
+    # SDK2
+    resource_root = None
+    media = {}
+    if version == '2':
+        resource_root = root + 'resources/'
+        manifest_path = root + 'appinfo.json'
+        if manifest_path in paths:
+            manifest_sha = paths[manifest_path].sha
+            manifest = json.loads(git_blob(repo, manifest_sha))
+            media = manifest.get('resources', {}).get('media', [])
+        else:
+            raise Exception("appinfo.json not found")
+    else:
+        # SDK1
+        resource_root = root + 'resources/src/'
+        remote_map_path = resource_root + 'resource_map.json'
+        if remote_map_path in paths:
+            remote_map_sha = paths[remote_map_path].sha
+            remote_map = json.loads(git_blob(repo, remote_map_sha))
+            media = remote_map['media']
+        else:
+            raise Exception("resource_map.json not found.")
+
+    for resource in media:
+        path = resource_root + resource['file']
+        if path not in paths:
+            raise Exception("Resource %s not found in repo." % path)
+
+    # Now we grab the zip.
+    zip_url = repo.get_archive_link('zipball', branch_name)
+    u = urllib2.urlopen(zip_url)
+    with tempfile.NamedTemporaryFile(suffix='.zip') as temp:
+        shutil.copyfileobj(u, temp)
+        temp.flush()
+        # And wipe the project!
+        project.source_files.all().delete()
+        project.resources.all().delete()
+        import_result = do_import_archive(project.id, temp.name)
+        project.github_last_commit = branch.commit.sha
+        project.github_last_sync = now()
+        project.save()
+
+        send_keen_event('cloudpebble', 'cloudpebble_github_pull', user=user, data={
+            'data': {
+                'repo': project.github_repo
+            }
+        })
+
+        return import_result
+
+
+@task
+def do_github_push(project_id, commit_message):
+    project = Project.objects.select_related('owner__github').get(pk=project_id)
+    return github_push(project.owner, commit_message, project.github_repo, project)
+
+
+@task
+def do_github_pull(project_id):
+    project = Project.objects.select_related('owner__github').get(pk=project_id)
+    return github_pull(project.owner, project)
+
+
+@task
+def hooked_commit(project_id, target_commit):
+    project = Project.objects.select_related('owner__github').get(pk=project_id)
+    did_something = False
+    print "Comparing %s versus %s" % (project.github_last_commit, target_commit)
+    if project.github_last_commit != target_commit:
+        github_pull(project.owner, project)
+        did_something = True
+
+    if project.github_hook_build:
+        build = BuildResult.objects.create(project=project)
+        run_compile(build.id)
+        did_something = True
+
+    return did_something
