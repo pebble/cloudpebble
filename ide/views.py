@@ -898,7 +898,15 @@ def proxy_keen(request, project_id):
     if event not in acceptable_events:
         return json_failure("nope.")
 
-    data = {'data': json.loads(request.POST['data'])} if 'data' in request.POST else None
+    data = {}
+    if 'data' in request.POST:
+        data['data'] = json.loads(request.POST['data'])
+
+    if 'device' in request.POST:
+        data['device'] = json.loads(request.POST['device'])
+
+    if len(data.items()) == 0:
+        data = None
 
     send_keen_event(['cloudpebble', 'sdk'], event, project=project, request=request, data=data)
     return json_response({})

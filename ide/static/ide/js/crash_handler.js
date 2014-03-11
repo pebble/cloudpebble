@@ -74,14 +74,14 @@ CloudPebble.CrashChecker = function(app_uuid) {
         });
     };
 
-    this.find_source_lines = function(pointers, callback) {
+    this.find_source_lines = function(version, pointers, callback) {
         if(mDebugCache === null) {
             $.ajax({
                 url: mDebugInfoURL,
                 dataType: "json"
             }).done(function(data) {
                 mDebugCache = data;
-                self.find_source_lines(pointers, callback);
+                self.find_source_lines(version, pointers, callback);
             });
             return;
         }

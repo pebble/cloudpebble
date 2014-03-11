@@ -266,35 +266,56 @@ CloudPebble.Compile = (function() {
             append_log_html("<span class='log-warning'>Different app crashed. Only the active app has debugging information available.</span>");
             return;
         }
-        append_log_html($("<span class='log-verbose'>Looking up debug information...</span>"));
-        mCrashAnalyser.find_source_lines([pc, lr], function(results) {
-            var pc_result = results[0];
-            var lr_result = results[1];
-            CloudPebble.Analytics.addEvent('app_logged_crash', {
-                pc: {
-                    pointer: pc,
-                    symbol: pc_result
-                },
-                lr: {
-                    pointer: lr,
-                    symbol: lr_result
-                },
-                did_resolve: !!(pc_result || lr_result)
-            });
-            if(pc_result === null) {
-                append_log_html("<span class='log-error'>Crashed inside firmware call.</span>");
-            } else {
-                append_log_html($("<span class='log-error'>")
-                    .text("Crashed at " + pc_result.file + ":" + pc_result.line + ", in " +
-                        pc_result.fn_name + " (starts at " + pc_result.file + ":" + pc_result.fn_line + ")."));
-            }
-            if(lr_result !== null) {
-                if(pc_result === null || (lr_result.fn_name !== pc_result.fn_name)) {
+        mPebble.request_version();
+        mPebble.on('version', function(pebble_version) {
+            mPebble.off('version');
+            append_log_html($("<span class='log-verbose'>Looking up debug information...</span>"));
+            mCrashAnalyser.find_source_lines(pebble_version, [pc, lr], function(results) {
+                var pc_result = results[0];
+                var lr_result = results[1];
+                CloudPebble.Analytics.addEvent('app_logged_crash', {
+                    pc: {
+                        pointer: pc,
+                        symbol: pc_result
+                    },
+                    lr: {
+                        pointer: lr,
+                        symbol: lr_result
+                    },
+                    did_resolve: !!(pc_result || lr_result)
+                }, {
+                    // This matches what Android reports, which is completely different from what iOS reports.
+                    // Someone should probably fix this.
+                    remote_device: {
+                        firmware_description: {
+                            version: {
+                                firmware: {
+                                    fw_version: pebble_version.running.version,
+                                    recovery_fw_version: pebble_version.recovery.version
+                                }
+                            }
+                        },
+                        bt_address: pebble_version.device_address,
+                        type: "watch",
+                        hw_version: pebble_version.board_revision,
+                        serial_number: pebble_version.serial_number
+                    }
+                });
+                if(pc_result === null) {
+                    append_log_html("<span class='log-error'>Crashed inside firmware call.</span>");
+                } else {
                     append_log_html($("<span class='log-error'>")
-                        .text("Which was called from " + lr_result.file + ":" + lr_result.line + ", in " +
-                            lr_result.fn_name + " (starts at " + lr_result.file + ":" + lr_result.fn_line + ")."));
+                        .text("Crashed at " + pc_result.file + ":" + pc_result.line + ", in " +
+                            pc_result.fn_name + " (starts at " + pc_result.file + ":" + pc_result.fn_line + ")."));
                 }
-            }
+                if(lr_result !== null) {
+                    if(pc_result === null || (lr_result.fn_name !== pc_result.fn_name)) {
+                        append_log_html($("<span class='log-error'>")
+                            .text("Which was called from " + lr_result.file + ":" + lr_result.line + ", in " +
+                                lr_result.fn_name + " (starts at " + lr_result.file + ":" + lr_result.fn_line + ")."));
+                    }
+                }
+            });
         });
     }
 
