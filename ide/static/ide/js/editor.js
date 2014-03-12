@@ -180,6 +180,22 @@ CloudPebble.Editor = (function() {
                         // And now bail.
                         if(!CloudPebble.ProjectInfo.app_jshint) return;
 
+                        var jshint_globals = {
+                            Pebble: true,
+                            console: true,
+                            XMLHttpRequest: true,
+                            navigator: true, // For navigator.geolocation
+                            localStorage: true,
+                            setTimeout: true
+                        };
+                        if(CloudPebble.ProjectInfo.type == 'simplyjs') {
+                            _.extend(jshint_globals, {
+                                simply: true,
+                                util2: true,
+                                ajax: true
+                            });
+                        }
+
                         var success = JSHINT(code_mirror.getValue(), {
                             freeze: true,
                             evil: false,
@@ -187,14 +203,7 @@ CloudPebble.Editor = (function() {
                             latedef: "nofunc",
                             undef: true,
                             unused: "vars"
-                        }, {
-                            Pebble: true,
-                            console: true,
-                            XMLHttpRequest: true,
-                            navigator: true, // For navigator.geolocation
-                            localStorage: true,
-                            setTimeout: true
-                        });
+                        }, jshint_globals);
                         if(!success) {
                             _.each(JSHINT.errors, function(error) {
                                 // If there are multiple errors on one line, we'll have already placed a marker here.
@@ -336,7 +345,8 @@ CloudPebble.Editor = (function() {
                 });
 
                 button_holder.append(error_area);
-                button_holder.append(delete_btn);
+                if(CloudPebble.ProjectInfo.type != 'simplyjs')
+                    button_holder.append(delete_btn);
                 button_holder.append(discard_btn);
                 button_holder.append(save_btn);
                 pane.append(button_holder);
