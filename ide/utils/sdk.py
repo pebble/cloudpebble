@@ -12,8 +12,11 @@ def generate_wscript_file(project, for_export=False):
 # Feel free to customize this to your needs.
 #
 
-from sh import jshint, ErrorReturnCode_2
-hint = jshint
+try:
+    from sh import jshint, ErrorReturnCode_2
+    hint = jshint
+except ImportError:
+    hint = None
 
 top = '.'
 out = 'build'
@@ -24,10 +27,11 @@ def options(ctx):
 def configure(ctx):
     ctx.load('pebble_sdk')
     global hint
-    hint = hint.bake(['--config', 'pebble-jshintrc'])
+    if hint is not None:
+        hint = hint.bake(['--config', 'pebble-jshintrc'])
 
 def build(ctx):
-    if {{jshint}}:
+    if {{jshint}} and hint is not None:
         try:
             hint("src/js/pebble-js-app.js", _tty_out=False) # no tty because there are none in the cloudpebble sandbox.
         except ErrorReturnCode_2 as e:
