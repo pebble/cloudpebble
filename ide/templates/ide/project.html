@@ -23,11 +23,11 @@
                     <li id="sidebar-pane-github" {{%if not github%}class="disabled"{%endif%}><a href="#">GitHub</a></li>
                     <li class="nav-header">Source files</li>
                     <li class="divider" id="end-source-files"></li>
-                    <li><a href="#" id="new-source-file"><strong>New C file</strong></a></li>
+                    <li class="native-only"><a href="#" id="new-source-file"><strong>New C file</strong></a></li>
                     <li><a href="#" id="new-js-file"><strong>New JavaScript file</strong></a></li>
-                    <li class="nav-header">Resources</li>
-                    <li class="hide" id="end-resources"></li>
-                    <li id="sidebar-pane-new-resource"><a href="#"><strong>New resource</strong></a></li>
+                    <li class="nav-header native-only">Resources</li>
+                    <li class="hide native-only" id="end-resources"></li>
+                    <li id="sidebar-pane-new-resource" class="native-only"><a href="#"><strong>New resource</strong></a></li>
                 </ul>
             </div>
         </div>
@@ -207,7 +207,7 @@
                     <input type="text" id="settings-name">
                 </div>
             </div>
-            <div class="control-group">
+            <div class="control-group native-only">
                 <label class="control-label" for="settings-sdk-version">SDK version</label>
                 <div class="controls">
                     <select id="settings-sdk-version">
@@ -235,7 +235,7 @@
         </div>
         <div class="v2-only"{% if project.sdk_version != '2' %} style="display: none;"{%endif%}>
             <div class="well">
-                <div class="control-group">
+                <div class="control-group native-only">
                     <label class="control-label" for="settings-app-is-watchface">App kind</label>
                     <div class="controls">
                         <select id="settings-app-is-watchface">
@@ -262,7 +262,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="control-group">
+                <div class="control-group native-only">
                     <label class="control-label" for="settings-menu-image">Menu image</label>
                     <div class="controls">
                         <select id="settings-menu-image">
@@ -311,7 +311,7 @@
                     </div>
                 </div>
             </div>
-            <div class="well">
+            <div class="well native-only">
                 <div class="control-group">
                     <label class="control-label" for="settings-app-keys">PebbleKit JS Message Keys</label>
                     <div class="controls">

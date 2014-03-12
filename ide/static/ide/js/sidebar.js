@@ -1,6 +1,7 @@
 CloudPebble.Sidebar = (function() {
 
     var suspended_panes = {};
+    var mProjectType = 'native';
 
     var suspend_active_pane = function() {
         var pane_id = $('#main-pane').data('pane-id');
@@ -147,6 +148,11 @@ CloudPebble.Sidebar = (function() {
                 html: true,
                 delay: {show: 250}
             }).click(function() { $(this).popover('hide'); });
+        },
+        SetProjectType: function(type) {
+            if(type == 'simplyjs') {
+                $('.native-only').hide();
+            }
         }
     };
 })();

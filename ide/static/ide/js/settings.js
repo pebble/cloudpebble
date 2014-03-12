@@ -11,14 +11,18 @@ CloudPebble.Settings = (function() {
         var pane = settings_template;
         shared_pane = pane;
 
-            pane.find('#settings-app-keys').keydown(function(e) {
-                if(e.keyCode == 9) {
-                    var start = $(this).get(0).selectionStart;
-                    $(this).val($(this).val().substring(0, start) + "    " + $(this).val().substring($(this).get(0).selectionEnd));
-                    $(this).get(0).selectionStart = $(this).get(0).selectionEnd = start + 4;
-                    return false;
-                }
-            });
+        pane.find('#settings-app-keys').keydown(function(e) {
+            if(e.keyCode == 9) {
+                var start = $(this).get(0).selectionStart;
+                $(this).val($(this).val().substring(0, start) + "    " + $(this).val().substring($(this).get(0).selectionEnd));
+                $(this).get(0).selectionStart = $(this).get(0).selectionEnd = start + 4;
+                return false;
+            }
+        });
+
+        if(CloudPebble.ProjectInfo.type != 'native') {
+            pane.find('.native-only').hide();
+        }
 
         var display_error = function(message) {
             window.scrollTo(0);
