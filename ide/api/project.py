@@ -26,6 +26,7 @@ def project_info(request, project_id):
     source_files = SourceFile.objects.filter(project=project)
     resources = ResourceFile.objects.filter(project=project)
     output = {
+        'type': project.project_type,
         'success': True,
         'name': project.name,
         'last_modified': str(project.last_modified),

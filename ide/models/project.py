@@ -22,6 +22,11 @@ class Project(IdeModel):
     )
     sdk_version = models.CharField(max_length=10, choices=SDK_VERSIONS, default='1')
 
+    PROJECT_TYPES = (
+        ('native', 'Native SDK'),
+        ('simplyjs', 'Simply.JS')
+    )
+    project_type = models.CharField(max_length=10, choices=PROJECT_TYPES, default='native')
 
     # New settings for 2.0
     app_uuid = models.CharField(max_length=36, blank=True, null=True, default=generate_half_uuid)
@@ -35,7 +40,7 @@ class Project(IdeModel):
     app_keys = models.TextField(default="{}")
     app_jshint = models.BooleanField(default=True)
 
-    app_capability_list = property(lambda: app_capabilities.split(','))
+    app_capability_list = property(lambda self: self.app_capabilities.split(','))
 
     OPTIMISATION_CHOICES = (
         ('0', 'None'),
