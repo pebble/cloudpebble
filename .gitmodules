@@ -1,0 +1,3 @@
+[submodule "ext/simplyjs"]
+	path = ext/simplyjs
+	url = git://github.com/CloudPebble/simplyjs.git

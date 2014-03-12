@@ -157,3 +157,37 @@ def generate_resource_dict(project, resources):
                     d['menuIcon'] = True
                 resource_map['media'].append(d)
     return resource_map
+
+def generate_simplyjs_manifest_dict(project):
+    manifest = {
+        "uuid": project.app_uuid,
+        "shortName": project.app_short_name,
+        "longName": project.app_long_name,
+        "companyName": project.app_company_name,
+        "versionCode": project.app_version_code,
+        "versionLabel": project.app_version_label,
+        "capabilities": [],
+        "watchapp": {
+            "watchface": project.app_is_watchface
+        },
+        "appKeys": {},
+        "resources": {
+            "media": [
+                {
+                    "menuIcon": True,
+                    "type": "png",
+                    "name": "IMAGE_MENU_ICON",
+                    "file": "images/menu_icon.png"
+                }, {
+                    "type": "png",
+                    "name": "IMAGE_LOGO_SPLASH",
+                    "file": "images/logo_splash.png"
+                }, {
+                    "type": "font",
+                    "name": "MONO_FONT_14",
+                    "file": "fonts/UbuntuMono-Regular.ttf"
+                }
+            ]
+        }
+    }
+    return manifest

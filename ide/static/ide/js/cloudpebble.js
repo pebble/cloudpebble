@@ -48,6 +48,7 @@ CloudPebble.Init = function() {
         });
 
         CloudPebble.Editor.Autocomplete.Init();
+        CloudPebble.Sidebar.SetProjectType(data.type);
     });
 
     window.addEventListener('beforeunload', function(e) {
