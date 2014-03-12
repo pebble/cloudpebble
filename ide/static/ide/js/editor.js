@@ -403,6 +403,7 @@ CloudPebble.Editor = (function() {
                 .prependTo(code_mirror.parent_pane);
         }
         code_mirror.refresh();
+        code_mirror.focus();
         is_fullscreen = toggle;
      }
 
