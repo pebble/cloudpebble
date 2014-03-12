@@ -1,6 +1,7 @@
 import os
 import re
 import tempfile
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db import transaction, IntegrityError
 from django.http import HttpResponse
@@ -150,6 +151,7 @@ def build_log(request, project_id, build_id):
 def create_project(request):
     name = request.POST['name']
     template_id = request.POST.get('template', None)
+    type = request.POST.get('type', 'native')
     try:
         with transaction.commit_on_success():
             project = Project.objects.create(
@@ -162,11 +164,15 @@ def create_project(request):
                 app_version_code=1,
                 app_version_label='1.0',
                 app_is_watchface=False,
-                app_capabilities=''
+                app_capabilities='',
+                project_type=type
             )
             if template_id is not None and int(template_id) != 0:
                 template = TemplateProject.objects.get(pk=int(template_id))
                 template.copy_into_project(project)
+            elif type == 'simplyjs':
+                f = SourceFile.objects.create(project=project, file_name="app.js")
+                f.save_file(open('{}/src/html/demo.js'.format(settings.SIMPLYJS_ROOT)).read())
     except IntegrityError as e:
         return json_failure(str(e))
     else:
