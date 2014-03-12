@@ -23,6 +23,11 @@
     </div>
     <div class="row-fluid">
         <div class="span12 well">
+            <p class="text-center">
+                <button id="create-project" class="btn">Create Project</button>
+                <button id="import-project" class="btn">Import Project</button>
+            </p>
+            <hr>
             {% if my_projects %}
                 <table class="table">
                     <thead>
@@ -54,10 +59,6 @@
             {% else %}
                 <p>You don't have any projects yet.</p>
             {% endif %}
-            <p>
-                <button id="create-project" class="btn">Create Project</button>
-                <button id="import-project" class="btn">Import Project</button>
-            </p>
         </div>
     </div>
     <div class="footer muted text-center">
