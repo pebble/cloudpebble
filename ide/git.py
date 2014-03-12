@@ -1,4 +1,4 @@
-from ide.models import User, UserGithub
+from ide.models.user import UserGithub
 
 from github import Github, BadCredentialsException, UnknownObjectException
 from github.NamedUser import NamedUser

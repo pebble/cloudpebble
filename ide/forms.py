@@ -1,6 +1,6 @@
 from django.forms import ModelForm
 
-from ide.models import UserSettings
+from ide.models.user import UserSettings
 
 
 class SettingsForm(ModelForm):

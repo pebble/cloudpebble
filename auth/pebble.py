@@ -1,6 +1,7 @@
 from social.backends.oauth import BaseOAuth2
 from django.conf import settings
-from ide.models import UserGithub, Project
+from ide.models.user import UserGithub
+from ide.models.project import Project
 
 
 class PebbleOAuth2(BaseOAuth2):

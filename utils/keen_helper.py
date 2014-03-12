@@ -1,9 +1,12 @@
+from ide.tasks.keen_task import keen_add_events
+
 __author__ = 'katharine'
 
 from django.conf import settings
 
 import keen
 import keen.scoped_keys
+
 
 # WARNING: Keen does not appear to respect the filters on scoped write keys.
 # Don't use this function.
@@ -17,9 +20,8 @@ def generate_scoped_key(user):
 
     return keen.scoped_keys.encrypt(settings.KEEN_API_KEY, {'filters': filters, 'allowed_operations': ['write']})
 
-def send_keen_event(collections, event, data=None, request=None, project=None, user=None):
-    from ide.tasks import keen_add_events
 
+def send_keen_event(collections, event, data=None, request=None, project=None, user=None):
     if not settings.KEEN_ENABLED:
         return
 

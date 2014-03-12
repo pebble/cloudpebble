@@ -127,6 +127,8 @@ Pebble = function(ip, port) {
             handle_app_log(message);
         } else if(command == ENDPOINTS.SCREENSHOT) {
             handle_screenshot(message);
+        } else if(command == ENDPOINTS.VERSION) {
+            handle_version(message);
         }
     };
 
@@ -146,6 +148,52 @@ Pebble = function(ip, port) {
             chars.push(String.fromCharCode(bytes[i]));
         }
         return chars.join('');
+    };
+
+    this.request_version = function() {
+        send_message('VERSION', pack("B", 0x00));
+    };
+
+    var hexify = function(list) {
+        var result = '';
+        _.each(list, function(number) {
+            var hex = number.toString(16);
+            while(hex.length < 2) hex = '0' + hex;
+            result = hex + result;
+        });
+        return result;
+    }
+
+    var handle_version = function(message) {
+        result = unpack("BIS32S8BBBIS32S8BBBIS9S12BBBBBBIIS16", message);
+        if(result[0] != 1) return;
+        self.trigger('version', {
+            running: {
+                timestamp: result[1],
+                version: result[2],
+                git: result[3],
+                is_recovery: !!result[4],
+                platform_version: result[5],
+                metadata_version: result[6]
+            },
+            recovery: {
+                timestamp: result[7],
+                version: result[8],
+                git: result[9],
+                is_recovery: !!result[10],
+                platform_version: result[11],
+                metadata_version: result[12]
+            },
+            bootloader_version: result[13],
+            board_revision: result[14],
+            serial_number: result[15],
+            device_address: hexify(result.slice(16, 22)),
+            resources: {
+                crc: result[22],
+                timestamp: result[23],
+                XXXXXXXXXXXXXXX: result[24]
+            }
+        });
     };
 
     this.request_screenshot = function() {
@@ -246,7 +294,7 @@ Pebble = function(ip, port) {
         "RESOURCE": 4000,
         "APP_MANAGER": 6000,
         "SCREENSHOT": 8000,
-        "PUTBYTES": 48879,
+        "PUTBYTES": 48879
     };
 
     var send_message = function(endpoint, message) {
@@ -318,6 +366,22 @@ Pebble = function(ip, port) {
             case "I":
                 data.push((bytes[pointer] << 24) | (bytes[pointer+1] << 16) | (bytes[pointer+2] << 8) | bytes[pointer+3]);
                 pointer += 4;
+                break;
+            case "S":
+                var len = '';
+                while(format.charAt(i+1).match(/\d/)) {
+                    len += format.charAt(++i);
+                }
+                len = parseInt(len, 10);
+                var end = pointer + len;
+                var output = '';
+                while(pointer < end) {
+                    if(bytes[pointer] === 0) break; // assume null-terminated strings.
+                    output += String.fromCharCode(bytes[pointer]);
+                    ++pointer;
+                }
+                pointer = end;
+                data.push(output);
                 break;
             }
         }
