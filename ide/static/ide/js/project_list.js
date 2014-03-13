@@ -1,4 +1,4 @@
-(function() {
+$(function() {
     $('#create-project').click(function() {
         $('#create-project').find('input button select').removeAttr('disabled');
         $('#project-prompt').modal();
@@ -159,4 +159,5 @@
     });
 
     jquery_csrf_setup();
+    $('table').tablesorter();
 })();

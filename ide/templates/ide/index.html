@@ -10,6 +10,9 @@
       .container-narrow > hr {
         margin: 30px 0;
       }
+      th {
+          cursor: pointer;
+      }
       </style>
 <div class="container-narrow">
     <div class="masthead">
@@ -198,4 +201,5 @@
 {% block scripts %}
 <script src="{% static 'ide/js/csrf.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/project_list.js' %}" type="text/javascript"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.13.3/jquery.tablesorter.min.js"></script>
 {% endblock %}
