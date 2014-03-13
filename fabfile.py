@@ -16,6 +16,7 @@ def check_updated():
 def update_remote():
     with cd(env.project_root), settings(sudo_user=env.app_user):
         sudo("git pull")
+        sudo("git submodule update --init --recursive")
 
 
 def update_django():

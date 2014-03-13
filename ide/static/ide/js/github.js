@@ -117,7 +117,7 @@ CloudPebble.GitHub = (function() {
                     pane.find('#github-repo').val(data.repo);
                     CloudPebble.ProjectInfo.github.repo = new_repo;
                     pane.find('#github-branch').val(data.branch);
-                    CloudPebble.ProjectInfo.github.branch = branch;
+                    CloudPebble.ProjectInfo.github.branch = data.branch;
                     prompt.modal('hide');
                     enable_all();
                 }

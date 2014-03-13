@@ -1,8 +1,17 @@
-(function() {
+$(function() {
     $('#create-project').click(function() {
         $('#create-project').find('input button select').removeAttr('disabled');
         $('#project-prompt').modal();
     });
+    $('#project-type').change(function() {
+        var val = $(this).val();
+        if(val != 'native') {
+            $('#project-template').val(0);
+            $('#template-holder').hide();
+        } else {
+            $('#template-holder').show();
+        }
+    })
 
     $('#project-confirm-button').click(function() {
         var value = $('#project-prompt-value').val();
@@ -14,7 +23,8 @@
         $('#create-project').find('input button select').attr('disabled', 'disabled');
         $.post('/ide/project/create', {
                 name: value,
-                template: $('#project-template').val()
+                template: $('#project-template').val(),
+                type: $('#project-type').val()
             }, function(data) {
                 if(!data.success) {
                     $('#project-prompt-errors').removeClass('hide').text(data.error);
@@ -149,4 +159,5 @@
     });
 
     jquery_csrf_setup();
+    $('table').tablesorter();
 })();

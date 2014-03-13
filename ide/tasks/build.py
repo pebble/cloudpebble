@@ -13,7 +13,8 @@ from django.utils.timezone import now
 
 import apptools.addr2lines
 from ide.utils import link_or_copy
-from ide.utils.sdk import generate_wscript_file, generate_jshint_file, generate_v2_manifest_dict
+from ide.utils.sdk import generate_wscript_file, generate_jshint_file, generate_v2_manifest_dict, \
+    generate_simplyjs_manifest_dict
 from utils.keen_helper import send_keen_event
 
 from ide.models.build import  BuildResult
@@ -45,44 +46,64 @@ def run_compile(build_result):
         pass
 
     try:
-        # Create symbolic links to the original files
-        # Source code
-        src_dir = os.path.join(base_dir, 'src')
-        os.mkdir(src_dir)
-        for f in source_files:
-            abs_target = os.path.abspath(os.path.join(src_dir, f.file_name))
-            if not abs_target.startswith(src_dir):
-                raise Exception("Suspicious filename: %s" % f.file_name)
-            abs_target_dir = os.path.dirname(abs_target)
-            if not os.path.exists(abs_target_dir):
-                print "Creating directory %s." % abs_target_dir
-                os.makedirs(abs_target_dir)
-            link_or_copy(os.path.abspath(f.local_filename), abs_target)
+        if project.project_type == 'native':
+            # Create symbolic links to the original files
+            # Source code
+            src_dir = os.path.join(base_dir, 'src')
+            os.mkdir(src_dir)
+            for f in source_files:
+                abs_target = os.path.abspath(os.path.join(src_dir, f.file_name))
+                if not abs_target.startswith(src_dir):
+                    raise Exception("Suspicious filename: %s" % f.file_name)
+                abs_target_dir = os.path.dirname(abs_target)
+                if not os.path.exists(abs_target_dir):
+                    print "Creating directory %s." % abs_target_dir
+                    os.makedirs(abs_target_dir)
+                link_or_copy(os.path.abspath(f.local_filename), abs_target)
 
-        # Resources
-        resource_root = 'resources'
-        os.makedirs(os.path.join(base_dir, resource_root, 'images'))
-        os.makedirs(os.path.join(base_dir, resource_root, 'fonts'))
-        os.makedirs(os.path.join(base_dir, resource_root, 'data'))
+            # Resources
+            resource_root = 'resources'
+            os.makedirs(os.path.join(base_dir, resource_root, 'images'))
+            os.makedirs(os.path.join(base_dir, resource_root, 'fonts'))
+            os.makedirs(os.path.join(base_dir, resource_root, 'data'))
 
-        print "Writing out manifest"
-        manifest_dict = generate_v2_manifest_dict(project, resources)
-        open(os.path.join(base_dir, 'appinfo.json'), 'w').write(json.dumps(manifest_dict))
+            print "Writing out manifest"
+            manifest_dict = generate_v2_manifest_dict(project, resources)
+            open(os.path.join(base_dir, 'appinfo.json'), 'w').write(json.dumps(manifest_dict))
 
-        for f in resources:
-            target_dir = os.path.abspath(os.path.join(base_dir, resource_root, ResourceFile.DIR_MAP[f.kind]))
-            abs_target = os.path.abspath(os.path.join(target_dir, f.file_name))
-            if not abs_target.startswith(target_dir):
-                raise Exception("Suspicious filename: %s" % f.file_name)
-            print "Added %s %s" % (f.kind, f.local_filename)
-            link_or_copy(os.path.abspath(f.local_filename), abs_target)
+            for f in resources:
+                target_dir = os.path.abspath(os.path.join(base_dir, resource_root, ResourceFile.DIR_MAP[f.kind]))
+                abs_target = os.path.abspath(os.path.join(target_dir, f.file_name))
+                if not abs_target.startswith(target_dir):
+                    raise Exception("Suspicious filename: %s" % f.file_name)
+                print "Added %s %s" % (f.kind, f.local_filename)
+                link_or_copy(os.path.abspath(f.local_filename), abs_target)
 
 
-        # Reconstitute the SDK
-        print "Inserting wscript"
-        open(os.path.join(base_dir, 'wscript'), 'w').write(generate_wscript_file(project))
-        print "Inserting jshintrc"
-        open(os.path.join(base_dir, 'pebble-jshintrc'), 'w').write(generate_jshint_file(project))
+            # Reconstitute the SDK
+            print "Inserting wscript"
+            open(os.path.join(base_dir, 'wscript'), 'w').write(generate_wscript_file(project))
+            print "Inserting jshintrc"
+            open(os.path.join(base_dir, 'pebble-jshintrc'), 'w').write(generate_jshint_file(project))
+        elif project.project_type == 'simplyjs':
+            os.rmdir(base_dir) # This is not intuitive behaviour.
+            shutil.copytree(settings.SIMPLYJS_ROOT, base_dir)
+            manifest_dict = generate_simplyjs_manifest_dict(project)
+
+            js_path = os.path.join(build_result.get_dir(), 'simply.js')
+            js_url = '{0}simply.js'.format(build_result.get_url())
+
+            # We should have exactly one source file, so just dump that in.
+            open(js_path, 'w').write(source_files[0].get_contents())
+
+            open(os.path.join(base_dir, 'appinfo.json'), 'w').write(json.dumps(manifest_dict))
+            open(os.path.join(base_dir, 'src', 'js', 'zzz_fixurl.js'), 'w').write("""
+                Pebble.addEventListener('ready', function() {
+                    if(localStorage.getItem('mainJsUrl') != '%(url)s') {
+                        simply.loadMainScript('%(url)s');
+                    }
+                });
+            """ % {'url': js_url})
 
         # Build the thing
         print "Beginning compile"

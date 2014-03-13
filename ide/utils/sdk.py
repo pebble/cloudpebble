@@ -12,8 +12,11 @@ def generate_wscript_file(project, for_export=False):
 # Feel free to customize this to your needs.
 #
 
-from sh import jshint, ErrorReturnCode_2
-hint = jshint
+try:
+    from sh import jshint, ErrorReturnCode_2
+    hint = jshint
+except ImportError:
+    hint = None
 
 top = '.'
 out = 'build'
@@ -24,10 +27,11 @@ def options(ctx):
 def configure(ctx):
     ctx.load('pebble_sdk')
     global hint
-    hint = hint.bake(['--config', 'pebble-jshintrc'])
+    if hint is not None:
+        hint = hint.bake(['--config', 'pebble-jshintrc'])
 
 def build(ctx):
-    if {{jshint}}:
+    if {{jshint}} and hint is not None:
         try:
             hint("src/js/pebble-js-app.js", _tty_out=False) # no tty because there are none in the cloudpebble sandbox.
         except ErrorReturnCode_2 as e:
@@ -157,3 +161,37 @@ def generate_resource_dict(project, resources):
                     d['menuIcon'] = True
                 resource_map['media'].append(d)
     return resource_map
+
+def generate_simplyjs_manifest_dict(project):
+    manifest = {
+        "uuid": project.app_uuid,
+        "shortName": project.app_short_name,
+        "longName": project.app_long_name,
+        "companyName": project.app_company_name,
+        "versionCode": project.app_version_code,
+        "versionLabel": project.app_version_label,
+        "capabilities": [],
+        "watchapp": {
+            "watchface": project.app_is_watchface
+        },
+        "appKeys": {},
+        "resources": {
+            "media": [
+                {
+                    "menuIcon": True,
+                    "type": "png",
+                    "name": "IMAGE_MENU_ICON",
+                    "file": "images/menu_icon.png"
+                }, {
+                    "type": "png",
+                    "name": "IMAGE_LOGO_SPLASH",
+                    "file": "images/logo_splash.png"
+                }, {
+                    "type": "font",
+                    "name": "MONO_FONT_14",
+                    "file": "fonts/UbuntuMono-Regular.ttf"
+                }
+            ]
+        }
+    }
+    return manifest
