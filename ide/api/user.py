@@ -30,3 +30,20 @@ def transition_delete(request):
     send_keen_event('cloudpebble', 'cloudpebble_ownership_transition_declined', request=request)
     request.user.delete()
     return json_response({})
+
+@login_required
+def whats_new(request):
+    # For now we just include what's new in this handy array...
+    new_things = [
+        ["You will now be alerted to new features on your first visit to the site after they're added. For instance, this one."],
+    ]
+
+    user_settings = request.user.settings
+    what = user_settings.whats_new
+    if what < len(new_things):
+        user_settings.whats_new = len(new_things)
+        user_settings.save()
+        return json_response({'new': new_things[what:]})
+    else:
+        return json_response({'new': []})
+
