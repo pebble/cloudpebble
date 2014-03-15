@@ -47,6 +47,9 @@ class UserSettings(IdeModel):
     # Used for the Pebble ownership transition, when it was set to False.
     accepted_terms = models.BooleanField(default=True)
 
+    # What "what's new" prompt have they seen?
+    whats_new = models.PositiveIntegerField(default=0)
+
 User.settings = property(lambda self: UserSettings.objects.get_or_create(user=self)[0])
 
 
