@@ -50,7 +50,8 @@ def send_keen_event(collections, event, data=None, request=None, project=None, u
             'app_name': project.app_long_name,
             'sdk': project.sdk_version,
             'is_watchface': project.app_is_watchface,
-            'jshint': project.app_jshint
+            'jshint': project.app_jshint,
+            'type': project.project_type,
         }
 
     data['platform'] = 'cloudpebble'
