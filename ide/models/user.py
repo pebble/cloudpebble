@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 
 from ide.models.meta import IdeModel
+from ide.utils.whatsnew import count_things
 
 __author__ = 'katharine'
 
@@ -48,7 +49,7 @@ class UserSettings(IdeModel):
     accepted_terms = models.BooleanField(default=True)
 
     # What "what's new" prompt have they seen?
-    whats_new = models.PositiveIntegerField(default=0)
+    whats_new = models.PositiveIntegerField(default=count_things)
 
 User.settings = property(lambda self: UserSettings.objects.get_or_create(user=self)[0])
 

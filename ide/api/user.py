@@ -3,6 +3,7 @@ from django.views.decorators.http import require_POST
 from ide.api import json_response
 from ide.tasks.archive import export_user_projects
 from utils.keen_helper import send_keen_event
+from ide.utils.whatsnew import get_new_things
 
 __author__ = 'katharine'
 
@@ -36,17 +37,4 @@ def whats_new(request):
     if not request.user.is_authenticated():
         return json_response({'new': []})
 
-    # For now we just include what's new in this handy array...
-    new_things = [
-        ["You will now be alerted to new features on your first visit to the site after they're added. For instance, this one."],
-    ]
-
-    user_settings = request.user.settings
-    what = user_settings.whats_new
-    if what < len(new_things):
-        user_settings.whats_new = len(new_things)
-        user_settings.save()
-        return json_response({'new': new_things[what:][::-1]})
-    else:
-        return json_response({'new': []})
-
+    return json_response({'new': get_new_things(request.user)})
