@@ -449,6 +449,9 @@ CloudPebble.Editor = (function() {
         },
         GetUnsavedFiles: function() {
             return unsaved_files;
+        },
+        Open: function(file) {
+            edit_source_file(file);
         }
     };
 })();

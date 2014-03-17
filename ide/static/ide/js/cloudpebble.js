@@ -49,6 +49,11 @@ CloudPebble.Init = function() {
 
         CloudPebble.Editor.Autocomplete.Init();
         CloudPebble.Sidebar.SetProjectType(data.type);
+
+        // simplyjs projects always have one file, so we may as well open it immediately.
+        if(data.type == 'simplyjs') {
+            CloudPebble.Editor.Open(data.source_files[0]);
+        }
     });
 
     window.addEventListener('beforeunload', function(e) {
