@@ -195,7 +195,7 @@ def do_import_archive(project_id, archive_location, delete_zip=False, delete_pro
                 Project.objects.get(pk=project_id).delete()
             except:
                 pass
-        send_keen_event('cloudpebble', 'cloudpebble_zip_import_failed', user=user, data={
+        send_keen_event('cloudpebble', 'cloudpebble_zip_import_failed', user=project.owner, data={
             'data': {
                 'reason': e.message
             }
