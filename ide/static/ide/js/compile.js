@@ -437,7 +437,12 @@ CloudPebble.Compile = (function() {
 
         var report_progress = function(percent) {
             modal.find('.progress').removeClass('progress-striped').find('.bar').css({width: percent + '%'});
-        }
+        };
+
+        mPebble.on('colour', function(colour) {
+            modal.find('.screenshot-holder').addClass('screenshot-holder-' + colour);
+            mPebble.close();
+        });
 
         mPebble.on('open', function() {
             mPebble.request_screenshot();
@@ -461,14 +466,15 @@ CloudPebble.Compile = (function() {
 
         mPebble.on('screenshot:complete', function(screenshot) {
             finished = true;
-            $(screenshot).addClass('img-polaroid');
+            var screenshot_holder = $('<div class="screenshot-holder">').append(screenshot);
+//            $(screenshot).addClass('img-polaroid');
             modal.find('.modal-body')
                 .empty()
-                .append(screenshot)
+                .append(screenshot_holder)
                 .append("<p>Right click -> Save Image as...</p>")
                 .css({'text-align': 'center'});
             modal.find('.dismiss-btn').removeClass('hide');
-            mPebble.close();
+            mPebble.request_colour();
             CloudPebble.Analytics.addEvent('app_screenshot_succeeded', {target_ip: ip});
         });
 

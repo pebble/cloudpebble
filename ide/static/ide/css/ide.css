@@ -197,3 +197,40 @@ span.cm-autofilled-end {
     border-radius: 0;
     z-index: 10000; /* Needs to be greater than 9999... */
 }
+
+.screenshot-holder {
+    height: 272px;
+    width: 236px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 104px;
+}
+
+.screenshot-holder-tintin-red,
+.screenshot-holder-unknown {
+    background-image: url('../img/pebbles/tintin-red.png')
+}
+
+.screenshot-holder-tintin-orange {
+    background-image: url('../img/pebbles/tintin-orange.png')
+}
+
+.screenshot-holder-tintin-black {
+    background-image: url('../img/pebbles/tintin-black.png');
+}
+
+.screenshot-holder-tintin-white {
+    background-image: url('../img/pebbles/tintin-white.png');
+}
+
+.screenshot-holder-tintin-grey {
+    background-image: url('../img/pebbles/tintin-grey.png');
+}
+
+.screenshot-holder-bianca-black {
+    background-image: url('../img/pebbles/bianca-black.png');
+}
+
+.screenshot-holder-bianca-silver {
+    background-image: url('../img/pebbles/bianca-silver.png');
+}
