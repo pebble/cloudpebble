@@ -129,6 +129,8 @@ Pebble = function(ip, port) {
             handle_screenshot(message);
         } else if(command == ENDPOINTS.VERSION) {
             handle_version(message);
+        } else if(command == ENDPOINTS.FACTORY_SETTINGS) {
+            handle_factory_setting(message);
         }
     };
 
@@ -149,6 +151,14 @@ Pebble = function(ip, port) {
         }
         return chars.join('');
     };
+
+    var string_to_bytes = function(string) {
+        var bytes = [];
+        for(var i = 0; i < string.length; ++i) {
+            bytes.push(string.charCodeAt(i));
+        }
+        return bytes;
+    }
 
     this.request_version = function() {
         send_message('VERSION', pack("B", 0x00));
@@ -195,6 +205,45 @@ Pebble = function(ip, port) {
             }
         });
     };
+
+    var request_factory_setting = function(key) {
+        send_message('FACTORY_SETTINGS', pack('BB', [0x00, key.length]).concat(string_to_bytes(key)));
+    }
+
+    this.request_colour = function() {
+        request_factory_setting('mfg_color');
+
+        var colour_mapping = {
+            1: 'tintin-black',
+            2: 'tintin-white',
+            3: 'tintin-red',
+            4: 'tintin-orange',
+            5: 'tintin-gray',
+            6: 'bianca-silver',
+            7: 'bianca-black'
+        };
+
+        var handle_colour = function(data) {
+            self.off('factory_setting:result', handle_colour);
+            var colour_id = unpack('I', data);
+            var colour_name = colour_mapping[colour_id] || 'unknown';
+            self.trigger('colour', colour_name);
+        }
+
+        self.on('factory_setting:result', handle_colour);
+    }
+
+
+    var handle_factory_setting = function(data) {
+        console.log(data);
+        var result = unpack('BB', data);
+        var command_id = result[0];
+        if(command_id == 0x01) {
+            var strlen = result[1];
+            var value = data.subarray(2, 2 + strlen);
+            self.trigger('factory_setting:result', value);
+        }
+    }
 
     this.request_screenshot = function() {
         if(mIncomingImage !== null) {
@@ -292,6 +341,7 @@ Pebble = function(ip, port) {
         "APP_LOGS": 2006,
         "NOTIFICATION": 3000,
         "RESOURCE": 4000,
+        "FACTORY_SETTINGS": 5001,
         "APP_MANAGER": 6000,
         "SCREENSHOT": 8000,
         "PUTBYTES": 48879
@@ -302,6 +352,7 @@ Pebble = function(ip, port) {
         if(mSocket.readyState != WebSocket.OPEN) {
             throw new Error("Cannot send on non-open socket.");
         }
+        console.log(data);
         mSocket.send(data);
     };
 
