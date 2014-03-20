@@ -218,7 +218,7 @@ Pebble = function(ip, port) {
             2: 'tintin-white',
             3: 'tintin-red',
             4: 'tintin-orange',
-            5: 'tintin-gray',
+            5: 'tintin-grey',
             6: 'bianca-silver',
             7: 'bianca-black'
         };
@@ -235,7 +235,6 @@ Pebble = function(ip, port) {
 
 
     var handle_factory_setting = function(data) {
-        console.log(data);
         var result = unpack('BB', data);
         var command_id = result[0];
         if(command_id == 0x01) {
@@ -352,7 +351,6 @@ Pebble = function(ip, port) {
         if(mSocket.readyState != WebSocket.OPEN) {
             throw new Error("Cannot send on non-open socket.");
         }
-        console.log(data);
         mSocket.send(data);
     };
 
