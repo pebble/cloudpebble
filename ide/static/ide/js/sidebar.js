@@ -74,6 +74,25 @@ CloudPebble.Sidebar = (function() {
         $('#sidebar-pane-' + id).addClass('active');
     };
 
+    var init = function() {
+        $('.save-and-run').click(function() {
+            var button = $(this);
+            button.attr('disabled', 'disabled');
+            button.find('img').show();
+            CloudPebble.Editor.SaveAll(function() {
+                CloudPebble.Compile.RunBuild(function (success) {
+                    button.removeAttr('disabled');
+                    button.find('img').hide();
+                    if(success) {
+                        CloudPebble.Compile.DoInstall();
+                    } else {
+                        CloudPebble.Compile.Show();
+                    }
+                });
+            });
+        });
+    }
+
     return {
         SuspendActive: function() {
             suspend_active_pane();
@@ -139,6 +158,7 @@ CloudPebble.Sidebar = (function() {
             $('#sidebar-pane-github > a').click(CloudPebble.GitHub.Show);
             $('#new-source-file').click(CloudPebble.Editor.Create);
             $('#new-js-file').click(CloudPebble.Editor.DoJSFile);
+            init();
         },
         SetPopover: function(pane_id, title, content) {
             $('#sidebar-pane-' + pane_id).popover('destroy').popover({

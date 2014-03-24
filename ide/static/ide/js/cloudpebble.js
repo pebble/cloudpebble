@@ -22,15 +22,16 @@ CloudPebble.ProjectInfo = {};
 
 CloudPebble.Init = function() {
     jquery_csrf_setup();
-    CloudPebble.Compile.Init();
-    CloudPebble.Editor.Init();
-    CloudPebble.Resources.Init();
-    CloudPebble.Sidebar.Init();
-    CloudPebble.Settings.Init();
-    CloudPebble.GitHub.Init();
 
     // Load in project data.
     $.getJSON('/ide/project/' + PROJECT_ID + '/info', function(data) {
+        CloudPebble.Compile.Init();
+        CloudPebble.Editor.Init();
+        CloudPebble.Resources.Init();
+        CloudPebble.Sidebar.Init();
+        CloudPebble.Settings.Init();
+        CloudPebble.GitHub.Init();
+
         CloudPebble.ProgressBar.Hide();
         if(!data.success) {
             alert("Something went wrong:\n" + data.error);

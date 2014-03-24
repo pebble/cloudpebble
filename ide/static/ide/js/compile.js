@@ -5,6 +5,9 @@ CloudPebble.Compile = (function() {
         3: {english: "Succeeded", cls: "success", label: 'success'}
     };
 
+    var mPendingCallbacks = [];
+    var mRunningBuild = false;
+
     var build_history_row = function(build) {
         var tr = $('<tr>');
         tr.append($('<td>' + (build.id === null ? '?' : build.id) + '</td>'));
@@ -83,6 +86,12 @@ CloudPebble.Compile = (function() {
             });
             if(data.builds.length > 0 && data.builds[0].state == 1) {
                 setTimeout(function() { update_build_history(pane); }, 1000);
+            } else if(mRunningBuild) {
+                mRunningBuild = false;
+                _.each(mPendingCallbacks, function(callback) {
+                    callback(data.builds[0].state == 3);
+                });
+                mPendingCallbacks = [];
             }
         });
     };
@@ -105,6 +114,13 @@ CloudPebble.Compile = (function() {
         if(navigator.userAgent.indexOf('Firefox') != -1) {
             pane.find('#firefox-warning').removeClass('hide');
         }
+        mCrashAnalyser = new CloudPebble.CrashChecker(CloudPebble.ProjectInfo.app_uuid);
+        pane.find('#compilation-run-build-button').click(run_build);
+
+
+        if(localStorage['cp-last-phone-ip']) {
+            pane.find('#phone-ip').val(localStorage['cp-last-phone-ip']);
+        }
     };
 
     var m_build_count = 0;
@@ -114,21 +130,24 @@ CloudPebble.Compile = (function() {
             return;
         }
 
-        mCrashAnalyser = new CloudPebble.CrashChecker(CloudPebble.ProjectInfo.app_uuid);
-        // Get build history
         update_build_history(pane);
-        pane.find('#compilation-run-build-button').click(function() {
-            if(CloudPebble.ProjectInfo.sdk_version == '1') return;
-            var temp_build = {started: (new Date()).toISOString(), finished: null, state: 1, uuid: null, id: null, size: {total: null, binary: null, resources: null}};
-            update_last_build(pane, temp_build);
-            pane.find('#run-build-table').prepend(build_history_row(temp_build));
-            $.post('/ide/project/' + PROJECT_ID + '/build/run', function() {
-                update_build_history(pane);
-            });
-            ga('send','event', 'build', 'run', {eventValue: ++m_build_count});
-        });
         CloudPebble.Sidebar.SetActivePane(pane, 'compile');
         CloudPebble.ProgressBar.Show();
+    };
+
+    var run_build = function(callback) {
+        if(CloudPebble.ProjectInfo.sdk_version == '1') return;
+        var temp_build = {started: (new Date()).toISOString(), finished: null, state: 1, uuid: null, id: null, size: {total: null, binary: null, resources: null}};
+        update_last_build(pane, temp_build);
+        pane.find('#run-build-table').prepend(build_history_row(temp_build));
+        $.post('/ide/project/' + PROJECT_ID + '/build/run', function() {
+            mRunningBuild = true;
+            if(callback) {
+                mPendingCallbacks.push(callback);
+            }
+            update_build_history(pane);
+        });
+        ga('send','event', 'build', 'run', {eventValue: ++m_build_count});
     };
 
     var update_last_build = function(pane, build) {
@@ -155,9 +174,6 @@ CloudPebble.Compile = (function() {
                     var url = build.pbw;
                     if(CloudPebble.ProjectInfo.sdk_version == "2" && navigator.userAgent.indexOf("Firefox") == -1) {
                         pane.find("#run-on-phone").removeClass('hide');
-                        if(localStorage['cp-last-phone-ip']) {
-                            pane.find('#phone-ip').val(localStorage['cp-last-phone-ip']);
-                        }
                     } else {
                         pane.find('#last-compilation-qr-code').removeClass('hide').find('img').attr('src', '/qr/?v=' + url);
                     }
@@ -338,7 +354,6 @@ CloudPebble.Compile = (function() {
     };
 
     var install_on_watch = function() {
-        var ip = get_phone_ip();
         var modal = $('#phone-install-progress').modal();
         modal.find('.modal-body > p').text("Installing app on your watch…");
         modal.find('.btn').addClass('hide');
@@ -350,6 +365,12 @@ CloudPebble.Compile = (function() {
             modal.find('.dismiss-btn').removeClass('hide');
             modal.find('.progress').addClass('progress-danger').removeClass('progress-striped');
         };
+
+        var ip = get_phone_ip();
+        if(ip == '') {
+            report_error("You must specify your phone's IP to install to your watch.");
+            return;
+        }
 
         try {
             mPebble = pebble_connect(ip);
@@ -418,7 +439,7 @@ CloudPebble.Compile = (function() {
     };
 
     var get_phone_ip = function() {
-        var ip = $('#phone-ip').val();
+        var ip = pane.find('#phone-ip').val();
         localStorage['cp-last-phone-ip'] = ip;
         return ip;
     };
@@ -501,6 +522,12 @@ CloudPebble.Compile = (function() {
         },
         Init: function() {
             init();
+        },
+        RunBuild: function(callback) {
+            run_build(callback);
+        },
+        DoInstall: function() {
+            install_on_watch();
         }
     };
 })();
