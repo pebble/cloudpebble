@@ -234,3 +234,12 @@ span.cm-autofilled-end {
 .screenshot-holder-bianca-silver {
     background-image: url('../img/pebbles/bianca-silver.png');
 }
+
+.save-and-run {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.save-and-run > img {
+    margin-top: -4px;
+}
