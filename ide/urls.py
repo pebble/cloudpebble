@@ -8,7 +8,7 @@ from ide.api.project import project_info, compile_project, last_build, build_his
 from ide.api.resource import create_resource, resource_info, delete_resource, update_resource, show_resource
 from ide.api.source import create_source_file, load_source_file, source_file_is_safe, save_source_file, \
     delete_source_file
-from ide.api.user import transition_accept, transition_export, transition_delete
+from ide.api.user import transition_accept, transition_export, transition_delete, whats_new
 from ide.views.index import index
 from ide.views.project import project, github_hook, build_status
 from ide.views.settings import settings_page, start_github_auth, remove_github_auth, complete_github_auth
@@ -58,4 +58,5 @@ urlpatterns = patterns(
     url(r'^check_phone/(?P<request_id>[0-9a-f-]+)$', check_phone),
     url(r'^update_phone$', update_phone),
     url(r'^list_phones$', list_phones),
+    url('^whats_new', whats_new, name='whats_new')
 )

@@ -151,8 +151,8 @@ CloudPebble.Editor = (function() {
                 var code_mirror = CodeMirror(pane[0], settings);
                 code_mirror.parent_pane = pane;
                 open_codemirrors[file.id] = code_mirror;
-                code_mirror.cloudpebble_save = function() {
-                    save();
+                code_mirror.cloudpebble_save = function(callback) {
+                    save(callback);
                 };
                 code_mirror.on('close', function() {
                     is_autocompleting = false;
@@ -206,6 +206,8 @@ CloudPebble.Editor = (function() {
                         }, jshint_globals);
                         if(!success) {
                             _.each(JSHINT.errors, function(error) {
+                                // It is apparently possible to get null errors; omit them.
+                                if(!error) return;
                                 // If there are multiple errors on one line, we'll have already placed a marker here.
                                 // Instead of replacing it with a new one, just update it.
                                 var markers = code_mirror.lineInfo(error.line - 1).gutterMarkers;
@@ -282,7 +284,7 @@ CloudPebble.Editor = (function() {
                     CloudPebble.Sidebar.ClearIcon('source-' + file.id);
                 };
 
-                var save = function() {
+                var save = function(callback) {
                     save_btn.attr('disabled','disabled');
                     delete_btn.attr('disabled','disabled');
                     $.post("/ide/project/" + PROJECT_ID + "/source/" + file.id + "/save", {
@@ -297,6 +299,9 @@ CloudPebble.Editor = (function() {
                             ga('send', 'event' ,'file', 'save');
                         } else {
                             alert(data.error);
+                        }
+                        if(callback) {
+                            callback()
                         }
                     });
                 };
@@ -374,6 +379,27 @@ CloudPebble.Editor = (function() {
         });
     };
 
+    var save_all = function(callback) {
+        var pending = 0;
+
+        var saved = function() {
+            if(--pending == 0) {
+                if(callback) {
+                    callback();
+                }
+            }
+        };
+
+        $.each(open_codemirrors, function(index, value) {
+            ++pending;
+            value.cloudpebble_save(saved);
+        });
+
+        if(pending === 0) {
+            callback();
+        }
+    };
+
     function init() {
         CodeMirror.commands.autocomplete = function(cm) {
             CodeMirror.showHint(cm, CloudPebble.Editor.Autocomplete.Complete, {completeSingle: false});
@@ -382,11 +408,9 @@ CloudPebble.Editor = (function() {
             cm.cloudpebble_save();
         };
         CodeMirror.commands.saveAll = function(cm) {
-            $.each(open_codemirrors, function(index, value) {
-                value.cloudpebble_save();
-            });
+            save_all();
         };
-     }
+    }
 
     function fullscreen(code_mirror, toggle) {
         if(toggle) {
@@ -405,7 +429,7 @@ CloudPebble.Editor = (function() {
         code_mirror.refresh();
         code_mirror.focus();
         is_fullscreen = toggle;
-     }
+    }
 
     return {
         Create: function() {
@@ -449,6 +473,12 @@ CloudPebble.Editor = (function() {
         },
         GetUnsavedFiles: function() {
             return unsaved_files;
+        },
+        Open: function(file) {
+            edit_source_file(file);
+        },
+        SaveAll: function(callback) {
+            save_all(callback);
         }
     };
 })();

@@ -3,6 +3,7 @@ from django.views.decorators.http import require_POST
 from ide.api import json_response
 from ide.tasks.archive import export_user_projects
 from utils.keen_helper import send_keen_event
+from ide.utils.whatsnew import get_new_things
 
 __author__ = 'katharine'
 
@@ -30,3 +31,10 @@ def transition_delete(request):
     send_keen_event('cloudpebble', 'cloudpebble_ownership_transition_declined', request=request)
     request.user.delete()
     return json_response({})
+
+def whats_new(request):
+    # Unauthenticated users never have anything new.
+    if not request.user.is_authenticated():
+        return json_response({'new': []})
+
+    return json_response({'new': get_new_things(request.user)})

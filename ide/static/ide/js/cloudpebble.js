@@ -22,21 +22,23 @@ CloudPebble.ProjectInfo = {};
 
 CloudPebble.Init = function() {
     jquery_csrf_setup();
-    CloudPebble.Compile.Init();
-    CloudPebble.Editor.Init();
-    CloudPebble.Resources.Init();
-    CloudPebble.Sidebar.Init();
-    CloudPebble.Settings.Init();
-    CloudPebble.GitHub.Init();
 
     // Load in project data.
     $.getJSON('/ide/project/' + PROJECT_ID + '/info', function(data) {
-        CloudPebble.ProgressBar.Hide();
         if(!data.success) {
             alert("Something went wrong:\n" + data.error);
             return;
         }
         CloudPebble.ProjectInfo = data;
+
+        CloudPebble.Compile.Init();
+        CloudPebble.Editor.Init();
+        CloudPebble.Resources.Init();
+        CloudPebble.Sidebar.Init();
+        CloudPebble.Settings.Init();
+        CloudPebble.GitHub.Init();
+
+        CloudPebble.ProgressBar.Hide();
 
         // Add source files.
         $.each(data.source_files, function(index, value) {
@@ -49,6 +51,11 @@ CloudPebble.Init = function() {
 
         CloudPebble.Editor.Autocomplete.Init();
         CloudPebble.Sidebar.SetProjectType(data.type);
+
+        // simplyjs projects always have one file, so we may as well open it immediately.
+        if(data.type == 'simplyjs') {
+            CloudPebble.Editor.Open(data.source_files[0]);
+        }
     });
 
     window.addEventListener('beforeunload', function(e) {

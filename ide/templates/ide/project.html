@@ -8,7 +8,6 @@
           <li class="active"><a>{{ project.name }}</a></li>
           <li><a href="{% url 'ide:index' %}">Your Projects</a></li>
           <li><a href="{% url 'ide:settings' %}">IDE Settings</a></li>
-          <li><a href="http://blog.cloudpebble.net/">Blog</a></li>
           <li><a href="{% url 'logout' %}">Sign out</a></li>
         </ul>
         <h3 class="muted">CloudPebble – <span class="project-name">{{ project.name }}</span></h3>
@@ -16,11 +15,12 @@
     <div class="row-fluid">
         <div class="span2" id="sidebar_wrapper">
             <div class="well">
+                <button class="btn save-and-run">Save and run <img src="{% static 'ide/img/spinner.gif' %}" style="display:none;"></button>
                 <ul class="nav nav-list" id="sidebar">
                     <li class="nav-header">Project</li>
                     <li id="sidebar-pane-settings"><a href="#">Settings</a></li>
                     <li id="sidebar-pane-compile"><a href="#">Compilation</a></li>
-                    <li id="sidebar-pane-github" class="native-only {{%if not github%}disabled{%endif%}"><a href="#">GitHub</a></li>
+                    <li id="sidebar-pane-github" class="native-only {%if not project.owner.github%}disabled{%endif%}"><a href="#">GitHub</a></li>
                     <li class="nav-header">Source files</li>
                     <li class="divider native-only" id="end-source-files"></li>
                     <li class="native-only"><a href="#" id="new-source-file"><strong>New C file</strong></a></li>

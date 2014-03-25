@@ -528,7 +528,7 @@ CloudPebble.Editor.Autocomplete = (function() {
         ['graphics_draw_text', 'void', ['GContext* ctx', 'const char* text', 'GFont const font', 'const GRect box', 'const GTextOverflowMode overflow_mode', 'const GTextAlignment alignment', 'const GTextLayoutCacheRef layout']],
         ['graphics_fill_circle', 'void', ['GContext* ctx', 'GPoint p', 'uint16_t radius']],
         ['graphics_fill_rect', 'void', ['GContext* ctx', 'GRect rect', 'uint16_t corner_radius', 'GCornerMask corner_mask']],
-        ['graphics_text_layout_get_content_size', 'GSize', ['const char* text', 'GFont const font', 'const GRect box', 'const GTextOverflowMode overflow_mode', 'const GTextAlignment alignment', 'GTextLayoutCacheRef layout']],
+        ['graphics_text_layout_get_content_size', 'GSize', ['const char* text', 'GFont const font', 'const GRect box', 'const GTextOverflowMode overflow_mode', 'const GTextAlignment alignment']],
         ['grect_align', 'void', ['GRect *rect', 'const GRect *inside_rect', 'const GAlign alignment', 'const bool clip']],
         ['grect_center_point', 'GPoint', ['const GRect *rect']],
         ['grect_clip', 'void', ['GRect * const rect_to_clip', 'const GRect * const rect_clipper']],
