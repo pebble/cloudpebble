@@ -206,7 +206,9 @@ Pebble = function(ip, port) {
         });
     };
 
-
+    var request_factory_setting = function(key) {
+        send_message('FACTORY_SETTINGS', pack('BB', [0x00, key.length]).concat(string_to_bytes(key)));
+    }
 
     this.request_colour = function() {
         request_factory_setting('mfg_color');
