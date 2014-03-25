@@ -206,6 +206,8 @@ CloudPebble.Editor = (function() {
                         }, jshint_globals);
                         if(!success) {
                             _.each(JSHINT.errors, function(error) {
+                                // It is apparently possible to get null errors; omit them.
+                                if(!error) return;
                                 // If there are multiple errors on one line, we'll have already placed a marker here.
                                 // Instead of replacing it with a new one, just update it.
                                 var markers = code_mirror.lineInfo(error.line - 1).gutterMarkers;
