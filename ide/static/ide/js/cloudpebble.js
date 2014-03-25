@@ -25,6 +25,12 @@ CloudPebble.Init = function() {
 
     // Load in project data.
     $.getJSON('/ide/project/' + PROJECT_ID + '/info', function(data) {
+        if(!data.success) {
+            alert("Something went wrong:\n" + data.error);
+            return;
+        }
+        CloudPebble.ProjectInfo = data;
+
         CloudPebble.Compile.Init();
         CloudPebble.Editor.Init();
         CloudPebble.Resources.Init();
@@ -33,11 +39,6 @@ CloudPebble.Init = function() {
         CloudPebble.GitHub.Init();
 
         CloudPebble.ProgressBar.Hide();
-        if(!data.success) {
-            alert("Something went wrong:\n" + data.error);
-            return;
-        }
-        CloudPebble.ProjectInfo = data;
 
         // Add source files.
         $.each(data.source_files, function(index, value) {
