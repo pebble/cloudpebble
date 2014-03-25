@@ -113,15 +113,11 @@ CloudPebble.Compile = (function() {
         });
         pane.find('#show-legacy-link').click(function(e) {
             e.preventDefault();
-            pane.find('.legacy-ip').show();
-            pane.find('.phone-listing').hide();
-            mUsingLegacyIP = true;
+            show_legacy_ip_input();
         });
         pane.find('#show-phone-list-link').click(function(e) {
             e.preventDefault();
-            pane.find('.phone-listing').show();
-            pane.find('.legacy-ip').hide();
-            mUsingLegacyIP = false;
+            show_phone_picker();
         });
         if(navigator.userAgent.indexOf('Firefox') != -1) {
             pane.find('#firefox-warning').removeClass('hide');
@@ -145,6 +141,18 @@ CloudPebble.Compile = (function() {
         });
     };
 
+    var show_phone_picker = function() {
+        pane.find('.phone-listing').show();
+        pane.find('.legacy-ip').hide();
+        mUsingLegacyIP = false;
+    };
+
+    var show_legacy_ip_input = function() {
+        pane.find('.legacy-ip').show();
+        pane.find('.phone-listing').hide();
+        mUsingLegacyIP = true;
+    }
+
     var m_build_count = 0;
     var show_compile_pane = function() {
         CloudPebble.Sidebar.SuspendActive();
@@ -161,24 +169,63 @@ CloudPebble.Compile = (function() {
         $.getJSON("/ide/list_phones", function(data) {
             if(data.success) {
                 pane.find('#phone').empty();
-                var platform_names = {
-                    'ios': 'iPhone',
-                    'android': 'Android phone'
-                };
+                var usable_devices = [];
                 _.each(data.devices, function(device) {
+                    if(!device_is_usable(device)) return;
+                    usable_devices.push(device);
                     mKnownPhones[device.id] = device;
                     pane.find('#phone')
                         .append($('<option>')
                             .attr('value', device.id)
-                            .text(platform_names[device.type] + ' ' + device.id.substring(20)));
+                            .text(device_name(device)));
                 });
-                var last_phone = localStorage['cp-last-picked-phone'];
-                if(last_phone && _.has(mKnownPhones, last_phone)) {
-                    mSelectedPhoneID = last_phone;
-                    pane.find('#phone').val(last_phone);
+                if(usable_devices.length > 0) {
+                    var last_phone = localStorage['cp-last-picked-phone'];
+                    if(last_phone && _.has(mKnownPhones, last_phone)) {
+                        mSelectedPhoneID = last_phone;
+                        pane.find('#phone').val(last_phone);
+                    } else if(usable_devices.length == 1) {
+                        mSelectedPhoneID = usable_devices[0].id;
+                        pane.find('#phone').val(mSelectedPhoneID);
+                    }
+                } else {
+                    show_legacy_ip_input();
                 }
             }
         })
+    };
+
+    var device_is_usable = function(device) {
+        if(device.type == 'ios') {
+            if(device.app_version) { // if version is not null, it's good enough for us.
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            // Nothing other than iOS works.
+            return false;
+        }
+        // Or: return !!(device.type == 'ios' && device.version) - but that's less clear.
+    };
+
+    var device_name = function(device) {
+        var platform_names = {
+            'ios': 'iOS device',
+            'android': 'Android device'
+        };
+        var name = device.name || (platform_names[device.type] + ' ' + device.id.substring(20));
+        if(device.type == 'ios') {
+            if(device.environment != 'appstore-production') {
+                environments = {
+                    'appstore-development': 'internal dev',
+                    'enterprise-production': 'beta',
+                    'enterprise-development': 'alpha?'
+                };
+                name += ' (' + environments[device.environment] + ')';
+            }
+        }
+        return name;
     }
 
     var run_build = function(callback) {
