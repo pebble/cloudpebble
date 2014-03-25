@@ -134,6 +134,15 @@ CloudPebble.Compile = (function() {
         if(localStorage['cp-last-phone-ip']) {
             pane.find('#phone-ip').val(localStorage['cp-last-phone-ip']);
         }
+
+        pane.find('#phone').change(function() {
+            var selected = $(this).val();
+            console.log(selected);
+            if(_.has(mKnownPhones, selected)) {
+                mSelectedPhoneID = selected;
+                localStorage['cp-last-picked-phone'] = mSelectedPhoneID;
+            }
+        });
     };
 
     var m_build_count = 0;
@@ -156,16 +165,16 @@ CloudPebble.Compile = (function() {
                     'ios': 'iPhone',
                     'android': 'Android phone'
                 };
-                phone_map = {};
                 _.each(data.devices, function(device) {
+                    mKnownPhones[device.id] = device;
                     pane.find('#phone')
                         .append($('<option>')
                             .attr('value', device.id)
                             .text(platform_names[device.type] + ' ' + device.id.substring(20)));
-                    phone_map[device.id] = device;
                 });
                 var last_phone = localStorage['cp-last-picked-phone'];
-                if(last_phone && _.has(phone_map, last_phone)) {
+                if(last_phone && _.has(mKnownPhones, last_phone)) {
+                    mSelectedPhoneID = last_phone;
                     pane.find('#phone').val(last_phone);
                 }
             }
@@ -272,6 +281,8 @@ CloudPebble.Compile = (function() {
     var mCrashAnalyser = null;
     var mUsingLegacyIP = false;
     var mPhoneIPs = {};
+    var mKnownPhones = {};
+    var mSelectedPhoneID = null;
 
     var pebble_connect = function(ip) {
         if(mPebble) return mPebble;
@@ -486,17 +497,15 @@ CloudPebble.Compile = (function() {
     };
 
     var get_phone_ip = function(callback) {
-        if(mUsingLegacyIP) {
+        if(mUsingLegacyIP || !mSelectedPhoneID) {
             var ip = pane.find('#phone-ip').val();
             localStorage['cp-last-phone-ip'] = ip;
             callback(ip);
         } else {
-            var selected_phone = $('#phone').val();
-            localStorage['cp-last-picked-phone'] = selected_phone;
-            if(mPhoneIPs[selected_phone]) {
-                callback(mPhoneIPs[selected_phone]);
+            if(mPhoneIPs[mSelectedPhoneID]) {
+                callback(mPhoneIPs[mSelectedPhoneID]);
             } else {
-                wake_phone(selected_phone, callback);
+                wake_phone(mSelectedPhoneID, callback);
             }
         }
     };
