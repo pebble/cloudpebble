@@ -230,11 +230,22 @@ Pebble = function(ip, port) {
             self.trigger('colour', colour_name);
         }
 
+        var handle_failure = function() {
+            self.off('factory_setting:error', handle_failure);
+            console.log("The attached watch has no concept of colour! So, red.");
+            self.trigger('colour', 'tintin-red');
+        }
+
         self.on('factory_setting:result', handle_colour);
+        self.on('factory_setting:error', handle_failure);
     }
 
 
     var handle_factory_setting = function(data) {
+        if(data.length < 2) {
+            self.trigger('factory_setting:error');
+            return;
+        }
         var result = unpack('BB', data);
         var command_id = result[0];
         if(command_id == 0x01) {
