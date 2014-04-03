@@ -59,7 +59,11 @@ def run_compile(build_result):
                 if not os.path.exists(abs_target_dir):
                     print "Creating directory %s." % abs_target_dir
                     os.makedirs(abs_target_dir)
-                link_or_copy(os.path.abspath(f.local_filename), abs_target)
+                try:
+                    link_or_copy(os.path.abspath(f.local_filename), abs_target)
+                except OSError as err:
+                    if err.errno == 2:
+                        open(abs_target, 'w').close() # create the file if it's missing.
 
             # Resources
             resource_root = 'resources'
