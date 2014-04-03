@@ -33,9 +33,15 @@ def do_import_github(project_id, github_user, github_project, github_branch, del
         else:
             raise Exception("The branch '%s' does not exist." % github_branch)
     except Exception as e:
-        if delete_project:
+        try:
+            project = Project.objects.get(pk=project_id)
+            user = project.owner
+        except:
+            project = None
+            user = None
+        if delete_project and project is not None:
             try:
-                Project.objects.get(pk=project_id).delete()
+                project.delete()
             except:
                 pass
         send_keen_event('cloudpebble', 'cloudpebble_github_import_failed', user=user, data={
