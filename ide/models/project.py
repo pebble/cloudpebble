@@ -77,9 +77,6 @@ class Project(IdeModel):
     def __unicode__(self):
         return u"%s" % self.name
 
-    class Meta(IdeModel.Meta):
-        unique_together = (('owner', 'name'),)
-
 
 
 class TemplateProject(Project):

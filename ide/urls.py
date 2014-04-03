@@ -3,13 +3,13 @@ from django.conf.urls import patterns, url
 from ide.api import proxy_keen, check_task, get_shortlink
 from ide.api.git import github_push, github_pull, set_project_repo, create_project_repo
 from ide.api.project import project_info, compile_project, last_build, build_history, build_log, create_project, \
-    save_project_settings, delete_project, begin_export, import_zip, import_github
+    save_project_settings, delete_project, begin_export, import_zip, import_github, do_import_gist
 from ide.api.resource import create_resource, resource_info, delete_resource, update_resource, show_resource
 from ide.api.source import create_source_file, load_source_file, source_file_is_safe, save_source_file, \
     delete_source_file
 from ide.api.user import transition_accept, transition_export, transition_delete, whats_new
 from ide.views.index import index
-from ide.views.project import project, github_hook, build_status
+from ide.views.project import project, github_hook, build_status, import_gist
 from ide.views.settings import settings_page, start_github_auth, remove_github_auth, complete_github_auth
 
 urlpatterns = patterns(
@@ -50,8 +50,10 @@ urlpatterns = patterns(
     url(r'^settings/github/unlink$', remove_github_auth, name='remove_github_auth'),
     url(r'^import/zip', import_zip, name='import_zip'),
     url(r'^import/github', import_github, name='import_github'),
+    url(r'^import/gist', do_import_gist, name='import_gist'),
     url(r'^transition/accept', transition_accept, name='transition_accept'),
     url(r'^transition/export', transition_export, name='transition_export'),
     url(r'^transition/delete', transition_delete, name='transition_delete'),
-    url('^whats_new', whats_new, name='whats_new')
+    url(r'^whats_new', whats_new, name='whats_new'),
+    url(r'^gist/(?P<gist_id>[0-9a-f]+)$', import_gist)
 )
