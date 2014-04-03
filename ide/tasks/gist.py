@@ -10,11 +10,15 @@ from ide.models.files import SourceFile
 from ide.utils.sdk import dict_to_pretty_json
 from ide.utils import generate_half_uuid
 
-@task
+@task(acks_late=True)
 def import_gist(user_id, gist_id):
     user = User.objects.get(pk=user_id)
     g = github.Github()
-    gist = g.get_gist(gist_id)
+
+    try:
+        gist = g.get_gist(gist_id)
+    except github.UnknownObjectException as e:
+        raise Exception("Couldn't find gist to import.")
 
     files = gist.files
     default_name = gist.description or 'Sample project'

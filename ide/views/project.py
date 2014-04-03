@@ -60,3 +60,12 @@ def build_status(request, project_id):
         return HttpResponseRedirect(settings.STATIC_URL + '/ide/img/status/passing.png')
     else:
         return HttpResponseRedirect(settings.STATIC_URL + '/ide/img/status/failing.png')
+
+@require_safe
+@login_required
+@ensure_csrf_cookie
+def import_gist(request, gist_id):
+    return render(request, 'ide/gist-import.html', {
+        'gist_id': gist_id,
+        'blurb': request.GET.get('blurb', None)
+    })

@@ -14,6 +14,7 @@ from ide.models.project import Project, TemplateProject
 from ide.models.files import SourceFile, ResourceFile
 from ide.tasks.archive import create_archive, do_import_archive
 from ide.tasks.build import run_compile
+from ide.tasks.gist import import_gist
 from ide.tasks.git import do_import_github
 from utils.keen_helper import send_keen_event
 
@@ -285,3 +286,9 @@ def import_github(request):
 
     task = do_import_github.delay(project.id, github_user, github_project, branch, delete_project=True)
     return json_response({'task_id': task.task_id, 'project_id': project.id})
+
+@login_required
+@require_POST
+def do_import_gist(request):
+    task = import_gist.delay(request.user.id, request.POST['gist_id'])
+    return json_response({'task_id': task.task_id})
