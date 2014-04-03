@@ -2,9 +2,9 @@ import base64
 import shutil
 import tempfile
 import urllib2
+import json
 from celery import task
 from django.conf import settings
-from django.utils import simplejson as json, simplejson
 from django.utils.timezone import now
 from github.GithubObject import NotSet
 from github import Github, GithubException, InputGitTreeElement

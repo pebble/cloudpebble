@@ -2,11 +2,11 @@ import base64
 import urllib
 import urllib2
 import uuid
+import json
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render
-from django.utils import simplejson as json, simplejson
 from django.views.decorators.http import require_safe, require_POST
 from ide.forms import SettingsForm
 from ide.models.user import UserGithub

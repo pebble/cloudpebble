@@ -1,12 +1,12 @@
 import os
 import re
 import tempfile
+import json
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db import transaction, IntegrityError
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.utils import simplejson as json
 from django.views.decorators.http import require_safe, require_POST
 from ide.api import json_response, json_failure
 from ide.models.build import BuildResult

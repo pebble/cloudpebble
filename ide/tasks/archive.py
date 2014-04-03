@@ -4,12 +4,12 @@ import shutil
 import tempfile
 import uuid
 import zipfile
+import json
 from celery import task
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import SuspiciousOperation
 from django.db import transaction
-from django.utils import simplejson as json
 from ide.utils.project import find_project_root
 from ide.utils.sdk import generate_resource_map, generate_v2_manifest, generate_wscript_file, generate_jshint_file, \
     dict_to_pretty_json

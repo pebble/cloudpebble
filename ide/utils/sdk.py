@@ -1,4 +1,4 @@
-from django.utils import simplejson as json, simplejson
+import json
 
 __author__ = 'katharine'
 

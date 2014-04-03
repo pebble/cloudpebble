@@ -4,11 +4,11 @@ import subprocess
 import tempfile
 import traceback
 import zipfile
+import json
 
 from celery import task
 
 from django.conf import settings
-from django.utils import simplejson as json
 from django.utils.timezone import now
 
 import apptools.addr2lines
