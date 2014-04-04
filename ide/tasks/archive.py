@@ -24,7 +24,7 @@ __author__ = 'katharine'
 def add_project_to_archive(z, project, prefix=''):
     source_files = SourceFile.objects.filter(project=project)
     resources = ResourceFile.objects.filter(project=project)
-    prefix = prefix + re.sub(r'[^\w]+', '_', project.name).strip('_').lower()
+    prefix += re.sub(r'[^\w]+', '_', project.name).strip('_').lower()
 
     for source in source_files:
         z.writestr('%s/src/%s' % (prefix, source.file_name), source.get_contents())
@@ -88,8 +88,8 @@ def export_user_projects(user_id):
 
 @task(acks_late=True)
 def do_import_archive(project_id, archive_location, delete_zip=False, delete_project=False):
+    project = Project.objects.get(pk=project_id)
     try:
-        project = Project.objects.get(pk=project_id)
         # archive_location *must not* be a file-like object. We ensure this by string casting.
         archive_location = str(archive_location)
         if not zipfile.is_zipfile(archive_location):

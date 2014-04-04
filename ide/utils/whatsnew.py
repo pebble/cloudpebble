@@ -3,6 +3,7 @@ NEW_THINGS = [
     ["CloudPebble now lets you create appications using pure JavaScript! <a href='https://developer.getpebble.com/blog/2014/03/14/CloudPebble-now-supports-Simplyjs/' target='_blank'>Check out our blog post!</a>"]
 ]
 
+
 def get_new_things(user):
     user_settings = user.settings
     what = user_settings.whats_new
@@ -14,6 +15,7 @@ def get_new_things(user):
         return NEW_THINGS[what:][::-1]
     else:
         return []
+
 
 def count_things():
     return len(NEW_THINGS)

@@ -162,6 +162,7 @@ def generate_resource_dict(project, resources):
                 resource_map['media'].append(d)
     return resource_map
 
+
 def generate_simplyjs_manifest_dict(project):
     manifest = {
         "uuid": project.app_uuid,

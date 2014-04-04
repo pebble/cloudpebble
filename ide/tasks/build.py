@@ -17,7 +17,7 @@ from ide.utils.sdk import generate_wscript_file, generate_jshint_file, generate_
     generate_simplyjs_manifest_dict
 from utils.keen_helper import send_keen_event
 
-from ide.models.build import  BuildResult
+from ide.models.build import BuildResult
 from ide.models.files import SourceFile, ResourceFile
 
 __author__ = 'katharine'
@@ -63,7 +63,7 @@ def run_compile(build_result):
                     link_or_copy(os.path.abspath(f.local_filename), abs_target)
                 except OSError as err:
                     if err.errno == 2:
-                        open(abs_target, 'w').close() # create the file if it's missing.
+                        open(abs_target, 'w').close()  # create the file if it's missing.
 
             # Resources
             resource_root = 'resources'
@@ -83,14 +83,13 @@ def run_compile(build_result):
                 print "Added %s %s" % (f.kind, f.local_filename)
                 link_or_copy(os.path.abspath(f.local_filename), abs_target)
 
-
             # Reconstitute the SDK
             print "Inserting wscript"
             open(os.path.join(base_dir, 'wscript'), 'w').write(generate_wscript_file(project))
             print "Inserting jshintrc"
             open(os.path.join(base_dir, 'pebble-jshintrc'), 'w').write(generate_jshint_file(project))
         elif project.project_type == 'simplyjs':
-            os.rmdir(base_dir) # This is not intuitive behaviour.
+            os.rmdir(base_dir)  # This is not intuitive behaviour.
             shutil.copytree(settings.SIMPLYJS_ROOT, base_dir)
             manifest_dict = generate_simplyjs_manifest_dict(project)
 
@@ -116,7 +115,9 @@ def run_compile(build_result):
         output = 'Failed to get output'
         try:
             if settings.CHROOT_JAIL is not None:
-                output = subprocess.check_output([settings.CHROOT_JAIL, project.sdk_version, base_dir[len(settings.CHROOT_ROOT):]], stderr=subprocess.STDOUT)
+                output = subprocess.check_output(
+                    [settings.CHROOT_JAIL, project.sdk_version, base_dir[len(settings.CHROOT_ROOT):]],
+                    stderr=subprocess.STDOUT)
             else:
                 os.chdir(base_dir)
                 print "Running SDK2 build"
@@ -150,7 +151,7 @@ def run_compile(build_result):
                 if os.path.exists(elf_file):
                     try:
                         debug_info = apptools.addr2lines.create_coalesced_group(elf_file)
-                    except Exception as e:
+                    except:
                         print "Generating debug info failed."
                         print traceback.format_exc()
                     else:
@@ -187,7 +188,3 @@ def run_compile(build_result):
     finally:
         print "Removing temporary directory"
         shutil.rmtree(base_dir)
-
-
-
-

@@ -44,4 +44,4 @@ def find_project_root(contents):
         break
     else:
         raise Exception("No project root found.")
-    return (version, base_dir)
+    return version, base_dir

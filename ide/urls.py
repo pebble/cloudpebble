@@ -9,14 +9,14 @@ from ide.api.source import create_source_file, load_source_file, source_file_is_
     delete_source_file
 from ide.api.user import transition_accept, transition_export, transition_delete, whats_new
 from ide.views.index import index
-from ide.views.project import project, github_hook, build_status, import_gist
+from ide.views.project import view_project, github_hook, build_status, import_gist
 from ide.views.settings import settings_page, start_github_auth, remove_github_auth, complete_github_auth
 
 urlpatterns = patterns(
     '',
     url(r'^$', index, name='index'),
     url(r'^project/create', create_project, name='create_project'),
-    url(r'^project/(?P<project_id>\d+)$', project, name='project'),
+    url(r'^project/(?P<project_id>\d+)$', view_project, name='project'),
     url(r'^project/(?P<project_id>\d+)/info', project_info, name='project_info'),
     url(r'^project/(?P<project_id>\d+)/save_settings', save_project_settings, name='save_project_settings'),
     url(r'^project/(?P<project_id>\d+)/delete', delete_project, name='delete_project'),

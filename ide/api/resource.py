@@ -26,7 +26,8 @@ def create_resource(request, project_id):
             for r in resource_ids:
                 regex = r['regex'] if 'regex' in r else None
                 tracking = int(r['tracking']) if 'tracking' in r else None
-                resources.append(ResourceIdentifier.objects.create(resource_file=rf, resource_id=r['id'], character_regex=regex, tracking=tracking))
+                resources.append(ResourceIdentifier.objects.create(resource_file=rf, resource_id=r['id'],
+                                                                   character_regex=regex, tracking=tracking))
             rf.save_file(request.FILES['file'])
 
 
@@ -67,7 +68,11 @@ def resource_info(request, project_id, resource_id):
 
     return json_response({
         'resource': {
-            'resource_ids': [{'id': x.resource_id, 'regex': x.character_regex, 'tracking': x.tracking} for x in resources],
+            'resource_ids': [{
+                                 'id': x.resource_id,
+                                 'regex': x.character_regex,
+                                 'tracking': x.tracking
+                             } for x in resources],
             'id': resource.id,
             'file_name': resource.file_name,
             'kind': resource.kind

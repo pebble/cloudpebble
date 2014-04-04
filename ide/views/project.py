@@ -18,7 +18,7 @@ __author__ = 'katharine'
 @require_safe
 @login_required
 @ensure_csrf_cookie
-def project(request, project_id):
+def view_project(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     if project.app_uuid is None:
         project.app_uuid = generate_half_uuid()
@@ -60,6 +60,7 @@ def build_status(request, project_id):
         return HttpResponseRedirect(settings.STATIC_URL + '/ide/img/status/passing.png')
     else:
         return HttpResponseRedirect(settings.STATIC_URL + '/ide/img/status/failing.png')
+
 
 @require_safe
 @login_required
