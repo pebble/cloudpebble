@@ -196,6 +196,9 @@ CloudPebble.Compile = (function() {
     };
 
     var device_is_usable = function(device) {
+        if(!device.push_enabled) {
+            return false;
+        }
         if(device.type == 'ios') {
             if(device.app_version) { // if version is not null, it's good enough for us.
                 return true;
