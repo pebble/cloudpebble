@@ -2,6 +2,7 @@ from django.conf.urls import patterns, url
 
 from ide.api import proxy_keen, check_task, get_shortlink
 from ide.api.git import github_push, github_pull, set_project_repo, create_project_repo
+from ide.api.phone import ping_phone, check_phone, list_phones, update_phone
 from ide.api.project import project_info, compile_project, last_build, build_history, build_log, create_project, \
     save_project_settings, delete_project, begin_export, import_zip, import_github
 from ide.api.resource import create_resource, resource_info, delete_resource, update_resource, show_resource
@@ -53,5 +54,9 @@ urlpatterns = patterns(
     url(r'^transition/accept', transition_accept, name='transition_accept'),
     url(r'^transition/export', transition_export, name='transition_export'),
     url(r'^transition/delete', transition_delete, name='transition_delete'),
+    url(r'^ping_phone$', ping_phone),
+    url(r'^check_phone/(?P<request_id>[0-9a-f-]+)$', check_phone),
+    url(r'^update_phone$', update_phone),
+    url(r'^list_phones$', list_phones),
     url('^whats_new', whats_new, name='whats_new')
 )

@@ -3,17 +3,24 @@
 echo "Replacing ubuntu mirrors with ones that suck less."
 sudo sed -i -e 's#us.archive.ubuntu.com#mirrors.mit.edu#g' /etc/apt/sources.list
 
-apt-get update
+
 # Install a bunch of things we want
+apt-get update
 apt-get install -y aptitude
-aptitude install -y python-pip mercurial git python-dev python-psycopg2 rabbitmq-server libmpc libevent-dev lighttpd
+aptitude install -y python-pip mercurial git python-dev python-psycopg2 rabbitmq-server libmpc libevent-dev lighttpd python-software-properties
+
+# We need a more recent redis than Ubuntu provides.
+add-apt-repository -y ppa:chris-lea/redis-server
 
 # Install node for jshint
-aptitude install -y g++ make python-software-properties
+aptitude install -y g++ make
 add-apt-repository -y ppa:chris-lea/node.js
 apt-get update
 aptitude install -y nodejs
 npm install -g jshint
+
+# Install redis
+aptitude install -y redis-server
 
 # Make our static server useful.
 ln -s /vagrant/user_data/build_results /var/www/builds 
@@ -44,7 +51,7 @@ popd
 
 sudo -u vagrant mkdir sdk2
 pushd sdk2
-    wget --progress=bar:force -O sdk.tar.gz https://s3.amazonaws.com/assets.getpebble.com/sdk2/PebbleSDK-2.0-BETA7.tar.gz
+    wget --progress=bar:force -O sdk.tar.gz https://s3.amazonaws.com/assets.getpebble.com/sdk2/PebbleSDK-2.0.1.tar.gz
     sudo -u vagrant tar --strip 1 -xzf sdk.tar.gz
     rm sdk.tar.gz
     sudo -u vagrant ln -s ~/arm-cs-tools arm-cs-tools
