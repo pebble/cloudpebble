@@ -1,12 +1,12 @@
 import os
 import re
 import tempfile
+import json
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db import transaction, IntegrityError
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.utils import simplejson as json
 from django.views.decorators.http import require_safe, require_POST
 from ide.api import json_response, json_failure
 from ide.models.build import BuildResult
@@ -14,6 +14,7 @@ from ide.models.project import Project, TemplateProject
 from ide.models.files import SourceFile, ResourceFile
 from ide.tasks.archive import create_archive, do_import_archive
 from ide.tasks.build import run_compile
+from ide.tasks.gist import import_gist
 from ide.tasks.git import do_import_github
 from utils.keen_helper import send_keen_event
 
@@ -78,7 +79,7 @@ def last_build(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     try:
         build = project.builds.order_by('-started')[0]
-    except (IndexError, BuildResult.DoesNotExist) as e:
+    except (IndexError, BuildResult.DoesNotExist):
         return json_response({"build": None})
     else:
         b = {
@@ -151,7 +152,7 @@ def build_log(request, project_id, build_id):
 def create_project(request):
     name = request.POST['name']
     template_id = request.POST.get('template', None)
-    type = request.POST.get('type', 'native')
+    project_type = request.POST.get('type', 'native')
     try:
         with transaction.commit_on_success():
             project = Project.objects.create(
@@ -165,12 +166,12 @@ def create_project(request):
                 app_version_label='1.0',
                 app_is_watchface=False,
                 app_capabilities='',
-                project_type=type
+                project_type=project_type
             )
             if template_id is not None and int(template_id) != 0:
                 template = TemplateProject.objects.get(pk=int(template_id))
                 template.copy_into_project(project)
-            elif type == 'simplyjs':
+            elif project_type == 'simplyjs':
                 f = SourceFile.objects.create(project=project, file_name="app.js")
                 f.save_file(open('{}/src/html/demo.js'.format(settings.SIMPLYJS_ROOT)).read())
     except IntegrityError as e:
@@ -274,7 +275,8 @@ def import_github(request):
     branch = request.POST['branch']
     match = re.match(r'^(?:https?://|git@|git://)?(?:www\.)?github\.com[/:]([\w.-]+)/([\w.-]+?)(?:\.git|/|$)', repo)
     if match is None:
-        return HttpResponse(json.dumps({"success": False, 'error': "Invalid GitHub URL."}), content_type="application/json")
+        return HttpResponse(json.dumps({"success": False, 'error': "Invalid GitHub URL."}),
+                            content_type="application/json")
     github_user = match.group(1)
     github_project = match.group(2)
 
@@ -285,3 +287,10 @@ def import_github(request):
 
     task = do_import_github.delay(project.id, github_user, github_project, branch, delete_project=True)
     return json_response({'task_id': task.task_id, 'project_id': project.id})
+
+
+@login_required
+@require_POST
+def do_import_gist(request):
+    task = import_gist.delay(request.user.id, request.POST['gist_id'])
+    return json_response({'task_id': task.task_id})

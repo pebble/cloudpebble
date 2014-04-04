@@ -8,6 +8,7 @@ import json
 import urllib2
 import re
 
+
 def git_auth_check(f):
     def g(user, *args, **kwargs):
         if not git_verify_tokens(user):
@@ -25,6 +26,7 @@ def git_auth_check(f):
             raise
     return g
 
+
 def git_verify_tokens(user):
     try:
         token = user.github.token
@@ -33,11 +35,12 @@ def git_verify_tokens(user):
     if token is None:
         return False
 
-    auth_string = base64.encodestring('%s:%s' % (settings.GITHUB_CLIENT_ID, settings.GITHUB_CLIENT_SECRET)).replace('\n', '')
+    auth_string = base64.encodestring('%s:%s' %
+                                      (settings.GITHUB_CLIENT_ID, settings.GITHUB_CLIENT_SECRET)).replace('\n', '')
     r = urllib2.Request('https://api.github.com/applications/%s/tokens/%s' % (settings.GITHUB_CLIENT_ID, token))
     r.add_header("Authorization", "Basic %s" % auth_string)
     try:
-        result = json.loads(urllib2.urlopen(r).read())
+        json.loads(urllib2.urlopen(r).read())
     except urllib2.HTTPError as e:
         # No such token
         if e.getcode() == 404:
@@ -46,8 +49,10 @@ def git_verify_tokens(user):
         return False
     return True
 
+
 def get_github(user):
     return Github(user.github.token, client_id=settings.GITHUB_CLIENT_ID, client_secret=settings.GITHUB_CLIENT_SECRET)
+
 
 def check_repo_access(user, repo):
     g = get_github(user)
@@ -58,12 +63,14 @@ def check_repo_access(user, repo):
 
     return repo.has_in_collaborators(NamedUser(None, {'login': user.github.username}, False))
 
+
 def url_to_repo(url):
     match = re.match(r'^(?:https?://|git@|git://)?(?:www\.)?github\.com[/:]([\w.-]+)/([\w.-]+?)(?:\.git|/|$)', url)
     if match is None:
         return None
     else:
-        return (match.group(1), match.group(2))
+        return match.group(1), match.group(2)
+
 
 @git_auth_check
 def create_repo(user, repo_name, description):

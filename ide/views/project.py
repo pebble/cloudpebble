@@ -1,9 +1,9 @@
+import json
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
-from django.utils import simplejson as json
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from django.views.decorators.http import require_safe, require_POST
 from ide.models.build import BuildResult
@@ -18,7 +18,7 @@ __author__ = 'katharine'
 @require_safe
 @login_required
 @ensure_csrf_cookie
-def project(request, project_id):
+def view_project(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     if project.app_uuid is None:
         project.app_uuid = generate_half_uuid()
@@ -60,3 +60,14 @@ def build_status(request, project_id):
         return HttpResponseRedirect(settings.STATIC_URL + '/ide/img/status/passing.png')
     else:
         return HttpResponseRedirect(settings.STATIC_URL + '/ide/img/status/failing.png')
+
+
+@require_safe
+@login_required
+@ensure_csrf_cookie
+def import_gist(request, gist_id):
+    send_keen_event('cloudpebble', 'cloudpebble_gist_landing', request=request, data={'data': {'gist_id': gist_id}})
+    return render(request, 'ide/gist-import.html', {
+        'gist_id': gist_id,
+        'blurb': request.GET.get('blurb', None)
+    })

@@ -1,4 +1,4 @@
-from django.utils import simplejson as json, simplejson
+import json
 
 __author__ = 'katharine'
 
@@ -161,6 +161,7 @@ def generate_resource_dict(project, resources):
                     d['menuIcon'] = True
                 resource_map['media'].append(d)
     return resource_map
+
 
 def generate_simplyjs_manifest_dict(project):
     manifest = {

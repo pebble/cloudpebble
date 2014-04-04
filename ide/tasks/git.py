@@ -2,9 +2,9 @@ import base64
 import shutil
 import tempfile
 import urllib2
+import json
 from celery import task
 from django.conf import settings
-from django.utils import simplejson as json, simplejson
 from django.utils.timezone import now
 from github.GithubObject import NotSet
 from github import Github, GithubException, InputGitTreeElement
@@ -33,9 +33,15 @@ def do_import_github(project_id, github_user, github_project, github_branch, del
         else:
             raise Exception("The branch '%s' does not exist." % github_branch)
     except Exception as e:
-        if delete_project:
+        try:
+            project = Project.objects.get(pk=project_id)
+            user = project.owner
+        except:
+            project = None
+            user = None
+        if delete_project and project is not None:
             try:
-                Project.objects.get(pk=project_id).delete()
+                project.delete()
             except:
                 pass
         send_keen_event('cloudpebble', 'cloudpebble_github_import_failed', user=user, data={
@@ -51,12 +57,13 @@ def do_import_github(project_id, github_user, github_project, github_branch, del
 
 def file_exists(url):
     request = urllib2.Request(url)
-    request.get_method = lambda : 'HEAD'
+    request.get_method = lambda: 'HEAD'
     try:
-        response = urllib2.urlopen(request)
-        return True
+        urllib2.urlopen(request)
     except:
         return False
+    else:
+        return True
 
 
 # SDK2 support has made this function a huge, unmaintainable mess.
@@ -87,7 +94,8 @@ def github_push(user, commit_message, repo_name, project):
         repo_path = src_root + source.file_name
         if repo_path not in next_tree:
             has_changed = True
-            next_tree[repo_path] = InputGitTreeElement(path=repo_path, mode='100644', type='blob', content=source.get_contents())
+            next_tree[repo_path] = InputGitTreeElement(path=repo_path, mode='100644', type='blob',
+                                                       content=source.get_contents())
             print "New file: %s" % repo_path
         else:
             sha = next_tree[repo_path]._InputGitTreeElement__sha
@@ -155,7 +163,7 @@ def github_push(user, commit_message, repo_name, project):
         else:
             their_res_dict = {'friendlyVersion': 'VERSION', 'versionDefName': '', 'media': []}
         their_manifest_dict = {}
-    elif remote_version == '2':
+    else:
         remote_manifest_sha = next_tree[remote_manifest_path]._InputGitTreeElement__sha if remote_map_path in next_tree else None
         if remote_manifest_sha is not None:
             their_manifest_dict = json.loads(git_blob(repo, remote_manifest_sha))
@@ -164,10 +172,9 @@ def github_push(user, commit_message, repo_name, project):
             their_manifest_dict = {}
             their_res_dict = {'media': []}
 
-
     if project.sdk_version == '1':
         our_res_dict = generate_resource_dict(project, resources)
-    elif project.sdk_version == '2':
+    else:
         our_manifest_dict = generate_v2_manifest_dict(project, resources)
         our_res_dict = our_manifest_dict['resources']
 
@@ -188,21 +195,22 @@ def github_push(user, commit_message, repo_name, project):
                 next_tree[remote_map_path]._InputGitTreeElement__sha = NotSet
                 next_tree[remote_map_path]._InputGitTreeElement__content = dict_to_pretty_json(our_res_dict)
             else:
-                next_tree[remote_map_path] = InputGitTreeElement(path=remote_map_path, mode='100644', type='blob', content=dict_to_pretty_json(our_res_dict))
+                next_tree[remote_map_path] = InputGitTreeElement(path=remote_map_path, mode='100644', type='blob',
+                                                                 content=dict_to_pretty_json(our_res_dict))
             # Delete the v2 manifest, if one exists
             if remote_manifest_path in next_tree:
                 del next_tree[remote_manifest_path]
     # This one is separate because there's more than just the resource map changing.
-    if (project.sdk_version == '2' and their_manifest_dict != our_manifest_dict):
+    if project.sdk_version == '2' and their_manifest_dict != our_manifest_dict:
         if remote_manifest_path in next_tree:
             next_tree[remote_manifest_path]._InputGitTreeElement__sha = NotSet
             next_tree[remote_manifest_path]._InputGitTreeElement__content = generate_v2_manifest(project, resources)
         else:
-            next_tree[remote_manifest_path] = InputGitTreeElement(path=remote_manifest_path, mode='100644', type='blob', content=generate_v2_manifest(project, resources))
+            next_tree[remote_manifest_path] = InputGitTreeElement(path=remote_manifest_path, mode='100644', type='blob',
+                                                                  content=generate_v2_manifest(project, resources))
         # Delete the v1 manifest, if one exists
         if remote_map_path in next_tree:
             del next_tree[remote_map_path]
-
 
     # Commit the new tree.
     if has_changed:
@@ -264,8 +272,7 @@ def github_pull(user, project):
     # First try finding the resource map so we don't fail out part-done later.
     # TODO: transaction support for file contents would be nice...
     # SDK2
-    resource_root = None
-    media = {}
+
     if version == '2':
         resource_root = root + 'resources/'
         manifest_path = root + 'appinfo.json'

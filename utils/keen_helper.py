@@ -72,7 +72,5 @@ def send_keen_event(collections, event, data=None, request=None, project=None, u
     for collection in collections:
         keen_request[collection] = [data]
 
-    print keen_request
-
     # keen.add_events(keen_request) # probably don't want to block while this processes...
     keen_add_events.delay(keen_request)

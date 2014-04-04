@@ -1,9 +1,9 @@
 import urllib2
+import json
 from celery.result import AsyncResult
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.utils import simplejson as json, simplejson
 from django.views.decorators.http import require_POST, require_safe
 from ide.models.project import Project
 
