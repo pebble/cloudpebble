@@ -66,7 +66,7 @@ def build_status(request, project_id):
 @login_required
 @ensure_csrf_cookie
 def import_gist(request, gist_id):
-    send_keen_event('cloudpebble', 'cloudpebble_gist_landing', request=request, data={'gist_id': gist_id})
+    send_keen_event('cloudpebble', 'cloudpebble_gist_landing', request=request, data={'data': {'gist_id': gist_id}})
     return render(request, 'ide/gist-import.html', {
         'gist_id': gist_id,
         'blurb': request.GET.get('blurb', None)

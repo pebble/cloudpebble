@@ -19,7 +19,7 @@ def import_gist(user_id, gist_id):
     try:
         gist = g.get_gist(gist_id)
     except github.UnknownObjectException:
-        send_keen_event('cloudpebble', 'cloudpebble_gist_not_found', user=user, data={'gist_id': gist_id})
+        send_keen_event('cloudpebble', 'cloudpebble_gist_not_found', user=user, data={'data': {'gist_id': gist_id}})
         raise Exception("Couldn't find gist to import.")
 
     files = gist.files
@@ -58,5 +58,5 @@ def import_gist(user_id, gist_id):
                 source_file = SourceFile.objects.create(project=project, file_name=cp_filename)
                 source_file.save_file(gist.files[filename].content)
 
-    send_keen_event('cloudpebble', 'cloudpebble_gist_import', project=project, data={'gist_id': gist_id})
+    send_keen_event('cloudpebble', 'cloudpebble_gist_import', project=project, data={'data': {'gist_id': gist_id}})
     return project.id
