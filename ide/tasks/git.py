@@ -307,10 +307,13 @@ def github_pull(user, project):
         # And wipe the project!
         project.source_files.all().delete()
         project.resources.all().delete()
-        import_result = do_import_archive(project.id, temp.name)
+
+        # This must happen before do_import_archive or we'll stamp on its results.
         project.github_last_commit = branch.commit.sha
         project.github_last_sync = now()
         project.save()
+
+        import_result = do_import_archive(project.id, temp.name)
 
         send_keen_event('cloudpebble', 'cloudpebble_github_pull', user=user, data={
             'data': {
