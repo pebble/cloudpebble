@@ -938,6 +938,8 @@ CloudPebble.Editor.Autocomplete = (function() {
         'YEAR_UNIT'
     ];
 
+    var mDocumentation = {};
+
     var tree1 = null;
     var tree2 = null;
     var mSelectionCallback = null;
@@ -961,6 +963,11 @@ CloudPebble.Editor.Autocomplete = (function() {
         if(CloudPebble.ProjectInfo.version_def_name) {
             tree1.insert(CloudPebble.ProjectInfo.version_def_name.toLowerCase(), CloudPebble.ProjectInfo.version_def_name);
         }
+
+        $.getJSON('/static/ide/documentation.json', function(data) {
+            mDocumentation = data;
+        });
+
         is_inited = true;
     };
 
@@ -1036,6 +1043,53 @@ CloudPebble.Editor.Autocomplete = (function() {
         elt.appendChild(elem[0]);
     };
 
+    var mCurrentSummaryElement = null;
+    var mWaiting = null;
+    var renderSummary = function(completion, element) {
+        if(!mCurrentSummaryElement) return;
+        if(completion.name && mDocumentation[completion.name]) {
+            mCurrentSummaryElement.html(mDocumentation[completion.name].description.replace(/[.;](\s|[\r\n])(.|[\r\n])*/, '.'));
+        } else {
+            mCurrentSummaryElement.empty();
+        }
+    };
+    var showSummary = function(hints) {
+        if(mCurrentSummaryElement) {
+            mCurrentSummaryElement.remove();
+        }
+        var summary = $('<div>');
+        summary.css({
+            position: 'absolute',
+            top: $(hints).offset().top + $(hints).outerHeight() - 5,
+            left: $(hints).offset().left,
+            width: $(hints).innerWidth() - 4,
+            height: 20,
+            zIndex: 10002,
+            backgroundColor: 'white',
+            borderBottomLeftRadius: 3,
+            borderBottomRightRadius: 3,
+            boxShadow: '2px 3px 5px rgba(0,0,0,.2)',
+            border: '1px solid silver',
+//            borderTop: 'none',
+            textOverflow: 'ellipsis',
+            textWrap: 'none',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            padding: 2,
+            display: 'none'
+        });
+        summary.text("This is a description.");
+        summary.appendTo('body');
+        mCurrentSummaryElement = summary;
+        clearTimeout(mWaiting);
+        mWaiting = setTimeout(function() { summary.show(); }, 170);
+    };
+    var hideSummary = function() {
+        mCurrentSummaryElement.remove();
+        $('.CodeMirror-hints').find("li:last").remove();
+        mCurrentSummaryElement = null;
+    };
+
     var getCompletions = function(token) {
         var results = (CloudPebble.ProjectInfo.sdk_version == '1' ? tree1 : tree2).search(token.string.toLowerCase(), 15);
         if(results.length == 1 && results[0] == token.string) {
@@ -1068,11 +1122,15 @@ CloudPebble.Editor.Autocomplete = (function() {
             if(token.string !== '') {
                 completions = getCompletions(token);
             }
-            return {
+            var result = {
                 list: completions,
                 from: Pos(editor.getCursor().line, token.start),
                 to: Pos(editor.getCursor().line, token.end)
             };
+            CodeMirror.on(result, 'shown', showSummary);
+            CodeMirror.on(result, 'select', renderSummary);
+            CodeMirror.on(result, 'close', hideSummary);
+            return result;
         },
         Init: function() {
             init();

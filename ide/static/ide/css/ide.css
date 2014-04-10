@@ -126,7 +126,9 @@ span.cm-autofilled-end {
 
 /* Fix truncated autocomplete introduced when moving to hosted CSS. */
 .CodeMirror-hint {
-    max-width: initial;
+    max-width: 80em;
+    min-width: 30em;
+    text-overflow: ellipsis;
 }
 
 .gutter-hint-warnings {
