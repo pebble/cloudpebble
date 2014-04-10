@@ -1,0 +1,161 @@
+/* ------------------- */
+/* FONTS --------------*/
+/* ------------------- */
+
+@font-face {
+  font-family: 'PFD-Black';
+  src: url() format('truetype');
+}
+
+
+.font-black {
+    font-family: PFD-Black,'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: normal;
+    font-style: normal;
+}
+
+
+@font-face {
+  font-family: 'PFD-Black-Light';
+  src: url('PFDinDisplayPro-Blacklt.ttf') format('truetype');
+}
+
+
+.font-black-light {
+    font-family: PFD-Black-Light,'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: lighter;
+    font-style: normal;
+}
+
+@font-face {
+  font-family: 'PFD-Bold';
+  src: url('PFDinDisplayPro-Bold.ttf') format('truetype');
+}
+
+.font-bold {
+    font-family: PFD-Bold,'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+  font-family: 'PFD-Bold-Italic';
+  src: url('PFDinDisplayPro-BoldItal.ttf') format('truetype');
+}
+
+.font-bold-italic {
+    font-family: PFD-Bold-Italic,'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: bold;
+    font-style: italic;
+}
+
+@font-face {
+  font-family: 'PFD-Italic';
+  src: url('PFDinDisplayPro-Italic.ttf') format('truetype');
+}
+
+.font-italic {
+    font-family: PFD-Italic,'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: normal;
+    font-style: italic;
+}
+
+@font-face {
+  font-family: 'PFD-Light';
+  src: url('PFDinDisplayPro-Light.ttf') format('truetype');
+}
+
+.font-light {
+    font-family: PFD-Light,'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: lighter;
+    font-style: normal;
+}
+
+@font-face {
+  font-family: 'PFD-Light-Italic';
+  src: url('PFDinDisplayPro-LightItal.ttf') format('truetype');
+}
+
+.font-light-italic {
+    font-family: PFD-Light-Italic,'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: lighter;
+    font-style: italic;
+}
+
+@font-face {
+  font-family: 'PFD-Medium';
+  src: url('PFDinDisplayPro-Med.ttf') format('truetype');
+}
+
+.font-medium {
+    font-family: PFD-Medium,'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+  font-family: 'PFD-Medium-Italic';
+  src: url('PFDinDisplayPro-MedItal.ttf') format('truetype');
+}
+
+.font-medium-italic {
+    font-family: PFD-Medium-Italic,'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: normal;
+    font-style: italic;
+}
+
+@font-face {
+  font-family: 'PFD-Regular';
+  src: url('PFDinDisplayPro-Reg.ttf') format('truetype');
+}
+
+.font-regular {
+    font-family: PFD-Regular,'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+  font-family: 'PFD-Thin';
+  src: url('PFDinDisplayPro-Thin.ttf') format('truetype');
+}
+
+.font-thin {
+    font-family: PFD-Thin,'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: lighter;
+    font-style: normal;
+}
+
+
+@font-face {
+  font-family: 'PFD-Thin-Italic';
+  src: url('PFDinDisplayPro-ThinItal.ttf') format('truetype');
+}
+
+.font-thin-italic {
+    font-family: PFD-Thin-Italic,'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: lighter;
+    font-style: italic;
+}
+
+@font-face {
+  font-family: 'PFD-X-Thin';
+  src: url('PFDinDisplayPro-XThin.ttf') format('truetype');
+}
+
+.font-x-thin {
+    font-family: PFD-X-Thin,'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: lighter;
+    font-style: normal;
+}
+
+@font-face {
+  font-family: 'PFD-X-Thin-Light';
+  src: url('PFDinDisplayPro-XThinlt.ttf') format('truetype');
+}
+
+.font-x-thin-light {
+    font-family: PFD-X-Thin-Light,'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: lighter;
+    font-style: normal;
+}

@@ -1,0 +1,188 @@
+body {
+    color: #969696;
+    background-color: #333;
+    font-family: PFD-X-Thin,'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: normal;
+    margin: 0;
+    padding: 0;
+}
+
+.header {
+    background-color: #292929;
+    height: 80px;
+}
+
+.footer {
+    background-color: #292929;
+    height: 80px;
+}
+
+.container {
+    width: 940px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero {
+    text-align: center;
+}
+
+.hero-logo {
+    height: 200px;
+    background-image: url('../images/clouds.png');
+    margin-bottom: 40px;
+    margin-top: 60px;
+}
+
+.hero-lead {
+    font-size: 45px;
+    font-family: PFD-Regular;
+    letter-spacing: 1px;
+}
+
+.hero-sub {
+    font-size: 26px;
+    letter-spacing: 1px;
+}
+
+.hero-button > .btn {
+    background-color: white;
+    border: none;
+    height: 65px;
+    color: #333;
+    line-height: 65px;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 28px;
+    width: 295px;
+    margin-top: 34px;
+}
+
+h1, h2, h3 {
+    color: #fff;
+    padding: 0;
+    margin: 0;
+    text-transform: uppercase;
+    font-weight: normal;
+}
+
+p {
+    padding: 0;
+    margin: 0;
+}
+
+a {
+    color: inherit;
+}
+
+a:hover {
+    color: white;
+}
+
+.cloudpebble-logo {
+    float: left;
+    height: 80px;
+    width: 300px;
+    line-height: 80px;
+    font-size: 24px;
+    font-weight: normal;
+}
+
+.cloudpebble-logo-cloud {
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.cloudpebble-logo-pebble {
+    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.header-login {
+    float: right;
+    line-height: 80px;
+}
+
+.small-print {
+    float: left;
+    height: 48px;
+    margin-top: 16px;
+    line-height: 24px;
+}
+
+.pebble-logo {
+    float: right;
+    padding-top: 28px;
+}
+
+.features {
+    width: 970px;
+    height: 680px;
+    margin-top: 80px;
+}
+
+.feature {
+    background-color: #3D3D3D;
+    height: 286px;
+    width: 335px;
+    border-radius: 5px;
+    float: left;
+    margin-right: 30px;
+    margin-bottom: 30px;
+    text-align: center;
+    font-size: 24px;
+    padding-left: 60px;
+    padding-right: 60px;
+}
+
+.feature > h3 {
+    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    letter-spacing: 1px;
+    font-size: 24px;
+}
+
+.feature-icon {
+    width: 80px;
+    height: 72px;
+    margin-top: 50px;
+    margin-bottom: 35px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.feature-icon-install {
+    background-image: url('../images/browser.png');
+}
+
+.feature-icon-json {
+    background-image: url('../images/json.png');
+}
+
+.feature-icon-cloudy {
+    background-image: url('../images/cloudy.png');
+}
+
+.feature-icon-unfinished {
+    background-image: url('../images/unfinished.png');
+}
+
+.btn {
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    position: relative;
+    text-decoration: none;
+    display: inline-block;
+    background-color: #ff4700;
+    color: white;
+    text-transform: uppercase;
+    font-size: 18px;
+    text-align: center;
+    white-space: nowrap;
+    height: 40px;
+    width: 130px;
+    line-height: 40px;
+    max-width: 100%;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
