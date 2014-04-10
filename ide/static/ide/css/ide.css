@@ -245,3 +245,42 @@ span.cm-autofilled-end {
 .save-and-run > img {
     margin-top: -4px;
 }
+
+.popover.doc-popover .popover-content {
+    max-height: 400px;
+    overflow: scroll;
+    font-size: smaller;
+}
+
+.doc-popover table th,
+.doc-popover table td{
+    vertical-align: top;
+    padding-right: 10px;
+}
+
+.doc-popover table th {
+    color: #aaaaaa;
+    font-weight: normal;
+    text-align: right;
+}
+.doc-popover {
+    width: 500px;
+    max-width: 500px;
+}
+
+.popover-declaration, .popover-params .param-name {
+    font-family: Menlo, 'Deja Vu Sans Mono', monospace;
+}
+
+.doc-popover p {
+    padding: 0;
+    margin: 0;
+}
+
+.doc-popover code {
+    color: initial;
+    background: initial;
+    border: initial;
+    margin: 0;
+    padding: 0;
+}

@@ -938,8 +938,6 @@ CloudPebble.Editor.Autocomplete = (function() {
         'YEAR_UNIT'
     ];
 
-    var mDocumentation = {};
-
     var tree1 = null;
     var tree2 = null;
     var mSelectionCallback = null;
@@ -963,10 +961,6 @@ CloudPebble.Editor.Autocomplete = (function() {
         if(CloudPebble.ProjectInfo.version_def_name) {
             tree1.insert(CloudPebble.ProjectInfo.version_def_name.toLowerCase(), CloudPebble.ProjectInfo.version_def_name);
         }
-
-        $.getJSON('/static/ide/documentation.json', function(data) {
-            mDocumentation = data;
-        });
 
         is_inited = true;
     };
@@ -1047,8 +1041,9 @@ CloudPebble.Editor.Autocomplete = (function() {
     var mWaiting = null;
     var renderSummary = function(completion, element) {
         if(!mCurrentSummaryElement) return;
-        if(completion.name && mDocumentation[completion.name]) {
-            mCurrentSummaryElement.html(mDocumentation[completion.name].description.replace(/[.;](\s|[\r\n])(.|[\r\n])*/, '.'));
+        var docs = CloudPebble.Documentation.Lookup(completion.name);
+        if(docs) {
+            mCurrentSummaryElement.html(docs.description.replace(/[.;](\s)[\s\S]*/, '.'));
         } else {
             mCurrentSummaryElement.empty();
         }

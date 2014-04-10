@@ -160,6 +160,17 @@ CloudPebble.Editor = (function() {
                 code_mirror.on('shown', function() {
                     is_autocompleting = true;
                 });
+
+                $(code_mirror.getWrapperElement()).mouseup(function(event) {
+                    if(!event.altKey) return;
+                    var x = event.pageX;
+                    var y = event.pageY;
+                    var char = code_mirror.coordsChar({left: x, top:y});
+                    var token = code_mirror.getTokenAt(char).string;
+
+                    create_popover(token, x, y);
+                });
+
                 if(!is_js && USER_SETTINGS.autocomplete === 1) {
                     code_mirror.on('change', function() {
                         if(!is_autocompleting)
@@ -429,6 +440,82 @@ CloudPebble.Editor = (function() {
         code_mirror.refresh();
         code_mirror.focus();
         is_fullscreen = toggle;
+    }
+
+    function create_popover(token, pos_x, pos_y) {
+        var doc = CloudPebble.Documentation.Lookup(token);
+        if(!doc) {
+            return;
+        }
+        var popover = $('<div class="popover bottom doc-popover"><div class="arrow"></div><div class="popover-content"></div></div>');
+        popover.css({
+            top: pos_y,
+            left: pos_x - 250
+        });
+        var signature = doc.returns + ' ' + doc.name + '(';
+        if(doc.params.length === 0) {
+            signature += 'void';
+        } else {
+            var params = [];
+            _.each(doc.params, function(param) {
+                var param_text = '';
+                param_text += param.type;
+                if(!/\*$/.test(param.type)) {
+                    param_text += ' ';
+                }
+                param_text += param.name;
+                params.push(param_text);
+            });
+            signature += params.join(', ');
+        }
+        signature += ')';
+
+        var sig_element = $('<span class="popover-declaration">').text(signature);
+
+        var result = [['Declaration', sig_element]];
+
+        if(doc.description) {
+            result.push(['Description', $('<div>').html(doc.description)]);
+        }
+
+        if(doc.return_desc) {
+            result.push(['Returns', doc.return_desc]);
+        }
+
+        if(doc.params.length > 0) {
+            var table = $('<table class="popover-params">');
+            _.each(doc.params, function(param) {
+                if(!param.description) return;
+                var tr = $('<tr>');
+                tr.append($('<td class="param-name">').html(param.name));
+                tr.append($('<td class="param-desc">').html(param.description));
+                table.append(tr);
+            });
+            if(table.find('tr').length)
+                result.push(['Parameters', table]);
+        }
+
+        if(doc.warning) {
+            result.push(['Note', $('<strong>').html(doc.warning)]);
+        }
+
+        var final_table = $('<table>');
+        _.each(result, function(row) {
+            var tr = $('<tr>');
+            tr.append($('<th>').text(row[0]));
+            tr.append($('<td>').append(row[1]));
+            final_table.append(tr);
+        });
+
+        popover.find('.popover-content').append(final_table);
+        popover.appendTo('body').show();
+        setTimeout(function() {
+            $('body').one('mouseup', function() {
+                if(!popover) return;
+                popover.remove();
+                popover = null;
+            });
+        }, 1);
     }
 
     return {
