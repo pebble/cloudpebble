@@ -250,12 +250,14 @@ span.cm-autofilled-end {
     max-height: 400px;
     overflow: scroll;
     font-size: smaller;
+    padding-bottom: 0;
 }
 
 .doc-popover table th,
 .doc-popover table td{
     vertical-align: top;
     padding-right: 10px;
+    padding-bottom: 5px;
 }
 
 .doc-popover table th {
@@ -266,6 +268,7 @@ span.cm-autofilled-end {
 .doc-popover {
     width: 500px;
     max-width: 500px;
+    line-height: 16px;
 }
 
 .popover-declaration, .popover-params .param-name {
@@ -283,4 +286,8 @@ span.cm-autofilled-end {
     border: initial;
     margin: 0;
     padding: 0;
+}
+
+.doc-popover tr {
+    margin-bottom: 5px;
 }
