@@ -508,7 +508,22 @@ CloudPebble.Editor = (function() {
         });
 
         popover.find('.popover-content').append(final_table);
-        popover.appendTo('body').show();
+
+        popover.appendTo('body');
+
+        if(pos_y + popover.height() > $(window).height()) {
+            popover.css({top: pos_y - popover.height()});
+            popover.addClass('top').removeClass('bottom');
+        }
+
+        if(pos_x + 250 > $(window).width()) {
+            var overshoot = pos_x + 250 - $(window).width() + 5;
+            popover.css({left: pos_x - 250 - overshoot});
+            popover.find('.arrow').css({'margin-left': overshoot - 10});
+        }
+
+        popover.show();
+
         setTimeout(function() {
             $('body').one('mouseup', function() {
                 if(!popover) return;
