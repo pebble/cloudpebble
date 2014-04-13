@@ -14,7 +14,8 @@ from ide.models.project import Project
 from ide.tasks import do_import_archive, run_compile
 from ide.utils.git import git_sha, git_blob
 from ide.utils.project import find_project_root
-from ide.utils.sdk import generate_resource_dict, generate_v2_manifest_dict, dict_to_pretty_json, generate_v2_manifest
+from ide.utils.sdk import generate_resource_dict, generate_v2_manifest_dict, dict_to_pretty_json, generate_v2_manifest,\
+    generate_wscript_file
 from utils.keen_helper import send_keen_event
 
 __author__ = 'katharine'
@@ -155,6 +156,7 @@ def github_push(user, commit_message, repo_name, project):
     # Both of these are used regardless of version
     remote_map_path = root + 'resources/src/resource_map.json'
     remote_manifest_path = root + 'appinfo.json'
+    remote_wscript_path = root + 'wscript'
 
     if remote_version == '1':
         remote_map_sha = next_tree[remote_map_path]._InputGitTreeElement__sha if remote_map_path in next_tree else None
@@ -211,6 +213,14 @@ def github_push(user, commit_message, repo_name, project):
         # Delete the v1 manifest, if one exists
         if remote_map_path in next_tree:
             del next_tree[remote_map_path]
+
+    if project.sdk_version == '2':
+        if remote_wscript_path not in next_tree:
+            next_tree[remote_wscript_path] = InputGitTreeElement(path=remote_wscript_path, mode='100644', type='blob',
+                                                                 content=generate_wscript_file(project, True))
+            has_changed = True
+    else:
+        del next_tree[remote_wscript_path]
 
     # Commit the new tree.
     if has_changed:
