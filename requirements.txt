@@ -13,3 +13,4 @@ pygithub==1.14.2
 python-social-auth
 keen
 redis
+dj-static
