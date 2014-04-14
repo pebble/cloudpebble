@@ -14,3 +14,4 @@ python-social-auth
 keen
 redis
 dj-static
+gunicorn
