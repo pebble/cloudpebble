@@ -2,7 +2,7 @@ CloudPebble.Documentation = new (function() {
     var mDocumentation = {};
 
     this.Init = function() {
-        $.getJSON('/static/ide/documentation.json', function(data) {
+        $.getJSON(DOC_JSON, function(data) {
             mDocumentation = data;
         });
     };
