@@ -1,29 +1,36 @@
 # Django settings for cloudpebble project.
 
 import os
+import dj_database_url
+_environ = os.environ
 
-DEBUG = True
+DEBUG = _environ.get('DEBUG', '') != ''
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
     ('Administrator', 'example@example.com'),
 )
 
-DEFAULT_FROM_EMAIL = 'CloudPebble <cloudpebble@example.com>'
+DEFAULT_FROM_EMAIL = _environ.get('FROM_EMAIL', 'CloudPebble <cloudpebble@example.com>')
 
 MANAGERS = ADMINS
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': os.getcwd() + '/dev.db',                      # Or path to database file if using sqlite3.
-        # The following settings are not used with sqlite3:
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',                      # Set to empty string for default.
+if 'DATABASE_URL' not in _environ:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+            'NAME': os.getcwd() + '/dev.db',                      # Or path to database file if using sqlite3.
+            # The following settings are not used with sqlite3:
+            'USER': '',
+            'PASSWORD': '',
+            'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+            'PORT': '',                      # Set to empty string for default.
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': dj_database_url.config()
+    }
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__)) + '/../'
 
@@ -76,7 +83,7 @@ SIMPLYJS_ROOT = os.getcwd() + '/ext/simplyjs/'
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://example.com/media/", "http://media.example.com/"
-MEDIA_URL = 'http://localhost:8001/builds/'
+MEDIA_URL = _environ.get('MEDIA_URL', 'http://localhost:8001/builds/')
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
@@ -104,7 +111,7 @@ STATICFILES_FINDERS = (
 )
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'y_!-!-i!_txo$v5j(@c7m4uk^jyg)l4bf*0yqrztmax)l2027j'
+SECRET_KEY = _environ.get('SECRET_KEY', 'y_!-!-i!_txo$v5j(@c7m4uk^jyg)l4bf*0yqrztmax)l2027j')
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -141,12 +148,13 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.user.user_details'
 )
 
-SOCIAL_AUTH_PEBBLE_KEY = 'bab3e760ede6e592517682837a054beff83c8a80725d8e13fa122e8e87e99c20'
-SOCIAL_AUTH_PEBBLE_SECRET = '7bf8b96fd736f3a2ac12d472b0703d44503441913626deed86180c0f47dcbb08'
+SOCIAL_AUTH_PEBBLE_KEY = _environ.get('PEBBLE_AUTH_KEY', 'bab3e760ede6e592517682837a054beff83c8a80725d8e13fa122e8e87e99c20')
+SOCIAL_AUTH_PEBBLE_SECRET = _environ.get('PEBBLE_AUTH_SECRET', '7bf8b96fd736f3a2ac12d472b0703d44503441913626deed86180c0f47dcbb08')
 
-SOCIAL_AUTH_PEBBLE_ROOT_URL = 'http://10.0.0.201:3000/'
+SOCIAL_AUTH_PEBBLE_ROOT_URL = _environ.get('PEBBLE_AUTH_URL', 'http://10.0.0.201:3000/')
+PEBBLE_AUTH_ADMIN_TOKEN = _environ.get('PEBBLE_AUTH_ADMIN_TOKEN', None)
 
-SOCIAL_AUTH_PEBBLE_REQUIRED = False
+SOCIAL_AUTH_PEBBLE_REQUIRED = 'PEBBLE_AUTH_REQUIRED' in _environ
 
 ROOT_URLCONF = 'cloudpebble.urls'
 
@@ -209,7 +217,7 @@ LOGGING = {
     }
 }
 
-BROKER_URL = 'amqp://guest:guest@localhost:5672/'
+BROKER_URL = _environ.get('CLOUDAMQP_URL', 'amqp://guest:guest@localhost:5672/')
 
 LOGIN_REDIRECT_URL = '/ide/'
 
@@ -225,22 +233,21 @@ DEFAULT_TEMPLATE = None
 
 EXPORT_DIRECTORY = os.getcwd() + '/user_data/export/'
 
-EXPORT_ROOT = 'http://localhost:8001/export/'
+EXPORT_ROOT = _environ.get('EXPORT_ROOT', 'http://localhost:8001/export/')
 
-GITHUB_CLIENT_ID = '15c3418f8f5c0f956ed8'
-GITHUB_CLIENT_SECRET = '06e9f765f00016a79a38599fbd858990b23b8afe'
+GITHUB_CLIENT_ID = _environ.get('GITHUB_ID', '15c3418f8f5c0f956ed8')
+GITHUB_CLIENT_SECRET = _environ.get('GITHUB_SECRET', '06e9f765f00016a79a38599fbd858990b23b8afe')
 
-GITHUB_HOOK_TEMPLATE = 'http://example.com/ide/project/%(project)d/github/push_hook?key=%(key)s'
+GITHUB_HOOK_TEMPLATE = _environ.get('GITHUB_HOOK', 'http://example.com/ide/project/%(project)d/github/push_hook?key=%(key)s')
 
 SDK1_ROOT = '/home/vagrant/sdk1/Pebble/sdk'
 
-ARM_CS_TOOLS = '/home/vagrant/arm-cs-tools/bin/'
+ARM_CS_TOOLS = _environ.get('ARM_CS_TOOLS', '/home/vagrant/arm-cs-tools/bin/')
 
-KEEN_PROJECT_ID = None
-KEEN_WRITE_KEY = None
-KEEN_ENABLED = False
+KEEN_PROJECT_ID = _environ.get('KEEN_PROJECT_ID', None)
+KEEN_WRITE_KEY = _environ.get('KEEN_WRITE_KEY', None)
+KEEN_ENABLED = 'ENABLE_KEEN' in _environ
 
-PEBBLE_AUTH_ADMIN_TOKEN = None
 
 import djcelery
 djcelery.setup_loader()
