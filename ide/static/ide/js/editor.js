@@ -520,7 +520,7 @@ CloudPebble.Editor = (function() {
 
         popover.appendTo('body');
 
-        if(pos_y + popover.height() > $(window).height()) {
+        if(pos_y + popover.height() + 20 > $(window).height()) {
             popover.css({top: pos_y - popover.height() - 10});
             popover.addClass('top').removeClass('bottom');
         } else {
@@ -533,7 +533,7 @@ CloudPebble.Editor = (function() {
             popover.find('.arrow').css({'margin-left': overshoot - 10});
         }
 
-        popover.show();
+        popover.show().focus();
 
         setTimeout(function() {
             var remove = function() {
@@ -541,6 +541,7 @@ CloudPebble.Editor = (function() {
                 if(!popover) return;
                 popover.remove();
                 popover = null;
+                cm.focus();
             }
             var handler = function(e) {
                 if(e.keyCode == 27) { // esc
