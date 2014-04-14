@@ -121,7 +121,7 @@ def run_compile(build_result):
             else:
                 os.chdir(base_dir)
                 print "Running SDK2 build"
-                output = subprocess.check_output(["pebble", "build"], stderr=subprocess.STDOUT)
+                output = subprocess.check_output([settings.PEBBLE_TOOL, "build"], stderr=subprocess.STDOUT)
                 print "output", output
         except subprocess.CalledProcessError as e:
             output = e.output
