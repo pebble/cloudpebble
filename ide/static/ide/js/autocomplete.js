@@ -860,16 +860,16 @@ CloudPebble.Editor.Autocomplete = (function() {
         'DICT_NOT_ENOUGH_STORAGE',
         'DICT_OK',
         'E_BUSY',
-        'E_DOES_NOT_EXIST,',
-        'E_ERROR,',
-        'E_INTERNAL,',
-        'E_INVALID_ARGUMENT,',
-        'E_INVALID_OPERATION,',
-        'E_OUT_OF_MEMORY,',
-        'E_OUT_OF_RESOURCES,',
-        'E_OUT_OF_STORAGE,',
-        'E_RANGE,',
-        'E_UNKNOWN,',
+        'E_DOES_NOT_EXIST',
+        'E_ERROR',
+        'E_INTERNAL',
+        'E_INVALID_ARGUMENT',
+        'E_INVALID_OPERATION',
+        'E_OUT_OF_MEMORY',
+        'E_OUT_OF_RESOURCES',
+        'E_OUT_OF_STORAGE',
+        'E_RANGE',
+        'E_UNKNOWN',
         'GAlignBottom',
         'GAlignBottomLeft',
         'GAlignBottomRight',
@@ -924,11 +924,11 @@ CloudPebble.Editor.Autocomplete = (function() {
         'SECOND_UNIT',
         'SNIFF_INTERVAL_NORMAL',
         'SNIFF_INTERVAL_REDUCED',
-        'S_FALSE,',
+        'S_FALSE',
         'S_NO_ACTION_REQUIRED',
-        'S_NO_MORE_ITEMS,',
-        'S_SUCCESS,',
-        'S_TRUE,',
+        'S_NO_MORE_ITEMS',
+        'S_SUCCESS',
+        'S_TRUE',
         'TRIG_MAX_ANGLE',
         'TRIG_MAX_RATIO',
         'TUPLE_BYTE_ARRAY',
@@ -1041,7 +1041,7 @@ CloudPebble.Editor.Autocomplete = (function() {
     var mWaiting = null;
     var renderSummary = function(completion, element) {
         if(!mCurrentSummaryElement) return;
-        var docs = CloudPebble.Documentation.Lookup(completion.name);
+        var docs = CloudPebble.Documentation.Lookup(completion.name || completion.text);
         if(docs) {
             mCurrentSummaryElement.html(docs.description.replace(/[.;](\s)[\s\S]*/, '.'));
         } else {

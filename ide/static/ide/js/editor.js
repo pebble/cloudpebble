@@ -461,23 +461,31 @@ CloudPebble.Editor = (function() {
             top: pos_y,
             left: pos_x - 250
         });
-        var signature = doc.returns + ' ' + doc.name + '(';
-        if(doc.params.length === 0) {
-            signature += 'void';
-        } else {
-            var params = [];
-            _.each(doc.params, function(param) {
-                var param_text = '';
-                param_text += param.type;
-                if(!/\*$/.test(param.type)) {
-                    param_text += ' ';
-                }
-                param_text += param.name;
-                params.push(param_text);
-            });
-            signature += params.join(', ');
+
+        var signature = '';
+        if(doc.kind == 'typedef') {
+            signature += 'typedef ';
         }
-        signature += ')';
+        signature += doc.returns + ' ' + doc.name;
+        if(doc.kind == 'fn' || (doc.kind == 'enum' && /\(/.test(doc.type))) {
+            signature += '(';
+            if(doc.params.length === 0) {
+                signature += 'void';
+            } else {
+                var params = [];
+                _.each(doc.params, function(param) {
+                    var param_text = '';
+                    param_text += param.type;
+                    if(!/\*$/.test(param.type)) {
+                        param_text += ' ';
+                    }
+                    param_text += param.name;
+                    params.push(param_text);
+                });
+                signature += params.join(', ');
+            }
+            signature += ')';
+        }
 
         var sig_element = $('<span class="popover-declaration">').text(signature);
 
