@@ -126,7 +126,9 @@ span.cm-autofilled-end {
 
 /* Fix truncated autocomplete introduced when moving to hosted CSS. */
 .CodeMirror-hint {
-    max-width: initial;
+    max-width: 80em;
+    min-width: 30em;
+    text-overflow: ellipsis;
 }
 
 .gutter-hint-warnings {
@@ -242,4 +244,50 @@ span.cm-autofilled-end {
 
 .save-and-run > img {
     margin-top: -4px;
+}
+
+.popover.doc-popover .popover-content {
+    max-height: 400px;
+    overflow: scroll;
+    font-size: smaller;
+    padding-bottom: 0;
+}
+
+.doc-popover table th,
+.doc-popover table td{
+    vertical-align: top;
+    padding-right: 10px;
+    padding-bottom: 5px;
+}
+
+.doc-popover table th {
+    color: #aaaaaa;
+    font-weight: normal;
+    text-align: right;
+}
+.doc-popover {
+    width: 500px;
+    max-width: 500px;
+    line-height: 16px;
+}
+
+.popover-declaration, .popover-params .param-name {
+    font-family: Menlo, 'Deja Vu Sans Mono', monospace;
+}
+
+.doc-popover p {
+    padding: 0;
+    margin: 0;
+}
+
+.doc-popover code {
+    color: initial;
+    background: initial;
+    border: initial;
+    margin: 0;
+    padding: 0;
+}
+
+.doc-popover tr {
+    margin-bottom: 5px;
 }

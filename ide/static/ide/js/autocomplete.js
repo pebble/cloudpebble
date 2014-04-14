@@ -860,16 +860,16 @@ CloudPebble.Editor.Autocomplete = (function() {
         'DICT_NOT_ENOUGH_STORAGE',
         'DICT_OK',
         'E_BUSY',
-        'E_DOES_NOT_EXIST,',
-        'E_ERROR,',
-        'E_INTERNAL,',
-        'E_INVALID_ARGUMENT,',
-        'E_INVALID_OPERATION,',
-        'E_OUT_OF_MEMORY,',
-        'E_OUT_OF_RESOURCES,',
-        'E_OUT_OF_STORAGE,',
-        'E_RANGE,',
-        'E_UNKNOWN,',
+        'E_DOES_NOT_EXIST',
+        'E_ERROR',
+        'E_INTERNAL',
+        'E_INVALID_ARGUMENT',
+        'E_INVALID_OPERATION',
+        'E_OUT_OF_MEMORY',
+        'E_OUT_OF_RESOURCES',
+        'E_OUT_OF_STORAGE',
+        'E_RANGE',
+        'E_UNKNOWN',
         'GAlignBottom',
         'GAlignBottomLeft',
         'GAlignBottomRight',
@@ -924,11 +924,11 @@ CloudPebble.Editor.Autocomplete = (function() {
         'SECOND_UNIT',
         'SNIFF_INTERVAL_NORMAL',
         'SNIFF_INTERVAL_REDUCED',
-        'S_FALSE,',
+        'S_FALSE',
         'S_NO_ACTION_REQUIRED',
-        'S_NO_MORE_ITEMS,',
-        'S_SUCCESS,',
-        'S_TRUE,',
+        'S_NO_MORE_ITEMS',
+        'S_SUCCESS',
+        'S_TRUE',
         'TRIG_MAX_ANGLE',
         'TRIG_MAX_RATIO',
         'TUPLE_BYTE_ARRAY',
@@ -961,6 +961,7 @@ CloudPebble.Editor.Autocomplete = (function() {
         if(CloudPebble.ProjectInfo.version_def_name) {
             tree1.insert(CloudPebble.ProjectInfo.version_def_name.toLowerCase(), CloudPebble.ProjectInfo.version_def_name);
         }
+
         is_inited = true;
     };
 
@@ -1036,6 +1037,54 @@ CloudPebble.Editor.Autocomplete = (function() {
         elt.appendChild(elem[0]);
     };
 
+    var mCurrentSummaryElement = null;
+    var mWaiting = null;
+    var renderSummary = function(completion, element) {
+        if(!mCurrentSummaryElement) return;
+        var docs = CloudPebble.Documentation.Lookup(completion.name || completion.text);
+        if(docs) {
+            mCurrentSummaryElement.html(docs.description.replace(/[.;](\s)[\s\S]*/, '.'));
+        } else {
+            mCurrentSummaryElement.empty();
+        }
+    };
+    var showSummary = function(hints) {
+        if(mCurrentSummaryElement) {
+            mCurrentSummaryElement.remove();
+        }
+        var summary = $('<div>');
+        summary.css({
+            position: 'absolute',
+            top: $(hints).offset().top + $(hints).outerHeight() - 5,
+            left: $(hints).offset().left,
+            width: $(hints).innerWidth() - 4,
+            height: 20,
+            zIndex: 10002,
+            backgroundColor: 'white',
+            borderBottomLeftRadius: 3,
+            borderBottomRightRadius: 3,
+            boxShadow: '2px 3px 5px rgba(0,0,0,.2)',
+            border: '1px solid silver',
+//            borderTop: 'none',
+            textOverflow: 'ellipsis',
+            textWrap: 'none',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            padding: 2,
+            display: 'none'
+        });
+        summary.text("This is a description.");
+        summary.appendTo('body');
+        mCurrentSummaryElement = summary;
+        clearTimeout(mWaiting);
+        mWaiting = setTimeout(function() { summary.show(); }, 170);
+    };
+    var hideSummary = function() {
+        mCurrentSummaryElement.remove();
+        $('.CodeMirror-hints').find("li:last").remove();
+        mCurrentSummaryElement = null;
+    };
+
     var getCompletions = function(token) {
         var results = (CloudPebble.ProjectInfo.sdk_version == '1' ? tree1 : tree2).search(token.string.toLowerCase(), 15);
         if(results.length == 1 && results[0] == token.string) {
@@ -1068,11 +1117,15 @@ CloudPebble.Editor.Autocomplete = (function() {
             if(token.string !== '') {
                 completions = getCompletions(token);
             }
-            return {
+            var result = {
                 list: completions,
                 from: Pos(editor.getCursor().line, token.start),
                 to: Pos(editor.getCursor().line, token.end)
             };
+            CodeMirror.on(result, 'shown', showSummary);
+            CodeMirror.on(result, 'select', renderSummary);
+            CodeMirror.on(result, 'close', hideSummary);
+            return result;
         },
         Init: function() {
             init();
