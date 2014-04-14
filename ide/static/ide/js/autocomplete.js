@@ -1054,25 +1054,11 @@ CloudPebble.Editor.Autocomplete = (function() {
         }
         var summary = $('<div>');
         summary.css({
-            position: 'absolute',
             top: $(hints).offset().top + $(hints).outerHeight() - 5,
             left: $(hints).offset().left,
             width: $(hints).innerWidth() - 4,
-            height: 20,
-            zIndex: 10002,
-            backgroundColor: 'white',
-            borderBottomLeftRadius: 3,
-            borderBottomRightRadius: 3,
-            boxShadow: '2px 3px 5px rgba(0,0,0,.2)',
-            border: '1px solid silver',
-//            borderTop: 'none',
-            textOverflow: 'ellipsis',
-            textWrap: 'none',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            padding: 2,
             display: 'none'
-        });
+        }).addClass('autocomplete-summary');
         summary.text("This is a description.");
         summary.appendTo('body');
         mCurrentSummaryElement = summary;

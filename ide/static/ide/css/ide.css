@@ -291,3 +291,23 @@ span.cm-autofilled-end {
 .doc-popover tr {
     margin-bottom: 5px;
 }
+
+.autocomplete-summary {
+    position: absolute;
+    height: 20px;
+    z-index: 10002;
+    background-color: white;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    box-shadow: 2px 3px 5px rgba(0,0,0,0.2);
+    border: 1px solid silver;
+    padding: 2px;
+}
+
+.autocomplete-summary,
+.autocomplete-summary > p {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-wrap: none;
+    overflow: hidden;
+}
