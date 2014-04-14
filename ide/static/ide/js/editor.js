@@ -168,8 +168,17 @@ CloudPebble.Editor = (function() {
                     var char = code_mirror.coordsChar({left: x, top:y});
                     var token = code_mirror.getTokenAt(char).string;
 
-                    create_popover(token, x, y);
+                    create_popover(code_mirror, token, x, y);
                 });
+
+                var help_shortcut = /Mac/.test(navigator.platform) ? 'Shift-Cmd-Ctrl-/' : 'Shift-Ctrl-Alt-/';
+
+                settings.extraKeys[help_shortcut] = function(cm) {
+                    var pos = cm.cursorCoords();
+                    var token = code_mirror.getTokenAt(cm.getCursor());
+
+                    create_popover(cm, token.string, pos.left, pos.top);
+                }
 
                 if(!is_js && USER_SETTINGS.autocomplete === 1) {
                     code_mirror.on('change', function() {
@@ -442,7 +451,7 @@ CloudPebble.Editor = (function() {
         is_fullscreen = toggle;
     }
 
-    function create_popover(token, pos_x, pos_y) {
+    function create_popover(cm, token, pos_x, pos_y) {
         var doc = CloudPebble.Documentation.Lookup(token);
         if(!doc) {
             return;
@@ -512,8 +521,10 @@ CloudPebble.Editor = (function() {
         popover.appendTo('body');
 
         if(pos_y + popover.height() > $(window).height()) {
-            popover.css({top: pos_y - popover.height()});
+            popover.css({top: pos_y - popover.height() - 10});
             popover.addClass('top').removeClass('bottom');
+        } else {
+            popover.css({top: pos_y + 10});
         }
 
         if(pos_x + 250 > $(window).width()) {
@@ -525,11 +536,20 @@ CloudPebble.Editor = (function() {
         popover.show();
 
         setTimeout(function() {
-            $('body').one('mouseup', function() {
+            var remove = function() {
+                $('body').off('keyup', handler);
                 if(!popover) return;
                 popover.remove();
                 popover = null;
-            });
+            }
+            var handler = function(e) {
+                if(e.keyCode == 27) { // esc
+                    remove();
+                }
+            };
+
+            $('body').one('mouseup', remove);
+            $('body').on('keydown', handler);
         }, 1);
     }
 
