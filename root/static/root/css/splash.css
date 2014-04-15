@@ -57,6 +57,10 @@ body {
     margin-top: 34px;
 }
 
+.hero-button > .btn:hover {
+    color: black;
+}
+
 h1, h2, h3 {
     color: #fff;
     padding: 0;
@@ -235,6 +239,27 @@ h3 {
     background-color: white;
     color: #ff4700;
     font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    transition: all 300ms ease;
+}
+
+.btn.btn-primary:hover {
+    background-color: #db3d00;
+    color: #ededed;
+}
+
+.btn:hover {
+    color: #db3d00;
+    background-color: #ededed;
+}
+
+.btn.btn-cancel:hover {
+    background-color: #333;
+    color: #aaaaaa;
+}
+
+a.btn {
+    padding-top: 3px;
+    height: 37px;
 }
 
 .btn.btn-primary {
