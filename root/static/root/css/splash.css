@@ -113,26 +113,57 @@ a:hover {
 }
 
 .features {
-    width: 970px;
     height: 680px;
     margin-top: 80px;
 }
 
-.feature {
+.login {
+    padding-top: 30px;
+    height: 380px;
+    background-color: #262626;
+}
+
+.login p {
+    line-height: 30px;
+}
+
+.login .box {
+    height: 300px;
+}
+
+.login .btn {
+    width: 355px;
+    margin-top: 20px;
+}
+
+.login h3 {
+    margin-left: 40px;
+    margin-right: 40px;
+}
+
+.box-holder {
+    width: 970px;
+}
+
+.box {
     background-color: #3D3D3D;
-    height: 286px;
-    width: 335px;
+    width: 395px;
     border-radius: 5px;
     float: left;
     margin-right: 30px;
     margin-bottom: 30px;
     text-align: center;
     font-size: 24px;
-    padding-left: 60px;
-    padding-right: 60px;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-top: 40px;
 }
 
-.feature > h3 {
+.feature {
+    height: 246px;
+}
+
+h3 {
     font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     letter-spacing: 1px;
     font-size: 24px;
@@ -141,7 +172,7 @@ a:hover {
 .feature-icon {
     width: 80px;
     height: 72px;
-    margin-top: 50px;
+    margin-top: 10px;
     margin-bottom: 35px;
     margin-left: auto;
     margin-right: auto;
@@ -170,8 +201,6 @@ a:hover {
     position: relative;
     text-decoration: none;
     display: inline-block;
-    background-color: #ff4700;
-    color: white;
     text-transform: uppercase;
     font-size: 18px;
     text-align: center;
@@ -183,6 +212,26 @@ a:hover {
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
     border-radius: 5px;
+    background-color: white;
+    color: #ff4700;
     font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
+.btn.btn-primary {
+    color: white;
+    background-color: #ff4700;
+}
+
+.btn.btn-cancel {
+    color: white;
+    background-color: #3f3f3f
+}
+
+.login p {
+    font-size: 19px;
+    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.blur {
+    -webkit-filter: blur(5px) brightness(40%);
+}
