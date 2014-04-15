@@ -118,9 +118,29 @@ a:hover {
 }
 
 .login {
+    /*padding-top: 30px;*/
+    /*height: 380px;*/
+    height: 0;
+    overflow: hidden;
+    background-color: #262626;
+    transition: height 1s, padding-top 1s;
+}
+
+.show-login .login {
     padding-top: 30px;
     height: 380px;
-    background-color: #262626;
+}
+
+.header-login .btn-cancel {
+    display: none;
+}
+
+.show-login .header-login .btn-cancel {
+    display: inline;
+}
+
+.show-login .header-login .btn-primary {
+    display: none;
 }
 
 .login p {

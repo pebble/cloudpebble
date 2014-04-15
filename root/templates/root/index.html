@@ -14,12 +14,12 @@
                         <span class="cloudpebble-logo-cloud">Cloud</span><span class="cloudpebble-logo-pebble">Pebble</span>
                     </h1>
                     <div class="header-login">
-                        <button class="btn btn-primary">Sign in</button>
-                        <button class="btn btn-cancel" style="display: none;">Close</button>
+                        <button class="btn btn-primary btn-show-login">Sign in</button>
+                        <button class="btn btn-cancel btn-hide-login">Close</button>
                     </div>
                 </div>
             </div>
-            <div class="login" style="display: none;">
+            <div class="login">
                 <div class="container">
                     <div class="box-holder">
                         <div class="box">
@@ -49,7 +49,7 @@
                         </div>
                         <h2 class="hero-lead">Online Pebble Development</h2>
                         <p class="hero-sub">Write apps without dealing with Linux, virtual machines, compilers, or Python.</p>
-                        <p class="hero-button"><button class="btn">Get Started</button></p>
+                        <p class="hero-button"><button class="btn btn-show-login">Get Started</button></p>
                     </div>
                     <div class="features box-holder">
                         <div class="feature box">
@@ -88,5 +88,7 @@
                 </div>
             </div>
         </div>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+        <script src="{% static 'root/js/splash.js' %}"></script>
     </body>
 </html>
