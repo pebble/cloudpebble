@@ -249,6 +249,15 @@ KEEN_PROJECT_ID = _environ.get('KEEN_PROJECT_ID', None)
 KEEN_WRITE_KEY = _environ.get('KEEN_WRITE_KEY', None)
 KEEN_ENABLED = 'ENABLE_KEEN' in _environ
 
+AWS_ENABLED = 'AWS_ENABLED' in _environ
+AWS_ACCESS_KEY_ID = _environ.get('AWS_ACCESS_KEY_ID', None)
+AWS_SECRET_ACCESS_KEY = _environ.get('AWS_SECRET_ACCESS_KEY', None)
+
+AWS_S3_SOURCE_BUCKET = _environ.get('AWS_S3_SOURCE_BUCKET', None)
+AWS_S3_BUILDS_BUCKET = _environ.get('AWS_S3_BUILDS_BUCKET', None)
+AWS_S3_EXPORT_BUCKET = _environ.get('AWS_S3_EXPORT_BUCKET', None)
+
+REDIS_URL = _environ.get('REDISTOGO_URL', 'redis://localhost:6379/')
 
 import djcelery
 djcelery.setup_loader()
@@ -259,3 +268,7 @@ try:
 except ImportError:
     print "No local settings overrides."
     pass
+
+# Don't keep these hanging around in the environment.
+for key in _environ.keys():
+    del _environ[key]

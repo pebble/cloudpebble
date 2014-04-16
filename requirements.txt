@@ -11,11 +11,14 @@ pygithub==1.14.2
 python-social-auth
 keen
 redis
+boto
+
+# These are used for Heroku hosting setup.
 dj-static
 gunicorn
 dj-database-url
+# This is required to set up the SDK.
 virtualenv
-
 # These are in the SDK requirements.txt and included here to save on Heroku deploy time.
 freetype-py==1.0
 sh==1.08
