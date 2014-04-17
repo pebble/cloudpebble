@@ -253,16 +253,12 @@ def begin_export(request, project_id):
 @require_POST
 def import_zip(request):
     zip_file = request.FILES['archive']
-    fd, tempzip = tempfile.mkstemp(suffix='.zip')
-    f = os.fdopen(fd, 'w')
-    for chunk in zip_file.chunks():
-        f.write(chunk)
     name = request.POST['name']
     try:
         project = Project.objects.create(owner=request.user, name=name)
     except IntegrityError as e:
         return json_failure(str(e))
-    task = do_import_archive.delay(project.id, tempzip, delete_zip=True, delete_project=True)
+    task = do_import_archive.delay(project.id, zip_file.read(), delete_project=True)
 
     return json_response({'task_id': task.task_id, 'project_id': project.id})
 
