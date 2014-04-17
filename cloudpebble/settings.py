@@ -271,4 +271,7 @@ except ImportError:
 
 # Don't keep these hanging around in the environment.
 for key in _environ.keys():
+    # We need these ones to run.
+    if key in {'PATH', 'TZ', 'RUN_MAIN', 'CELERY_LOADER', 'DJANGO_SETTINGS_MODULE'}:
+        continue
     del _environ[key]
