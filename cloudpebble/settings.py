@@ -13,6 +13,8 @@ ADMINS = (
 
 DEFAULT_FROM_EMAIL = _environ.get('FROM_EMAIL', 'CloudPebble <cloudpebble@example.com>')
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 MANAGERS = ADMINS
 
 if 'DATABASE_URL' not in _environ:
