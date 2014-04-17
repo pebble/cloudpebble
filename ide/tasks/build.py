@@ -18,6 +18,7 @@ from utils.keen_helper import send_keen_event
 
 from ide.models.build import BuildResult
 from ide.models.files import SourceFile, ResourceFile
+from ide.utils.prepreprocessor import process_file as check_preprocessor_directives
 
 __author__ = 'katharine'
 
@@ -54,6 +55,9 @@ def run_compile(build_result):
                     print "Creating directory %s." % abs_target_dir
                     os.makedirs(abs_target_dir)
                 f.copy_to_path(abs_target)
+                # Make sure we don't duplicate downloading effort; just open the one we created.
+                with open(abs_target) as f:
+                    check_preprocessor_directives(f.read())
 
             # Resources
             resource_root = 'resources'
