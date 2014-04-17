@@ -134,7 +134,7 @@ def build_log(request, project_id, build_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     build = get_object_or_404(BuildResult, project=project, pk=build_id)
     try:
-        log = open(build.build_log, 'r').read().decode('utf-8')
+        log = build.read_build_log()
     except Exception as e:
         return json_failure(str(e))
 

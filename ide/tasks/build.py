@@ -12,7 +12,6 @@ from django.conf import settings
 from django.utils.timezone import now
 
 import apptools.addr2lines
-from ide.utils import link_or_copy
 from ide.utils.sdk import generate_wscript_file, generate_jshint_file, generate_v2_manifest_dict, \
     generate_simplyjs_manifest_dict
 from utils.keen_helper import send_keen_event
@@ -41,11 +40,6 @@ def run_compile(build_result):
     print "Compiling in %s" % base_dir
 
     try:
-        os.makedirs(build_result.get_dir())
-    except OSError:
-        pass
-
-    try:
         if project.project_type == 'native':
             # Create symbolic links to the original files
             # Source code
@@ -59,11 +53,7 @@ def run_compile(build_result):
                 if not os.path.exists(abs_target_dir):
                     print "Creating directory %s." % abs_target_dir
                     os.makedirs(abs_target_dir)
-                try:
-                    link_or_copy(os.path.abspath(f.local_filename), abs_target)
-                except OSError as err:
-                    if err.errno == 2:
-                        open(abs_target, 'w').close()  # create the file if it's missing.
+                f.copy_to_path(abs_target)
 
             # Resources
             resource_root = 'resources'
@@ -80,8 +70,8 @@ def run_compile(build_result):
                 abs_target = os.path.abspath(os.path.join(target_dir, f.file_name))
                 if not abs_target.startswith(target_dir):
                     raise Exception("Suspicious filename: %s" % f.file_name)
-                print "Added %s %s" % (f.kind, f.local_filename)
-                link_or_copy(os.path.abspath(f.local_filename), abs_target)
+                print "Added %s %s" % (f.kind, f.s3_path)
+                f.copy_to_path(abs_target)
 
             # Reconstitute the SDK
             print "Inserting wscript"
@@ -93,11 +83,8 @@ def run_compile(build_result):
             shutil.copytree(settings.SIMPLYJS_ROOT, base_dir)
             manifest_dict = generate_simplyjs_manifest_dict(project)
 
-            js_path = os.path.join(build_result.get_dir(), 'simply.js')
-            js_url = '{0}simply.js'.format(build_result.get_url())
-
             # We should have exactly one source file, so just dump that in.
-            open(js_path, 'w').write(source_files[0].get_contents())
+            build_result.save_simplyjs(source_files[0].get_contents())
 
             open(os.path.join(base_dir, 'appinfo.json'), 'w').write(json.dumps(manifest_dict))
             open(os.path.join(base_dir, 'src', 'js', 'zzz_fixurl.js'), 'w').write("""
@@ -106,7 +93,7 @@ def run_compile(build_result):
                         simply.loadMainScript('%(url)s');
                     }
                 });
-            """ % {'url': js_url})
+            """ % {'url': build_result.simplyjs_url})
 
         # Build the thing
         print "Beginning compile"
@@ -155,9 +142,9 @@ def run_compile(build_result):
                         print "Generating debug info failed."
                         print traceback.format_exc()
                     else:
-                        json.dump(debug_info, open(build_result.debug_info, 'w'))
+                        build_result.save_debug_info(debug_info)
 
-                shutil.move(temp_file, build_result.pbw)
+                build_result.save_pbw(temp_file)
                 print "Build succeeded."
                 send_keen_event(['cloudpebble', 'sdk'], 'app_build_succeeded', data={
                     'data': {
@@ -171,7 +158,7 @@ def run_compile(build_result):
                         'cloudpebble_build_id': build_result.id
                     }
                 }, project=project)
-            open(build_result.build_log, 'w').write(output)
+            build_result.save_build_log(output)
             build_result.state = BuildResult.STATE_SUCCEEDED if success else BuildResult.STATE_FAILED
             build_result.finished = now()
             build_result.save()
@@ -181,7 +168,7 @@ def run_compile(build_result):
         build_result.state = BuildResult.STATE_FAILED
         build_result.finished = now()
         try:
-            open(build_result.build_log, 'w').write("Something broke:\n%s" % e)
+            build_result.save_build_log("Something broke:\n%s" % e)
         except:
             pass
         build_result.save()

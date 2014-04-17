@@ -17,6 +17,7 @@ from utils.keen_helper import send_keen_event
 
 from ide.models.files import SourceFile, ResourceFile, ResourceIdentifier
 from ide.models.project import Project
+import utils.s3 as s3
 
 __author__ = 'katharine'
 
@@ -31,7 +32,7 @@ def add_project_to_archive(z, project, prefix=''):
 
     for resource in resources:
         res_path = 'resources/src' if project.sdk_version == '1' else 'resources'
-        z.writestr('%s/%s/%s' % (prefix, res_path, resource.path), open(resource.local_filename).read())
+        z.writestr('%s/%s/%s' % (prefix, res_path, resource.path), resource.get_contents())
 
     if project.sdk_version == '1':
         resource_map = generate_resource_map(project, resources)
@@ -55,14 +56,21 @@ def create_archive(project_id):
 
         # Generate a URL
         u = uuid.uuid4().hex
-        outfile = '%s%s/%s.zip' % (settings.EXPORT_DIRECTORY, u, prefix)
-        os.makedirs(os.path.dirname(outfile), 0755)
-        shutil.copy(filename, outfile)
-        os.chmod(outfile, 0644)
 
         send_keen_event('cloudpebble', 'cloudpebble_export_project', project=project)
 
-        return '%s%s/%s.zip' % (settings.EXPORT_ROOT, u, prefix)
+        if not settings.AWS_ENABLED:
+            outfile = '%s%s/%s.zip' % (settings.EXPORT_DIRECTORY, u, prefix)
+            os.makedirs(os.path.dirname(outfile), 0755)
+            shutil.copy(filename, outfile)
+            os.chmod(outfile, 0644)
+            return '%s%s/%s.zip' % (settings.EXPORT_ROOT, u, prefix)
+        else:
+            outfile = '%s/%s.zip' % (u, prefix)
+            s3.upload_file('export', outfile, filename, public=True, content_type='application/zip')
+            return 'https://%s.s3.amazonaws.com/%s' % (settings.AWS_S3_EXPORT_BUCKET, outfile)
+
+
 
 
 @task(acks_late=True)
@@ -163,9 +171,8 @@ def do_import_archive(project_id, archive_location, delete_zip=False, delete_pro
                             is_menu_icon = resource.get('menuIcon', False)
                             if file_name not in resources:
                                 resources[file_name] = ResourceFile.objects.create(project=project, file_name=os.path.basename(file_name), kind=kind, is_menu_icon=is_menu_icon)
-                                local_filename = resources[file_name].get_local_filename(create=True)
                                 res_path = 'resources/src' if version == '1' else 'resources'
-                                open(local_filename, 'w').write(z.open('%s%s/%s' % (base_dir, res_path, file_name)).read())
+                                resources[file_name].save_file(z.open('%s%s/%s' % (base_dir, res_path, file_name)))
                             ResourceIdentifier.objects.create(
                                 resource_file=resources[file_name],
                                 resource_id=def_name,

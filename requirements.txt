@@ -1,17 +1,17 @@
-django
+Django==1.6.2
 -e hg+https://bitbucket.org/ubernostrum/django-registration#egg=django-registration
-amqp
-celery
-django_celery
-flup
-psycopg2
-South
-qrcode
+amqp==1.4.4
+celery==3.1.10
+django_celery==3.1.10
+flup==1.0.3.dev-20110405
+psycopg2==2.4.5
+South==0.8.4
+qrcode==4.0.4
 pygithub==1.14.2
-python-social-auth
-keen
-redis
-boto
+python-social-auth==0.1.23
+keen==0.2.3
+redis==2.9.1
+boto==2.27.0
 
 # These are used for Heroku hosting setup.
 dj-static
