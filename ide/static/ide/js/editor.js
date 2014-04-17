@@ -251,7 +251,7 @@ CloudPebble.Editor = (function() {
                 var fix_height = function() {
                     if(!is_fullscreen) {
                         var browserHeight = document.documentElement.clientHeight;
-                        code_mirror.getWrapperElement().style.height = browserHeight - 130 + 'px';
+                        code_mirror.getWrapperElement().style.height = browserHeight - 190 + 'px';
                         code_mirror.refresh();
                     }
                 };
