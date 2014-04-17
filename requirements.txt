@@ -17,6 +17,7 @@ boto==2.27.0
 dj-static
 gunicorn
 dj-database-url
+newrelic
 # This is required to set up the SDK.
 virtualenv
 # These are in the SDK requirements.txt and included here to save on Heroku deploy time.
