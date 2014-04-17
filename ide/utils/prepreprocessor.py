@@ -17,7 +17,7 @@ def remove_comments(source):
 
 
 def extract_includes(source):
-    return [x for x in re.findall(r'^#\s*include\s*[<"](.+)[">]\s*$', source, flags=re.MULTILINE)]
+    return re.findall(r'^#\s*include\s*[<"](.+)[">]\s*$', source, flags=re.MULTILINE)
 
 
 def check_include_legal(include):
