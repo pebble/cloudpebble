@@ -57,4 +57,8 @@ def upload_file(bucket_name, dest_path, src_path, public=False, content_type='ap
 def get_signed_url(bucket_name, path, headers=None):
     bucket = _buckets[bucket_name]
     key = bucket.get_key(path)
-    return key.generate_url(3600, response_headers=headers)
+    url = key.generate_url(3600, response_headers=headers)
+    # hack to avoid invalid SSL certs.
+    if '.cloudpebble.' in url:
+        url = url.replace('.s3.amazonaws.com', '')
+    return url
