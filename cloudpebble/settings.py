@@ -259,7 +259,7 @@ AWS_S3_SOURCE_BUCKET = _environ.get('AWS_S3_SOURCE_BUCKET', None)
 AWS_S3_BUILDS_BUCKET = _environ.get('AWS_S3_BUILDS_BUCKET', None)
 AWS_S3_EXPORT_BUCKET = _environ.get('AWS_S3_EXPORT_BUCKET', None)
 
-REDIS_URL = _environ.get('REDISTOGO_URL', 'redis://localhost:6379/')
+REDIS_URL = _environ.get('REDISCLOUD_URL', 'redis://localhost:6379/')
 
 import djcelery
 djcelery.setup_loader()
