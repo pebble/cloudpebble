@@ -68,7 +68,7 @@ def create_archive(project_id):
         else:
             outfile = '%s/%s.zip' % (u, prefix)
             s3.upload_file('export', outfile, filename, public=True, content_type='application/zip')
-            return 'https://%s.s3.amazonaws.com/%s' % (settings.AWS_S3_EXPORT_BUCKET, outfile)
+            return '%s%s' % (settings.EXPORT_ROOT, outfile)
 
 
 

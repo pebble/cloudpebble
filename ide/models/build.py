@@ -45,7 +45,7 @@ class BuildResult(IdeModel):
 
     def get_url(self):
         if settings.AWS_ENABLED:
-            return "https://%s.s3.amazonaws.com/%s/" % (settings.AWS_S3_BUILDS_BUCKET, self.uuid)
+            return "%s%s/" % (settings.MEDIA_URL, self.uuid)
         else:
             return '%s%s/%s/%s/' % (settings.MEDIA_URL, self.uuid[0], self.uuid[1], self.uuid)
 
