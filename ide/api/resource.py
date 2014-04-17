@@ -1,13 +1,15 @@
 import json
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_safe
 from ide.api import json_failure, json_response
 from ide.models.project import Project
 from ide.models.files import ResourceFile, ResourceIdentifier
 from utils.keen_helper import send_keen_event
+import utils.s3 as s3
 
 __author__ = 'katharine'
 
@@ -28,7 +30,7 @@ def create_resource(request, project_id):
                 tracking = int(r['tracking']) if 'tracking' in r else None
                 resources.append(ResourceIdentifier.objects.create(resource_file=rf, resource_id=r['id'],
                                                                    character_regex=regex, tracking=tracking))
-            rf.save_file(request.FILES['file'])
+            rf.save_file(request.FILES['file'], request.FILES['file'].size)
 
 
     except Exception as e:
@@ -119,7 +121,7 @@ def update_resource(request, project_id, resource_id):
                 resources.append(ResourceIdentifier.objects.create(resource_file=resource, resource_id=r['id'], character_regex=regex, tracking=tracking))
 
             if 'file' in request.FILES:
-                resource.save_file(request.FILES['file'])
+                resource.save_file(request.FILES['file'], request.FILES['file'].size)
     except Exception as e:
         return json_failure(str(e))
     else:
@@ -143,7 +145,21 @@ def update_resource(request, project_id, resource_id):
 @login_required
 def show_resource(request, project_id, resource_id):
     resource = get_object_or_404(ResourceFile, pk=resource_id, project__owner=request.user)
-    content_type = {'png': 'image/png', 'png-trans': 'image/png', 'font': 'application/octet-stream', 'raw': 'application/octet-stream'}
-    response = HttpResponse(open(resource.local_filename), content_type=content_type[resource.kind])
-    response['Content-Disposition'] = "attachment; filename=\"%s\"" % resource.file_name
-    return response
+    content_types = {
+        u'png': 'image/png',
+        u'png-trans': 'image/png',
+        u'font': 'application/octet-stream',
+        u'raw': 'application/octet-stream'
+    }
+    content_disposition = "attachment; filename=\"%s\"" % resource.file_name
+    content_type = content_types[resource.kind]
+    if settings.AWS_ENABLED:
+        headers = {
+            'response-content-disposition': content_disposition,
+            'Content-Type': content_type
+        }
+        return HttpResponseRedirect(s3.get_signed_url('source', resource.s3_path, headers=headers))
+    else:
+        response = HttpResponse(open(resource.local_filename), content_type=content_type)
+        response['Content-Disposition'] = content_disposition
+        return response

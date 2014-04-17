@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Make sure we have the SDK in place.
+
+echo "Downloading the SDK"
+curl -o /tmp/pebblesdk-2.0.2.tar.gz https://cloudpebble-vagrant.s3.amazonaws.com/PebbleSDK-2.0.2.tar.gz
+
+echo "Downloading the toolchain"
+curl -o /tmp/arm-cs-tools.tar.bz2 https://cloudpebble-vagrant.s3.amazonaws.com/arm-cs-tools.tar.bz2
+
+echo "Extracting the SDK"
+tar -xf /tmp/pebblesdk-2.0.2.tar.gz
+mv PebbleSDK-2.0.2 sdk2
+pushd sdk2
+    echo "Extracting the toolchain"
+    tar -xf /tmp/arm-cs-tools.tar.bz2
+    echo "Preparing virtualenv"
+    virtualenv .env
+    # Instead of actually installing the requirements, we instead just use the global ones, which are a superset
+    # of the ones here.
+#    source .env/bin/activate
+#        pip install -r requirements.txt
+#    deactivate
+popd
+echo "Cleaning up."
+rm /tmp/*.tar.*
+
+# Make sure the database is up to date.
+echo "Performing database migration."
+python manage.py syncdb
+python manage.py migrate
+
+echo "Post-compile complete."

@@ -27,10 +27,7 @@ def do_import_github(project_id, github_user, github_project, github_branch, del
         url = "https://github.com/%s/%s/archive/%s.zip" % (github_user, github_project, github_branch)
         if file_exists(url):
             u = urllib2.urlopen(url)
-            with tempfile.NamedTemporaryFile(suffix='.zip') as temp:
-                shutil.copyfileobj(u, temp)
-                temp.flush()
-                return do_import_archive(project_id, temp.name)
+            return do_import_archive(project_id, u.read())
         else:
             raise Exception("The branch '%s' does not exist." % github_branch)
     except Exception as e:
@@ -311,27 +308,25 @@ def github_pull(user, project):
     # Now we grab the zip.
     zip_url = repo.get_archive_link('zipball', branch_name)
     u = urllib2.urlopen(zip_url)
-    with tempfile.NamedTemporaryFile(suffix='.zip') as temp:
-        shutil.copyfileobj(u, temp)
-        temp.flush()
-        # And wipe the project!
-        project.source_files.all().delete()
-        project.resources.all().delete()
 
-        # This must happen before do_import_archive or we'll stamp on its results.
-        project.github_last_commit = branch.commit.sha
-        project.github_last_sync = now()
-        project.save()
+    # And wipe the project!
+    project.source_files.all().delete()
+    project.resources.all().delete()
 
-        import_result = do_import_archive(project.id, temp.name)
+    # This must happen before do_import_archive or we'll stamp on its results.
+    project.github_last_commit = branch.commit.sha
+    project.github_last_sync = now()
+    project.save()
 
-        send_keen_event('cloudpebble', 'cloudpebble_github_pull', user=user, data={
-            'data': {
-                'repo': project.github_repo
-            }
-        })
+    import_result = do_import_archive(project.id, u.read())
 
-        return import_result
+    send_keen_event('cloudpebble', 'cloudpebble_github_pull', user=user, data={
+        'data': {
+            'repo': project.github_repo
+        }
+    })
+
+    return import_result
 
 
 @task
