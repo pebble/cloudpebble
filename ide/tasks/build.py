@@ -5,6 +5,7 @@ import tempfile
 import traceback
 import zipfile
 import json
+import resource
 
 from celery import task
 
@@ -21,6 +22,13 @@ from ide.models.files import SourceFile, ResourceFile
 from ide.utils.prepreprocessor import process_file as check_preprocessor_directives
 
 __author__ = 'katharine'
+
+
+def _set_resource_limits():
+    resource.setrlimit(resource.RLIMIT_CPU, (20, 20)) # 20 seconds of CPU time
+    resource.setrlimit(resource.RLIMIT_NOFILE, (100, 100)) # 100 open files
+    resource.setrlimit(resource.RLIMIT_RSS, (20 * 1024 * 1024, 20 * 1024 * 1024)) # 20 MB of memory
+    resource.setrlimit(resource.RLIMIT_FSIZE, (5 * 1024 * 1024, 5 * 1024 * 1024)) # 5 MB output files.
 
 
 @task(ignore_result=True, acks_late=True)
@@ -111,8 +119,8 @@ def run_compile(build_result):
                     stderr=subprocess.STDOUT)
             else:
                 os.chdir(base_dir)
-                print "Running SDK2 build"
-                output = subprocess.check_output([settings.PEBBLE_TOOL, "build"], stderr=subprocess.STDOUT)
+                print "Running SDK2 build!"
+                output = subprocess.check_output([settings.PEBBLE_TOOL, "build"], stderr=subprocess.STDOUT, preexec_fn=_set_resource_limits)
                 print "output", output
         except subprocess.CalledProcessError as e:
             output = e.output
