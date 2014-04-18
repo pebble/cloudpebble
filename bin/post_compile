@@ -6,14 +6,14 @@ echo "Downloading the SDK"
 curl -o /tmp/pebblesdk-2.0.2.tar.gz https://cloudpebble-vagrant.s3.amazonaws.com/PebbleSDK-2.0.2.tar.gz
 
 echo "Downloading the toolchain"
-curl -o /tmp/arm-cs-tools.tar.bz2 https://cloudpebble-vagrant.s3.amazonaws.com/arm-cs-tools.tar.bz2
+curl -o /tmp/arm-cs-tools.tar https://cloudpebble-vagrant.s3.amazonaws.com/arm-cs-tools-stripped.tar
 
 echo "Extracting the SDK"
 tar -xf /tmp/pebblesdk-2.0.2.tar.gz
 mv PebbleSDK-2.0.2 sdk2
 pushd sdk2
     echo "Extracting the toolchain"
-    tar -xf /tmp/arm-cs-tools.tar.bz2
+    tar -xf /tmp/arm-cs-tools.tar
     echo "Preparing virtualenv"
     virtualenv .env
     # Instead of actually installing the requirements, we instead just use the global ones, which are a superset
