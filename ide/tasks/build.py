@@ -90,16 +90,16 @@ def run_compile(build_result):
             manifest_dict = generate_simplyjs_manifest_dict(project)
 
             # We should have exactly one source file, so just dump that in.
-            build_result.save_simplyjs(source_files[0].get_contents())
+            js = source_files[0].get_contents()
+            escaped_js = json.dumps(js)
+            build_result.save_simplyjs(js)
 
             open(os.path.join(base_dir, 'appinfo.json'), 'w').write(json.dumps(manifest_dict))
-            open(os.path.join(base_dir, 'src', 'js', 'zzz_fixurl.js'), 'w').write("""
-                Pebble.addEventListener('ready', function() {
-                    if(localStorage.getItem('mainJsUrl') != '%(url)s') {
-                        simply.loadMainScript('%(url)s');
-                    }
-                });
-            """ % {'url': build_result.simplyjs_url})
+            open(os.path.join(base_dir, 'src', 'js', 'zzz_userscript.js'), 'w').write("""
+            (function() {
+                simply.mainScriptSource = %s;
+            })();
+            """ % escaped_js)
 
         # Build the thing
         cwd = os.getcwd()
