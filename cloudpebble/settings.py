@@ -227,6 +227,8 @@ LOGGING = {
 
 BROKER_URL = _environ.get('CLOUDAMQP_URL', 'amqp://guest:guest@localhost:5672/')
 
+BROKER_POOL_LIMIT = int(_environ.get('BROKER_POOL_LIMIT', 10))
+
 LOGIN_REDIRECT_URL = '/ide/'
 
 LOGIN_URL = '/login/'
