@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url
 
-from ide.api import proxy_keen, check_task, get_shortlink
+from ide.api import proxy_keen, check_task, get_shortlink, heartbeat
 from ide.api.git import github_push, github_pull, set_project_repo, create_project_repo
 from ide.api.phone import ping_phone, check_phone, list_phones, update_phone
 from ide.api.project import project_info, compile_project, last_build, build_history, build_log, create_project, \
@@ -60,5 +60,6 @@ urlpatterns = patterns(
     url(r'^update_phone$', update_phone),
     url(r'^list_phones$', list_phones),
     url(r'^whats_new', whats_new, name='whats_new'),
-    url(r'^gist/(?P<gist_id>[0-9a-f]+)$', import_gist)
+    url(r'^gist/(?P<gist_id>[0-9a-f]+)$', import_gist),
+    url(r'^heartbeat$', heartbeat)
 )
