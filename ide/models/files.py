@@ -55,6 +55,15 @@ class ResourceFile(IdeModel):
         self.project.last_modified = now()
         self.project.save()
 
+    def save_string(self, string):
+        if not settings.AWS_ENABLED:
+            if not os.path.exists(os.path.dirname(self.local_filename)):
+                os.makedirs(os.path.dirname(self.local_filename))
+            with open(self.local_filename, 'wb') as out:
+                out.write(string)
+        else:
+            s3.save_file('source', self.s3_path, string)
+
     def get_contents(self):
         if not settings.AWS_ENABLED:
             return open(self.local_filename).read()
