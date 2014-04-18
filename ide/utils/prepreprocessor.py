@@ -11,8 +11,8 @@ def merge_newlines(source):
 
 
 def remove_comments(source):
-    no_mutiline = re.sub(r'/\*.*?\*/', ' ', source, flags=re.DOTALL)
-    no_single_line = re.sub(r'//.*$', ' ', no_mutiline)
+    no_mutiline = re.sub(r'/\*.*?\*/', ' ', source, flags=re.DOTALL|re.MULTILINE)
+    no_single_line = re.sub(r'//.*$', ' ', no_mutiline, flags=re.MULTILINE)
     return no_single_line
 
 
