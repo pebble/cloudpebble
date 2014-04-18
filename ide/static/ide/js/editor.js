@@ -333,7 +333,7 @@ CloudPebble.Editor = (function() {
                 var delete_btn = $('<button class="btn btn-danger" style="margin-right: 20px;">Delete</button>');
                 var error_area = $('<div>');
 
-                save_btn.click(save);
+                save_btn.click(function() { save(); });
                 delete_btn.click(function() {
                     CloudPebble.Prompts.Confirm("Do you want to delete " + file.name + "?", "This cannot be undone.", function() {
                         save_btn.attr('disabled','disabled');
