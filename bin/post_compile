@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# If this fails, the deploy should fail.
+set -e
+
 # Make sure we have the SDK in place.
 
 echo "Downloading the SDK"
