@@ -46,7 +46,6 @@ def run_compile(build_result):
 
     # Assemble the project somewhere
     base_dir = tempfile.mkdtemp(dir=os.path.join(settings.CHROOT_ROOT, 'tmp') if settings.CHROOT_ROOT else None)
-    print "Compiling in %s" % base_dir
 
     try:
         if project.project_type == 'native':
@@ -60,7 +59,6 @@ def run_compile(build_result):
                     raise Exception("Suspicious filename: %s" % f.file_name)
                 abs_target_dir = os.path.dirname(abs_target)
                 if not os.path.exists(abs_target_dir):
-                    print "Creating directory %s." % abs_target_dir
                     os.makedirs(abs_target_dir)
                 f.copy_to_path(abs_target)
                 # Make sure we don't duplicate downloading effort; just open the one we created.
@@ -73,7 +71,6 @@ def run_compile(build_result):
             os.makedirs(os.path.join(base_dir, resource_root, 'fonts'))
             os.makedirs(os.path.join(base_dir, resource_root, 'data'))
 
-            print "Writing out manifest"
             manifest_dict = generate_v2_manifest_dict(project, resources)
             open(os.path.join(base_dir, 'appinfo.json'), 'w').write(json.dumps(manifest_dict))
 
@@ -82,13 +79,10 @@ def run_compile(build_result):
                 abs_target = os.path.abspath(os.path.join(target_dir, f.file_name))
                 if not abs_target.startswith(target_dir):
                     raise Exception("Suspicious filename: %s" % f.file_name)
-                print "Added %s %s" % (f.kind, f.s3_path)
                 f.copy_to_path(abs_target)
 
             # Reconstitute the SDK
-            print "Inserting wscript"
             open(os.path.join(base_dir, 'wscript'), 'w').write(generate_wscript_file(project))
-            print "Inserting jshintrc"
             open(os.path.join(base_dir, 'pebble-jshintrc'), 'w').write(generate_jshint_file(project))
         elif project.project_type == 'simplyjs':
             os.rmdir(base_dir)  # This is not intuitive behaviour.
@@ -108,7 +102,6 @@ def run_compile(build_result):
             """ % {'url': build_result.simplyjs_url})
 
         # Build the thing
-        print "Beginning compile"
         cwd = os.getcwd()
         success = False
         output = 'Failed to get output'
@@ -119,9 +112,7 @@ def run_compile(build_result):
                     stderr=subprocess.STDOUT)
             else:
                 os.chdir(base_dir)
-                print "Running SDK2 build!"
                 output = subprocess.check_output([settings.PEBBLE_TOOL, "build"], stderr=subprocess.STDOUT, preexec_fn=_set_resource_limits)
-                print "output", output
         except subprocess.CalledProcessError as e:
             output = e.output
             success = False
@@ -151,20 +142,17 @@ def run_compile(build_result):
                     try:
                         debug_info = apptools.addr2lines.create_coalesced_group(elf_file)
                     except:
-                        print "Generating debug info failed."
                         print traceback.format_exc()
                     else:
                         build_result.save_debug_info(debug_info)
 
                 build_result.save_pbw(temp_file)
-                print "Build succeeded."
                 send_keen_event(['cloudpebble', 'sdk'], 'app_build_succeeded', data={
                     'data': {
                         'cloudpebble_build_id': build_result.id
                     }
                 }, project=project)
             else:
-                print "Build failed."
                 send_keen_event(['cloudpebble', 'sdk'], 'app_build_failed', data={
                     'data': {
                         'cloudpebble_build_id': build_result.id
@@ -185,5 +173,4 @@ def run_compile(build_result):
             pass
         build_result.save()
     finally:
-        print "Removing temporary directory"
         shutil.rmtree(base_dir)
