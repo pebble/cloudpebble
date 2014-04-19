@@ -1,94 +1,77 @@
+{% extends 'common/base-narrow.html' %}
 {% load staticfiles %}
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title>CloudPebble</title>
-        <link rel="stylesheet" type="text/css" href="{% static 'root/css/splash.css' %}">
-        <link rel="stylesheet" type="text/css" href="{% static 'root/fonts/fonts.css' %}">
-    </head>
-    <body>
-        <div class="main-container">
-            <div class="header">
-                <div class="container">
-                    <h1 class="cloudpebble-logo">
-                        <span class="cloudpebble-logo-cloud">Cloud</span><span class="cloudpebble-logo-pebble">Pebble</span>
-                    </h1>
-                    <div class="header-login">
-                        <button class="btn btn-primary btn-show-login">Sign in</button>
-                        <button class="btn btn-cancel btn-hide-login">Close</button>
-                    </div>
+
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'root/css/splash.css' %}">
+{% endblock %}
+
+{% block headercontent %}
+    <div class="header-login">
+        <button class="btn btn-primary btn-show-login">Sign in</button>
+        <button class="btn btn-cancel btn-hide-login">Close</button>
+    </div>
+{% endblock %}
+
+{% block precontent %}
+    <div class="login">
+        <div class="container">
+            <div class="box-holder">
+                <div class="box">
+                    <h3>Already have a Pebble account?</h3>
+                    <p>This is the same account you use to log in to the Pebble Forums, Developer Portal
+                       and phone app. Don't have a Pebble account? Create one!</p>
+                    <p><a class="btn btn-primary" href="/login/pebble/?next=ide">Log in with your Pebble account</a></p>
+                    <p><a class="btn" href="{{ sso_root }}/users/sign_up">Create Pebble account</a></p>
                 </div>
-            </div>
-            <div class="login">
-                <div class="container">
-                    <div class="box-holder">
-                        <div class="box">
-                            <h3>Already have a Pebble account?</h3>
-                            <p>This is the same account you use to log in to the Pebble Forums, Developer Portal
-                               and phone app. Don't have a Pebble account? Create one!</p>
-                            <p><a class="btn btn-primary" href="/login/pebble/?next=ide">Log in with your Pebble account</a></p>
-                            <p><a class="btn" href="{{ sso_root }}/users/sign_up">Create Pebble account</a></p>
-                        </div>
-                        <div class="box">
-                            <h3>Have a legacy CloudPebble account?</h3>
-                            <p>Log in to link it with your Pebble account. Legacy
-                                accounts are being phased out in favour of the unified
-                                Pebble account system. Once you log in to your
-                                legacy account you will be required to link it;
-                                henceforth you must use the button below to log in.</p>
-                            <p><button class="btn">Link to your Pebble account</button></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="container">
-                <div class="content">
-                    <div class="hero">
-                        <div class="hero-logo">
-                            <img src="{% static 'root/images/cloudpebble.png' %}">
-                        </div>
-                        <h2 class="hero-lead">Online Pebble Development</h2>
-                        <p class="hero-sub">Write apps without dealing with Linux, virtual machines, compilers, or Python.</p>
-                        <p class="hero-button"><button class="btn btn-show-login">Get Started</button></p>
-                    </div>
-                    <div class="features box-holder">
-                        <div class="feature box">
-                            <div class="feature-icon feature-icon-install"></div>
-                            <h3>Nothing to install</h3>
-                            <p>Write apps directly in your browser. Skip all setup instructions!</p>
-                        </div>
-                        <div class="feature box">
-                            <div class="feature-icon feature-icon-json"></div>
-                            <h3>No JSON to edit</h3>
-                            <p>Resources are managed through a friendly user interface</p>
-                        </div>
-                        <div class="feature box">
-                            <div class="feature-icon feature-icon-cloudy"></div>
-                            <h3>Cloudy</h3>
-                            <p>It's on the internet. Accessible from anywhere! That's a good thing, right?</p>
-                        </div>
-                        <div class="feature box">
-                            <div class="feature-icon feature-icon-unfinished"></div>
-                            <h3>More to come</h3>
-                            <p>This is only the beginning!<br>There's much more to come.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="footer">
-                <div class="container">
-                    <p class="small-print">
-                        CloudPebble was created by Katharine Berry and is now run by Pebble.<br>
-                        Please submit bug reports and feature requests on <a href="https://github.com/CloudPebble">GitHub</a>.
-                        Questions? Email me at <a href="mailto:katharine@getpebble.com">katharine@getpebble.com</a>.
-                    </p>
-                    <div class="pebble-logo">
-                        <img src="{% static 'root/images/pebble.png' %}">
-                    </div>
+                <div class="box">
+                    <h3>Have a legacy CloudPebble account?</h3>
+                    <p>Log in to link it with your Pebble account. Legacy
+                        accounts are being phased out in favour of the unified
+                        Pebble account system. Once you log in to your
+                        legacy account you will be required to link it;
+                        henceforth you must use the button below to log in.</p>
+                    <p><button class="btn">Link to your Pebble account</button></p>
                 </div>
             </div>
         </div>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-        <script src="{% static 'root/js/splash.js' %}"></script>
-    </body>
-</html>
+    </div>
+{% endblock %}
+
+{% block narrowcontent %}
+    <div class="content">
+        <div class="hero">
+            <div class="hero-logo">
+                <img src="{% static 'root/images/cloudpebble.png' %}">
+            </div>
+            <h2 class="hero-lead">Online Pebble Development</h2>
+            <p class="hero-sub">Write apps without dealing with Linux, virtual machines, compilers, or Python.</p>
+            <p class="hero-button"><button class="btn btn-show-login">Get Started</button></p>
+        </div>
+        <div class="features box-holder">
+            <div class="feature box">
+                <div class="feature-icon feature-icon-install"></div>
+                <h3>Nothing to install</h3>
+                <p>Write apps directly in your browser. Skip all setup instructions!</p>
+            </div>
+            <div class="feature box">
+                <div class="feature-icon feature-icon-json"></div>
+                <h3>No JSON to edit</h3>
+                <p>Resources are managed through a friendly user interface</p>
+            </div>
+            <div class="feature box">
+                <div class="feature-icon feature-icon-cloudy"></div>
+                <h3>Cloudy</h3>
+                <p>It's on the internet. Accessible from anywhere! That's a good thing, right?</p>
+            </div>
+            <div class="feature box">
+                <div class="feature-icon feature-icon-unfinished"></div>
+                <h3>More to come</h3>
+                <p>This is only the beginning!<br>There's much more to come.</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'root/js/splash.js' %}"></script>
+{% endblock %}

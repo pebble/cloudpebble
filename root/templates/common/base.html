@@ -4,7 +4,8 @@
     <head>
         <meta charset="utf-8">
         <title>{% block title %}CloudPebble{% endblock %}</title>
-        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="{% static 'common/fonts/fonts.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'common/css/common.css' %}">
         <link rel="stylesheet" href="{% static 'ide/css/base.css' %}">
         <link rel="icon" href="{% static 'ide/img/favicon.png' %}" />
         <!--[if IE]>
@@ -13,7 +14,9 @@
         {% block head %}{% endblock %}
     </head>
     <body>
-        {% block content %}{% endblock %}
+        <div class="main-container">
+            {% block content %}{% endblock %}
+        </div>
         <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>

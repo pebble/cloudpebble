@@ -1,0 +1,31 @@
+{% extends 'common/base.html' %}
+{% load staticfiles %}
+{% block content %}
+    <div class="header">
+        <div class="container">
+            <h1 class="cloudpebble-logo">
+                <span class="cloudpebble-logo-cloud">Cloud</span><span class="cloudpebble-logo-pebble">Pebble</span>
+            </h1>
+            <div class="header-right">
+                {% block headercontent %}{% endblock %}
+            </div>
+        </div>
+    </div>
+    {% block precontent %}{% endblock %}
+    <div class="container">
+        {% block narrowcontent %}{% endblock %}
+    </div>
+    {% block postcontent %}{% endblock %}
+    <div class="footer">
+        <div class="container">
+            <p class="small-print">
+                CloudPebble was created by Katharine Berry and is now run by Pebble.<br>
+                Please submit bug reports and feature requests on <a href="https://github.com/CloudPebble">GitHub</a>.
+                Questions? Email me at <a href="mailto:katharine@getpebble.com">katharine@getpebble.com</a>.
+            </p>
+            <div class="pebble-logo">
+                <img src="{% static 'root/images/pebble.png' %}">
+            </div>
+        </div>
+    </div>
+{% endblock content %}

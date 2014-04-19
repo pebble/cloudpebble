@@ -1,28 +1,3 @@
-body {
-    color: #969696;
-    background-color: #333;
-    font-family: PFD-X-Thin,'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-weight: normal;
-    margin: 0;
-    padding: 0;
-}
-
-.header {
-    background-color: #292929;
-    height: 80px;
-}
-
-.footer {
-    background-color: #292929;
-    height: 80px;
-}
-
-.container {
-    width: 940px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
 .hero {
     text-align: center;
 }
@@ -31,7 +6,7 @@ body {
     height: 200px;
     background-image: url('../images/clouds.png');
     margin-bottom: 40px;
-    margin-top: 60px;
+    margin-top: 20px;
 }
 
 .hero-lead {
@@ -61,63 +36,13 @@ body {
     color: black;
 }
 
-h1, h2, h3 {
-    color: #fff;
-    padding: 0;
-    margin: 0;
-    text-transform: uppercase;
-    font-weight: normal;
-}
-
-p {
-    padding: 0;
-    margin: 0;
-}
-
-a {
-    color: inherit;
-}
-
-a:hover {
-    color: white;
-}
-
-.cloudpebble-logo {
-    float: left;
-    height: 80px;
-    width: 300px;
-    line-height: 80px;
-    font-size: 24px;
-    font-weight: normal;
-}
-
-.cloudpebble-logo-cloud {
-    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-}
-
-.cloudpebble-logo-pebble {
-    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-}
-
 .header-login {
     float: right;
     line-height: 80px;
 }
 
-.small-print {
-    float: left;
-    height: 48px;
-    margin-top: 16px;
-    line-height: 24px;
-}
-
-.pebble-logo {
-    float: right;
-    padding-top: 28px;
-}
-
 .features {
-    height: 680px;
+    height: 640px;
     margin-top: 80px;
 }
 
@@ -187,12 +112,6 @@ a:hover {
     height: 246px;
 }
 
-h3 {
-    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    letter-spacing: 1px;
-    font-size: 24px;
-}
-
 .feature-icon {
     width: 80px;
     height: 72px;
@@ -218,65 +137,7 @@ h3 {
     background-image: url('../images/unfinished.png');
 }
 
-.btn {
-    border: none;
-    cursor: pointer;
-    font-family: inherit;
-    position: relative;
-    text-decoration: none;
-    display: inline-block;
-    text-transform: uppercase;
-    font-size: 18px;
-    text-align: center;
-    white-space: nowrap;
-    height: 40px;
-    width: 130px;
-    line-height: 40px;
-    max-width: 100%;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
-    background-color: white;
-    color: #ff4700;
-    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    transition: all 300ms ease;
-}
-
-.btn.btn-primary:hover {
-    background-color: #db3d00;
-    color: #ededed;
-}
-
-.btn:hover {
-    color: #db3d00;
-    background-color: #ededed;
-}
-
-.btn.btn-cancel:hover {
-    background-color: #333;
-    color: #aaaaaa;
-}
-
-a.btn {
-    padding-top: 3px;
-    height: 37px;
-}
-
-.btn.btn-primary {
-    color: white;
-    background-color: #ff4700;
-}
-
-.btn.btn-cancel {
-    color: white;
-    background-color: #3f3f3f
-}
-
 .login p {
     font-size: 19px;
     font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-}
-
-.blur {
-    -webkit-filter: blur(5px) brightness(40%);
 }
