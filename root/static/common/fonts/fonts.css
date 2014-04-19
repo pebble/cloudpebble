@@ -4,7 +4,7 @@
 
 @font-face {
   font-family: 'PFD-Black';
-  src: url() format('truetype');
+  src: url('//static.cloudpebble.net/fonts/PFDinDisplayPro-Black.ttf') format('truetype');
 }
 
 
@@ -14,22 +14,9 @@
     font-style: normal;
 }
 
-
-@font-face {
-  font-family: 'PFD-Black-Light';
-  src: url('PFDinDisplayPro-Blacklt.ttf') format('truetype');
-}
-
-
-.font-black-light {
-    font-family: PFD-Black-Light,'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-weight: lighter;
-    font-style: normal;
-}
-
 @font-face {
   font-family: 'PFD-Bold';
-  src: url('PFDinDisplayPro-Bold.ttf') format('truetype');
+  src: url('//static.cloudpebble.net/fonts/PFDinDisplayPro-Bold.ttf') format('truetype');
 }
 
 .font-bold {
@@ -40,7 +27,7 @@
 
 @font-face {
   font-family: 'PFD-Bold-Italic';
-  src: url('PFDinDisplayPro-BoldItal.ttf') format('truetype');
+  src: url('//static.cloudpebble.net/fonts/PFDinDisplayPro-BoldItal.ttf') format('truetype');
 }
 
 .font-bold-italic {
@@ -51,7 +38,7 @@
 
 @font-face {
   font-family: 'PFD-Italic';
-  src: url('PFDinDisplayPro-Italic.ttf') format('truetype');
+  src: url('//static.cloudpebble.net/fonts/PFDinDisplayPro-Italic.ttf') format('truetype');
 }
 
 .font-italic {
@@ -62,7 +49,7 @@
 
 @font-face {
   font-family: 'PFD-Light';
-  src: url('PFDinDisplayPro-Light.ttf') format('truetype');
+  src: url('//static.cloudpebble.net/fonts/PFDinDisplayPro-Light.ttf') format('truetype');
 }
 
 .font-light {
@@ -73,7 +60,7 @@
 
 @font-face {
   font-family: 'PFD-Light-Italic';
-  src: url('PFDinDisplayPro-LightItal.ttf') format('truetype');
+  src: url('//static.cloudpebble.net/fonts/PFDinDisplayPro-LightItal.ttf') format('truetype');
 }
 
 .font-light-italic {
@@ -84,7 +71,7 @@
 
 @font-face {
   font-family: 'PFD-Medium';
-  src: url('PFDinDisplayPro-Med.ttf') format('truetype');
+  src: url('//static.cloudpebble.net/fonts/PFDinDisplayPro-Med.ttf') format('truetype');
 }
 
 .font-medium {
@@ -95,7 +82,7 @@
 
 @font-face {
   font-family: 'PFD-Medium-Italic';
-  src: url('PFDinDisplayPro-MedItal.ttf') format('truetype');
+  src: url('//static.cloudpebble.net/fonts/PFDinDisplayPro-MedItal.ttf') format('truetype');
 }
 
 .font-medium-italic {
@@ -106,7 +93,7 @@
 
 @font-face {
   font-family: 'PFD-Regular';
-  src: url('PFDinDisplayPro-Reg.ttf') format('truetype');
+  src: url('//static.cloudpebble.net/fonts/PFDinDisplayPro-Reg.ttf') format('truetype');
 }
 
 .font-regular {
@@ -117,7 +104,7 @@
 
 @font-face {
   font-family: 'PFD-Thin';
-  src: url('PFDinDisplayPro-Thin.ttf') format('truetype');
+  src: url('//static.cloudpebble.net/fonts/PFDinDisplayPro-Thin.ttf') format('truetype');
 }
 
 .font-thin {
@@ -129,7 +116,7 @@
 
 @font-face {
   font-family: 'PFD-Thin-Italic';
-  src: url('PFDinDisplayPro-ThinItal.ttf') format('truetype');
+  src: url('//static.cloudpebble.net/fonts/PFDinDisplayPro-ThinItal.ttf') format('truetype');
 }
 
 .font-thin-italic {
@@ -140,22 +127,11 @@
 
 @font-face {
   font-family: 'PFD-X-Thin';
-  src: url('PFDinDisplayPro-XThin.ttf') format('truetype');
+  src: url('//static.cloudpebble.net/fonts/PFDinDisplayPro-XThin.ttf') format('truetype');
 }
 
 .font-x-thin {
     font-family: PFD-X-Thin,'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-weight: lighter;
-    font-style: normal;
-}
-
-@font-face {
-  font-family: 'PFD-X-Thin-Light';
-  src: url('PFDinDisplayPro-XThinlt.ttf') format('truetype');
-}
-
-.font-x-thin-light {
-    font-family: PFD-X-Thin-Light,'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-weight: lighter;
     font-style: normal;
 }
