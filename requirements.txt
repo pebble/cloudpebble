@@ -1,15 +1,32 @@
-django
+Django==1.6.2
 -e hg+https://bitbucket.org/ubernostrum/django-registration#egg=django-registration
-amqp
-celery
-django_celery
-flup
-freetype-py
-psycopg2
-Pillow==2.0.0
-South
-qrcode
+amqp==1.4.4
+celery==3.1.10
+django_celery==3.1.10
+flup==1.0.3.dev-20110405
+psycopg2==2.4.5
+South==0.8.4
+qrcode==4.0.4
+Pillow
 pygithub==1.14.2
-python-social-auth
-keen
-redis
+python-social-auth==0.1.23
+keen==0.2.3
+redis==2.9.1
+boto==2.27.0
+
+# These are used for Heroku hosting setup.
+dj-static
+gunicorn
+dj-database-url
+newrelic
+# This is required to set up the SDK.
+virtualenv
+# These are in the SDK requirements.txt and included here to save on Heroku deploy time.
+freetype-py==1.0
+sh==1.08
+websocket-client==0.12.0
+pyserial>=2.6
+pypng==0.0.16
+# These aren't used anywhere at all, but are in the SDK requirements.txt anyway...
+twisted==12.0.0
+autobahn==0.5.14

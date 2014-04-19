@@ -124,7 +124,7 @@ CloudPebble.Compile = (function() {
         }
         update_phone_list();
         mCrashAnalyser = new CloudPebble.CrashChecker(CloudPebble.ProjectInfo.app_uuid);
-        pane.find('#compilation-run-build-button').click(run_build);
+        pane.find('#compilation-run-build-button').click(function() { run_build(); });
 
 
         if(localStorage['cp-last-phone-ip']) {

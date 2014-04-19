@@ -1,9 +1,11 @@
 import os
+import shutil
 from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.utils.timezone import now
+import utils.s3 as s3
 
 from ide.models.meta import IdeModel
 
@@ -31,24 +33,51 @@ class ResourceFile(IdeModel):
                 os.makedirs(os.path.dirname(filename))
         return filename
 
-    local_filename = property(get_local_filename)
+    def get_s3_path(self):
+        return 'resources/%s' % self.id
 
-    def save_file(self, stream):
-        if not os.path.exists(os.path.dirname(self.local_filename)):
-            os.makedirs(os.path.dirname(self.local_filename))
-        out = open(self.local_filename, 'wb')
-        for chunk in stream.chunks():
-            out.write(chunk)
-        out.close()
+    local_filename = property(get_local_filename)
+    s3_path = property(get_s3_path)
+
+    def save_file(self, stream, file_size=0):
+        if not settings.AWS_ENABLED:
+            if not os.path.exists(os.path.dirname(self.local_filename)):
+                os.makedirs(os.path.dirname(self.local_filename))
+            out = open(self.local_filename, 'wb')
+            for chunk in stream.chunks():
+                out.write(chunk)
+            out.close()
+        else:
+            if file_size > 5*1024*1024:
+                raise Exception("Uploaded file too big.");
+            s3.save_file('source', self.s3_path, stream.read())
 
         self.project.last_modified = now()
         self.project.save()
 
+    def save_string(self, string):
+        if not settings.AWS_ENABLED:
+            if not os.path.exists(os.path.dirname(self.local_filename)):
+                os.makedirs(os.path.dirname(self.local_filename))
+            with open(self.local_filename, 'wb') as out:
+                out.write(string)
+        else:
+            s3.save_file('source', self.s3_path, string)
+
     def get_contents(self):
-        return open(self.local_filename).read()
+        if not settings.AWS_ENABLED:
+            return open(self.local_filename).read()
+        else:
+            return s3.read_file('source', self.s3_path)
 
     def get_identifiers(self):
         return ResourceIdentifier.objects.filter(resource_file=self)
+
+    def copy_to_path(self, path):
+        if not settings.AWS_ENABLED:
+            shutil.copy(self.local_filename, path)
+        else:
+            s3.read_file_to_filesystem('source', self.s3_path, path)
 
     def save(self, *args, **kwargs):
         self.project.last_modified = now()
@@ -95,18 +124,39 @@ class SourceFile(IdeModel):
         padded_id = '%05d' % self.id
         return '%ssources/%s/%s/%s' % (settings.FILE_STORAGE, padded_id[0], padded_id[1], padded_id)
 
+    def get_s3_path(self):
+        return 'sources/%d' % self.id
+
     def get_contents(self):
-        try:
-            return open(self.local_filename).read()
-        except IOError:
-            return ''
+        if not settings.AWS_ENABLED:
+            try:
+                return open(self.local_filename).read()
+            except IOError:
+                return ''
+        else:
+            return s3.read_file('source', self.s3_path)
 
     def save_file(self, content):
-        if not os.path.exists(os.path.dirname(self.local_filename)):
-            os.makedirs(os.path.dirname(self.local_filename))
-        open(self.local_filename, 'w').write(content.encode('utf-8'))
+        if not settings.AWS_ENABLED:
+            if not os.path.exists(os.path.dirname(self.local_filename)):
+                os.makedirs(os.path.dirname(self.local_filename))
+            open(self.local_filename, 'w').write(content.encode('utf-8'))
+        else:
+            s3.save_file('source', self.s3_path, content.encode('utf-8'))
 
         self.save()
+
+    def copy_to_path(self, path):
+        if not settings.AWS_ENABLED:
+            try:
+                shutil.copy(self.local_filename, path)
+            except IOError as err:
+                if err.errno == 2:
+                    open(path, 'w').close()  # create the file if it's missing.
+                else:
+                    raise
+        else:
+            s3.read_file_to_filesystem('source', self.s3_path, path)
 
     def save(self, *args, **kwargs):
         self.project.last_modified = now()
@@ -114,6 +164,7 @@ class SourceFile(IdeModel):
         super(SourceFile, self).save(*args, **kwargs)
 
     local_filename = property(get_local_filename)
+    s3_path = property(get_s3_path)
 
     class Meta(IdeModel.Meta):
         unique_together = (('project', 'file_name'))

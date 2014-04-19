@@ -95,7 +95,7 @@ class TemplateProject(Project):
         uuid_string = ", ".join(["0x%02X" % ord(b) for b in uuid.uuid4().bytes])
         for resource in self.resources.all():
             new_resource = ResourceFile.objects.create(project=project, file_name=resource.file_name, kind=resource.kind)
-            shutil.copy(resource.local_filename, new_resource.get_local_filename(create=True))
+            new_resource.save_string(resource.get_contents())
             for i in resource.identifiers.all():
                 ResourceIdentifier.objects.create(resource_file=new_resource, resource_id=i.resource_id, character_regex=i.character_regex)
 

@@ -19,6 +19,7 @@ def create_source_file(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     try:
         f = SourceFile.objects.create(project=project, file_name=request.POST['name'])
+        f.save_file('')
     except IntegrityError as e:
         return json_failure(str(e))
     else:

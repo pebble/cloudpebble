@@ -25,13 +25,13 @@ CloudPebble.Settings = (function() {
         }
 
         var display_error = function(message) {
-            window.scrollTo(0);
+            window.scrollTo(window.scrollX, 0);
             pane.find('.alert').addClass('alert-error').removeClass('hide').text(message);
             pane.find('input, button, select').removeAttr('disabled');
         };
 
         var display_success = function(message) {
-            window.scrollTo(0);
+            window.scrollTo(window.scrollX, 0);
             pane.find('.alert').addClass('alert-success').removeClass('hide').text(message);
             pane.find('input, button, select').removeAttr('disabled');
         };

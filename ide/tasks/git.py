@@ -14,7 +14,8 @@ from ide.models.project import Project
 from ide.tasks import do_import_archive, run_compile
 from ide.utils.git import git_sha, git_blob
 from ide.utils.project import find_project_root
-from ide.utils.sdk import generate_resource_dict, generate_v2_manifest_dict, dict_to_pretty_json, generate_v2_manifest
+from ide.utils.sdk import generate_resource_dict, generate_v2_manifest_dict, dict_to_pretty_json, generate_v2_manifest,\
+    generate_wscript_file
 from utils.keen_helper import send_keen_event
 
 __author__ = 'katharine'
@@ -26,10 +27,7 @@ def do_import_github(project_id, github_user, github_project, github_branch, del
         url = "https://github.com/%s/%s/archive/%s.zip" % (github_user, github_project, github_branch)
         if file_exists(url):
             u = urllib2.urlopen(url)
-            with tempfile.NamedTemporaryFile(suffix='.zip') as temp:
-                shutil.copyfileobj(u, temp)
-                temp.flush()
-                return do_import_archive(project_id, temp.name)
+            return do_import_archive(project_id, u.read())
         else:
             raise Exception("The branch '%s' does not exist." % github_branch)
     except Exception as e:
@@ -155,6 +153,7 @@ def github_push(user, commit_message, repo_name, project):
     # Both of these are used regardless of version
     remote_map_path = root + 'resources/src/resource_map.json'
     remote_manifest_path = root + 'appinfo.json'
+    remote_wscript_path = root + 'wscript'
 
     if remote_version == '1':
         remote_map_sha = next_tree[remote_map_path]._InputGitTreeElement__sha if remote_map_path in next_tree else None
@@ -211,6 +210,14 @@ def github_push(user, commit_message, repo_name, project):
         # Delete the v1 manifest, if one exists
         if remote_map_path in next_tree:
             del next_tree[remote_map_path]
+
+    if project.sdk_version == '2':
+        if remote_wscript_path not in next_tree:
+            next_tree[remote_wscript_path] = InputGitTreeElement(path=remote_wscript_path, mode='100644', type='blob',
+                                                                 content=generate_wscript_file(project, True))
+            has_changed = True
+    else:
+        del next_tree[remote_wscript_path]
 
     # Commit the new tree.
     if has_changed:
@@ -301,27 +308,25 @@ def github_pull(user, project):
     # Now we grab the zip.
     zip_url = repo.get_archive_link('zipball', branch_name)
     u = urllib2.urlopen(zip_url)
-    with tempfile.NamedTemporaryFile(suffix='.zip') as temp:
-        shutil.copyfileobj(u, temp)
-        temp.flush()
-        # And wipe the project!
-        project.source_files.all().delete()
-        project.resources.all().delete()
 
-        # This must happen before do_import_archive or we'll stamp on its results.
-        project.github_last_commit = branch.commit.sha
-        project.github_last_sync = now()
-        project.save()
+    # And wipe the project!
+    project.source_files.all().delete()
+    project.resources.all().delete()
 
-        import_result = do_import_archive(project.id, temp.name)
+    # This must happen before do_import_archive or we'll stamp on its results.
+    project.github_last_commit = branch.commit.sha
+    project.github_last_sync = now()
+    project.save()
 
-        send_keen_event('cloudpebble', 'cloudpebble_github_pull', user=user, data={
-            'data': {
-                'repo': project.github_repo
-            }
-        })
+    import_result = do_import_archive(project.id, u.read())
 
-        return import_result
+    send_keen_event('cloudpebble', 'cloudpebble_github_pull', user=user, data={
+        'data': {
+            'repo': project.github_repo
+        }
+    })
+
+    return import_result
 
 
 @task

@@ -134,7 +134,7 @@ def build_log(request, project_id, build_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     build = get_object_or_404(BuildResult, project=project, pk=build_id)
     try:
-        log = open(build.build_log, 'r').read().decode('utf-8')
+        log = build.read_build_log()
     except Exception as e:
         return json_failure(str(e))
 
@@ -253,16 +253,12 @@ def begin_export(request, project_id):
 @require_POST
 def import_zip(request):
     zip_file = request.FILES['archive']
-    fd, tempzip = tempfile.mkstemp(suffix='.zip')
-    f = os.fdopen(fd, 'w')
-    for chunk in zip_file.chunks():
-        f.write(chunk)
     name = request.POST['name']
     try:
         project = Project.objects.create(owner=request.user, name=name)
     except IntegrityError as e:
         return json_failure(str(e))
-    task = do_import_archive.delay(project.id, tempzip, delete_zip=True, delete_project=True)
+    task = do_import_archive.delay(project.id, zip_file.read(), delete_project=True)
 
     return json_response({'task_id': task.task_id, 'project_id': project.id})
 

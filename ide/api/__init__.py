@@ -81,3 +81,6 @@ def get_shortlink(request):
             'data': {'short_url': response['url']}
         }, request=request)
         return json_response({'url': response['url']})
+
+def heartbeat(request):
+    return json_response({})
