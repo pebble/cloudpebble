@@ -1,28 +1,23 @@
 {% extends "common/base-narrow.html" %}
 {% load staticfiles %}
+
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'ide/css/settings.css' %}">
+{% endblock %}
+
+{% block headercontent %}
+<ul class="nav nav-pills pull-right">
+    <li><a href="{% url 'ide:index' %}" class="btn">Projects</a></li>
+    <li><a class="active btn">Settings</a></li>
+    <li><a href="{% url 'logout' %}" class="btn">Sign out</a></li>
+</ul>
+{% endblock %}
+
 {% block narrowcontent %}
-<style type="text/css">
-    /* Custom container */
-    .container-narrow {
-        margin: 0 auto;
-        max-width: 800px;
-    }
-    .container-narrow > hr {
-        margin: 30px 0;
-    }
-</style>
-<div class="container-narrow">
-    <div class="masthead">
-        <ul class="nav nav-pills pull-right">
-          <li><a href="{% url 'ide:index' %}">Your Projects</a></li>
-          <li class="active"><a>IDE Settings</a></li>
-          <li><a href="{% url 'logout' %}">Sign out</a></li>
-        </ul>
-        <h3 class="muted">CloudPebble</h3>
-    </div>
-    <div class="row-fluid">
-        <div class="span12">
-            <h4>Editor settings</h4>
+<div class="settings-container">
+    <div class="editor-settings">
+        <h2 class="section-heading">Editor settings</h2>
+        <div class="well">
             <form method="post" class="form-horizontal">
                 {% if saved %}
                     <div class="alert alert-success">Settings saved!</div>
@@ -33,7 +28,7 @@
                 {% endfor %}
                 {% for field in form.visible_fields %}
                 <div class="control-group">
-                    <label class="control-label" for="id_{{field.html_name}}">{{field.label}}</label>
+                    <label for="id_{{field.html_name}}">{{field.label}}</label>
                     <div class="controls">
                         {{ field }}
                         <span class="help-block hide"></span>
@@ -47,20 +42,22 @@
             </form>
         </div>
     </div>
-    <div class="row-fluid">
-        <div class="span12 well">
+    <div class="github-settings">
+        <h2 class="section-heading">GitHub Integration</h2>
+        <div class="well">
             <form action="{% url 'ide:remove_github_auth' %}" method="post" id="unlink-form">{%csrf_token%}</form>
             {% if github and github.token %}
-            <img src="{{ github.avatar }}" class="img-rounded" style="height: 100px; width: 100px; float: left; margin-right: 10px;">
-            <h4>{{ github.username }}</h4>
-            <p>You have linked your GitHub account.<br>
-            If you want, you can <a href="{% url 'ide:start_github_auth' %}">re-authenticate</a> or <a id="unlink-btn" href="{% url 'ide:remove_github_auth' %}">un-link</a> your account.</p>
-            {% else %}
-            <h4>GitHub integration</h4>
-            <a href="{% url 'ide:start_github_auth' %}">Link your GitHub account.</a>
-            {% endif %}
-            <hr>
-            <p>Connecting your GitHub account enables you to connect your projects to GitHub repositories.</p>
+            <img src="{{ github.avatar }}" class="github-avatar">
+            <h2 class="github-username">{{ github.username }}</h2>
+            <div class="github-options">
+                <p><a href="{% url 'ide:start_github_auth' %}" class="btn btn-primary">Re-authenticate</a></p>
+                <p><a href="{% url 'ide:remove_github_auth' %}" class="btn btn-primary">Unlink account</a></p>
+                {% else %}
+                <p><a href="{% url 'ide:start_github_auth' %}" class="btn btn-primary">Link your GitHub account</a></p>
+                {% endif %}
+                <hr>
+                <p>Connecting your GitHub account enables you to connect your projects to GitHub repositories.</p>
+            </div>
         </div>
     </div>
 </div>

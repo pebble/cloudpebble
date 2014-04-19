@@ -21,6 +21,10 @@ body {
     height: 80px;
 }
 
+.narrow-container {
+    min-height: 733px;
+}
+
 .container {
     width: 940px;
     margin-left: auto;
@@ -187,10 +191,7 @@ table.table td {
 .well {
     background-color: #3d3d3d;
     border-radius: 10px;
-    padding-top: 20px;
-    padding-bottom: 20px;
-    padding-left: 50px;
-    padding-right: 50px;
+    padding: 20px 50px;
 }
 
 .header {
@@ -199,6 +200,7 @@ table.table td {
 
 .footer {
     margin-top: 40px;
+    clear: both;
 }
 
 .label {
@@ -226,3 +228,50 @@ table.table td {
     background-color: #3a87ad;
 }
 
+h2.section-heading {
+    line-height: 50px;
+    margin-left: 50px;
+    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.form-horizontal .control-group::after {
+    clear: both;
+}
+
+.form-horizontal .control-group {
+    min-height: 40px;
+}
+
+.form-horizontal .control-group label {
+    float: left;
+    text-transform: uppercase;
+    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: white;
+    font-size: large;
+    line-height: 40px;
+    text-align: right;
+    width: 130px;
+    padding-right: 20px;
+}
+
+.form-horizontal .controls {
+    margin-bottom: 20px;
+}
+
+select {
+    -webkit-appearance: none;
+    height: 40px;
+    line-height: 30px;
+    border-radius: 10px;
+    background-color: white;
+    font-family: PFD-X-Thin, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: larger;
+    width: 270px;
+    border: none;
+    padding-top: 5px;
+    padding-left: 15px;
+    cursor: pointer;
+    background-position: right 10px center;;
+    background-repeat: no-repeat;
+    background-image: url('../../common/img/dropdown.png');
+}

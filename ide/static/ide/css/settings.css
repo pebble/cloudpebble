@@ -1,0 +1,41 @@
+.editor-settings {
+    float: left;
+    width: 535px;
+}
+
+.github-settings {
+    float: right;
+    width: 375px;
+}
+
+.github-settings .btn {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.github-avatar {
+    width: 80px;
+    height: 80px;
+    float: left;
+    margin-right: 15px;
+    margin-bottom: 30px;
+    background-color: white;
+    border-radius: 10px;
+}
+
+.github-username {
+    padding-top: 10px;
+    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.github-options {
+    clear: both;
+    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: large;
+}
+
+hr {
+    border: 1px solid #4f4f4f;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
