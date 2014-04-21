@@ -323,8 +323,8 @@
                     </div>
                 </div>
             </div>
-            <div class="well native-only">
-                <div class="control-group">
+            <div class="well">
+                <div class="control-group native-only">
                     <label class="control-label" for="settings-app-keys">PebbleKit JS Message Keys</label>
                     <div class="controls">
                         <textarea id="settings-app-keys" style="height: 100px;" placeholder="{}" style="font-family: monospace;">{{project.app_keys}}</textarea>
@@ -338,7 +338,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="control-group">
+                <div class="control-group native-only">
                     <label class="control-label" for="settings-app-jshint">Check Javascript with jshint before building</label>
                     <div class="controls">
                         <input type="checkbox" id="settings-app-jshint" {%if project.app_jshint%}checked{%endif%}>
