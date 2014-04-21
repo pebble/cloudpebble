@@ -1,6 +1,7 @@
 {% extends "ide/base.html" %}
 {% load staticfiles %}
 {% block title %}CloudPebble – {{ project.name }}{% endblock %}
+
 {% block content %}
 <div class="container-fluid">
     <div class="masthead" id="masthead_wrapper">
@@ -327,15 +328,34 @@
                 <div class="control-group">
                     <label class="control-label" for="settings-app-keys">PebbleKit JS Message Keys</label>
                     <div class="controls">
-                        <textarea id="settings-app-keys" style="height: 100px;" placeholder="{}" style="font-family: monospace;">{{project.app_keys}}</textarea>
-                        <div class="help-block">
-                            A JSON mapping from strings to integers used by PebbleKit JS, like this:
-                            <pre style="width: 200px;">
-{
-    "apple": 1,
-    "banana": 2
-}</pre>
-                        </div>
+                        <table id="settings-app-keys">
+                            <thead>
+                                <tr>
+                                    <th>Key Name</th>
+                                    <th>Key ID</th>
+                                    <th>&nbsp;</th>
+                                </tr>
+                            </thead>
+                            <tbody id="app_keys">
+                                {%  for key, id in app_keys %}
+                                <tr id="id_appkey_{{ key }}">
+                                    <th><input class="appkey" value="{{key}}" type="hidden" />{{ key }}</th>
+                                    <td><input id="appkey_{{key}}" value="{{id}}" type="number" /></td>
+                                    <td><button onclick="CloudPebble.Settings.RemoveAppKey('{{ key }}')" class="btn"><span class="icon-minus"></span></button></td>
+                                </tr>
+                                {%  endfor  %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td><input id="id_add_appkey_name" type="text" placeholder="Name" /></td>
+                                    <td><input id="id_add_appkey_id" type="number" value="0" /></td>
+                                    <td><button onclick="CloudPebble.Settings.AddAppKey()" class="btn"><span class="icon-plus"></span></button></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                        <span class="help-block">
+                            Click the <span class="icon-plus"></span> to add a key to the map.
+                        </span>
                     </div>
                 </div>
                 <div class="control-group">
