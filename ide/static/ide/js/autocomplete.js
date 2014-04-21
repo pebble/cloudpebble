@@ -1042,10 +1042,10 @@ CloudPebble.Editor.Autocomplete = (function() {
     var renderSummary = function(completion, element) {
         if(!mCurrentSummaryElement) return;
         var docs = CloudPebble.Documentation.Lookup(completion.name || completion.text);
-        if(docs) {
-            mCurrentSummaryElement.html(docs.description.replace(/[.;](\s)[\s\S]*/, '.'));
+        if(docs && docs.description) {
+            mCurrentSummaryElement.html(docs.description.replace(/[.;](\s)[\s\S]*/, '.')).show();
         } else {
-            mCurrentSummaryElement.empty();
+            mCurrentSummaryElement.empty().hide();
         }
     };
     var showSummary = function(hints) {
@@ -1059,11 +1059,9 @@ CloudPebble.Editor.Autocomplete = (function() {
             width: $(hints).innerWidth() - 4,
             display: 'none'
         }).addClass('autocomplete-summary');
-        summary.text("This is a description.");
         summary.appendTo('body');
         mCurrentSummaryElement = summary;
         clearTimeout(mWaiting);
-        mWaiting = setTimeout(function() { summary.show(); }, 170);
     };
     var hideSummary = function() {
         mCurrentSummaryElement.remove();
