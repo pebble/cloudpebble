@@ -40,16 +40,14 @@ class ResourceFile(IdeModel):
     s3_path = property(get_s3_path)
 
     def save_file(self, stream, file_size=0):
+        if file_size > 5*1024*1024:
+            raise Exception("Uploaded file too big.");
         if not settings.AWS_ENABLED:
             if not os.path.exists(os.path.dirname(self.local_filename)):
                 os.makedirs(os.path.dirname(self.local_filename))
-            out = open(self.local_filename, 'wb')
-            for chunk in stream.chunks():
-                out.write(chunk)
-            out.close()
+            with open(self.local_filename, 'wb') as out:
+                out.write(stream.read())
         else:
-            if file_size > 5*1024*1024:
-                raise Exception("Uploaded file too big.");
             s3.save_file('source', self.s3_path, stream.read())
 
         self.project.last_modified = now()
