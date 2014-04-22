@@ -13,9 +13,9 @@ def generate_wscript_file(project, for_export=False):
 #
 
 try:
-    from sh import jshint, ErrorReturnCode_2
+    from sh import CommandNotFound, jshint, ErrorReturnCode_2
     hint = jshint
-except ImportError:
+except (ImportError, CommandNotFound):
     hint = None
 
 top = '.'
