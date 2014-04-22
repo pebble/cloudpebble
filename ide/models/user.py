@@ -36,13 +36,18 @@ class UserSettings(IdeModel):
         ('solarized dark', 'Solarized (dark)'),
     )
 
+    USE_SPACES_CHOICES = (
+        (True, 'Using spaces'),
+        (False, 'Using tabs')
+    )
+
     def __unicode__(self):
         return self.user.name
 
     autocomplete = models.IntegerField(choices=AUTOCOMPLETE_CHOICES, default=AUTOCOMPLETE_ALWAYS)
     keybinds = models.CharField(max_length=20, choices=KEYBIND_CHOICES, default=KEYBIND_STANDARD)
     theme = models.CharField(max_length=50, choices=THEME_CHOICES, default='monokai')
-    use_spaces = models.BooleanField(default=True, verbose_name="Indent using spaces")
+    use_spaces = models.BooleanField(default=True, verbose_name="Indents", choices=USE_SPACES_CHOICES)
     tab_width = models.PositiveSmallIntegerField(default=2)
 
     # Used for the Pebble ownership transition, when it was set to False.
