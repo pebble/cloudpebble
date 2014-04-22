@@ -202,11 +202,14 @@ CloudPebble.Settings = (function() {
             ga('send', 'event', 'project', 'export', 'zip');
         });
 
-        pane.find('#add-appkey').click(function() {
-            var name = pane.find('#add_appkey_name').val();
-            var id = pane.find('#add_appkey_id').val();
+        var appkey_name = pane.find('#add-appkey-name').val();
+        var appkey_id = pane.find('#add-appkey-id').val();
 
-            pane.find('#add_appkey_name').val('');
+        pane.find('#add-appkey').click(function() {
+            var name = appkey_name.val();
+            var id = appkey_id.val();
+
+            appkey_name.val('');
 
             var new_appkey = $('<tr class="appkey">' +
                 '<td><input class="appkey-name" type="text" /></td>' +
