@@ -100,7 +100,7 @@ CloudPebble.Settings = (function() {
                 }
 
                 pane.find(".appkey").each(function() {
-                    app_keys[$(this).val()] = pane.find("#appkey_" + $(this).val()).val();
+                    app_keys[$(this).find('.appkey-name').val()] = $(this).find('.appkey-id').val();
                 });
 
                 saved_settings['app_short_name'] = short_name;
@@ -202,6 +202,33 @@ CloudPebble.Settings = (function() {
             ga('send', 'event', 'project', 'export', 'zip');
         });
 
+        pane.find('#add-appkey').click(function() {
+            //add_appkey(settings_template.find('#id_add_appkey_name').val(),settings_template.find('#id_add_appkey_id').val());
+            var name = pane.find('#add_appkey_name').val();
+            var id = pane.find('#add_appkey_id').val();
+
+            pane.find('#add_appkey_name').val('');
+
+            var thing = $('<tr class="appkey">' +
+                '<td><input class="appkey-name" type="text" /></td>' +
+                '<td><input class="appkey-value" type="number" /></td>' +
+                '<td><button class="btn remove-appkey"><span class="icon-minus"></span></button></td>' +
+                '</tr>');
+
+            thing.find('.remove-appkey').click(function() {
+                thing.remove();
+            }).removeAttr('id');
+
+            thing.find('.appkey-name').val(name);
+            thing.find('.appkey-value').val(id);
+
+            pane.find('#appkeys').append(thing);
+        });
+
+        pane.find('.remove-appkey').click(function() {
+            $(this).parent().parent().remove();
+        });
+
         pane.find('#settings-sdk-version').click(function() {
             var val = $(this).val();
             if(val == '1') {
@@ -235,21 +262,9 @@ CloudPebble.Settings = (function() {
     };
 
     var add_appkey = function(name, id) {
-        $('#app_keys').append('<tr id="new_appkey_entry">' +
-            '<th><input class="appkey" type="hidden" />' + name + "</th>" +
-            '<td><input type="number" id="new_appkey_value" /></td>' +
-            '<td><button id="new_appkey_remove" class="btn"><span class="icon-minus"></span></button></td>' +
-            '</tr>');
-
-        var thing = settings_template.find('#new_appkey_entry');
-
-        thing.find('#new_appkey_remove').click(function() {
-            CloudPebble.Settings.RemoveAppKey(name);
-        }).removeAttr('id');
-
-        thing.find('.appkey').val(name);
-        thing.find('#new_appkey_value').val(id).attr('id', 'appkey_' + name)
-        thing.attr('id', 'id_appkey_' + name);
+        if(name == "") {
+            return; // NO-OP on blank name.
+        }
     };
 
     return {
@@ -264,12 +279,6 @@ CloudPebble.Settings = (function() {
         },
         RemoveResource: function(resource) {
             remove_resource(resource);
-        },
-        RemoveAppKey: function(key) {
-            $('#id_appkey_' + key).remove();
-        },
-        AddAppKey: function() {
-            add_appkey(settings_template.find('#id_add_appkey_name').val(),settings_template.find('#id_add_appkey_id').val());
         }
     };
 })();

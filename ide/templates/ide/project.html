@@ -336,20 +336,20 @@
                                     <th>&nbsp;</th>
                                 </tr>
                             </thead>
-                            <tbody id="app_keys">
+                            <tbody id="appkeys">
                                 {%  for key, id in app_keys %}
-                                <tr id="id_appkey_{{ key }}">
-                                    <th><input class="appkey" value="{{key}}" type="hidden" />{{ key }}</th>
-                                    <td><input id="appkey_{{key}}" value="{{id}}" type="number" /></td>
-                                    <td><button onclick="CloudPebble.Settings.RemoveAppKey('{{ key }}')" class="btn"><span class="icon-minus"></span></button></td>
+                                <tr class="appkey">
+                                    <td><input class="appkey-name" value="{{key}}" type="text" /></td>
+                                    <td><input class="appkey-id" value="{{id}}" type="number" /></td>
+                                    <td><button class="btn remove-appkey"><span class="icon-minus"></span></button></td>
                                 </tr>
                                 {%  endfor  %}
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <td><input id="id_add_appkey_name" type="text" placeholder="Name" /></td>
-                                    <td><input id="id_add_appkey_id" type="number" value="0" /></td>
-                                    <td><button onclick="CloudPebble.Settings.AddAppKey()" class="btn"><span class="icon-plus"></span></button></td>
+                                    <td><input id="add_appkey_name" type="text" placeholder="Name" /></td>
+                                    <td><input id="add_appkey_id" type="number" value="0" /></td>
+                                    <td><button id="add-appkey" class="btn"><span class="icon-plus"></span></button></td>
                                 </tr>
                             </tfoot>
                         </table>
