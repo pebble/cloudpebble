@@ -226,7 +226,7 @@ CloudPebble.Settings = (function() {
         });
 
         pane.find('.remove-appkey').click(function() {
-            $(this).parent().parent().remove();
+            $(this).closest('.appkey').remove();
         });
 
         pane.find('#settings-sdk-version').click(function() {
@@ -258,12 +258,6 @@ CloudPebble.Settings = (function() {
         if(resource.id == CloudPebble.ProjectInfo.menu_icon) {
             thing.val('');
             CloudPebble.ProjectInfo.menu_icon = null;
-        }
-    };
-
-    var add_appkey = function(name, id) {
-        if(name == "") {
-            return; // NO-OP on blank name.
         }
     };
 
