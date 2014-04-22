@@ -33,7 +33,7 @@ def view_project(request, project_id):
     if project.app_version_label is None:
         project.app_version_label = '1.0'
     send_keen_event('cloudpebble', 'cloudpebble_open_project', request=request, project=project)
-    app_keys = json.loads(project.app_keys).iteritems()  # TODO: This should probably be sorted somehow.
+    app_keys = json.loads(project.app_keys).iteritems()
     return render(request, 'ide/project.html', {'project': project, 'app_keys': app_keys})
 
 

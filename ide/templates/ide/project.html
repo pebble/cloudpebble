@@ -337,25 +337,25 @@
                                 </tr>
                             </thead>
                             <tbody id="appkeys">
-                                {%  for key, id in app_keys %}
+                                {% for key, id in app_keys %}
                                 <tr class="appkey">
                                     <td><input class="appkey-name" value="{{key}}" type="text" /></td>
                                     <td><input class="appkey-id" value="{{id}}" type="number" /></td>
-                                    <td><button class="btn remove-appkey"><span class="icon-minus"></span></button></td>
+                                    <td><button class="btn remove-appkey"><i class="icon-minus"></i></button></td>
                                 </tr>
-                                {%  endfor  %}
+                                {% endfor %}
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <td><input id="add_appkey_name" type="text" placeholder="Name" /></td>
-                                    <td><input id="add_appkey_id" type="number" value="0" /></td>
-                                    <td><button id="add-appkey" class="btn"><span class="icon-plus"></span></button></td>
+                                    <td><input id="add-appkey-name" type="text" placeholder="Name" /></td>
+                                    <td><input id="add-appkey-id" type="number" value="0" /></td>
+                                    <td><button id="add-appkey" class="btn"><i class="icon-plus"></i></button></td>
                                 </tr>
                             </tfoot>
                         </table>
-                        <span class="help-block">
-                            Click the <span class="icon-plus"></span> to add a key to the map.
-                        </span>
+                        <div class="help-block">
+                            Click the <i class="icon-plus"></i> to add a key to the map.
+                        </div>
                     </div>
                 </div>
                 <div class="control-group native-only">
