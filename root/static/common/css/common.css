@@ -236,6 +236,8 @@ h2.section-heading {
 
 .form-horizontal .control-group::after {
     clear: both;
+    content: "";
+    display: table;
 }
 
 .form-horizontal .control-group {
