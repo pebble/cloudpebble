@@ -213,7 +213,7 @@ CloudPebble.Settings = (function() {
 
             var new_appkey = $('<tr class="appkey">' +
                 '<td><input class="appkey-name" type="text" /></td>' +
-                '<td><input class="appkey-value" type="number" /></td>' +
+                '<td><input class="appkey-id" type="number" /></td>' +
                 '<td><button class="btn remove-appkey"><i class="icon-minus"></i></button></td>' +
                 '</tr>');
 
@@ -222,7 +222,7 @@ CloudPebble.Settings = (function() {
             });
 
             new_appkey.find('.appkey-name').val(name);
-            new_appkey.find('.appkey-value').val(id);
+            new_appkey.find('.appkey-id').val(id);
 
             pane.find('#appkeys').append(new_appkey);
         });
