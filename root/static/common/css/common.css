@@ -277,3 +277,18 @@ select {
     background-repeat: no-repeat;
     background-image: url('../../common/img/dropdown.png');
 }
+
+input[type=text], input[type=number] {
+    height: 35px;
+    font-family: PFD-X-Thin, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: larger;
+    border: none;
+    border-radius: 10px;
+    padding-top: 5px;
+    padding-left: 15px;
+    margin: 0;
+}
+
+input[type=number] {
+    width: 100px;
+}
