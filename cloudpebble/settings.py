@@ -4,7 +4,7 @@ import os
 import dj_database_url
 _environ = os.environ
 
-DEBUG = _environ.get('DEBUG', '') != ''
+DEBUG = True #_environ.get('DEBUG', '') != ''
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (

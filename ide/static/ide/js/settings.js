@@ -235,6 +235,10 @@ CloudPebble.Settings = (function() {
     };
 
     var add_appkey = function(name, id) {
+        if(name == "") {
+            return; // NO-OP on blank name.
+        }
+
         $('#app_keys').append('<tr id="new_appkey_entry">' +
             '<th><input class="appkey" type="hidden" />' + name + "</th>" +
             '<td><input type="number" id="new_appkey_value" /></td>' +
