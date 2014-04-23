@@ -1,38 +1,54 @@
-{% extends "ide/../../../root/templates/common/base.html" %}
+{% extends "common/base.html" %}
 {% load staticfiles %}
+
 {% block title %}CloudPebble – {{ project.name }}{% endblock %}
+
+
+{% block head %}
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/addon/hint/show-hint.min.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/addon/dialog/dialog.min.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/codemirror.min.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/theme/monokai.min.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/theme/eclipse.min.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/theme/blackboard.min.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/theme/solarized.min.css">
+<link rel="stylesheet" href="{% static 'ide/css/ide.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="masthead" id="masthead_wrapper">
-        <ul class="nav nav-pills pull-right">
-          <li class="active"><a>{{ project.name }}</a></li>
-          <li><a href="{% url 'ide:index' %}">Your Projects</a></li>
-          <li><a href="{% url 'ide:settings' %}">IDE Settings</a></li>
-          <li><a href="{% url 'logout' %}">Sign out</a></li>
-        </ul>
-        <h3 class="muted">CloudPebble – <span class="project-name">{{ project.name }}</span></h3>
-    </div>
+<div class="header">
+{#    <div class="container">#}
+        <h1 class="cloudpebble-logo" style="padding-left: 40px;">
+            <span class="cloudpebble-logo-cloud">Cloud</span><span class="cloudpebble-logo-pebble">Pebble</span>
+        </h1>
+        <div class="header-right">
+            <ul class="nav-pills">
+                <li><a href="{% url 'ide:index' %}" class="btn">Projects</a></li>
+                <li><a href="{% url 'ide:settings' %}" class="btn">Settings</a></li>
+                <li><a href="{% url 'logout' %}" class="btn">Sign out</a></li>
+            </ul>
+        </div>
+{#    </div>#}
+</div>
+<div class="project-container">
     <div class="row-fluid">
-        <div class="span2" id="sidebar_wrapper">
-            <div class="well">
-                <button class="btn save-and-run">Save and run <img src="{% static 'ide/img/spinner.gif' %}" style="display:none;"></button>
-                <ul class="nav nav-list" id="sidebar">
-                    <li class="nav-header">Project</li>
-                    <li id="sidebar-pane-settings"><a href="#">Settings</a></li>
-                    <li id="sidebar-pane-compile"><a href="#">Compilation</a></li>
-                    <li id="sidebar-pane-github" class="native-only {%if not project.owner.github%}disabled{%endif%}"><a href="#">GitHub</a></li>
-                    <li class="nav-header">Source files</li>
-                    <li class="divider native-only" id="end-source-files"></li>
-                    <li class="native-only"><a href="#" id="new-source-file"><strong>New C file</strong></a></li>
-                    <li class="native-only"><a href="#" id="new-js-file"><strong>New JavaScript file</strong></a></li>
-                    <li class="nav-header native-only">Resources</li>
+        <div id="sidebar-wrapper">
+            <div>
+{#                <button class="btn save-and-run">Save and run <img src="{% static 'ide/img/spinner.gif' %}" style="display:none;"></button>#}
+                <ul class="nav-list" id="sidebar">
+                    <li class="nav-header project-name">{{ project.name }}</li>
+                    <li class="nav-header" id="sidebar-pane-settings"><a href="#">Settings</a></li>
+                    <li class="nav-header" id="sidebar-pane-compile"><a href="#">Compilation</a></li>
+                    <li class="nav-header" id="sidebar-pane-github" class="native-only {%if not project.owner.github%}disabled{%endif%}"><a href="#">GitHub</a></li>
+                    <li class="nav-header nav-section">Source files <button class="btn btn-small" id="new-source-file">Add new</button></li>
+                    <li class="native-only" id="end-source-files"></li>
+                    <li class="nav-header nav-section native-only">Resources <button class="btn btn-small" id="sidebar-pane-new-resource">Add new</button></li>
                     <li class="hide native-only" id="end-resources"></li>
-                    <li id="sidebar-pane-new-resource" class="native-only"><a href="#"><strong>New resource</strong></a></li>
                 </ul>
             </div>
         </div>
-        <div class="span10" id="pane-parent">
-            <div id="main-pane">
+        <div id="pane-parent">
+            <div id="main-pane" style="display: none;">
             </div>
             <div id="progress-pane">
                 <div class="row-fluid">
@@ -48,6 +64,17 @@
         </div>
     </div>
 </div>
+<div class="footer">
+        <p class="small-print">
+            CloudPebble was created by Katharine Berry and is now run by Pebble.<br>
+            Please submit bug reports and feature requests on <a href="https://github.com/CloudPebble">GitHub</a>.
+            Questions? Email me at <a href="mailto:katharine@getpebble.com">katharine@getpebble.com</a>.
+        </p>
+        <div class="pebble-logo">
+            <img src="{% static 'root/images/pebble.png' %}">
+        </div>
+</div>
+
 <!-- Resource editing template -->
 <div id="resource-pane-template" class="hide">
     <form class="form-horizontal">
@@ -602,6 +629,7 @@
     </div>
 </div>
 {% endblock %}
+
 {% block scripts %}
 <script type="text/javascript">
 var PROJECT_ID = {{ project.id }};
@@ -655,14 +683,4 @@ var DOC_JSON = "{% static 'ide/documentation.json' %}";
 <script type="text/javascript">
 CloudPebble.Init();
 </script>
-{% endblock %}
-{% block head %}
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/addon/hint/show-hint.min.css">
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/addon/dialog/dialog.min.css">
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/codemirror.min.css">
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/theme/monokai.min.css">
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/theme/eclipse.min.css">
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/theme/blackboard.min.css">
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/theme/solarized.min.css">
-<link rel="stylesheet" href="{% static 'ide/css/ide.css' %}">
 {% endblock %}

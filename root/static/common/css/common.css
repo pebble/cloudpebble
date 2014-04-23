@@ -51,6 +51,7 @@ p {
 }
 
 a {
+    text-decoration: none;
     color: inherit;
 }
 
@@ -61,7 +62,6 @@ a:hover {
 .cloudpebble-logo {
     float: left;
     height: 80px;
-    width: 300px;
     line-height: 80px;
     font-size: 24px;
     font-weight: normal;
@@ -90,7 +90,6 @@ a:hover {
 .btn {
     border: none;
     cursor: pointer;
-    font-family: inherit;
     position: relative;
     text-decoration: none;
     display: inline-block;
@@ -137,6 +136,13 @@ a.btn {
 .btn.btn-cancel {
     color: white;
     background-color: #3f3f3f
+}
+
+.btn-small {
+    font-size: 12px;
+    height: 20px;
+    line-height: 18px;
+    width: initial;
 }
 
 .blur {

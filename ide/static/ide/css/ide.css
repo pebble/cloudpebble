@@ -1,3 +1,93 @@
+/* New stuff. */
+
+.project-container {
+    position: absolute;
+    top: 80px;
+    bottom: 80px;
+    width: 100%;
+    background-color: red; /* This should always be completely obscured. */
+}
+
+#sidebar {
+    background-color: #292929;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    overflow: auto;
+    width: 210px;
+    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: large;
+    padding-left: 67px;
+    padding-top: 34px;
+}
+
+.footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding-left: 40px;
+    padding-right: 40px;
+    overflow: hidden;
+}
+
+.nav-list .nav-header {
+    text-transform: uppercase;
+    color: #767676;
+}
+
+.nav-list .active {
+    color: white;
+    background-color: #333333;
+}
+
+.nav-list li.nav-section {
+    margin-top: 30px;
+}
+
+.nav-list li {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.nav-list .project-name {
+    color: #adadad;
+    border: 2px solid #333333;
+    display: inline;
+    border-radius: 5px;
+    padding: 4px 15px 2px;
+    margin-left: -15px;
+}
+
+.nav-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+#pane-parent {
+    background: #333333 url('../img/background-logo.png') no-repeat center;
+    position: absolute;
+    top: 0;
+    left: 277px;
+    bottom: 0;
+    right: 0;
+}
+
+#main-pane {
+    background: #333333;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow: scroll;
+}
+
+/* Old stuff. */
+
 .CodeMirror {
   border: 1px solid #eee;
   border-radius: 4px;
@@ -21,18 +111,6 @@
 
 .nav-list .popover {
     max-width: 350px;
-}
-
-#sidebar.nav-list > li > a, #sidebar.nav-list .nav-header {
-    margin-right: -20px;
-    margin-left: -20px;
-}
-
-#sidebar.nav-list {
-    padding-left: 0;
-    padding-right: 0;
-    margin-top: -10px;
-    margin-bottom: -10px;
 }
 
 #last-compilation-qr-code img {
