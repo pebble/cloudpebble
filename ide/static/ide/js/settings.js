@@ -211,7 +211,7 @@ CloudPebble.Settings = (function() {
         });
 
         var add_appkey_field = function() {
-            $(this).unbind('change', add_appkey_field);
+            $(this).off('change', add_appkey_field);
 
             var entry = $(this).closest('.appkey');
             entry.find('.remove-appkey').removeClass('disabled').click(function() {
@@ -224,12 +224,12 @@ CloudPebble.Settings = (function() {
                 '<td><button class="btn remove-appkey disabled"><i class="icon-minus"></i></button></td>' +
                 '</tr>');
 
-            new_appkey.find('.appkey-name').bind('change', add_appkey_field);
+            new_appkey.find('.appkey-name').on('change', add_appkey_field);
 
             pane.find('#appkeys').append(new_appkey);
         };
 
-        pane.find('.appkey:last').bind('change', add_appkey_field);
+        pane.find('.appkey:last').on('change', add_appkey_field);
 
         pane.find('.remove-appkey').not('.disabled').click(function() {
             $(this).closest('.appkey').remove();
