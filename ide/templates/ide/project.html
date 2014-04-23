@@ -344,17 +344,15 @@
                                     <td><button class="btn remove-appkey"><i class="icon-minus"></i></button></td>
                                 </tr>
                                 {% endfor %}
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td><input id="add-appkey-name" type="text" placeholder="Name" /></td>
-                                    <td><input id="add-appkey-id" type="number" value="0" /></td>
-                                    <td><button id="add-appkey" class="btn"><i class="icon-plus"></i></button></td>
+                                <tr class="appkey">
+                                    <td><input class="appkey-name" type="text" placeholder="New Entry" /></td>
+                                    <td><input class="appkey-id" type="number" value="0" /></td>
+                                    <td><button class="btn remove-appkey disabled"><i class="icon-minus"></i></button></td>
                                 </tr>
-                            </tfoot>
+                            </tbody>
                         </table>
                         <div class="help-block">
-                            Click the <i class="icon-plus"></i> to add a key to the map.
+                            A mapping from strings to integers used by PebbleKit JS.
                         </div>
                     </div>
                 </div>
