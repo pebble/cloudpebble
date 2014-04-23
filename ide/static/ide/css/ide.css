@@ -311,3 +311,9 @@ span.cm-autofilled-end {
     text-wrap: none;
     overflow: hidden;
 }
+
+#add-appkey {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
