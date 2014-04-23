@@ -1,5 +1,13 @@
 /* New stuff. */
 
+/* Page layout framework */
+
+/* This disables bouncing in Safari */
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
 .project-container {
     position: absolute;
     top: 80px;
@@ -17,8 +25,7 @@
     width: 210px;
     font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: large;
-    padding-left: 67px;
-    padding-top: 34px;
+    padding-left: 40px;
 }
 
 .footer {
@@ -30,6 +37,29 @@
     padding-right: 40px;
     overflow: hidden;
 }
+
+/* Main content */
+
+#pane-parent {
+    background: #333333 url('../img/background-logo.png') no-repeat center;
+    position: absolute;
+    top: 0;
+    left: 250px;
+    bottom: 0;
+    right: 0;
+}
+
+#main-pane {
+    background: #333333;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow: scroll;
+}
+
+/* Sidebar */
 
 .nav-list .nav-header {
     text-transform: uppercase;
@@ -55,10 +85,11 @@
 .nav-list .project-name {
     color: #adadad;
     border: 2px solid #333333;
-    display: inline;
+    display: inline-block;
     border-radius: 5px;
     padding: 4px 15px 2px;
     margin-left: -15px;
+    margin-bottom: 12px;
 }
 
 .nav-list {
@@ -67,34 +98,63 @@
     list-style: none;
 }
 
-#pane-parent {
-    background: #333333 url('../img/background-logo.png') no-repeat center;
-    position: absolute;
-    top: 0;
-    left: 277px;
-    bottom: 0;
-    right: 0;
-}
+/* Editor */
 
-#main-pane {
-    background: #333333;
+.CodeMirror {
+    font-family: Menlo, 'Deja Vu Sans Mono', monospace;
+    font-size: 13px;
+    line-height: 18px;
     position: absolute;
     top: 0;
     bottom: 0;
     left: 0;
+    right: 50px;
+    height: 100% !important;
+}
+
+#editor-button-wrapper {
+    position: absolute;
+    width: 40px;
+    margin-left: 5px;
+    margin-right: 5px;
     right: 0;
-    overflow: scroll;
+    top: 0;
+    bottom: 0;
+}
+
+#editor-button-wrapper .btn {
+    margin-top: 10px;
+}
+
+.run-btn {
+    background: #00B293 url('../img/run.png') no-repeat 15px; /* optically centred */
+}
+
+.run-btn:hover {
+    background-color: #00B293;
+}
+
+.save-btn {
+    background: white url('../img/save.png') no-repeat center;
+}
+
+.reload-btn {
+    background: white url('../img/reload.png') no-repeat center;
+}
+
+.delete-btn {
+    background: #e5171f url('../img/delete.png') no-repeat center;
+}
+
+.delete-btn:hover {
+    background-color: #e5171f;
+}
+
+#editor-button-wrapper .btn:hover {
+    opacity: 0.8;
 }
 
 /* Old stuff. */
-
-.CodeMirror {
-  border: 1px solid #eee;
-  border-radius: 4px;
-  font-family: Menlo, 'Deja Vu Sans Mono', monospace;
-  font-size: 13px;
-  line-height: 18px;
-}
 
 .CodeMirror-hints {
   font-family: Menlo, 'Deja Vu Sans Mono', monospace;

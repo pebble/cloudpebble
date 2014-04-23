@@ -1,0 +1,29 @@
+/* Based on Sublime Text's Monokai theme */
+
+.cm-s-cloudpebble.CodeMirror {background: #333333; color: #d7d7d7;}
+.cm-s-cloudpebble div.CodeMirror-selected {background: #49483E !important;}
+.cm-s-cloudpebble .CodeMirror-gutters {background: #333333; border-right: 0;}
+.cm-s-cloudpebble .CodeMirror-linenumber {color: #d0d0d0;}
+.cm-s-cloudpebble .CodeMirror-cursor {border-left: 1px solid #f8f8f0 !important;}
+
+.cm-s-cloudpebble span.cm-comment {color: #d7d7d7;}
+.cm-s-cloudpebble span.cm-atom {color: #07af88;}
+.cm-s-cloudpebble span.cm-number {color: #07af88;}
+
+.cm-s-cloudpebble span.cm-property, .cm-s-cloudpebble span.cm-attribute {color: #a4dc40;}
+.cm-s-cloudpebble span.cm-keyword {color: #f52323;}
+.cm-s-cloudpebble span.cm-string {color: #e47c08;}
+
+.cm-s-cloudpebble span.cm-variable {color: #a4dc40;}
+.cm-s-cloudpebble span.cm-variable-2 {color: #9effff;}
+.cm-s-cloudpebble span.cm-def {color: #fd971f;}
+.cm-s-cloudpebble span.cm-bracket {color: #f8f8f2;}
+.cm-s-cloudpebble span.cm-tag {color: #f52323;}
+.cm-s-cloudpebble span.cm-link {color: #ae81ff;}
+.cm-s-cloudpebble span.cm-error {background: #f92672; color: #f8f8f0;}
+
+.cm-s-cloudpebble .CodeMirror-activeline-background {background: #373831 !important;}
+.cm-s-cloudpebble .CodeMirror-matchingbracket {
+  text-decoration: underline;
+  color: white !important;
+}

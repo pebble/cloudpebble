@@ -21,6 +21,10 @@ body {
     height: 80px;
 }
 
+.footer a {
+    text-decoration: underline;
+}
+
 .narrow-container {
     min-height: 733px;
 }

@@ -29,6 +29,7 @@ class UserSettings(IdeModel):
     )
 
     THEME_CHOICES = (
+        ('cloudpebble', 'CloudPebble'),
         ('monokai', 'Monokai (Sublime Text)'),
         ('blackboard', 'Blackboard (TextMate)'),
         ('eclipse', 'Eclipse'),
@@ -46,7 +47,7 @@ class UserSettings(IdeModel):
 
     autocomplete = models.IntegerField(choices=AUTOCOMPLETE_CHOICES, default=AUTOCOMPLETE_ALWAYS)
     keybinds = models.CharField(max_length=20, choices=KEYBIND_CHOICES, default=KEYBIND_STANDARD)
-    theme = models.CharField(max_length=50, choices=THEME_CHOICES, default='monokai')
+    theme = models.CharField(max_length=50, choices=THEME_CHOICES, default='cloudpebble')
     use_spaces = models.BooleanField(default=True, verbose_name="Indents", choices=USE_SPACES_CHOICES)
     tab_width = models.PositiveSmallIntegerField(default=2)
 
