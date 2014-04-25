@@ -99,7 +99,7 @@ class BuildResult(IdeModel):
         if not settings.AWS_ENABLED:
             shutil.move(pbw_path, self.pbw)
         else:
-            s3.upload_file('builds', self.pbw, pbw_path, public=True)
+            s3.upload_file('builds', self.pbw, pbw_path, public=True, download_filename='%s.pbw' % self.project.app_short_name.replace('/','-'))
 
     def save_simplyjs(self, javascript):
         if not settings.AWS_ENABLED:

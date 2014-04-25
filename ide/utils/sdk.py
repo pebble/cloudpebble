@@ -13,9 +13,9 @@ def generate_wscript_file(project, for_export=False):
 #
 
 try:
-    from sh import jshint, ErrorReturnCode_2
+    from sh import CommandNotFound, jshint, ErrorReturnCode_2
     hint = jshint
-except ImportError:
+except (ImportError, CommandNotFound):
     hint = None
 
 top = '.'
@@ -171,7 +171,7 @@ def generate_simplyjs_manifest_dict(project):
         "companyName": project.app_company_name,
         "versionCode": project.app_version_code,
         "versionLabel": project.app_version_label,
-        "capabilities": [],
+        "capabilities": project.app_capabilities.split(','),
         "watchapp": {
             "watchface": project.app_is_watchface
         },
