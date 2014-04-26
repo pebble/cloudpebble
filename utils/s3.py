@@ -1,6 +1,7 @@
 import boto
 from boto.s3.key import Key
 from django.conf import settings
+import urllib
 
 if settings.AWS_ENABLED:
     _s3 = boto.connect_s3(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
@@ -53,7 +54,7 @@ def save_file(bucket_name, path, value, public=False, content_type='application/
 
 
 @_requires_aws
-def upload_file(bucket_name, dest_path, src_path, public=False, content_type='application/octet-stream'):
+def upload_file(bucket_name, dest_path, src_path, public=False, content_type='application/octet-stream', download_filename=None):
     bucket = _buckets[bucket_name]
     key = Key(bucket)
     key.key = dest_path
@@ -63,7 +64,14 @@ def upload_file(bucket_name, dest_path, src_path, public=False, content_type='ap
     else:
         policy = 'private'
 
-    key.set_contents_from_filename(src_path, policy=policy, headers={'Content-Type': content_type})
+    headers = {
+        'Content-Type': content_type
+    }
+
+    if download_filename is not None:
+        headers['Content-Disposition'] = 'attachment;filename="%s"' % download_filename.replace(' ','_')
+
+    key.set_contents_from_filename(src_path, policy=policy, headers=headers)
 
 
 @_requires_aws

@@ -158,6 +158,65 @@ html, body {
     opacity: 0.8;
 }
 
+/* Settings */
+
+.settings-pane .well {
+    margin: 30px;
+    padding-left: 30px;
+    padding-right: 30px;
+    width: 650px;
+}
+
+.settings-pane .form-horizontal .control-group label {
+    width: 150px;
+}
+
+.settings-pane .help-block {
+    margin-left: 170px;
+}
+
+.settings-pane input {
+    width: 435px;
+}
+
+.settings-pane select {
+    width: 450px;
+}
+
+#settings-app-keys input[type=text] {
+    width: 200px;
+    font-family: Menlo, 'Deja Vu Sans Mono', monospace;
+    border-radius: 5px;
+}
+
+#settings-app-keys input[type=number] {
+    width: 100px;
+    border-radius: 5px;
+}
+
+#settings-app-keys button {
+    width: 50px;
+}
+
+.remove-appkey {
+    font-weight: bold;
+}
+
+.settings-pane .form-actions {
+    padding-left: 25px;
+    padding-right: 25px;
+    width: 660px;
+}
+
+.settings-pane .form-actions .btn {
+    width: 210px;
+    margin-right: 10px;
+}
+
+.settings-pane .form-actions .btn:last-of-type {
+    margin-right: 0;
+}
+
 /* Old stuff. */
 
 .CodeMirror-hints {
@@ -165,7 +224,7 @@ html, body {
   z-index: 10001; /* Needs to be higher than the z-index of .CodeMirror.FullScreen */
 }
 
-.edit-resource-regex, #settings-app-keys {
+.edit-resource-regex, .appkey-name, .appkey-id {
   font-family: Menlo, 'Deja Vu Sans Mono', monospace;
 }
 

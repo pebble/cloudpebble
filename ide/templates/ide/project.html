@@ -3,7 +3,6 @@
 
 {% block title %}CloudPebble – {{ project.name }}{% endblock %}
 
-
 {% block head %}
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/addon/hint/show-hint.min.css">
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/addon/dialog/dialog.min.css">
@@ -237,7 +236,7 @@
     </table>
 </div>
 <!-- Settings template -->
-<div id="settings-pane-template" class="hide">
+<div id="settings-pane-template" class="hide settings-pane">
     <form class="form-horizontal">
         <div class="alert alert-error hide"></div>
         <div class="well">
@@ -289,7 +288,7 @@
                     <div class="controls">
                         <input type="text" id="settings-short-name" placeholder="Demo App" value="{{project.app_short_name}}">
                         <span class="help-block">
-                            App's short name. This will appear <strong>on the Pebble watch</strong>.
+                            App's short name. This will appear on the watch.
                         </span>
                     </div>
                 </div>
@@ -298,7 +297,7 @@
                     <div class="controls">
                         <input type="text" id="settings-long-name" placeholder="Demo App" value="{{project.app_long_name}}">
                         <span class="help-block">
-                            App's long name. This will appear <strong>in the app list on the phone</strong>.
+                            App's long name. This will appear in the app list on the phone.
                         </span>
                     </div>
                 </div>
@@ -322,7 +321,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="control-group">
+                <div class="control-group hide">
                     <label class="control-label" for="settings-version-code">Version code</label>
                     <div class="controls">
                         <input type="number" id="settings-version-code" placeholder="1" value="{{project.app_version_code}}">
@@ -344,42 +343,59 @@
                 <div class="control-group">
                     <label class="control-label" for="settings-uuid">App UUID</label>
                     <div class="controls">
-                        <input type="text" id="settings-uuid" pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" placeholder="00000000-0000-0000-0000-000000000000" value="{{project.app_uuid}}" style="width: 20em;">
+                        <input type="text" id="settings-uuid" pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" placeholder="00000000-0000-0000-0000-000000000000" value="{{project.app_uuid}}">
                         <span class="help-block">
                             A unique identifier for the app.
                         </span>
                     </div>
                 </div>
             </div>
-            <div class="well native-only">
-                <div class="control-group">
+            <div class="well">
+                <div class="control-group native-only">
                     <label class="control-label" for="settings-app-keys">PebbleKit JS Message Keys</label>
                     <div class="controls">
-                        <textarea id="settings-app-keys" style="height: 100px;" placeholder="{}" style="font-family: monospace;">{{project.app_keys}}</textarea>
+                        <table id="settings-app-keys">
+                            <thead>
+                                <tr>
+                                    <th>Key Name</th>
+                                    <th>Key ID</th>
+                                    <th>&nbsp;</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appkeys">
+                                {% for key, id in app_keys %}
+                                <tr class="appkey">
+                                    <td><input class="appkey-name" value="{{key}}" type="text" /></td>
+                                    <td><input class="appkey-id" value="{{id}}" type="number" /></td>
+                                    <td><button class="btn remove-appkey">–</button></td>
+                                </tr>
+                                {% endfor %}
+                                <tr class="appkey">
+                                    <td><input class="appkey-name" type="text" placeholder="New Entry" /></td>
+                                    <td><input class="appkey-id" type="number" value="0" /></td>
+                                    <td><button class="btn remove-appkey disabled">–</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
                         <div class="help-block">
-                            A JSON mapping from strings to integers used by PebbleKit JS, like this:
-                            <pre style="width: 200px;">
-{
-    "apple": 1,
-    "banana": 2
-}</pre>
+                            A mapping from strings to integers used by PebbleKit JS.
                         </div>
                     </div>
                 </div>
-                <div class="control-group">
-                    <label class="control-label" for="settings-app-jshint">Check Javascript with jshint before building</label>
+                <div class="control-group native-only">
+                    <label class="control-label" for="settings-app-jshint">Check Javascript</label>
                     <div class="controls">
                         <input type="checkbox" id="settings-app-jshint" {%if project.app_jshint%}checked{%endif%}>
                     </div>
                 </div>
                 <div class="control-group">
-                    <label class="control-label" for="settings-capabilities-location">Uses PebbleKit JS Location</label>
+                    <label class="control-label" for="settings-capabilities-location">Uses Location</label>
                     <div class="controls">
                         <input type="checkbox" id="settings-capabilities-location" {%if 'location' in project.app_capabilities%}checked{%endif%}>
                     </div>
                 </div>
                 <div class="control-group">
-                    <label class="control-label" for="settings-capabilities-configuration">Uses PebbleKit JS configuration screen</label>
+                    <label class="control-label" for="settings-capabilities-configuration">Configurable</label>
                     <div class="controls">
                         <input type="checkbox" id="settings-capabilities-configuration" {%if 'configurable' in project.app_capabilities%}checked{%endif%}>
                     </div>
@@ -387,15 +403,9 @@
             </div>
         </div>
         <div class="well form-actions">
-            <button id="project-save" class="btn btn-primary">Save changes</button>
-        </div>
-        <div class="well form-actions native-only">
+            <button id="project-save" class="btn btn-affirmative">Save changes</button>
             <button id="project-export-zip" class="btn">Download as zip</button>
-            <span class="help-block">Export your source files and resources to your computer.</span>
-        </div>
-        <div class="well form-actions">
             <button id="project-delete" class="btn btn-danger">Delete Project</button>
-            <span class="help-inline"><strong>This cannot be undone.</strong></span>
         </div>
     </form>
 </div>

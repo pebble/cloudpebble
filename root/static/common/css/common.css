@@ -149,6 +149,24 @@ a.btn {
     width: initial;
 }
 
+.btn.btn-affirmative {
+    color: white;
+    background-color: #00B293;
+}
+
+.btn.btn-affirmative:hover {
+    background-color: #008c6f;
+}
+
+.btn.btn-danger {
+    color: white;
+    background-color: #e5171f;
+}
+
+.btn.btn-danger:hover {
+    background-color: #b2171e;
+}
+
 .blur {
     -webkit-filter: blur(5px) brightness(40%);
 }
@@ -297,8 +315,20 @@ input[type=text], input[type=number] {
     padding-top: 5px;
     padding-left: 15px;
     margin: 0;
+    padding-right: 0;
+    padding-bottom: 0;
 }
 
 input[type=number] {
     width: 100px;
+}
+
+.help-block {
+    display: block;
+    clear: both;
+    margin-left: 150px;
+    padding-top: 20px;
+    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: large;
+    width: 435px;
 }
