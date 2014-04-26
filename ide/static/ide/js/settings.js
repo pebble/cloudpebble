@@ -221,7 +221,7 @@ CloudPebble.Settings = (function() {
             var new_appkey = $('<tr class="appkey">' +
                 '<td><input class="appkey-name" type="text" placeholder="New Entry" /></td>' +
                 '<td><input class="appkey-id" type="number" value="0" /></td>' +
-                '<td><button class="btn remove-appkey disabled"><i class="icon-minus"></i></button></td>' +
+                '<td><button class="btn remove-appkey disabled">–</button></td>' +
                 '</tr>');
 
             new_appkey.find('.appkey-name').on('change', add_appkey_field);

@@ -236,7 +236,7 @@
     </table>
 </div>
 <!-- Settings template -->
-<div id="settings-pane-template" class="hide">
+<div id="settings-pane-template" class="hide settings-pane">
     <form class="form-horizontal">
         <div class="alert alert-error hide"></div>
         <div class="well">
@@ -288,7 +288,7 @@
                     <div class="controls">
                         <input type="text" id="settings-short-name" placeholder="Demo App" value="{{project.app_short_name}}">
                         <span class="help-block">
-                            App's short name. This will appear <strong>on the Pebble watch</strong>.
+                            App's short name. This will appear on the watch.
                         </span>
                     </div>
                 </div>
@@ -297,7 +297,7 @@
                     <div class="controls">
                         <input type="text" id="settings-long-name" placeholder="Demo App" value="{{project.app_long_name}}">
                         <span class="help-block">
-                            App's long name. This will appear <strong>in the app list on the phone</strong>.
+                            App's long name. This will appear in the app list on the phone.
                         </span>
                     </div>
                 </div>
@@ -321,7 +321,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="control-group">
+                <div class="control-group hide">
                     <label class="control-label" for="settings-version-code">Version code</label>
                     <div class="controls">
                         <input type="number" id="settings-version-code" placeholder="1" value="{{project.app_version_code}}">
@@ -343,7 +343,7 @@
                 <div class="control-group">
                     <label class="control-label" for="settings-uuid">App UUID</label>
                     <div class="controls">
-                        <input type="text" id="settings-uuid" pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" placeholder="00000000-0000-0000-0000-000000000000" value="{{project.app_uuid}}" style="width: 20em;">
+                        <input type="text" id="settings-uuid" pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" placeholder="00000000-0000-0000-0000-000000000000" value="{{project.app_uuid}}">
                         <span class="help-block">
                             A unique identifier for the app.
                         </span>
@@ -367,13 +367,13 @@
                                 <tr class="appkey">
                                     <td><input class="appkey-name" value="{{key}}" type="text" /></td>
                                     <td><input class="appkey-id" value="{{id}}" type="number" /></td>
-                                    <td><button class="btn remove-appkey"><i class="icon-minus"></i></button></td>
+                                    <td><button class="btn remove-appkey">–</button></td>
                                 </tr>
                                 {% endfor %}
                                 <tr class="appkey">
                                     <td><input class="appkey-name" type="text" placeholder="New Entry" /></td>
                                     <td><input class="appkey-id" type="number" value="0" /></td>
-                                    <td><button class="btn remove-appkey disabled"><i class="icon-minus"></i></button></td>
+                                    <td><button class="btn remove-appkey disabled">–</button></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -383,19 +383,19 @@
                     </div>
                 </div>
                 <div class="control-group native-only">
-                    <label class="control-label" for="settings-app-jshint">Check Javascript with jshint before building</label>
+                    <label class="control-label" for="settings-app-jshint">Check Javascript</label>
                     <div class="controls">
                         <input type="checkbox" id="settings-app-jshint" {%if project.app_jshint%}checked{%endif%}>
                     </div>
                 </div>
                 <div class="control-group">
-                    <label class="control-label" for="settings-capabilities-location">Uses PebbleKit JS Location</label>
+                    <label class="control-label" for="settings-capabilities-location">Uses Location</label>
                     <div class="controls">
                         <input type="checkbox" id="settings-capabilities-location" {%if 'location' in project.app_capabilities%}checked{%endif%}>
                     </div>
                 </div>
                 <div class="control-group">
-                    <label class="control-label" for="settings-capabilities-configuration">Uses PebbleKit JS configuration screen</label>
+                    <label class="control-label" for="settings-capabilities-configuration">Configurable</label>
                     <div class="controls">
                         <input type="checkbox" id="settings-capabilities-configuration" {%if 'configurable' in project.app_capabilities%}checked{%endif%}>
                     </div>
@@ -403,15 +403,9 @@
             </div>
         </div>
         <div class="well form-actions">
-            <button id="project-save" class="btn btn-primary">Save changes</button>
-        </div>
-        <div class="well form-actions native-only">
+            <button id="project-save" class="btn btn-affirmative">Save changes</button>
             <button id="project-export-zip" class="btn">Download as zip</button>
-            <span class="help-block">Export your source files and resources to your computer.</span>
-        </div>
-        <div class="well form-actions">
             <button id="project-delete" class="btn btn-danger">Delete Project</button>
-            <span class="help-inline"><strong>This cannot be undone.</strong></span>
         </div>
     </form>
 </div>
