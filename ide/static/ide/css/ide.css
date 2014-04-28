@@ -175,7 +175,7 @@ html, body {
     margin-left: 170px;
 }
 
-.settings-pane input {
+.settings-pane input:not([type=checkbox]) {
     width: 435px;
 }
 
