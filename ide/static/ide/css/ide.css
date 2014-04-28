@@ -217,6 +217,84 @@ html, body {
     margin-right: 0;
 }
 
+/* Compilation pane */
+
+.compilation-pane .well {
+    margin: 30px;
+    padding-left: 60px;
+    padding-right: 60px;
+    width: 590px;
+}
+
+.compilation-pane input:not([type=checkbox]) {
+    width: 460px;
+}
+
+.compilation-pane select {
+    width: 475px;
+}
+
+.compilation-pane form.form-horizontal label {
+    width: 90px;
+    text-align: left;
+}
+
+.compilation-pane form.form-horizontal .help-block {
+    margin-left: 110px;
+}
+
+.compilation-pane #run-on-phone .btn,
+.compilation-pane .build-buttons .btn {
+    width: 188px;
+    margin-right: 9px;
+}
+
+.compilation-pane #run-on-phone .btn:last-of-type,
+.compilation-pane .build-buttons .btn:last-child {
+    margin-right: 0;
+}
+
+.compilation-pane h3 {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.build-stats p {
+    color: white;
+    margin-bottom: 10px;
+    font-size: large;
+    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.build-stats label {
+    color: #adadad;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    text-transform: uppercase;
+}
+
+table.build-results .build-id {
+    color: white;
+    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    padding-right: 30px;
+}
+
+table.build-results .build-state {
+    text-transform: uppercase;
+}
+
+table.build-results tr.success .build-state {
+    color: #00B293;
+}
+
+table.build-results tr.error .build-state {
+    color: #E5171F;
+}
+
+table.build-results tr.pending .build-state {
+    color: #3a87ad;
+}
+
+
 /* Old stuff. */
 
 .CodeMirror-hints {

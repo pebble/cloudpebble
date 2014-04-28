@@ -59,6 +59,13 @@ a {
     color: inherit;
 }
 
+hr {
+    border: 1px solid #4f4f4f;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+
 a:hover {
     color: white;
 }
@@ -128,8 +135,10 @@ a:hover {
 }
 
 a.btn {
-    padding-top: 3px;
+    display: inline-block;
     height: 37px;
+    padding-top: 2px;
+    padding-bottom: 1px;
 }
 
 .btn.btn-primary {
@@ -147,6 +156,13 @@ a.btn {
     height: 20px;
     line-height: 18px;
     width: initial;
+}
+
+a.btn-small {
+    height: 20px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 3px;
 }
 
 .btn.btn-affirmative {
@@ -204,7 +220,7 @@ table.table th {
     text-align: left;
     font-size: 18px;
     font-weight: normal;
-    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 table.table tr {

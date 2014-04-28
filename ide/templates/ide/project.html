@@ -147,93 +147,78 @@
     </form>
 </div>
 <!-- Compilation pane -->
-<div id="compilation-pane-template" class="hide">
+<div id="compilation-pane-template" class="hide compilation-pane">
     <div id="last-compilation" class="hide">
-        <h3>Last build</h3>
-        <div class="row hide" id="firefox-warning" style="margin-bottom:10px;">
-            <div class="offset1 span9">
-                <div class="alert alert-danger" style="text-align: center;">
-                    <a class="close" data-dismiss="alert" href="#">&times;</a>
-                    Firefox does not support SDK2 automatic deployment and log viewing.<br>
-                    Please try using 
-                        <a href="http://google.com/chrome">Chrome</a>,
-                        <a href="http://apple.com/safari">Safari</a> or
-                        <a href="http://opera.com/">Opera</a>.
+        <div class="hide well" id="run-on-phone">
+            <form class="form-horizontal">
+                <div class="control-group text-center phone-listing">
+                    <label class="control-label" for="phone">Phone</label>
+                    <div class="controls">
+                        <select id="phone">
+                            <option>Loading...</option>
+                        </select>
+                        <div class="help-block phone-listing">
+                            <a href="#" id="show-legacy-link">Not listed? Enter phone IP manually.</a>
+                        </div>
+                    </div>
                 </div>
-            </div>
+                <!-- Legacy manual entry -->
+                <div class="control-group text-center hide legacy-ip">
+                    <label class="control-label" for="phone-ip">Phone IP</label>
+                    <div class="controls">
+                        <input type="text" id="phone-ip" placeholder="10.0.0.153">
+                        <div class="help-block legacy-ip-hide">
+                            Requires that the Pebble app be running on your phone with Developer Mode enabled.<br>
+                            <a href="#" id="show-phone-list-link">Show phone list.</a>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+
+                <div>
+                    <button class="btn btn-primary" id="install-on-phone-btn">Install and Run</button>
+                    <button class="btn" id="show-app-logs-btn">View app logs</button>
+                    <button class="btn" id="screenshot-btn">Screenshot</button>
+                </div>
+            </form>
         </div>
-        <div class="row">
-            <div class="offset1 span6">
-                <p>Started: <span id="last-compilation-started">April 17, 2013, 11:50 a.m.</span></p>
-                <p id="last-compilation-time">Build time: <span>0.98 seconds</span></p>
-                <p>Status: <span id="last-compilation-status" class="label label-success">Successful</span></p>
-                <p id="last-compilation-size" class="hide">Size: <span class="total">27</span> KiB (<span class="res">10</span> KiB resources, <span class="bin">17</span> KiB binary)</p>
-                <p id="last-compilation-memory" class="hide">Available RAM: <span class="free-bytes"></span> / <span class="available-bytes">24576</span> bytes (<span class="free-pct"></span>%)</p>
-                <p id="last-compilation-pbw" class="hide"><a href="#">Download compiled PBW</a> <span id="pbw-shortlink">(<a href="#">get short link</a>)</span></p>
-                <p id="last-compilation-log" class="hide"><a href="#">Build log</a></p>
-            </div>
-            <div class="span3 hide" id="last-compilation-qr-code">
+        <div class="well">
+            <h3>Last build</h3>
+            <div class="hide" id="last-compilation-qr-code">
                 <p style="text-align: center;"><img src=""><br>
                     <span class="muted">Scan to download watchface</span></p>
             </div>
-            <div class="span4 hide" id="run-on-phone">
-                <form class="well well-small">
-                    <div class="control-group text-center phone-listing">
-                        <label class="control-label" for="phone">Phone:</label>
-                        <div class="controls">
-                            <select id="phone">
-                                <option>Loading...</option>
-                            </select>
-                        </div>
-                    </div>
-                    <!-- Legacy manual entry -->
-                    <div class="control-group text-center hide legacy-ip">
-                        <label class="control-label" for="phone-ip">Phone IP:</label>
-                        <div class="controls">
-                            <input type="text" id="phone-ip" placeholder="10.0.0.153">
-                        </div>
-                    </div>
-                    <p class="text-center phone-listing" style="margin: 0; font-size: small;"><a href="#" id="show-legacy-link">Not listed? Enter phone IP manually.</a></p>
-                    <p class="text-center legacy-ip hide" style="margin: 0; font-size: small;"><a href="#" id="show-phone-list-link">Show phone list.</a></p>
-
-                    <div class="form-actions" style="margin-bottom: 0; padding-bottom: 0; padding-left:5px; padding-right: 5px; text-align: center;">
-                        <div style="">
-                            <button class="btn btn-primary" id="install-on-phone-btn">Install &amp; Run</button>
-                            <button class="btn" id="show-app-logs-btn">View app logs</button>
-                            <button class="btn" id="screenshot-btn">Screenshot</button>
-                        </div>
-                        <span class="help-block hide legacy-ip">Requires that the Pebble app be running on your phone with Developer Mode enabled.</span>
-                    </div>
-                </form>
+            <div class="build-stats">
+                <p><label>Started:</label> <span id="last-compilation-started">April 17, 2013, 11:50 a.m.</span></p>
+                <p id="last-compilation-time"><label>Build time:</label> <span>0.98 seconds</span></p>
+                <p><label>Status:</label> <span id="last-compilation-status" class="label label-success">Successful</span></p>
+                <p id="last-compilation-size" class="hide"><label>Size:</label> <span class="total">27</span> KiB (<span class="res">10</span> KiB resources, <span class="bin">17</span> KiB binary)</p>
+                <p id="last-compilation-memory" class="hide"><label>Available RAM:</label> <span class="free-bytes"></span> / <span class="available-bytes">24576</span> bytes (<span class="free-pct"></span>%)</p>
             </div>
+            <hr>
+            <div class="build-buttons v2-only">
+                <button class="btn btn-affirmative" id="compilation-run-build-button">Run build</button>
+                <a id="last-compilation-pbw" href="#" class="btn hide">Get PBW</a>
+                <a id="last-compilation-log" class="btn hide" href="#">Build log</a>
+            </div>
+            <span class="v1-only" style="{% if project.sdk_version != '1' %}display:none;{% endif %}">Building SDK 1 projects is no longer supported.</span>
         </div>
-        <hr>
     </div>
-    <form class="form-inline">
-        <div class="row-fluid">
-            <div class="span12">
-                <div class="control-group">
-                    <button class="btn btn-primary v2-only" style="{% if project.sdk_version != '2' %}display:none;{% endif %}" id="compilation-run-build-button">Run build</button>
-                    <span class="v1-only" style="{% if project.sdk_version != '1' %}display:none;{% endif %}">Building SDK 1 projects is no longer supported.</span>
-                </div>
-            </div>
-        </div>
-    </form>
-    <hr>
-    <h3>Build history</h3>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Date</th>
-                <th>Status</th>
-                <th>Size</th>
-                <th colspan="2"></th>
-            </tr>
-        </thead>
-        <tbody id="run-build-table">
-        </tbody>
-    </table>
+    <div class="well">
+        <table class="table build-results">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Size</th>
+                    <th colspan="2"></th>
+                </tr>
+            </thead>
+            <tbody id="run-build-table">
+            </tbody>
+        </table>
+    </div>
 </div>
 <!-- Settings template -->
 <div id="settings-pane-template" class="hide settings-pane">
