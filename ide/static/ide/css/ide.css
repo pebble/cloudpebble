@@ -294,6 +294,12 @@ table.build-results tr.pending .build-state {
     color: #3a87ad;
 }
 
+#last-compilation-qr-code img {
+    height: 164px;
+    width: 164px;
+    float: right;
+    margin-top: -10px;
+}
 
 /* Old stuff. */
 
@@ -312,12 +318,6 @@ table.build-results tr.pending .build-state {
 
 .nav-list .popover {
     max-width: 350px;
-}
-
-#last-compilation-qr-code img {
-    height: 148px;
-    width: 148px;
-    margin-top: -20px;
 }
 
 .CodeMirror-dialog input {
