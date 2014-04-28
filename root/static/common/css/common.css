@@ -188,7 +188,7 @@ a.btn-small {
 }
 
 .hide {
-    display: none;
+    display: none !important;
 }
 
 ul.nav-pills {
