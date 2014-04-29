@@ -147,10 +147,10 @@
                 </div>
             </div>
             <div id="import-github" class="tab-pane">
-                <div class="alert alert-info">
-                    This is a <em>one-time only</em> import from a public GitHub repo containing <em>one</em> project.
+                <p>
+                    This is a one-time only import from a public GitHub repo containing one project.
                     There will be no further synchronisation.
-                </div>
+                </p>
                 <div class="errors alert alert-error hide"></div>
                 <form class="form-horizontal">
                     <div class="control-group">
@@ -180,6 +180,7 @@
     </div>
     <div class="modal-footer">
         <button class="btn btn-primary" id="run-import">Import</button>
+        <button class="btn" data-dismiss="modal">Cancel</button>
     </div>
 </div>
 {% endblock %}

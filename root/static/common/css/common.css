@@ -500,12 +500,17 @@ body.backdrop .main-container {
     right: 0;
 }
 
-.modal-body form {
-    margin-left: 50px;
-}
-
 .modal-body .control-group:not(:last-of-type) {
     padding-bottom: 10px;
+}
+
+.modal-body .form-horizontal .control-group label {
+    width: 180px;
+}
+
+.modal-body .help-block {
+    margin-left: 200px;
+    width: 350px;
 }
 
 .modal-body input:not([type=checkbox]) {
