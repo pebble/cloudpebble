@@ -40,7 +40,7 @@
                     <li class="nav-header" id="sidebar-pane-settings"><a href="#">Settings</a></li>
                     <li class="nav-header" id="sidebar-pane-compile"><a href="#">Compilation</a></li>
                     <li class="nav-header" id="sidebar-pane-github" class="native-only {%if not project.owner.github%}disabled{%endif%}"><a href="#">GitHub</a></li>
-                    <li class="nav-header nav-section">Source files <button class="btn btn-small" id="new-source-file">Add new</button></li>
+                    <li class="nav-header nav-section">Source files <button class="btn btn-small" id="new-source-file">Add C</button> <button class="btn btn-small" id="new-js-file">JS</button></li>
                     <li class="native-only" id="end-source-files"></li>
                     <li class="nav-header nav-section native-only">Resources <button class="btn btn-small" id="sidebar-pane-new-resource">Add new</button></li>
                     <li class="hide native-only" id="end-resources"></li>
@@ -598,8 +598,14 @@
     </div>
     <div class="modal-body">
         <div id="modal-text-input-errors"></div>
-        <p id="modal-text-input-prompt">Modal text input prompt:</p>
-        <p><input type="text" id="modal-text-input-value"></p>
+        <form class="form-horizontal">
+            <div class="control-group">
+                <label id="modal-text-input-prompt" for="modal-text-input-value">Modal text input prompt:</label>
+                <div class="controls">
+                    <input type="text" id="modal-text-input-value">
+                </div>
+            </div>
+        </form>
     </div>
     <div class="modal-footer">
         <button class="btn" data-dismiss="modal">Cancel</button>

@@ -556,7 +556,7 @@ CloudPebble.Editor = (function() {
 
     return {
         Create: function() {
-            CloudPebble.Prompts.Prompt("New Source File", "Enter a name for the new file", "somefile.c", '', function(value, resp) {
+            CloudPebble.Prompts.Prompt("New Source File", "File name", "somefile.c", '', function(value, resp) {
                if(value === '') {
                     resp.error("You must specify a filename.");
                 } else if(!(/\.h$/.test(value) || /\.c$/.test(value))) {
