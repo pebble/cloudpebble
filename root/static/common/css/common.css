@@ -373,12 +373,12 @@ input[type=checkbox]:checked {
     top: 10%;
     left: 50%;
     z-index: 1050;
-    width: 560px;
-    margin-left: -280px;
+    margin-left: -300px;
+    width: 600px;
     background-color: #333;
     border: 1px solid #999;
     border: 1px solid rgba(0,0,0,0.3);
-    border-radius: 6px;
+    border-radius: 10px;
     outline: 0;
     box-shadow: 0 3px 7px rgba(0,0,0,0.3);
     background-clip: padding-box;
@@ -400,6 +400,8 @@ input[type=checkbox]:checked {
 }
 
 .modal-header {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
     background-color: #292929;
     text-align: center;
 }
@@ -411,13 +413,14 @@ input[type=checkbox]:checked {
 }
 
 .modal-footer {
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
     background-color: #292929;
     text-align: center;
     padding: 20px;
 }
 
 .modal-body {
-    width: 600px;
     position: relative;
     max-height: 400px;
     padding: 15px;
@@ -429,6 +432,7 @@ input[type=checkbox]:checked {
 }
 
 body.backdrop .main-container {
+    -webkit-transform: translate3d(0, 0, 0); /* This works around a flicker as the animation completes. */
     -webkit-filter: blur(10px) brightness(50%);
 }
 
@@ -442,6 +446,14 @@ body.backdrop .main-container {
     bottom: 0;
     left: 0;
     right: 0;
+}
+
+.modal-body form {
+    margin-left: 50px;
+}
+
+.modal-body .control-group:not(:last-of-type) {
+    padding-bottom: 10px;
 }
 
 .modal-body input:not([type=checkbox]) {
