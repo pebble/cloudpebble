@@ -18,7 +18,7 @@
             {% block content %}{% endblock %}
         </div>
         <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="{% static 'common/js/modal.js' %}"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.0/backbone-min.js"></script>
         <script src="{% static 'ide/js/whats_new.js' %}"></script>
@@ -45,6 +45,7 @@
                 <button data-dismiss="modal" class="btn">Okay</button>
             </div>
         </div>
+        {% block modals %}{% endblock %}
         {% block scripts %}{% endblock %}
     </body>
 </html>

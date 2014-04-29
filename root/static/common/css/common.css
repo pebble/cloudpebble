@@ -7,6 +7,10 @@ body {
     padding: 0;
 }
 
+.main-container {
+    background-color: #333;
+}
+
 .header {
     background-color: #292929;
     height: 80px;
@@ -317,7 +321,7 @@ select {
     padding-top: 5px;
     padding-left: 15px;
     cursor: pointer;
-    background-position: right 10px center;;
+    background-position: right 10px center;
     background-repeat: no-repeat;
     background-image: url('../../common/img/dropdown.png');
 }
@@ -360,4 +364,90 @@ input[type=checkbox]:checked {
     font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: large;
     width: 435px;
+}
+
+/* Modals! */
+
+.modal {
+    position: fixed;
+    top: 10%;
+    left: 50%;
+    z-index: 1050;
+    width: 560px;
+    margin-left: -280px;
+    background-color: #333;
+    border: 1px solid #999;
+    border: 1px solid rgba(0,0,0,0.3);
+    border-radius: 6px;
+    outline: 0;
+    box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+    background-clip: padding-box;
+}
+
+.fade {
+    top: -25%;
+    opacity: 0;
+    -webkit-transition: opacity .3s linear,top .3s ease-out;
+    -moz-transition: opacity .3s linear,top .3s ease-out;
+    -o-transition: opacity .3s linear,top .3s ease-out;
+    transition: opacity .3s linear,top .3s ease-out;
+}
+
+.fade.in {
+    opacity:1;
+    top: 10%;
+    display: block !important;
+}
+
+.modal-header {
+    background-color: #292929;
+    text-align: center;
+}
+
+.modal-header h3 {
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    padding: 20px;
+    margin: 0;
+}
+
+.modal-footer {
+    background-color: #292929;
+    text-align: center;
+    padding: 20px;
+}
+
+.modal-body {
+    width: 600px;
+    position: relative;
+    max-height: 400px;
+    padding: 15px;
+    overflow-y: auto;
+}
+
+.modal-footer .btn:not(:last-child) {
+    margin-right: 20px;
+}
+
+body.backdrop .main-container {
+    -webkit-filter: blur(10px) brightness(50%);
+}
+
+.main-container {
+    transition: -webkit-filter 0.3s linear;
+}
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.modal-body input:not([type=checkbox]) {
+    width: 310px;
+}
+
+.modal-body select {
+    width: 325px;
 }
