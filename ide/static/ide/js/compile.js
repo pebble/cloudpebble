@@ -248,10 +248,10 @@ CloudPebble.Compile = (function() {
 
     var update_last_build = function(pane, build) {
         if(build === null) {
-            pane.find('#last-compilation').addClass('hide');
+            pane.find('#last-compilation, .build-stats').addClass('hide');
             pane.find('#compilation-run-build-button').removeAttr('disabled');
         } else {
-            pane.find('#last-compilation').removeClass('hide');
+            pane.find('#last-compilation, .build-stats').removeClass('hide');
             pane.find('#last-compilation-started').text(CloudPebble.Utils.FormatDatetime(build.started));
             if(build.state > 1) {
                 pane.find('#last-compilation-time').removeClass('hide').find('span').text(CloudPebble.Utils.FormatInterval(build.started, build.finished));

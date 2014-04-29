@@ -182,26 +182,26 @@
                 </div>
             </form>
         </div>
-        <div class="well">
-            <h3>Last build</h3>
-            <div class="hide" id="last-compilation-qr-code">
-                <img src="">
-            </div>
-            <div class="build-stats">
-                <p><label>Started:</label> <span id="last-compilation-started">April 17, 2013, 11:50 a.m.</span></p>
-                <p id="last-compilation-time"><label>Build time:</label> <span>0.98 seconds</span></p>
-                <p><label>Status:</label> <span id="last-compilation-status" class="label label-success">Successful</span></p>
-                <p id="last-compilation-size" class="hide"><label>Size:</label> <span class="total">27</span> KiB (<span class="res">10</span> KiB resources, <span class="bin">17</span> KiB binary)</p>
-                <p id="last-compilation-memory" class="hide"><label>Available RAM:</label> <span class="free-bytes"></span> / <span class="available-bytes">24576</span> bytes (<span class="free-pct"></span>%)</p>
-            </div>
-            <hr>
-            <div class="build-buttons v2-only">
-                <button class="btn btn-affirmative" id="compilation-run-build-button">Run build</button>
-                <a id="last-compilation-pbw" href="#" class="btn hide">Get PBW</a>
-                <a id="last-compilation-log" class="btn hide" href="#">Build log</a>
-            </div>
-            <span class="v1-only" style="{% if project.sdk_version != '1' %}display:none;{% endif %}">Building SDK 1 projects is no longer supported.</span>
+    </div>
+    <div class="well">
+        <h3>Last build</h3>
+        <div class="hide" id="last-compilation-qr-code">
+            <img src="">
         </div>
+        <div class="build-stats">
+            <p><label>Started:</label> <span id="last-compilation-started">April 17, 2013, 11:50 a.m.</span></p>
+            <p id="last-compilation-time"><label>Build time:</label> <span>0.98 seconds</span></p>
+            <p><label>Status:</label> <span id="last-compilation-status" class="label label-success">Successful</span></p>
+            <p id="last-compilation-size" class="hide"><label>Size:</label> <span class="total">27</span> KiB (<span class="res">10</span> KiB resources, <span class="bin">17</span> KiB binary)</p>
+            <p id="last-compilation-memory" class="hide"><label>Available RAM:</label> <span class="free-bytes"></span> / <span class="available-bytes">24576</span> bytes (<span class="free-pct"></span>%)</p>
+        </div>
+        <hr>
+        <div class="build-buttons v2-only">
+            <button class="btn btn-affirmative" id="compilation-run-build-button">Run build</button>
+            <a id="last-compilation-pbw" href="#" class="btn hide">Get PBW</a>
+            <a id="last-compilation-log" class="btn hide" href="#">Build log</a>
+        </div>
+        <span class="v1-only" style="{% if project.sdk_version != '1' %}display:none;{% endif %}">Building SDK 1 projects is no longer supported.</span>
     </div>
     <div class="well">
         <table class="table build-results">
