@@ -366,6 +366,60 @@ input[type=checkbox]:checked {
     width: 435px;
 }
 
+.nav-tabs {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.nav-tabs:after {
+    content: "";
+    clear: both;
+    padding-bottom: 20px;
+    display: block;
+}
+
+.nav-tabs li {
+    float: left;
+    display: block;
+    border: 2px solid white;
+    padding: 5px;
+    width: calc(50% - 13px);
+    text-align: center;
+}
+
+.nav-tabs li:not(:last-child) {
+    border-right: none;
+}
+
+.nav-tabs li:first-child {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+.nav-tabs li:last-child {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.nav-tabs li > a {
+    color: white;
+    font-size: large;
+    text-transform: uppercase;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    display: inline-block;
+    width: 100%;
+}
+
+.nav-tabs li.active {
+    background-color: white;
+}
+
+.nav-tabs li.active > a {
+    color: #333;
+}
+
 /* Modals! */
 
 .modal {
@@ -423,7 +477,7 @@ input[type=checkbox]:checked {
 .modal-body {
     position: relative;
     max-height: 400px;
-    padding: 15px;
+    padding: 30px;
     overflow-y: auto;
 }
 
@@ -462,4 +516,12 @@ body.backdrop .main-container {
 
 .modal-body select {
     width: 325px;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
 }
