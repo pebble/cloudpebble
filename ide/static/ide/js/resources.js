@@ -167,14 +167,9 @@ CloudPebble.Resources = (function() {
                 div.append(preview_img);
                 var dimensions = $('<p class="muted">');
                 // Create an unscaled image and make sure it's in the DOM so we can see its size.
-                $('<img>')
-                    .css({position: 'absolute', top: 0, left: 0, visibility: 'hidden', zIndex: -20})
-                    .appendTo('body')
-                    .attr('src', preview_url)
-                    .load(function() {
-                        dimensions.text($(this).width() + ' x ' + $(this).height());
-                        $(this).remove();
-                    });
+                preview_img.load(function() {
+                    dimensions.text(this.naturalWidth + ' x ' + this.naturalHeight);
+                });
                 div.append(dimensions);
                 $('.resource-type-column').removeClass('span12').addClass('span8').before(div);
             } else if(resource.kind == 'font') {
