@@ -23,7 +23,7 @@ html, body {
     bottom: 0;
     overflow: auto;
     width: 210px;
-    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: large;
     padding-left: 40px;
 }
@@ -263,12 +263,11 @@ html, body {
     color: white;
     margin-bottom: 10px;
     font-size: large;
-    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .build-stats label {
     color: #adadad;
-    font-family: PFD-Bold, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     text-transform: uppercase;
 }
 
