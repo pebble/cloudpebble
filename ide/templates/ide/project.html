@@ -393,25 +393,6 @@
         </div>
     </form>
 </div>
-<div id="export-progress" class="modal hide fade" tabindex="-1" role="dialog">
-    <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">x</button>
-        <h3>Exporting…</h3>
-    </div>
-    <div class="model-body">
-        <div class="row-fluid" id="export-pending-body">
-            <div class="span10 offset1">
-                <div class="text-center" id="export-progress-text">
-                    <img src="{% static 'ide/img/zip.png' %}" style="height: 200px; width: 200px; margin-top: 10px;">
-                    <div class="progress active">
-                        <div class="bar" style="width: 100%;"></div>
-                    </div>
-                    <p>We're just getting that packaged up for you.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 <!-- GitHub panel -->
 <div id="github-template" class="hide">
     <div class="alert hide"></div>
@@ -623,6 +604,27 @@
     <div class="modal-footer">
         <button class="btn" data-dismiss="modal">Cancel</button>
         <button class="btn btn-danger" id="modal-warning-prompt-button">Continue</button>
+    </div>
+</div>
+<div id="export-progress" class="modal hide fade" tabindex="-1" role="dialog">
+    <div class="modal-header">
+        <h3>Exporting…</h3>
+    </div>
+    <div class="model-body">
+        <div class="row-fluid" id="export-pending-body">
+            <div class="span10 offset1">
+                <div class="text-center" id="export-progress-text">
+                    <img src="{% static 'ide/img/zip.png' %}" style="height: 200px; width: 200px; margin-top: 10px;">
+                    <div class="progress active">
+                        <div class="bar" style="width: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <a href="" class="download-btn btn btn-primary" style="display: none;" data-dismiss="modal">Download</a>
+        <button class="btn" data-dismiss="modal">Cancel</button>
     </div>
 </div>
 {% endblock %}

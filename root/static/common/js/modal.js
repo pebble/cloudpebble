@@ -56,7 +56,7 @@
       }
 
     , hide: function (e) {
-        e && e.preventDefault()
+//        e && e.preventDefault()
 
         var that = this
 

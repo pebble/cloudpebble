@@ -217,6 +217,10 @@ html, body {
     margin-right: 0;
 }
 
+#export-pending-body {
+    text-align: center;
+}
+
 /* Compilation pane */
 
 .compilation-pane .well {
