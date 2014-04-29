@@ -1,7 +1,7 @@
 body {
     color: #969696;
     background-color: #333;
-    font-family: PFD-X-Thin,'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Light,'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-weight: normal;
     margin: 0;
     padding: 0;
@@ -48,8 +48,7 @@ h1, h2, h3 {
 }
 
 h3 {
-    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    letter-spacing: 1px;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 24px;
 }
 
@@ -83,11 +82,11 @@ a:hover {
 }
 
 .cloudpebble-logo-cloud {
-    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Bold, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .cloudpebble-logo-pebble {
-    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .small-print {
@@ -119,7 +118,7 @@ a:hover {
     border-radius: 5px;
     background-color: white;
     color: #ff4700;
-    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     transition: all 300ms ease;
 }
 
@@ -224,7 +223,7 @@ table.table th {
     text-align: left;
     font-size: 18px;
     font-weight: normal;
-    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Bold, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 table.table tr {
@@ -261,7 +260,7 @@ table.table td {
     padding-left: 8px;
     padding-right: 8px;
     padding-top: 4px;
-    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .label-success {
@@ -279,7 +278,7 @@ table.table td {
 h2.section-heading {
     line-height: 50px;
     margin-left: 50px;
-    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .form-horizontal .control-group::after {
@@ -295,7 +294,7 @@ h2.section-heading {
 .form-horizontal .control-group label {
     float: left;
     text-transform: uppercase;
-    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     color: white;
     font-size: large;
     line-height: 40px;
@@ -314,7 +313,7 @@ select {
     line-height: 30px;
     border-radius: 10px;
     background-color: white;
-    font-family: PFD-X-Thin, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: larger;
     width: 270px;
     border: none;
@@ -328,7 +327,7 @@ select {
 
 input[type=text], input[type=number] {
     height: 35px;
-    font-family: PFD-X-Thin, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: larger;
     border: none;
     border-radius: 10px;
@@ -407,7 +406,7 @@ input[type=checkbox]:checked {
     color: white;
     font-size: large;
     text-transform: uppercase;
-    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Bold, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     display: inline-block;
     width: 100%;
 }
@@ -461,7 +460,6 @@ input[type=checkbox]:checked {
 }
 
 .modal-header h3 {
-    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     padding: 20px;
     margin: 0;
 }

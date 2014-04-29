@@ -25,11 +25,11 @@
 
 .github-username {
     padding-top: 10px;
-    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .github-options {
     clear: both;
-    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: large;
 }
