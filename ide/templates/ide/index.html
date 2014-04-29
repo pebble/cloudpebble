@@ -54,10 +54,11 @@
             {% else %}
                 <p>You don't have any projects yet.</p>
             {% endif %}
+{% endblock %}
 
+{% block modals %}
 <div id="project-prompt" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">x</button>
         <h3 id="project-prompt-title">Create New Project</h3>
     </div>
     <div class="modal-body">
@@ -110,13 +111,12 @@
         </form>
     </div>
     <div class="modal-footer">
-        <button class="btn" data-dismiss="modal">Cancel</button>
         <button class="btn btn-primary" id="project-confirm-button">Create</button>
+        <button class="btn" data-dismiss="modal">Cancel</button>
     </div>
 </div>
 <div id="import-prompt" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">x</button>
         <h3>Import Existing Project</h3>
     </div>
     <div class="modal-body">
@@ -177,9 +177,9 @@
                 </div>
             </div>
         </div>
-        <div class="modal-footer">
-            <button class="btn btn-primary" id="run-import">Import</button>
-        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" id="run-import">Import</button>
     </div>
 </div>
 {% endblock %}

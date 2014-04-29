@@ -1,10 +1,14 @@
 body {
     color: #969696;
     background-color: #333;
-    font-family: PFD-X-Thin,'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Light,'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-weight: normal;
     margin: 0;
     padding: 0;
+}
+
+.main-container {
+    background-color: #333;
 }
 
 .header {
@@ -44,8 +48,7 @@ h1, h2, h3 {
 }
 
 h3 {
-    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    letter-spacing: 1px;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 24px;
 }
 
@@ -79,11 +82,11 @@ a:hover {
 }
 
 .cloudpebble-logo-cloud {
-    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Bold, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .cloudpebble-logo-pebble {
-    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .small-print {
@@ -115,7 +118,7 @@ a:hover {
     border-radius: 5px;
     background-color: white;
     color: #ff4700;
-    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     transition: all 300ms ease;
 }
 
@@ -188,7 +191,7 @@ a.btn-small {
 }
 
 .hide {
-    display: none !important;
+    display: none;
 }
 
 ul.nav-pills {
@@ -220,7 +223,7 @@ table.table th {
     text-align: left;
     font-size: 18px;
     font-weight: normal;
-    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Bold, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 table.table tr {
@@ -257,7 +260,7 @@ table.table td {
     padding-left: 8px;
     padding-right: 8px;
     padding-top: 4px;
-    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .label-success {
@@ -275,7 +278,7 @@ table.table td {
 h2.section-heading {
     line-height: 50px;
     margin-left: 50px;
-    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .form-horizontal .control-group::after {
@@ -291,7 +294,7 @@ h2.section-heading {
 .form-horizontal .control-group label {
     float: left;
     text-transform: uppercase;
-    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     color: white;
     font-size: large;
     line-height: 40px;
@@ -310,21 +313,21 @@ select {
     line-height: 30px;
     border-radius: 10px;
     background-color: white;
-    font-family: PFD-X-Thin, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: larger;
     width: 270px;
     border: none;
     padding-top: 5px;
     padding-left: 15px;
     cursor: pointer;
-    background-position: right 10px center;;
+    background-position: right 10px center;
     background-repeat: no-repeat;
     background-image: url('../../common/img/dropdown.png');
 }
 
 input[type=text], input[type=number] {
     height: 35px;
-    font-family: PFD-X-Thin, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: larger;
     border: none;
     border-radius: 10px;
@@ -360,4 +363,163 @@ input[type=checkbox]:checked {
     font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: large;
     width: 435px;
+}
+
+.nav-tabs {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.nav-tabs:after {
+    content: "";
+    clear: both;
+    padding-bottom: 20px;
+    display: block;
+}
+
+.nav-tabs li {
+    float: left;
+    display: block;
+    border: 2px solid white;
+    padding: 5px;
+    width: calc(50% - 13px);
+    text-align: center;
+}
+
+.nav-tabs li:not(:last-child) {
+    border-right: none;
+}
+
+.nav-tabs li:first-child {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+.nav-tabs li:last-child {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.nav-tabs li > a {
+    color: white;
+    font-size: large;
+    text-transform: uppercase;
+    font-family: PFD-Bold, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    display: inline-block;
+    width: 100%;
+}
+
+.nav-tabs li.active {
+    background-color: white;
+}
+
+.nav-tabs li.active > a {
+    color: #333;
+}
+
+/* Modals! */
+
+.modal {
+    position: fixed;
+    top: 10%;
+    left: 50%;
+    z-index: 1050;
+    margin-left: -300px;
+    width: 600px;
+    background-color: #333;
+    border: 1px solid #999;
+    border: 1px solid rgba(0,0,0,0.3);
+    border-radius: 10px;
+    outline: 0;
+    box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+    background-clip: padding-box;
+}
+
+.fade {
+    top: -25%;
+    opacity: 0;
+    -webkit-transition: opacity .3s linear,top .3s ease-out;
+    -moz-transition: opacity .3s linear,top .3s ease-out;
+    -o-transition: opacity .3s linear,top .3s ease-out;
+    transition: opacity .3s linear,top .3s ease-out;
+}
+
+.fade.in {
+    opacity:1;
+    top: 10%;
+    display: block;
+}
+
+.modal-header {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    background-color: #292929;
+    text-align: center;
+}
+
+.modal-header h3 {
+    padding: 20px;
+    margin: 0;
+}
+
+.modal-footer {
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    background-color: #292929;
+    text-align: center;
+    padding: 20px;
+}
+
+.modal-body {
+    position: relative;
+    max-height: 400px;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+.modal-footer .btn:not(:last-child) {
+    margin-right: 20px;
+}
+
+body.backdrop .main-container {
+    -webkit-transform: translate3d(0, 0, 0); /* This works around a flicker as the animation completes. */
+    -webkit-filter: blur(10px) brightness(50%);
+}
+
+.main-container {
+    transition: -webkit-filter 0.3s linear;
+}
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.modal-body form {
+    margin-left: 50px;
+}
+
+.modal-body .control-group:not(:last-of-type) {
+    padding-bottom: 10px;
+}
+
+.modal-body input:not([type=checkbox]) {
+    width: 310px;
+}
+
+.modal-body select {
+    width: 325px;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
 }
