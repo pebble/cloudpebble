@@ -452,10 +452,13 @@
         <button class="btn" id="github-pull-btn" disabled>Pull Latest Commit</button>
     </div>
 </div>
+{% endblock %}
+
+{% block modals %}
+
 <!-- Create new repo prompt -->
 <div id="github-new-repo-prompt" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">x</button>
         <h3>Create New Repo</h3>
     </div>
     <form class="form-horizontal" style="margin-bottom: 0px; padding-bottom: 0px;">
@@ -486,7 +489,6 @@
 <!-- Commit prompt -->
 <div id="github-commit-prompt" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">x</button>
         <h3>Push New Commit</h3>
     </div>
     <form class="form">
@@ -517,7 +519,6 @@
 <!-- Pull confirmation/progress -->
 <div id="github-pull-prompt" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">x</button>
         <h3>Pull Latest Commit</h3>
     </div>
     <div class="modal-body">
@@ -540,7 +541,6 @@
 <!-- Phone waiting -->
 <div id="phone-waiting" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">x</button>
         <h3>Waiting for phone</h3>
     </div>
     <div class="modal-body text-center">
@@ -563,7 +563,6 @@
 <!-- Phone install progress -->
 <div id="phone-install-progress" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">x</button>
         <h3>Install App</h3>
     </div>
     <div class="modal-body">
@@ -580,7 +579,6 @@
 <!-- Phone screenshot -->
 <div id="phone-screenshot-display" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">x</button>
         <h3>Taking Screenshot</h3>
     </div>
     <div class="modal-body">
@@ -596,7 +594,6 @@
 <!-- Modal text prompt -->
 <div id="modal-text-input" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">x</button>
         <h3 id="modal-text-input-title">Modal header</h3>
     </div>
     <div class="modal-body">
@@ -612,7 +609,6 @@
 <!-- Modal boolean confirmation prompt -->
 <div id="modal-warning-prompt" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">x</button>
         <h3 id="modal-warning-prompt-title">Modal header</h3>
     </div>
     <div class="modal-body">
