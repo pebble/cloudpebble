@@ -192,7 +192,7 @@ a.btn-small {
 }
 
 .hide {
-    display: none !important;
+    display: none;
 }
 
 ul.nav-pills {
@@ -396,7 +396,7 @@ input[type=checkbox]:checked {
 .fade.in {
     opacity:1;
     top: 10%;
-    display: block !important;
+    display: block;
 }
 
 .modal-header {
