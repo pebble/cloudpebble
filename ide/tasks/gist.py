@@ -25,10 +25,16 @@ def import_gist(user_id, gist_id):
     files = gist.files
     default_name = gist.description or 'Sample project'
 
+    is_native = True
+
     if 'appinfo.json' in files:
         settings = json.loads(files['appinfo.json'].content)
+        if len(files) == 2 and 'simply.js' in files:
+            is_native = False
     else:
         settings = {}
+        if len(files) == 1 and 'simply.js' in files:
+            is_native = False
 
     project_settings = {
         'name': settings.get('longName', default_name),
@@ -42,21 +48,26 @@ def import_gist(user_id, gist_id):
         'app_version_label': settings.get('versionLabel', '1.0'),
         'app_is_watchface': settings.get('watchapp', {}).get('watchface', False),
         'app_capabilities': ','.join(settings.get('capabilities', [])),
-        'app_keys': dict_to_pretty_json(settings.get('appKeys', {}))
+        'app_keys': dict_to_pretty_json(settings.get('appKeys', {})),
+        'project_type': 'native' if is_native else 'simplyjs'
     }
 
     with transaction.commit_on_success():
         project = Project.objects.create(**project_settings)
 
-        for filename in gist.files:
-            if filename.endswith('.c') or filename.endswith('.h') or filename == 'pebble-js-app.js':
-                # Because gists can't have subdirectories.
-                if filename == 'pebble-js-app.js':
-                    cp_filename = 'js/pebble-js-app.js'
-                else:
-                    cp_filename = filename
-                source_file = SourceFile.objects.create(project=project, file_name=cp_filename)
-                source_file.save_file(gist.files[filename].content)
+        if is_native:
+            for filename in gist.files:
+                if filename.endswith('.c') or filename.endswith('.h') or filename == 'pebble-js-app.js':
+                    # Because gists can't have subdirectories.
+                    if filename == 'pebble-js-app.js':
+                        cp_filename = 'js/pebble-js-app.js'
+                    else:
+                        cp_filename = filename
+                    source_file = SourceFile.objects.create(project=project, file_name=cp_filename)
+                    source_file.save_file(gist.files[filename].content)
+        else:
+            source_file = SourceFile.objects.create(project=project, file_name='app.js')
+            source_file.save_file(gist.files['simply.js'].content)
 
     send_keen_event('cloudpebble', 'cloudpebble_gist_import', project=project, data={'data': {'gist_id': gist_id}})
     return project.id
