@@ -610,21 +610,25 @@
     <div class="modal-header">
         <h3>Exporting…</h3>
     </div>
-    <div class="model-body">
-        <div class="row-fluid" id="export-pending-body">
-            <div class="span10 offset1">
-                <div class="text-center" id="export-progress-text">
-                    <img src="{% static 'ide/img/zip.png' %}" style="height: 200px; width: 200px; margin-top: 10px;">
-                    <div class="progress active">
-                        <div class="bar" style="width: 100%;"></div>
-                    </div>
-                </div>
-            </div>
+    <div class="modal-body text-center" id="export-progress-text">
+        <img src="{% static 'ide/img/zip.png' %}" style="height: 200px; width: 200px; margin-top: 10px;">
+        <div class="progress active">
+            <div class="bar" style="width: 100%;"></div>
         </div>
     </div>
     <div class="modal-footer">
         <a href="" class="download-btn btn btn-primary" style="display: none;" data-dismiss="modal">Download</a>
         <button class="btn" data-dismiss="modal">Cancel</button>
+    </div>
+</div>
+<div id="generic-progress" class="modal hide fade" tabindex="-1" role="dialog">
+    <div class="modal-header">
+        <h3>Doing a thing…</h3>
+    </div>
+    <div class="modal-body text-center" id="generic-progress-text">
+        <div class="progress progress-striped active">
+            <div class="bar" style="width: 100%;"></div>
+        </div>
     </div>
 </div>
 {% endblock %}

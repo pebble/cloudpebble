@@ -360,6 +360,22 @@ CloudPebble.Editor = (function() {
                     );
                 });
 
+                run_btn.click(function() {
+                    var button = $(this);
+                    CloudPebble.Prompts.Progress.Show("Saving...");
+                    CloudPebble.Editor.SaveAll(function() {
+                        CloudPebble.Prompts.Progress.Show("Compiling...");
+                        CloudPebble.Compile.RunBuild(function (success) {
+                            CloudPebble.Prompts.Progress.Hide();
+                            if(success) {
+                                CloudPebble.Compile.DoInstall();
+                            } else {
+                                CloudPebble.Compile.Show();
+                            }
+                        });
+                    });
+                });
+
                 button_holder.append(error_area);
                 button_holder.append(run_btn);
                 button_holder.append(save_btn);

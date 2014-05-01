@@ -109,6 +109,14 @@ CloudPebble.Prompts = {
             $('#modal-warning-prompt').modal('hide');
             callback();
         });
+    },
+    Progress: {
+        Show: function(title) {
+            $('#generic-progress').modal('show').find('h3').text(title);
+        },
+        Hide: function() {
+            $('#generic-progress').modal('hide');
+        }
     }
 };
 

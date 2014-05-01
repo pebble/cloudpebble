@@ -75,22 +75,6 @@ CloudPebble.Sidebar = (function() {
     };
 
     var init = function() {
-        $('.save-and-run').click(function() {
-            var button = $(this);
-            button.attr('disabled', 'disabled');
-            button.find('img').show();
-            CloudPebble.Editor.SaveAll(function() {
-                CloudPebble.Compile.RunBuild(function (success) {
-                    button.removeAttr('disabled');
-                    button.find('img').hide();
-                    if(success) {
-                        CloudPebble.Compile.DoInstall();
-                    } else {
-                        CloudPebble.Compile.Show();
-                    }
-                });
-            });
-        });
     }
 
     return {
