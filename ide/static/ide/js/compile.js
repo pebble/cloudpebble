@@ -465,7 +465,7 @@ CloudPebble.Compile = (function() {
             }
 
             mPebble.on('open', function() {
-                mPebble.install_app(pane.find('#last-compilation-pbw > a').attr('href'));
+                mPebble.install_app(pane.find('#last-compilation-pbw').attr('href'));
             });
             mPebble.on('status', function(code) {
                 if(code === 0) {
