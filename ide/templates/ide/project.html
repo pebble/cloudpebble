@@ -40,7 +40,7 @@
                     <li class="nav-header" id="sidebar-pane-settings"><a href="#">Settings</a></li>
                     <li class="nav-header" id="sidebar-pane-compile"><a href="#">Compilation</a></li>
                     <li class="nav-header" id="sidebar-pane-github" class="native-only {%if not project.owner.github%}disabled{%endif%}"><a href="#">GitHub</a></li>
-                    <li class="nav-header nav-section">Source files <button class="btn btn-small" id="new-source-file">Add C</button> <button class="btn btn-small" id="new-js-file">JS</button></li>
+                    <li class="nav-header nav-section">Source files <button class="btn btn-small native-only" id="new-source-file">Add C</button> <button class="btn btn-small native-only" id="new-js-file">JS</button></li>
                     <li class="native-only" id="end-source-files"></li>
                     <li class="nav-header nav-section native-only">Resources <button class="btn btn-small" id="sidebar-pane-new-resource">Add new</button></li>
                     <li class="hide native-only" id="end-resources"></li>
@@ -388,7 +388,7 @@
         </div>
         <div class="well form-actions">
             <button id="project-save" class="btn btn-affirmative">Save changes</button>
-            <button id="project-export-zip" class="btn">Download as zip</button>
+            <button id="project-export-zip" class="btn native-only">Download as zip</button>
             <button id="project-delete" class="btn btn-danger">Delete Project</button>
         </div>
     </form>
