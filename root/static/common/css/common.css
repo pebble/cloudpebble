@@ -124,6 +124,12 @@ a:hover {
     transition: all 300ms ease;
 }
 
+.btn[disabled] {
+    background-color: gray !important;
+    opacity: 1 !important;
+    cursor: default;
+}
+
 .btn.btn-primary:hover {
     background-color: #db3d00;
     color: #ededed;
