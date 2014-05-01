@@ -486,7 +486,6 @@ input[type=checkbox]:checked {
 }
 
 body.backdrop .main-container {
-    -webkit-transform: translate3d(0, 0, 0); /* This works around a flicker as the animation completes. */
     -webkit-filter: blur(10px) brightness(50%);
 }
 
