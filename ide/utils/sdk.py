@@ -163,7 +163,7 @@ def generate_resource_dict(project, resources):
     return resource_map
 
 
-def generate_simplyjs_manifest_dict(project):
+def generate_simplyjs_manifest_dict(project, resources):
     manifest = {
         "uuid": project.app_uuid,
         "shortName": project.app_short_name,
@@ -195,4 +195,22 @@ def generate_simplyjs_manifest_dict(project):
             ]
         }
     }
+
+    for resource in resources:
+        for resource_id in resource.get_identifiers():
+            d = {
+                'type': resource.kind,
+                'file': resource.path
+            }
+            if project.sdk_version == '1':
+                d['defName'] = resource_id.resource_id
+            else:
+                d['name'] = resource_id.resource_id
+            if resource_id.character_regex:
+                d['characterRegex'] = resource_id.character_regex
+            if resource_id.tracking:
+                d['trackingAdjust'] = resource_id.tracking
+            if resource.is_menu_icon:
+                d['menuIcon'] = True
+            manifest['resources']['media'].append(d)
     return manifest

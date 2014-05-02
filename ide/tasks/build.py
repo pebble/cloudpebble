@@ -48,6 +48,12 @@ def run_compile(build_result):
     base_dir = tempfile.mkdtemp(dir=os.path.join(settings.CHROOT_ROOT, 'tmp') if settings.CHROOT_ROOT else None)
 
     try:
+        # Resources
+        resource_root = 'resources'
+        os.makedirs(os.path.join(base_dir, resource_root, 'images'))
+        os.makedirs(os.path.join(base_dir, resource_root, 'fonts'))
+        os.makedirs(os.path.join(base_dir, resource_root, 'data'))
+
         if project.project_type == 'native':
             # Create symbolic links to the original files
             # Source code
@@ -65,29 +71,14 @@ def run_compile(build_result):
                 with open(abs_target) as f:
                     check_preprocessor_directives(f.read())
 
-            # Resources
-            resource_root = 'resources'
-            os.makedirs(os.path.join(base_dir, resource_root, 'images'))
-            os.makedirs(os.path.join(base_dir, resource_root, 'fonts'))
-            os.makedirs(os.path.join(base_dir, resource_root, 'data'))
-
-            manifest_dict = generate_v2_manifest_dict(project, resources)
-            open(os.path.join(base_dir, 'appinfo.json'), 'w').write(json.dumps(manifest_dict))
-
-            for f in resources:
-                target_dir = os.path.abspath(os.path.join(base_dir, resource_root, ResourceFile.DIR_MAP[f.kind]))
-                abs_target = os.path.abspath(os.path.join(target_dir, f.file_name))
-                if not abs_target.startswith(target_dir):
-                    raise Exception("Suspicious filename: %s" % f.file_name)
-                f.copy_to_path(abs_target)
-
             # Reconstitute the SDK
             open(os.path.join(base_dir, 'wscript'), 'w').write(generate_wscript_file(project))
             open(os.path.join(base_dir, 'pebble-jshintrc'), 'w').write(generate_jshint_file(project))
+            manifest_dict = generate_v2_manifest_dict(project, resources)
         elif project.project_type == 'simplyjs':
-            os.rmdir(base_dir)  # This is not intuitive behaviour.
+            shutil.rmtree(base_dir)  # This is not intuitive behaviour.
             shutil.copytree(settings.SIMPLYJS_ROOT, base_dir)
-            manifest_dict = generate_simplyjs_manifest_dict(project)
+            manifest_dict = generate_simplyjs_manifest_dict(project, resources)
 
             # We should have exactly one source file, so just dump that in.
             js = source_files[0].get_contents()
@@ -100,6 +91,33 @@ def run_compile(build_result):
                 simply.mainScriptSource = %s;
             })();
             """ % escaped_js)
+
+            # Magical hack: we need to get the resource IDs into the user's JavaScript somehow.
+            # This is actually not trivial to do, especially because the resource IDs aren't known
+            # until we've already built the thing, at which point it's too late to be useful.
+            # Instead we're going to rely on the deterministic nature of Python dictionaries,
+            # as long as the same sequence of actions is performed. Therefore, we will read back
+            # the dictionary we just wrote, and therefore should have the same ordering.
+            # Resource IDs then start at 1.
+            # Note: this will fail in the event of resources that generate multiple outputs, such as
+            # png-trans - which we don't support anyway.
+            with open(os.path.join(base_dir, 'appinfo.json')) as f:
+                manifest = json.load(f)
+                media = manifest['resources']['media']
+                resource_ids = dict(zip([x['name'] for x in media], xrange(1, len(media) + 1)))
+
+            with open(os.path.join(base_dir, 'src', 'js', 'zzy_resources.js'), 'w') as f:
+                f.write("RESOURCES = %s;" % json.dumps(resource_ids))
+
+
+        open(os.path.join(base_dir, 'appinfo.json'), 'w').write(json.dumps(manifest_dict))
+
+        for f in resources:
+            target_dir = os.path.abspath(os.path.join(base_dir, resource_root, ResourceFile.DIR_MAP[f.kind]))
+            abs_target = os.path.abspath(os.path.join(target_dir, f.file_name))
+            if not abs_target.startswith(target_dir):
+                raise Exception("Suspicious filename: %s" % f.file_name)
+            f.copy_to_path(abs_target)
 
         # Build the thing
         cwd = os.getcwd()

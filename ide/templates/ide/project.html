@@ -26,9 +26,9 @@
                     <li class="divider native-only" id="end-source-files"></li>
                     <li class="native-only"><a href="#" id="new-source-file"><strong>New C file</strong></a></li>
                     <li class="native-only"><a href="#" id="new-js-file"><strong>New JavaScript file</strong></a></li>
-                    <li class="nav-header native-only">Resources</li>
-                    <li class="hide native-only" id="end-resources"></li>
-                    <li id="sidebar-pane-new-resource" class="native-only"><a href="#"><strong>New resource</strong></a></li>
+                    <li class="nav-header">Resources</li>
+                    <li class="hide" id="end-resources"></li>
+                    <li id="sidebar-pane-new-resource"><a href="#"><strong>New resource</strong></a></li>
                 </ul>
             </div>
         </div>
@@ -61,9 +61,11 @@
                         <div class="controls">
                             <select id="edit-resource-type">
                                 <option value="png">PNG image</option>
+                                {% if project.project_type == 'native' %}
                                 <option value="png-trans">PNG with transparency</option>
                                 <option value="font">TrueType font</option>
                                 <option value="raw">Raw binary blob</option>
+                                {% endif %}
                             </select>
                         </div>
                     </div>
@@ -84,7 +86,7 @@
             <label class="control-label" for="edit-resource-id">Resource Identifier</label>
             <div class="controls">
                 <input type="text" class="span4 edit-resource-id" placeholder="IMAGE_EXAMPLE_IDENTIFIER" pattern="[A-Za-z0-9_]+">
-                <span class="help-block">This is used in your code and must be a valid C identifier.</span>
+                <span class="help-block">This is used in your code and must be a valid {% if project.project_type == 'native' %}C{% else %}JavaScript{% endif %} identifier.</span>
             </div>
         </div>
         <div id="font-resource-group" class="hide">
