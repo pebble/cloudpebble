@@ -181,12 +181,8 @@ def generate_simplyjs_manifest_dict(project, resources):
                 {
                     "menuIcon": True,
                     "type": "png",
-                    "name": "IMAGE_MENU_ICON",
+                    "name": "SIMPLYJS_DEFAULT_MENU_ICON",
                     "file": "images/menu_icon.png"
-                }, {
-                    "type": "png",
-                    "name": "IMAGE_LOGO_SPLASH",
-                    "file": "images/logo_splash.png"
                 }, {
                     "type": "font",
                     "name": "MONO_FONT_14",
