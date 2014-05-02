@@ -145,6 +145,7 @@ CloudPebble.Sidebar = (function() {
             init();
         },
         SetPopover: function(pane_id, title, content) {
+            return;
             $('#sidebar-pane-' + pane_id).popover('destroy').popover({
                 trigger: 'hover',
                 title: title,
