@@ -9,5 +9,6 @@ urlpatterns = patterns(
     '',
     url(r'^register/?$', reg_view, name="registration_register"),
     url(r'^logout/?$', views.logout_view, name="logout"),
+    url(r'^api/login$', views.login_action, name="login"),
     url(r'', include('registration.backends.simple.urls'))
 )

@@ -20,6 +20,5 @@ urlpatterns = patterns('',
      url(r'^accounts/', include('auth.urls')), # Namespacing this breaks things.
      url(r'^qr/', include('qr.urls', namespace='qr')),
      url(r'^$', include('root.urls', namespace='root')),
-     url(r'', include('social.apps.django_app.urls', namespace='social')),
-     url(r'^login/?$', 'auth.views.login_split')
+     url(r'', include('social.apps.django_app.urls', namespace='social'))
 )

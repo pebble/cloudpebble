@@ -231,7 +231,7 @@ BROKER_POOL_LIMIT = int(_environ.get('BROKER_POOL_LIMIT', 10))
 
 LOGIN_REDIRECT_URL = '/ide/'
 
-LOGIN_URL = '/login/'
+LOGIN_URL = '/#login'
 
 FILE_STORAGE = os.getcwd() + '/user_data/'
 

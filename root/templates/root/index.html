@@ -26,11 +26,11 @@
                 <div class="box">
                     <h3>Have a legacy CloudPebble account?</h3>
                     <p>Log in to link it with your Pebble account. Legacy
-                        accounts are being phased out in favour of the unified
-                        Pebble account system. Once you log in to your
-                        legacy account you will be required to link it;
-                        henceforth you must use the button below to log in.</p>
-                    <p><button class="btn">Link to your Pebble account</button></p>
+                        accounts are being phased out in favour of the
+                        Pebble account system. Once you log in you will be
+                        required to link your accounts;
+                        henceforth you must log in with your pebble account.</p>
+                    <p><button class="btn" id="legacy-trigger-btn">Link to your Pebble account</button></p>
                 </div>
             </div>
         </div>
@@ -72,6 +72,33 @@
     </div>
 {% endblock %}
 
+{% block modals %}
+<div id="legacy-login" class="modal hide fade" tabindex="-1" role="dialog">
+    <div class="modal-header">
+        <h3 id="modal-warning-prompt-title">Log in with legacy account</h3>
+    </div>
+    <div class="modal-body">
+        <form class="form-horizontal">
+            <div class="control-group">
+                <label for="legacy-username">Username</label>
+                <div class="controls">
+                    <input type="text" id="legacy-username">
+                </div>
+                <label for="legacy-password">Password</label>
+                <div class="controls">
+                    <input type="password" id="legacy-password">
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" id="legacy-login-btn">Log in</button>
+        <button class="btn" data-dismiss="modal">Cancel</button>
+    </div>
+</div>
+{% endblock %}
+
 {% block scripts %}
+    <script src="{% static 'ide/js/csrf.js' %}"></script>
     <script src="{% static 'root/js/splash.js' %}"></script>
 {% endblock %}
