@@ -524,6 +524,13 @@ body.backdrop .main-container {
     width: 310px;
 }
 
+.modal-body > p {
+    text-align: center;
+    color: white;
+    font-size: large;
+    padding: 10px;
+}
+
 .modal-body select {
     width: 325px;
 }
