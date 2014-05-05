@@ -551,6 +551,7 @@ span.cm-autofilled-end {
     width: 500px;
     max-width: 500px;
     line-height: 16px;
+    color: white;
 }
 
 .popover-declaration, .popover-params .param-name {
@@ -560,14 +561,6 @@ span.cm-autofilled-end {
 .doc-popover p {
     padding: 0;
     margin: 0;
-}
-
-.doc-popover code {
-    color: initial;
-    background: initial;
-    border: initial;
-    margin: 0;
-    padding: 0;
 }
 
 .doc-popover tr {
