@@ -28,10 +28,10 @@ CloudPebble.GitHub = (function() {
             pane.find('input, button').removeAttr('disabled');
         };
         var disable_needy = function() {
-            pane.find('.needs-repo').find('input, button').attr('disabled', 'disabled');
+            pane.find('.github-actions').find('input, button').attr('disabled', 'disabled');
         };
         var enable_needy = function() {
-            pane.find('.needs-repo').find('input, button').removeAttr('disabled');
+            pane.find('.github-actions').find('input, button').removeAttr('disabled');
         };
 
         pane.find('#github-repo-form').submit(function(e) {
@@ -39,8 +39,8 @@ CloudPebble.GitHub = (function() {
             clear_alert();
             var new_repo = pane.find('#github-repo').val();
             var repo_branch = pane.find('#github-branch').val();
-            var auto_pull = pane.find('#github-repo-hook').prop('checked');
-            var auto_build = pane.find('#github-repo-build').prop('checked');
+            var auto_pull = pane.find('#github-repo-hook').val() == '1';
+            var auto_build = pane.find('#github-repo-build').val() == '1';
 
             if(repo_branch == null || repo_branch.length == 0) {
                 repo_branch = "master";
@@ -97,8 +97,8 @@ CloudPebble.GitHub = (function() {
         if(CloudPebble.ProjectInfo.github.branch) {
             pane.find('#github-branch').val(CloudPebble.ProjectInfo.github.branch);
         }
-        pane.find('#github-repo-hook').prop('checked', CloudPebble.ProjectInfo.github.auto_pull);
-        pane.find('#github-repo-build').prop('checked', CloudPebble.ProjectInfo.github.auto_build);
+        pane.find('#github-repo-hook').val(CloudPebble.ProjectInfo.github.auto_pull ? '1' : '0');
+        pane.find('#github-repo-build').val(CloudPebble.ProjectInfo.github.auto_build ? '1' : '0');
 
         var prompt = $('#github-new-repo-prompt');
         prompt.find('form').submit(function(e) {

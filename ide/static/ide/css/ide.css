@@ -304,6 +304,42 @@ table.build-results tr.pending .build-state {
     margin-top: -10px;
 }
 
+/* GitHub pane */
+
+.github-pane .well {
+    margin: 30px;
+    padding-left: 30px;
+    padding-right: 30px;
+    width: 650px;
+}
+
+.github-pane .form-horizontal .control-group label {
+    width: 150px;
+}
+
+.github-pane .help-block {
+    margin-left: 170px;
+}
+
+.github-pane input:not([type=checkbox]):not([type=submit]) {
+    width: 435px;
+}
+
+.github-pane select {
+    width: 450px;
+}
+
+.github-actions .btn {
+    width: 250px;
+    margin-right: 20px;
+}
+
+.modal-body .running p {
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
 /* Old stuff. */
 
 .CodeMirror-hints {
