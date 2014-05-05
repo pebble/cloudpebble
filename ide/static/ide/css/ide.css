@@ -421,6 +421,62 @@ table.build-results tr.pending .build-state {
     padding: 20px;
 }
 
+/* Resources pane */
+
+.resource-pane .well {
+    margin: 30px;
+    padding-left: 30px;
+    padding-right: 30px;
+    width: 650px;
+}
+
+.resource-pane .form-horizontal .control-group label {
+    width: 150px;
+}
+
+.resource-pane .help-block {
+    margin-left: 170px;
+}
+
+.resource-pane input:not([type=checkbox]):not([type=submit]) {
+    width: 435px;
+}
+
+.resource-pane select {
+    width: 450px;
+}
+
+.resource-download-link .btn {
+    margin-left: 170px;
+    width: 300px;
+}
+
+.image-resource-preview img {
+    margin-left: 170px;
+    border: 2px solid #767676;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.image-resource-preview p {
+    display: table-cell;
+    vertical-align: middle;
+    padding-left: 10px;
+    padding-top: 5px;
+}
+
+.image-resource-preview > div {
+    display: table-row;
+}
+
+.image-resource-preview > div > * {
+    display: table-cell;
+}
+
+.resource-actions .btn {
+    margin-right: 20px;
+}
+
 /* Old stuff. */
 
 .CodeMirror-hints {
@@ -430,10 +486,6 @@ table.build-results tr.pending .build-state {
 
 .edit-resource-regex, .appkey-name, .appkey-id {
   font-family: Menlo, 'Deja Vu Sans Mono', monospace;
-}
-
-.resource-download-link {
-    margin-left: 180px; /* Matches Bootstrap's form offset. */
 }
 
 .nav-list .popover {

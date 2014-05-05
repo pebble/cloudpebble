@@ -75,47 +75,51 @@
 </div>
 
 <!-- Resource editing template -->
-<div id="resource-pane-template" class="hide">
+<div id="resource-pane-template" class="hide resource-pane">
     <form class="form-horizontal">
         <div class="alert alert-error hide"></div>
         <div class="well">
-            <div class="row-fluid">
-                <div class="span12 resource-type-column">
-                    <div class="control-group">
-                        <label class="control-label" for="edit-resource-type">Resource type</label>
-                        <div class="controls">
-                            <select id="edit-resource-type">
-                                <option value="png">PNG image</option>
-                                <option value="png-trans">PNG with transparency</option>
-                                <option value="font">TrueType font</option>
-                                <option value="raw">Raw binary blob</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="edit-resource-file">File</label>
-                        <div class="controls">
-                            <input type="file" id="edit-resource-file">
-                            <span class="help-block hide">You can have multiple Pebble resources from a single file (for different sizes, etc.)</span>
-                        </div>
-                    </div>
-                    <div class="resource-download-link hide">
-                        <a href="#">Download uploaded resource</a>
-                    </div>
+            <div class="control-group">
+                <label class="control-label" for="edit-resource-type">Resource type</label>
+                <div class="controls">
+                    <select id="edit-resource-type">
+                        <option value="png">PNG image</option>
+                        <option value="png-trans">PNG with transparency</option>
+                        <option value="font">TrueType font</option>
+                        <option value="raw">Raw binary blob</option>
+                    </select>
                 </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="edit-resource-file">File</label>
+                <div class="controls">
+                    <input type="file" id="edit-resource-file">
+                    <span class="help-block hide">You can have multiple Pebble resources from a single file (for different sizes, etc.)</span>
+                </div>
+            </div>
+            <div class="image-resource-preview hide">
+                <hr>
+                <div>
+                    <img src="">
+                    <p>52x52</p>
+                </div>
+            </div>
+            <div class="resource-download-link hide">
+                <hr>
+                <a href="#" class="btn">Download uploaded resource</a>
             </div>
         </div>
         <div class="control-group well " id="non-font-resource-group">
-            <label class="control-label" for="edit-resource-id">Resource Identifier</label>
+            <label class="control-label" for="edit-resource-id">Identifier</label>
             <div class="controls">
-                <input type="text" class="span4 edit-resource-id" placeholder="IMAGE_EXAMPLE_IDENTIFIER" pattern="[A-Za-z0-9_]+">
+                <input type="text" class="edit-resource-id" placeholder="IMAGE_EXAMPLE_IDENTIFIER" pattern="[A-Za-z0-9_]+">
                 <span class="help-block">This is used in your code and must be a valid C identifier.</span>
             </div>
         </div>
         <div id="font-resource-group" class="hide">
             <div class="well font-resource-group-single">
                 <div class="control-group">
-                    <label class="control-label">Resource Identifier</label>
+                    <label class="control-label">Identifier</label>
                     <div class="controls">
                         <input type="text" class="span6 edit-resource-id" placeholder="FONT_EXAMPLE_BOLD_SUBSET_24" pattern="[A-Za-z0-9_]*[0-9]+">
                         <span class="help-block">This is used in your code and must be a valid C identifier.<br>
@@ -123,7 +127,7 @@
                     </div>
                 </div>
                 <div class="control-group font-resource-regex-group">
-                    <label class="control-label">Character Expression</label>
+                    <label class="control-label">Characters</label>
                     <div class="controls">
                         <input type="text" class="span4 edit-resource-regex" placeholder="[0-9:. ]">
                         <span class="help-block">A PCRE regular expression that restricts characters.</span>
@@ -138,10 +142,10 @@
                 </div>
             </div>
         </div>
-        <div id="edit-resource-buttons" class="well form-actions">
-            <button type="submit" class="btn btn-primary">Save</button>
-            <button type="button" class="btn hide" id="add-font-resource">Another font resource</button>
+        <div id="edit-resource-buttons" class="well resource-actions">
+            <button type="submit" class="btn btn-affirmative">Save</button>
             <button type="button" class="btn btn-danger hide" id="edit-resource-delete">Delete</button>
+            <button type="button" class="btn hide" id="add-font-resource">Another font</button>
         </div>
     </form>
 </div>

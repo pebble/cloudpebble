@@ -155,23 +155,18 @@ CloudPebble.Resources = (function() {
 
             CloudPebble.Sidebar.SetActivePane(pane, 'resource-' + resource.id);
             pane.find('#edit-resource-type').val(resource.kind).attr('disabled', 'disabled');
-            pane.find('label[for="edit-resource-file"]').text("Replace with new file");
             pane.find('#edit-resource-file').after($("<span class='help-block'>If specified, this file will replace the current file for this resource, regardless of its filename.</span>"));
 
             // Generate a preview.
             var preview_url = '/ide/project/' + PROJECT_ID + '/resource/' + resource.id +'/get';
             if(resource.kind == 'png' || resource.kind == 'png-trans') {
-                var div = $('<div class="span4 text-center">');
-                preview_img = $('<img class="img-polaroid img-dimmer">');
+                preview_img = pane.find('.image-resource-preview img');
                 preview_img.attr('src', preview_url);
-                div.append(preview_img);
-                var dimensions = $('<p class="muted">');
-                // Create an unscaled image and make sure it's in the DOM so we can see its size.
+                var dimensions = pane.find('.image-resource-preview p');
                 preview_img.load(function() {
                     dimensions.text(this.naturalWidth + ' x ' + this.naturalHeight);
+                    pane.find('.image-resource-preview').show();
                 });
-                div.append(dimensions);
-                $('.resource-type-column').removeClass('span12').addClass('span8').before(div);
             } else if(resource.kind == 'font') {
                 var style = document.createElement('style');
                 ++preview_count;
@@ -194,13 +189,11 @@ CloudPebble.Resources = (function() {
                 }
                 var tracking = parseInt(group.find('.edit-resource-tracking').val(), 10) || 0;
                 var row = $('<div class="control-group font-preview"><label class="control-label">Preview</label>');
-                var preview = $('<div class="controls">');
-                var line1 = ('abcdefghijklmnopqrstuvwxyz'.match(preview_regex)||[]).join('');
-                var line2 = ('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.match(preview_regex)||[]).join('');
-                var line3 = ('0123456789'.match(preview_regex) || []).join('');
-                var line4 = ('~!@#$%^& *()_+[]{}\\|;:\'"<>?`'.match(preview_regex)||[]).join('');
+                var preview_holder = $('<div class="controls">');
+                var preview = $('<div>').appendTo(preview_holder);
+                var line = ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789~!@#$%^& *()_+[]{}\\|;:\'"<>?`'.match(preview_regex)||[]).join('');
                 var font_size = id_str.match(/[0-9]+$/)[0];
-                preview.html(line1 + (line1 ? "<br>" : '') + line2 + (line2 ? "<br>" : '')+ line3 + (line3 ? "<br>" : '')+ line4);
+                preview.text(line);
                 // Officially, a CSS pixel is defined as one pixel at 96 dpi.
                 // 96 / PEBBLE_PPI should thus be correct.
                 // We use 'transform' to work around https://bugs.webkit.org/show_bug.cgi?id=20606
@@ -210,9 +203,15 @@ CloudPebble.Resources = (function() {
                     'line-height': font_size + 'px',
                     'letter-spacing': tracking + 'px',
                     'transform': 'scale(' + (96 / PEBBLE_PPI) + ')',
-                    'transform-origin': '0 0'
+                    'transform-origin': '0 0',
+                    'display': 'inline-block',
+                    'border': (2 * (PEBBLE_PPI / 96)) + 'px solid #767676',
+                    'padding': '5px',
+                    'border-radius': '5px',
+                    'background-color': 'white',
+                    'color': 'black'
                 });
-                row.append(preview);
+                row.append(preview_holder);
                 group.append(row);
             };
 
