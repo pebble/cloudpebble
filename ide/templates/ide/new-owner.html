@@ -1,48 +1,33 @@
-{% extends "ide/../../../root/templates/common/base.html" %}
+{% extends "common/base-narrow.html" %}
 {% load staticfiles %}
-{% block content %}
-<style type="text/css">
-/* Custom container */
-.container-narrow {
-    margin: 0 auto;
-    max-width: 800px;
-}
-.container-narrow > hr {
-    margin: 30px 0;
-}
-</style>
-<div class="container-narrow">
-    <div class="masthead">
-        <ul class="nav nav-pills pull-right">
-            <li class="active"><a>Your Projects</a></li>
-            <li><a href="{% url 'ide:settings' %}">IDE Settings</a></li>
-            <li><a href="{% url 'logout' %}">Sign out</a></li>
-        </ul>
-        <h3 class="muted">CloudPebble</h3>
-    </div>
-    <div class="row-fluid">
-        <div class="span12">
-            <h2 style="text-align: center;">CloudPebble is now sponsored by Pebble!</h2>
-        </div>
-        <div class="span12 well" style="text-align: center;">
-            <p>Your account and projects are as you left them, and you can continue as usual:</p>
-            <p><button class="btn btn-primary btn-large" id="btn-accept">Accept and Continue</button></p>
-            <p style="margin-top: 40px;">If you object to Pebble running CloudPebble, you can export your data and delete your account.</p>
-            <p><button class="btn" id="btn-export">Export all projects</button> <button class="btn btn-danger" id="btn-delete">Delete account</button></p>
-            <p>Note that deleting your account is permanent and irreversible. Be sure you export your data first!</p>
-        </div>
+{% block narrowcontent %}
+    <style>
+    p {
+        padding: 5px;
+    }
+    </style>
+<div>
+    <h1 style="text-align: center;">CloudPebble is now sponsored by Pebble!</h1>
+    <div class="well" style="text-align: center;">
+        <p>Your account and projects are as you left them, and you can continue as usual:</p>
+        <p><button class="btn btn-primary" id="btn-accept" style="width: 250px;">Accept and Continue</button></p>
+        <hr>
+        <p>If you object to Pebble running CloudPebble, you can export your data and delete your account.</p>
+        <p><button class="btn" id="btn-export" style="width: 200px;">Export all projects</button> <button class="btn btn-danger" id="btn-delete" style="width: 200px;">Delete account</button></p>
+        <p>Note that deleting your account is permanent and irreversible. Be sure you export your data first!</p>
     </div>
 </div>
+{% endblock %}
 
+{% block modals %}
 <div id="export-progress" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">x</button>
         <h3>Exporting…</h3>
     </div>
-    <div class="model-body">
-        <div class="row-fluid" id="export-pending-body">
-            <div class="span10 offset1">
-                <div class="text-center" id="export-progress-text">
+    <div class="model-body" style="text-align: center;">
+        <div id="export-pending-body">
+            <div>
+                <div id="export-progress-text" style="color: white;">
                     <img src="{% static 'ide/img/zip.png' %}" style="height: 200px; width: 200px; margin-top: 10px;">
                     <div class="progress active">
                         <div class="bar" style="width: 100%;"></div>
@@ -57,10 +42,9 @@
 <!-- Modal boolean confirmation prompt -->
 <div id="modal-warning-prompt" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">x</button>
         <h3 id="modal-warning-prompt-title">Modal header</h3>
     </div>
-    <div class="modal-body">
+    <div class="modal-body" style="text-align: center;">
         <p id="modal-warning-prompt-warning">Modal warning</p>
     </div>
     <div class="modal-footer">
