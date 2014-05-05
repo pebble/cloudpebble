@@ -1,32 +1,15 @@
-{% extends 'ide/../../../root/templates/common/base.html' %}
-{% block content %}
-<style type="text/css">
-    /* Custom container */
-    .container-narrow {
-        margin: 0 auto;
-        max-width: 600px;
-    }
-</style>
-<div class="container-narrow">
-    <div class="masthead">
-        <ul class="nav nav-pills pull-right">
-          <!-- top right pills -->
-        </ul>
-        <h3 class="muted"><a href="/" class="muted">CloudPebble</a></h3>
+{% extends 'common/base-narrow.html' %}
+{% block narrowcontent %}
+    <div class="well" style="text-align: center; width: 500px; margin-left: auto; margin-right: auto;">
+        <p>
+            Legacy CloudPebble accounts are being phased out in favour of the unified Pebble account. To continue
+            you must link your account with your Pebble account.</p>
+        <p>
+            After linking you <strong>will not be able to log in using your legacy account.</strong>
+            In future, please use the Pebble Account button to log in.
+        </p>
+        <hr>
+        <p class="text-center"><a href="/login/pebble" class="btn btn-primary" style="width: 300px;">Link your Pebble Account</a></p>
+        <p class="text-center" style="margin-top:20px;">This is the same account you use to log in to the Pebble Forums, Developer Portal and phone app.</p>
     </div>
-    <div class="row-fluid pebble-account-box">
-        <div class="span12 well">
-            <p>
-                Legacy CloudPebble accounts are being phased out in favour of the unified Pebble account. To continue
-                you must link your account with your Pebble account.</p>
-            <p>
-                After linking you <strong>will not be able to log in using your legacy account.</strong>
-                In future, please use the Pebble Account button to log in.
-            </p>
-            <hr>
-            <p class="text-center"><a href="/login/pebble" class="btn btn-large btn-primary">Link your Pebble Account</a></p>
-            <p class="text-center">This is the same account you use to log in to the Pebble Forums, Developer Portal and phone app.</p>
-        </div>
-    </div>
-</div>
 {%endblock%}
