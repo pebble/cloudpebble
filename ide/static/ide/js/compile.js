@@ -491,7 +491,10 @@ CloudPebble.Compile = (function() {
                     } else {
                         mPebble.close();
                         mPebble = null;
-                        report_error("You must update your firmware to at least " + MINIMUM_INSTALL_VERSION + " to install apps (you have " + version_string + ").");
+                        report_error(
+                            "Please update your pebble to " + MINIMUM_INSTALL_VERSION + " to be able to install apps " +
+                                "from CloudPebble and the appstore (you're on version " + version_string + ")."
+                        );
                     }
                 });
                 mPebble.request_version();
