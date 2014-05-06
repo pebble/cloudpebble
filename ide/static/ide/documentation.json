@@ -539,6 +539,15 @@
         ], 
         "description": "<p>Reschedules an already running timer for some point in the future."
     }, 
+    "NumberWindowCallback": {
+        "kind": "typedef", 
+        "name": "NumberWindowCallback", 
+        "return_desc": null, 
+        "returns": "void(*", 
+        "warning": null, 
+        "params": [], 
+        "description": "<p>Function signature for NumberWindow callbacks. </p>"
+    }, 
     "ARRAY_LENGTH": {
         "kind": "def", 
         "name": "ARRAY_LENGTH", 
@@ -577,20 +586,20 @@
         ], 
         "description": "<p>Trim one rectangle using the edges of a second rectangle."
     }, 
-    "rot_bitmap_layer_destroy": {
+    "window_get_click_config_context": {
         "kind": "fn", 
-        "name": "rot_bitmap_layer_destroy", 
+        "name": "window_get_click_config_context", 
         "return_desc": null, 
-        "returns": "void", 
+        "returns": "void *", 
         "warning": null, 
         "params": [
             {
-                "type": "RotBitmapLayer *", 
-                "name": "bitmap", 
-                "description": null
+                "type": "Window *", 
+                "name": "window", 
+                "description": "<p>The window for which to get the click config provider context </p>"
             }
         ], 
-        "description": ""
+        "description": "<p>Gets the current click configuration provider context of the window."
     }, 
     "MenuRowAlignCenter": {
         "kind": "enum", 
@@ -1006,7 +1015,7 @@
         "name": "clock_copy_time_string", 
         "return_desc": null, 
         "returns": "void", 
-        "warning": null, 
+        "warning": "<p>AM/PM are also outputted with the time if the user's preference is 12h time. </p>", 
         "params": [
             {
                 "type": "char *", 
@@ -1019,7 +1028,7 @@
                 "description": "<p>The maximum size of buffer </p>"
             }
         ], 
-        "description": "<p>Copies a time string into the buffer, formatted according to the user's time display preferences (such as 12h/24h time). Example results: \"7:30\" or \"15:00\""
+        "description": "<p>Copies a time string into the buffer, formatted according to the user's time display preferences (such as 12h/24h time). Example results: \"7:30\" or \"15:00\"."
     }, 
     "menu_layer_set_click_config_onto_window": {
         "kind": "fn", 
@@ -1970,7 +1979,7 @@
                 "description": "<p>The ClickHandler to fire on this event. </p>"
             }
         ], 
-        "description": "<p>Subscribe to single click events. A single click is detected every time \"<code>repeat_interval_ms</code>\" has been reached. \n\n<p>When there is a <code>multi_click</code> and/or <code>long_click</code> setup, there will be a delay pending before the single click handler will get fired. On the other hand, when there is no <code>multi_click</code> nor <code>long_click</code> setup, the single click handler will fire directly on button down. </p>\n\n</p>"
+        "description": "<p>Subscribe to single click events. A single click is detected every time \"<code>repeat_interval_ms</code>\" has been reached. <p>When there is a <code>multi_click</code> and/or <code>long_click</code> setup, there will be a delay pending before the single click handler will get fired. On the other hand, when there is no <code>multi_click</code> nor <code>long_click</code> setup, the single click handler will fire directly on button down. </p>\n\n</p>"
     }, 
     "animation_create": {
         "kind": "fn", 
@@ -2235,7 +2244,7 @@
         "returns": "", 
         "warning": null, 
         "params": [], 
-        "description": "<p>Acts like GTextOverflowModeTrailingEllipsis but isn't limited to a single line. The text will wrap until the vertical space is consumed and then the final word will be truncated with a trailing ellipsis. </p>"
+        "description": "<p>Acts like GTextOverflowModeTrailingEllipsis, plus trims leading and trailing newlines, while treating all other newlines as spaces. </p>"
     }, 
     "layer_insert_above_sibling": {
         "kind": "fn", 
@@ -2302,7 +2311,7 @@
                 "description": "<p>A callback to be executed on tick event </p>"
             }
         ], 
-        "description": "<p>Subscribe to the tick timer event service. Once subscribed, the handler gets called on every requested unit change"
+        "description": "<p>Subscribe to the tick timer event service. Once subscribed, the handler gets called on every requested unit change. Only\u00a0the\u00a0last\u00a0callback\u00a0and\u00a0settings\u00a0passed\u00a0will\u00a0be\u00a0used.\u00a0 This\u00a0can only be called once."
     }, 
     "number_window_create": {
         "kind": "fn", 
@@ -2597,6 +2606,15 @@
         ], 
         "description": "<p>Gets the application-specific callback context of the animation. This void pointer is passed as an argument when the animation system calls AnimationHandlers callbacks. The context pointer can be set to point to any application specific data using <code>animation_set_handlers()</code>. \n</p>"
     }, 
+    "MenuLayerGetSeparatorHeightCallback": {
+        "kind": "typedef", 
+        "name": "MenuLayerGetSeparatorHeightCallback", 
+        "return_desc": "<p>The height of the separator at the given MenuIndex </p>", 
+        "returns": "int16_t(*", 
+        "warning": null, 
+        "params": [], 
+        "description": "<p>Function signature for the callback to get the height of the separator at a given index. \n</p>"
+    }, 
     "grect_crop": {
         "kind": "fn", 
         "name": "grect_crop", 
@@ -2730,7 +2748,7 @@
             {
                 "type": "int32_t", 
                 "name": "angle", 
-                "description": "<p>The angle for which to compute the cosine. A the angle value is scaled linearly, such that a value of 0x10000 corresponds to 360 degrees or 2 PI radians. </p>"
+                "description": "<p>The angle for which to compute the cosine. The angle value is scaled linearly, such that a value of 0x10000 corresponds to 360 degrees or 2 PI radians. </p>"
             }
         ], 
         "description": "<p>Look-up the sine of the given angle from a pre-computed table."
@@ -2792,6 +2810,15 @@
         "params": [], 
         "description": "<p>Unschedules all animations of the application. \n</p>"
     }, 
+    "MenuLayerDrawSeparatorCallback": {
+        "kind": "typedef", 
+        "name": "MenuLayerDrawSeparatorCallback", 
+        "return_desc": null, 
+        "returns": "void(*", 
+        "warning": "<p>The <code>cell_layer</code> argument is provided to make it easy to re-use an .<code>update_proc</code> implementation in this callback. Only the bounds and frame of the <code>cell_layer</code> are actually valid and other properties should be ignored. </p>", 
+        "params": [], 
+        "description": "<p>Function signature for the callback to render the separator at a given MenuIndex. \n</p>"
+    }, 
     "light_enable_interaction": {
         "kind": "fn", 
         "name": "light_enable_interaction", 
@@ -2852,7 +2879,7 @@
         "returns": "", 
         "warning": null, 
         "params": [], 
-        "description": ""
+        "description": "<p>Successful operation. </p>"
     }, 
     "rot_bitmap_layer_set_corner_clip_color": {
         "kind": "fn", 
@@ -3145,7 +3172,7 @@
         "returns": "", 
         "warning": null, 
         "params": [], 
-        "description": "<p>On overflow, wrap words to a new line below the current one. </p>"
+        "description": "<p>On overflow, wrap words to a new line below the current one. Once vertical space is consumed, the last line may be clipped. </p>"
     }, 
     "dict_write_uint16": {
         "kind": "fn", 
@@ -3798,14 +3825,20 @@
         "params": [], 
         "description": "<p>The event loop for apps, to be used in app's main(). Will block until the app is ready to exit. \n</p>"
     }, 
-    "NumberWindowCallback": {
-        "kind": "typedef", 
-        "name": "NumberWindowCallback", 
+    "rot_bitmap_layer_destroy": {
+        "kind": "fn", 
+        "name": "rot_bitmap_layer_destroy", 
         "return_desc": null, 
-        "returns": "void(*", 
+        "returns": "void", 
         "warning": null, 
-        "params": [], 
-        "description": "<p>Function signature for NumberWindow callbacks. </p>"
+        "params": [
+            {
+                "type": "RotBitmapLayer *", 
+                "name": "bitmap", 
+                "description": null
+            }
+        ], 
+        "description": ""
     }, 
     "S_SUCCESS": {
         "kind": "enum", 
@@ -4042,7 +4075,7 @@
             {
                 "type": "int32_t", 
                 "name": "angle", 
-                "description": "<p>The angle for which to compute the cosine. A the angle value is scaled linearly, such that a value of 0x10000 corresponds to 360 degrees or 2 PI radians. </p>"
+                "description": "<p>The angle for which to compute the cosine. The angle value is scaled linearly, such that a value of 0x10000 corresponds to 360 degrees or 2 PI radians. </p>"
             }
         ], 
         "description": "<p>Look-up the cosine of the given angle from a pre-computed table. This is equivalent to calling <code>sin_lookup</code>(angle + <code>MAX_ANGLE</code> / 4)."
@@ -4261,7 +4294,7 @@
             {
                 "type": "bool", 
                 "name": "last_click_only", 
-                "description": "<p>Defaults to false. When true, only the for the last multi-click the handler is called. </p>"
+                "description": "<p>Defaults to false. When true, only the handler for the last multi-click is called. </p>"
             }, 
             {
                 "type": "ClickHandler", 
@@ -4830,7 +4863,7 @@
                 "description": null
             }
         ], 
-        "description": "<p>Look-up the arctangent of a given x, y pair A the angle value is scaled linearly, such that a value of 0x10000 corresponds to 360 degrees or 2 PI radians. </p>"
+        "description": "<p>Look-up the arctangent of a given x, y pair The angle value is scaled linearly, such that a value of 0x10000 corresponds to 360 degrees or 2 PI radians. </p>"
     }, 
     "APP_MESSAGE_INBOX_SIZE_MINIMUM": {
         "kind": "def", 
@@ -5574,7 +5607,7 @@
                 "description": "<p>If non-null, draws an icon to the left of the text. If NULL, the icon will be omitted and the leftover space is used for the title and subtitle. </p>"
             }
         ], 
-        "description": "<p>and icon on the left of the cell. Call this function inside the .<code>draw_row</code> callback implementation, see MenuLayerCallbacks."
+        "description": "<p>Section drawing function to draw a basic section cell with the title, subtitle, and icon of the section. Call this function inside the .<code>draw_row</code> callback implementation, see MenuLayerCallbacks."
     }, 
     "window_destroy": {
         "kind": "fn", 
@@ -6142,7 +6175,7 @@
         "returns": "", 
         "warning": null, 
         "params": [], 
-        "description": "<p>On overflow, truncate as needed to fit a trailing ellipsis (...). </p>"
+        "description": "<p>On overflow, wrap words to a new line below the current one. Once vertical space is consumed, truncate as needed to fit a trailing ellipsis (...). Clipping may occur if the vertical space cannot accomodate the first line of text. </p>"
     }, 
     "app_message_open": {
         "kind": "fn", 

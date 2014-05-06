@@ -10,6 +10,9 @@ NEW_THINGS = [
      "You can also view the pop-up for the name your editor cursor is in by pressing cmd-ctrl-shift-/ (Mac) or ctrl-alt-shift-/ (Windows)." +
      " (On some keyboard layouts, that is cmd-ctrl-? or ctrl-alt-?)",
      "Short summaries now also appear at the bottom of the autocomplete popup."],
+    ["CloudPebble is now running Pebble SDK 2.1. See the <a href='https://developer.getpebble.com/2/changelog-2.1.html'>full release notes</a>.",
+     "<strong>Warning:</strong> Apps that incorrectly free the same memory twice will now crash immediately instead of carrying on but potentially silently corrupting memory.",
+     "Apps built on CloudPebble now require you to <a href='https://developer.getpebble.com/2/getting-started/'>update to Pebble OS 2.1</a> to run your apps."],
 ]
 
 

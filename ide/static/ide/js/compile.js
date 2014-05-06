@@ -1,4 +1,6 @@
 CloudPebble.Compile = (function() {
+    var MINIMUM_INSTALL_VERSION = "v2.1";
+
     var COMPILE_SUCCESS_STATES = {
         1: {english: "Pending", cls: "info", label: 'info'},
         2: {english: "Failed", cls: "error", label: 'error'},
@@ -448,7 +450,7 @@ CloudPebble.Compile = (function() {
             modal.off('hide');
 
             var report_error = function(message) {
-                modal.find('.modal-body > p').text(message);
+                modal.find('.modal-body > p').html(message);
                 modal.find('.dismiss-btn').removeClass('hide');
                 modal.find('.progress').addClass('progress-danger').removeClass('progress-striped');
             };
@@ -465,7 +467,24 @@ CloudPebble.Compile = (function() {
             }
 
             mPebble.on('open', function() {
-                mPebble.install_app(pane.find('#last-compilation-pbw').attr('href'));
+                mPebble.once('version', function(version_info) {
+                    var version_string = version_info.running.version;
+                    console.log(version_string);
+                    // Make sure that we have the required version - but also assume that anyone who has the string 'test'
+                    // in their firmware version number (e.g. me) knows what they're doing.
+                    if(/test/.test(version_string) || compare_version_strings(version_string, MINIMUM_INSTALL_VERSION) >= 0) {
+                        mPebble.install_app(pane.find('#last-compilation-pbw').attr('href'));
+                    } else {
+                        mPebble.close();
+                        mPebble = null;
+                        report_error(
+                            "Please <a href='https://developer.getpebble.com/2/getting-started/'>update your pebble</a>" +
+                                " to " + MINIMUM_INSTALL_VERSION + " to be able to install apps from CloudPebble and " +
+                                "the appstore (you're on version " + version_string + ")."
+                        );
+                    }
+                });
+                mPebble.request_version();
             });
             mPebble.on('status', function(code) {
                 if(code === 0) {
@@ -653,6 +672,28 @@ CloudPebble.Compile = (function() {
         }
         mPreviousDisplayLogs = [];
         mLogHolder = null;
+    };
+
+    // Todo: find somewhere better to put this.
+    var compare_version_strings = function(a, b) {
+        var split = function(version) {
+            return _.map(version.substr(1).split('-')[0].split('.'), _.partial(parseInt, _, 10));
+        }
+
+        a = split(a);
+        b = split(b);
+        var len = Math.max(a.length, b.length);
+        for(var i = 0; i < len; ++i) {
+            var a_part = a[i] || 0;
+            var b_part = b[i] || 0;
+            console.log(a_part, b_part);
+            if(a_part > b_part) {
+                return 1;
+            } else if(a_part < b_part) {
+                return -1;
+            }
+        }
+        return 0;
     };
 
     return {
