@@ -1,0 +1,38 @@
+.project-name {
+    text-transform: uppercase;
+    color: white;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.project-name a {
+    text-decoration: none;
+}
+
+.project-name a:hover {
+    text-decoration: underline;
+}
+
+.project-list-header {
+    height: 50px;
+}
+
+.project-list-header h2 {
+    float: left;
+}
+
+.project-list-header .buttons {
+    float: right;
+    padding-right: 50px;
+    padding-top: 0;
+    magin: 0;
+}
+.project-list-header .btn {
+    margin-left: 20px;
+}
+
+#import-github p {
+    text-align: center;
+    font-size: large;
+    padding: 20px;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}

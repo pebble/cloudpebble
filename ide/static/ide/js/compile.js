@@ -3,7 +3,7 @@ CloudPebble.Compile = (function() {
 
     var COMPILE_SUCCESS_STATES = {
         1: {english: "Pending", cls: "info", label: 'info'},
-        2: {english: "Failed", cls: "error", label: 'important'},
+        2: {english: "Failed", cls: "error", label: 'error'},
         3: {english: "Succeeded", cls: "success", label: 'success'}
     };
 
@@ -12,15 +12,15 @@ CloudPebble.Compile = (function() {
 
     var build_history_row = function(build) {
         var tr = $('<tr>');
-        tr.append($('<td>' + (build.id === null ? '?' : build.id) + '</td>'));
-        tr.append($('<td>' + CloudPebble.Utils.FormatDatetime(build.started) + '</td>'));
-        tr.append($('<td>' + COMPILE_SUCCESS_STATES[build.state].english + '</td>'));
-        tr.append($('<td>' + (build.size.total !== null ? Math.round(build.size.total / 1024) + ' KiB' : '') + '</td>'));
-        tr.append($('<td>' + (build.state == 3 ? ('<a href="'+build.pbw+'">pbw</a>') : ' ') + '</td>'));
+        tr.append($('<td class="build-id">' + (build.id === null ? '?' : build.id) + '</td>'));
+        tr.append($('<td class="build-date">' + CloudPebble.Utils.FormatDatetime(build.started) + '</td>'));
+        tr.append($('<td class="build-state">' + COMPILE_SUCCESS_STATES[build.state].english + '</td>'));
+        tr.append($('<td class="build-size">' + (build.size.total !== null ? Math.round(build.size.total / 1024) + ' KiB' : '') + '</td>'));
+        tr.append($('<td class="build-pbw">' + (build.state == 3 ? ('<a href="'+build.pbw+'" class="btn btn-small">pbw</a>') : ' ') + '</td>'));
         // Build log thingy.
-        var td = $('<td>');
+        var td = $('<td class="build-log">');
         if(build.state > 1) {
-            var a = $('<a href="'+build.log+'">build log</a>').click(function(e) {
+            var a = $('<a href="'+build.log+'" class="btn btn-small">build log</a>').click(function(e) {
                 if(e.ctrlKey || e.metaKey) {
                     ga('send', 'event', 'build log', 'show', 'external');
                     return true;
@@ -250,14 +250,14 @@ CloudPebble.Compile = (function() {
 
     var update_last_build = function(pane, build) {
         if(build === null) {
-            pane.find('#last-compilation').addClass('hide');
+            pane.find('#last-compilation, .build-stats').addClass('hide');
             pane.find('#compilation-run-build-button').removeAttr('disabled');
         } else {
-            pane.find('#last-compilation').removeClass('hide');
+            pane.find('#last-compilation, .build-stats').removeClass('hide');
             pane.find('#last-compilation-started').text(CloudPebble.Utils.FormatDatetime(build.started));
             if(build.state > 1) {
                 pane.find('#last-compilation-time').removeClass('hide').find('span').text(CloudPebble.Utils.FormatInterval(build.started, build.finished));
-                pane.find('#last-compilation-log').removeClass('hide').find('a').attr('href', build.log).off('click').click(function(e) {
+                pane.find('#last-compilation-log').removeClass('hide').attr('href', build.log).off('click').click(function(e) {
                     if(e.ctrlKey || e.metaKey) {
                         ga('send', 'event', 'build log', 'show', 'external');
                         return true;
@@ -268,27 +268,13 @@ CloudPebble.Compile = (function() {
                 });
                 pane.find('#compilation-run-build-button').removeAttr('disabled');
                 if(build.state == 3) {
-                    pane.find('#last-compilation-pbw').removeClass('hide').find('a:first').attr('href', build.pbw);
+                    pane.find('#last-compilation-pbw').removeClass('hide').attr('href', build.pbw);
                     var url = build.pbw;
                     if(CloudPebble.ProjectInfo.sdk_version == "2" && navigator.userAgent.indexOf("Firefox") == -1) {
                         pane.find("#run-on-phone").removeClass('hide');
                     } else {
                         pane.find('#last-compilation-qr-code').removeClass('hide').find('img').attr('src', '/qr/?v=' + url);
                     }
-                    var shortlink = $('#pbw-shortlink').find('> a');
-                    shortlink.attr('href', '#').text("get short link").unbind('click').click(function() {
-                        shortlink.text("generating…").unbind('click');
-                        ga('send', 'event', 'short link', 'generate');
-                        $.post("/ide/shortlink", {url: url}, function(data) {
-                            if(data.success) {
-                                shortlink.attr('href', data.url).text(data.url.replace(/^https?:\/\//,'')).click(function() {
-                                    ga('send', 'event', 'short link', 'click');
-                                });
-                            } else {
-                                shortlink.text("no shortlink");
-                            }
-                        });
-                    });
                     if(build.size.total !== null) {
                         var s = pane.find('#last-compilation-size').removeClass('hide');
                         s.find('.total').text(Math.round(build.size.total / 1024));
@@ -487,7 +473,7 @@ CloudPebble.Compile = (function() {
                     // Make sure that we have the required version - but also assume that anyone who has the string 'test'
                     // in their firmware version number (e.g. me) knows what they're doing.
                     if(/test/.test(version_string) || compare_version_strings(version_string, MINIMUM_INSTALL_VERSION) >= 0) {
-                        mPebble.install_app(pane.find('#last-compilation-pbw > a').attr('href'));
+                        mPebble.install_app(pane.find('#last-compilation-pbw').attr('href'));
                     } else {
                         mPebble.close();
                         mPebble = null;

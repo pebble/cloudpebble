@@ -13,12 +13,18 @@ __author__ = 'katharine'
 @login_required
 @ensure_csrf_cookie
 def index(request):
-    my_projects = Project.objects.filter(owner=request.user).order_by('-last_modified')
-    if not request.user.settings.accepted_terms:
+    user = request.user
+    my_projects = Project.objects.filter(owner=user).order_by('-last_modified')
+    if not user.settings.accepted_terms:
+        # Screw it.
+        # user_settings = user.settings
+        # user_settings.accepted_terms = True
+        # user_settings.save()
+
         return render(request, 'ide/new-owner.html', {
             'my_projects': my_projects
         })
-    elif settings.SOCIAL_AUTH_PEBBLE_REQUIRED and request.user.social_auth.filter(provider='pebble').count() == 0:
+    elif settings.SOCIAL_AUTH_PEBBLE_REQUIRED and user.social_auth.filter(provider='pebble').count() == 0:
         return render(request, 'registration/merge_account.html')
     else:
         send_keen_event('cloudpebble', 'cloudpebble_project_list', request=request)

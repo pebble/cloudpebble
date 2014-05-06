@@ -1,43 +1,13 @@
-{% extends "ide/base.html" %}
+{% extends "common/base-narrow.html" %}
 {% load staticfiles %}
-{% block content %}
-<style type="text/css">
-      /* Custom container */
-      .container-narrow {
-        margin: 0 auto;
-        max-width: 800px;
-      }
-      .container-narrow > hr {
-        margin: 30px 0;
-      }
-      th {
-          cursor: pointer;
-      }
-</style>
-<div class="container-narrow">
-    <div class="masthead">
-        <ul class="nav nav-pills pull-right">
-          <li><a href="{% url 'ide:index' %}">Your Projects</a></li>
-          <li><a href="{% url 'ide:settings' %}">IDE Settings</a></li>
-          <li><a href="{% url 'logout' %}">Sign out</a></li>
-        </ul>
-        <h3 class="muted">CloudPebble</h3>
-    </div>
-    <div class="row-fluid">
-        <div class="span12 well text-center">
-            <p>You are going to create a project based on a template.</p>
-            {% if blurb %}
-            <p>{{ blurb }}</p>
-            <hr>
-            {% endif %}
-            <p><button class="btn btn-primary btn-large" id="import-btn">Create Project</button></p>
-        </div>
-    </div>
-    <div class="footer muted text-center">
-        <small>CloudPebble was created by Katharine Berry and is now run by Pebble.<br>
-            Please submit bug reports and feature requests <a href="https://github.com/CloudPebble/CloudPebble/issues?state=open">on GitHub</a>.
-            Questions? Email me at <a href="mailto:katharine@getpebble.com">katharine@getpebble.com</a>.</small>
-    </div>
+{% block narrowcontent %}
+<div class="well" style="text-align: center;">
+    <p style="margin-bottom:20px;">You are going to create a project based on a template.</p>
+    {% if blurb %}
+    <p>{{ blurb }}</p>
+    <hr>
+    {% endif %}
+    <p><button class="btn btn-primary btn-large" id="import-btn" style="width: 200px;">Create Project</button></p>
 </div>
 {% endblock %}
 {% block scripts %}

@@ -75,22 +75,6 @@ CloudPebble.Sidebar = (function() {
     };
 
     var init = function() {
-        $('.save-and-run').click(function() {
-            var button = $(this);
-            button.attr('disabled', 'disabled');
-            button.find('img').show();
-            CloudPebble.Editor.SaveAll(function() {
-                CloudPebble.Compile.RunBuild(function (success) {
-                    button.removeAttr('disabled');
-                    button.find('img').hide();
-                    if(success) {
-                        CloudPebble.Compile.DoInstall();
-                    } else {
-                        CloudPebble.Compile.Show();
-                    }
-                });
-            });
-        });
     }
 
     return {
@@ -152,7 +136,7 @@ CloudPebble.Sidebar = (function() {
             $('#sidebar-pane-' + pane_id).find('a > i').remove();
         },
         Init: function() {
-            $('#sidebar-pane-new-resource > a').click(CloudPebble.Resources.Create);
+            $('#sidebar-pane-new-resource').click(CloudPebble.Resources.Create);
             $('#sidebar-pane-compile > a').click(CloudPebble.Compile.Show);
             $('#sidebar-pane-settings > a').click(CloudPebble.Settings.Show);
             $('#sidebar-pane-github > a').click(CloudPebble.GitHub.Show);

@@ -1,39 +1,53 @@
-{% extends "ide/base.html" %}
+{% extends "common/base.html" %}
 {% load staticfiles %}
+
 {% block title %}CloudPebble – {{ project.name }}{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/addon/hint/show-hint.min.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/addon/dialog/dialog.min.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/codemirror.min.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/theme/monokai.min.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/theme/eclipse.min.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/theme/blackboard.min.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/theme/solarized.min.css">
+<link rel="stylesheet" href="{% static 'ide/css/ide.css' %}">
+<link rel="stylesheet" href="{% static 'ide/css/codemirror-default.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="masthead" id="masthead_wrapper">
-        <ul class="nav nav-pills pull-right">
-          <li class="active"><a>{{ project.name }}</a></li>
-          <li><a href="{% url 'ide:index' %}">Your Projects</a></li>
-          <li><a href="{% url 'ide:settings' %}">IDE Settings</a></li>
-          <li><a href="{% url 'logout' %}">Sign out</a></li>
-        </ul>
-        <h3 class="muted">CloudPebble – <span class="project-name">{{ project.name }}</span></h3>
-    </div>
+<div class="header">
+{#    <div class="container">#}
+        <h1 class="cloudpebble-logo" style="padding-left: 40px;">
+            <span class="cloudpebble-logo-cloud">Cloud</span><span class="cloudpebble-logo-pebble">Pebble</span>
+        </h1>
+        <div class="header-right">
+            <ul class="nav-pills">
+                <li><a href="{% url 'ide:index' %}" class="btn">Projects</a></li>
+                <li><a href="{% url 'ide:settings' %}" class="btn">Settings</a></li>
+                <li><a href="{% url 'logout' %}" class="btn">Sign out</a></li>
+            </ul>
+        </div>
+{#    </div>#}
+</div>
+<div class="project-container">
     <div class="row-fluid">
-        <div class="span2" id="sidebar_wrapper">
-            <div class="well">
-                <button class="btn save-and-run">Save and run <img src="{% static 'ide/img/spinner.gif' %}" style="display:none;"></button>
-                <ul class="nav nav-list" id="sidebar">
-                    <li class="nav-header">Project</li>
-                    <li id="sidebar-pane-settings"><a href="#">Settings</a></li>
-                    <li id="sidebar-pane-compile"><a href="#">Compilation</a></li>
-                    <li id="sidebar-pane-github" class="native-only {%if not project.owner.github%}disabled{%endif%}"><a href="#">GitHub</a></li>
-                    <li class="nav-header">Source files</li>
-                    <li class="divider native-only" id="end-source-files"></li>
-                    <li class="native-only"><a href="#" id="new-source-file"><strong>New C file</strong></a></li>
-                    <li class="native-only"><a href="#" id="new-js-file"><strong>New JavaScript file</strong></a></li>
-                    <li class="nav-header native-only">Resources</li>
+        <div id="sidebar-wrapper">
+            <div>
+                <ul class="nav-list" id="sidebar">
+                    <li class="nav-header project-name">{{ project.name }}</li>
+                    <li class="nav-header" id="sidebar-pane-settings"><a href="#">Settings</a></li>
+                    <li class="nav-header" id="sidebar-pane-compile"><a href="#">Compilation</a></li>
+                    <li id="sidebar-pane-github" class="nav-header native-only {%if not project.owner.github%}disabled{%endif%}"><a href="#">GitHub</a></li>
+                    <li class="nav-header nav-section">Source files <button class="btn btn-small native-only" id="new-source-file">Add C</button> <button class="btn btn-small native-only" id="new-js-file">JS</button></li>
+                    <li class="native-only" id="end-source-files"></li>
+                    <li class="nav-header nav-section native-only">Resources <button class="btn btn-small" id="sidebar-pane-new-resource">Add new</button></li>
                     <li class="hide native-only" id="end-resources"></li>
-                    <li id="sidebar-pane-new-resource" class="native-only"><a href="#"><strong>New resource</strong></a></li>
                 </ul>
             </div>
         </div>
-        <div class="span10" id="pane-parent">
-            <div id="main-pane">
+        <div id="pane-parent">
+            <div id="main-pane" style="display: none;">
             </div>
             <div id="progress-pane">
                 <div class="row-fluid">
@@ -49,48 +63,63 @@
         </div>
     </div>
 </div>
+<div class="footer">
+        <p class="small-print">
+            CloudPebble was created by Katharine Berry and is now run by Pebble.<br>
+            Please submit bug reports and feature requests on <a href="https://github.com/pebble/cloudpebble">GitHub</a>.
+            Questions? Email us at <a href="mailto:cloudpebble@getpebble.com">cloudpebble@getpebble.com</a>.
+        </p>
+        <div class="pebble-logo">
+            <img src="{% static 'root/images/pebble.png' %}">
+        </div>
+</div>
+
 <!-- Resource editing template -->
-<div id="resource-pane-template" class="hide">
+<div id="resource-pane-template" class="hide resource-pane">
     <form class="form-horizontal">
         <div class="alert alert-error hide"></div>
         <div class="well">
-            <div class="row-fluid">
-                <div class="span12 resource-type-column">
-                    <div class="control-group">
-                        <label class="control-label" for="edit-resource-type">Resource type</label>
-                        <div class="controls">
-                            <select id="edit-resource-type">
-                                <option value="png">PNG image</option>
-                                <option value="png-trans">PNG with transparency</option>
-                                <option value="font">TrueType font</option>
-                                <option value="raw">Raw binary blob</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <label class="control-label" for="edit-resource-file">File</label>
-                        <div class="controls">
-                            <input type="file" id="edit-resource-file">
-                            <span class="help-block hide">You can have multiple Pebble resources from a single file (for different sizes, etc.)</span>
-                        </div>
-                    </div>
-                    <div class="resource-download-link hide">
-                        <a href="#">Download uploaded resource</a>
-                    </div>
+            <div class="control-group">
+                <label class="control-label" for="edit-resource-type">Resource type</label>
+                <div class="controls">
+                    <select id="edit-resource-type">
+                        <option value="png">PNG image</option>
+                        <option value="png-trans">PNG with transparency</option>
+                        <option value="font">TrueType font</option>
+                        <option value="raw">Raw binary blob</option>
+                    </select>
                 </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="edit-resource-file">File</label>
+                <div class="controls">
+                    <input type="file" id="edit-resource-file">
+                    <span class="help-block hide">You can have multiple Pebble resources from a single file (for different sizes, etc.)</span>
+                </div>
+            </div>
+            <div class="image-resource-preview hide">
+                <hr>
+                <div>
+                    <img src="">
+                    <p>52x52</p>
+                </div>
+            </div>
+            <div class="resource-download-link hide">
+                <hr>
+                <a href="#" class="btn">Download uploaded resource</a>
             </div>
         </div>
         <div class="control-group well " id="non-font-resource-group">
-            <label class="control-label" for="edit-resource-id">Resource Identifier</label>
+            <label class="control-label" for="edit-resource-id">Identifier</label>
             <div class="controls">
-                <input type="text" class="span4 edit-resource-id" placeholder="IMAGE_EXAMPLE_IDENTIFIER" pattern="[A-Za-z0-9_]+">
+                <input type="text" class="edit-resource-id" placeholder="IMAGE_EXAMPLE_IDENTIFIER" pattern="[A-Za-z0-9_]+">
                 <span class="help-block">This is used in your code and must be a valid C identifier.</span>
             </div>
         </div>
         <div id="font-resource-group" class="hide">
             <div class="well font-resource-group-single">
                 <div class="control-group">
-                    <label class="control-label">Resource Identifier</label>
+                    <label class="control-label">Identifier</label>
                     <div class="controls">
                         <input type="text" class="span6 edit-resource-id" placeholder="FONT_EXAMPLE_BOLD_SUBSET_24" pattern="[A-Za-z0-9_]*[0-9]+">
                         <span class="help-block">This is used in your code and must be a valid C identifier.<br>
@@ -98,7 +127,7 @@
                     </div>
                 </div>
                 <div class="control-group font-resource-regex-group">
-                    <label class="control-label">Character Expression</label>
+                    <label class="control-label">Characters</label>
                     <div class="controls">
                         <input type="text" class="span4 edit-resource-regex" placeholder="[0-9:. ]">
                         <span class="help-block">A PCRE regular expression that restricts characters.</span>
@@ -113,104 +142,88 @@
                 </div>
             </div>
         </div>
-        <div id="edit-resource-buttons" class="well form-actions">
-            <button type="submit" class="btn btn-primary">Save</button>
-            <button type="button" class="btn hide" id="add-font-resource">Another font resource</button>
+        <div id="edit-resource-buttons" class="well resource-actions">
+            <button type="submit" class="btn btn-affirmative">Save</button>
             <button type="button" class="btn btn-danger hide" id="edit-resource-delete">Delete</button>
+            <button type="button" class="btn hide" id="add-font-resource">Another font</button>
         </div>
     </form>
 </div>
 <!-- Compilation pane -->
-<div id="compilation-pane-template" class="hide">
+<div id="compilation-pane-template" class="hide compilation-pane">
     <div id="last-compilation" class="hide">
-        <h3>Last build</h3>
-        <div class="row hide" id="firefox-warning" style="margin-bottom:10px;">
-            <div class="offset1 span9">
-                <div class="alert alert-danger" style="text-align: center;">
-                    <a class="close" data-dismiss="alert" href="#">&times;</a>
-                    Firefox does not support SDK2 automatic deployment and log viewing.<br>
-                    Please try using 
-                        <a href="http://google.com/chrome">Chrome</a>,
-                        <a href="http://apple.com/safari">Safari</a> or
-                        <a href="http://opera.com/">Opera</a>.
+        <div class="hide well" id="run-on-phone">
+            <form class="form-horizontal">
+                <div class="control-group text-center phone-listing">
+                    <label class="control-label" for="phone">Phone</label>
+                    <div class="controls">
+                        <select id="phone">
+                            <option>Loading...</option>
+                        </select>
+                        <div class="help-block phone-listing">
+                            <a href="#" id="show-legacy-link">Not listed? Enter phone IP manually.</a>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="offset1 span6">
-                <p>Started: <span id="last-compilation-started">April 17, 2013, 11:50 a.m.</span></p>
-                <p id="last-compilation-time">Build time: <span>0.98 seconds</span></p>
-                <p>Status: <span id="last-compilation-status" class="label label-success">Successful</span></p>
-                <p id="last-compilation-size" class="hide">Size: <span class="total">27</span> KiB (<span class="res">10</span> KiB resources, <span class="bin">17</span> KiB binary)</p>
-                <p id="last-compilation-memory" class="hide">Available RAM: <span class="free-bytes"></span> / <span class="available-bytes">24576</span> bytes (<span class="free-pct"></span>%)</p>
-                <p id="last-compilation-pbw" class="hide"><a href="#">Download compiled PBW</a> <span id="pbw-shortlink">(<a href="#">get short link</a>)</span></p>
-                <p id="last-compilation-log" class="hide"><a href="#">Build log</a></p>
-            </div>
-            <div class="span3 hide" id="last-compilation-qr-code">
-                <p style="text-align: center;"><img src=""><br>
-                    <span class="muted">Scan to download watchface</span></p>
-            </div>
-            <div class="span4 hide" id="run-on-phone">
-                <form class="well well-small">
-                    <div class="control-group text-center phone-listing">
-                        <label class="control-label" for="phone">Phone:</label>
-                        <div class="controls">
-                            <select id="phone">
-                                <option>Loading...</option>
-                            </select>
+                <!-- Legacy manual entry -->
+                <div class="control-group text-center hide legacy-ip">
+                    <label class="control-label" for="phone-ip">Phone IP</label>
+                    <div class="controls">
+                        <input type="text" id="phone-ip" placeholder="10.0.0.153">
+                        <div class="help-block legacy-ip-hide">
+                            Requires that the Pebble app be running on your phone with Developer Mode enabled.<br>
+                            <a href="#" id="show-phone-list-link">Show phone list.</a>
                         </div>
                     </div>
-                    <!-- Legacy manual entry -->
-                    <div class="control-group text-center hide legacy-ip">
-                        <label class="control-label" for="phone-ip">Phone IP:</label>
-                        <div class="controls">
-                            <input type="text" id="phone-ip" placeholder="10.0.0.153">
-                        </div>
-                    </div>
-                    <p class="text-center phone-listing" style="margin: 0; font-size: small;"><a href="#" id="show-legacy-link">Not listed? Enter phone IP manually.</a></p>
-                    <p class="text-center legacy-ip hide" style="margin: 0; font-size: small;"><a href="#" id="show-phone-list-link">Show phone list.</a></p>
+                </div>
+                <hr>
 
-                    <div class="form-actions" style="margin-bottom: 0; padding-bottom: 0; padding-left:5px; padding-right: 5px; text-align: center;">
-                        <div style="">
-                            <button class="btn btn-primary" id="install-on-phone-btn">Install &amp; Run</button>
-                            <button class="btn" id="show-app-logs-btn">View app logs</button>
-                            <button class="btn" id="screenshot-btn">Screenshot</button>
-                        </div>
-                        <span class="help-block hide legacy-ip">Requires that the Pebble app be running on your phone with Developer Mode enabled.</span>
-                    </div>
-                </form>
-            </div>
+                <div>
+                    <button class="btn btn-primary" id="install-on-phone-btn">Install and Run</button>
+                    <button class="btn" id="show-app-logs-btn">View app logs</button>
+                    <button class="btn" id="screenshot-btn">Screenshot</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="well">
+        <h3>Last build</h3>
+        <div class="hide" id="last-compilation-qr-code">
+            <img src="">
+        </div>
+        <div class="build-stats">
+            <p><label>Started:</label> <span id="last-compilation-started">April 17, 2013, 11:50 a.m.</span></p>
+            <p id="last-compilation-time"><label>Build time:</label> <span>0.98 seconds</span></p>
+            <p><label>Status:</label> <span id="last-compilation-status" class="label label-success">Successful</span></p>
+            <p id="last-compilation-size" class="hide"><label>Size:</label> <span class="total">27</span> KiB (<span class="res">10</span> KiB resources, <span class="bin">17</span> KiB binary)</p>
+            <p id="last-compilation-memory" class="hide"><label>Available RAM:</label> <span class="free-bytes"></span> / <span class="available-bytes">24576</span> bytes (<span class="free-pct"></span>%)</p>
         </div>
         <hr>
-    </div>
-    <form class="form-inline">
-        <div class="row-fluid">
-            <div class="span12">
-                <div class="control-group">
-                    <button class="btn btn-primary v2-only" style="{% if project.sdk_version != '2' %}display:none;{% endif %}" id="compilation-run-build-button">Run build</button>
-                    <span class="v1-only" style="{% if project.sdk_version != '1' %}display:none;{% endif %}">Building SDK 1 projects is no longer supported.</span>
-                </div>
-            </div>
+        <div class="build-buttons v2-only">
+            <button class="btn btn-affirmative" id="compilation-run-build-button">Run build</button>
+            <a id="last-compilation-pbw" href="#" class="btn hide">Get PBW</a>
+            <a id="last-compilation-log" class="btn hide" href="#">Build log</a>
         </div>
-    </form>
-    <hr>
-    <h3>Build history</h3>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Date</th>
-                <th>Status</th>
-                <th>Size</th>
-                <th colspan="2"></th>
-            </tr>
-        </thead>
-        <tbody id="run-build-table">
-        </tbody>
-    </table>
+        <span class="v1-only" style="{% if project.sdk_version != '1' %}display:none;{% endif %}">Building SDK 1 projects is no longer supported.</span>
+    </div>
+    <div class="well">
+        <table class="table build-results">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Size</th>
+                    <th colspan="2"></th>
+                </tr>
+            </thead>
+            <tbody id="run-build-table">
+            </tbody>
+        </table>
+    </div>
 </div>
 <!-- Settings template -->
-<div id="settings-pane-template" class="hide">
+<div id="settings-pane-template" class="hide settings-pane">
     <form class="form-horizontal">
         <div class="alert alert-error hide"></div>
         <div class="well">
@@ -262,7 +275,7 @@
                     <div class="controls">
                         <input type="text" id="settings-short-name" placeholder="Demo App" value="{{project.app_short_name}}">
                         <span class="help-block">
-                            App's short name. This will appear <strong>on the Pebble watch</strong>.
+                            App's short name. This will appear on the watch.
                         </span>
                     </div>
                 </div>
@@ -271,7 +284,7 @@
                     <div class="controls">
                         <input type="text" id="settings-long-name" placeholder="Demo App" value="{{project.app_long_name}}">
                         <span class="help-block">
-                            App's long name. This will appear <strong>in the app list on the phone</strong>.
+                            App's long name. This will appear in the app list on the phone.
                         </span>
                     </div>
                 </div>
@@ -295,7 +308,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="control-group">
+                <div class="control-group hide">
                     <label class="control-label" for="settings-version-code">Version code</label>
                     <div class="controls">
                         <input type="number" id="settings-version-code" placeholder="1" value="{{project.app_version_code}}">
@@ -317,7 +330,7 @@
                 <div class="control-group">
                     <label class="control-label" for="settings-uuid">App UUID</label>
                     <div class="controls">
-                        <input type="text" id="settings-uuid" pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" placeholder="00000000-0000-0000-0000-000000000000" value="{{project.app_uuid}}" style="width: 20em;">
+                        <input type="text" id="settings-uuid" pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" placeholder="00000000-0000-0000-0000-000000000000" value="{{project.app_uuid}}">
                         <span class="help-block">
                             A unique identifier for the app.
                         </span>
@@ -341,13 +354,13 @@
                                 <tr class="appkey">
                                     <td><input class="appkey-name" value="{{key}}" type="text" /></td>
                                     <td><input class="appkey-id" value="{{id}}" type="number" /></td>
-                                    <td><button class="btn remove-appkey"><i class="icon-minus"></i></button></td>
+                                    <td><button class="btn remove-appkey">–</button></td>
                                 </tr>
                                 {% endfor %}
                                 <tr class="appkey">
                                     <td><input class="appkey-name" type="text" placeholder="New Entry" /></td>
                                     <td><input class="appkey-id" type="number" value="0" /></td>
-                                    <td><button class="btn remove-appkey disabled"><i class="icon-minus"></i></button></td>
+                                    <td><button class="btn remove-appkey disabled">–</button></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -357,19 +370,19 @@
                     </div>
                 </div>
                 <div class="control-group native-only">
-                    <label class="control-label" for="settings-app-jshint">Check Javascript with jshint before building</label>
+                    <label class="control-label" for="settings-app-jshint">Check Javascript</label>
                     <div class="controls">
                         <input type="checkbox" id="settings-app-jshint" {%if project.app_jshint%}checked{%endif%}>
                     </div>
                 </div>
                 <div class="control-group">
-                    <label class="control-label" for="settings-capabilities-location">Uses PebbleKit JS Location</label>
+                    <label class="control-label" for="settings-capabilities-location">Uses Location</label>
                     <div class="controls">
                         <input type="checkbox" id="settings-capabilities-location" {%if 'location' in project.app_capabilities%}checked{%endif%}>
                     </div>
                 </div>
                 <div class="control-group">
-                    <label class="control-label" for="settings-capabilities-configuration">Uses PebbleKit JS configuration screen</label>
+                    <label class="control-label" for="settings-capabilities-configuration">Configurable</label>
                     <div class="controls">
                         <input type="checkbox" id="settings-capabilities-configuration" {%if 'configurable' in project.app_capabilities%}checked{%endif%}>
                     </div>
@@ -377,39 +390,14 @@
             </div>
         </div>
         <div class="well form-actions">
-            <button id="project-save" class="btn btn-primary">Save changes</button>
-        </div>
-        <div class="well form-actions native-only">
-            <button id="project-export-zip" class="btn">Download as zip</button>
-            <span class="help-block">Export your source files and resources to your computer.</span>
-        </div>
-        <div class="well form-actions">
+            <button id="project-save" class="btn btn-affirmative">Save changes</button>
+            <button id="project-export-zip" class="btn native-only">Download as zip</button>
             <button id="project-delete" class="btn btn-danger">Delete Project</button>
-            <span class="help-inline"><strong>This cannot be undone.</strong></span>
         </div>
     </form>
 </div>
-<div id="export-progress" class="modal hide fade" tabindex="-1" role="dialog">
-    <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">x</button>
-        <h3>Exporting…</h3>
-    </div>
-    <div class="model-body">
-        <div class="row-fluid" id="export-pending-body">
-            <div class="span10 offset1">
-                <div class="text-center" id="export-progress-text">
-                    <img src="{% static 'ide/img/zip.png' %}" style="height: 200px; width: 200px; margin-top: 10px;">
-                    <div class="progress active">
-                        <div class="bar" style="width: 100%;"></div>
-                    </div>
-                    <p>We're just getting that packaged up for you.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 <!-- GitHub panel -->
-<div id="github-template" class="hide">
+<div id="github-template" class="hide github-pane">
     <div class="alert hide"></div>
     <div class="well">
         <form class="form-horizontal" id="github-repo-form">
@@ -420,38 +408,50 @@
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label" for="github-branch">Branch (optional)</label>
+                <label class="control-label" for="github-branch">Branch</label>
                 <div class="controls">
                     <input type="text" class="span6" id="github-branch" placeholder="master" />
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label" for="github-repo-hook">Automatically pull changes</label>
+                <label class="control-label" for="github-repo-hook">Pull changes</label>
                 <div class="controls">
-                    <input type="checkbox" id="github-repo-hook">
-                    <span class="help-block dire-warning">If you enable this, the contents of this project <em>will be overwritten</em> every time you push to your repo from elsewhere, <em>without prompting you</em>.</span>
+                    <select id="github-repo-hook">
+                        <option value="0">Manually</option>
+                        <option value="1">Automatically</option>
+                    </select>
+                    <span class="help-block">If you select 'Automatically', the contents of this project <em>will be overwritten</em> every time you push to your repo from elsewhere, <em>without prompting you</em>.</span>
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label" for="github-repo-build">Automatically build after pulling</label>
+                <label class="control-label" for="github-repo-build">After pulling</label>
                 <div class="controls">
-                    <input type="checkbox" id="github-repo-build">
+                    <select id="github-repo-build">
+                        <option value="0">Do nothing</option>
+                        <option value="1">Build automatically</option>
+                    </select>
                 </div>
             </div>
-            <div class="form-actions">
-                <input type="submit" class="btn btn-primary" value="Save">
+            <div class="control-group">
+                <label class="control-label">&nbsp;</label>
+                <div class="controls">
+                    <input type="submit" class="btn btn-primary" value="Save">
+                </div>
             </div>
         </form>
     </div>
-    <div class="well needs-repo" style="padding-left: 198px;">
-        <button class="btn" id="github-push-btn" disabled>Push New Commit</button>
-        <button class="btn" id="github-pull-btn" disabled>Pull Latest Commit</button>
+    <div class="well github-actions">
+        <button class="btn btn-affirmative" id="github-push-btn" disabled>Push New Commit</button>
+        <button class="btn btn-affirmative" id="github-pull-btn" disabled>Pull Latest Commit</button>
     </div>
 </div>
+{% endblock %}
+
+{% block modals %}
+
 <!-- Create new repo prompt -->
 <div id="github-new-repo-prompt" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">x</button>
         <h3>Create New Repo</h3>
     </div>
     <form class="form-horizontal" style="margin-bottom: 0px; padding-bottom: 0px;">
@@ -482,7 +482,6 @@
 <!-- Commit prompt -->
 <div id="github-commit-prompt" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">x</button>
         <h3>Push New Commit</h3>
     </div>
     <form class="form">
@@ -513,7 +512,6 @@
 <!-- Pull confirmation/progress -->
 <div id="github-pull-prompt" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">x</button>
         <h3>Pull Latest Commit</h3>
     </div>
     <div class="modal-body">
@@ -536,7 +534,6 @@
 <!-- Phone waiting -->
 <div id="phone-waiting" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">x</button>
         <h3>Waiting for phone</h3>
     </div>
     <div class="modal-body text-center">
@@ -559,7 +556,6 @@
 <!-- Phone install progress -->
 <div id="phone-install-progress" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">x</button>
         <h3>Install App</h3>
     </div>
     <div class="modal-body">
@@ -576,7 +572,6 @@
 <!-- Phone screenshot -->
 <div id="phone-screenshot-display" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">x</button>
         <h3>Taking Screenshot</h3>
     </div>
     <div class="modal-body">
@@ -592,13 +587,18 @@
 <!-- Modal text prompt -->
 <div id="modal-text-input" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">x</button>
         <h3 id="modal-text-input-title">Modal header</h3>
     </div>
     <div class="modal-body">
         <div id="modal-text-input-errors"></div>
-        <p id="modal-text-input-prompt">Modal text input prompt:</p>
-        <p><input type="text" id="modal-text-input-value"></p>
+        <form class="form-horizontal">
+            <div class="control-group">
+                <label id="modal-text-input-prompt" for="modal-text-input-value">Modal text input prompt:</label>
+                <div class="controls">
+                    <input type="text" id="modal-text-input-value">
+                </div>
+            </div>
+        </form>
     </div>
     <div class="modal-footer">
         <button class="btn" data-dismiss="modal">Cancel</button>
@@ -608,7 +608,6 @@
 <!-- Modal boolean confirmation prompt -->
 <div id="modal-warning-prompt" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">x</button>
         <h3 id="modal-warning-prompt-title">Modal header</h3>
     </div>
     <div class="modal-body">
@@ -619,7 +618,33 @@
         <button class="btn btn-danger" id="modal-warning-prompt-button">Continue</button>
     </div>
 </div>
+<div id="export-progress" class="modal hide fade" tabindex="-1" role="dialog">
+    <div class="modal-header">
+        <h3>Exporting…</h3>
+    </div>
+    <div class="modal-body text-center" id="export-progress-text">
+        <img src="{% static 'ide/img/zip.png' %}" style="height: 200px; width: 200px; margin-top: 10px;">
+        <div class="progress active">
+            <div class="bar" style="width: 100%;"></div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <a href="" class="download-btn btn btn-primary" style="display: none;" data-dismiss="modal">Download</a>
+        <button class="btn" data-dismiss="modal">Cancel</button>
+    </div>
+</div>
+<div id="generic-progress" class="modal hide fade" tabindex="-1" role="dialog">
+    <div class="modal-header">
+        <h3>Doing a thing…</h3>
+    </div>
+    <div class="modal-body text-center" id="generic-progress-text">
+        <div class="progress progress-striped active">
+            <div class="bar" style="width: 100%;"></div>
+        </div>
+    </div>
+</div>
 {% endblock %}
+
 {% block scripts %}
 <script type="text/javascript">
 var PROJECT_ID = {{ project.id }};
@@ -673,14 +698,4 @@ var DOC_JSON = "{% static 'ide/documentation.json' %}";
 <script type="text/javascript">
 CloudPebble.Init();
 </script>
-{% endblock %}
-{% block head %}
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/addon/hint/show-hint.min.css">
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/addon/dialog/dialog.min.css">
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/codemirror.min.css">
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/theme/monokai.min.css">
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/theme/eclipse.min.css">
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/theme/blackboard.min.css">
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.20.0/theme/solarized.min.css">
-<link rel="stylesheet" href="{% static 'ide/css/ide.css' %}">
 {% endblock %}

@@ -4,7 +4,8 @@
     <head>
         <meta charset="utf-8">
         <title>{% block title %}CloudPebble{% endblock %}</title>
-        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="{% static 'common/fonts/fonts.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'common/css/common.css' %}">
         <link rel="stylesheet" href="{% static 'ide/css/base.css' %}">
         <link rel="icon" href="{% static 'ide/img/favicon.png' %}" />
         <!--[if IE]>
@@ -13,9 +14,11 @@
         {% block head %}{% endblock %}
     </head>
     <body>
-        {% block content %}{% endblock %}
+        <div class="main-container">
+            {% block content %}{% endblock %}
+        </div>
         <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="{% static 'common/js/modal.js' %}"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.0/backbone-min.js"></script>
         <script src="{% static 'ide/js/whats_new.js' %}"></script>
@@ -31,7 +34,6 @@
         </script>
         <div id="whats-new" class="modal hide fade" tabindex="-1" role="dialog">
             <div class="modal-header">
-                <button type="button" class="close data-dismiss=modal">x</button>
                 <h3>Welcome Back</h3>
             </div>
             <div class="modal-body">
@@ -42,6 +44,7 @@
                 <button data-dismiss="modal" class="btn">Okay</button>
             </div>
         </div>
+        {% block modals %}{% endblock %}
         {% block scripts %}{% endblock %}
     </body>
 </html>

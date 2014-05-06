@@ -1,0 +1,143 @@
+.hero {
+    text-align: center;
+}
+
+.hero-logo {
+    height: 200px;
+    background-image: url('../images/clouds.png');
+    margin-bottom: 40px;
+    margin-top: 20px;
+}
+
+.hero-lead {
+    font-size: 45px;
+    font-family: PFD-Regular;
+    letter-spacing: 1px;
+}
+
+.hero-sub {
+    font-size: 26px;
+    letter-spacing: 1px;
+}
+
+.hero-button > .btn {
+    background-color: white;
+    border: none;
+    height: 65px;
+    color: #333;
+    line-height: 65px;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 28px;
+    width: 295px;
+    margin-top: 34px;
+}
+
+.hero-button > .btn:hover {
+    color: black;
+}
+
+.header-login {
+    float: right;
+    line-height: 80px;
+}
+
+.features {
+    height: 640px;
+    margin-top: 80px;
+}
+
+.login {
+    /*padding-top: 30px;*/
+    /*height: 380px;*/
+    height: 0;
+    overflow: hidden;
+    background-color: #262626;
+    transition: height 1s, padding-top 1s;
+}
+
+.show-login .login {
+    padding-top: 30px;
+    height: 380px;
+}
+
+.header-login .btn-cancel {
+    display: none;
+}
+
+.show-login .header-login .btn-cancel {
+    display: inline;
+}
+
+.show-login .header-login .btn-primary {
+    display: none;
+}
+
+.login p {
+    line-height: 30px;
+}
+
+.login .box {
+    height: 300px;
+}
+
+.login .btn {
+    width: 355px;
+    margin-top: 20px;
+}
+
+.login h3 {
+    margin-left: 40px;
+    margin-right: 40px;
+}
+
+.box-holder {
+    width: 970px;
+}
+
+.box {
+    background-color: #3D3D3D;
+    width: 395px;
+    border-radius: 5px;
+    float: left;
+    margin-right: 30px;
+    margin-bottom: 30px;
+    text-align: center;
+    font-size: 24px;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-top: 40px;
+}
+
+.feature {
+    height: 246px;
+}
+
+.feature-icon {
+    width: 80px;
+    height: 72px;
+    margin-top: 10px;
+    margin-bottom: 35px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.feature-icon-install {
+    background-image: url('../images/browser.png');
+}
+
+.feature-icon-json {
+    background-image: url('../images/json.png');
+}
+
+.feature-icon-cloudy {
+    background-image: url('../images/cloudy.png');
+}
+
+.feature-icon-unfinished {
+    background-image: url('../images/unfinished.png');
+}
+
+.login p {
+    font-size: 19px;
+    font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}

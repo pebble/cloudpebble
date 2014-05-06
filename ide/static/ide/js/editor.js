@@ -268,16 +268,6 @@ CloudPebble.Editor = (function() {
                     });
                 };
 
-                var fix_height = function() {
-                    if(!is_fullscreen) {
-                        var browserHeight = document.documentElement.clientHeight;
-                        code_mirror.getWrapperElement().style.height = browserHeight - 130 + 'px';
-                        code_mirror.refresh();
-                    }
-                };
-                fix_height();
-                $(window).resize(fix_height);
-
                 CloudPebble.Sidebar.SetActivePane(pane, 'source-' + file.id, function() {
                     code_mirror.refresh();
                     code_mirror.focus();
@@ -327,10 +317,11 @@ CloudPebble.Editor = (function() {
                 };
 
                 // Add some buttons
-                var button_holder = $('<p style="padding-top: 5px; text-align: right;" id="buttons_wrapper">');
-                var save_btn = $('<button class="btn btn-primary">Save</button>');
-                var discard_btn = $('<button class="btn" style="margin-right: 20px;">Reload file</button>');
-                var delete_btn = $('<button class="btn btn-danger" style="margin-right: 20px;">Delete</button>');
+                var button_holder = $('<p id="editor-button-wrapper">');
+                var run_btn = $('<button class="btn run-btn" title="Save, build, install and run"></button>');
+                var save_btn = $('<button class="btn save-btn" title="Save"></button>');
+                var discard_btn = $('<button class="btn reload-btn" title="Reload"></button>');
+                var delete_btn = $('<button class="btn delete-btn" title="Delete"></button>');
                 var error_area = $('<div>');
 
                 save_btn.click(function() { save(); });
@@ -369,11 +360,28 @@ CloudPebble.Editor = (function() {
                     );
                 });
 
+                run_btn.click(function() {
+                    var button = $(this);
+                    CloudPebble.Prompts.Progress.Show("Saving...");
+                    CloudPebble.Editor.SaveAll(function() {
+                        CloudPebble.Prompts.Progress.Show("Compiling...");
+                        CloudPebble.Compile.RunBuild(function (success) {
+                            CloudPebble.Prompts.Progress.Hide();
+                            if(success) {
+                                CloudPebble.Compile.DoInstall();
+                            } else {
+                                CloudPebble.Compile.Show();
+                            }
+                        });
+                    });
+                });
+
                 button_holder.append(error_area);
+                button_holder.append(run_btn);
+                button_holder.append(save_btn);
+                button_holder.append(discard_btn);
                 if(CloudPebble.ProjectInfo.type != 'simplyjs')
                     button_holder.append(delete_btn);
-                button_holder.append(discard_btn);
-                button_holder.append(save_btn);
                 pane.append(button_holder);
                 code_mirror.refresh();
 
@@ -564,7 +572,7 @@ CloudPebble.Editor = (function() {
 
     return {
         Create: function() {
-            CloudPebble.Prompts.Prompt("New Source File", "Enter a name for the new file", "somefile.c", '', function(value, resp) {
+            CloudPebble.Prompts.Prompt("New Source File", "File name", "somefile.c", '', function(value, resp) {
                if(value === '') {
                     resp.error("You must specify a filename.");
                 } else if(!(/\.h$/.test(value) || /\.c$/.test(value))) {
