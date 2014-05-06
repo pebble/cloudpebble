@@ -464,7 +464,7 @@ CloudPebble.Compile = (function() {
             modal.off('hide');
 
             var report_error = function(message) {
-                modal.find('.modal-body > p').text(message);
+                modal.find('.modal-body > p').html(message);
                 modal.find('.dismiss-btn').removeClass('hide');
                 modal.find('.progress').addClass('progress-danger').removeClass('progress-striped');
             };
@@ -492,8 +492,9 @@ CloudPebble.Compile = (function() {
                         mPebble.close();
                         mPebble = null;
                         report_error(
-                            "Please update your pebble to " + MINIMUM_INSTALL_VERSION + " to be able to install apps " +
-                                "from CloudPebble and the appstore (you're on version " + version_string + ")."
+                            "Please <a href='https://developer.getpebble.com/2/getting-started/'>update your pebble</a>" +
+                                " to " + MINIMUM_INSTALL_VERSION + " to be able to install apps from CloudPebble and " +
+                                "the appstore (you're on version " + version_string + ")."
                         );
                     }
                 });
