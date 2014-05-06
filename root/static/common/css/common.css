@@ -542,3 +542,16 @@ body.backdrop .main-container {
 .tab-pane.active {
     display: block;
 }
+
+.whats-new-text {
+    color: white;
+}
+
+.whats-new-text a {
+    text-decoration: underline;
+    color: #3DBFFF;
+}
+
+#whats-new p {
+    padding: 0;
+}
