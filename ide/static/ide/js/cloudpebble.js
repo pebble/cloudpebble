@@ -125,10 +125,15 @@ CloudPebble.Utils = {
         var date = new Date(Date.parse(str.replace(' ', 'T')));
         var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
             'August', 'September', 'October', 'November', 'December'];
+
         var minutes = String(date.getMinutes());
         while(minutes.length < 2) minutes = '0' + minutes;
-        return date.getDate() + ' ' + months[date.getMonth()] +', \'' + String(date.getFullYear()).substr(2)
-            + ' – ' + (date.getHours() % 12) + ":" + minutes + ' ' + (date.getHours < 12 ? 'AM' : 'PM');
+
+        var hours = date.getHours() % 12;
+        if(hours === 0) hours = 12;
+
+        return date.getDate() + ' ' + months[date.getMonth()] +', \'' + (date.getFullYear() % 100) +
+            ' – ' + hours + ":" + minutes + ' ' + (date.getHours() < 12 ? 'AM' : 'PM');
     },
     FormatInterval: function(s1, s2) {
         var t = Math.round(Math.abs(Date.parse(s2.replace(' ','T')) - Date.parse(s1.replace(' ','T'))) / 1000);
