@@ -10,8 +10,8 @@ html, body {
 
 .project-container {
     position: absolute;
-    top: 80px;
-    bottom: 80px;
+    top: 50px;
+    bottom: 50px;
     width: 100%;
     background-color: red; /* This should always be completely obscured. */
 }
@@ -28,6 +28,18 @@ html, body {
     padding-left: 40px;
 }
 
+.header {
+    height: 50px;
+}
+
+.cloudpebble-logo {
+    line-height: 55px;
+}
+
+ul.nav-pills {
+    line-height: 55px;
+}
+
 .footer {
     position: absolute;
     bottom: 0;
@@ -36,6 +48,21 @@ html, body {
     padding-left: 40px;
     padding-right: 40px;
     overflow: hidden;
+    height: 50px;
+}
+
+.footer .pebble-logo {
+    padding-top: 13px;
+}
+
+.footer .pebble-logo img {
+    vertical-align: middle;
+    margin-top: -6px;
+}
+
+.footer .pebble-logo .katharine-at {
+    margin-top: 6px;
+    display: inline-block;
 }
 
 /* Main content */
