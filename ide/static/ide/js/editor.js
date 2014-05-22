@@ -370,8 +370,7 @@ CloudPebble.Editor = (function() {
                 button_holder.append(run_btn);
                 button_holder.append(save_btn);
                 button_holder.append(discard_btn);
-                if(CloudPebble.ProjectInfo.type != 'simplyjs')
-                    button_holder.append(delete_btn);
+                button_holder.append(delete_btn);
                 pane.append(button_holder);
                 code_mirror.refresh();
 
