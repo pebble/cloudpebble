@@ -1,5 +1,4 @@
 CloudPebble.Editor = (function() {
-    var THAT_ONE_JS_FILE = 'js/pebble-js-app.js'; // You'll probably want to grep this when adding multiple JS file support.:
     var project_source_files = {};
     var open_codemirrors = {};
     var unsaved_files = 0;
@@ -11,11 +10,6 @@ CloudPebble.Editor = (function() {
         });
 
         project_source_files[file.name] = file;
-        // If we're adding that one JS file, remove the link to add it.
-        // (this arguably intrudes upon the sidebar's domain, but...)
-        if(file.name == THAT_ONE_JS_FILE) {
-            $('#new-js-file').hide();
-        }
     };
 
     var edit_source_file = function(file) {
@@ -336,10 +330,6 @@ CloudPebble.Editor = (function() {
                                 CloudPebble.Sidebar.DestroyActive();
                                 delete project_source_files[file.name];
                                 CloudPebble.Sidebar.Remove('source-' + file.id);
-                                // Restore the add JS button if we just removed it.
-                                if(file.name == THAT_ONE_JS_FILE) {
-                                    $('#new-js-file').show();
-                                }
                             } else {
                                 alert(data.error);
                             }
@@ -595,12 +585,25 @@ CloudPebble.Editor = (function() {
             });
         },
         DoJSFile: function() {
-            $.post("/ide/project/" + PROJECT_ID + "/create_source_file", {'name': THAT_ONE_JS_FILE}, function(data) {
-                if(!data.success) {
-                    alert(data.error);
+            CloudPebble.Prompts.Prompt("New Source File", "File name", "somefile.js", '', function(value, resp) {
+               if(value === '') {
+                    resp.error("You must specify a filename.");
+                } else if(!/\.js$/.test(value)) {
+                    resp.error("Source files must end in .js");
+                } else if(project_source_files[value]) {
+                    resp.error("A file called '" + value + "' already exists.");
                 } else {
-                    add_source_file(data.file);
-                    edit_source_file(data.file);
+                    resp.disable();
+                    $.post("/ide/project/" + PROJECT_ID + "/create_source_file", {'name': value}, function(data) {
+                        if(!data.success) {
+                            resp.error(data.error);
+                        } else {
+                            resp.dismiss();
+                            add_source_file(data.file);
+                            edit_source_file(data.file);
+                        }
+                    });
+                    ga('send', 'event', 'file', 'create');
                 }
             });
         },
