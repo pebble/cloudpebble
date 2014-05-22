@@ -90,7 +90,7 @@ def run_compile(build_result):
             manifest_dict = generate_simplyjs_manifest_dict(project)
 
             # We should have exactly one source file, so just dump that in.
-            js = source_files[0].get_contents()
+            js = '\n\n'.join(x.get_contents() for x in source_files if x.file_name.endswith('.js'))
             escaped_js = json.dumps(js)
             build_result.save_simplyjs(js)
 
@@ -115,6 +115,7 @@ def run_compile(build_result):
                 output = subprocess.check_output([settings.PEBBLE_TOOL, "build"], stderr=subprocess.STDOUT, preexec_fn=_set_resource_limits)
         except subprocess.CalledProcessError as e:
             output = e.output
+            print output
             success = False
         else:
             success = True
