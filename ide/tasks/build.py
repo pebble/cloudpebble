@@ -89,7 +89,6 @@ def run_compile(build_result):
             shutil.copytree(settings.SIMPLYJS_ROOT, base_dir)
             manifest_dict = generate_simplyjs_manifest_dict(project)
 
-            # We should have exactly one source file, so just dump that in.
             js = '\n\n'.join(x.get_contents() for x in source_files if x.file_name.endswith('.js'))
             escaped_js = json.dumps(js)
             build_result.save_simplyjs(js)
