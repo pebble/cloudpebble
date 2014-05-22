@@ -115,6 +115,7 @@ def run_compile(build_result):
                 output = subprocess.check_output([settings.PEBBLE_TOOL, "build"], stderr=subprocess.STDOUT, preexec_fn=_set_resource_limits)
         except subprocess.CalledProcessError as e:
             output = e.output
+            print output
             success = False
         else:
             success = True
