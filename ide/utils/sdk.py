@@ -40,7 +40,7 @@ def build(ctx):
     # Concatenate all our JS files (but not recursively).
 
     ctx.path.make_node('src/js/').mkdir()
-    ctx.exec_command(['cat'] + [node.abspath() for node in ctx.path.ant_glob("src/*.js")], stdout=open('src/js/pebble-js-app.js', 'w'))
+    ctx.exec_command(['cat'] + [node.abspath() for node in ctx.path.ant_glob("src/*.js")], stdout=open('src/js/pebble-js-app.js', 'a'))
 
     ctx.load('pebble_sdk')
 
