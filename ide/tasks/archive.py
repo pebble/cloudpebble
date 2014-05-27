@@ -179,8 +179,8 @@ def do_import_archive(project_id, archive, delete_project=False):
                                 )
 
                         elif filename.startswith(SRC_DIR):
-                            if (not filename.startswith('.')) and (filename.endswith('.c') or filename.endswith('.h') or filename.endswith('js/pebble-js-app.js')):
-                                base_filename = os.path.basename(filename) if not filename.endswith('.js') else 'js/pebble-js-app.js'
+                            if (not filename.startswith('.')) and (filename.endswith('.c') or filename.endswith('.h') or filename.endswith('.js')):
+                                base_filename = os.path.basename(filename) if not filename.endswith('js/pebble-js-app.js') else 'js/pebble-js-app.js'
                                 source = SourceFile.objects.create(project=project, file_name=base_filename)
                                 with z.open(entry.filename) as f:
                                     source.save_file(f.read().decode('utf-8'))
