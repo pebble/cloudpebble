@@ -37,10 +37,11 @@ def build(ctx):
         except ErrorReturnCode_2 as e:
             ctx.fatal("\\nJavaScript linting failed (you can disable this in Project Settings):\\n" + e.stdout)
 
-    # Concatenate all our JS files (but not recursively).
-
+    # Concatenate all our JS files (but not recursively), and only if any JS exists in the first place.
     ctx.path.make_node('src/js/').mkdir()
-    ctx.exec_command(['cat'] + [node.abspath() for node in ctx.path.ant_glob("src/*.js")], stdout=open('src/js/pebble-js-app.js', 'a'))
+    js_paths = [node.abspath() for node in ctx.path.ant_glob("src/*.js")]
+    if js_paths:
+        ctx.exec_command(['cat'] + js_paths, stdout=open('src/js/pebble-js-app.js', 'a'))
 
     ctx.load('pebble_sdk')
 
