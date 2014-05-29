@@ -208,6 +208,11 @@ CloudPebble.Editor = (function() {
                                 util2: true,
                                 ajax: true
                             });
+                        } else if(CloudPebble.ProjectInfo.type == 'pebblejs') {
+                            _.extend(jshint_globals, {
+                                require: true,
+                                ajax: true
+                            });
                         }
 
                         var success = JSHINT(code_mirror.getValue(), {
@@ -370,7 +375,10 @@ CloudPebble.Editor = (function() {
                 button_holder.append(run_btn);
                 button_holder.append(save_btn);
                 button_holder.append(discard_btn);
-                button_holder.append(delete_btn);
+                // You must have an app.js in pebblejs projects.
+                if(CloudPebble.ProjectInfo.type != 'pebblejs' || file.name != 'app.js') {
+                    button_holder.append(delete_btn);
+                }
                 pane.append(button_holder);
                 code_mirror.refresh();
 

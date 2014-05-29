@@ -154,7 +154,7 @@ CloudPebble.Sidebar = (function() {
             }).click(function() { $(this).popover('hide'); });
         },
         SetProjectType: function(type) {
-            if(type == 'simplyjs') {
+            if(type != 'native') {
                 $('.native-only').hide();
             }
         }

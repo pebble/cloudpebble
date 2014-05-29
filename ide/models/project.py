@@ -23,8 +23,9 @@ class Project(IdeModel):
     sdk_version = models.CharField(max_length=10, choices=SDK_VERSIONS, default='1')
 
     PROJECT_TYPES = (
-        ('native', 'Native SDK'),
-        ('simplyjs', 'Simply.JS')
+        ('native', 'Pebble C SDK'),
+        ('simplyjs', 'Simply.js'),
+        ('pebblejs', 'Pebble.js (beta)'),
     )
     project_type = models.CharField(max_length=10, choices=PROJECT_TYPES, default='native')
 
