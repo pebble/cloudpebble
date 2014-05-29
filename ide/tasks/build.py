@@ -14,7 +14,7 @@ from django.utils.timezone import now
 
 import apptools.addr2lines
 from ide.utils.sdk import generate_wscript_file, generate_jshint_file, generate_v2_manifest_dict, \
-    generate_simplyjs_manifest_dict
+    generate_simplyjs_manifest_dict, generate_pebblejs_manifest_dict
 from utils.keen_helper import send_keen_event
 
 from ide.models.build import BuildResult
@@ -29,6 +29,20 @@ def _set_resource_limits():
     resource.setrlimit(resource.RLIMIT_NOFILE, (100, 100)) # 100 open files
     resource.setrlimit(resource.RLIMIT_RSS, (20 * 1024 * 1024, 20 * 1024 * 1024)) # 20 MB of memory
     resource.setrlimit(resource.RLIMIT_FSIZE, (5 * 1024 * 1024, 5 * 1024 * 1024)) # 5 MB output files.
+
+
+def create_source_files(source_files, src_dir):
+    for f in source_files:
+        abs_target = os.path.abspath(os.path.join(src_dir, f.file_name))
+        if not abs_target.startswith(src_dir):
+            raise Exception("Suspicious filename: %s" % f.file_name)
+        abs_target_dir = os.path.dirname(abs_target)
+        if not os.path.exists(abs_target_dir):
+            os.makedirs(abs_target_dir)
+        f.copy_to_path(abs_target)
+        # Make sure we don't duplicate downloading effort; just open the one we created.
+        with open(abs_target) as f:
+            check_preprocessor_directives(f.read())
 
 
 @task(ignore_result=True, acks_late=True)
@@ -49,22 +63,10 @@ def run_compile(build_result):
 
     try:
         if project.project_type == 'native':
-            # Create symbolic links to the original files
             # Source code
             src_dir = os.path.join(base_dir, 'src')
             os.mkdir(src_dir)
-            for f in source_files:
-                abs_target = os.path.abspath(os.path.join(src_dir, f.file_name))
-                if not abs_target.startswith(src_dir):
-                    raise Exception("Suspicious filename: %s" % f.file_name)
-                abs_target_dir = os.path.dirname(abs_target)
-                if not os.path.exists(abs_target_dir):
-                    os.makedirs(abs_target_dir)
-                f.copy_to_path(abs_target)
-                # Make sure we don't duplicate downloading effort; just open the one we created.
-                with open(abs_target) as f:
-                    check_preprocessor_directives(f.read())
-
+            create_source_files(source_files, src_dir)
             # Resources
             resource_root = 'resources'
             os.makedirs(os.path.join(base_dir, resource_root, 'images'))
@@ -85,7 +87,7 @@ def run_compile(build_result):
             open(os.path.join(base_dir, 'wscript'), 'w').write(generate_wscript_file(project))
             open(os.path.join(base_dir, 'pebble-jshintrc'), 'w').write(generate_jshint_file(project))
         elif project.project_type == 'simplyjs':
-            os.rmdir(base_dir)  # This is not intuitive behaviour.
+            os.rmdir(base_dir)
             shutil.copytree(settings.SIMPLYJS_ROOT, base_dir)
             manifest_dict = generate_simplyjs_manifest_dict(project)
 
@@ -99,6 +101,13 @@ def run_compile(build_result):
                 simply.mainScriptSource = %s;
             })();
             """ % escaped_js)
+        elif project.project_type == 'pebblejs':
+            os.rmdir(base_dir)
+            shutil.copytree(settings.PEBBLEJS_ROOT, base_dir)
+            manifest_dict = generate_pebblejs_manifest_dict(project)
+            create_source_files(source_files, os.path.join(base_dir, 'src', 'js'))
+
+            open(os.path.join(base_dir, 'appinfo.json'), 'w').write(json.dumps(manifest_dict))
 
         # Build the thing
         cwd = os.getcwd()

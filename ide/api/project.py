@@ -174,6 +174,9 @@ def create_project(request):
             elif project_type == 'simplyjs':
                 f = SourceFile.objects.create(project=project, file_name="app.js")
                 f.save_file(open('{}/src/html/demo.js'.format(settings.SIMPLYJS_ROOT)).read())
+            elif project_type == 'pebblejs':
+                f = SourceFile.objects.create(project=project, file_name="app.js")
+                f.save_file(open('{}/src/js/app.js'.format(settings.PEBBLEJS_ROOT)).read())
     except IntegrityError as e:
         return json_failure(str(e))
     else:

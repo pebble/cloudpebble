@@ -201,3 +201,7 @@ def generate_simplyjs_manifest_dict(project):
         }
     }
     return manifest
+
+def generate_pebblejs_manifest_dict(project):
+    # These are apparently actually identical.
+    return generate_simplyjs_manifest_dict(project)
