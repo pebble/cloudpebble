@@ -121,9 +121,6 @@ CloudPebble.Compile = (function() {
             e.preventDefault();
             show_phone_picker();
         });
-        if(navigator.userAgent.indexOf('Firefox') != -1) {
-            pane.find('#firefox-warning').removeClass('hide');
-        }
         update_phone_list();
         mCrashAnalyser = new CloudPebble.CrashChecker(CloudPebble.ProjectInfo.app_uuid);
         pane.find('#compilation-run-build-button').click(function() { run_build(); });
@@ -270,7 +267,7 @@ CloudPebble.Compile = (function() {
                 if(build.state == 3) {
                     pane.find('#last-compilation-pbw').removeClass('hide').attr('href', build.pbw);
                     var url = build.pbw;
-                    if(CloudPebble.ProjectInfo.sdk_version == "2" && navigator.userAgent.indexOf("Firefox") == -1) {
+                    if(CloudPebble.ProjectInfo.sdk_version == "2") {
                         pane.find("#run-on-phone").removeClass('hide');
                     } else {
                         pane.find('#last-compilation-qr-code').removeClass('hide').find('img').attr('src', '/qr/?v=' + url);
