@@ -142,7 +142,7 @@
           var doAnimate = $.support.transition && animate;
 
           this.$backdrop = $('<div class="modal-backdrop" />')
-            .appendTo(document.body);
+            .appendTo(document.body)
 
           this.$backdrop.click(
             this.options.backdrop == 'static' ?
@@ -150,7 +150,8 @@
             : $.proxy(this.hide, this)
           );
 
-          this.$backdrop.addClass('in');
+          var self = this;
+          setTimeout(function() { self.$backdrop.addClass('in') }, 1);
         } else if (!this.isShown && this.$backdrop) {
           this.$backdrop.remove();
           this.isShown = false;

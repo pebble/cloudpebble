@@ -492,7 +492,7 @@ input[type=checkbox]:checked {
 }
 
 body.backdrop .main-container {
-    -webkit-filter: blur(10px) brightness(50%);
+    -webkit-filter: blur(10px);
 }
 
 .main-container {
@@ -505,6 +505,13 @@ body.backdrop .main-container {
     bottom: 0;
     left: 0;
     right: 0;
+    opacity: 0;
+    transition: opacity 0.3s linear;
+    background-color: black;
+}
+
+.modal-backdrop.in {
+    opacity: 0.5;
 }
 
 .modal-body .control-group:not(:last-of-type) {
