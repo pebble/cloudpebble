@@ -10,12 +10,12 @@ Pebble = function(ip, port) {
     _.extend(this, Backbone.Events);
 
     var init = function() {
-        mSocket = new WebSocket('ws://' + mIP + ':' + mPort + '/');
-        mSocket.binaryType = "arraybuffer";
-        mSocket.onerror = handle_socket_error;
-        mSocket.onclose = handle_socket_close;
-        mSocket.onmessage = handle_socket_message;
-        mSocket.onopen = handle_socket_open;
+        mSocket = new PebbleWebSocket(mIP, mPort);
+        mSocket.on('error', handle_socket_error);
+        mSocket.on('close', handle_socket_close);
+        mSocket.on('open', handle_socket_open);
+        mSocket.on('message', handle_socket_message);
+        mSocket.connect();
     };
 
     this.ping = function() {
@@ -59,7 +59,7 @@ Pebble = function(ip, port) {
     };
 
     this.is_connected = function() {
-        return mSocket && mSocket.readyState == WebSocket.OPEN;
+        return mSocket && mSocket.isOpen();
     };
 
     var enable_app_logs = function() {
@@ -106,8 +106,7 @@ Pebble = function(ip, port) {
         self.trigger('close');
     };
 
-    var handle_socket_message = function(e) {
-        var data = new Uint8Array(e.data);
+    var handle_socket_message = function(data) {
         var origin = data[0];
         if(origin == 5) {
             var result = unpack("I", data.subarray(1, 5));
@@ -359,7 +358,7 @@ Pebble = function(ip, port) {
 
     var send_message = function(endpoint, message) {
         var data = new Uint8Array([1].concat(build_message(ENDPOINTS[endpoint], message)));
-        if(mSocket.readyState != WebSocket.OPEN) {
+        if(!mSocket.isOpen()) {
             throw new Error("Cannot send on non-open socket.");
         }
         mSocket.send(data);
