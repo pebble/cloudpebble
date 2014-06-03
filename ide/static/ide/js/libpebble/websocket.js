@@ -44,4 +44,4 @@ var PebbleWebSocket = function(ip, port) {
     var handle_socket_message = function(e) {
         self.trigger('message', new Uint8Array(e.data));
     };
-}
+};

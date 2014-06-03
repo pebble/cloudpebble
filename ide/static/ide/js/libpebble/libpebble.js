@@ -10,7 +10,7 @@ Pebble = function(ip, port) {
     _.extend(this, Backbone.Events);
 
     var init = function() {
-        mSocket = new PebbleWebSocket(mIP, mPort);
+        mSocket = new PebbleMixedContent(mIP, mPort);
         mSocket.on('error', handle_socket_error);
         mSocket.on('close', handle_socket_close);
         mSocket.on('open', handle_socket_open);
