@@ -134,7 +134,12 @@
         }
 
         function handleError(e) {
-            sendEvent('error', JSON.parse(JSON.stringify(e)));
+            var object = {};
+            for(var prop in e) {
+                // The lack of a hasOwnProperty check here is intentional.
+                object[prop] = e[prop];
+            }
+            sendEvent('error', object);
         }
 
         function handleMessage(e) {
