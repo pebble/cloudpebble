@@ -145,12 +145,14 @@ CloudPebble.Sidebar = (function() {
             init();
         },
         SetPopover: function(pane_id, title, content) {
-            $('#sidebar-pane-' + pane_id).popover('destroy').popover({
+            $('#sidebar-pane-' + pane_id).find('a').popover('destroy').popover({
                 trigger: 'hover',
                 title: title,
                 content: content,
                 html: true,
-                delay: {show: 250}
+                animation: false,
+                delay: {show: 250},
+                container: 'body'
             }).click(function() { $(this).popover('hide'); });
         },
         SetProjectType: function(type) {

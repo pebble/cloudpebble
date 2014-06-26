@@ -166,7 +166,6 @@
   left: 0;
   z-index: 1010;
   display: none;
-  max-width: 276px;
   padding: 1px;
   text-align: left;
   white-space: normal;
@@ -207,7 +206,6 @@
   font-weight: normal;
   line-height: 18px;
   background-color: #292929;
-  border-bottom: 1px solid #ebebeb;
   -webkit-border-radius: 5px 5px 0 0;
      -moz-border-radius: 5px 5px 0 0;
           border-radius: 5px 5px 0 0;
