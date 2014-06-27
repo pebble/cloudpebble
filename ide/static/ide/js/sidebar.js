@@ -92,6 +92,7 @@ CloudPebble.Sidebar = (function() {
             return restored;
         },
         SetActivePane: function(pane, id, restore_function, destroy_function) {
+            suspend_active_pane();
             set_main_pane(pane, id, restore_function, destroy_function);
             set_active_menu_entry(id);
         },
