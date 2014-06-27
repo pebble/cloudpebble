@@ -136,7 +136,7 @@ def generate_resource_map(project, resources):
 
 
 def dict_to_pretty_json(d):
-    return json.dumps(d, indent=4, separators=(',', ': ')) + "\n"
+    return json.dumps(d, indent=4, separators=(',', ': '), sort_keys=True) + "\n"
 
 
 def generate_resource_dict(project, resources):
