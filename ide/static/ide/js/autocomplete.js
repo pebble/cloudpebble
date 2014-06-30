@@ -966,6 +966,7 @@ CloudPebble.Editor.Autocomplete = (function() {
     };
 
     var preventIncludingQuotes = function(old_selection, expected_text, cm, selection) {
+        selection = selection.ranges[0];
         cm.off('beforeSelectionChange', mSelectionCallback);
         var text = cm.getRange(selection.anchor, selection.head);
         var old_text = cm.getRange(old_selection.from, old_selection.to);
