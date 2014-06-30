@@ -296,10 +296,6 @@
     CodeMirror.on(hints, "mousedown", function() {
       setTimeout(function(){cm.focus();}, 20);
     });
-
-    console.log(completions[0]);
-      console.log(this.data);
-      console.log(hints.firstChild);
     return true;
   }
 
