@@ -118,13 +118,8 @@ def run_compile(build_result):
         success = False
         output = 'Failed to get output'
         try:
-            if settings.CHROOT_JAIL is not None:
-                output = subprocess.check_output(
-                    [settings.CHROOT_JAIL, '2', base_dir[len(settings.CHROOT_ROOT):]],
-                    stderr=subprocess.STDOUT)
-            else:
-                os.chdir(base_dir)
-                output = subprocess.check_output([settings.PEBBLE_TOOL, "build"], stderr=subprocess.STDOUT, preexec_fn=_set_resource_limits)
+            os.chdir(base_dir)
+            output = subprocess.check_output([settings.PEBBLE_TOOL, "build"], stderr=subprocess.STDOUT, preexec_fn=_set_resource_limits)
         except subprocess.CalledProcessError as e:
             output = e.output
             print output
