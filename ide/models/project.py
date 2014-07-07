@@ -15,12 +15,6 @@ class Project(IdeModel):
     owner = models.ForeignKey(User)
     name = models.CharField(max_length=50)
     last_modified = models.DateTimeField(auto_now_add=True)
-    version_def_name = models.CharField(max_length=50, default="APP_RESOURCES")
-    SDK_VERSIONS = (
-        ('1', '1.1.2'),
-        ('2', '2.0')
-    )
-    sdk_version = models.CharField(max_length=10, choices=SDK_VERSIONS, default='1')
 
     PROJECT_TYPES = (
         ('native', 'Pebble C SDK'),
@@ -107,9 +101,8 @@ class TemplateProject(Project):
         # Copy over relevant project properties.
         # NOTE: If new, relevant properties are added, they must be copied here.
         # todo: can we do better than that? Maybe we could reuse the zip import mechanism or something...
-        if self.sdk_version != '1':
-            project.app_capabilities = self.app_capabilities
-            project.app_is_watchface = self.app_is_watchface
-            project.app_keys = self.app_keys
-            project.app_jshint = self.app_jshint
-            project.save()
+        project.app_capabilities = self.app_capabilities
+        project.app_is_watchface = self.app_is_watchface
+        project.app_keys = self.app_keys
+        project.app_jshint = self.app_jshint
+        project.save()

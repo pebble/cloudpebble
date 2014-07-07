@@ -236,8 +236,6 @@ LOGIN_URL = '/#login'
 
 FILE_STORAGE = os.getcwd() + '/user_data/'
 
-CHROOT_JAIL = None
-
 CHROOT_ROOT = None
 
 DEFAULT_TEMPLATE = None

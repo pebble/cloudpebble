@@ -231,7 +231,6 @@ CloudPebble.Compile = (function() {
     }
 
     var run_build = function(callback) {
-        if(CloudPebble.ProjectInfo.sdk_version == '1') return;
         var temp_build = {started: (new Date()).toISOString(), finished: null, state: 1, uuid: null, id: null, size: {total: null, binary: null, resources: null}};
         update_last_build(pane, temp_build);
         pane.find('#run-build-table').prepend(build_history_row(temp_build));
@@ -266,12 +265,7 @@ CloudPebble.Compile = (function() {
                 pane.find('#compilation-run-build-button').removeAttr('disabled');
                 if(build.state == 3) {
                     pane.find('#last-compilation-pbw').removeClass('hide').attr('href', build.pbw);
-                    var url = build.pbw;
-                    if(CloudPebble.ProjectInfo.sdk_version == "2") {
-                        pane.find("#run-on-phone").removeClass('hide');
-                    } else {
-                        pane.find('#last-compilation-qr-code').removeClass('hide').find('img').attr('src', '/qr/?v=' + url);
-                    }
+                    pane.find("#run-on-phone").removeClass('hide');
                     if(build.size.total !== null) {
                         var s = pane.find('#last-compilation-size').removeClass('hide');
                         s.find('.total').text(Math.round(build.size.total / 1024));

@@ -52,12 +52,6 @@ def run_compile(build_result):
     source_files = SourceFile.objects.filter(project=project)
     resources = ResourceFile.objects.filter(project=project)
 
-    if project.sdk_version == '1':
-        build_result.state = BuildResult.STATE_FAILED
-        build_result.finished = now()
-        build_result.save()
-        return
-
     # Assemble the project somewhere
     base_dir = tempfile.mkdtemp(dir=os.path.join(settings.CHROOT_ROOT, 'tmp') if settings.CHROOT_ROOT else None)
 
@@ -124,13 +118,8 @@ def run_compile(build_result):
         success = False
         output = 'Failed to get output'
         try:
-            if settings.CHROOT_JAIL is not None:
-                output = subprocess.check_output(
-                    [settings.CHROOT_JAIL, project.sdk_version, base_dir[len(settings.CHROOT_ROOT):]],
-                    stderr=subprocess.STDOUT)
-            else:
-                os.chdir(base_dir)
-                output = subprocess.check_output([settings.PEBBLE_TOOL, "build"], stderr=subprocess.STDOUT, preexec_fn=_set_resource_limits)
+            os.chdir(base_dir)
+            output = subprocess.check_output([settings.PEBBLE_TOOL, "build"], stderr=subprocess.STDOUT, preexec_fn=_set_resource_limits)
         except subprocess.CalledProcessError as e:
             output = e.output
             print output
