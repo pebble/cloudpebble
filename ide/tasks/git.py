@@ -64,7 +64,6 @@ def file_exists(url):
         return True
 
 
-# SDK2 support has made this function a huge, unmaintainable mess.
 @git_auth_check
 def github_push(user, commit_message, repo_name, project):
     g = Github(user.github.token, client_id=settings.GITHUB_CLIENT_ID, client_secret=settings.GITHUB_CLIENT_SECRET)
@@ -81,9 +80,9 @@ def github_push(user, commit_message, repo_name, project):
     next_tree = {x.path: InputGitTreeElement(path=x.path, mode=x.mode, type=x.type, sha=x.sha) for x in tree.tree}
 
     try:
-        remote_version, root = find_project_root(paths)
+        root = find_project_root(paths)
     except:
-        remote_version, root = project.sdk_version, ''
+        root = ''
 
     src_root = root + 'src/'
     project_sources = project.source_files.all()
@@ -118,24 +117,10 @@ def github_push(user, commit_message, repo_name, project):
 
     resources = project.resources.all()
 
-    old_resource_root = root + ("resources/src/" if remote_version == '1' else 'resources/')
-    new_resource_root = root + ("resources/src/" if project.sdk_version == '1' else 'resources/')
-
-    # Migrate all the resources so we can subsequently ignore the issue.
-    if old_resource_root != new_resource_root:
-        print "moving resources"
-        new_next_tree = next_tree.copy()
-        for path in next_tree:
-            if path.startswith(old_resource_root) and not path.endswith('resource_map.json'):
-                new_path = new_resource_root + path[len(old_resource_root):]
-                print "moving %s to %s" % (path, new_path)
-                next_tree[path]._InputGitTreeElement__path = new_path
-                new_next_tree[new_path] = next_tree[path]
-                del new_next_tree[path]
-        next_tree = new_next_tree
+    resource_root = root + 'resources/'
 
     for res in resources:
-        repo_path = new_resource_root + res.path
+        repo_path = resource_root + res.path
         if repo_path in next_tree:
             content = res.get_contents()
             if git_sha(content) != next_tree[repo_path]._InputGitTreeElement__sha:
@@ -150,32 +135,19 @@ def github_push(user, commit_message, repo_name, project):
             print "Created blob %s" % blob.sha
             next_tree[repo_path] = InputGitTreeElement(path=repo_path, mode='100644', type='blob', sha=blob.sha)
 
-    # Both of these are used regardless of version
-    remote_map_path = root + 'resources/src/resource_map.json'
     remote_manifest_path = root + 'appinfo.json'
     remote_wscript_path = root + 'wscript'
 
-    if remote_version == '1':
-        remote_map_sha = next_tree[remote_map_path]._InputGitTreeElement__sha if remote_map_path in next_tree else None
-        if remote_map_sha is not None:
-            their_res_dict = json.loads(git_blob(repo, remote_map_sha))
-        else:
-            their_res_dict = {'friendlyVersion': 'VERSION', 'versionDefName': '', 'media': []}
+    remote_manifest_sha = next_tree[remote_manifest_path]._InputGitTreeElement__sha if remote_manifest_path in next_tree else None
+    if remote_manifest_sha is not None:
+        their_manifest_dict = json.loads(git_blob(repo, remote_manifest_sha))
+        their_res_dict = their_manifest_dict['resources']
+    else:
         their_manifest_dict = {}
-    else:
-        remote_manifest_sha = next_tree[remote_manifest_path]._InputGitTreeElement__sha if remote_map_path in next_tree else None
-        if remote_manifest_sha is not None:
-            their_manifest_dict = json.loads(git_blob(repo, remote_manifest_sha))
-            their_res_dict = their_manifest_dict['resources']
-        else:
-            their_manifest_dict = {}
-            their_res_dict = {'media': []}
+        their_res_dict = {'media': []}
 
-    if project.sdk_version == '1':
-        our_res_dict = generate_resource_dict(project, resources)
-    else:
-        our_manifest_dict = generate_v2_manifest_dict(project, resources)
-        our_res_dict = our_manifest_dict['resources']
+    our_manifest_dict = generate_v2_manifest_dict(project, resources)
+    our_res_dict = our_manifest_dict['resources']
 
     if our_res_dict != their_res_dict:
         print "Resources mismatch."
@@ -183,41 +155,24 @@ def github_push(user, commit_message, repo_name, project):
         # Try removing things that we've deleted, if any
         to_remove = set(x['file'] for x in their_res_dict['media']) - set(x['file'] for x in our_res_dict['media'])
         for path in to_remove:
-            repo_path = new_resource_root + path
+            repo_path = resource_root + path
             if repo_path in next_tree:
                 print "Deleted resource: %s" % repo_path
                 del next_tree[repo_path]
 
-        # Update the stored resource map, if applicable.
-        if project.sdk_version == '1':
-            if remote_map_path in next_tree:
-                next_tree[remote_map_path]._InputGitTreeElement__sha = NotSet
-                next_tree[remote_map_path]._InputGitTreeElement__content = dict_to_pretty_json(our_res_dict)
-            else:
-                next_tree[remote_map_path] = InputGitTreeElement(path=remote_map_path, mode='100644', type='blob',
-                                                                 content=dict_to_pretty_json(our_res_dict))
-            # Delete the v2 manifest, if one exists
-            if remote_manifest_path in next_tree:
-                del next_tree[remote_manifest_path]
     # This one is separate because there's more than just the resource map changing.
-    if project.sdk_version == '2' and their_manifest_dict != our_manifest_dict:
+    if their_manifest_dict != our_manifest_dict:
         if remote_manifest_path in next_tree:
             next_tree[remote_manifest_path]._InputGitTreeElement__sha = NotSet
             next_tree[remote_manifest_path]._InputGitTreeElement__content = generate_v2_manifest(project, resources)
         else:
             next_tree[remote_manifest_path] = InputGitTreeElement(path=remote_manifest_path, mode='100644', type='blob',
                                                                   content=generate_v2_manifest(project, resources))
-        # Delete the v1 manifest, if one exists
-        if remote_map_path in next_tree:
-            del next_tree[remote_map_path]
 
-    if project.sdk_version == '2':
-        if remote_wscript_path not in next_tree:
-            next_tree[remote_wscript_path] = InputGitTreeElement(path=remote_wscript_path, mode='100644', type='blob',
-                                                                 content=generate_wscript_file(project, True))
-            has_changed = True
-    else:
-        del next_tree[remote_wscript_path]
+    if remote_wscript_path not in next_tree:
+        next_tree[remote_wscript_path] = InputGitTreeElement(path=remote_wscript_path, mode='100644', type='blob',
+                                                             content=generate_wscript_file(project, True))
+        has_changed = True
 
     # Commit the new tree.
     if has_changed:
@@ -274,31 +229,19 @@ def github_pull(user, project):
 
     paths = {x.path: x for x in tree.tree}
 
-    version, root = find_project_root(paths)
+    root = find_project_root(paths)
 
     # First try finding the resource map so we don't fail out part-done later.
     # TODO: transaction support for file contents would be nice...
-    # SDK2
 
-    if version == '2':
-        resource_root = root + 'resources/'
-        manifest_path = root + 'appinfo.json'
-        if manifest_path in paths:
-            manifest_sha = paths[manifest_path].sha
-            manifest = json.loads(git_blob(repo, manifest_sha))
-            media = manifest.get('resources', {}).get('media', [])
-        else:
-            raise Exception("appinfo.json not found")
+    resource_root = root + 'resources/'
+    manifest_path = root + 'appinfo.json'
+    if manifest_path in paths:
+        manifest_sha = paths[manifest_path].sha
+        manifest = json.loads(git_blob(repo, manifest_sha))
+        media = manifest.get('resources', {}).get('media', [])
     else:
-        # SDK1
-        resource_root = root + 'resources/src/'
-        remote_map_path = resource_root + 'resource_map.json'
-        if remote_map_path in paths:
-            remote_map_sha = paths[remote_map_path].sha
-            remote_map = json.loads(git_blob(repo, remote_map_sha))
-            media = remote_map['media']
-        else:
-            raise Exception("resource_map.json not found.")
+        raise Exception("appinfo.json not found")
 
     for resource in media:
         path = resource_root + resource['file']

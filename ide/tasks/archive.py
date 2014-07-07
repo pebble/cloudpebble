@@ -31,18 +31,14 @@ def add_project_to_archive(z, project, prefix=''):
         z.writestr('%s/src/%s' % (prefix, source.file_name), source.get_contents())
 
     for resource in resources:
-        res_path = 'resources/src' if project.sdk_version == '1' else 'resources'
+        res_path = 'resources'
         z.writestr('%s/%s/%s' % (prefix, res_path, resource.path), resource.get_contents())
 
-    if project.sdk_version == '1':
-        resource_map = generate_resource_map(project, resources)
-        z.writestr('%s/resources/src/resource_map.json' % prefix, resource_map)
-    else:
-        manifest = generate_v2_manifest(project, resources)
-        z.writestr('%s/appinfo.json' % prefix, manifest)
-        # This file is always the same, but needed to build.
-        z.writestr('%s/wscript' % prefix, generate_wscript_file(project, for_export=True))
-        z.writestr('%s/jshintrc' % prefix, generate_jshint_file(project))
+    manifest = generate_v2_manifest(project, resources)
+    z.writestr('%s/appinfo.json' % prefix, manifest)
+    # This file is always the same, but needed to build.
+    z.writestr('%s/wscript' % prefix, generate_wscript_file(project, for_export=True))
+    z.writestr('%s/jshintrc' % prefix, generate_jshint_file(project))
 
 
 @task(acks_late=True)
@@ -114,16 +110,14 @@ def do_import_archive(project_id, archive, delete_project=False):
                 #   - This is taken to be the project directory.
                 # - Import every file in 'src/' with the extension .c or .h as a source file
                 # - Parse resource_map.json and import files it references
-                RESOURCE_MAP = 'resources/src/resource_map.json'
                 MANIFEST = 'appinfo.json'
                 SRC_DIR = 'src/'
                 if len(contents) > 200:
                     raise Exception("Too many files in zip file.")
                 file_list = [x.filename for x in contents]
 
-                version, base_dir = find_project_root(file_list)
+                base_dir = find_project_root(file_list)
                 dir_end = len(base_dir)
-                project.sdk_version = version
 
                 # Now iterate over the things we found
                 with transaction.commit_on_success():
@@ -139,37 +133,33 @@ def do_import_archive(project_id, archive, delete_project=False):
                         if entry.file_size > 5242880:  # 5 MB
                             raise Exception("Excessively large compressed file.")
 
-                        if (filename == RESOURCE_MAP and version == '1') or (filename == MANIFEST and version == '2'):
+                        if filename == MANIFEST:
                             # We have a resource map! We can now try importing things from it.
                             with z.open(entry) as f:
                                 m = json.loads(f.read())
 
-                            if version == '1':
-                                project.version_def_name = m['versionDefName']
-                                media_map = m['media']
-                            elif version == '2':
-                                project.app_uuid = m['uuid']
-                                project.app_short_name = m['shortName']
-                                project.app_long_name = m['longName']
-                                project.app_company_name = m['companyName']
-                                project.app_version_code = m['versionCode']
-                                project.app_version_label = m['versionLabel']
-                                project.app_is_watchface = m.get('watchapp', {}).get('watchface', False)
-                                project.app_capabilities = ','.join(m.get('capabilities', []))
-                                project.app_keys = dict_to_pretty_json(m.get('appKeys', {}))
-                                media_map = m['resources']['media']
+                            project.app_uuid = m['uuid']
+                            project.app_short_name = m['shortName']
+                            project.app_long_name = m['longName']
+                            project.app_company_name = m['companyName']
+                            project.app_version_code = m['versionCode']
+                            project.app_version_label = m['versionLabel']
+                            project.app_is_watchface = m.get('watchapp', {}).get('watchface', False)
+                            project.app_capabilities = ','.join(m.get('capabilities', []))
+                            project.app_keys = dict_to_pretty_json(m.get('appKeys', {}))
+                            media_map = m['resources']['media']
 
                             resources = {}
                             for resource in media_map:
                                 kind = resource['type']
-                                def_name = resource['defName'] if version == '1' else resource['name']
+                                def_name = resource['name']
                                 file_name = resource['file']
                                 regex = resource.get('characterRegex', None)
                                 tracking = resource.get('trackingAdjust', None)
                                 is_menu_icon = resource.get('menuIcon', False)
                                 if file_name not in resources:
                                     resources[file_name] = ResourceFile.objects.create(project=project, file_name=os.path.basename(file_name), kind=kind, is_menu_icon=is_menu_icon)
-                                    res_path = 'resources/src' if version == '1' else 'resources'
+                                    res_path = 'resources'
                                     resources[file_name].save_file(z.open('%s%s/%s' % (base_dir, res_path, file_name)))
                                 ResourceIdentifier.objects.create(
                                     resource_file=resources[file_name],

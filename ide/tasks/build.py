@@ -52,12 +52,6 @@ def run_compile(build_result):
     source_files = SourceFile.objects.filter(project=project)
     resources = ResourceFile.objects.filter(project=project)
 
-    if project.sdk_version == '1':
-        build_result.state = BuildResult.STATE_FAILED
-        build_result.finished = now()
-        build_result.save()
-        return
-
     # Assemble the project somewhere
     base_dir = tempfile.mkdtemp(dir=os.path.join(settings.CHROOT_ROOT, 'tmp') if settings.CHROOT_ROOT else None)
 
@@ -126,7 +120,7 @@ def run_compile(build_result):
         try:
             if settings.CHROOT_JAIL is not None:
                 output = subprocess.check_output(
-                    [settings.CHROOT_JAIL, project.sdk_version, base_dir[len(settings.CHROOT_ROOT):]],
+                    [settings.CHROOT_JAIL, '2', base_dir[len(settings.CHROOT_ROOT):]],
                     stderr=subprocess.STDOUT)
             else:
                 os.chdir(base_dir)

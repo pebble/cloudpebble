@@ -39,7 +39,6 @@ def import_gist(user_id, gist_id):
     project_settings = {
         'name': settings.get('longName', default_name),
         'owner': user,
-        'sdk_version': 2,
         'app_uuid':  generate_half_uuid(),
         'app_short_name': settings.get('shortName', default_name),
         'app_long_name': settings.get('longName', default_name),

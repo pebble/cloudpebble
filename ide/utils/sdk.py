@@ -142,31 +142,21 @@ def dict_to_pretty_json(d):
 
 def generate_resource_dict(project, resources):
     resource_map = {'media': []}
-    if project.sdk_version == '1':
-        resource_map['friendlyVersion'] = 'VERSION'
-        resource_map['versionDefName'] = project.version_def_name
 
-    if project.sdk_version == '1' and len(resources) == 0:
-        print "No resources; adding dummy."
-        resource_map['media'].append({"type": "raw", "defName": "DUMMY", "file": "resource_map.json"})
-    else:
-        for resource in resources:
-            for resource_id in resource.get_identifiers():
-                d = {
-                    'type': resource.kind,
-                    'file': resource.path
-                }
-                if project.sdk_version == '1':
-                    d['defName'] = resource_id.resource_id
-                else:
-                    d['name'] = resource_id.resource_id
-                if resource_id.character_regex:
-                    d['characterRegex'] = resource_id.character_regex
-                if resource_id.tracking:
-                    d['trackingAdjust'] = resource_id.tracking
-                if resource.is_menu_icon:
-                    d['menuIcon'] = True
-                resource_map['media'].append(d)
+    for resource in resources:
+        for resource_id in resource.get_identifiers():
+            d = {
+                'type': resource.kind,
+                'file': resource.path,
+                'name': resource_id.resource_id,
+            }
+            if resource_id.character_regex:
+                d['characterRegex'] = resource_id.character_regex
+            if resource_id.tracking:
+                d['trackingAdjust'] = resource_id.tracking
+            if resource.is_menu_icon:
+                d['menuIcon'] = True
+            resource_map['media'].append(d)
     return resource_map
 
 

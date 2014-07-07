@@ -32,7 +32,6 @@ def project_info(request, project_id):
         'success': True,
         'name': project.name,
         'last_modified': str(project.last_modified),
-        'version_def_name': project.version_def_name,
         'app_uuid': project.app_uuid or '',
         'app_company_name': project.app_company_name,
         'app_short_name': project.app_short_name,
@@ -43,7 +42,6 @@ def project_info(request, project_id):
         'app_capabilities': project.app_capabilities,
         'app_jshint': project.app_jshint,
         'menu_icon': project.menu_icon.id if project.menu_icon else None,
-        'sdk_version': project.sdk_version,
         'source_files': [{'name': f.file_name, 'id': f.id} for f in source_files],
         'resources': [{
             'id': x.id,
@@ -158,7 +156,6 @@ def create_project(request):
             project = Project.objects.create(
                 name=name,
                 owner=request.user,
-                sdk_version=2,
                 app_company_name=request.user.username,
                 app_short_name=name,
                 app_long_name=name,
@@ -192,33 +189,28 @@ def save_project_settings(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     try:
         with transaction.commit_on_success():
-            sdk_version = int(request.POST['sdk_version'])
             project.name = request.POST['name']
-            project.sdk_version = sdk_version
-            if sdk_version == 1:
-                project.version_def_name = request.POST['version_def_name']
-            elif sdk_version > 1:
-                project.app_uuid = request.POST['app_uuid']
-                project.app_company_name = request.POST['app_company_name']
-                project.app_short_name = request.POST['app_short_name']
-                project.app_long_name = request.POST['app_long_name']
-                project.app_version_code = int(request.POST['app_version_code'])
-                project.app_version_label = request.POST['app_version_label']
-                project.app_is_watchface = bool(int(request.POST['app_is_watchface']))
-                project.app_capabilities = request.POST['app_capabilities']
-                project.app_keys = request.POST['app_keys']
-                project.app_jshint = bool(int(request.POST['app_jshint']))
+            project.app_uuid = request.POST['app_uuid']
+            project.app_company_name = request.POST['app_company_name']
+            project.app_short_name = request.POST['app_short_name']
+            project.app_long_name = request.POST['app_long_name']
+            project.app_version_code = int(request.POST['app_version_code'])
+            project.app_version_label = request.POST['app_version_label']
+            project.app_is_watchface = bool(int(request.POST['app_is_watchface']))
+            project.app_capabilities = request.POST['app_capabilities']
+            project.app_keys = request.POST['app_keys']
+            project.app_jshint = bool(int(request.POST['app_jshint']))
 
-                menu_icon = request.POST['menu_icon']
-                if menu_icon != '':
-                    menu_icon = int(menu_icon)
-                    old_icon = project.menu_icon
-                    if old_icon is not None:
-                        old_icon.is_menu_icon = False
-                        old_icon.save()
-                    icon_resource = project.resources.filter(id=menu_icon)[0]
-                    icon_resource.is_menu_icon = True
-                    icon_resource.save()
+            menu_icon = request.POST['menu_icon']
+            if menu_icon != '':
+                menu_icon = int(menu_icon)
+                old_icon = project.menu_icon
+                if old_icon is not None:
+                    old_icon.is_menu_icon = False
+                    old_icon.save()
+                icon_resource = project.resources.filter(id=menu_icon)[0]
+                icon_resource.is_menu_icon = True
+                icon_resource.save()
 
             project.save()
     except IntegrityError as e:
