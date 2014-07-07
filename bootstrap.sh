@@ -41,14 +41,6 @@ sudo -u vagrant tar -xjf arm-cs-tools.tar.bz2
 rm arm-cs-tools.tar.bz2
 
 # Obtain the SDK.
-sudo -u vagrant mkdir sdk1
-pushd sdk1
-    sudo -u vagrant git clone https://github.com/pebble/pebblekit.git .
-    # Make sure we actually have an SDK1 revision
-    sudo -u vagrant git reset --hard 19f6810bad92b669830d2a274dba13c72c58c5d3
-    pip install -r Pebble/sdk/requirements.txt
-popd
-
 sudo -u vagrant mkdir sdk2
 pushd sdk2
     wget --progress=bar:force -O sdk.tar.gz https://s3.amazonaws.com/assets.getpebble.com/sdk2/PebbleSDK-2.3.tar.gz
