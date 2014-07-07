@@ -15,12 +15,6 @@ class Project(IdeModel):
     owner = models.ForeignKey(User)
     name = models.CharField(max_length=50)
     last_modified = models.DateTimeField(auto_now_add=True)
-    version_def_name = models.CharField(max_length=50, default="APP_RESOURCES")
-    SDK_VERSIONS = (
-        ('1', '1.1.2'),
-        ('2', '2.0')
-    )
-    sdk_version = models.CharField(max_length=10, choices=SDK_VERSIONS, default='2')
 
     PROJECT_TYPES = (
         ('native', 'Pebble C SDK'),
