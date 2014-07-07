@@ -62,16 +62,17 @@ def run_compile(build_result):
     base_dir = tempfile.mkdtemp(dir=os.path.join(settings.CHROOT_ROOT, 'tmp') if settings.CHROOT_ROOT else None)
 
     try:
+        # Resources
+        resource_root = 'resources'
+        os.makedirs(os.path.join(base_dir, resource_root, 'images'))
+        os.makedirs(os.path.join(base_dir, resource_root, 'fonts'))
+        os.makedirs(os.path.join(base_dir, resource_root, 'data'))
+
         if project.project_type == 'native':
             # Source code
             src_dir = os.path.join(base_dir, 'src')
             os.mkdir(src_dir)
             create_source_files(source_files, src_dir)
-            # Resources
-            resource_root = 'resources'
-            os.makedirs(os.path.join(base_dir, resource_root, 'images'))
-            os.makedirs(os.path.join(base_dir, resource_root, 'fonts'))
-            os.makedirs(os.path.join(base_dir, resource_root, 'data'))
 
             manifest_dict = generate_v2_manifest_dict(project, resources)
             open(os.path.join(base_dir, 'appinfo.json'), 'w').write(json.dumps(manifest_dict))
@@ -87,7 +88,7 @@ def run_compile(build_result):
             open(os.path.join(base_dir, 'wscript'), 'w').write(generate_wscript_file(project))
             open(os.path.join(base_dir, 'pebble-jshintrc'), 'w').write(generate_jshint_file(project))
         elif project.project_type == 'simplyjs':
-            os.rmdir(base_dir)
+            shutil.rmtree(base_dir)
             shutil.copytree(settings.SIMPLYJS_ROOT, base_dir)
             manifest_dict = generate_simplyjs_manifest_dict(project)
 
@@ -102,10 +103,19 @@ def run_compile(build_result):
             })();
             """ % escaped_js)
         elif project.project_type == 'pebblejs':
-            os.rmdir(base_dir)
+            shutil.rmtree(base_dir)
             shutil.copytree(settings.PEBBLEJS_ROOT, base_dir)
-            manifest_dict = generate_pebblejs_manifest_dict(project)
+            manifest_dict = generate_pebblejs_manifest_dict(project, resources)
             create_source_files(source_files, os.path.join(base_dir, 'src', 'js'))
+
+            for f in resources:
+                if f.kind != 'png':
+                    continue
+                target_dir = os.path.abspath(os.path.join(base_dir, resource_root, ResourceFile.DIR_MAP[f.kind]))
+                abs_target = os.path.abspath(os.path.join(target_dir, f.file_name))
+                if not abs_target.startswith(target_dir):
+                    raise Exception("Suspicious filename: %s" % f.file_name)
+                f.copy_to_path(abs_target)
 
             open(os.path.join(base_dir, 'appinfo.json'), 'w').write(json.dumps(manifest_dict))
 

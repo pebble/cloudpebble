@@ -67,12 +67,14 @@ CloudPebble.Resources = (function() {
         }
         var resources = [];
         if(kind != 'font') {
-            var resource_id = form.find('#non-font-resource-group .edit-resource-id').val();
-            if(resource_id === '' || !validate_resource_id(resource_id)) {
-                report_error("You must provide a valid resource identifier. Use only letters, numbers and underscores.");
-                return;
+            if(CloudPebble.ProjectInfo.type != 'pebblejs') {
+                var resource_id = form.find('#non-font-resource-group .edit-resource-id').val();
+                if(resource_id === '' || !validate_resource_id(resource_id)) {
+                    report_error("You must provide a valid resource identifier. Use only letters, numbers and underscores.");
+                    return;
+                }
+                resources = [{'id': resource_id}];
             }
-            resources = [{'id': resource_id}];
         } else {
             var resource_ids = {};
             var okay = true;
@@ -296,6 +298,9 @@ CloudPebble.Resources = (function() {
     var prepare_resource_pane = function() {
         var template = resource_template.clone();
         template.removeClass('hide');
+        if(CloudPebble.ProjectInfo.type != 'native') {
+            template.find('.native-only').addClass('hide');
+        }
 
         template.find('#edit-resource-type').change(function() {
             if($(this).val() == 'font') {

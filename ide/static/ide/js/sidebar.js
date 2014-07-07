@@ -160,6 +160,9 @@ CloudPebble.Sidebar = (function() {
             if(type != 'native') {
                 $('.native-only').hide();
             }
+            if(type == 'simplyjs') {
+                $('.not-simplyjs').hide();
+            }
         }
     };
 })();
