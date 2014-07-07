@@ -1,4 +1,5 @@
 import json
+import re
 
 __author__ = 'katharine'
 
@@ -203,7 +204,7 @@ def generate_simplyjs_manifest_dict(project):
     }
     return manifest
 
-def generate_pebblejs_manifest_dict(project):
+def generate_pebblejs_manifest_dict(project, resources):
     manifest = {
         "uuid": project.app_uuid,
         "shortName": project.app_short_name,
@@ -239,4 +240,11 @@ def generate_pebblejs_manifest_dict(project):
             ]
         }
     }
+
+    manifest['resources']['media'].extend({
+        'type': x.kind,
+        'file': x.path,
+        'name': re.sub(r'[^A-Z0-9_]', '_', x.path.upper())
+    } for x in resources if x.kind == 'png')
+
     return manifest

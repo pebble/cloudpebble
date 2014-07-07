@@ -40,9 +40,9 @@
                     <li class="nav-header" id="sidebar-pane-compile"><a href="#">Compilation</a></li>
                     <li id="sidebar-pane-github" class="nav-header native-only {%if not project.owner.github%}disabled{%endif%}"><a href="#">GitHub</a></li>
                     <li class="nav-header nav-section">Source files <button class="btn btn-small native-only" id="new-source-file">Add C</button> <button class="btn btn-small" id="new-js-file">JS</button></li>
-                    <li class="native-only" id="end-source-files"></li>
-                    <li class="nav-header nav-section native-only">Resources <button class="btn btn-small" id="sidebar-pane-new-resource">Add new</button></li>
-                    <li class="hide native-only" id="end-resources"></li>
+                    <li class="not-simplyjs" id="end-source-files"></li>
+                    <li class="nav-header nav-section not-simplyjs">Resources <button class="btn btn-small" id="sidebar-pane-new-resource">Add new</button></li>
+                    <li class="hide not-simplyjs" id="end-resources"></li>
                 </ul>
             </div>
         </div>
@@ -83,9 +83,11 @@
                 <div class="controls">
                     <select id="edit-resource-type">
                         <option value="png">PNG image</option>
+                        {% if project.project_type == 'native' %}
                         <option value="png-trans">PNG with transparency</option>
                         <option value="font">TrueType font</option>
                         <option value="raw">Raw binary blob</option>
+                        {% endif %}
                     </select>
                 </div>
             </div>
@@ -108,7 +110,7 @@
                 <a href="#" class="btn">Download uploaded resource</a>
             </div>
         </div>
-        <div class="control-group well " id="non-font-resource-group">
+        <div class="control-group well native-only" id="non-font-resource-group">
             <label class="control-label" for="edit-resource-id">Identifier</label>
             <div class="controls">
                 <input type="text" class="edit-resource-id" placeholder="IMAGE_EXAMPLE_IDENTIFIER" pattern="[A-Za-z0-9_]+">
