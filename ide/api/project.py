@@ -150,7 +150,10 @@ def build_log(request, project_id, build_id):
 def create_project(request):
     name = request.POST['name']
     template_id = request.POST.get('template', None)
+    if template_id is not None:
+        template_id = int(template_id)
     project_type = request.POST.get('type', 'native')
+    template_name = None
     try:
         with transaction.commit_on_success():
             project = Project.objects.create(
@@ -165,8 +168,9 @@ def create_project(request):
                 app_capabilities='',
                 project_type=project_type
             )
-            if template_id is not None and int(template_id) != 0:
-                template = TemplateProject.objects.get(pk=int(template_id))
+            if template_id is not None and template_id != 0:
+                template = TemplateProject.objects.get(pk=template_id)
+                template_name = template.name
                 template.copy_into_project(project)
             elif project_type == 'simplyjs':
                 f = SourceFile.objects.create(project=project, file_name="app.js")
@@ -178,7 +182,13 @@ def create_project(request):
         return json_failure(str(e))
     else:
 
-        send_keen_event('cloudpebble', 'cloudpebble_create_project', project=project, request=request)
+        send_keen_event(
+            'cloudpebble',
+            'cloudpebble_create_project',
+            {'data': {'template': {'id': template_id, 'name': template_name}}},
+            project=project,
+            request=request
+        )
 
         return json_response({"id": project.id})
 
