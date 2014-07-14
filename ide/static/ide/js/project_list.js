@@ -111,6 +111,7 @@ $(function() {
         var name = active_set.find('#import-github-name').val();
         var url = active_set.find('#import-github-url').val();
         var branch = active_set.find('#import-github-branch').val();
+        var add_remote = !!active_set.find('#import-github-add-remote').is(':checked');
         if(name.replace(/\s/g, '') === '') {
             active_set.find('.errors').removeClass('hide').text("You must specify a project name.");
             return;
@@ -125,7 +126,7 @@ $(function() {
         }
         disable_import_controls();
         active_set.find('.progress').removeClass('hide');
-        $.post('/ide/import/github', {name: name, repo: url, branch: branch}, function(data) {
+        $.post('/ide/import/github', {name: name, repo: url, branch: branch, add_remote: add_remote}, function(data) {
             if(data.success) {
                 handle_import_progress(active_set, data.task_id, data.project_id);
             } else {

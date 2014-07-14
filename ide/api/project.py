@@ -274,6 +274,7 @@ def import_github(request):
     name = request.POST['name']
     repo = request.POST['repo']
     branch = request.POST['branch']
+    add_remote = (request.POST['add_remote'] == 'true')
     match = re.match(r'^(?:https?://|git@|git://)?(?:www\.)?github\.com[/:]([\w.-]+)/([\w.-]+?)(?:\.git|/|$)', repo)
     if match is None:
         return HttpResponse(json.dumps({"success": False, 'error': "Invalid GitHub URL."}),
@@ -285,6 +286,11 @@ def import_github(request):
         project = Project.objects.create(owner=request.user, name=name)
     except IntegrityError as e:
         return json_failure(str(e))
+
+    if add_remote:
+        project.github_repo = "%s/%s" % (github_user, github_project)
+        project.github_branch = branch
+        project.save()
 
     task = do_import_github.delay(project.id, github_user, github_project, branch, delete_project=True)
     return json_response({'task_id': task.task_id, 'project_id': project.id})

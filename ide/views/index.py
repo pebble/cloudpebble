@@ -33,5 +33,6 @@ def index(request):
             'sdk_templates': TemplateProject.objects.filter(template_kind=TemplateProject.KIND_TEMPLATE),
             'example_templates': TemplateProject.objects.filter(template_kind=TemplateProject.KIND_EXAMPLE),
             'demo_templates': TemplateProject.objects.filter(template_kind=TemplateProject.KIND_SDK_DEMO),
-            'default_template_id': settings.DEFAULT_TEMPLATE
+            'default_template_id': settings.DEFAULT_TEMPLATE,
+            'user': user,
         })

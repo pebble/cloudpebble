@@ -148,10 +148,6 @@
                 </div>
             </div>
             <div id="import-github" class="tab-pane">
-                <p>
-                    This is a one-time only import from a public GitHub repo containing one project.
-                    There will be no further synchronisation.
-                </p>
                 <div class="errors alert alert-error hide"></div>
                 <form class="form-horizontal">
                     <div class="control-group">
@@ -172,6 +168,14 @@
                             <input type="text" id="import-github-branch" placeholder="master" />
                         </div>
                     </div>
+                    {% if user.github %}
+                    <div class="control-group">
+                        <label class="control-label" for="import-github-add-remote">Use as Git remote</label>
+                        <div class="controls">
+                            <input type="checkbox" id="import-github-add-remote">
+                        </div>
+                    </div>
+                    {% endif %}
                 </form>
                 <div class="progress progress-striped active hide">
                     <div class="bar" style="width: 100%;"></div>
