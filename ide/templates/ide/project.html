@@ -296,9 +296,10 @@
                 <div class="control-group">
                     <label class="control-label" for="settings-version-label">Version label</label>
                     <div class="controls">
-                        <input type="text" id="settings-version-label" placeholder="0.1.2" value="{{project.app_version_label}}">
+                        <input type="text" id="settings-version-label" placeholder="0.1.2" value="{{project.app_version_label}}"
+                                pattern="^(\d{1,2}|1\d{2}|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d{2}|2[0-4]\d|25[0-5])(\.\d+(-.+)?)?)?$">
                         <span class="help-block">
-                            Version label for the app. Typically formatted as Major.Minor.Bugfix
+                            App version. Takes the format major[.minor[.bugfix[-suffix]]], where major and minor are between 0 and 255.
                         </span>
                     </div>
                 </div>
