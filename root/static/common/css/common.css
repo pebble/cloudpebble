@@ -566,5 +566,33 @@ body.backdrop .main-container {
 input:invalid,
 textarea:invalid,
 select:invalid {
-  color: #b2171e;;
+  color: #b2171e;
+}
+
+.alert.alert-error {
+    color: white;
+    background-color: #b2171e;
+}
+
+.alert.alert-warning {
+    color: white;
+    background-color: #fd971f;
+}
+
+.alert.alert-success {
+    color: white;
+    background-color: #00B293;
+}
+
+.well.alert {
+    padding-bottom: 15px;
+}
+
+.modal .alert {
+    border-radius: 10px;
+    padding: 10px 20px;
+    padding-bottom: 8px;
+    margin-right: 12px;
+    margin-left: 12px;
+    margin-bottom: 20px;
 }
