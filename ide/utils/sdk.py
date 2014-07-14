@@ -110,6 +110,17 @@ def generate_jshint_file(project):
 """
 
 
+def generate_manifest(project, resources):
+    if project.project_type == 'native':
+        return generate_v2_manifest(project, resources)
+    elif project.project_type == 'pebblejs':
+        return generate_pebblejs_manifest(project, resources)
+    elif project.project_type == 'simplyjs':
+        return generate_simplyjs_manifest(project)
+    else:
+        raise Exception("Unknown project type %s" % project.project_type)
+
+
 def generate_v2_manifest(project, resources):
     return dict_to_pretty_json(generate_v2_manifest_dict(project, resources))
 
@@ -127,10 +138,21 @@ def generate_v2_manifest_dict(project, resources):
         },
         'appKeys': json.loads(project.app_keys),
         'resources': generate_resource_dict(project, resources),
-        'capabilities': project.app_capabilities.split(',')
+        'capabilities': project.app_capabilities.split(','),
+        'projectType': 'native'
     }
     return manifest
 
+
+def generate_manifest_dict(project, resources):
+    if project.project_type == 'native':
+        return generate_v2_manifest_dict(project, resources)
+    elif project.project_type == 'simplyjs':
+        return generate_simplyjs_manifest_dict(project)
+    elif project.project_type == 'pebblejs':
+        return generate_pebblejs_manifest_dict(project, resources)
+    else:
+        raise Exception("Unknown project type %s" % project.project_type)
 
 def generate_resource_map(project, resources):
     return dict_to_pretty_json(generate_resource_dict(project, resources))
@@ -141,6 +163,17 @@ def dict_to_pretty_json(d):
 
 
 def generate_resource_dict(project, resources):
+    if project.project_type == 'native':
+        return generate_v2_resource_dict(resources)
+    elif project.project_type == 'simplyjs':
+        return generate_simplyjs_resource_dict()
+    elif project.project_type == 'pebblejs':
+        return generate_pebblejs_resource_dict(resources)
+    else:
+        raise Exception("Unknown project type %s" % project.project_type)
+
+
+def generate_v2_resource_dict(resources):
     resource_map = {'media': []}
 
     for resource in resources:
@@ -160,6 +193,64 @@ def generate_resource_dict(project, resources):
     return resource_map
 
 
+def generate_simplyjs_resource_dict():
+    return {
+        "media": [
+            {
+                "menuIcon": True,
+                "type": "png",
+                "name": "IMAGE_MENU_ICON",
+                "file": "images/menu_icon.png"
+            }, {
+                "type": "png",
+                "name": "IMAGE_LOGO_SPLASH",
+                "file": "images/logo_splash.png"
+            }, {
+                "type": "font",
+                "name": "MONO_FONT_14",
+                "file": "fonts/UbuntuMono-Regular.ttf"
+            }
+        ]
+    }
+
+
+def generate_pebblejs_resource_dict(resources):
+    media = [
+        {
+            "menuIcon": True,
+            "type": "png",
+            "name": "IMAGE_MENU_ICON",
+            "file": "images/menu_icon.png"
+        }, {
+            "type": "png",
+            "name": "IMAGE_LOGO_SPLASH",
+            "file": "images/logo_splash.png"
+        }, {
+            "type": "png",
+            "name": "IMAGE_TILE_SPLASH",
+            "file": "images/tile_splash.png"
+        }, {
+            "type": "font",
+            "name": "MONO_FONT_14",
+            "file": "fonts/UbuntuMono-Regular.ttf"
+        }
+    ]
+
+    media.extend({
+        'type': x.kind,
+        'file': x.path,
+        'name': re.sub(r'[^A-Z0-9_]', '_', x.path.upper())
+    } for x in resources if x.kind == 'png')
+
+    return {
+        'media': media
+    }
+
+
+def generate_simplyjs_manifest(project):
+    return dict_to_pretty_json(generate_simplyjs_manifest_dict(project))
+
+
 def generate_simplyjs_manifest_dict(project):
     manifest = {
         "uuid": project.app_uuid,
@@ -173,26 +264,15 @@ def generate_simplyjs_manifest_dict(project):
             "watchface": project.app_is_watchface
         },
         "appKeys": {},
-        "resources": {
-            "media": [
-                {
-                    "menuIcon": True,
-                    "type": "png",
-                    "name": "IMAGE_MENU_ICON",
-                    "file": "images/menu_icon.png"
-                }, {
-                    "type": "png",
-                    "name": "IMAGE_LOGO_SPLASH",
-                    "file": "images/logo_splash.png"
-                }, {
-                    "type": "font",
-                    "name": "MONO_FONT_14",
-                    "file": "fonts/UbuntuMono-Regular.ttf"
-                }
-            ]
-        }
+        "resources": generate_simplyjs_resource_dict(),
+        "projectType": "simplyjs"
     }
     return manifest
+
+
+def generate_pebblejs_manifest(project, resources):
+    return dict_to_pretty_json(generate_pebblejs_manifest_dict(project, resources))
+
 
 def generate_pebblejs_manifest_dict(project, resources):
     manifest = {
@@ -207,34 +287,8 @@ def generate_pebblejs_manifest_dict(project, resources):
             "watchface": project.app_is_watchface
         },
         "appKeys": {},
-        "resources": {
-            "media": [
-                {
-                    "menuIcon": True,
-                    "type": "png",
-                    "name": "IMAGE_MENU_ICON",
-                    "file": "images/menu_icon.png"
-                }, {
-                    "type": "png",
-                    "name": "IMAGE_LOGO_SPLASH",
-                    "file": "images/logo_splash.png"
-                }, {
-                    "type": "png",
-                    "name": "IMAGE_TILE_SPLASH",
-                    "file": "images/tile_splash.png"
-                }, {
-                    "type": "font",
-                    "name": "MONO_FONT_14",
-                    "file": "fonts/UbuntuMono-Regular.ttf"
-                }
-            ]
-        }
+        "resources": generate_pebblejs_resource_dict(resources),
+        "projectType": "pebblejs"
     }
-
-    manifest['resources']['media'].extend({
-        'type': x.kind,
-        'file': x.path,
-        'name': re.sub(r'[^A-Z0-9_]', '_', x.path.upper())
-    } for x in resources if x.kind == 'png')
 
     return manifest

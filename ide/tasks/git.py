@@ -14,8 +14,7 @@ from ide.models.project import Project
 from ide.tasks import do_import_archive, run_compile
 from ide.utils.git import git_sha, git_blob
 from ide.utils.project import find_project_root
-from ide.utils.sdk import generate_resource_dict, generate_v2_manifest_dict, dict_to_pretty_json, generate_v2_manifest,\
-    generate_wscript_file
+from ide.utils.sdk import generate_manifest_dict, generate_manifest, generate_wscript_file
 from utils.keen_helper import send_keen_event
 
 __author__ = 'katharine'
@@ -120,6 +119,7 @@ def github_push(user, commit_message, repo_name, project):
     resource_root = root + 'resources/'
 
     for res in resources:
+
         repo_path = resource_root + res.path
         if repo_path in next_tree:
             content = res.get_contents()
@@ -146,7 +146,7 @@ def github_push(user, commit_message, repo_name, project):
         their_manifest_dict = {}
         their_res_dict = {'media': []}
 
-    our_manifest_dict = generate_v2_manifest_dict(project, resources)
+    our_manifest_dict = generate_manifest_dict(project, resources)
     our_res_dict = our_manifest_dict['resources']
 
     if our_res_dict != their_res_dict:
@@ -164,12 +164,12 @@ def github_push(user, commit_message, repo_name, project):
     if their_manifest_dict != our_manifest_dict:
         if remote_manifest_path in next_tree:
             next_tree[remote_manifest_path]._InputGitTreeElement__sha = NotSet
-            next_tree[remote_manifest_path]._InputGitTreeElement__content = generate_v2_manifest(project, resources)
+            next_tree[remote_manifest_path]._InputGitTreeElement__content = generate_manifest(project, resources)
         else:
             next_tree[remote_manifest_path] = InputGitTreeElement(path=remote_manifest_path, mode='100644', type='blob',
-                                                                  content=generate_v2_manifest(project, resources))
+                                                                  content=generate_manifest(project, resources))
 
-    if remote_wscript_path not in next_tree:
+    if project.project_type == 'native' and remote_wscript_path not in next_tree:
         next_tree[remote_wscript_path] = InputGitTreeElement(path=remote_wscript_path, mode='100644', type='blob',
                                                              content=generate_wscript_file(project, True))
         has_changed = True

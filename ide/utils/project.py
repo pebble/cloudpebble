@@ -21,7 +21,7 @@ def find_project_root(contents):
         for source_dir in contents:
             if source_dir[:dir_end] != base_dir:
                 continue
-            if source_dir[-2:] != '.c':
+            if not source_dir.endswith('.c') and not source_dir.endswith('.js'):
                 continue
             if source_dir[dir_end:dir_end+len(SRC_DIR)] != SRC_DIR:
                 continue
