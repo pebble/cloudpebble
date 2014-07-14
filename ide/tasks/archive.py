@@ -11,8 +11,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import SuspiciousOperation
 from django.db import transaction
 from ide.utils.project import find_project_root
-from ide.utils.sdk import generate_resource_map, generate_v2_manifest, generate_wscript_file, generate_jshint_file, \
-    dict_to_pretty_json
+from ide.utils.sdk import generate_manifest, generate_wscript_file, generate_jshint_file, dict_to_pretty_json
 from utils.keen_helper import send_keen_event
 
 from ide.models.files import SourceFile, ResourceFile, ResourceIdentifier
@@ -34,11 +33,12 @@ def add_project_to_archive(z, project, prefix=''):
         res_path = 'resources'
         z.writestr('%s/%s/%s' % (prefix, res_path, resource.path), resource.get_contents())
 
-    manifest = generate_v2_manifest(project, resources)
+    manifest = generate_manifest(project, resources)
     z.writestr('%s/appinfo.json' % prefix, manifest)
-    # This file is always the same, but needed to build.
-    z.writestr('%s/wscript' % prefix, generate_wscript_file(project, for_export=True))
-    z.writestr('%s/jshintrc' % prefix, generate_jshint_file(project))
+    if project.project_type == 'native':
+        # This file is always the same, but needed to build.
+        z.writestr('%s/wscript' % prefix, generate_wscript_file(project, for_export=True))
+        z.writestr('%s/jshintrc' % prefix, generate_jshint_file(project))
 
 
 @task(acks_late=True)
@@ -147,6 +147,9 @@ def do_import_archive(project_id, archive, delete_project=False):
                             project.app_is_watchface = m.get('watchapp', {}).get('watchface', False)
                             project.app_capabilities = ','.join(m.get('capabilities', []))
                             project.app_keys = dict_to_pretty_json(m.get('appKeys', {}))
+                            project.project_type = m.get('projectType', 'native')
+                            if project.project_type not in [x[0] for x in Project.PROJECT_TYPES]:
+                                raise Exception("Illegal project type %s" % project.project_type)
                             media_map = m['resources']['media']
 
                             resources = {}
@@ -154,6 +157,10 @@ def do_import_archive(project_id, archive, delete_project=False):
                                 kind = resource['type']
                                 def_name = resource['name']
                                 file_name = resource['file']
+                                # Pebble.js and simply.js both have some internal resources that we don't import.
+                                if project.project_type in {'pebblejs', 'simplyjs'}:
+                                    if def_name in {'MONO_FONT_14', 'IMAGE_MENU_ICON', 'IMAGE_LOGO_SPLASH', 'IMAGE_TILE_SPLASH'}:
+                                        continue
                                 regex = resource.get('characterRegex', None)
                                 tracking = resource.get('trackingAdjust', None)
                                 is_menu_icon = resource.get('menuIcon', False)
@@ -170,7 +177,7 @@ def do_import_archive(project_id, archive, delete_project=False):
 
                         elif filename.startswith(SRC_DIR):
                             if (not filename.startswith('.')) and (filename.endswith('.c') or filename.endswith('.h') or filename.endswith('.js')):
-                                base_filename = os.path.basename(filename) if not filename.endswith('js/pebble-js-app.js') else 'js/pebble-js-app.js'
+                                base_filename = filename[len(SRC_DIR):]
                                 source = SourceFile.objects.create(project=project, file_name=base_filename)
                                 with z.open(entry.filename) as f:
                                     source.save_file(f.read().decode('utf-8'))
