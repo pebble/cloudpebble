@@ -25,8 +25,8 @@ __author__ = 'katharine'
 @login_required
 def project_info(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
-    source_files = SourceFile.objects.filter(project=project)
-    resources = ResourceFile.objects.filter(project=project)
+    source_files = SourceFile.objects.filter(project=project).order_by('file_name')
+    resources = ResourceFile.objects.filter(project=project).order_by('file_name')
     output = {
         'type': project.project_type,
         'success': True,
