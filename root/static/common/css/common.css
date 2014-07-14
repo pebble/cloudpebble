@@ -562,3 +562,9 @@ body.backdrop .main-container {
 #whats-new p {
     padding: 0;
 }
+
+input:invalid,
+textarea:invalid,
+select:invalid {
+  color: #b2171e;;
+}
