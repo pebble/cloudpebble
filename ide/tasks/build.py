@@ -117,9 +117,13 @@ def run_compile(build_result):
         cwd = os.getcwd()
         success = False
         output = 'Failed to get output'
+        build_start_time = None
+        build_end_time = None
         try:
             os.chdir(base_dir)
+            build_start_time = now()
             output = subprocess.check_output([settings.PEBBLE_TOOL, "build"], stderr=subprocess.STDOUT, preexec_fn=_set_resource_limits)
+            build_end_time = now()
         except subprocess.CalledProcessError as e:
             output = e.output
             print output
@@ -155,21 +159,30 @@ def run_compile(build_result):
                         build_result.save_debug_info(debug_info)
 
                 build_result.save_pbw(temp_file)
-                send_keen_event(['cloudpebble', 'sdk'], 'app_build_succeeded', data={
-                    'data': {
-                        'cloudpebble_build_id': build_result.id
-                    }
-                }, project=project)
-            else:
-                send_keen_event(['cloudpebble', 'sdk'], 'app_build_failed', data={
-                    'data': {
-                        'cloudpebble_build_id': build_result.id
-                    }
-                }, project=project)
             build_result.save_build_log(output)
             build_result.state = BuildResult.STATE_SUCCEEDED if success else BuildResult.STATE_FAILED
             build_result.finished = now()
             build_result.save()
+
+            build_time = None
+            if build_start_time is not None and build_end_time is not None:
+                build_time = (build_end_time - build_start_time).total_seconds()
+            job_run_time = (build_result.finished - build_result.started).total_seconds()
+
+            data = {
+                'data': {
+                    'cloudpebble': {
+                        'build_id': build_result.id,
+                        'job_run_time': job_run_time,
+                    },
+                    'build_time': build_time,
+                }
+            }
+
+            event_name = 'app_build_succeeded' if success else 'app_build_failed'
+
+            send_keen_event(['cloudpebble', 'sdk'], event_name, data, project=project)
+
     except Exception as e:
         print "Build failed due to internal error: %s" % e
         traceback.print_exc()
