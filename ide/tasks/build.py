@@ -117,13 +117,10 @@ def run_compile(build_result):
         cwd = os.getcwd()
         success = False
         output = 'Failed to get output'
-        build_start_time = None
-        build_end_time = None
+        build_start_time = now()
         try:
             os.chdir(base_dir)
-            build_start_time = now()
             output = subprocess.check_output([settings.PEBBLE_TOOL, "build"], stderr=subprocess.STDOUT, preexec_fn=_set_resource_limits)
-            build_end_time = now()
         except subprocess.CalledProcessError as e:
             output = e.output
             print output
@@ -135,6 +132,7 @@ def run_compile(build_result):
                 success = False
                 print "Success was a lie."
         finally:
+            build_end_time = now()
             os.chdir(cwd)
 
             if success:
@@ -164,18 +162,13 @@ def run_compile(build_result):
             build_result.finished = now()
             build_result.save()
 
-            build_time = None
-            if build_start_time is not None and build_end_time is not None:
-                build_time = (build_end_time - build_start_time).total_seconds()
-            job_run_time = (build_result.finished - build_result.started).total_seconds()
-
             data = {
                 'data': {
                     'cloudpebble': {
                         'build_id': build_result.id,
-                        'job_run_time': job_run_time,
+                        'job_run_time': (build_result.finished - build_result.started).total_seconds(),
                     },
-                    'build_time': build_time,
+                    'build_time': (build_end_time - build_start_time).total_seconds(),
                 }
             }
 
