@@ -76,6 +76,7 @@ console log
 
 script
     export PATH="$PATH:/home/vagrant/arm-cs-tools/bin:/home/vagrant/sdk2/bin"
+    export DEBUG=yes
     exec /usr/bin/python manage.py runserver 0.0.0.0:8000
 end script
 
@@ -97,6 +98,7 @@ console log
 
 script
     export PATH="$PATH:/home/vagrant/arm-cs-tools/bin:/home/vagrant/sdk2/bin"
+    export DEBUG=yes
     exec /usr/bin/python manage.py celery worker --autoreload --loglevel=info --no-color
 end script
 
