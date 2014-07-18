@@ -217,7 +217,7 @@ def generate_simplyjs_resource_dict():
 def generate_pebblejs_resource_dict(resources):
     media = [
         {
-            "menuIcon": True,
+            "menuIcon": True,  # This must be the first entry; we adjust it later.
             "type": "png",
             "name": "IMAGE_MENU_ICON",
             "file": "images/menu_icon.png"
@@ -236,11 +236,20 @@ def generate_pebblejs_resource_dict(resources):
         }
     ]
 
-    media.extend({
-        'type': x.kind,
-        'file': x.path,
-        'name': re.sub(r'[^A-Z0-9_]', '_', x.path.upper())
-    } for x in resources if x.kind == 'png')
+    for resource in resources:
+        if resource.kind != 'png':
+            continue
+
+        d = {
+            'type': resource.kind,
+            'file': resource.path,
+            'name': re.sub(r'[^A-Z0-9_]', '_', resource.path.upper()),
+        }
+        if resource.is_menu_icon:
+            d['menuIcon'] = True
+            del media[0]['menuIcon']
+
+        media.append(d)
 
     return {
         'media': media
