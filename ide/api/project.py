@@ -212,15 +212,18 @@ def save_project_settings(request, project_id):
             project.app_jshint = bool(int(request.POST['app_jshint']))
 
             menu_icon = request.POST['menu_icon']
+            old_icon = project.menu_icon
             if menu_icon != '':
                 menu_icon = int(menu_icon)
-                old_icon = project.menu_icon
                 if old_icon is not None:
                     old_icon.is_menu_icon = False
                     old_icon.save()
                 icon_resource = project.resources.filter(id=menu_icon)[0]
                 icon_resource.is_menu_icon = True
                 icon_resource.save()
+            elif old_icon is not None:
+                old_icon.is_menu_icon = False
+                old_icon.save()
 
             project.save()
     except IntegrityError as e:
