@@ -6,120 +6,118 @@
      * @constructor
      */
     IB.Layer = function(id) {
-        var self = this;
-        var mNode = null;
-        var mID = null;
-        var mPos = new IB.Pos();
-        var mSize = new IB.Size();
-
         _.extend(this, Backbone.Events);
-
+        this._pos = null;
+        this._size = null;
+        this._node = null;
+        this._ID = id || ("layer_" + ++sLayerCounter);
+        this._node = $('<div class="ib-layer">');
+        this._node.data('object', this); // reference cycles? pfft.
+        this._node.css({
+            position: 'absolute'
+        });
+        this.init();
+    };
+    IB.Layer.prototype = {
         /**
          * Initialises the layer.
-         * @param {String} [id] - ID/name of the layer. Defaults to "layer_n", for some unique n.
+         * @param {String} - ID/name of the layer. Defaults to "layer_n", for some unique n.
          */
-        function init(id) {
-            mNode = $('<div class="ib-layer">');
-            mNode.data('object', self); // reference cycles? pfft.
-            mNode.css({
-                position: 'absolute',
-                backgroundColor: 'white'
-            });
-            mID = id || ("layer_" + ++sLayerCounter)
-        }
+        init: function() {
+            this._node.css('background-color', 'white');
+            return this;
+        },
 
         /**
          * Generates a C declaration for the layer.
          * @returns {string[]} C code
          */
-        this.generateDeclaration = function() {
-            return ["static Layer *" + mID + ";"];
-        };
+        generateDeclaration: function() {
+            return ["static Layer *" + this._ID + ";"];
+        },
 
         /**
          * Generates a GRect indicating the frame of the layer
          * @returns {string[]} C code
          */
-        this.generateRect = function() {
-            return ["GRect(" + mPos.x + ", " + mPos.y + ", " + mSize.w + ", " + mSize.h + ")"];
-        };
+        generateRect: function() {
+            return ["GRect(" + this._pos.x + ", " + this._pos.y + ", " + this._size.w + ", " + this._size.h + ")"];
+        },
 
         /**
          * Generates an initialiser to create the layer.
          * @returns {string[]} C code
          */
-        this.generateInitialiser = function() {
-            return [mID + " = layer_create(" + self.generateRect() + ");"];
-        };
+        generateInitialiser: function() {
+            return [this._ID + " = layer_create(" + this.generateRect() + ");"];
+        },
 
         /**
          * Generates a destructor for the layer
          * @returns {string[]} C code
          */
-        this.generateDestructor = function() {
-            return ["layer_destroy(" + mID + ");"];
-        };
+        generateDestructor: function() {
+            return ["layer_destroy(" + this._ID + ");"];
+        },
 
         /**
          * Returns the size of the layer.
          * @returns {IB.Size}
          */
-        this.getSize = function() {
-            return _.clone(mSize);
-        };
+        getSize: function() {
+            return _.clone(this._size);
+        },
 
         /**
          * Sets the size of the layer.
          * @param {Number} w - layer width
          * @param {Number} h - layer height
          */
-        this.setSize = function(w, h) {
-            mSize = new IB.Size(w, h);
-            self.trigger('size', self.getSize());
-        };
+        setSize: function(w, h) {
+            this._size = new IB.Size(w, h);
+            this.trigger('size', this.getSize());
+        },
 
         /**
          * Returns the position of the layer.
          * @returns {IB.Pos}
          */
-        this.getPos = function() {
-            return _.clone(mPos);
-        };
+        getPos: function() {
+            return _.clone(this._pos);
+        },
 
         /**
          * Sets the position of the layer.
          * @param {Number} x
          * @param {Number} y
          */
-        this.setPos = function(x, y) {
-            mPos = new IB.Pos(x, y);
-            self.trigger('position', self.getPos());
-        };
+        setPos: function(x, y) {
+            this._pos = new IB.Pos(x, y);
+            this.trigger('position', this.getPos());
+        },
 
         /**
          *
          * @returns {string}
          */
-        this.getID = function() {
-            return mID;
-        }
+        getID: function() {
+            return this._ID;
+        },
 
         /**
          * Renders the layer. Note that it can only be displayed once.
          * @param {jQuery|HTMLElement} [parent] Node to render the layer into.
          */
-        this.render = function(parent) {
+        render: function(parent) {
             if(parent) {
-                mNode.appendTo(parent);
+                this._node.appendTo(parent);
             }
-            mNode.css({
-                height: mSize.h,
-                width: mSize.w,
-                top: mPos.y,
-                left: mPos.x
+            this._node.css({
+                height: this._size.h,
+                width: this._size.w,
+                top: this._pos.y,
+                left: this._pos.x
             });
-        };
-
-        init();
+        }
     };
 })();

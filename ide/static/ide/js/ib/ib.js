@@ -13,7 +13,7 @@
             layer.setSize(50, 50);
             mCanvas.addLayer(layer);
 
-            var layer2 = new IB.Layer("other_layer");
+            var layer2 = new IB.TextLayer("other_layer");
             layer2.setPos(80, 80);
             layer2.setSize(20, 20);
             mCanvas.addLayer(layer2);

@@ -98,7 +98,6 @@
         }
 
         function handleDrag(e) {
-            console.log("dragging");
             // If it's a layer, set its position.
             if(mMouseDownNode) {
                 var mousePos = eventToPosition(e);
@@ -108,11 +107,11 @@
                     object.setPos(mousePos.x - mMouseNodeOffset.x, mousePos.y - mMouseNodeOffset.y);
                     object.render();
                 } else if(object instanceof IB.Resizer) {
-                    var size = object.getLayer().getSize();
-                    var pos = object.getLayer().getPos();
+                    var layer = object.getLayer();
+                    var size = layer.getSize();
+                    var pos = layer.getPos();
                     var resizeX = mMouseDownNode.data('resize-x');
                     var resizeY = mMouseDownNode.data('resize-y');
-                    console.log(size, pos, resizeX, resizeY);
 
                     if(resizeX == 1) {
                         size.w = Math.max(size.w + (mousePos.x - mLastCoords.x), 0);
@@ -127,9 +126,9 @@
                         size.h = Math.max(size.h - (mousePos.y - mLastCoords.y), 0);
                         pos.y = pos.y - (mLastCoords.y - mousePos.y);
                     }
-                    object.getLayer().setSize(size.w, size.h);
-                    object.getLayer().setPos(pos.x, pos.y);
-                    object.getLayer().render();
+                    layer.setSize(size.w, size.h);
+                    layer.setPos(pos.x, pos.y);
+                    layer.render();
                 }
             }
             mLastCoords = eventToPosition(e);
