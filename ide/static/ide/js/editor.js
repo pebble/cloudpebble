@@ -321,6 +321,7 @@ CloudPebble.Editor = (function() {
                 var save_btn = $('<button class="btn save-btn" title="Save"></button>');
                 var discard_btn = $('<button class="btn reload-btn" title="Reload"></button>');
                 var delete_btn = $('<button class="btn delete-btn" title="Delete"></button>');
+                var ib_btn = $('<button class="btn ib-btn" title="UI Editor"></button>');
                 var error_area = $('<div>');
 
                 save_btn.click(function() { save(); });
@@ -371,10 +372,15 @@ CloudPebble.Editor = (function() {
                     });
                 });
 
+                ib_btn.click(function() {
+                    CloudPebble.UIEditor.Show(code_mirror.getValue());
+                });
+
                 button_holder.append(error_area);
                 button_holder.append(run_btn);
                 button_holder.append(save_btn);
                 button_holder.append(discard_btn);
+                button_holder.append(ib_btn);
                 // You must have an app.js in pebblejs projects.
                 if(CloudPebble.ProjectInfo.type != 'pebblejs' || file.name != 'app.js') {
                     button_holder.append(delete_btn);

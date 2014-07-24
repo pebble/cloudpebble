@@ -504,6 +504,22 @@ table.build-results tr.pending .build-state {
     margin-right: 20px;
 }
 
+/* UI Editor pane */
+
+.ui-canvas {
+    border: 4px solid gray;
+    width: 288px; /* PEBBLE_WIDTH*2 */
+    height: 336px; /* PEBBLE_HEIGHT*2  */
+    float: left;
+}
+
+.ui-thingies {
+    width: 400px;
+    height: 100%;
+    padding-left: 20px;
+    float: left;
+}
+
 /* Old stuff. */
 
 .CodeMirror-hints {
