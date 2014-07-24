@@ -2,7 +2,7 @@
     var sLayerCounter = 0;
     /**
      * Creates a generic layer.
-     * @param {string} id The ID of the layer (to be used as a C identifier)
+     * @param {string} [id] The ID of the layer (to be used as a C identifier)
      * @constructor
      */
     IB.Layer = function(id) {
@@ -12,13 +12,15 @@
         var mPos = new IB.Pos();
         var mSize = new IB.Size();
 
+        _.extend(this, Backbone.Events);
+
         /**
          * Initialises the layer.
          * @param {String} [id] - ID/name of the layer. Defaults to "layer_n", for some unique n.
          */
         function init(id) {
             mNode = $('<div class="ib-layer">');
-            mNode.data('layer', self); // reference cycles? pfft.
+            mNode.data('object', self); // reference cycles? pfft.
             mNode.css({
                 position: 'absolute',
                 backgroundColor: 'white'
@@ -73,6 +75,7 @@
          */
         this.setSize = function(w, h) {
             mSize = new IB.Size(w, h);
+            self.trigger('size', self.getSize());
         };
 
         /**
@@ -90,17 +93,25 @@
          */
         this.setPos = function(x, y) {
             mPos = new IB.Pos(x, y);
+            self.trigger('position', self.getPos());
         };
 
-
+        /**
+         *
+         * @returns {string}
+         */
+        this.getID = function() {
+            return mID;
+        }
 
         /**
          * Renders the layer. Note that it can only be displayed once.
-         * @param {jQuery|HTMLElement} parent Node to render the layer into.
+         * @param {jQuery|HTMLElement} [parent] Node to render the layer into.
          */
         this.render = function(parent) {
-            parent = $(parent);
-            mNode.appendTo(parent);
+            if(parent) {
+                mNode.appendTo(parent);
+            }
             mNode.css({
                 height: mSize.h,
                 width: mSize.w,

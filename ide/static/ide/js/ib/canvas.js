@@ -16,6 +16,11 @@
         var mMouseDownCoords = null;
         var mMouseDownNode = null;
         var mMouseNodeOffset = null;
+        var mLastCoords = null;
+
+        // Selection management
+        var mSelectedLayer = null;
+        var mResizer = null;
 
         function init(parent) {
             mNode = $('<div class="ib-canvas">');
@@ -58,7 +63,7 @@
 
         function pageCoordsToPosition(x, y) {
             var me = mNode.offset();
-            return new IB.Pos((x - me.left) / mScaleX, (y - me.top) / mScaleY);
+            return new IB.Pos(Math.round((x - me.left) / mScaleX), Math.round((y - me.top) / mScaleY));
         }
 
         function handleMouseDown(e) {
@@ -67,6 +72,7 @@
             mNode.on('mousemove', handleDrag);
             $('body').one('mouseup', handlePageMouseUp);
             mMouseDownCoords = eventToPosition(e);
+            mLastCoords = _.clone(mMouseDownCoords);
             mMouseDownNode = $(e.target);
             console.log(mMouseDownNode);
             if(mMouseDownNode) {
@@ -79,7 +85,7 @@
         function handleMouseUp(e) {
             var mouseUpCoords = eventToPosition(e);
             if(mouseUpCoords.x == mMouseDownCoords.x && mouseUpCoords.y == mMouseDownCoords.y) {
-                handleClick(e);
+                handleClick();
             }
         }
 
@@ -87,6 +93,8 @@
             mNode.off('mousemove', handleDrag);
             mMouseDownCoords = null;
             mMouseDownNode = null;
+            mMouseNodeOffset = null;
+            mLastCoords = null;
         }
 
         function handleDrag(e) {
@@ -94,16 +102,58 @@
             // If it's a layer, set its position.
             if(mMouseDownNode) {
                 var mousePos = eventToPosition(e);
-                var layer = mMouseDownNode.data('layer');
-                if(layer && layer instanceof IB.Layer) {
-                    layer.setPos(mousePos.x - mMouseNodeOffset.x, mousePos.y - mMouseNodeOffset.y);
-                    layer.render(mNode);
+                var object = mMouseDownNode.data('object');
+                if(!object) return;
+                if(object instanceof IB.Layer) {
+                    object.setPos(mousePos.x - mMouseNodeOffset.x, mousePos.y - mMouseNodeOffset.y);
+                    object.render();
+                } else if(object instanceof IB.Resizer) {
+                    var size = object.getLayer().getSize();
+                    var pos = object.getLayer().getPos();
+                    var resizeX = mMouseDownNode.data('resize-x');
+                    var resizeY = mMouseDownNode.data('resize-y');
+                    console.log(size, pos, resizeX, resizeY);
+
+                    if(resizeX == 1) {
+                        size.w = Math.max(size.w + (mousePos.x - mLastCoords.x), 0);
+                    } else if(resizeX == -1) {
+                        size.w = Math.max(size.w - (mousePos.x - mLastCoords.x), 0);
+                        pos.x = pos.x - (mLastCoords.x - mousePos.x);
+                    }
+
+                    if(resizeY == 1) {
+                        size.h = Math.max(size.h + (mousePos.y - mLastCoords.y), 0);
+                    } else if(resizeY == -1) {
+                        size.h = Math.max(size.h - (mousePos.y - mLastCoords.y), 0);
+                        pos.y = pos.y - (mLastCoords.y - mousePos.y);
+                    }
+                    object.getLayer().setSize(size.w, size.h);
+                    object.getLayer().setPos(pos.x, pos.y);
+                    object.getLayer().render();
+                }
+            }
+            mLastCoords = eventToPosition(e);
+        }
+
+        function handleClick() {
+            if(mMouseDownNode) {
+                if(mMouseDownNode == mNode) {
+                    mSelectedLayer = null;
+                } else {
+                    var object = mMouseDownNode.data('object');
+                    if(object && object instanceof IB.Layer) {
+                        selectLayer(object);
+                    }
                 }
             }
         }
 
-        function handleClick(e) {
-            console.log("clicking");
+        function selectLayer(layer) {
+            if(mResizer != null) {
+                mResizer.destroy();
+            }
+            mResizer = new IB.Resizer(mNode, layer);
+            mSelectedLayer = layer;
         }
 
         /**

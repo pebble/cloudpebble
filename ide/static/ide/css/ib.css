@@ -1,0 +1,56 @@
+.ib-handle {
+    position: absolute;
+    background-color: white;
+    border: 1px solid black;
+    height: 4px;
+    width: 4px;
+    pointer-events: auto;
+}
+
+.ib-handle-upper-left {
+    cursor: nwse-resize;
+    top: -3.5px;
+    left: -3.5px;
+}
+
+.ib-handle-upper-middle {
+    cursor: ns-resize;
+    top: -3.5px;
+    left: calc(50% - 3.5px);
+}
+
+.ib-handle-upper-right {
+    cursor: nesw-resize;
+    top: -3.5px;
+    right: -3.5px;
+}
+
+.ib-handle-middle-left {
+    cursor: ew-resize;
+    top: calc(50% - 3.5px);
+    left: -3.5px;
+}
+
+.ib-handle-middle-right {
+    cursor: ew-resize;
+    top: calc(50% - 3.5px);
+    right: -3.5px;
+}
+
+.ib-handle-lower-left {
+    cursor: nesw-resize;
+    bottom: -3.5px;
+    left: -3.5px;
+}
+
+.ib-handle-lower-middle {
+    cursor: ns-resize;
+    bottom: -3.5px;
+    left: calc(50% - 3.5px);
+}
+
+.ib-handle-lower-right {
+    cursor: nwse-resize;
+    bottom: -3.5px;
+    right: -3.5px;
+}
