@@ -78,7 +78,16 @@
             if(mMouseDownNode) {
                 var nodePos = offsetToPosition(mMouseDownNode.offset());
                 mMouseNodeOffset = {x: mMouseDownCoords.x - nodePos.x, y: mMouseDownCoords.y - nodePos.y};
-                console.log(mMouseNodeOffset);
+
+                // We want to fiddle selections immediately on mousedown.
+                if(mMouseDownNode[0] == mNode[0]) {
+                    selectLayer(null);
+                } else {
+                    var object = mMouseDownNode.data('object');
+                    if(object && object instanceof IB.Layer) {
+                        selectLayer(object);
+                    }
+                }
             }
         }
 
@@ -136,22 +145,17 @@
 
         function handleClick() {
             if(mMouseDownNode) {
-                if(mMouseDownNode == mNode) {
-                    mSelectedLayer = null;
-                } else {
-                    var object = mMouseDownNode.data('object');
-                    if(object && object instanceof IB.Layer) {
-                        selectLayer(object);
-                    }
-                }
             }
         }
 
         function selectLayer(layer) {
             if(mResizer != null) {
                 mResizer.destroy();
+                mResizer = null;
             }
-            mResizer = new IB.Resizer(mNode, layer);
+            if(layer) {
+                mResizer = new IB.Resizer(mNode, layer);
+            }
             mSelectedLayer = layer;
         }
 

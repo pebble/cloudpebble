@@ -17,13 +17,10 @@
         function init() {
             mNode = $('<div class="ib-resizer">')
                 .css({
-                    border: '1px dashed black',
                     width: mLayer.getSize().w - 2,
                     height: mLayer.getSize().h - 2,
-                    position: 'absolute',
                     top: mLayer.getPos().y,
-                    left: mLayer.getPos().x,
-                    'pointer-events': 'none'
+                    left: mLayer.getPos().x
                 })
                 .data('object', self)
                 .appendTo(mParent);

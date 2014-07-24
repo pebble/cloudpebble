@@ -1,3 +1,9 @@
+.ib-resizer {
+    border: 1px dashed black;
+    position: absolute;
+    pointer-events: none;
+}
+
 .ib-handle {
     position: absolute;
     background-color: white;
