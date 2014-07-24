@@ -19,9 +19,18 @@
     IB.Size = function(w, h) {
         this.w = w || 0;
         this.h = h || 0;
-    }
+    };
 
-    IB.ColourWhite = 'GColorWhite';
-    IB.ColourBlack = 'GColorBlack';
-    IB.ColourClear = 'GColorClear';
+    IB.Colour = function(name, css) {
+        this.name = name;
+        this.css = css;
+
+        this.toString = function() {
+            return this.name;
+        };
+    };
+
+    IB.ColourWhite = new IB.Colour('GColorWhite', 'white');
+    IB.ColourBlack = new IB.Colour('GColorBlack', 'black');
+    IB.ColourClear = new IB.Colour('GColorClear', 'rgba(0, 0, 0, 0)');
 })();

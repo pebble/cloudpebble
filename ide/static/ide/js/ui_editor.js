@@ -12,7 +12,7 @@ CloudPebble.UIEditor = (function() {
 
         function init(pane, source) {
             mPane = pane;
-            mIB = new IB(mPane.find('.ui-canvas'), mPane.find(), source);
+            mIB = new IB(mPane.find('.ui-canvas'), mPane.find('#ui-properties'), mPane.find('#ui-toolkit'), source);
         }
 
         init(pane, source);

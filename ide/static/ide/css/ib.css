@@ -1,3 +1,15 @@
+/* Canvas */
+
+.ib-canvas {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: default;
+}
+
+/* Resizer */
+
 .ib-resizer {
     border: 1px dashed black;
     position: absolute;
@@ -59,4 +71,10 @@
     cursor: nwse-resize;
     bottom: -3.5px;
     right: -3.5px;
+}
+
+/* Toolkit list */
+
+.ib-toolkit-layer {
+    cursor: pointer;
 }

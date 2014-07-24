@@ -81,11 +81,11 @@
 
                 // We want to fiddle selections immediately on mousedown.
                 if(mMouseDownNode[0] == mNode[0]) {
-                    selectLayer(null);
+                    self.selectLayer(null);
                 } else {
                     var object = mMouseDownNode.data('object');
                     if(object && object instanceof IB.Layer) {
-                        selectLayer(object);
+                        self.selectLayer(object);
                     }
                 }
             }
@@ -148,7 +148,7 @@
             }
         }
 
-        function selectLayer(layer) {
+        this.selectLayer = function(layer) {
             if(mResizer != null) {
                 mResizer.destroy();
                 mResizer = null;

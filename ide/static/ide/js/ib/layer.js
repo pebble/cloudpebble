@@ -7,24 +7,22 @@
      */
     IB.Layer = function(id) {
         _.extend(this, Backbone.Events);
-        this._pos = null;
-        this._size = null;
-        this._node = null;
+        this._pos = new IB.Pos(20, 20);
+        this._size = new IB.Size(40, 40);
         this._ID = id || ("layer_" + ++sLayerCounter);
-        this._node = $('<div class="ib-layer">');
-        this._node.data('object', this); // reference cycles? pfft.
-        this._node.css({
-            position: 'absolute'
-        });
+        this._node = $('<div class="ib-layer">')
+                        .data('object', this) // reference cycles? pfft.
+                        .css({
+                            position: 'absolute'
+                        });
         this.init();
     };
+    IB.Layer.layerClass = 'Layer';
     IB.Layer.prototype = {
         /**
          * Initialises the layer.
-         * @param {String} - ID/name of the layer. Defaults to "layer_n", for some unique n.
          */
         init: function() {
-            this._node.css('background-color', 'white');
             return this;
         },
 
@@ -120,4 +118,6 @@
             });
         }
     };
+
+    IB.registry.register(IB.Layer);
 })();
