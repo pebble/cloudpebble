@@ -68,6 +68,7 @@
 
         this.destroy = function() {
             mLayer.off('position', handlePosition);
+            mLayer.off('size', handleSize);
             mNode.remove();
             mParent = null;
             mLayer = null;
