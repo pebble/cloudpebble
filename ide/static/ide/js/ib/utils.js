@@ -21,16 +21,17 @@
         this.h = h || 0;
     };
 
-    IB.Colour = function(name, css) {
+    IB.Colour = function(name, css, display) {
         this.name = name;
         this.css = css;
+        this.display = display;
 
         this.toString = function() {
             return this.name;
         };
     };
 
-    IB.ColourWhite = new IB.Colour('GColorWhite', 'white');
-    IB.ColourBlack = new IB.Colour('GColorBlack', 'black');
-    IB.ColourClear = new IB.Colour('GColorClear', 'rgba(0, 0, 0, 0)');
+    IB.ColourWhite = new IB.Colour('GColorWhite', 'white', 'White');
+    IB.ColourBlack = new IB.Colour('GColorBlack', 'black', 'Black');
+    IB.ColourClear = new IB.Colour('GColorClear', 'rgba(0, 0, 0, 0)', 'Transparent');
 })();

@@ -11,7 +11,11 @@
             this._root.empty().append(groups).appendTo(this._parent);
         },
         destroy: function() {
-            this._parent.empty();
+            _.each(this._layer.getProperties(), function(property) {
+                property.getNode().detach();
+            });
+            this._root.empty();
+            this._root = null;
             this._parent = null;
             this._layer = null;
         },

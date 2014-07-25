@@ -123,11 +123,53 @@
         _generateNode: function() {
             return $('<input type="text" class="ib-property ib-text">')
                 .val(this._value)
-                .keyup(_.bind(this._handleChange, this));
-            return node;
+                .keyup(_.bind(this._handleChange, this))
+                .change(_.bind(this._handleChange, this));
         },
         _handleChange: function() {
             var val = this._node.val();
+            if(val != this._value) {
+                this.setValue(val);
+            }
+        }
+    });
+
+    /**
+     * Represents a colour property.
+     * @param {string} name The name of the property
+     * @param {IB.Colour} value The value of the property
+     * @constructor
+     * @extends {IB.Properties.Property}
+     */
+    IB.Properties.Colour = function(name, value) {
+        Property.call(this, name, value);
+    };
+    IB.Properties.Colour.prototype = Object.create(_super);
+    IB.Properties.Colour.constructor = IB.Properties.Colour;
+    _.extend(IB.Properties.Colour.prototype, {
+        setValue: function(value) {
+            _super.setValue.call(this, value);
+            this._node.val(this._value.name);
+        },
+        _generateNode: function() {
+            return $('<select class="ib-property ib-colour">')
+                .append(this._createColour(IB.ColourWhite))
+                .append(this._createColour(IB.ColourBlack))
+                .append(this._createColour(IB.ColourClear))
+                .val(this._value.name)
+                .change(_.bind(this._handleChange, this));
+        },
+        _createColour: function(colour) {
+            return $('<option>')
+                .attr('value', colour.name)
+                .text(colour.display);
+        },
+        _handleChange: function() {
+            var mapping = {};
+            mapping[IB.ColourWhite.name] = IB.ColourWhite;
+            mapping[IB.ColourBlack.name] = IB.ColourBlack;
+            mapping[IB.ColourClear.name] = IB.ColourClear;
+            var val = mapping[this._node.val()];
             if(val != this._value) {
                 this.setValue(val);
             }

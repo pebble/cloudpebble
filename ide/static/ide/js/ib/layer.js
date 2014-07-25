@@ -38,18 +38,10 @@
             this._ID = value;
         }, this));
 
-        this.on('all', _.bind(this.render, this));
-        this.init();
+        this.on('all', this.render, this);
     };
     IB.Layer.layerClass = 'Layer';
     IB.Layer.prototype = {
-        /**
-         * Initialises the layer.
-         */
-        init: function() {
-            return this;
-        },
-
         /**
          * Generates a C declaration for the layer.
          * @returns {string[]} C code
