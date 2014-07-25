@@ -174,20 +174,24 @@
             layer.render(mNode);
         };
 
+        this.getLayers = function() {
+            return mChildren;
+        };
+
         this.generateDeclaration = function() {
-            return ["static Window *window;"];
+            return ["static Window *s_window;"];
         };
 
         this.generateInitialiser = function() {
-            var initialiser = ["window = window_create();"];
+            var initialiser = ["s_window = window_create();"];
             if(mBackgroundColour != IB.ColourWhite) {
-                initialiser.push("window_set_background_color(window, " + mBackgroundColour + ");");
+                initialiser.push("window_set_background_color(s_window, " + mBackgroundColour + ");");
             }
             return initialiser;
         };
 
         this.generateDestructor = function() {
-            return ["window_destroy(window);"];
+            return ["window_destroy(s_window);"];
         };
 
         init(parent);

@@ -9,6 +9,7 @@
             mCanvas.on('selection', handleSelection);
             mToolkit = new IB.Toolkit(toolkitPane, mCanvas);
             mToolkit.renderList();
+            window.mCanvas = mCanvas;
         }
 
         function handleSelection(selectedLayer) {
@@ -21,6 +22,10 @@
                 mPropertyView.render();
             }
         }
+
+        this.getCanvas = function() {
+            return mCanvas;
+        };
 
         init();
     }

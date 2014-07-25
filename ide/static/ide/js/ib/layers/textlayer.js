@@ -11,6 +11,7 @@
         this._text = "Text layer";
         this._backgroundColour = IB.ColourWhite;
         this._textColour = IB.ColourBlack;
+        this._node.addClass('ib-textlayer');
 
         _.extend(this._properties, {
             text: new IB.Properties.Text("Text", this._text),
@@ -61,6 +62,25 @@
             this._backgroundColour = colour;
             this._properties.bg.setValue(colour);
             this.trigger('backgroundColourChange', colour);
+        },
+        generateDeclaration: function() {
+            return ["static TextLayer *" + this._ID + ";"];
+        },
+        generateInitialiser: function() {
+            var init = [this._ID + " = text_layer_create(" + this.generateRect() + ");"];
+            if(this._backgroundColour != IB.ColourWhite) {
+                init.push("text_layer_set_background_color(" + this._ID + ", " + this._backgroundColour.name + ");");
+            }
+            if(this._textColour != IB.ColourBlack) {
+                init.push("text_layer_set_text_color(" + this._ID + ", " + this._textColour.name + ");");
+            }
+            if(this._text != "") {
+                init.push("text_layer_set_text(" + this._ID + ", \"" + IB.escapeCString(this._text) + "\");");
+            }
+            return init;
+        },
+        generateDestructor: function() {
+            return ["text_layer_destroy(" + this._ID + ");"];
         }
     });
 

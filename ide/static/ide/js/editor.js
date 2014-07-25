@@ -373,7 +373,7 @@ CloudPebble.Editor = (function() {
                 });
 
                 ib_btn.click(function() {
-                    CloudPebble.UIEditor.Show(code_mirror.getValue());
+                    CloudPebble.UIEditor.Show(code_mirror);
                 });
 
                 button_holder.append(error_area);

@@ -2,20 +2,21 @@ CloudPebble.UIEditor = (function() {
     /**
      *
      * @param {jQuery|HTMLElement} pane
-     * @param {String} source
+     * @param {CodeMirror} cm
      * @constructor
      */
-    function UIEditor(pane, source) {
+    function UIEditor(pane, cm) {
         var self = this;
         var mPane = null;
         var mIB = null;
+        var mCodeMirror = cm;
 
-        function init(pane, source) {
+        function init(pane) {
             mPane = pane;
-            mIB = new IB(mPane.find('.ui-canvas'), mPane.find('#ui-properties'), mPane.find('#ui-toolkit'), source);
+            mIB = new IB(mPane.find('.ui-canvas'), mPane.find('#ui-properties'), mPane.find('#ui-toolkit'), mCodeMirror.getValue());
         }
 
-        init(pane, source);
+        init(pane);
     }
 
     function prepareEditorPane() {
@@ -24,20 +25,20 @@ CloudPebble.UIEditor = (function() {
         return pane;
     }
 
-    function showUIEditor(source) {
+    function showUIEditor(cm) {
         CloudPebble.Sidebar.SuspendActive();
         var pane = prepareEditorPane();
-        CloudPebble.Sidebar.SetActivePane(pane);
-        new UIEditor(pane, source);
+        CloudPebble.Sidebar.SetActivePane(pane, 'ui-editor');
+        new UIEditor(pane, cm);
     }
 
     return {
         /**
          * Displays a UI editor pane.
-         * @param {String} source
+         * @param {CodeMirror} cm
          */
-        Show: function(source) {
-            showUIEditor(source);
+        Show: function(cm) {
+            showUIEditor(cm);
         }
     }
 })();

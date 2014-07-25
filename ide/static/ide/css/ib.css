@@ -73,6 +73,12 @@
     right: -3.5px;
 }
 
+/* TextLayer */
+
+.ib-textlayer {
+    overflow: hidden;
+}
+
 /* Toolkit list */
 
 .ib-toolkit-layer {

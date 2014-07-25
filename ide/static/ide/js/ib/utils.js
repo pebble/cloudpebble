@@ -34,4 +34,11 @@
     IB.ColourWhite = new IB.Colour('GColorWhite', 'white', 'White');
     IB.ColourBlack = new IB.Colour('GColorBlack', 'black', 'Black');
     IB.ColourClear = new IB.Colour('GColorClear', 'rgba(0, 0, 0, 0)', 'Transparent');
+
+    IB.escapeCString = function(string) {
+        return string
+            .replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("\n", "\\\n")
+    };
 })();
