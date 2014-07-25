@@ -22,6 +22,8 @@
         var mSelectedLayer = null;
         var mResizer = null;
 
+        _.extend(this, Backbone.Events);
+
         function init(parent) {
             mNode = $('<div class="ib-canvas">');
             mNode.on('mousedown', handleMouseDown);
@@ -149,6 +151,9 @@
         }
 
         this.selectLayer = function(layer) {
+            if(layer == mSelectedLayer) {
+                return;
+            }
             if(mResizer != null) {
                 mResizer.destroy();
                 mResizer = null;
@@ -157,6 +162,7 @@
                 mResizer = new IB.Resizer(mNode, layer);
             }
             mSelectedLayer = layer;
+            self.trigger('selection', mSelectedLayer);
         }
 
         /**

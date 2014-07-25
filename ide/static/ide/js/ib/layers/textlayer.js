@@ -11,6 +11,13 @@
         this._text = "Text layer";
         this._backgroundColour = IB.ColourWhite;
         this._textColour = IB.ColourBlack;
+
+        _.extend(this._properties, {
+            text: new IB.Properties.Text("Text", this._text)
+        });
+        this._properties.text.on('change', _.bind(function(value) {
+            this.setText(value);
+        }, this));
     };
     IB.TextLayer.prototype = Object.create(IB.Layer.prototype);
     IB.TextLayer.constructor = IB.TextLayer;
@@ -26,6 +33,13 @@
                 color: this._textColour.css
             });
             this._node.text(this._text);
+        },
+        setText: function(text) {
+            if(this._text == text) {
+                return;
+            }
+            this._text = text;
+            this.trigger('textChange', text);
         }
     });
 

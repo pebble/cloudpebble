@@ -15,6 +15,30 @@
                         .css({
                             position: 'absolute'
                         });
+        this._properties = {
+            x: new IB.Properties.Int("X Position", this._pos.x, -32768, 32767),
+            y: new IB.Properties.Int("Y Position", this._pos.y, -32768, 32767),
+            w: new IB.Properties.Int("Width", this._size.w, 0, 32767),
+            h: new IB.Properties.Int("Height", this._size.h, 0, 32767),
+            id: new IB.Properties.Text("ID", this._ID)
+        };
+        this._properties.x.on('change', _.bind(function(value) {
+            this.setPos(value, this._pos.y);
+        }, this));
+        this._properties.y.on('change', _.bind(function(value) {
+            this.setPos(this._pos.x, value);
+        }, this));
+        this._properties.w.on('change', _.bind(function(value) {
+            this.setSize(value, this._size.h);
+        }, this));
+        this._properties.h.on('change', _.bind(function(value) {
+            this.setSize(this._size.w, value);
+        }, this));
+        this._properties.id.on('change', _.bind(function(value) {
+            this._ID = value;
+        }, this));
+
+        this.on('all', _.bind(this.render, this));
         this.init();
     };
     IB.Layer.layerClass = 'Layer';
@@ -72,7 +96,12 @@
          * @param {Number} h - layer height
          */
         setSize: function(w, h) {
+            if(this._size.w == w && this._size.h == h) {
+                return;
+            }
             this._size = new IB.Size(w, h);
+            this._properties.w.setValue(this._size.w);
+            this._properties.h.setValue(this._size.h);
             this.trigger('size', this.getSize());
         },
 
@@ -90,7 +119,12 @@
          * @param {Number} y
          */
         setPos: function(x, y) {
+            if(this._pos.x == x && this._pos.y == y) {
+                return;
+            }
             this._pos = new IB.Pos(x, y);
+            this._properties.x.setValue(this._pos.x);
+            this._properties.y.setValue(this._pos.y);
             this.trigger('position', this.getPos());
         },
 
@@ -116,6 +150,14 @@
                 top: this._pos.y,
                 left: this._pos.x
             });
+        },
+
+        /**
+         * A reference to the properties.
+         * @returns {*} Properties
+         */
+        getProperties: function() {
+            return this._properties;
         }
     };
 
