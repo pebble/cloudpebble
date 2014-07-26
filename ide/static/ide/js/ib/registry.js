@@ -5,6 +5,9 @@
     IB.Registry.prototype = {
         register: function(layer) {
             this.knownLayers[layer.layerClass] = layer;
+        },
+        getLayerClass: function(layerClass) {
+            return this.knownLayers[layerClass];
         }
     };
 

@@ -150,6 +150,14 @@
          */
         getProperties: function() {
             return this._properties;
+        },
+
+        /**
+         * Given some properties, understand things.
+         * @param {{fn: string, params: string[]}[]} properties
+         */
+        readProperties: function(properties) {
+            // We don't actually have any properties.
         }
     };
 

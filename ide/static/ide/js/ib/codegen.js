@@ -14,9 +14,7 @@
             var code = [
                 this._canvas.generateDeclaration()
             ];
-            code = code.concat(_.map(this._canvas.getLayers(), function(child) {
-                return child.generateDeclaration();
-            }));
+            code = code.concat(_.invoke(this._canvas.getLayers(), 'generateDeclaration'));
             return code.join("\n");
         },
         generateInitialiser: function() {

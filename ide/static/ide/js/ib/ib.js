@@ -9,6 +9,8 @@
             mCanvas.on('selection', handleSelection);
             mToolkit = new IB.Toolkit(toolkitPane, mCanvas);
             mToolkit.renderList();
+            var parser = new IB.Codeparser(source);
+            mCanvas.addLayers(parser.parse());
             window.mCanvas = mCanvas;
         }
 

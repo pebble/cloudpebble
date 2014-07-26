@@ -163,7 +163,7 @@
             }
             mSelectedLayer = layer;
             self.trigger('selection', mSelectedLayer);
-        }
+        };
 
         /**
          *
@@ -173,6 +173,8 @@
             mChildren.push(layer);
             layer.render(mNode);
         };
+
+        this.addLayers = _.partial(_.each, _, this.addLayer, this);
 
         this.getLayers = function() {
             return mChildren;
