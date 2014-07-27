@@ -4,6 +4,7 @@
      * Creates a generic layer.
      * @param {string} [id] The ID of the layer (to be used as a C identifier)
      * @constructor
+     * @extends {Backbone.Events}
      */
     IB.Layer = function(id) {
         _.extend(this, Backbone.Events);

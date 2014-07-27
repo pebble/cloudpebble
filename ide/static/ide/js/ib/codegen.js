@@ -11,10 +11,8 @@
     };
     IB.Codegen.prototype = {
         generateDeclaration: function() {
-            var code = [
-                this._canvas.generateDeclaration()
-            ];
-            code = code.concat(_.invoke(this._canvas.getLayers(), 'generateDeclaration'));
+            var code = this._canvas.generateDeclaration();
+            code = code.concat(_.flatten(_.invoke(this._canvas.getLayers(), 'generateDeclaration')));
             return code.join("\n");
         },
         generateInitialiser: function() {

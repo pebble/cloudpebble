@@ -376,6 +376,12 @@ CloudPebble.Resources = (function() {
                 });
             });
             return names;
+        },
+        GetBitmaps: function() {
+            return _.filter(project_resources, function(item) { return /^png/.test(item.kind); });
+        },
+        GetResourceByID: function(id) {
+            return _.find(project_resources, function(resource) { return _.contains(resource.identifiers, id); });
         }
     };
 })();

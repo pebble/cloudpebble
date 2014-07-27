@@ -10,6 +10,7 @@
      * @param {*} value Value of the property.
      * @constructor
      * @abstract
+     * @extends {Backbone.Events}
      */
     IB.Properties.Property = function(name, value) {
         this._name = name;
@@ -173,6 +174,50 @@
             if(val != this._value) {
                 this.setValue(val);
             }
+        }
+    });
+
+    /**
+     * Represents a bitmap resource.
+     * @param {string} name The name of the property
+     * @param {string} value The associated bitmap resource
+     * @constructor
+     * @extends {IB.Properties.Property}
+     */
+    IB.Properties.Bitmap = function(name, value) {
+        Property.call(this, name, value);
+    };
+    IB.Properties.Bitmap.prototype = Object.create(_super);
+    IB.Properties.Bitmap.constructor = IB.Properties.Bitmap;
+    _.extend(IB.Properties.Bitmap.prototype, {
+        setValue: function(value) {
+            _super.setValue.call(this, value);
+            this._node.val(this._value);
+        },
+        getBitmapURL: function() {
+            var resource = CloudPebble.Resources.GetResourceByID(this._value);
+            if(resource) {
+                return '/ide/project/' + PROJECT_ID + '/resource/' + resource.id + '/get';
+            } else {
+                return null;
+            }
+        },
+        _generateNode: function() {
+            return $('<select class="ib-property ib-bitmap">')
+                .append(this._createBitmapOption('', "Blank"))
+                .append(_.map(CloudPebble.Resources.GetBitmaps(), function(resource) {
+                    return this._createBitmapOption(resource.identifiers[0], resource.file_name);
+                }, this))
+                .val(this._value)
+                .change(_.bind(this._handleChange, this));
+        },
+        _createBitmapOption: function(id, name) {
+            return $('<option>')
+                .attr('value', id)
+                .text(name);
+        },
+        _handleChange: function() {
+            this.setValue(this._node.val());
         }
     });
 })();
