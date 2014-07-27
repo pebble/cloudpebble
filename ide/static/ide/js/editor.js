@@ -315,6 +315,29 @@ CloudPebble.Editor = (function() {
                     });
                 };
 
+                var ib_pane = $('#ui-editor-pane-template').clone().removeClass('hide').appendTo(pane).hide();
+                var ib_editor = new IB(ib_pane.find('.ui-canvas'), ib_pane.find('#ui-properties'), ib_pane.find('#ui-toolkit'));
+                var ib_showing = false;
+
+                function toggle_ib() {
+                    if(!ib_showing) {
+                        $(code_mirror.getWrapperElement()).hide();
+                        ib_pane.show();
+                        ib_editor.setSource(code_mirror.getValue());
+                    } else {
+                        var content = code_mirror.getValue();
+                        var new_content = ib_editor.integrateSource(content);
+                        if(content != new_content) {
+                            code_mirror.setValue(new_content);
+                        }
+                        ib_pane.hide();
+                        $(code_mirror.getWrapperElement()).show();
+                        code_mirror.refresh();
+                        code_mirror.focus();
+                    }
+                    ib_showing = !ib_showing;
+                }
+
                 // Add some buttons
                 var button_holder = $('<p id="editor-button-wrapper">');
                 var run_btn = $('<button class="btn run-btn" title="Save, build, install and run"></button>');
@@ -372,9 +395,7 @@ CloudPebble.Editor = (function() {
                     });
                 });
 
-                ib_btn.click(function() {
-                    CloudPebble.UIEditor.Show(code_mirror);
-                });
+                ib_btn.click(toggle_ib);
 
                 button_holder.append(error_area);
                 button_holder.append(run_btn);

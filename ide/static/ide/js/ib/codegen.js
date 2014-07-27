@@ -60,16 +60,18 @@
             var start = source.indexOf(this._beginBlock);
             var end = source.indexOf(this._endBlock + "\n");
             var index;
+            var prefix = "";
 
             if(start != -1) {
                 // Remove them.
-                source = source.substring(0, start) + source.substring(end + this._beginBlock.length + 1);
+                source = source.substring(0, start) + source.substring(end + this._endBlock.length);
                 index = start;
             } else {
                 // No existing block; try to find the last #include.
                 var match = source.match(/^\s*#\s*include.*$(?!\s*#\s*include.*$)/m);
                 if(match) {
                     index = match.index + match[0].length;
+                    prefix = "\n\n";
                 } else {
                     // Eh, stick it at the beginning.
                     index = 0;
@@ -84,7 +86,7 @@
                 + "\n\n" + this.generateDestructor()
                 + "\n" + this._endBlock;
 
-            source = source.substring(0, index) + generated + source.substring(index);
+            source = source.substring(0, index) + prefix + generated + source.substring(index);
 
             return source;
         }

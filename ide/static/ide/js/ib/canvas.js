@@ -180,6 +180,11 @@
             return mChildren;
         };
 
+        this.clear = function() {
+            mChildren = [];
+            mNode.empty();
+        };
+
         this.generateDeclaration = function() {
             return ["static Window *s_window;"];
         };

@@ -160,6 +160,9 @@
             // We don't actually have any properties.
         }
     };
+    IB.Layer.setLayerCounter = function(count) {
+        sLayerCounter = count;
+    };
 
     IB.registry.register(IB.Layer);
 })();

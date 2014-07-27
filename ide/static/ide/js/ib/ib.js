@@ -9,8 +9,6 @@
             mCanvas.on('selection', handleSelection);
             mToolkit = new IB.Toolkit(toolkitPane, mCanvas);
             mToolkit.renderList();
-            var parser = new IB.Codeparser(source);
-            mCanvas.addLayers(parser.parse());
             window.mCanvas = mCanvas;
         }
 
@@ -25,8 +23,17 @@
             }
         }
 
-        this.getCanvas = function() {
-            return mCanvas;
+        this.setSource = function(source) {
+            mCanvas.clear();
+            var parser = new IB.Codeparser(source);
+            var layers = parser.parse();
+            mCanvas.addLayers(layers);
+            IB.Layer.setLayerCounter(layers.length);
+        };
+
+        this.integrateSource = function(source) {
+            var codegen = new IB.Codegen(mCanvas);
+            return codegen.integrateSource(source);
         };
 
         init();

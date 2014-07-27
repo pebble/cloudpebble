@@ -45,6 +45,7 @@
                 return;
             }
             this._text = text;
+            this._properties.text.setValue(text);
             this.trigger('textChange', text);
         },
         setTextColour: function(colour) {
