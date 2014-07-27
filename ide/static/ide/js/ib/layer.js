@@ -9,7 +9,7 @@
         _.extend(this, Backbone.Events);
         this._pos = new IB.Pos(20, 20);
         this._size = new IB.Size(40, 40);
-        this._ID = id || ("layer_" + ++sLayerCounter);
+        this._ID = id || ("s_layer_" + ++sLayerCounter);
         this._node = $('<div class="ib-layer">')
                         .data('object', this) // reference cycles? pfft.
                         .css({
