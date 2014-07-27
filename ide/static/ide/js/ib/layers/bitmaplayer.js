@@ -48,14 +48,14 @@
         generateDeclaration: function() {
             var decl = ["static BitmapLayer *" + this._ID + ";"];
             if(this._resource.getValue()) {
-                decl.push("static GBitmap " + this._ID + "_gbitmap;");
+                decl.push("static GBitmap *" + this._ID + "_gbitmap;");
             }
             return decl;
         },
         generateInitialiser: function() {
             var init = [this._ID + " = bitmap_layer_create(" + this.generateRect() + ");"];
             if(this._resource.getValue()) {
-                init.push(this._ID + "_gbitmap = gbitmap_create_with_resource(" + this._resource.getValue() + ");");
+                init.push(this._ID + "_gbitmap = gbitmap_create_with_resource(RESOURCE_ID_" + this._resource.getValue() + ");");
                 init.push("bitmap_layer_set_bitmap(" + this._ID + ", " + this._ID + "_gbitmap);");
             }
             if(this._bg_colour.getValue() != IB.ColourClear) {
@@ -68,7 +68,7 @@
             if(this._resource.getValue()) {
                 destroy.push("gbitmap_destroy(" + this._ID + "_gbitmap);");
             }
-            destroy.push("bitmap_layer_destroy(" + this._ID + ")");
+            destroy.push("bitmap_layer_destroy(" + this._ID + ");");
             return destroy;
         },
         readProperties: function(properties, mappings) {

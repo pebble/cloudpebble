@@ -37,7 +37,7 @@
         },
         // This is an unfortunate hack, but I dunno where else it could go.
         _getBitmapMappings: function() {
-            var regex = /^\s*([A-Za-z0-9_]+) = gbitmap_create_with_resource\(([A-Za-z0-9_]+)\);\s*$/gm;
+            var regex = /^\s*([A-Za-z0-9_]+) = gbitmap_create_with_resource\(RESOURCE_ID_([A-Za-z0-9_]+)\);\s*$/gm;
             var groups;
             var mapping = Object.create(null);
             while((groups = regex.exec(this._source))) {
