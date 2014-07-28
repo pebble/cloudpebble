@@ -1,4 +1,5 @@
 (function() {
+    var STATUS_BAR_HEIGHT = 16;
     /**
      * Represents an IB canvas, which can contain layers.
      * @param {jQuery|HTMLElement} parent Node to which to attach the canvas.
@@ -21,6 +22,18 @@
         // Selection management
         var mSelectedLayer = null;
         var mResizer = null;
+
+        // Window properties
+        var mProperties = {
+            bg: new IB.Properties.Colour("Background", IB.ColourWhite),
+            fullscreen: new IB.Properties.Bool("Fullscreen", CloudPebble.ProjectInfo.app_is_watchface)
+        }
+        mProperties.bg.on('change', handleBackgroundChange, this);
+        mProperties.fullscreen.on('change', handleFullscreenChange, this);
+        // Watchfaces must be fullscreen.
+        if(CloudPebble.ProjectInfo.app_is_watchface) {
+            mProperties.fullscreen.lock();
+        }
 
         _.extend(this, Backbone.Events);
 
@@ -46,8 +59,11 @@
                 '-moz-transform': cssTransform,
                 '-ms-transform': cssTransform,
                 transform: cssTransform,
-                overflow: 'hidden'
+                overflow: 'hidden',
+                'background-color': mProperties.bg.getValue().css
             });
+
+            handleFullscreenChange(mProperties.fullscreen.getValue());
         }
 
         /**
@@ -150,6 +166,26 @@
             }
         }
 
+        function handleBackgroundChange(colour) {
+            mNode.css({
+                'background-color': colour.css
+            });
+        }
+
+        function handleFullscreenChange(fullscreen) {
+            if(fullscreen) {
+                mNode.css({
+                    'margin-top': 0,
+                    'height': 168
+                });
+            } else {
+                mNode.css({
+                    'margin-top': STATUS_BAR_HEIGHT * mScaleY,
+                    'height': 168 - STATUS_BAR_HEIGHT
+                });
+            }
+        }
+
         this.selectLayer = function(layer) {
             if(layer == mSelectedLayer) {
                 return;
@@ -171,6 +207,7 @@
          */
         this.addLayer = function(layer) {
             mChildren.push(layer);
+            layer.setCanvas(self);
             layer.render(mNode);
         };
 
@@ -191,14 +228,36 @@
 
         this.generateInitialiser = function() {
             var initialiser = ["s_window = window_create();"];
-            if(mBackgroundColour != IB.ColourWhite) {
-                initialiser.push("window_set_background_color(s_window, " + mBackgroundColour + ");");
+            if(mProperties.bg.getValue() != IB.ColourWhite) {
+                initialiser.push("window_set_background_color(s_window, " + mProperties.bg.getValue() + ");");
             }
+            initialiser.push("window_set_fullscreen(s_window, " + mProperties.fullscreen.getValue() + ");");
             return initialiser;
         };
 
         this.generateDestructor = function() {
             return ["window_destroy(s_window);"];
+        };
+
+        this.readPropertes = function(properties) {
+            _.each(properties, function(values, property) {
+                switch(property) {
+                    case "window_set_background_color":
+                        mProperties.bg.setValue(IB.ColourMap[values[1]]);
+                        break;
+                    case "window_set_fullscreen":
+                        mProperties.fullscreen.setValue(JSON.parse(values[1]));
+                        break;
+                }
+            }, this);
+        };
+
+        this.getProperties = function() {
+            return mProperties;
+        };
+
+        this.isFullscreen = function() {
+            return mProperties.fullscreen.getValue();
         };
 
         init(parent);

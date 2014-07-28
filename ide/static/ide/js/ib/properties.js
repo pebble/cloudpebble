@@ -54,6 +54,9 @@
         lock: function() {
             this._locked = true;
         },
+        isLocked: function() {
+            return this._locked;
+        },
         /**
          * Generates a node.
          * @abstract
@@ -111,6 +114,26 @@
             if(val != this._value) {
                 this.setValue(val);
             }
+        }
+    });
+
+    IB.Properties.Bool = function(name, value) {
+        Property.call(this, name, value);
+    };
+    IB.Properties.Bool.prototype = Object.create(_super);
+    IB.Properties.Bool.constructor = IB.Properties.Bool;
+    _.extend(IB.Properties.Bool.prototype, {
+        setValue: function(value) {
+            _super.setValue.call(this, value);
+            this._node.prop('checked', this._value);
+        },
+        _generateNode: function() {
+            return $('<input type="checkbox" class="ib-property ib-boolean">')
+                .prop("checked", this._value)
+                .change(_.bind(this._handleChange, this));
+        },
+        _handleChange: function() {
+            this.setValue(this._node.prop('checked'));
         }
     });
 

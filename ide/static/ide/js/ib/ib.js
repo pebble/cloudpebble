@@ -10,6 +10,7 @@
             mToolkit = new IB.Toolkit(toolkitPane, mCanvas);
             mToolkit.renderList();
             window.mCanvas = mCanvas;
+            handleSelection(null);
         }
 
         function handleSelection(selectedLayer) {
@@ -19,6 +20,9 @@
             }
             if(selectedLayer) {
                 mPropertyView = new IB.PropertyView(propertyPane, selectedLayer);
+                mPropertyView.render();
+            } else {
+                mPropertyView = new IB.PropertyView(propertyPane, mCanvas);
                 mPropertyView.render();
             }
         }

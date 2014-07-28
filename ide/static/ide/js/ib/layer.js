@@ -8,6 +8,7 @@
      */
     IB.Layer = function(id) {
         _.extend(this, Backbone.Events);
+        this._canvas = null;
         this._ID = id || ("s_layer_" + ++sLayerCounter);
         this._node = $('<div class="ib-layer">')
                         .data('object', this) // reference cycles? pfft.
@@ -137,6 +138,14 @@
          */
         readProperties: function(properties) {
             // We don't actually have any properties.
+        },
+
+        /**
+         * Gives the layer a reference to its containing canvas.
+         * @param {IB.Canvas} canvas
+         */
+        setCanvas: function(canvas) {
+            this._canvas = canvas;
         },
         /**
          * Adds a listener to a property's change event that triggers an event on the layer.

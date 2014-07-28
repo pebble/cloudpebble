@@ -6,8 +6,9 @@
     };
     IB.PropertyView.prototype = {
         render: function() {
-            // Here we assume bootstrap magic... mostly because it's convenient.
-            var groups = _.map(this._layer.getProperties(), this._generateControlGroup);
+            var groups = _.map(
+                _.reject(this._layer.getProperties(), function(x) { return x.isLocked(); }),
+                this._generateControlGroup);
             this._root.empty().append(groups).appendTo(this._parent);
         },
         destroy: function() {
@@ -20,6 +21,7 @@
             this._layer = null;
         },
         _generateControlGroup: function(property) {
+            // Here we assume bootstrap magic... mostly because it's convenient.
             return $('<div class="control-group">')
                 .append(
                     $('<label class="control-label">')

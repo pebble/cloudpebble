@@ -27,7 +27,7 @@
             this._propListener(this._properties['icon_' + it], it + 'IconChange');
         }, this);
 
-        this.setSize(20, 150);
+        this.setSize(20, 162);
         this.setPos(124, 3);
         this._size.lock();
         this._pos.lock();
@@ -40,7 +40,8 @@
             IB.Layer.prototype.render.call(this, parent);
             this._node.addClass('ib-actionbarlayer');
             this._node.css({
-                'background-color': this._backgroundColour.getValue().css
+                'background-color': this._backgroundColour.getValue().css,
+                'height': 'calc(100% - 6px)'
             });
             _.each(this._icon_nodes, function(node, it) {
                 node.css({
