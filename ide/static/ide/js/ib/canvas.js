@@ -23,6 +23,9 @@
         var mSelectedLayer = null;
         var mResizer = null;
 
+        // Keyboard management
+        var mPressedKeys = {};
+
         // Window properties
         var mProperties = {
             bg: new IB.Properties.Colour("Background", IB.ColourWhite),
@@ -166,6 +169,60 @@
             }
         }
 
+        function keyboardStart() {
+            $(document).keydown(handleKeyDown);
+            $(document).keyup(handleKeyUp);
+        }
+
+        function handleKeyDown(e) {
+            mPressedKeys[e.keyCode] = true;
+            switch(e.keyCode) {
+                case 37: // left arrow
+                    keyboardNudge(37, -1, 0);
+                    break;
+                case 38: // up arrow
+                    keyboardNudge(38, 0, -1);
+                    break;
+                case 39: // right arrow
+                    keyboardNudge(39, 1, 0);
+                    break;
+                case 40: // down arrow
+                    keyboardNudge(40, 0, 1);
+                    break;
+            }
+        }
+
+        function handleKeyUp(e) {
+            if(e.keyCode in mPressedKeys) {
+                delete mPressedKeys[e.keyCode]
+            };
+            console.log(e.keyCode);
+            switch(e.keyCode) {
+                case 27: // esc
+                    self.selectLayer(null);
+                    break;
+                case 8: // backspace
+                case 46: // delete
+                    if(mSelectedLayer) {
+                        deleteLayer(mSelectedLayer);
+                    }
+                    break;
+            }
+        }
+
+        function keyboardNudge(keyCode, dx, dy) {
+            if(mPressedKeys[keyCode] && mSelectedLayer) {
+                var pos = mSelectedLayer.getPos();
+                mSelectedLayer.setPos(pos.x + dx, pos.y + dy);
+                _.delay(keyboardNudge, 200, dx, dy);
+            }
+        }
+
+        function keyboardStop() {
+            $(document).off('keydown', handleKeyDown);
+            $(document).off('keyup', handleKeyUp);
+        }
+
         function handleBackgroundChange(colour) {
             mNode.css({
                 'background-color': colour.css
@@ -186,16 +243,30 @@
             }
         }
 
+        function deleteLayer(layer) {
+            if(!layer) {
+                return;
+            }
+            if(layer == mSelectedLayer) {
+                self.selectLayer(null);
+            }
+            layer.destroy();
+            mChildren = _.without(mChildren, layer);
+            layer = null;
+        }
+
         this.selectLayer = function(layer) {
             if(layer == mSelectedLayer) {
                 return;
             }
             if(mResizer != null) {
                 mResizer.destroy();
+                keyboardStop();
                 mResizer = null;
             }
             if(layer) {
                 mResizer = new IB.Resizer(mNode, layer);
+                keyboardStart();
             }
             mSelectedLayer = layer;
             self.trigger('selection', mSelectedLayer);

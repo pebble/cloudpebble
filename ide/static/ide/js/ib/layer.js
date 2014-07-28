@@ -147,6 +147,9 @@
         setCanvas: function(canvas) {
             this._canvas = canvas;
         },
+        destroy: function() {
+            this._node.remove();
+        },
         /**
          * Adds a listener to a property's change event that triggers an event on the layer.
          * @param prop
