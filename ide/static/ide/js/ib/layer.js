@@ -8,8 +8,6 @@
      */
     IB.Layer = function(id) {
         _.extend(this, Backbone.Events);
-        this._pos = new IB.Pos(20, 20);
-        this._size = new IB.Size(40, 40);
         this._ID = id || ("s_layer_" + ++sLayerCounter);
         this._node = $('<div class="ib-layer">')
                         .data('object', this) // reference cycles? pfft.
@@ -17,27 +15,21 @@
                             position: 'absolute'
                         });
         this._properties = {
-            x: new IB.Properties.Int("X Position", this._pos.x, -32768, 32767),
-            y: new IB.Properties.Int("Y Position", this._pos.y, -32768, 32767),
-            w: new IB.Properties.Int("Width", this._size.w, 0, 32767),
-            h: new IB.Properties.Int("Height", this._size.h, 0, 32767),
+            pos: new IB.Properties.Pos("Position", new IB.Pos(20, 20)),
+            size: new IB.Properties.Size("Size", new IB.Size(40, 40)),
             id: new IB.Properties.Text("ID", this._ID)
         };
-        this._properties.x.on('change', _.bind(function(value) {
-            this.setPos(value, this._pos.y);
-        }, this));
-        this._properties.y.on('change', _.bind(function(value) {
-            this.setPos(this._pos.x, value);
-        }, this));
-        this._properties.w.on('change', _.bind(function(value) {
-            this.setSize(value, this._size.h);
-        }, this));
-        this._properties.h.on('change', _.bind(function(value) {
-            this.setSize(this._size.w, value);
-        }, this));
+        this._size = this._properties.size;
+        this._pos = this._properties.pos;
         this._properties.id.on('change', _.bind(function(value) {
             this._ID = value;
         }, this));
+        this._properties.size.on('change', function(value) {
+            this.trigger('resize', value);
+        }, this);
+        this._properties.pos.on('change', function(value) {
+            this.trigger('reposition', value);
+        }, this);
 
         this.on('all', this.render, this);
     };
@@ -56,7 +48,9 @@
          * @returns {string[]} C code
          */
         generateRect: function() {
-            return ["GRect(" + this._pos.x + ", " + this._pos.y + ", " + this._size.w + ", " + this._size.h + ")"];
+            var size = this._size.getValue();
+            var pos = this._pos.getValue();
+            return ["GRect(" + pos.x + ", " + pos.y + ", " + size.w + ", " + size.h + ")"];
         },
 
         /**
@@ -80,7 +74,7 @@
          * @returns {IB.Size}
          */
         getSize: function() {
-            return _.clone(this._size);
+            return _.clone(this._size.getValue());
         },
 
         /**
@@ -89,13 +83,7 @@
          * @param {Number} h - layer height
          */
         setSize: function(w, h) {
-            if(this._size.w == w && this._size.h == h) {
-                return;
-            }
-            this._size = new IB.Size(w, h);
-            this._properties.w.setValue(this._size.w);
-            this._properties.h.setValue(this._size.h);
-            this.trigger('size', this.getSize());
+            this._size.setValue(new IB.Size(w, h));
         },
 
         /**
@@ -103,7 +91,7 @@
          * @returns {IB.Pos}
          */
         getPos: function() {
-            return _.clone(this._pos);
+            return _.clone(this._pos.getValue());
         },
 
         /**
@@ -112,13 +100,7 @@
          * @param {Number} y
          */
         setPos: function(x, y) {
-            if(this._pos.x == x && this._pos.y == y) {
-                return;
-            }
-            this._pos = new IB.Pos(x, y);
-            this._properties.x.setValue(this._pos.x);
-            this._properties.y.setValue(this._pos.y);
-            this.trigger('position', this.getPos());
+            this._pos.setValue(new IB.Pos(x, y));
         },
 
         /**
@@ -138,10 +120,10 @@
                 this._node.appendTo(parent);
             }
             this._node.css({
-                height: this._size.h,
-                width: this._size.w,
-                top: this._pos.y,
-                left: this._pos.x
+                height: this._size.getValue().h,
+                width: this._size.getValue().w,
+                top: this._pos.getValue().y,
+                left: this._pos.getValue().x
             });
         },
 

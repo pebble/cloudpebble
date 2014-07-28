@@ -36,7 +36,7 @@
          * @param value
          */
         setValue: function(value) {
-            if(value != this._value) {
+            if(!_.isEqual(value, this._value)) {
                 this._value = value;
                 this.trigger('change', value);
             }
@@ -218,6 +218,92 @@
         },
         _handleChange: function() {
             this.setValue(this._node.val());
+        }
+    });
+
+    /**
+     * Represents a size property
+     * @param {string} name The name of the property
+     * @param {IB.Size} value The size of the layer
+     * @constructor
+     * @extends {IB.Properties.Property}
+     */
+    IB.Properties.Size = function(name, value) {
+        this._w_node = null;
+        this._h_node = null;
+        Property.call(this, name, value);
+    };
+    IB.Properties.Size.prototype = Object.create(_super);
+    IB.Properties.Size.constructor = IB.Properties.Size;
+    _.extend(IB.Properties.Size.prototype, {
+        _generateNode: function() {
+            this._w_node = $('<input type="number">')
+                .attr('min', 0)
+                .attr('max', 32767)
+                .val(this._value.w)
+                .change(_.bind(this._handleChange, this));
+            this._h_node = $('<input type="number">')
+                .attr('min', 0)
+                .attr('max', 32767)
+                .val(this._value.h)
+                .change(_.bind(this._handleChange, this));
+            return $('<span>').append(this._w_node, ' x ', this._h_node);
+        },
+        _handleChange: function() {
+            var w = parseInt(this._w_node.val(), 10);
+            var h = parseInt(this._h_node.val(), 10);
+            if(w == this._value.w && h == this._value.h) {
+                return;
+            }
+            this.setValue(new IB.Size(w, h));
+        },
+        setValue: function(value) {
+            _super.setValue.call(this, value);
+            this._w_node.val(this._value.w);
+            this._h_node.val(this._value.h);
+        }
+    });
+
+    /**
+     * Represents a position property
+     * @param {string} name The name of the property
+     * @param {IB.Size} value The position of the layer
+     * @constructor
+     * @extends {IB.Properties.Property}
+     */
+    IB.Properties.Pos = function(name, value) {
+        this._x_node = null;
+        this._y_node = null;
+        Property.call(this, name, value);
+    };
+    IB.Properties.Pos.prototype = Object.create(_super);
+    IB.Properties.Pos.constructor = IB.Properties.Pos;
+    _.extend(IB.Properties.Pos.prototype, {
+        _generateNode: function() {
+            this._x_node = $('<input type="number">')
+                .attr('min', -32768)
+                .attr('max', 32767)
+                .val(this._value.x)
+                .change(_.bind(this._handleChange, this));
+            this._y_node = $('<input type="number">')
+                .attr('min', -32768)
+                .attr('max', 32767)
+                .val(this._value.y)
+                .change(_.bind(this._handleChange, this));
+            return $('<span>').append(this._x_node, ', ', this._y_node);
+        },
+        _handleChange: function() {
+            var x = parseInt(this._x_node.val(), 10);
+            var y = parseInt(this._y_node.val(), 10);
+            if(x == this._value.x && y == this._value.y) {
+                return;
+            }
+            this.setValue(new IB.Pos(x, y));
+        },
+        setValue: function(value) {
+            _super.setValue.call(this, value);
+            this._x_node.val(this._value.x);
+            this._y_node.val(this._value.y);
         }
     });
 })();

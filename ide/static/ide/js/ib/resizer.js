@@ -24,8 +24,8 @@
                 })
                 .data('object', self)
                 .appendTo(mParent);
-            mLayer.on('position', handlePosition);
-            mLayer.on('size', handleSize);
+            mLayer.on('reposition', handlePosition);
+            mLayer.on('resize', handleSize);
 
             mUpperLeftHandle = makeHandle('upper-left', -1, -1);
             mUpperMiddleHandle = makeHandle('upper-middle', 0, -1);
@@ -64,8 +64,8 @@
         };
 
         this.destroy = function() {
-            mLayer.off('position', handlePosition);
-            mLayer.off('size', handleSize);
+            mLayer.off('reposition', handlePosition);
+            mLayer.off('resize', handleSize);
             mNode.remove();
             mParent = null;
             mLayer = null;
