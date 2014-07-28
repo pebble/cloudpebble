@@ -210,6 +210,36 @@
         }
     });
 
+    IB.Properties.MultipleChoice = function(name, options, value) {
+        this._options = options;
+        Property.call(this, name, value);
+    };
+    IB.Properties.MultipleChoice.prototype = Object.create(_super);
+    IB.Properties.MultipleChoice.constructor = IB.Properties.MultipleChoice;
+    _.extend(IB.Properties.MultipleChoice.prototype, {
+        _generateNode: function() {
+            return $('<select class="ib-property ib-multiplechoice">')
+                .append(_.map(this._options, function(text, value) {
+                    console.log(text, value);
+                    return $('<option>')
+                        .attr('value', value)
+                        .text(text);
+                }))
+                .val(this._value)
+                .change(_.bind(this._handleChange, this));
+        },
+        _handleChange: function() {
+            this.setValue(this._node.val());
+        },
+        setValue: function(value) {
+            if(!_.has(this._options, value)) {
+                return;
+            }
+            _super.setValue.call(this, value);
+            this._node.val(this._value);
+        }
+    });
+
     /**
      * Represents a bitmap resource.
      * @param {string} name The name of the property

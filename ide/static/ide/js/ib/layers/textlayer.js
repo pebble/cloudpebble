@@ -12,14 +12,21 @@
         _.extend(this._properties, {
             text: new IB.Properties.Text("Text", "Text layer"),
             fg: new IB.Properties.Colour("Text colour", IB.ColourBlack),
-            bg: new IB.Properties.Colour("Background", IB.ColourWhite)
+            bg: new IB.Properties.Colour("Background", IB.ColourWhite),
+            align: new IB.Properties.MultipleChoice("Alignment", {
+                "GTextAlignmentLeft": "Left",
+                "GTextAlignmentCenter": "Centre",
+                "GTextAlignmentRight": "Right"
+            }, "GTextAlignmentLeft")
         });
         this._text = this._properties.text;
         this._textColour = this._properties.fg;
         this._backgroundColour = this._properties.bg;
+        this._align = this._properties.align;
         this._propListener(this._text, 'textChange');
         this._propListener(this._textColour, 'textColourChange');
         this._propListener(this._backgroundColour, 'backgroundColourChange');
+        this._propListener(this._align, 'alignmentChange');
 
         this.setSize(100, 20);
     };
@@ -31,7 +38,12 @@
             IB.Layer.prototype.render.call(this, parent);
             this._node.css({
                 'background-color': this._backgroundColour.getValue().css,
-                color: this._textColour.getValue().css
+                color: this._textColour.getValue().css,
+                'text-align': {
+                    "GTextAlignmentLeft": "left",
+                    "GTextAlignmentCenter": "center",
+                    "GTextAlignmentRight": "right"
+                }[this._align.getValue()]
             });
             this._node.text(this._text.getValue());
         },
@@ -61,6 +73,9 @@
             if(this._text.getValue() != "") {
                 init.push("text_layer_set_text(" + this._ID + ", \"" + IB.escapeCString(this.getText()) + "\");");
             }
+            if(this._align.getValue() != "GTextAlignLeft") {
+                init.push("text_layer_set_text_alignment(" + this._ID + ", " + this._align.getValue() + ");");
+            }
             return init;
         },
         generateDestructor: function() {
@@ -79,6 +94,8 @@
                     case "text_layer_set_text":
                         this.setText(JSON.parse(values[0]));
                         break;
+                    case "text_layer_set_text_alignment":
+                        this._align.setValue(values[1]);
                 }
             }, this);
         }
