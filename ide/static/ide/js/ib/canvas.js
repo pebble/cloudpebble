@@ -95,7 +95,6 @@
             mMouseDownCoords = eventToPosition(e);
             mLastCoords = _.clone(mMouseDownCoords);
             mMouseDownNode = $(e.target);
-            console.log(mMouseDownNode);
             if(mMouseDownNode) {
                 var nodePos = offsetToPosition(mMouseDownNode.offset());
                 mMouseNodeOffset = {x: mMouseDownCoords.x - nodePos.x, y: mMouseDownCoords.y - nodePos.y};
