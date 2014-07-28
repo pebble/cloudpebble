@@ -64,11 +64,10 @@
                 var layer = new layerClass(layerID);
 
                 var frame = this._getFrameForLayerID(layerID);
-                if(!frame) {
-                    continue;
+                if(frame) {
+                    layer.setPos(frame.pos.x, frame.pos.y);
+                    layer.setSize(frame.size.w, frame.size.h);
                 }
-                layer.setPos(frame.pos.x, frame.pos.y);
-                layer.setSize(frame.size.w, frame.size.h);
 
                 layer.readProperties(this._getPropertiesForLayerID(layerID), gbitmap_mapping);
 

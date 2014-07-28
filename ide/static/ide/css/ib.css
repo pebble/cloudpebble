@@ -79,6 +79,34 @@
     overflow: hidden;
 }
 
+/* ActionBarLayer */
+
+.ib-actionbarlayer {
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+
+.ib-actionbarlayer-icon {
+    position: absolute;
+    left: 1px;
+    width: 18px;
+    height: 18px;
+    background-repeat: no-repeat;
+    pointer-events: none;
+}
+
+.ib-icon-up {
+    top: calc(16% - 9px);
+}
+
+.ib-icon-select {
+    top: calc(50% - 9px);
+}
+
+.ib-icon-down {
+    top: calc(83% - 9px);
+}
+
 /* Toolkit list */
 
 .ib-toolkit-layer {

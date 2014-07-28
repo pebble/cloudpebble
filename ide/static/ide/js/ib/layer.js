@@ -24,12 +24,8 @@
         this._properties.id.on('change', _.bind(function(value) {
             this._ID = value;
         }, this));
-        this._properties.size.on('change', function(value) {
-            this.trigger('resize', value);
-        }, this);
-        this._properties.pos.on('change', function(value) {
-            this.trigger('reposition', value);
-        }, this);
+        this._propListener(this._size, 'resize');
+        this._propListener(this._pos, 'reposition');
 
         this.on('all', this.render, this);
     };
@@ -141,6 +137,17 @@
          */
         readProperties: function(properties) {
             // We don't actually have any properties.
+        },
+        /**
+         * Adds a listener to a property's change event that triggers an event on the layer.
+         * @param prop
+         * @param event
+         * @private
+         */
+        _propListener: function(prop, event) {
+            prop.on('change', function(value) {
+                this.trigger(event, value);
+            }, this);
         }
     };
     IB.Layer.setLayerCounter = function(count) {

@@ -16,6 +16,7 @@
         this._name = name;
         this._value = value;
         this._node = this._generateNode();
+        this._locked = false;
         _.extend(this, Backbone.Events);
     };
     IB.Properties.Property.prototype = {
@@ -36,6 +37,9 @@
          * @param value
          */
         setValue: function(value) {
+            if(this._locked) {
+                return;
+            }
             if(!_.isEqual(value, this._value)) {
                 this._value = value;
                 this.trigger('change', value);
@@ -43,6 +47,12 @@
         },
         getNode: function() {
             return this._node;
+        },
+        /**
+         * Locks the property to its current value; henceforth it is immutable.
+         */
+        lock: function() {
+            this._locked = true;
         },
         /**
          * Generates a node.
@@ -195,6 +205,9 @@
             this._node.val(this._value);
         },
         getBitmapURL: function() {
+            if(this._value == '') {
+                return null;
+            }
             var resource = CloudPebble.Resources.GetResourceByID(this._value);
             if(resource) {
                 return '/ide/project/' + PROJECT_ID + '/resource/' + resource.id + '/get';
@@ -267,7 +280,7 @@
     /**
      * Represents a position property
      * @param {string} name The name of the property
-     * @param {IB.Size} value The position of the layer
+     * @param {IB.Pos} value The position of the layer
      * @constructor
      * @extends {IB.Properties.Property}
      */

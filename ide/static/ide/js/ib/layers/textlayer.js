@@ -12,20 +12,14 @@
         _.extend(this._properties, {
             text: new IB.Properties.Text("Text", "Text layer"),
             fg: new IB.Properties.Colour("Text colour", IB.ColourBlack),
-            bg: new IB.Properties.Colour("Background colour", IB.ColourWhite)
+            bg: new IB.Properties.Colour("Background", IB.ColourWhite)
         });
         this._text = this._properties.text;
         this._textColour = this._properties.fg;
         this._backgroundColour = this._properties.bg;
-        this._text.on('change', function(value) {
-            this.trigger('textChange', value);
-        }, this);
-        this._textColour.on('change', function(value) {
-            this.trigger('backgroundColourChange', value);
-        }, this);
-        this._backgroundColour.on('change', function(value) {
-            this.trigger('textColourChange', value);
-        }, this);
+        this._propListener(this._text, 'textChange');
+        this._propListener(this._textColour, 'textColourChange');
+        this._propListener(this._backgroundColour, 'backgroundColourChange');
 
         this.setSize(100, 20);
     };
