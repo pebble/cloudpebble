@@ -30,7 +30,7 @@
         var mProperties = {
             bg: new IB.Properties.Colour("Background", IB.ColourWhite),
             fullscreen: new IB.Properties.Bool("Fullscreen", CloudPebble.ProjectInfo.app_is_watchface)
-        }
+        };
         mProperties.bg.on('change', handleBackgroundChange, this);
         mProperties.fullscreen.on('change', handleFullscreenChange, this);
         // Watchfaces must be fullscreen.
@@ -118,7 +118,7 @@
             }
         }
 
-        function handlePageMouseUp(e) {
+        function handlePageMouseUp() {
             mNode.off('mousemove', handleDrag);
             mMouseDownCoords = null;
             mMouseDownNode = null;
@@ -194,7 +194,7 @@
         function handleKeyUp(e) {
             if(e.keyCode in mPressedKeys) {
                 delete mPressedKeys[e.keyCode]
-            };
+            }
             console.log(e.keyCode);
             switch(e.keyCode) {
                 case 27: // esc
@@ -309,7 +309,7 @@
             return ["window_destroy(s_window);"];
         };
 
-        this.readPropertes = function(properties) {
+        this.readProperties = function(properties) {
             _.each(properties, function(values, property) {
                 switch(property) {
                     case "window_set_background_color":

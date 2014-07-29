@@ -45,7 +45,7 @@
             }
             return mapping;
         },
-        parse: function() {
+        parse: function(canvas) {
             var thingRegex = /^static\s*([a-z]+) \*([a-z0-9_]+);\s*$/gim;
             var results = [];
             var groups;
@@ -54,7 +54,7 @@
                 var layerType = groups[1];
                 var layerID = groups[2];
                 if(layerType == "Window") {
-                    // We don't deal with Window.
+                    canvas.readProperties(this._getPropertiesForLayerID('s_window'));
                     continue;
                 }
                 var layerClass = IB.registry.getLayerClass(layerType);
@@ -73,6 +73,7 @@
 
                 results.push(layer);
             }
+            canvas.addLayers(results);
             return results;
         }
     };

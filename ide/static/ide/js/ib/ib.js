@@ -30,8 +30,7 @@
         this.setSource = function(source) {
             mCanvas.clear();
             var parser = new IB.Codeparser(source);
-            var layers = parser.parse();
-            mCanvas.addLayers(layers);
+            var layers = parser.parse(mCanvas);
             IB.Layer.setLayerCounter(layers.length);
         };
 
