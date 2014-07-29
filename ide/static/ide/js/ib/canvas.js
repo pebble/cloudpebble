@@ -173,7 +173,15 @@
             $(document).keyup(handleKeyUp);
         }
 
+        function shouldHandleKey(e) {
+            // Only handle keys that are not from form elements.
+            return !$(e.target).is('input,select');
+        }
+
         function handleKeyDown(e) {
+            if(!shouldHandleKey(e)) {
+                return;
+            }
             mPressedKeys[e.keyCode] = true;
             switch(e.keyCode) {
                 case 37: // left arrow
@@ -194,6 +202,9 @@
         function handleKeyUp(e) {
             if(e.keyCode in mPressedKeys) {
                 delete mPressedKeys[e.keyCode]
+            }
+            if(!shouldHandleKey(e)) {
+                return;
             }
             console.log(e.keyCode);
             switch(e.keyCode) {

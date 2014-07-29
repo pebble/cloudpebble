@@ -152,7 +152,9 @@
     _.extend(IB.Properties.Text.prototype, {
         setValue: function(value) {
             _super.setValue.call(this, value);
-            this._node.val(this._value);
+            if(this._node.val() != this._value) {
+                this._node.val(this._value);
+            }
         },
         _generateNode: function() {
             return $('<input type="text" class="ib-property ib-text">')
