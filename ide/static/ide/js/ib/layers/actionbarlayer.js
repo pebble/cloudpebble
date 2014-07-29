@@ -27,7 +27,7 @@
             this._propListener(this._properties['icon_' + it], it + 'IconChange');
         }, this);
 
-        this.setSize(20, 162);
+        this.setSize(20, 146);
         this.setPos(124, 3);
         this._size.lock();
         this._pos.lock();
@@ -40,12 +40,13 @@
             IB.Layer.prototype.render.call(this, parent);
             this._node.addClass('ib-actionbarlayer');
             this._node.css({
-                'background-color': this._backgroundColour.getValue().css,
-                'height': 'calc(100% - 6px)'
+                'background-color': this._backgroundColour.getValue().css
             });
+            var invertIcons = (this._backgroundColour.getValue() != IB.ColourWhite);
             _.each(this._icon_nodes, function(node, it) {
                 node.css({
-                    'background-image': 'url(' + this._icons[it].getBitmapURL() + ')'
+                    'background-image': 'url(' + this._icons[it].getBitmapURL() + ')',
+                    '-webkit-filter': invertIcons ? 'invert(100%)' : 'none'
                 });
             }, this);
         },
