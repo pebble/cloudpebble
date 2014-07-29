@@ -60,7 +60,10 @@
             return decl;
         },
         generateInitialiser: function() {
-            var init = [this._ID + " = action_bar_layer_create();"];
+            var init = [
+                this._ID + " = action_bar_layer_create();",
+                "action_bar_layer_add_to_window(" + this._ID + ", s_window);"
+            ];
             if(this._backgroundColour != IB.ColourBlack) {
                 init.push("action_bar_layer_set_background_color("
                     + this._ID + ", " + this._backgroundColour.getValue().name + ");");
