@@ -11,6 +11,11 @@
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.2.0/theme/eclipse.css">
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.2.0/theme/blackboard.css">
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.2.0/theme/solarized.css">
+{% if font_css %}
+<link rel="stylesheet" href="{{ font_css }}" />
+{% endif %}
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Droid+Serif:700|Roboto+Condensed|Roboto:700">
+<link rel="stylesheet" href="//cloudpebble-vagrant.s3.amazonaws.com/raster-gothic/stylesheet.css">
 <link rel="stylesheet" href="{% static 'ide/css/ide.css' %}">
 <link rel="stylesheet" href="{% static 'ide/css/ib.css' %}">
 <link rel="stylesheet" href="{% static 'ide/css/codemirror-default.css' %}">

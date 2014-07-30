@@ -380,4 +380,252 @@
             this._y_node.val(this._value.y);
         }
     });
+
+    /**
+     * Represents a font available for use by the app.
+     * @param {string} name Name of the property
+     * @param {string} value Name of the font.
+     * @constructor
+     * @extends {IB.Properties.Property}
+     */
+    IB.Properties.Font = function(name, value) {
+        this._fonts = {
+            "GOTHIC_14": {
+                css: {
+                    'font-family': "'Raster Gothic 14'",
+                    'font-weight': 'normal',
+                    'font-style': 'normal',
+                    'font-size': 14,
+                    'letter-spacing': 0,
+                    'font-kerning': 'none'
+                },
+                name: "Gothic 14",
+                builtin: true
+            },
+            "GOTHIC_14_BOLD": {
+                css: {
+                    'font-family': "'Raster Gothic 14'",
+                    'font-weight': 'bold',
+                    'font-style': 'normal',
+                    'font-size': 14,
+                    'letter-spacing': 0,
+                    'font-kerning': 'none'
+                },
+                name: "Gothic 14 Bold",
+                builtin: true
+            },
+            "GOTHIC_18": {
+                css: {
+                    'font-family': "'Raster Gothic 18'",
+                    'font-weight': 'normal',
+                    'font-style': 'normal',
+                    'font-size': 18,
+                    'letter-spacing': 0,
+                    'font-kerning': 'none'
+                },
+                name: "Gothic 18",
+                builtin: true
+            },
+            "GOTHIC_18_BOLD": {
+                css: {
+                    'font-family': "'Raster Gothic 18'",
+                    'font-weight': 'bold',
+                    'font-style': 'normal',
+                    'font-size': 18,
+                    'letter-spacing': 0,
+                    'font-kerning': 'none'
+                },
+                name: "Gothic 18 Bold",
+                builtin: true
+            },
+            "GOTHIC_24": {
+                css: {
+                    'font-family': "'Raster Gothic 24'",
+                    'font-weight': 'normal',
+                    'font-style': 'normal',
+                    'font-size': 24,
+                    'letter-spacing': 0,
+                    'font-kerning': 'none'
+                },
+                name: "Gothic 24",
+                builtin: true
+            },
+            "GOTHIC_24_BOLD": {
+                css: {
+                    'font-family': "'Raster Gothic 24'",
+                    'font-weight': 'bold',
+                    'font-style': 'normal',
+                    'font-size': 24,
+                    'letter-spacing': 0,
+                    'font-kerning': 'none'
+                },
+                name: "Gothic 24 Bold",
+                builtin: true
+            },
+            "GOTHIC_28": {
+                css: {
+                    'font-family': "'Raster Gothic 28'",
+                    'font-weight': 'normal',
+                    'font-style': 'normal',
+                    'font-size': 28,
+                    'letter-spacing': 0,
+                    'font-kerning': 'none'
+                },
+                name: "Gothic 28",
+                builtin: true
+            },
+            "GOTHIC_28_BOLD": {
+                css: {
+                    'font-family': "'Raster Gothic 28'",
+                    'font-weight': 'bold',
+                    'font-style': 'normal',
+                    'font-size': 28,
+                    'letter-spacing': 0,
+                    'font-kerning': 'none'
+                },
+                name: "Gothic 28 Bold",
+                builtin: true
+            },
+            "BITHAM_30_BLACK": {
+                css: {
+                    'font-family': "'Gotham A', 'Gotham B'",
+                    'font-weight': 800,
+                    'font-style': 'normal',
+                    'font-size': 30,
+                    'letter-spacing': 0,
+                    'font-kerning': 'none'
+                },
+                name: "Bitham 30 Black",
+                builtin: true
+            },
+            "BITHAM_42_BOLD": {
+                css: {
+                    'font-family': "'Gotham A', 'Gotham B'",
+                    'font-weight': 700,
+                    'font-style': 'normal',
+                    'font-size': 42,
+                    'letter-spacing': -2,
+                    'font-kerning': 'none'
+                },
+                name: "Bitham 42 Bold",
+                builtin: true
+            },
+            "BITHAM_42_LIGHT": {
+                css: {
+                    'font-family': "'Gotham A', 'Gotham B'",
+                    'font-weight': 300,
+                    'font-style': 'normal',
+                    'font-size': 42,
+                    'letter-spacing': -3,
+                    'font-kerning': 'none'
+                },
+                name: "Bitham 42 Light",
+                builtin: true
+            },
+            "BITHAM_42_MEDIUM_NUMBERS": {
+                css: {
+                    'font-family': "'Gotham A', 'Gotham B'",
+                    'font-weight': 500,
+                    'font-style': 'normal',
+                    'font-size': 42,
+                    'letter-spacing': -3,
+                    'font-kerning': 'none'
+                },
+                name: "Bitham 42 Medium (Numbers)",
+                builtin: true,
+                charRegex: /[0-9:-]/
+            },
+            "BITHAM_34_MEDIUM_NUMBERS": {
+                css: {
+                    'font-family': "'Gotham A', 'Gotham B'",
+                    'font-weight': 500,
+                    'font-style': 'normal',
+                    'font-size': 42,
+                    'letter-spacing': -2,
+                    'font-kerning': 'none'
+                },
+                name: "Bitham 34 Medium (Numbers)",
+                builtin: true,
+                charRegex: /[0-9:\.,-]/
+            },
+            "ROBOTO_CONDENSED_21": {
+                css: {
+                    'font-family': "'Roboto Condensed'",
+                    'font-weight': 400,
+                    'font-style': 'normal',
+                    'font-size': 21,
+                    'letter-spacing': 0,
+                    'font-kerning': 'none'
+                },
+                name: "Roboto Condensed 21",
+                builtin: true
+            },
+            "ROBOTO_BOLD_SUBSET_49": {
+                css: {
+                    'font-family': "Roboto",
+                    'font-weight': 700,
+                    'font-style': 'normal',
+                    'font-size': 49,
+                    'letter-spacing': 0,
+                    'font-kerning': 'none'
+                },
+                name: "Roboto Bold Subset",
+                builtin: true,
+                charRegex: /[:0-9]/
+            },
+            "DROID_SERIF_28_BOLD": {
+                css: {
+                    'font-family': "'Droid Serif'",
+                    'font-weight': 700,
+                    'font-style': 'normal',
+                    'font-size': 28,
+                    'letter-spacing': 0,
+                    'font-kerning': 'none'
+                },
+                name: "Droid Serif 28 Bold",
+                builtin: true
+            }
+        };
+        Property.call(this, name, value);
+    };
+    IB.Properties.Font.prototype = Object.create(_super);
+    IB.Properties.Font.prototype.constructor = IB.Properties.Font;
+    _.extend(IB.Properties.Font.prototype, {
+        setValue: function(value) {
+            _super.setValue.call(this, value);
+            this._node.val(this._value);
+        },
+        _generateNode: function() {
+            return $('<select class="ib-property ib-font">')
+                .append(_.map(this._fonts, this._generateOption, this))
+                .val(this._value)
+                .change(_.bind(this._handleChange, this));
+        },
+        _generateOption: function(font, id) {
+            return $('<option>')
+                .attr('value', id)
+                .text(font.name);
+        },
+        _handleChange: function() {
+            var val = this._node.val();
+            if(this._value != val) {
+                this.setValue(val);
+            }
+        },
+        getCSS: function() {
+            return this._fonts[this._value].css;
+        },
+        filterText: function(text) {
+            var regex = this._fonts[this._value].charRegex;
+            if(!regex) {
+                return text;
+            }
+            return _.map(text, function(char) {
+                return regex.test(char) ? char : "\u25AF"
+            }).join('');
+        },
+        useKerningHack: function() {
+            return !!this._fonts[this._value].kerningHack;
+        }
+    });
 })();

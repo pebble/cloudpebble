@@ -11,22 +11,25 @@
 
         _.extend(this._properties, {
             text: new IB.Properties.Text("Text", "Text layer"),
+            font: new IB.Properties.Font("Font", "GOTHIC_14"),
             fg: new IB.Properties.Colour("Text colour", IB.ColourBlack),
             bg: new IB.Properties.Colour("Background", IB.ColourWhite),
             align: new IB.Properties.MultipleChoice("Alignment", {
                 "GTextAlignmentLeft": "Left",
                 "GTextAlignmentCenter": "Centre",
                 "GTextAlignmentRight": "Right"
-            }, "GTextAlignmentLeft")
+            }, "GTextAlignmentLeft"),
         });
         this._text = this._properties.text;
         this._textColour = this._properties.fg;
         this._backgroundColour = this._properties.bg;
         this._align = this._properties.align;
+        this._font = this._properties.font;
         this._propListener(this._text, 'textChange');
         this._propListener(this._textColour, 'textColourChange');
         this._propListener(this._backgroundColour, 'backgroundColourChange');
         this._propListener(this._align, 'alignmentChange');
+        this._propListener(this._font, 'fontChange');
 
         this.setSize(100, 20);
     };
@@ -45,7 +48,8 @@
                     "GTextAlignmentRight": "right"
                 }[this._align.getValue()]
             });
-            this._node.text(this._text.getValue());
+            this._node.css(this._font.getCSS());
+            this._node.text(this._font.filterText(this._text.getValue()).replace(/ /g, '\u00a0\u200B'));
         },
         setText: function(text) {
             this._text.setValue(text);
@@ -76,6 +80,9 @@
             if(this._align.getValue() != "GTextAlignLeft") {
                 init.push("text_layer_set_text_alignment(" + this._ID + ", " + this._align.getValue() + ");");
             }
+            if(this._font.getValue() != "GOTHIC_14") {
+                init.push("text_layer_set_font(" + this._ID + ", fonts_get_system_font(" + this._font.getValue() + "));");
+            }
             return init;
         },
         generateDestructor: function() {
@@ -96,6 +103,12 @@
                         break;
                     case "text_layer_set_text_alignment":
                         this._align.setValue(values[1]);
+                        break;
+                    case "text_layer_set_font":
+                        if(/^fonts_get_system_font\(/.test(values[0])) {
+                            this._font.setValue(values[0].substring(22, values[0].length - 1));
+                        }
+                        break;
                 }
             }, this);
         }
