@@ -11,7 +11,7 @@
 
         _.extend(this._properties, {
             text: new IB.Properties.Text("Text", "Text layer"),
-            font: new IB.Properties.Font("Font", "GOTHIC_14"),
+            font: new IB.Properties.Font("Font", "GOTHIC_14_BOLD"),
             fg: new IB.Properties.Colour("Text colour", IB.ColourBlack),
             bg: new IB.Properties.Colour("Background", IB.ColourWhite),
             align: new IB.Properties.MultipleChoice("Alignment", {
@@ -77,10 +77,10 @@
             if(this._text.getValue() != "") {
                 init.push("text_layer_set_text(" + this._ID + ", \"" + IB.escapeCString(this.getText()) + "\");");
             }
-            if(this._align.getValue() != "GTextAlignLeft") {
+            if(this._align.getValue() != "GTextAlignmentLeft") {
                 init.push("text_layer_set_text_alignment(" + this._ID + ", " + this._align.getValue() + ");");
             }
-            if(this._font.getValue() != "GOTHIC_14") {
+            if(this._font.getValue() != "GOTHIC_14_BOLD") {
                 init.push("text_layer_set_font(" + this._ID + ", fonts_get_system_font(FONT_KEY_" + this._font.getValue() + "));");
             }
             return init;

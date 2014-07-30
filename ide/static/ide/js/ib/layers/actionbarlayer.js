@@ -45,11 +45,13 @@
             });
             var invertIcons = (this._backgroundColour.getValue() != IB.ColourWhite);
             _.each(this._icon_nodes, function(node, it) {
+                node.css('-webkit-filter', invertIcons ? 'invert(100%)' : 'none');
                 var url = this._icons[it].getBitmapURL();
-                if(url)
+                if(url) {
                     node.attr('src', url);
-                else
+                } else {
                     node.removeAttr('src');
+                }
             }, this);
         },
         generateDeclaration: function() {
