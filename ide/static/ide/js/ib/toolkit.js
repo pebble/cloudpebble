@@ -34,7 +34,7 @@
          * @private
          */
         _createLayer: function(layerClass) {
-            var layer = new layerClass();
+            var layer = new layerClass(this._canvas.findNameForLayerType(layerClass.layerClass));
             this._canvas.addLayer(layer);
             this._canvas.selectLayer(layer);
         }

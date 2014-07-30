@@ -1,5 +1,4 @@
 (function() {
-    var sLayerCounter = 0;
     /**
      * Creates a generic layer.
      * @param {string} [id] The ID of the layer (to be used as a C identifier)
@@ -9,7 +8,7 @@
     IB.Layer = function(id) {
         _.extend(this, Backbone.Events);
         this._canvas = null;
-        this._ID = id || ("s_layer_" + ++sLayerCounter);
+        this._ID = id;
         this._node = $('<div class="ib-layer">')
                         .data('object', this) // reference cycles? pfft.
                         .css({

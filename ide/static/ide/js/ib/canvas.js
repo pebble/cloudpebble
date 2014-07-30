@@ -7,7 +7,7 @@
      */
     IB.Canvas = function(parent) {
         var self = this;
-        var mChildren = [];
+        var mChildren = {};
         var mNode = null;
         var mScaleX = null;
         var mScaleY = null;
@@ -260,8 +260,17 @@
                 self.selectLayer(null);
             }
             layer.destroy();
-            mChildren = _.without(mChildren, layer);
+            delete mChildren[layer.getID()];
             layer = null;
+        }
+
+        this.findNameForLayerType = function(layerType) {
+            var prefix = "s_" + layerType.toLowerCase() + "_";
+            var counter = 1;
+            while((prefix + counter) in mChildren) {
+                ++counter;
+            }
+            return prefix + counter;
         }
 
         this.selectLayer = function(layer) {
@@ -286,7 +295,7 @@
          * @param {IB.Layer} layer
          */
         this.addLayer = function(layer) {
-            mChildren.push(layer);
+            mChildren[layer.getID()] = layer;
             layer.setCanvas(self);
             layer.render(mNode);
         };
@@ -294,11 +303,11 @@
         this.addLayers = _.partial(_.each, _, this.addLayer, this);
 
         this.getLayers = function() {
-            return mChildren;
+            return _.values(mChildren);
         };
 
         this.clear = function() {
-            mChildren = [];
+            mChildren = {};
             mNode.empty();
         };
 
