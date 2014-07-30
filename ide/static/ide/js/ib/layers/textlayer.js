@@ -81,7 +81,7 @@
                 init.push("text_layer_set_text_alignment(" + this._ID + ", " + this._align.getValue() + ");");
             }
             if(this._font.getValue() != "GOTHIC_14") {
-                init.push("text_layer_set_font(" + this._ID + ", fonts_get_system_font(" + this._font.getValue() + "));");
+                init.push("text_layer_set_font(" + this._ID + ", fonts_get_system_font(FONT_KEY_" + this._font.getValue() + "));");
             }
             return init;
         },
@@ -106,7 +106,7 @@
                         break;
                     case "text_layer_set_font":
                         if(/^fonts_get_system_font\(/.test(values[0])) {
-                            this._font.setValue(values[0][0].substring(22, values[0][0].length - 1));
+                            this._font.setValue(values[0][0].substring(31, values[0][0].length - 1));
                         }
                         break;
                 }
