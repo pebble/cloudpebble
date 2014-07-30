@@ -206,7 +206,6 @@
             if(!shouldHandleKey(e)) {
                 return;
             }
-            console.log(e.keyCode);
             switch(e.keyCode) {
                 case 27: // esc
                     self.selectLayer(null);

@@ -229,7 +229,6 @@
         _generateNode: function() {
             return $('<select class="ib-property ib-multiplechoice">')
                 .append(_.map(this._options, function(text, value) {
-                    console.log(text, value);
                     return $('<option>')
                         .attr('value', value)
                         .text(text);

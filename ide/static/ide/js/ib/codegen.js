@@ -76,8 +76,6 @@
                 }
             }
 
-            console.log("Inserting code at index " + index);
-
             var generated = this._beginBlock
                 + "\n" + this.generateDeclaration()
                 + "\n\n" + this.generateInitialiser()
