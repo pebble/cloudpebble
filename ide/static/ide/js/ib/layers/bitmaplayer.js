@@ -30,8 +30,9 @@
                 'background-color': this._bg_colour.getValue().css
             });
             if(this._has_changed_image) {
+                var url = this._resource.getBitmapURL();
                 this._node.css({
-                    'background-image': 'url(' + this._resource.getBitmapURL() + ')'
+                    'background-image': 'url(' + url + ')'
                 });
                 this._has_changed_image = false;
             }

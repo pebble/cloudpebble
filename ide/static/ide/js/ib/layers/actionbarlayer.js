@@ -44,8 +44,9 @@
             });
             var invertIcons = (this._backgroundColour.getValue() != IB.ColourWhite);
             _.each(this._icon_nodes, function(node, it) {
+                var url = this._icons[it].getBitmapURL();
                 node.css({
-                    'background-image': 'url(' + this._icons[it].getBitmapURL() + ')',
+                    'background-image': url ? 'url(' + url + ')' : '',
                     '-webkit-filter': invertIcons ? 'invert(100%)' : 'none'
                 });
             }, this);
