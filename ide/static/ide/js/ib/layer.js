@@ -17,12 +17,18 @@
         this._properties = {
             pos: new IB.Properties.Pos("Position", new IB.Pos(20, 20)),
             size: new IB.Properties.Size("Size", new IB.Size(40, 40)),
-            id: new IB.Properties.Text("ID", this._ID)
+            id: new IB.Properties.Text("ID", this._ID, false)
         };
         this._size = this._properties.size;
         this._pos = this._properties.pos;
         this._properties.id.on('change', _.bind(function(value) {
+            if(value == '' || (this._canvas && !this._canvas.isLayerNameAvailable(value))) {
+                this._properties.id.setValue(this._ID);
+                return;
+            }
+            var oldID = this._ID;
             this._ID = value;
+            this.trigger('changeID', oldID, this._ID);
         }, this));
         this._propListener(this._size, 'resize');
         this._propListener(this._pos, 'reposition');

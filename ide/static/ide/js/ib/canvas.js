@@ -259,9 +259,17 @@
             if(layer == mSelectedLayer) {
                 self.selectLayer(null);
             }
+            layer.off('changeID', handleChangeID);
             layer.destroy();
             delete mChildren[layer.getID()];
             layer = null;
+        }
+
+        function handleChangeID(oldID, newID) {
+            if(mChildren[oldID]) {
+                mChildren[newID] = mChildren[oldID];
+                delete mChildren[oldID];
+            }
         }
 
         this.findNameForLayerType = function(layerType) {
@@ -271,7 +279,11 @@
                 ++counter;
             }
             return prefix + counter;
-        }
+        };
+
+        this.isLayerNameAvailable = function(name) {
+            return !(name in mChildren);
+        };
 
         this.selectLayer = function(layer) {
             if(layer == mSelectedLayer) {
@@ -297,6 +309,7 @@
         this.addLayer = function(layer) {
             mChildren[layer.getID()] = layer;
             layer.setCanvas(self);
+            layer.on('changeID', handleChangeID);
             layer.render(mNode);
         };
 

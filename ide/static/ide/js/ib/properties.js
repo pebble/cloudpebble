@@ -144,7 +144,8 @@
      * @constructor
      * @extends {IB.Properties.Property}
      */
-    IB.Properties.Text = function(name, value) {
+    IB.Properties.Text = function(name, value, realtime) {
+        this._realtime = realtime;
         Property.call(this, name, value);
     };
     IB.Properties.Text.prototype = Object.create(_super);
@@ -157,10 +158,13 @@
             }
         },
         _generateNode: function() {
-            return $('<input type="text" class="ib-property ib-text">')
+            var node = $('<input type="text" class="ib-property ib-text">')
                 .val(this._value)
-                .keyup(_.bind(this._handleChange, this))
                 .change(_.bind(this._handleChange, this));
+            if(this._realtime) {
+                node.keyup(_.bind(this._handleChange, this));
+            }
+            return node;
         },
         _handleChange: function() {
             var val = this._node.val();
