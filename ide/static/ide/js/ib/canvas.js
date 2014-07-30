@@ -323,10 +323,10 @@
             _.each(properties, function(values, property) {
                 switch(property) {
                     case "window_set_background_color":
-                        mProperties.bg.setValue(IB.ColourMap[values[1]]);
+                        mProperties.bg.setValue(IB.ColourMap[values[0][1]]);
                         break;
                     case "window_set_fullscreen":
-                        mProperties.fullscreen.setValue(JSON.parse(values[1]));
+                        mProperties.fullscreen.setValue(JSON.parse(values[0][1]));
                         break;
                 }
             }, this);

@@ -93,20 +93,20 @@
             _.each(properties, function(values, property) {
                 switch(property) {
                     case "text_layer_set_background_color":
-                        this.setBackgroundColour(IB.ColourMap[values[1]]);
+                        this.setBackgroundColour(IB.ColourMap[values[0][1]]);
                         break;
                     case "text_layer_set_text_color":
-                        this.setTextColour(IB.ColourMap[values[1]]);
+                        this.setTextColour(IB.ColourMap[values[0][1]]);
                         break;
                     case "text_layer_set_text":
-                        this.setText(JSON.parse(values[0]));
+                        this.setText(JSON.parse(values[0][0]));
                         break;
                     case "text_layer_set_text_alignment":
-                        this._align.setValue(values[1]);
+                        this._align.setValue(values[0][1]);
                         break;
                     case "text_layer_set_font":
                         if(/^fonts_get_system_font\(/.test(values[0])) {
-                            this._font.setValue(values[0].substring(22, values[0].length - 1));
+                            this._font.setValue(values[0][0].substring(22, values[0][0].length - 1));
                         }
                         break;
                 }

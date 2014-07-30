@@ -21,9 +21,10 @@
         this._icon_nodes = {};
         _.each(BUTTONS, function(it) {
             this._icons[it] = this._properties['icon_' + it];
-            this._icon_nodes[it] = $('<div>')
-                .addClass('ib-actionbarlayer-icon ib-icon-' + it)
-                .appendTo(this._node);
+            this._icon_nodes[it] = $('<img>').appendTo(
+                $('<div>')
+                    .addClass('ib-actionbarlayer-icon ib-icon-' + it)
+                    .appendTo(this._node));
             this._propListener(this._properties['icon_' + it], it + 'IconChange');
         }, this);
 
@@ -45,10 +46,10 @@
             var invertIcons = (this._backgroundColour.getValue() != IB.ColourWhite);
             _.each(this._icon_nodes, function(node, it) {
                 var url = this._icons[it].getBitmapURL();
-                node.css({
-                    'background-image': url ? 'url(' + url + ')' : '',
-                    '-webkit-filter': invertIcons ? 'invert(100%)' : 'none'
-                });
+                if(url)
+                    node.attr('src', url);
+                else
+                    node.removeAttr('src');
             }, this);
         },
         generateDeclaration: function() {
@@ -98,10 +99,12 @@
             _.each(properties, function(values, property) {
                 switch(property) {
                     case "action_bar_layer_set_background_color":
-                        this._backgroundColour.setValue(IB.ColourMap[values[1]]);
+                        this._backgroundColour.setValue(IB.ColourMap[values[0][1]]);
                         break;
                     case "action_bar_layer_set_icon":
-                        this._icons[values[1].split('_').pop().toLowerCase()].setValue(mappings[values[2]]);
+                        _.each(values, function(group) {
+                            this._icons[group[1].split('_').pop().toLowerCase()].setValue(mappings[group[2]]);
+                        }, this);
                         break;
                 }
             }, this);

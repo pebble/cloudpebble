@@ -91,6 +91,7 @@
     left: 1px;
     width: 18px;
     height: 18px;
+    text-align: center;
     background-repeat: no-repeat;
     pointer-events: none;
 }

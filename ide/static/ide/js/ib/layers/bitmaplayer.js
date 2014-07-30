@@ -77,10 +77,10 @@
             _.each(properties, function(values, property) {
                 switch(property) {
                     case "bitmap_layer_set_background_color":
-                        this.setBackgroundColour(IB.ColourMap[values[1]]);
+                        this.setBackgroundColour(IB.ColourMap[values[0][1]]);
                         break;
                     case "bitmap_layer_set_bitmap":
-                        this.setResourceID(mappings[values[1]]);
+                        this.setResourceID(mappings[values[0][1]]);
                         break;
                 }
             }, this);

@@ -35,7 +35,10 @@
             var groups;
             var props = Object.create(null);
             while((groups = regex.exec(this._source))) {
-                props[groups[1]] = _.invoke([groups[2]].concat(groups[2].split(',')), 'trim');
+                if(!props[groups[1]]) {
+                    props[groups[1]] = [];
+                }
+                props[groups[1]].push(_.invoke([groups[2]].concat(groups[2].split(',')), 'trim'));
             }
             return props;
         },
