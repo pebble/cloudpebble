@@ -147,8 +147,18 @@
         setCanvas: function(canvas) {
             this._canvas = canvas;
         },
+        /**
+         * Destroys the layer.
+         */
         destroy: function() {
             this._node.remove();
+        },
+        /**
+         * Returns the name of the layer's type (e.g. BitmapLayer)
+         * @returns {string}
+         */
+        getTypeName: function() {
+            return this.constructor.layerClass;
         },
         /**
          * Adds a listener to a property's change event that triggers an event on the layer.
@@ -160,7 +170,8 @@
             prop.on('change', function(value) {
                 this.trigger(event, value);
             }, this);
-        }
+        },
+        constructor: IB.Layer
     };
     IB.Layer.setLayerCounter = function(count) {
         sLayerCounter = count;

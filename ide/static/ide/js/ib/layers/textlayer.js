@@ -31,7 +31,7 @@
         this.setSize(100, 20);
     };
     IB.TextLayer.prototype = Object.create(IB.Layer.prototype);
-    IB.TextLayer.constructor = IB.TextLayer;
+    IB.TextLayer.prototype.constructor = IB.TextLayer;
     IB.TextLayer.layerClass = 'TextLayer';
     _.extend(IB.TextLayer.prototype, {
         render: function(parent) {

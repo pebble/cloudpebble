@@ -341,6 +341,14 @@
             return mProperties.fullscreen.getValue();
         };
 
+        /**
+         * Returns the type name of the canvas (i.e. "Window")
+         * @returns {string} "Window"
+         */
+        this.getTypeName = function() {
+            return "Window";
+        };
+
         init(parent);
     };
 })();

@@ -83,7 +83,7 @@
         this._max = max;
     };
     IB.Properties.Int.prototype = Object.create(_super);
-    IB.Properties.Int.constructor = IB.Properties.Int;
+    IB.Properties.Int.prototype.constructor = IB.Properties.Int;
     _.extend(IB.Properties.Int.prototype, {
         /**
          * Sets the value of the property, clamped between min and max (inclusive).
@@ -121,7 +121,7 @@
         Property.call(this, name, value);
     };
     IB.Properties.Bool.prototype = Object.create(_super);
-    IB.Properties.Bool.constructor = IB.Properties.Bool;
+    IB.Properties.Bool.prototype.constructor = IB.Properties.Bool;
     _.extend(IB.Properties.Bool.prototype, {
         setValue: function(value) {
             _super.setValue.call(this, value);
@@ -148,7 +148,7 @@
         Property.call(this, name, value);
     };
     IB.Properties.Text.prototype = Object.create(_super);
-    IB.Properties.Text.constructor = IB.Properties.Text;
+    IB.Properties.Text.prototype.constructor = IB.Properties.Text;
     _.extend(IB.Properties.Text.prototype, {
         setValue: function(value) {
             _super.setValue.call(this, value);
@@ -181,7 +181,7 @@
         Property.call(this, name, value);
     };
     IB.Properties.Colour.prototype = Object.create(_super);
-    IB.Properties.Colour.constructor = IB.Properties.Colour;
+    IB.Properties.Colour.prototype.constructor = IB.Properties.Colour;
     _.extend(IB.Properties.Colour.prototype, {
         setValue: function(value) {
             _super.setValue.call(this, value);
@@ -224,7 +224,7 @@
         Property.call(this, name, value);
     };
     IB.Properties.MultipleChoice.prototype = Object.create(_super);
-    IB.Properties.MultipleChoice.constructor = IB.Properties.MultipleChoice;
+    IB.Properties.MultipleChoice.prototype.constructor = IB.Properties.MultipleChoice;
     _.extend(IB.Properties.MultipleChoice.prototype, {
         _generateNode: function() {
             return $('<select class="ib-property ib-multiplechoice">')
@@ -260,7 +260,7 @@
         Property.call(this, name, value);
     };
     IB.Properties.Bitmap.prototype = Object.create(_super);
-    IB.Properties.Bitmap.constructor = IB.Properties.Bitmap;
+    IB.Properties.Bitmap.prototype.constructor = IB.Properties.Bitmap;
     _.extend(IB.Properties.Bitmap.prototype, {
         setValue: function(value) {
             _super.setValue.call(this, value);
@@ -309,7 +309,7 @@
         Property.call(this, name, value);
     };
     IB.Properties.Size.prototype = Object.create(_super);
-    IB.Properties.Size.constructor = IB.Properties.Size;
+    IB.Properties.Size.prototype.constructor = IB.Properties.Size;
     _.extend(IB.Properties.Size.prototype, {
         _generateNode: function() {
             this._w_node = $('<input type="number">')
@@ -352,7 +352,7 @@
         Property.call(this, name, value);
     };
     IB.Properties.Pos.prototype = Object.create(_super);
-    IB.Properties.Pos.constructor = IB.Properties.Pos;
+    IB.Properties.Pos.prototype.constructor = IB.Properties.Pos;
     _.extend(IB.Properties.Pos.prototype, {
         _generateNode: function() {
             this._x_node = $('<input type="number">')

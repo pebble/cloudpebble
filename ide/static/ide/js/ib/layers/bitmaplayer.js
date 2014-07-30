@@ -20,7 +20,7 @@
         this._bg_colour.on('change', this.setBackgroundColour, this);
     };
     IB.BitmapLayer.prototype = Object.create(IB.Layer.prototype);
-    IB.BitmapLayer.constructor = IB.BitmapLayer;
+    IB.BitmapLayer.prototype.constructor = IB.BitmapLayer;
     IB.BitmapLayer.layerClass = 'BitmapLayer';
     _.extend(IB.BitmapLayer.prototype, {
         render: function(parent) {

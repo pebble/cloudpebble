@@ -18,7 +18,11 @@
             var groups = _.map(
                 _.reject(this._layer.getProperties(), function(x) { return x.isLocked(); }),
                 this._generateControlGroup);
-            this._root.empty().append(groups).appendTo(this._parent);
+            this._root
+                .empty()
+                .append($('<h2>').text(this._layer.getTypeName()))
+                .append(groups)
+                .appendTo(this._parent);
         },
         /**
          * Destroys the property view

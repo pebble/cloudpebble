@@ -33,7 +33,7 @@
         this._pos.lock();
     };
     IB.ActionBarLayer.prototype = Object.create(IB.Layer.prototype);
-    IB.ActionBarLayer.constructor = IB.ActionBarLayer;
+    IB.ActionBarLayer.prototype.constructor = IB.ActionBarLayer;
     IB.ActionBarLayer.layerClass = 'ActionBarLayer';
     _.extend(IB.ActionBarLayer.prototype, {
         render: function(parent) {
