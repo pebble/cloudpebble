@@ -1,4 +1,10 @@
 (function() {
+    /**
+     * A resizer UI element that overlays itself on a layer inside a canvas.
+     * @param parent
+     * @param layer
+     * @constructor
+     */
     IB.Resizer = function(parent, layer) {
         var self = this;
         var mParent = parent;
@@ -59,10 +65,17 @@
             });
         }
 
+        /**
+         * Returns the layer this resizer is applied to.
+         * @returns {IB.Layer}
+         */
         this.getLayer = function() {
             return mLayer;
         };
 
+        /**
+         * Destroys this resizer and removes all handlers.
+         */
         this.destroy = function() {
             mLayer.off('reposition', handlePosition);
             mLayer.off('resize', handleSize);

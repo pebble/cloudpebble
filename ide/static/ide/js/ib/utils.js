@@ -41,6 +41,11 @@
         GColorClear: IB.ColourClear
     };
 
+    /**
+     * Escapes a string by replacing sequences that are illegal in C.
+     * @param {string} string
+     * @returns {string}
+     */
     IB.escapeCString = function(string) {
         return string
             .replace("\\", "\\\\")

@@ -212,6 +212,13 @@
         }
     });
 
+    /**
+     * Represents a generic multiple choice property
+     * @param {string} name The user-visible name of the property
+     * @param {Object.<string, string>} options Mapping of options; value -> human name
+     * @param {string} value The default value
+     * @constructor
+     */
     IB.Properties.MultipleChoice = function(name, options, value) {
         this._options = options;
         Property.call(this, name, value);
