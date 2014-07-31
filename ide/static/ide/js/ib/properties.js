@@ -528,7 +528,7 @@
             },
             "BITHAM_42_MEDIUM_NUMBERS": {
                 css: {
-                    'font-family': "'Gotham A', 'Gotham B'",
+                    'font-family': "'Gotham Numbers A', 'Gotham Numbers B'",
                     'font-weight': 500,
                     'font-style': 'normal',
                     'font-size': 42,
@@ -541,10 +541,10 @@
             },
             "BITHAM_34_MEDIUM_NUMBERS": {
                 css: {
-                    'font-family': "'Gotham A', 'Gotham B'",
+                    'font-family': "'Gotham Numbers A', 'Gotham Numbers B'",
                     'font-weight': 500,
                     'font-style': 'normal',
-                    'font-size': 42,
+                    'font-size': 34,
                     'letter-spacing': -2,
                     'font-kerning': 'none'
                 },
