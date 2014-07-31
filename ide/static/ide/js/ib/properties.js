@@ -145,7 +145,7 @@
      * @extends {IB.Properties.Property}
      */
     IB.Properties.Text = function(name, value, realtime) {
-        this._realtime = realtime;
+        this._realtime = (realtime !== false);
         Property.call(this, name, value);
     };
     IB.Properties.Text.prototype = Object.create(_super);
