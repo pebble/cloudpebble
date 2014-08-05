@@ -207,7 +207,7 @@ Pebble = function(ip, port) {
 
     var request_factory_setting = function(key) {
         send_message('FACTORY_SETTINGS', pack('BB', [0x00, key.length]).concat(string_to_bytes(key)));
-    }
+    };
 
     this.request_colour = function() {
         request_factory_setting('mfg_color');
@@ -219,25 +219,28 @@ Pebble = function(ip, port) {
             4: 'tintin-orange',
             5: 'tintin-grey',
             6: 'bianca-silver',
-            7: 'bianca-black'
+            7: 'bianca-black',
+            8: 'tintin-blue',
+            9: 'tintin-green',
+            10: 'tintin-pink'
         };
 
         var handle_colour = function(data) {
             self.off('factory_setting:result', handle_colour);
-            var colour_id = unpack('I', data);
+            var colour_id = unpack('I', data)[0];
             var colour_name = colour_mapping[colour_id] || 'unknown';
             self.trigger('colour', colour_name);
-        }
+        };
 
         var handle_failure = function() {
             self.off('factory_setting:error', handle_failure);
             console.log("The attached watch has no concept of colour! So, red.");
             self.trigger('colour', 'tintin-red');
-        }
+        };
 
         self.on('factory_setting:result', handle_colour);
         self.on('factory_setting:error', handle_failure);
-    }
+    };
 
 
     var handle_factory_setting = function(data) {
