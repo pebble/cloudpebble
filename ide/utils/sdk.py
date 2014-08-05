@@ -1,5 +1,6 @@
 import json
 import re
+from ide.models.files import ResourceFile, ResourceIdentifier
 
 __author__ = 'katharine'
 

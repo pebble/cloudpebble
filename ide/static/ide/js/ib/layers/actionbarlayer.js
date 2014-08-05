@@ -52,9 +52,9 @@
                 node.css('-webkit-filter', invertIcons ? 'invert(100%)' : 'none');
                 var url = this._icons[it].getBitmapURL();
                 if(url) {
-                    node.attr('src', url);
+                    node.attr('src', url).show();
                 } else {
-                    node.removeAttr('src');
+                    node.removeAttr('src').hide();
                 }
             }, this);
         },
@@ -103,8 +103,19 @@
             if(old_icon != '') {
                 this._canvas.getResources().removeResource(old_icon);
             }
-            this._canvas.getResources().addResource('GBitmap', new_icon);
+            if(new_icon != '') {
+                this._canvas.getResources().addResource('GBitmap', new_icon);
+            }
             this._old_icon_ids[it] = new_icon;
+        },
+        destroy: function() {
+            _.each(this._icons, function(icon) {
+                var res = icon.getValue();
+                if (res != '') {
+                    this._canvas.getResources().removeResource(res);
+                }
+            }, this);
+            IB.Layer.prototype.destroy.call(this);
         }
     });
 

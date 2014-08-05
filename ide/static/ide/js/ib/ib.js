@@ -61,6 +61,13 @@
             return codegen.integrateSource(source);
         };
 
+        this.clean = function() {
+            canvasPane.empty();
+            propertyPane.empty();
+            toolkitPane.empty();
+            init();
+        };
+
         init();
     }
     window.IB = IB;

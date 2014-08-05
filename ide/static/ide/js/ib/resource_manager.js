@@ -10,6 +10,9 @@
     IB.ResourceManager.prototype = {
         constructor: IB.ResourceManager,
         addResource: function(kind, id) {
+            if(id == '') {
+                return;
+            }
             if(!(id in this._resources)) {
                 var cls = IB.resourceRegistry.getClass(kind);
                 var args = _.tail(arguments);

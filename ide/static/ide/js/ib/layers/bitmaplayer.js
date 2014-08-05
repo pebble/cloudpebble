@@ -44,9 +44,11 @@
             if(this._old_resource_id != '') {
                 this._canvas.getResources().removeResource('GBitmap', this._old_resource_id);
             }
-            this._resource.setValue(id);
-            this._canvas.getResources().addResource('GBitmap', this._resource.getValue());
+            if(id != '') {
+                this._canvas.getResources().addResource('GBitmap', this._resource.getValue());
+            }
             this._old_resource_id = this._resource.getValue();
+            this._resource.setValue(id);
             this.trigger('resourceChange', id);
         },
         setBackgroundColour: function(colour) {
@@ -87,6 +89,7 @@
             if(res != '') {
                 this._canvas.getResources().removeResource(res);
             }
+            IB.Layer.prototype.destroy.call(this);
         }
     });
 

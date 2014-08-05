@@ -331,6 +331,7 @@ CloudPebble.Editor = (function() {
                             code_mirror.setValue(new_content);
                         }
                         ib_pane.hide();
+                        ib_editor.clean();
                         $(code_mirror.getWrapperElement()).show();
                         code_mirror.refresh();
                         code_mirror.focus();

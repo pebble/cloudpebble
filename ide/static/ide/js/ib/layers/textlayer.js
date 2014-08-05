@@ -121,6 +121,13 @@
                 this._canvas.getResources().addResource('GFont', new_font);
             }
             this._oldFont = new_font;
+        },
+        destroy: function() {
+            var res = this._font.getValue();
+            if(res != '' && res != 'GOTHIC_14_BOLD') {
+                this._canvas.getResources().removeResource(res);
+            }
+            IB.Layer.prototype.destroy.call(this);
         }
     });
 
