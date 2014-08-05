@@ -619,6 +619,9 @@
     IB.Properties.Font.prototype.constructor = IB.Properties.Font;
     _.extend(IB.Properties.Font.prototype, {
         setValue: function(value) {
+            if(!(value in this._fonts)) {
+                return;
+            }
             _super.setValue.call(this, value);
             this._node.val(this._value);
         },
