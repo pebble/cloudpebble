@@ -1,5 +1,6 @@
 CloudPebble.Resources = (function() {
     var project_resources = {};
+    var preview_count = 0;
 
     var add_resource = function(resource) {
         var li = CloudPebble.Sidebar.AddResource(resource, function() {
@@ -150,7 +151,6 @@ CloudPebble.Resources = (function() {
             var pane = prepare_resource_pane();
             var list_entry = $('#sidebar-pane-resource-' + resource.id);
             var preview_img = null;
-            var preview_count = 0;
             if(list_entry) {
                 list_entry.addClass('active');
             }
@@ -169,12 +169,6 @@ CloudPebble.Resources = (function() {
                     dimensions.text(this.naturalWidth + ' x ' + this.naturalHeight);
                     pane.find('.image-resource-preview').show();
                 });
-            } else if(resource.kind == 'font') {
-                var style = document.createElement('style');
-                ++preview_count;
-                var rule = '@font-face { font-family: "font-preview-' + resource.id + '-' + (preview_count) + '"; src: url(' + preview_url + '#e' + (preview_count) + '); }';
-                style.appendChild(document.createTextNode(rule));
-                $('body').append(style);
             }
             pane.find('.resource-download-link').removeClass('hide').find('a').attr('href', preview_url);
 
@@ -200,7 +194,7 @@ CloudPebble.Resources = (function() {
                 // 96 / PEBBLE_PPI should thus be correct.
                 // We use 'transform' to work around https://bugs.webkit.org/show_bug.cgi?id=20606
                 preview.css({
-                    'font-family': 'font-preview-' + resource.id + '-' + preview_count,
+                    'font-family': CloudPebble.Resources.GetFontFamily(resource),
                     'font-size': font_size + 'px',
                     'line-height': font_size + 'px',
                     'letter-spacing': tracking + 'px',
@@ -278,11 +272,7 @@ CloudPebble.Resources = (function() {
                         preview_img.attr('src', preview_img.attr('src').replace(/#e.*$/,'') + '#e' + (++preview_count));
                     }
                     if(resource.kind == 'font') {
-                        var style = document.createElement('style');
-                        ++preview_count;
-                        var rule = '@font-face { font-family: "font-preview-' + resource.id + '-' + (preview_count) + '"; src: url(' + preview_url + '#e' + (preview_count) + '); }';
-                        style.appendChild(document.createTextNode(rule));
-                        $('body').append(style);
+                        resource.family = null;
                         $.each(pane.find('.font-resource-group-single'), function(index, group) {
                             update_font_preview($(group));
                         });
@@ -380,8 +370,22 @@ CloudPebble.Resources = (function() {
         GetBitmaps: function() {
             return _.filter(project_resources, function(item) { return /^png/.test(item.kind); });
         },
+        GetFonts: function() {
+            return _.where(project_resources, {kind: 'font'});
+        },
         GetResourceByID: function(id) {
             return _.find(project_resources, function(resource) { return _.contains(resource.identifiers, id); });
+        },
+        GetFontFamily: function(font) {
+            if(!font.family) {
+                var preview_url = '/ide/project/' + PROJECT_ID + '/resource/' + font.id +'/get';
+                var style = document.createElement('style');
+                font.family = 'font-preview-' + font.id + '-' + (++preview_count);
+                var rule = '@font-face { font-family: "' + font.family + '"; src: url(' + preview_url + '#e' + (preview_count) + '); }';
+                style.appendChild(document.createTextNode(rule));
+                $('body').append(style);
+            }
+            return font.family;
         }
     };
 })();

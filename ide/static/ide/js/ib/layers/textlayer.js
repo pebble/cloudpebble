@@ -118,7 +118,7 @@
                 this._canvas.getResources().removeResource(this._oldFont);
             }
             if(new_font != 'GOTHIC_14_BOLD') {
-                this._canvas.getResources().addResource('GFont', new_font);
+                this._canvas.getResources().addResource('GFont', new_font, this._font.isCustom());
             }
             this._oldFont = new_font;
         },
