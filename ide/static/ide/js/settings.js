@@ -81,8 +81,8 @@ CloudPebble.Settings = (function() {
             }
             // This is not an appropriate use of a regex, but we have to have it for the HTML5 pattern attribute anyway,
             // so we may as well reuse the effort here.
-            // It validates that the format matches x[.y[.z[-suffix]]] with x, y in [0, 255].
-            if(!version_label.match(/^(\d{1,2}|1\d{2}|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d{2}|2[0-4]\d|25[0-5])(\.\d+(-.+)?)?)?$/)) {
+            // It validates that the format matches x[.y] with x, y in [0, 255].
+            if(!version_label.match(/^(\d{1,2}|1\d{2}|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d{2}|2[0-4]\d|25[0-5]))?$/)) {
                 display_error("You must specify a valid version number.");
                 return;
             }
