@@ -41,8 +41,9 @@
                 return;
             }
             if(!_.isEqual(value, this._value)) {
+                var oldValue = this._value;
                 this._value = value;
-                this.trigger('change', value);
+                this.trigger('change', value, oldValue);
             }
         },
         getNode: function() {
@@ -63,6 +64,12 @@
          */
         _generateNode: function() {
             throw new Error("_generateNode not implemented.");
+        },
+        /**
+         * Destroys the property.
+         */
+        destroy: function() {
+            // nothing to do.
         }
     };
     var Property = IB.Properties.Property;

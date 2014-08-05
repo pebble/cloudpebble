@@ -21,7 +21,7 @@
             }
             var list = this._listNode;
             list.empty();
-            _.each(IB.registry.knownLayers, function(layer, name) {
+            _.each(IB.layerRegistry.knownClasses, function(layer, name) {
                 var li = $('<li class="ib-toolkit-layer">')
                     .text(name)
                     .click(_.bind(this._createLayer, this, layer))
@@ -34,7 +34,7 @@
          * @private
          */
         _createLayer: function(layerClass) {
-            var layer = new layerClass(this._canvas.findNameForLayerType(layerClass.layerClass));
+            var layer = new layerClass(this._canvas, this._canvas.findNameForLayerType(layerClass.className));
             this._canvas.addLayer(layer);
             this._canvas.selectLayer(layer);
         }

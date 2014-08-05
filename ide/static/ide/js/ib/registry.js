@@ -1,28 +1,29 @@
 (function() {
     /**
-     * A registry of known UI elements. Used to generate lists and instantiate elements.
+     * A registry of things. Used to generate lists and instantiate said things.
      * @constructor
      */
     IB.Registry = function() {
-        this.knownLayers = Object.create(null);
+        this.knownClasses = Object.create(null);
     };
     IB.Registry.prototype = {
         /**
          * Registers a new layer type. Should be called at Layer definition time.
-         * @param {IB.Layer} layer
+         * @param {*} cls
          */
-        register: function(layer) {
-            this.knownLayers[layer.layerClass] = layer;
+        register: function(cls) {
+            this.knownClasses[cls.className] = cls;
         },
         /**
          * Returns a layer class given its name
-         * @param {string} layerClass
+         * @param {string} className
          * @returns {IB.Layer}
          */
-        getLayerClass: function(layerClass) {
-            return this.knownLayers[layerClass];
+        getClass: function(className) {
+            return this.knownClasses[className];
         }
     };
 
-    IB.registry = new IB.Registry();
+    IB.layerRegistry = new IB.Registry();
+    IB.resourceRegistry = new IB.Registry();
 })();

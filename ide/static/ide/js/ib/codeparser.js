@@ -60,20 +60,9 @@
                 return null;
             }
         },
-        /**
-         * Finds the mapping between GBitmap pointer names and resource IDs.
-         * @returns {Object.<string, string>} A variable -> resource ID mapping. The RESOURCE_ID_ is omitted.
-         * @private
-         */
-        // This is an unfortunate hack, but I dunno where else it could go.
-        _getBitmapMappings: function() {
-            var regex = /^\s*([A-Za-z0-9_]+) = gbitmap_create_with_resource\(RESOURCE_ID_([A-Za-z0-9_]+)\);\s*$/gm;
-            var groups;
-            var mapping = Object.create(null);
-            while((groups = regex.exec(this._source))) {
-                mapping[groups[1]] = groups[2];
-            }
-            return mapping;
+        _getInitialiserForThing: function(id) {
+            var regex = new RegExp('^\\s*' + id + '\\s*=\\s*([a-z_]+)\\((.*)\\);\\s*$', 'm');
+            return regex.exec(this._source).slice(1);
         },
         /**
          * Parses the given source for a window layout, updates the given canvas, adds the relevant layers,
@@ -82,32 +71,38 @@
          * @returns {IB.Layer[]}
          */
         parse: function(canvas) {
-            var thingRegex = /^static\s*([a-z]+) \*([a-z0-9_]+);\s*$/gim;
+            var thingRegex = /^static\s*([a-z]+) \*?([a-z0-9_]+);\s*$/gim;
             var results = [];
             var groups;
-            var gbitmap_mapping = this._getBitmapMappings();
+            var resourceMapping = Object.create(null);
             while((groups = thingRegex.exec(this._source))) {
-                var layerType = groups[1];
-                var layerID = groups[2];
-                if(layerType == "Window") {
+                var thingType = groups[1];
+                var thingID = groups[2];
+                if(thingType == "Window") {
                     canvas.readProperties(this._getPropertiesForLayerID('s_window'));
                     continue;
                 }
-                var layerClass = IB.registry.getLayerClass(layerType);
-                if(!layerClass) {
+                var layerClass = IB.layerRegistry.getClass(thingType);
+                if(layerClass) {
+                    var layer = new layerClass(canvas, thingID);
+
+                    var frame = this._getFrameForLayerID(thingID);
+                    if(frame) {
+                        layer.setPos(frame.pos.x, frame.pos.y);
+                        layer.setSize(frame.size.w, frame.size.h);
+                    }
+
+                    layer.readProperties(this._getPropertiesForLayerID(thingID), resourceMapping);
+
+                    results.push(layer);
                     continue;
                 }
-                var layer = new layerClass(layerID);
-
-                var frame = this._getFrameForLayerID(layerID);
-                if(frame) {
-                    layer.setPos(frame.pos.x, frame.pos.y);
-                    layer.setSize(frame.size.w, frame.size.h);
+                var resourceClass = IB.resourceRegistry.getClass(thingType);
+                if(resourceClass) {
+                    var init = this._getInitialiserForThing(thingID);
+                    resourceMapping[thingID] = resourceClass.resourceFromInitialiser(init[0], init[1]);
+                    continue;
                 }
-
-                layer.readProperties(this._getPropertiesForLayerID(layerID), gbitmap_mapping);
-
-                results.push(layer);
             }
             canvas.addLayers(results);
             return results;

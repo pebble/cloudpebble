@@ -37,6 +37,7 @@
         if(CloudPebble.ProjectInfo.app_is_watchface) {
             mProperties.fullscreen.lock();
         }
+        var mResources = new IB.ResourceManager();
 
         _.extend(this, Backbone.Events);
 
@@ -308,7 +309,6 @@
          */
         this.addLayer = function(layer) {
             mChildren[layer.getID()] = layer;
-            layer.setCanvas(self);
             layer.on('changeID', handleChangeID);
             layer.render(mNode);
         };
@@ -360,6 +360,10 @@
 
         this.isFullscreen = function() {
             return mProperties.fullscreen.getValue();
+        };
+
+        this.getResources = function() {
+            return mResources;
         };
 
         /**

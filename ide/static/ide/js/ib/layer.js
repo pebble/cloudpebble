@@ -1,13 +1,14 @@
 (function() {
     /**
      * Creates a generic layer.
+     * @param {IB.Canvas} canvas The canvas we're going to stick the thing into.
      * @param {string} [id] The ID of the layer (to be used as a C identifier)
      * @constructor
      * @extends {Backbone.Events}
      */
-    IB.Layer = function(id) {
+    IB.Layer = function(canvas, id) {
         _.extend(this, Backbone.Events);
-        this._canvas = null;
+        this._canvas = canvas;
         this._ID = id;
         this._node = $('<div class="ib-layer">')
                         .data('object', this) // reference cycles? pfft.
@@ -35,7 +36,7 @@
 
         this.on('all', this.render, this);
     };
-    IB.Layer.layerClass = 'Layer';
+    IB.Layer.className = 'Layer';
     IB.Layer.prototype = {
         /**
          * Generates a C declaration for the layer.
@@ -144,26 +145,19 @@
         readProperties: function(properties) {
             // We don't actually have any properties.
         },
-
-        /**
-         * Gives the layer a reference to its containing canvas.
-         * @param {IB.Canvas} canvas
-         */
-        setCanvas: function(canvas) {
-            this._canvas = canvas;
-        },
         /**
          * Destroys the layer.
          */
         destroy: function() {
             this._node.remove();
+            _.invoke(this._properties, 'destroy');
         },
         /**
          * Returns the name of the layer's type (e.g. BitmapLayer)
          * @returns {string}
          */
         getTypeName: function() {
-            return this.constructor.layerClass;
+            return this.constructor.className;
         },
         /**
          * Adds a listener to a property's change event that triggers an event on the layer.
@@ -178,9 +172,6 @@
         },
         constructor: IB.Layer
     };
-    IB.Layer.setLayerCounter = function(count) {
-        sLayerCounter = count;
-    };
 
-    IB.registry.register(IB.Layer);
+    IB.layerRegistry.register(IB.Layer);
 })();

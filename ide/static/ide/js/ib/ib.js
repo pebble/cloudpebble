@@ -48,7 +48,6 @@
             mCanvas.clear();
             var parser = new IB.Codeparser(source);
             var layers = parser.parse(mCanvas);
-            IB.Layer.setLayerCounter(layers.length);
         };
 
         /**

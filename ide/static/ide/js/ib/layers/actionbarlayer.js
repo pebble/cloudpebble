@@ -2,12 +2,13 @@
     var BUTTONS = ['up', 'select', 'down'];
     /**
      * Represents an ActionBarLayer (and so cannot be moved or resized)
+     * @param {IB.Canvas} canvas
      * @param {string} [id]
      * @extends {IB.Layer}
      * @constructor
      */
-    IB.ActionBarLayer = function(id) {
-        IB.Layer.call(this, id);
+    IB.ActionBarLayer = function(canvas, id) {
+        IB.Layer.call(this, canvas, id);
 
         _.extend(this._properties, {
             bg: new IB.Properties.Colour("Background", IB.ColourBlack),
@@ -19,13 +20,16 @@
         this._propListener(this._backgroundColour, 'backgroundColourChange');
         this._icons = {};
         this._icon_nodes = {};
+        this._old_icon_ids = {};
         _.each(BUTTONS, function(it) {
             this._icons[it] = this._properties['icon_' + it];
+            this._old_icon_ids[it] = '';
             this._icon_nodes[it] = $('<img>').appendTo(
                 $('<div>')
                     .addClass('ib-actionbarlayer-icon ib-icon-' + it)
                     .appendTo(this._node));
             this._propListener(this._properties['icon_' + it], it + 'IconChange');
+            this._properties['icon_' + it].on('change', _.partial(this._handleIconChange, it), this);
         }, this);
 
         this.setSize(20, 146);
@@ -35,7 +39,7 @@
     };
     IB.ActionBarLayer.prototype = Object.create(IB.Layer.prototype);
     IB.ActionBarLayer.prototype.constructor = IB.ActionBarLayer;
-    IB.ActionBarLayer.layerClass = 'ActionBarLayer';
+    IB.ActionBarLayer.className = 'ActionBarLayer';
     _.extend(IB.ActionBarLayer.prototype, {
         render: function(parent) {
             IB.Layer.prototype.render.call(this, parent);
@@ -55,14 +59,7 @@
             }, this);
         },
         generateDeclaration: function() {
-            var decl = ["static ActionBarLayer *" + this._ID + ";"];
-            _.each(BUTTONS, function(it) {
-                var icon = this._icons[it].getValue();
-                if(icon) {
-                    decl.push("static GBitmap *" + this._ID + "_icon_" + it + ";");
-                }
-            }, this);
-            return decl;
+            return ["static ActionBarLayer *" + this._ID + ";"];
         },
         generateInitialiser: function() {
             var init = [
@@ -76,25 +73,15 @@
             _.each(BUTTONS, function(it) {
                 var icon = this._icons[it].getValue();
                 if(icon) {
-                    init.push(this._ID + "_icon_" + it
-                        + " = gbitmap_create_with_resource(RESOURCE_ID_" + icon + ");");
                     init.push("action_bar_layer_set_icon(" + this._ID
                         + ", BUTTON_ID_" + it.toUpperCase() + ", "
-                        + this._ID + "_icon_" + it + ");");
+                        + this._canvas.getResources().getResource(icon) + ");");
                 }
             }, this);
             return init;
         },
         generateDestructor: function() {
-            var destroy = [];
-            _.each(BUTTONS, function(it) {
-                var icon = this._icons[it].getValue();
-                if(icon) {
-                    destroy.push("gbitmap_destroy(" + this._ID + "_icon_" + it + ");");
-                }
-            }, this);
-            destroy.push("action_bar_layer_destroy(" + this._ID + ");");
-            return destroy;
+            return ["action_bar_layer_destroy(" + this._ID + ");"];
         },
         readProperties: function(properties, mappings) {
             IB.Layer.prototype.readProperties.call(this, properties);
@@ -105,13 +92,21 @@
                         break;
                     case "action_bar_layer_set_icon":
                         _.each(values, function(group) {
-                            this._icons[group[1].split('_').pop().toLowerCase()].setValue(mappings[group[2]]);
+                            this._icons[group[1].split('_').pop().toLowerCase()].setValue(mappings[group[2]].getID());
                         }, this);
                         break;
                 }
             }, this);
+        },
+        _handleIconChange: function(it, new_icon) {
+            var old_icon = this._old_icon_ids[it];
+            if(old_icon != '') {
+                this._canvas.getResources().removeResource(old_icon);
+            }
+            this._canvas.getResources().addResource('GBitmap', new_icon);
+            this._old_icon_ids[it] = new_icon;
         }
     });
 
-    IB.registry.register(IB.ActionBarLayer);
+    IB.layerRegistry.register(IB.ActionBarLayer);
 })();

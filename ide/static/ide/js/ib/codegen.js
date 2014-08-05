@@ -12,12 +12,14 @@
     IB.Codegen.prototype = {
         generateDeclaration: function() {
             var code = this._canvas.generateDeclaration();
+            code = code.concat(this._canvas.getResources().generateDeclaration());
             code = code.concat(_.flatten(_.invoke(this._canvas.getLayers(), 'generateDeclaration')));
             return code.join("\n");
         },
         generateInitialiser: function() {
             var code = this._canvas.generateInitialiser();
             code.push('');
+            code = code.concat(this._canvas.getResources().generateInitialiser());
             _.each(this._canvas.getLayers(), function(layer) {
                 code.push('// ' + layer.getID());
                 code = code.concat(layer.generateInitialiser());
@@ -39,6 +41,7 @@
             _.each(this._canvas.getLayers(), function(layer) {
                 code = code.concat(layer.generateDestructor());
             });
+            code = code.concat(this._canvas.getResources().generateDestructor());
             var fn = [
                 'static void destroy_ui() {'
             ];
