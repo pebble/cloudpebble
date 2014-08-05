@@ -597,12 +597,31 @@
                 builtin: true
             }
         };
+        _.extend(this._fonts, _.object(_.flatten(_.map(CloudPebble.Resources.GetFonts(), function(font) {
+            return _.map(font.extra, function(info, resource_id) {
+                var font_size = parseInt(resource_id.match(/[0-9]+$/)[0], 10);
+                return [resource_id, {
+                    css: {
+                        'font-family': CloudPebble.Resources.GetFontFamily(font),
+                        'font-size': font_size,
+                        'letter-spacing': info.tracking || 0,
+                        'font-kerning': 'none'
+                    },
+                    name: resource_id,
+                    builtin: false,
+                    charRegex: info.regex ? new RegExp(info.regex) : null
+                }];
+            });
+        }), true)));
         Property.call(this, name, value);
     };
     IB.Properties.Font.prototype = Object.create(_super);
     IB.Properties.Font.prototype.constructor = IB.Properties.Font;
     _.extend(IB.Properties.Font.prototype, {
         setValue: function(value) {
+            if(!(value in this._fonts)) {
+                return;
+            }
             _super.setValue.call(this, value);
             this._node.val(this._value);
         },
@@ -635,8 +654,8 @@
                 return regex.test(char) ? char : "\u25AF"
             }).join('');
         },
-        useKerningHack: function() {
-            return !!this._fonts[this._value].kerningHack;
+        isCustom: function() {
+            return !this._fonts[this._value].builtin;
         }
     });
 })();

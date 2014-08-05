@@ -110,7 +110,7 @@
             if(!this._is_custom) {
                 return [this.name + " = fonts_get_system_font(FONT_KEY_" + this._resource_id + ");"];
             } else {
-                return [this.name + " = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_" + this._resource_id + ");"];
+                return [this.name + " = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_" + this._resource_id + "));"];
             }
         },
         generateDestructor: function() {
@@ -125,7 +125,7 @@
         if(fn_name == 'fonts_get_system_font') {
             return new IB.Resources.Font(id.replace(/^FONT_KEY_/, ''), false);
         } else if(fn_name == 'fonts_load_custom_font') {
-            return new IB.Resources.Font(id.replace(/^resource_get_handle\(RESOURCE_ID_/, ''), false);
+            return new IB.Resources.Font(id.replace(/^resource_get_handle\(RESOURCE_ID_|\)$/g, ''), true);
         } else {
             return null;
         }
