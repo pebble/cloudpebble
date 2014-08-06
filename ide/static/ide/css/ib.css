@@ -108,6 +108,16 @@
     top: calc(83% - 9px);
 }
 
+/* MenuLayer */
+
+.ib-menulayer {
+    background: #ffffff; /* Old browsers */
+    background: -moz-repeating-linear-gradient(top,  #ffffff 0, #ffffff 47px, #000000 47px, #000000 48px); /* FF3.6+ */
+    background: -webkit-repeating-linear-gradient(top,  #ffffff 0, #ffffff 47px, #000000 47px, #000000 48px);/* Chrome10+,Safari5.1+ */
+    background: -o-repeating-linear-gradient(top,  #ffffff 0, #ffffff 47px, #000000 47px, #000000 48px); /* Opera 11.10+ */
+    background: repeating-linear-gradient(to bottom,  #ffffff 0, #ffffff 47px, #000000 47px, #000000 48px); /* W3C */
+}
+
 /* Toolkit list */
 
 .ib-toolkit-layer {

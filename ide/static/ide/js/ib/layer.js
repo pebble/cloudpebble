@@ -43,7 +43,7 @@
          * @returns {string[]} C code
          */
         generateDeclaration: function() {
-            return ["static Layer *" + this._ID + ";"];
+            return ["static " + this.constructor.className + " *" + this._ID + ";"];
         },
 
         /**
