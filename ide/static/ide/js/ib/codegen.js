@@ -28,7 +28,7 @@
             });
             code.pop(); // get rid of stray blank line.
             var fn = [
-                'static void initialise_ui() {'
+                'static void initialise_ui(void) {'
             ];
             fn = fn.concat(_.map(code, function(line) {
                 return '  ' + line;
@@ -43,7 +43,7 @@
             });
             code = code.concat(this._canvas.getResources().generateDestructor());
             var fn = [
-                'static void destroy_ui() {'
+                'static void destroy_ui(void) {'
             ];
             fn = fn.concat(_.map(code, function(line) {
                 return '  ' + line;
