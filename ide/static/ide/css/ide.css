@@ -177,6 +177,10 @@ ul.nav-pills {
     background: #e5171f url('../img/delete.png') no-repeat center;
 }
 
+.ib-btn {
+    background: white url('../img/ib.png') no-repeat center;
+}
+
 .delete-btn:hover {
     background-color: #e5171f;
 }
