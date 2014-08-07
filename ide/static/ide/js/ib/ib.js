@@ -64,10 +64,11 @@
         };
 
         this.clean = function() {
+            mCanvas.clear();
             canvasPane.empty();
             propertyPane.empty();
             toolkitPane.empty();
-            mCanvas.clear();
+            layerPane.empty();
             init();
         };
 
