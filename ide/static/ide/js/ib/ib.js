@@ -7,16 +7,18 @@
      * @param {string} source The source code, for some reason?
      * @constructor
      */
-    function IB(canvasPane, propertyPane, toolkitPane, source) {
+    function IB(canvasPane, propertyPane, toolkitPane, layerPane, source) {
         var mCanvas;
         var mPropertyView;
         var mToolkit;
+        var mLayerListView;
 
         function init() {
             mCanvas = new IB.Canvas(canvasPane);
             mCanvas.on('selection', handleSelection);
             mToolkit = new IB.Toolkit(toolkitPane, mCanvas);
             mToolkit.renderList();
+            mLayerListView = new IB.LayerListView(layerPane, mCanvas);
             window.mCanvas = mCanvas;
             handleSelection(null);
         }
@@ -65,6 +67,7 @@
             canvasPane.empty();
             propertyPane.empty();
             toolkitPane.empty();
+            mCanvas.clear();
             init();
         };
 

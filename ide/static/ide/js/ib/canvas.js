@@ -8,10 +8,10 @@
     IB.Canvas = function(parent) {
         var self = this;
         var mChildren = {};
+        var mChildOrder = [];
         var mNode = null;
         var mScaleX = null;
         var mScaleY = null;
-        var mBackgroundColour = IB.ColourWhite;
 
         // Drag tracking.
         var mMouseDownCoords = null;
@@ -260,8 +260,10 @@
             if(layer == mSelectedLayer) {
                 self.selectLayer(null);
             }
+            self.trigger('removelayer', layer);
             layer.off('changeID', handleChangeID);
             layer.destroy();
+            mChildOrder = _.without(mChildOrder, layer);
             delete mChildren[layer.getID()];
             layer = null;
         }
@@ -309,18 +311,22 @@
          */
         this.addLayer = function(layer) {
             mChildren[layer.getID()] = layer;
+            mChildOrder.push(layer);
             layer.on('changeID', handleChangeID);
             layer.render(mNode);
+            self.trigger('addlayer', layer);
         };
 
         this.addLayers = _.partial(_.each, _, this.addLayer, this);
 
         this.getLayers = function() {
-            return _.values(mChildren);
+            return mChildOrder;
         };
 
         this.clear = function() {
+            _.each(mChildren, deleteLayer, this);
             mChildren = {};
+            mChildOrder = [];
             mNode.empty();
         };
 
@@ -372,6 +378,11 @@
          */
         this.getTypeName = function() {
             return "Window";
+        };
+
+        this.moveLayer = function(from, to) {
+            mChildOrder.splice(to, 0, mChildOrder.splice(from, 1)[0]);
+            _.invoke(mChildOrder, 'render', mNode);
         };
 
         init(parent);

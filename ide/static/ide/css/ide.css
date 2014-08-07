@@ -515,11 +515,15 @@ table.build-results tr.pending .build-state {
     padding-left: 20px;
 }
 
+.ui-canvas-things {
+    width: 296px; /* PEBBLE_WIDTH*2 + a bit */
+    float: left;
+}
+
 .ui-canvas {
     border: 4px solid gray;
     width: 288px; /* PEBBLE_WIDTH*2 */
     height: 336px; /* PEBBLE_HEIGHT*2  */
-    float: left;
 }
 
 .ui-thingies {
@@ -527,6 +531,10 @@ table.build-results tr.pending .build-state {
     height: 100%;
     padding-left: 20px;
     float: left;
+}
+
+#ui-layer-list {
+    padding-top: 20px;
 }
 
 /* Old stuff. */
