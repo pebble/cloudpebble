@@ -402,7 +402,9 @@ CloudPebble.Editor = (function() {
                 button_holder.append(run_btn);
                 button_holder.append(save_btn);
                 button_holder.append(discard_btn);
-                button_holder.append(ib_btn);
+                if(source.indexOf('// BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY') != -1) {
+                    button_holder.append(ib_btn);
+                }
                 // You must have an app.js in pebblejs projects.
                 if(CloudPebble.ProjectInfo.type != 'pebblejs' || file.name != 'app.js') {
                     button_holder.append(delete_btn);
@@ -691,7 +693,11 @@ CloudPebble.Editor = (function() {
                         });
                         create_remote_file({
                             name: name + ".c",
-                            content: "#include \"" + name + ".h\"\n#include <pebble.h>\n\n\n\n" +
+                            content: "#include \"" + name + ".h\"\n#include <pebble.h>\n\n" +
+                                "// BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY\n" +
+                                "static void destroy_ui(void) {}\n" +
+                                "static void initialise_ui(void) {}\n" +
+                                "// END AUTO-GENERATED UI CODE\n\n" +
                                 "static void handle_window_unload(Window* window) {\n" +
                                 "  destroy_ui();\n" +
                                 "}\n\n" +
