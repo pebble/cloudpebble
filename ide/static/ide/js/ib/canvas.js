@@ -237,6 +237,7 @@
             mNode.css({
                 'background-color': colour.css
             });
+            self.trigger('changeBackground', colour);
         }
 
         function handleFullscreenChange(fullscreen) {
@@ -251,6 +252,7 @@
                     'height': 168 - STATUS_BAR_HEIGHT
                 });
             }
+            self.trigger('changeFullscreen', fullscreen);
         }
 
         function deleteLayer(layer) {
@@ -260,11 +262,12 @@
             if(layer == mSelectedLayer) {
                 self.selectLayer(null);
             }
-            self.trigger('removelayer', layer);
             layer.off('changeID', handleChangeID);
-            layer.destroy();
+            // The layers must be removed from the child set before we trigger any events.
             mChildOrder = _.without(mChildOrder, layer);
             delete mChildren[layer.getID()];
+            layer.destroy();
+            self.trigger('removelayer', layer);
             layer = null;
         }
 
@@ -367,6 +370,10 @@
         this.isFullscreen = function() {
             return mProperties.fullscreen.getValue();
         };
+
+        this.getBackgroundColour = function() {
+            return mProperties.bg.getValue();
+        }
 
         this.getResources = function() {
             return mResources;

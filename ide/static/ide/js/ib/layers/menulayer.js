@@ -2,8 +2,8 @@
     /**
      * Represents a MenuLayer. This is pretty boring because MenuLayers are configured
      * entirely by callbacks that we can't really provide without defeating the point.
-     * @param canvas
-     * @param id
+     * @param {IB.Canvas} canvas
+     * @param {string} id
      * @constructor
      * @extends {IB.Layer}
      */

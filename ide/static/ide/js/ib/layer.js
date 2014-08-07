@@ -151,6 +151,7 @@
         destroy: function() {
             this._node.remove();
             _.invoke(this._properties, 'destroy');
+            this.trigger('destroy', this);
         },
         /**
          * Returns the name of the layer's type (e.g. BitmapLayer)

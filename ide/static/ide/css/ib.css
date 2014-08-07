@@ -118,11 +118,24 @@
     background: repeating-linear-gradient(to bottom,  #ffffff 0, #ffffff 47px, #000000 47px, #000000 48px); /* W3C */
 }
 
+/* Inverter layer */
+
+.ib-inverterlayer {
+    -webkit-filter: invert(100%);
+    overflow: hidden;
+}
+
+.ib-inverterlayer * {
+    pointer-events: none !important;
+}
+
 /* Toolkit list */
 
 .ib-toolkit-layer {
     cursor: pointer;
 }
+
+/* Layer list */
 
 .ib-layerlistview {
     margin: auto;
