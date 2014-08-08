@@ -10,6 +10,7 @@
         this._canvas = canvas;
         canvas.on('addlayer', this._handleNewLayer, this);
         canvas.on('removelayer', this._handleDeleteLayer, this);
+        canvas.on('selection', this._handleSelection, this);
         this._init();
     };
     IB.LayerListView.prototype = {
@@ -38,7 +39,16 @@
             this._node.sortable('reload');
         },
         _handleDeleteLayer: function(layer) {
-            _.find(this._node.find('li'), function(x) {return $(x).data('layer-id') == layer.getID();}).remove();
+            this._getLayerNode(layer).remove();
+        },
+        _handleSelection: function(layer) {
+            this._node.find('li.selected').removeClass('selected');
+            if(layer != null) {
+                this._getLayerNode(layer).addClass('selected');
+            }
+        },
+        _getLayerNode: function(layer) {
+            return $(_.find(this._node.find('li'), function(x) {return $(x).data('layer-id') == layer.getID();}));
         }
     };
 })();

@@ -169,3 +169,8 @@
     cursor: move;
     border-collapse: collapse;
 }
+
+.ib-layerlistview li.selected {
+    color: #333333;
+    background-color: #969696;
+}
