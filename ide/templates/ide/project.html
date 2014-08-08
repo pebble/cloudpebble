@@ -11,7 +11,13 @@
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.2.0/theme/eclipse.css">
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.2.0/theme/blackboard.css">
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.2.0/theme/solarized.css">
+{% if font_css %}
+<link rel="stylesheet" href="{{ font_css }}" />
+{% endif %}
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Droid+Serif:700|Roboto+Condensed|Roboto:700">
+<link rel="stylesheet" href="//static.cloudpebble.net/fonts/raster-gothic/stylesheet.css">
 <link rel="stylesheet" href="{% static 'ide/css/ide.css' %}">
+<link rel="stylesheet" href="{% static 'ide/css/ib.css' %}">
 <link rel="stylesheet" href="{% static 'ide/css/codemirror-default.css' %}">
 {% endblock %}
 
@@ -39,7 +45,7 @@
                     <li class="nav-header" id="sidebar-pane-settings"><a href="#">Settings</a></li>
                     <li class="nav-header" id="sidebar-pane-compile"><a href="#">Compilation</a></li>
                     <li id="sidebar-pane-github" class="nav-header {%if not project.owner.github%}disabled{%endif%}"><a href="#">GitHub</a></li>
-                    <li class="nav-header nav-section">Source files <button class="btn btn-small native-only" id="new-source-file">Add C</button> <button class="btn btn-small" id="new-js-file">JS</button></li>
+                    <li class="nav-header nav-section">Source files <button class="btn btn-small" id="new-source-file">Add new</button></li>
                     <li class="not-simplyjs" id="end-source-files"></li>
                     <li class="nav-header nav-section not-simplyjs">Resources <button class="btn btn-small" id="sidebar-pane-new-resource">Add new</button></li>
                     <li class="hide not-simplyjs" id="end-resources"></li>
@@ -78,10 +84,65 @@
 {% include "ide/project/compile.html" %}
 {% include "ide/project/settings.html" %}
 {% include "ide/project/github.html" %}
+{% include "ide/project/ui-editor.html" %}
 {% endblock %}
 
 {% block modals %}
-
+<!-- Create new file prompt -->
+<div id="editor-new-file-prompt" class="modal hide fade" tabindex="-1" role="dialog">
+    <div class="modal-header">
+        <h3>Create new file</h3>
+    </div>
+    <form class="form-horizontal">
+        <div class="modal-body">
+            <div class="alert alert-error hide"></div>
+            <div class="control-group">
+                <label class="control-label" for="new-file-type">File type</label>
+                <div class="controls">
+                    <select id="new-file-type">
+                        <option value="c" selected>C file</option>
+                        <option value="js">JavaScript file</option>
+                        <option value="layout">Window Layout</option>
+                    </select>
+                </div>
+            </div>
+            <div class="c-file-options file-group">
+                <div class="control-group">
+                    <label class="control-label" for="new-c-file-name">Filename</label>
+                    <div class="controls">
+                        <input type="text" id="new-c-file-name" pattern="[a-zA-Z0-9_-]+\.(c|h)$">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="new-c-generate-h">Create header</label>
+                    <div class="controls">
+                        <input type="checkbox" id="new-c-generate-h">
+                    </div>
+                </div>
+            </div>
+            <div class="js-file-options file-group hide">
+                <div class="control-group">
+                    <label class="control-label" for="new-js-file-name">Filename</label>
+                    <div class="controls">
+                        <input type="text" id="new-js-file-name" pattern="[a-zA-Z0-9_-]+\.js$">
+                    </div>
+                </div>
+            </div>
+            <div class="layout-file-options file-group hide">
+                <div class="control-group">
+                    <label class="control-label" for="new-window-name">Window name</label>
+                    <div class="controls">
+                        <input type="text" id="new-window-name" pattern="^[a-z]([a-z0-9_]*[a-z0-9])?$">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" id="editor-create-file-button">Create</button>
+    </div>
+</div>
 <!-- Create new repo prompt -->
 <div id="github-new-repo-prompt" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
@@ -330,7 +391,27 @@ var LIBPEBBLE_
 <script src="{% static 'ide/js/crash_handler.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/analytics.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/documentation.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/ib/ib.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/ib/utils.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/ib/properties.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/ib/registry.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/ib/resource_manager.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/ib/resource.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/ib/layer.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/ib/canvas.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/ib/resizer.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/ib/layers/textlayer.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/ib/layers/bitmaplayer.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/ib/layers/actionbarlayer.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/ib/layers/menulayer.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/ib/layers/inverterlayer.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/ib/toolkit.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/ib/property_view.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/ib/codegen.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/ib/codeparser.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/ib/layer_list.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/external/jshint.min.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/external/html.sortable.min.js' %}" type="text/javascript"></script>
 <script type="text/javascript">
 CloudPebble.Init();
 </script>

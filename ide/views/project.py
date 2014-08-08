@@ -34,7 +34,11 @@ def view_project(request, project_id):
         project.app_version_label = '1.0'
     send_keen_event('cloudpebble', 'cloudpebble_open_project', request=request, project=project)
     app_keys = sorted(json.loads(project.app_keys).iteritems(), key=lambda x: x[1])
-    return render(request, 'ide/project.html', {'project': project, 'app_keys': app_keys})
+    return render(request, 'ide/project.html', {
+        'project': project,
+        'app_keys': app_keys,
+        'font_css': settings.TYPOGRAPHY_CSS
+    })
 
 
 @csrf_exempt

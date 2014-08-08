@@ -12,7 +12,7 @@ CloudPebble.Editor = (function() {
         project_source_files[file.name] = file;
     };
 
-    var edit_source_file = function(file) {
+    var edit_source_file = function(file, show_ui_editor) {
         // See if we already had it open.
         CloudPebble.Sidebar.SuspendActive();
         if(CloudPebble.Sidebar.Restore('source-'+file.id)) {
@@ -271,6 +271,7 @@ CloudPebble.Editor = (function() {
                     code_mirror.refresh();
                     code_mirror.focus();
                     check_safe();
+                    refresh_ib();
                 }, function() {
                     if(!was_clean) {
                         --unsaved_files;
@@ -294,6 +295,14 @@ CloudPebble.Editor = (function() {
                 };
 
                 var save = function(callback) {
+                    // Make sure we're up to date with whatever changed in IB.
+                    if(ib_showing) {
+                        var content = code_mirror.getValue();
+                        var new_content = ib_editor.integrateSource(content);
+                        if(content != new_content) {
+                            code_mirror.setValue(new_content);
+                        }
+                    }
                     save_btn.attr('disabled','disabled');
                     delete_btn.attr('disabled','disabled');
                     $.post("/ide/project/" + PROJECT_ID + "/source/" + file.id + "/save", {
@@ -315,12 +324,68 @@ CloudPebble.Editor = (function() {
                     });
                 };
 
+                var ib_pane = $('#ui-editor-pane-template').clone().removeClass('hide').appendTo(pane).hide();
+                var ib_editor = new IB(ib_pane.find('.ui-canvas'), ib_pane.find('#ui-properties'), ib_pane.find('#ui-toolkit'), ib_pane.find('#ui-layer-list > div'));
+                var ib_showing = false;
+
+                function toggle_ib() {
+                    if(!ib_showing) {
+                        $(code_mirror.getWrapperElement()).hide();
+                        ib_pane.show();
+                        ib_editor.setSource(code_mirror.getValue());
+                        delete_btn.hide();
+                        discard_btn.hide();
+                        ib_btn.addClass('active');
+                    } else {
+                        var content = code_mirror.getValue();
+                        var new_content = ib_editor.integrateSource(content);
+                        if(content != new_content) {
+                            code_mirror.setValue(new_content);
+                        }
+                        ib_pane.hide();
+                        ib_editor.clean();
+                        $(code_mirror.getWrapperElement()).show();
+                        code_mirror.refresh();
+                        code_mirror.focus();
+                        delete_btn.show();
+                        discard_btn.show();
+                        ib_btn.removeClass('active');
+                    }
+                    ib_showing = !ib_showing;
+                }
+
+                function refresh_ib() {
+                    if(!ib_showing) {
+                        return;
+                    }
+                    // This is terrible.
+                    toggle_ib();
+                    toggle_ib();
+                }
+
+                ib_editor.on('changed', _.throttle(function() {
+                    if(!ib_showing) {
+                        return;
+                    }
+                    var content = code_mirror.getValue();
+                    var new_content = ib_editor.integrateSource(content);
+                    if(content != new_content) {
+                        code_mirror.setValue(new_content);
+                    }
+                    ib_editor.setSource(new_content, false);
+                }), 10000);
+
+                ib_editor.on('selection', function() {
+                    ib_pane.find('a[href=#ui-properties]').tab('show');
+                });
+
                 // Add some buttons
                 var button_holder = $('<p id="editor-button-wrapper">');
                 var run_btn = $('<button class="btn run-btn" title="Save, build, install and run"></button>');
                 var save_btn = $('<button class="btn save-btn" title="Save"></button>');
                 var discard_btn = $('<button class="btn reload-btn" title="Reload"></button>');
                 var delete_btn = $('<button class="btn delete-btn" title="Delete"></button>');
+                var ib_btn = $('<button class="btn ib-btn" title="UI Editor"></button>');
                 var error_area = $('<div>');
 
                 save_btn.click(function() { save(); });
@@ -371,10 +436,15 @@ CloudPebble.Editor = (function() {
                     });
                 });
 
+                ib_btn.click(toggle_ib);
+
                 button_holder.append(error_area);
                 button_holder.append(run_btn);
                 button_holder.append(save_btn);
                 button_holder.append(discard_btn);
+                if(source.indexOf('// BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY') != -1) {
+                    button_holder.append(ib_btn);
+                }
                 // You must have an app.js in pebblejs projects.
                 if(CloudPebble.ProjectInfo.type != 'pebblejs' || file.name != 'app.js') {
                     button_holder.append(delete_btn);
@@ -397,6 +467,10 @@ CloudPebble.Editor = (function() {
                 $(document).keyup(function(e) {
                   if (e.keyCode == 27) { fullscreen(code_mirror, false); }   // Esc exits fullscreen mode
                 });
+
+                if(show_ui_editor === true) {
+                    toggle_ib();
+                }
 
                 // Tell Google
                 ga('send', 'event', 'file', 'open');
@@ -426,6 +500,7 @@ CloudPebble.Editor = (function() {
     };
 
     function init() {
+        init_create_prompt();
         CodeMirror.commands.autocomplete = function(cm) {
             CodeMirror.showHint(cm, CloudPebble.Editor.Autocomplete.Complete, {completeSingle: false});
         };
@@ -567,52 +642,138 @@ CloudPebble.Editor = (function() {
         }, 1);
     }
 
+    function create_remote_file(params, callback) {
+        if(_.isString(params)) {
+            params = {name: params};
+        }
+        $.post("/ide/project/" + PROJECT_ID + "/create_source_file", params, function(data) {
+            if(data.success) {
+                add_source_file(data.file);
+            }
+            if(callback) {
+                callback(data);
+            }
+        });
+        ga('send', 'event', 'file', 'create');
+    }
+
+    function init_create_prompt() {
+        var prompt = $('#editor-new-file-prompt');
+        prompt.find('#new-file-type').change(function() {
+            prompt.find('.file-group').hide();
+            prompt.find('.' + $(this).val() + '-file-options').show();
+        });
+        // If this isn't a native project, only JS files should exist.
+        if(CloudPebble.ProjectInfo.type != 'native') {
+            prompt.find('#new-file-type').val('js').parent('.control-group').hide();
+        }
+
+        prompt.find('#editor-create-file-button').click(function() {
+            var kind = prompt.find('#new-file-type').val();
+            var error = prompt.find('.alert');
+            // do stuff.
+            if(kind == 'c') {
+                (function() { // for scoping reasons, mostly.
+                    var name = prompt.find('#new-c-file-name').val();
+                    if (!(/.+\.h$/.test(name) || /.+\.c$/.test(name))) {
+                        error.text("Source files must end in .c or .h").show();
+                    } else if (project_source_files[name]) {
+                        error.text("A file called '" + name + "' already exists.").show();
+                    } else {
+                        // Should we create a header?
+                        if (prompt.find('#new-c-generate-h').is(':checked')) {
+                            // Drop the .c to make a .h
+                            var split_name = name.split('.');
+                            if (split_name.pop() == 'c') {
+                                create_remote_file({
+                                    name: split_name.join('.') + '.h',
+                                    content: "#pragma once\n"
+                                });
+                            }
+                        }
+                        create_remote_file(name, function (data) {
+                            if (data.success) {
+                                prompt.modal('hide');
+                                edit_source_file(data.file);
+                            } else {
+                                error.text(data.error).show();
+                            }
+                        });
+                    }
+                })();
+            } else if(kind == 'js') {
+                (function() {
+                    var name = prompt.find('#new-js-file-name').val();
+                    if(!/.+\.js$/.test(name)) {
+                        error.text("Source files must end in .js").show();
+                    } else if(project_source_files[name]) {
+                        error.text("A file called '" + name + "' already exists.").show();
+                    } else {
+                        create_remote_file(name, function(data) {
+                            if (data.success) {
+                                prompt.modal('hide');
+                                edit_source_file(data.file);
+                            } else {
+                                error.text(data.error).show();
+                            }
+                        });
+                    }
+                })();
+            } else if(kind == 'layout') {
+                (function() {
+                    var name = prompt.find('#new-window-name').val();
+                    if(!/^[a-z]([a-z0-9_]*[a-z0-9])?$/.test(name)) {
+                        error.text("You must specify a valid window name using lowercase letters and underscores.").show();
+                    } else if(project_source_files[name + ".h"] || project_source_files[name + ".c"]) {
+                        error.text("That name is already used in this project.").show();
+                    } else {
+                        create_remote_file({
+                            name: name + ".h",
+                            content: "void show_" + name + "(void);\nvoid hide_" + name + "(void);\n"
+                        });
+                        create_remote_file({
+                            name: name + ".c",
+                            content: "#include \"" + name + ".h\"\n#include <pebble.h>\n\n" +
+                                "// BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY\n" +
+                                "static void destroy_ui(void) {}\n" +
+                                "static void initialise_ui(void) {}\n" +
+                                "// END AUTO-GENERATED UI CODE\n\n" +
+                                "static void handle_window_unload(Window* window) {\n" +
+                                "  destroy_ui();\n" +
+                                "}\n\n" +
+                                "void show_" + name + "(void) {\n" +
+                                "  initialise_ui();\n" +
+                                "  window_set_window_handlers(s_window, (WindowHandlers) {\n" +
+                                "    .unload = handle_window_unload,\n" +
+                                "  });\n" +
+                                "  window_stack_push(s_window, true);\n" +
+                                "}\n\n" +
+                                "void hide_" + name + "(void) {\n" +
+                                "  window_stack_remove(s_window, true);\n" +
+                                "}\n"
+                        }, function(data) {
+                            if(data.success) {
+                                edit_source_file(data.file, true);
+                                prompt.modal('hide');
+                            }
+                        });
+                    }
+                })();
+            }
+        });
+    }
+
+    function create_source_file() {
+        var prompt = $('#editor-new-file-prompt');
+        // reset the prompt
+        prompt.find('.alert').text('').hide();
+        prompt.find('input[type=text]').val('');
+        prompt.modal('show');
+    }
+
     return {
         Create: function() {
-            CloudPebble.Prompts.Prompt("New Source File", "File name", "somefile.c", '', function(value, resp) {
-               if(value === '') {
-                    resp.error("You must specify a filename.");
-                } else if(!(/\.h$/.test(value) || /\.c$/.test(value))) {
-                    resp.error("Source files must end in .c or .h");
-                } else if(project_source_files[value]) {
-                    resp.error("A file called '" + value + "' already exists.");
-                } else {
-                    resp.disable();
-                    $.post("/ide/project/" + PROJECT_ID + "/create_source_file", {'name': value}, function(data) {
-                        if(!data.success) {
-                            resp.error(data.error);
-                        } else {
-                            resp.dismiss();
-                            add_source_file(data.file);
-                            edit_source_file(data.file);
-                        }
-                    });
-                    ga('send', 'event', 'file', 'create');
-                }
-            });
-        },
-        DoJSFile: function() {
-            CloudPebble.Prompts.Prompt("New Source File", "File name", "somefile.js", '', function(value, resp) {
-               if(value === '') {
-                    resp.error("You must specify a filename.");
-                } else if(!/\.js$/.test(value)) {
-                    resp.error("Source files must end in .js");
-                } else if(project_source_files[value]) {
-                    resp.error("A file called '" + value + "' already exists.");
-                } else {
-                    resp.disable();
-                    $.post("/ide/project/" + PROJECT_ID + "/create_source_file", {'name': value}, function(data) {
-                        if(!data.success) {
-                            resp.error(data.error);
-                        } else {
-                            resp.dismiss();
-                            add_source_file(data.file);
-                            edit_source_file(data.file);
-                        }
-                    });
-                    ga('send', 'event', 'file', 'create');
-                }
-            });
+            create_source_file();
         },
         Add: function(file) {
             add_source_file(file);

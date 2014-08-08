@@ -1,0 +1,176 @@
+/* Canvas */
+
+.ib-canvas {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: default;
+}
+
+/* Resizer */
+
+.ib-resizer {
+    border: 1px dashed black;
+    position: absolute;
+    pointer-events: none;
+}
+
+.ib-handle {
+    position: absolute;
+    background-color: white;
+    border: 1px solid black;
+    height: 4px;
+    width: 4px;
+    pointer-events: auto;
+}
+
+.ib-handle-upper-left {
+    cursor: nwse-resize;
+    top: -3.5px;
+    left: -3.5px;
+}
+
+.ib-handle-upper-middle {
+    cursor: ns-resize;
+    top: -3.5px;
+    left: calc(50% - 3.5px);
+}
+
+.ib-handle-upper-right {
+    cursor: nesw-resize;
+    top: -3.5px;
+    right: -3.5px;
+}
+
+.ib-handle-middle-left {
+    cursor: ew-resize;
+    top: calc(50% - 3.5px);
+    left: -3.5px;
+}
+
+.ib-handle-middle-right {
+    cursor: ew-resize;
+    top: calc(50% - 3.5px);
+    right: -3.5px;
+}
+
+.ib-handle-lower-left {
+    cursor: nesw-resize;
+    bottom: -3.5px;
+    left: -3.5px;
+}
+
+.ib-handle-lower-middle {
+    cursor: ns-resize;
+    bottom: -3.5px;
+    left: calc(50% - 3.5px);
+}
+
+.ib-handle-lower-right {
+    cursor: nwse-resize;
+    bottom: -3.5px;
+    right: -3.5px;
+}
+
+/* TextLayer */
+
+.ib-textlayer {
+    overflow: hidden;
+}
+
+/* ActionBarLayer */
+
+.ib-actionbarlayer {
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+
+.ib-actionbarlayer-icon {
+    position: absolute;
+    left: 1px;
+    width: 18px;
+    height: 18px;
+    text-align: center;
+    background-repeat: no-repeat;
+    pointer-events: none;
+}
+
+.ib-icon-up {
+    top: calc(16% - 9px);
+}
+
+.ib-icon-select {
+    top: calc(50% - 9px);
+}
+
+.ib-icon-down {
+    top: calc(83% - 9px);
+}
+
+/* MenuLayer */
+
+.ib-menulayer {
+    background: #ffffff; /* Old browsers */
+    background: -moz-repeating-linear-gradient(top,  #ffffff 0, #ffffff 47px, #000000 47px, #000000 48px); /* FF3.6+ */
+    background: -webkit-repeating-linear-gradient(top,  #ffffff 0, #ffffff 47px, #000000 47px, #000000 48px);/* Chrome10+,Safari5.1+ */
+    background: -o-repeating-linear-gradient(top,  #ffffff 0, #ffffff 47px, #000000 47px, #000000 48px); /* Opera 11.10+ */
+    background: repeating-linear-gradient(to bottom,  #ffffff 0, #ffffff 47px, #000000 47px, #000000 48px); /* W3C */
+}
+
+/* Inverter layer */
+
+.ib-inverterlayer {
+    -webkit-filter: invert(100%);
+    overflow: hidden;
+}
+
+.ib-inverterlayer * {
+    pointer-events: none !important;
+}
+
+/* Toolkit list */
+
+.ib-toolkit {
+    border-collapse: collapse;
+}
+
+.ib-toolkit tr {
+    cursor: pointer;
+}
+
+.ib-toolkit td {
+    border-top: 2px solid grey;
+    border-bottom: 2px solid grey;
+}
+
+.ib-toolkit .name {
+    color: white;
+    font-weight: bold;
+    width: 150px;
+}
+
+/* Layer list */
+
+.ib-layerlistview {
+    margin: auto;
+    padding: 0;
+    width: 100%;
+    border-top: 2px solid gray;
+    user-select: none;
+}
+
+.ib-layerlistview li {
+    list-style: none;
+    border: 2px solid gray;
+    border-top: 0;
+    padding: 5px;
+    height: 22px;
+    cursor: move;
+    border-collapse: collapse;
+}
+
+.ib-layerlistview li.selected {
+    color: #333333;
+    background-color: #969696;
+}

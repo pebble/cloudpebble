@@ -49,7 +49,8 @@ def create_resource(request, project_id):
             "kind": rf.kind,
             "file_name": rf.file_name,
             "resource_ids": [{'id': x.resource_id, 'regex': x.character_regex} for x in resources],
-            "identifiers": [x.resource_id for x in resources]
+            "identifiers": [x.resource_id for x in resources],
+            "extra": {y.resource_id: {'regex': y.character_regex, 'tracking': y.tracking} for y in rf.identifiers.all()}
         }})
 
 
@@ -77,7 +78,8 @@ def resource_info(request, project_id, resource_id):
                              } for x in resources],
             'id': resource.id,
             'file_name': resource.file_name,
-            'kind': resource.kind
+            'kind': resource.kind,
+            "extra": {y.resource_id: {'regex': y.character_regex, 'tracking': y.tracking} for y in resource.identifiers.all()}
         }
     })
 
@@ -137,7 +139,8 @@ def update_resource(request, project_id, resource_id):
             "kind": resource.kind,
             "file_name": resource.file_name,
             "resource_ids": [{'id': x.resource_id, 'regex': x.character_regex} for x in resources],
-            "identifiers": [x.resource_id for x in resources]
+            "identifiers": [x.resource_id for x in resources],
+            "extra": {y.resource_id: {'regex': y.character_regex, 'tracking': y.tracking} for y in resource.identifiers.all()}
         }})
 
 

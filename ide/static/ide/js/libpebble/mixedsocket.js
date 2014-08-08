@@ -16,7 +16,6 @@
             "   var listener = function(event) {\n" +
             "       window.removeEventListener('message', listener, false);\n" +
             "       gParentWindow = event.source;\n" +
-            "       console.log(event.data);\n" +
             "       eval(event.data);\n" +
             "   }\n" +
             "   window.addEventListener('message', listener, false);\n" +
@@ -81,7 +80,6 @@
             } else if(data.event == 'message') {
                 data.eventData = new Uint8Array(data.eventData);
             }
-            console.log(data.eventData);
             self.trigger(data.event, data.eventData);
         };
     };
