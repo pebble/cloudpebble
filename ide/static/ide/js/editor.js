@@ -370,8 +370,7 @@ CloudPebble.Editor = (function() {
                 }), 10000);
 
                 ib_editor.on('selection', function() {
-                    ib_pane.find('#ui-properties').addClass('active');
-                    ib_pane.find('#ui-toolkit').removeClass('active');
+                    ib_pane.find('a[href=#ui-properties]').tab('show');
                 });
 
                 // Add some buttons
