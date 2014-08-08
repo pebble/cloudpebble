@@ -131,8 +131,23 @@
 
 /* Toolkit list */
 
-.ib-toolkit-layer {
+.ib-toolkit {
+    border-collapse: collapse;
+}
+
+.ib-toolkit tr {
     cursor: pointer;
+}
+
+.ib-toolkit td {
+    border-top: 2px solid grey;
+    border-bottom: 2px solid grey;
+}
+
+.ib-toolkit .name {
+    color: white;
+    font-weight: bold;
+    width: 150px;
 }
 
 /* Layer list */

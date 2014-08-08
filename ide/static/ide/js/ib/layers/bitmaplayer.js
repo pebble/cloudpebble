@@ -24,6 +24,7 @@
     IB.BitmapLayer.prototype = Object.create(IB.Layer.prototype);
     IB.BitmapLayer.prototype.constructor = IB.BitmapLayer;
     IB.BitmapLayer.className = 'BitmapLayer';
+    IB.BitmapLayer.description = "BitmapLayer will display an opaque bitmap image.";
     _.extend(IB.BitmapLayer.prototype, {
         render: function(parent) {
             IB.Layer.prototype.render.call(this, parent);

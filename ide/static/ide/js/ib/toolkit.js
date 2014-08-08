@@ -16,14 +16,15 @@
          */
         renderList: function() {
             if(!this._listNode) {
-                this._listNode = $('<ul class="ib-toolkit">')
+                this._listNode = $('<table class="ib-toolkit">')
                     .appendTo(this._parent);
             }
             var list = this._listNode;
             list.empty();
             _.each(IB.layerRegistry.knownClasses, function(layer, name) {
-                var li = $('<li class="ib-toolkit-layer">')
-                    .text(name)
+                var li = $('<tr>')
+                    .append($('<td class="name">').text(name))
+                    .append($('<td class="desc">').text(layer.description))
                     .click(_.bind(this._createLayer, this, layer))
                     .appendTo(list);
             }, this);

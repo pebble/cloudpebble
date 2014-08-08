@@ -39,6 +39,7 @@
     IB.TextLayer.prototype = Object.create(IB.Layer.prototype);
     IB.TextLayer.prototype.constructor = IB.TextLayer;
     IB.TextLayer.className = 'TextLayer';
+    IB.TextLayer.description = "Displays text.";
     _.extend(IB.TextLayer.prototype, {
         render: function(parent) {
             IB.Layer.prototype.render.call(this, parent);

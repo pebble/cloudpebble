@@ -46,6 +46,7 @@
                 mPropertyView = new IB.PropertyView(propertyPane, mCanvas);
                 mPropertyView.render();
             }
+            self.trigger('selection');
         }
 
         function handleChange() {

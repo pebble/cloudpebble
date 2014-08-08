@@ -369,6 +369,11 @@ CloudPebble.Editor = (function() {
                     ib_editor.setSource(new_content, false);
                 }), 10000);
 
+                ib_editor.on('selection', function() {
+                    ib_pane.find('#ui-properties').addClass('active');
+                    ib_pane.find('#ui-toolkit').removeClass('active');
+                });
+
                 // Add some buttons
                 var button_holder = $('<p id="editor-button-wrapper">');
                 var run_btn = $('<button class="btn run-btn" title="Save, build, install and run"></button>');

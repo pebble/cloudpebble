@@ -37,6 +37,7 @@
         this.on('all', this.render, this);
     };
     IB.Layer.className = 'Layer';
+    IB.Layer.description = "The basic layer. Invisible unless drawing callbacks are set up programatically.";
     IB.Layer.prototype = {
         /**
          * Generates a C declaration for the layer.
