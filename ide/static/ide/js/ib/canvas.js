@@ -263,6 +263,7 @@
                 self.selectLayer(null);
             }
             layer.off('changeID', handleChangeID);
+            layer.off('all', handleLayerEvent);
             // The layers must be removed from the child set before we trigger any events.
             mChildOrder = _.without(mChildOrder, layer);
             delete mChildren[layer.getID()];
@@ -276,6 +277,10 @@
                 mChildren[newID] = mChildren[oldID];
                 delete mChildren[oldID];
             }
+        }
+
+        function handleLayerEvent(event) {
+            self.trigger('changed');
         }
 
         this.findNameForLayerType = function(layerType) {
@@ -316,6 +321,7 @@
             mChildren[layer.getID()] = layer;
             mChildOrder.push(layer);
             layer.on('changeID', handleChangeID);
+            layer.on('all', handleLayerEvent);
             layer.render(mNode);
             self.trigger('addlayer', layer);
         };

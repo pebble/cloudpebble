@@ -4,14 +4,20 @@
      * @param {jQuery|HTMLElement} canvasPane HTML element into which to render the canvas.
      * @param {jQuery|HTMLElement} propertyPane HTML element into which to render the property view.
      * @param {jQuery|HTMLElement} toolkitPane HTML element into which to render the toolkit view.
+     * @param {jQuery|HTMLElement} layerPane HTML element into which to render the layer view.
      * @param {string} source The source code, for some reason?
      * @constructor
+     * @extends {Backbone.Events}
      */
     function IB(canvasPane, propertyPane, toolkitPane, layerPane, source) {
         var mCanvas;
         var mPropertyView;
         var mToolkit;
         var mLayerListView;
+        var mSource = '';
+        var self = this;
+
+        _.extend(this, Backbone.Events);
 
         function init() {
             mCanvas = new IB.Canvas(canvasPane);
@@ -19,7 +25,7 @@
             mToolkit = new IB.Toolkit(toolkitPane, mCanvas);
             mToolkit.renderList();
             mLayerListView = new IB.LayerListView(layerPane, mCanvas);
-            window.mCanvas = mCanvas;
+            mCanvas.on('changed', handleChange);
             handleSelection(null);
         }
 
@@ -42,14 +48,22 @@
             }
         }
 
+        function handleChange() {
+            self.trigger('changed');
+        }
+
         /**
          * Given some source code, reconstitutes the window layout.
          * @param {string} source
+         * @param {?boolean} reparse If false, do not parse the source.
          */
-        this.setSource = function(source) {
-            mCanvas.clear();
-            var parser = new IB.Codeparser(source);
-            var layers = parser.parse(mCanvas);
+        this.setSource = function(source, reparse) {
+            mSource = source;
+            if(reparse !== false) {
+                mCanvas.clear();
+                var parser = new IB.Codeparser(source);
+                var layers = parser.parse(mCanvas);
+            }
         };
 
         /**

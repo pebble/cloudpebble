@@ -271,6 +271,7 @@ CloudPebble.Editor = (function() {
                     code_mirror.refresh();
                     code_mirror.focus();
                     check_safe();
+                    refresh_ib();
                 }, function() {
                     if(!was_clean) {
                         --unsaved_files;
@@ -294,6 +295,14 @@ CloudPebble.Editor = (function() {
                 };
 
                 var save = function(callback) {
+                    // Make sure we're up to date with whatever changed in IB.
+                    if(ib_showing) {
+                        var content = code_mirror.getValue();
+                        var new_content = ib_editor.integrateSource(content);
+                        if(content != new_content) {
+                            code_mirror.setValue(new_content);
+                        }
+                    }
                     save_btn.attr('disabled','disabled');
                     delete_btn.attr('disabled','disabled');
                     $.post("/ide/project/" + PROJECT_ID + "/source/" + file.id + "/save", {
@@ -338,6 +347,27 @@ CloudPebble.Editor = (function() {
                     }
                     ib_showing = !ib_showing;
                 }
+
+                function refresh_ib() {
+                    if(!ib_showing) {
+                        return;
+                    }
+                    // This is terrible.
+                    toggle_ib();
+                    toggle_ib();
+                }
+
+                ib_editor.on('changed', _.throttle(function() {
+                    if(!ib_showing) {
+                        return;
+                    }
+                    var content = code_mirror.getValue();
+                    var new_content = ib_editor.integrateSource(content);
+                    if(content != new_content) {
+                        code_mirror.setValue(new_content);
+                    }
+                    ib_editor.setSource(new_content, false);
+                }), 10000);
 
                 // Add some buttons
                 var button_holder = $('<p id="editor-button-wrapper">');
