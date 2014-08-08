@@ -656,6 +656,9 @@
         },
         isCustom: function() {
             return !this._fonts[this._value].builtin;
+        },
+        getHeight: function() {
+            return this._fonts[this._value].css['font-size'];
         }
     });
 })();

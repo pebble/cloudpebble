@@ -9,6 +9,7 @@
     IB.TextLayer = function(canvas, id) {
         IB.Layer.call(this, canvas, id);
         this._node.addClass('ib-textlayer');
+        this._expectingFontChange = false;
 
         _.extend(this._properties, {
             text: new IB.Properties.Text("Text", "Text layer"),
@@ -32,7 +33,7 @@
         this._propListener(this._backgroundColour, 'backgroundColourChange');
         this._propListener(this._align, 'alignmentChange');
         this._propListener(this._font, 'fontChange');
-        this.on('fontChange', this._handle_font_change, this);
+        this.on('fontChange', this._handleFontChange, this);
 
         this.setSize(100, 20);
     };
@@ -109,17 +110,22 @@
                         this._align.setValue(values[0][1]);
                         break;
                     case "text_layer_set_font":
+                        var size = this.getSize();
                         this._font.setValue(mapping[values[0][1]].getID());
+                        this.setSize(size.w, size.h);
                         break;
                 }
             }, this);
         },
-        _handle_font_change: function(new_font) {
+        _handleFontChange: function(new_font) {
             if(this._oldFont != '') {
                 this._canvas.getResources().removeResource(this._oldFont);
             }
             if(new_font != 'GOTHIC_14_BOLD') {
                 this._canvas.getResources().addResource('GFont', new_font, this._font.isCustom());
+            }
+            if(this._font.getHeight() > this._size.getValue().h) {
+                this.setSize(this._size.getValue().w, this._font.getHeight());
             }
             this._oldFont = new_font;
         },
