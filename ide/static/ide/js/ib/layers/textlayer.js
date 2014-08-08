@@ -118,7 +118,7 @@
             }, this);
         },
         _handleFontChange: function(new_font) {
-            if(this._oldFont != '') {
+            if(this._oldFont != '' && this._oldFont != 'GOTHIC_14_BOLD') {
                 this._canvas.getResources().removeResource(this._oldFont);
             }
             if(new_font != 'GOTHIC_14_BOLD') {
