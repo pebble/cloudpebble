@@ -21,7 +21,8 @@
                 .on('sortupdate', _.bind(this._handleShuffle, this));
         },
         _handleShuffle: function(e, ui) {
-            this._canvas.moveLayer(ui.oldindex, ui.item.index());
+            var count = this._canvas.getLayers().length;
+            this._canvas.moveLayer(count - ui.oldindex - 1, count - ui.item.index() - 1);
         },
         _handleNewLayer: function(layer) {
             var node = $('<li>')
@@ -30,7 +31,7 @@
                 .click(_.bind(function() {
                     this._canvas.selectLayer(layer);
                 }, this))
-                .appendTo(this._node);
+                .prependTo(this._node);
             layer.on('changeID', function(oldID, newID) {
                 node.text(newID).data('layer-id', newID);
             });
