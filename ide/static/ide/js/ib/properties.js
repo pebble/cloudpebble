@@ -288,6 +288,9 @@
             }
         },
         _generateNode: function() {
+            if(CloudPebble.Resources.GetBitmaps().length == 0) {
+                return $("<p>You must add a new image resource on the left before you can select a bitmap here.</p>");
+            }
             return $('<select class="ib-property ib-bitmap">')
                 .append(this._createBitmapOption('', "Blank"))
                 .append(_.map(CloudPebble.Resources.GetBitmaps(), function(resource) {
