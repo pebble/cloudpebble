@@ -214,7 +214,7 @@
                 case 8: // backspace
                 case 46: // delete
                     if(mSelectedLayer) {
-                        deleteLayer(mSelectedLayer);
+                        self.deleteLayer(mSelectedLayer);
                     }
                     break;
             }
@@ -255,7 +255,7 @@
             self.trigger('changeFullscreen', fullscreen);
         }
 
-        function deleteLayer(layer) {
+        this.deleteLayer = function(layer) {
             if(!layer) {
                 return;
             }
@@ -269,6 +269,7 @@
             delete mChildren[layer.getID()];
             layer.destroy();
             self.trigger('removelayer', layer);
+            self.trigger('changed');
             layer = null;
         }
 
@@ -333,7 +334,7 @@
         };
 
         this.clear = function() {
-            _.each(mChildren, deleteLayer, this);
+            _.each(mChildren, self.deleteLayer, this);
             mChildren = {};
             mChildOrder = [];
             mNode.empty();

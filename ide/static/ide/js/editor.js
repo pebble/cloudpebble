@@ -333,6 +333,7 @@ CloudPebble.Editor = (function() {
                         $(code_mirror.getWrapperElement()).hide();
                         ib_pane.show();
                         ib_editor.setSource(code_mirror.getValue());
+                        delete_btn.hide();
                     } else {
                         var content = code_mirror.getValue();
                         var new_content = ib_editor.integrateSource(content);
@@ -344,6 +345,7 @@ CloudPebble.Editor = (function() {
                         $(code_mirror.getWrapperElement()).show();
                         code_mirror.refresh();
                         code_mirror.focus();
+                        delete_btn.show();
                     }
                     ib_showing = !ib_showing;
                 }

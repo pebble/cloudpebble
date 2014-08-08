@@ -9,6 +9,9 @@
         this._parent = parent;
         this._layer = layer;
         this._root = $('<div class="form-horizontal">');
+        this._delete =
+            $('<div style="text-align: center;"><button class="btn btn-danger">Delete layer</button></div>')
+                .on('click', _.bind(this._deleteLayer, this));
     };
     IB.PropertyView.prototype = {
         /**
@@ -23,6 +26,9 @@
                 .append($('<h2>').text(this._layer.getTypeName()))
                 .append(groups)
                 .appendTo(this._parent);
+            if(this._layer instanceof IB.Layer) {
+                this._root.append(this._delete);
+            }
         },
         /**
          * Destroys the property view
@@ -51,6 +57,9 @@
                 .append(
                     $('<div class="controls">')
                         .append(property.getNode()));
+        },
+        _deleteLayer: function() {
+            this._layer.deleteLayer();
         }
     };
 })();

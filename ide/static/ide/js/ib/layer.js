@@ -161,6 +161,9 @@
         getTypeName: function() {
             return this.constructor.className;
         },
+        deleteLayer: function() {
+            this._canvas.deleteLayer(this);
+        },
         /**
          * Adds a listener to a property's change event that triggers an event on the layer.
          * @param prop
