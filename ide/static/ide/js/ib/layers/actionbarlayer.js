@@ -50,7 +50,11 @@
             });
             var invertIcons = (this._backgroundColour.getValue() != IB.ColourWhite);
             _.each(this._icon_nodes, function(node, it) {
-                node.css('-webkit-filter', invertIcons ? 'invert(100%)' : 'none');
+                if(invertIcons) {
+                    node.addClass('ib-invert');
+                } else {
+                    node.removeClass('ib-invert');
+                }
                 var url = this._icons[it].getBitmapURL();
                 if(url) {
                     node.attr('src', url).show();
