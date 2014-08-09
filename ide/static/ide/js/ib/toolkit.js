@@ -38,6 +38,7 @@
             var layer = new layerClass(this._canvas, this._canvas.findNameForLayerType(layerClass.className));
             this._canvas.addLayer(layer);
             this._canvas.selectLayer(layer);
+            CloudPebble.Analytics.addEvent("cloudpebble_ib_created_layer", {layer_type: layerClass.className}, null, ['cloudpebble']);
         }
     };
 })();

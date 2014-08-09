@@ -757,6 +757,7 @@ CloudPebble.Editor = (function() {
                                 prompt.modal('hide');
                             }
                         });
+                        CloudPebble.Analytics.addEvent("cloudpebble_created_ui_layout", {name: name}, null, ['cloudpebble']);
                     }
                 })();
             }
