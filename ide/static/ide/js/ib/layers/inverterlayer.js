@@ -21,7 +21,7 @@
         // can update our clone whenever they change.
         render: function(parent) {
             IB.Layer.prototype.render.call(this, parent);
-            this._node.addClass('ib-inverterlayer');
+            this._node.addClass('ib-inverterlayer ib-invert');
             var layers = this._canvas.getLayers();
             _.invoke(this._clonedLayers, 'off', 'all', this._handleOtherChange, this);
             this._clonedLayers = layers.slice(0, _.indexOf(layers, this));

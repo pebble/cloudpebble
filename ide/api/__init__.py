@@ -35,7 +35,10 @@ def proxy_keen(request, project_id):
         'app_log_view',
         'app_logged_crash',
         'sdk_screenshot_success',
-        'sdk_screenshot_failed'
+        'sdk_screenshot_failed',
+        'cloudpebble_created_ui_layout',
+        'cloudpebble_ib_displayed',
+        'cloudpebble_ib_created_layer',
     }
 
     event = request.POST['event']
@@ -49,10 +52,14 @@ def proxy_keen(request, project_id):
     if 'device' in request.POST:
         data['device'] = json.loads(request.POST['device'])
 
+    collections = ['cloudpebble', 'sdk']
+    if 'collections' in request.POST:
+        collections = list(set(collections) & set(json.loads(request.POST['collections'])))
+
     if len(data.items()) == 0:
         data = None
 
-    send_keen_event(['cloudpebble', 'sdk'], event, project=project, request=request, data=data)
+    send_keen_event(collections, event, project=project, request=request, data=data)
     return json_response({})
 
 

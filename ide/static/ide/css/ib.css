@@ -8,6 +8,13 @@
     cursor: default;
 }
 
+/* Colour Inverter */
+
+.ib-invert {
+    filter: url(../svg/filters.svg#invert); /* For Firefox */
+    -webkit-filter: invert(100%); /* For Chrome/Safari/Opera - we actually prefer vendor-specific here. */
+}
+
 /* Resizer */
 
 .ib-resizer {
@@ -121,7 +128,6 @@
 /* Inverter layer */
 
 .ib-inverterlayer {
-    -webkit-filter: invert(100%);
     overflow: hidden;
 }
 

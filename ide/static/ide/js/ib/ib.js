@@ -27,6 +27,7 @@
             mLayerListView = new IB.LayerListView(layerPane, mCanvas);
             mCanvas.on('changed', handleChange);
             handleSelection(null);
+            CloudPebble.Analytics.addEvent("cloudpebble_ib_displayed", null, null, ['cloudpebble']);
         }
 
         /**
