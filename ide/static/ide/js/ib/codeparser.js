@@ -49,7 +49,7 @@
          * @private
          */
         _getFrameForLayerID: function(id) {
-            var regex = new RegExp('^\\s*' + id + '\\s*=.+create.+GRect\\((\\d+), (\\d+), (\\d+), (\\d+)\\)\\);', 'm');
+            var regex = new RegExp('^\\s*' + id + '\\s*=.+create.+GRect\\(([0-9-]+), ([0-9-]+), ([0-9-]+), ([0-9-]+)\\)\\);', 'm');
             var match = regex.exec(this._source);
             if(match) {
                 return {
