@@ -62,7 +62,12 @@
         },
         _getInitialiserForThing: function(id) {
             var regex = new RegExp('^\\s*' + id + '\\s*=\\s*([a-z_]+)\\((.*)\\);\\s*$', 'm');
-            return regex.exec(this._source).slice(1);
+            var result = regex.exec(this._source);
+            if(result) {
+                return result.slice(1);
+            } else {
+                return null;
+            }
         },
         /**
          * Parses the given source for a window layout, updates the given canvas, adds the relevant layers,
@@ -100,6 +105,9 @@
                 var resourceClass = IB.resourceRegistry.getClass(thingType);
                 if(resourceClass) {
                     var init = this._getInitialiserForThing(thingID);
+                    if(!init) {
+                        continue;
+                    }
                     resourceMapping[thingID] = resourceClass.resourceFromInitialiser(init[0], init[1]);
                     continue;
                 }

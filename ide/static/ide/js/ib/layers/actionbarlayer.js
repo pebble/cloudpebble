@@ -97,7 +97,9 @@
                         break;
                     case "action_bar_layer_set_icon":
                         _.each(values, function(group) {
-                            this._icons[group[1].split('_').pop().toLowerCase()].setValue(mappings[group[2]].getID());
+                            if(mappings[group[2]]) {
+                                this._icons[group[1].split('_').pop().toLowerCase()].setValue(mappings[group[2]].getID());
+                            }
                         }, this);
                         break;
                 }

@@ -80,7 +80,9 @@
                         this.setBackgroundColour(IB.ColourMap[values[0][1]]);
                         break;
                     case "bitmap_layer_set_bitmap":
-                        this.setResourceID(mappings[values[0][1]].getID());
+                        if(mappings[values[0][1]]) {
+                            this.setResourceID(mappings[values[0][1]].getID());
+                        }
                         break;
                 }
             }, this);
