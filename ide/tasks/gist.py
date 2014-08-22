@@ -26,16 +26,24 @@ def import_gist(user_id, gist_id):
     files = gist.files
     default_name = gist.description or 'Sample project'
 
-    is_native = True
+    project_type = 'native'
 
     if 'appinfo.json' in files:
         settings = json.loads(files['appinfo.json'].content)
-        if len(files) == 2 and 'simply.js' in files:
-            is_native = False
+        if 'projectType' in settings:
+            project_type = settings['projectType']
+        elif len(files) == 2:
+            if 'simply.js' in files:
+                project_type = 'simplyjs'
+            elif 'app.js' in files:
+                project_type = 'pebblejs'
     else:
         settings = {}
-        if len(files) == 1 and 'simply.js' in files:
-            is_native = False
+        if len(files) == 1:
+            if 'simply.js' in files:
+                project_type = 'simplyjs'
+            elif 'app.js' in files:
+                project_type = 'pebblejs'
 
     project_settings = {
         'name': settings.get('longName', default_name),
@@ -49,15 +57,15 @@ def import_gist(user_id, gist_id):
         'app_is_watchface': settings.get('watchapp', {}).get('watchface', False),
         'app_capabilities': ','.join(settings.get('capabilities', [])),
         'app_keys': dict_to_pretty_json(settings.get('appKeys', {})),
-        'project_type': 'native' if is_native else 'simplyjs'
+        'project_type': project_type
     }
 
     with transaction.commit_on_success():
         project = Project.objects.create(**project_settings)
 
-        if is_native:
+        if project_type != 'simplyjs':
             for filename in gist.files:
-                if filename.endswith('.c') or filename.endswith('.h') or filename.endswith('.js'):
+                if (project_type == 'native' and filename.endswith('.c') or filename.endswith('.h')) or filename.endswith('.js'):
                     # Because gists can't have subdirectories.
                     if filename == 'pebble-js-app.js':
                         cp_filename = 'js/pebble-js-app.js'
