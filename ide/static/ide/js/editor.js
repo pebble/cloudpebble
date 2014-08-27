@@ -665,7 +665,7 @@ CloudPebble.Editor = (function() {
         });
         // If this isn't a native project, only JS files should exist.
         if(CloudPebble.ProjectInfo.type != 'native') {
-            prompt.find('#new-file-type').val('js').parent('.control-group').hide();
+            prompt.find('#new-file-type').val('js').change().parents('.control-group').hide();
         }
 
         prompt.find('#editor-create-file-button').click(function() {
