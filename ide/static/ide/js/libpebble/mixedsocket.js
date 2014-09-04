@@ -97,10 +97,14 @@
             window.gInstanceID = 0;
         }
 
+        function ipToHostname(ip) {
+            return 'ip-' + ip.split('.').join('-') + '.ip.pebble-sockets.com';
+        }
+
         function handleFrameMessage(e) {
             var data = e.data;
             if(data.action == 'connect') {
-                mSocket = new WebSocket('ws://' + data.ip + ':' + data.port + '/');
+                mSocket = new WebSocket('ws://' + ipToHostname(data.ip) + ':' + data.port + '/');
                 mSocket.binaryType = "arraybuffer";
                 mSocket.onopen = handleOpen;
                 mSocket.onclose = handleClose;
