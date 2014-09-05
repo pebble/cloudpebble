@@ -59,7 +59,7 @@ def send_keen_event(collections, event, data=None, request=None, project=None, u
             'referrer': request.META.get('HTTP_REFERER'),
             'user_agent': request.META.get('HTTP_USER_AGENT'),
             'path': request.path,
-            'ip': request.META.get('HTTP_X_FORWARDED_FOR', request.META['REMOTE_ADDR']),
+            'ip': request.META.get('HTTP_X_FORWARDED_FOR', request.META['REMOTE_ADDR']).split(',')[0],
             'url': request.build_absolute_uri(),
         }
 
