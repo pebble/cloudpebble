@@ -492,8 +492,8 @@ input[type=checkbox]:checked {
 }
 
 body.backdrop .main-container {
-    filter: url(/static/ide/svg/filters.svg#modal-blur);
-    -webkit-filter: blur(10px);
+    /*filter: url(/static/ide/svg/filters.svg#modal-blur);*/
+    /*-webkit-filter: blur(10px);*/
 }
 
 .main-container {
