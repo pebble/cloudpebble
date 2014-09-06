@@ -82,7 +82,8 @@
             } else if(data.event == 'dns_survey') {
                 CloudPebble.Analytics.addEvent('cloudpebble_dns_survey', {
                     resolved: data.eventData.resolved,
-                    target_ip: mIP
+                    target_ip: mIP,
+                    rev: 2
                 });
             }
             self.trigger(data.event, data.eventData);
@@ -96,6 +97,7 @@
         var mTargetIP = null;
         var mTargetPort = null;
         var mTestingDNS = true;
+        var mDidConnect = false;
 
         // This should be a no-op but makes my editor stop whining about undefined variables.
         if(!window.gParentWindow) {
@@ -126,6 +128,12 @@
             mSocket = null;
         }
 
+        function doFallback() {
+            mTestingDNS = false;
+            destroyWebsocket();
+            createWebSocket('ws://' + mTargetIP + ':' + mTargetPort + '/');
+        }
+
         function handleFrameMessage(e) {
             var data = e.data;
             if(data.action == 'connect') {
@@ -151,25 +159,22 @@
         }
 
         function handleOpen() {
+            mDidConnect = true;
             sendEvent('open');
             sendEvent('dns_survey', {resolved: mTestingDNS});
         }
 
         function handleClose(e) {
-            if(!e.wasClean && mTestingDNS) {
-                mTestingDNS = false;
-                destroyWebsocket();
-                createWebSocket('ws://' + mTargetIP + ':' + mTargetPort + '/');
+            if(!mDidConnect && !e.wasClean && mTestingDNS) {
+                doFallback();
                 return;
             }
             sendEvent('close', {wasClean: e.wasClean});
         }
 
         function handleError(e) {
-            if(mTestingDNS) {
-                mTestingDNS = false;
-                destroyWebsocket();
-                createWebSocket('ws://' + mTargetIP + ':' + mTargetPort + '/');
+            if(!mDidConnect && mTestingDNS) {
+                doFallback();
                 return;
             }
             var object = {};
