@@ -345,9 +345,13 @@ CloudPebble.Compile = (function() {
 
     var show_log_line = function(log) {
         if(mLogHolder) {
-            var display = get_log_label(log.priority) + ' ' + log.filename + ':' + log.line_number + ': ' + log.message;
-            append_log_html($('<span>').addClass(get_log_class(log.priority)).text(display));
-            mCrashAnalyser.check_line_for_crash(log.message, handle_crash);
+            if(log === null) {
+                append_log_html($('<hr>'));
+            } else {
+                var display = get_log_label(log.priority) + ' ' + log.filename + ':' + log.line_number + ': ' + log.message;
+                append_log_html($('<span>').addClass(get_log_class(log.priority)).text(display));
+                mCrashAnalyser.check_line_for_crash(log.message, handle_crash);
+            }
         }
     };
 
@@ -479,7 +483,7 @@ CloudPebble.Compile = (function() {
             });
             mPebble.on('status', function(code) {
                 if(code === 0) {
-                    mPreviousDisplayLogs = [];
+                    mPreviousDisplayLogs.push(null);
                     mPebble.enable_app_logs();
                     modal.find('.modal-body > p').text("Installed successfully!");
                     modal.find('.btn').removeClass('hide');
@@ -661,7 +665,7 @@ CloudPebble.Compile = (function() {
             mPebble.close();
             mPebble = null;
         }
-        mPreviousDisplayLogs = [];
+        mPreviousDisplayLogs.push(null);
         mLogHolder = null;
     };
 
