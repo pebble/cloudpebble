@@ -243,8 +243,13 @@ def github_pull(user, project):
     else:
         raise Exception("appinfo.json not found")
 
+    project_type = manifest.get('projectType', 'native')
+
     for resource in media:
         path = resource_root + resource['file']
+        if project_type == 'pebblejs' and resource['name'] in {
+            'MONO_FONT_14', 'IMAGE_MENU_ICON', 'IMAGE_LOGO_SPLASH', 'IMAGE_TILE_SPLASH'}:
+            continue
         if path not in paths:
             raise Exception("Resource %s not found in repo." % path)
 
