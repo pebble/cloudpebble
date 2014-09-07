@@ -138,6 +138,12 @@ CloudPebble.Editor = (function() {
                         }
                         return CodeMirror.Pass;
                     };
+                    settings.extraKeys['Cmd-/'] = function(cm) {
+                        CodeMirror.commands.toggleComment(cm);
+                    };
+                    settings.extraKeys['Ctrl-/']  = function(cm) {
+                        CodeMirror.commands.toggleComment(cm);
+                    };
                 }
                 if(is_js) {
                     settings.gutters = ['CodeMirror-linenumbers', 'gutter-hint-warnings'];
