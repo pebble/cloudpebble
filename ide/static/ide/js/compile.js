@@ -343,14 +343,16 @@ CloudPebble.Compile = (function() {
         show_log_line(log);
     };
 
-    var show_log_line = function(log) {
+    var show_log_line = function(log, ignore_crashes) {
         if(mLogHolder) {
             if(log === null) {
                 append_log_html($('<hr>'));
             } else {
                 var display = get_log_label(log.priority) + ' ' + log.filename + ':' + log.line_number + ': ' + log.message;
                 append_log_html($('<span>').addClass(get_log_class(log.priority)).text(display));
-                mCrashAnalyser.check_line_for_crash(log.message, handle_crash);
+                if(ignore_crashes !== true) {
+                    mCrashAnalyser.check_line_for_crash(log.message, handle_crash);
+                }
             }
         }
     };
@@ -526,7 +528,7 @@ CloudPebble.Compile = (function() {
             } else {
                 mLogHolder.empty();
             }
-            _.each(mPreviousDisplayLogs, show_log_line);
+            _.each(mPreviousDisplayLogs, _.partial(show_log_line, _, true));
             CloudPebble.Sidebar.SetActivePane(mLogHolder, undefined, undefined, stop_logs);
             CloudPebble.Analytics.addEvent('app_log_view'/*, {target_ip: ip}*/);
         };
