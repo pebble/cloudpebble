@@ -1,7 +1,6 @@
-Pebble = function(ip, port) {
+Pebble = function(token) {
     var self = this;
-    var mIP = ip;
-    var mPort = port || 9000;
+    var mToken = token;
     var mSocket;
     var mAppLogEnabled = false;
     var mHasConnected = false;
@@ -10,7 +9,7 @@ Pebble = function(ip, port) {
     _.extend(this, Backbone.Events);
 
     var init = function() {
-        mSocket = new PebbleMixedContent(mIP, mPort);
+        mSocket = new PebbleProxySocket(mToken);
         mSocket.on('error', handle_socket_error);
         mSocket.on('close', handle_socket_close);
         mSocket.on('open', handle_socket_open);
@@ -85,7 +84,7 @@ Pebble = function(ip, port) {
     var handle_socket_open = function(e) {
         console.log("Socket open");
         mHasConnected = true;
-        ga('send', 'event', 'phone-connect', 'success', mIP);
+        ga('send', 'event', 'phone-connect', 'success');
         self.trigger('open');
     };
 
@@ -95,13 +94,13 @@ Pebble = function(ip, port) {
             console.log("Close was unexpected.");
             if(!mHasConnected) {
                 self.trigger("error", "Connection to the phone failed. Check the IP and that developer mode is active.");
-                ga('send', 'event', 'phone-connect', 'failed', mIP);
+                ga('send', 'event', 'phone-connect', 'failed');
             } else {
                 self.trigger("error", "Connection to the phone was interrupted.");
-                ga('send', 'event', 'phone-disconnect', 'dirty', mIP);
+                ga('send', 'event', 'phone-disconnect', 'dirty');
             }
         } else {
-            ga('send', 'event', 'phone-disconnect', 'clean', mIP);
+            ga('send', 'event', 'phone-disconnect', 'clean');
         }
         self.trigger('close');
     };
