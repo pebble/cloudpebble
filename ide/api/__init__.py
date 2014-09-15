@@ -39,7 +39,6 @@ def proxy_keen(request, project_id):
         'cloudpebble_created_ui_layout',
         'cloudpebble_ib_displayed',
         'cloudpebble_ib_created_layer',
-        'cloudpebble_dns_survey',
     }
 
     event = request.POST['event']
