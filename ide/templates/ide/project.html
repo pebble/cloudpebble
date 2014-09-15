@@ -358,7 +358,7 @@ var USER_SETTINGS = {
         avatar: "{{ project.owner.github.avatar }}"
     },
     {% endif %}
-    dummy: null // For IE.
+    token: "{{ token }}"
 };
 var DOC_JSON = "{% static 'ide/documentation.json' %}";
 var LIBPEBBLE_
