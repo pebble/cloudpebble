@@ -16,6 +16,9 @@ NEW_THINGS = [
     ["CloudPebble now supports import, export, and GitHub pull/push for Simply.js and Pebble.js (beta) projects."],
     ["CloudPebble is now using SDK 2.4; check out <a href='https://developer.getpebble.com/2/changelog-2.4.html' target='_blank'>release notes</a>."],
     ["CloudPebble now feature a UI builder for native apps! Learn more <a href='https://developer.getpebble.com/blog/2014/08/08/CloudPebble-Graphical-UI-Editor/' target='_blank'>on our blog</a>."],
+    ["CloudPebble is now running SDK 2.5!",
+     "New features include <a href='https://developer.getpebble.com/2/guides/compass.html' target='_blank'>compass support</a>, heap state APIs, and emoji in system fonts <code>GOTHIC_24_BOLD</code>, <code>GOTHIC_18</code> and <code>GOTHIC_18_BOLD</code>.",
+     "Check out <a href='https://developer.getpebble.com/2/changelog-2.5.html' target='_blank'>the full release notes</a>."],
 ]
 
 
