@@ -11,7 +11,7 @@ CloudPebble.Editor.Autocomplete = (function() {
         ['TupletInteger', 'const Tuplet', ['key', 'integer']],
         ['UuidMake', 'Uuid', ['uint8_t p0', 'uint8_t p1', 'uint8_t p2', 'uint8_t p3', 'uint8_t p4', 'uint8_t p5', 'uint8_t p6', 'uint8_t p7', 'uint8_t p8', 'uint8_t p9', 'uint8_t p10', 'uint8_t p11', 'uint8_t p12', 'uint8_t p13', 'uint8_t p14', 'uint8_t p15']],
         ['UuidMakeFromBEBytes', 'Uuid', ['uint8_t *bytes']],
-        ['UuidMakeFromKEBytes', 'Uuid', ['uint8_t *bytes']],
+        ['UuidMakeFromLEBytes', 'Uuid', ['uint8_t *bytes']],
         ['accel_data_service_subscribe', 'void', ['uint32_t samples_per_update', 'AccelDataHandler handler']],
         ['accel_data_service_unsubscribe', 'void', []],
         ['accel_raw_data_service_subscribe', 'void', ['uint32_t samples_per_update', 'AccelRawDataHandler handler']],
