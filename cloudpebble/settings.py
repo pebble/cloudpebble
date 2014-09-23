@@ -269,6 +269,8 @@ TYPOGRAPHY_CSS = _environ.get('TYPOGRAPHY_CSS', None)
 
 REDIS_URL = _environ.get('REDISCLOUD_URL', 'redis://localhost:6379/')
 
+LIBPEBBLE_PROXY = _environ.get('LIBPEBBLE_PROXY', None)
+
 import djcelery
 djcelery.setup_loader()
 

@@ -1,5 +1,5 @@
 (function() {
-    var PROXY_SERVER = "wss://ws-proxy.getpebble.com/tool";
+    var PROXY_SERVER = LIBPEBBLE_PROXY;
 
     window.PebbleProxySocket = function(token) {
         var self = this;
@@ -12,6 +12,12 @@
         _.extend(this, Backbone.Events);
 
         this.connect = function() {
+            if(!PROXY_SERVER) {
+                _.defer(function() {
+                    self.trigger('error', "Websocket proxy not specified.");
+                });
+                return;
+            }
             mSocket = new WebSocket(PROXY_SERVER);
             mSocket.binaryType = "arraybuffer";
             mSocket.onerror = handle_socket_error;
