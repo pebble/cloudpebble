@@ -77,6 +77,8 @@
                     console.log("Connection closed remotely.");
                     self.trigger('close', {wasClean: true});
                 }
+            } else {
+                self.trigger('message', data);
             }
         }
 
