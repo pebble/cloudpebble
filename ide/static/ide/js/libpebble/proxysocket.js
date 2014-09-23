@@ -33,7 +33,6 @@
         };
 
         this.send = function(data) {
-            console.log("Sending data:", data);
             mSocket.send(data);
         };
 
@@ -59,7 +58,6 @@
 
         function handle_socket_message(e) {
             var data = new Uint8Array(e.data);
-            console.log("Received socket message", data);
             if(data[0] == 0x09) {
                 if(data[1] == 0x00) {
                     console.log("Authenticated successfully.");
