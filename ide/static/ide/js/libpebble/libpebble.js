@@ -14,6 +14,7 @@ Pebble = function(token) {
         mSocket.on('close', handle_socket_close);
         mSocket.on('open', handle_socket_open);
         mSocket.on('message', handle_socket_message);
+        console.log("Starting connection");
         mSocket.connect();
     };
 
@@ -22,6 +23,7 @@ Pebble = function(token) {
     };
 
     this.install_app = function(url) {
+        console.log("Starting install process.");
         var request = new XMLHttpRequest();
         request.open('get', url, true);
         request.responseType = "arraybuffer";
@@ -33,6 +35,7 @@ Pebble = function(token) {
                 final_buffer.set(buffer, 1);
                 final_buffer.set([4]);
                 mSocket.send(final_buffer);
+                console.log("Sent install message.");
             }
         };
         request.send();
@@ -63,6 +66,7 @@ Pebble = function(token) {
 
     var enable_app_logs = function() {
         if(!mAppLogEnabled) {
+            console.log("Enabling app logs.");
             send_message("APP_LOGS", [1]);
             mAppLogEnabled = true;
         }
@@ -70,6 +74,7 @@ Pebble = function(token) {
 
     var disable_app_logs = function() {
         if(mAppLogEnabled) {
+            console.log("Disabling app logs.");
             send_message("APP_LOGS", [0]);
             mAppLogEnabled = false;
         }
@@ -133,6 +138,7 @@ Pebble = function(token) {
     };
 
     var handle_app_log = function(data) {
+        console.log("Received app log.");
         var metadata = unpack("IBBH", data.subarray(16, 24));
         var filename = bytes_to_string(data.subarray(24, 40));
         var message = bytes_to_string(data.subarray(40, 40+metadata[2]));
@@ -159,6 +165,7 @@ Pebble = function(token) {
     }
 
     this.request_version = function() {
+        console.log("Requesting watch version.");
         send_message('VERSION', pack("B", 0x00));
     };
 
@@ -173,6 +180,7 @@ Pebble = function(token) {
     }
 
     var handle_version = function(message) {
+        console.log("Received watch version.");
         result = unpack("BIS32S8BBBIS32S8BBBIS9S12BBBBBBIIS16", message);
         if(result[0] != 1) return;
         self.trigger('version', {
@@ -205,10 +213,12 @@ Pebble = function(token) {
     };
 
     var request_factory_setting = function(key) {
+        console.log("Requesting factory settings.");
         send_message('FACTORY_SETTINGS', pack('BB', [0x00, key.length]).concat(string_to_bytes(key)));
     };
 
     this.request_colour = function() {
+        console.log("Requesting colour");
         request_factory_setting('mfg_color');
 
         var colour_mapping = {
@@ -243,6 +253,7 @@ Pebble = function(token) {
 
 
     var handle_factory_setting = function(data) {
+        console.log("Received factory settings.");
         if(data.length < 2) {
             self.trigger('factory_setting:error');
             return;
@@ -257,6 +268,7 @@ Pebble = function(token) {
     }
 
     this.request_screenshot = function() {
+        console.log("Requesting screenshot.");
         if(mIncomingImage !== null) {
             self.trigger('screenshot:error', "Cannot take a screenshot while a previous screenshot is processing.");
             return;
@@ -265,6 +277,7 @@ Pebble = function(token) {
     };
 
     var handle_screenshot = function(data) {
+        console.log("Received screenshot fragment.");
         if(mIncomingImage === null) {
             data = read_screenshot_header(data);
             if(data === null) {
@@ -359,6 +372,7 @@ Pebble = function(token) {
     };
 
     var send_message = function(endpoint, message) {
+        console.log("Sending message to " + endpoint + "(" + ENDPOINTS[endpoint] + ")");
         var data = new Uint8Array([1].concat(build_message(ENDPOINTS[endpoint], message)));
         if(!mSocket.isOpen()) {
             throw new Error("Cannot send on non-open socket.");

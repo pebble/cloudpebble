@@ -28,18 +28,16 @@
         };
 
         this.close = function() {
-            console.log("closed requested.");
             mSocket.close();
             cleanup();
         };
 
         this.send = function(data) {
-            console.log("send requested.");
+            console.log("Sending data:", data);
             mSocket.send(data);
         };
 
         this.isOpen = function() {
-            console.log("open check: " + mIsConnected);
             return mIsConnected;
         };
 
@@ -56,7 +54,7 @@
 
         function handle_socket_open(e) {
             console.log("socket open; authenticating...");
-            mSocket.send(new Uint8Array([0x09, mToken.length].concat(_.invoke(mToken, 'charCodeAt', 0))));
+            self.send(new Uint8Array([0x09, mToken.length].concat(_.invoke(mToken, 'charCodeAt', 0))));
         }
 
         function handle_socket_message(e) {
