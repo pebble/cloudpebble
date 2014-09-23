@@ -5,7 +5,6 @@
         var self = this;
         var mToken = token;
         var mSocket = null;
-        var mConnected = false;
         var mIsConnected = false;
         var mIsAuthenticated = false;
 
@@ -13,6 +12,7 @@
 
         this.connect = function() {
             if(!PROXY_SERVER) {
+                console.log("No proxy server available.");
                 _.defer(function() {
                     self.trigger('error', "Websocket proxy not specified.");
                 });
@@ -28,6 +28,7 @@
         };
 
         this.close = function() {
+            if(!mSocket) return;
             mSocket.close();
             cleanup();
         };

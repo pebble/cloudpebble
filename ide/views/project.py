@@ -42,7 +42,7 @@ def view_project(request, project_id):
         'project': project,
         'app_keys': app_keys,
         'font_css': settings.TYPOGRAPHY_CSS,
-        'libpebble_proxy': settings.LIBPEBBLE_PROXY,
+        'libpebble_proxy': json.dumps(settings.LIBPEBBLE_PROXY),
         'token': token
     })
 
