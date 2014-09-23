@@ -54,6 +54,7 @@
 
         function handle_socket_open(e) {
             console.log("socket open; authenticating...");
+            self.trigger('proxy:authenticating');
             self.send(new Uint8Array([0x09, mToken.length].concat(_.invoke(mToken, 'charCodeAt', 0))));
         }
 
@@ -61,6 +62,7 @@
             var data = new Uint8Array(e.data);
             if(data[0] == 0x09) {
                 if(data[1] == 0x00) {
+                    self.trigger('proxy:waiting');
                     console.log("Authenticated successfully.");
                     mIsAuthenticated = true;
                 } else {

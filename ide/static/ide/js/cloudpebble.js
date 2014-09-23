@@ -106,8 +106,19 @@ CloudPebble.Prompts = {
         });
     },
     Progress: {
-        Show: function(title) {
-            $('#generic-progress').modal('show').find('h3').text(title);
+        Show: function(title, text) {
+            var modal = $('#generic-progress').modal('show');
+            modal.find('.progress').removeClass('progress-danger').addClass('progress-striped');
+            modal.find('h3').text(title);
+            modal.find('p').text(text || '');
+        },
+        Fail: function() {
+            var modal = $('#generic-progress').modal('show');
+            modal.find('.progress').addClass('progress-danger').removeClass('progress-striped');
+        },
+        Update: function(text) {
+           var modal = $('#generic-progress').modal('show');
+           modal.find('p').text(text || '');
         },
         Hide: function() {
             $('#generic-progress').modal('hide');

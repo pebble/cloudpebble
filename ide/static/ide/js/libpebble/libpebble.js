@@ -14,6 +14,7 @@ Pebble = function(token) {
         mSocket.on('close', handle_socket_close);
         mSocket.on('open', handle_socket_open);
         mSocket.on('message', handle_socket_message);
+        mSocket.on('all', handle_proxysocket_event); // special message
         console.log("Starting connection");
         mSocket.connect();
     };
@@ -134,6 +135,12 @@ Pebble = function(token) {
             handle_version(message);
         } else if(command == ENDPOINTS.FACTORY_SETTINGS) {
             handle_factory_setting(message);
+        }
+    };
+
+    var handle_proxysocket_event = function(event) {
+        if(event.substr(0, 6) == "proxy:") {
+            self.trigger(event);
         }
     };
 

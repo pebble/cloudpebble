@@ -208,12 +208,34 @@ CloudPebble.Compile = (function() {
     var mLogHolder = null;
     var mCrashAnalyser = null;
 
-    var pebble_connect = function() {
-        if(mPebble) return mPebble;
+    var pebble_connect = function(callback) {
+        if(mPebble) {
+            callback(mPebble);
+            return;
+        }
+        CloudPebble.Prompts.Progress.Show("Connecting...", "Establishing connection...");
         mPebble = new Pebble(USER_SETTINGS.token);
         mPebble.on('app_log', handle_app_log);
         mPebble.on('phone_log', handle_phone_log);
-        return mPebble;
+        mPebble.on('proxy:authenticating', function() {
+            CloudPebble.Prompts.Progress.Update("Authenticating...");
+        });
+        mPebble.on('proxy:waiting', function() {
+            CloudPebble.Prompts.Progress.Update("Waiting for phone. Make sure the developer server is enabled.");
+        });
+        var connection_error = function() {
+            mPebble.off();
+            CloudPebble.Prompts.Progress.Fail();
+            CloudPebble.Prompts.Progress.Update("Connection interrupted.");
+            mPebble = null;
+        }
+        mPebble.on('close error', connection_error);
+        mPebble.on('open', function() {
+            mPebble.off(null, connection_error);
+            mPebble.off('proxy:authenticating proxy:waiting');
+            CloudPebble.Prompts.Progress.Hide();
+            callback(mPebble);
+        });
     };
 
     var handle_app_log = function(priority, filename, line_number, message) {
@@ -334,25 +356,21 @@ CloudPebble.Compile = (function() {
     };
 
     var install_on_watch = function() {
-        var modal = $('#phone-install-progress').modal();
-        modal.find('.modal-body > p').text("Installing app on your watch…");
-        modal.find('.btn').addClass('hide');
-        modal.find('.progress').removeClass('progress-danger progress-success').addClass('progress-striped');
-        modal.off('hide');
+        var modal = $('#phone-install-progress');
 
         var report_error = function(message) {
             modal.find('.modal-body > p').html(message);
             modal.find('.dismiss-btn').removeClass('hide');
             modal.find('.progress').addClass('progress-danger').removeClass('progress-striped');
         };
-        try {
-            mPebble = pebble_connect();
-        } catch(e) {
-            report_error("Failed to create socket.");
-        }
 
-        mPebble.on('open', function() {
+        pebble_connect(function() {
+            modal.modal();
             mPebble.once('version', function(version_info) {
+                modal.find('.modal-body > p').text("Installing app on your watch…");
+                modal.find('.btn').addClass('hide');
+                modal.find('.progress').removeClass('progress-danger progress-success').addClass('progress-striped');
+                modal.off('hide');
                 var version_string = version_info.running.version;
                 console.log(version_string);
                 // Make sure that we have the required version - but also assume that anyone who has the string 'test'
@@ -421,8 +439,7 @@ CloudPebble.Compile = (function() {
         };
 
         if(!mPebble || !mPebble.is_connected()) {
-            mPebble = pebble_connect(USER_SETTINGS.token);
-            mPebble.on('open', function() {
+            pebble_connect(function() {
                 mPebble.enable_app_logs();
                 if(mLogHolder)
                     mLogHolder.append($('<span>').addClass('log-success').text("Connected.\n"));
@@ -434,9 +451,13 @@ CloudPebble.Compile = (function() {
     };
 
     var take_screenshot = function() {
-        mPebble = new Pebble(USER_SETTINGS.token);
-        var modal = $('#phone-screenshot-display').clone().modal();
+        var modal = $('#phone-screenshot-display').clone();
         var finished = false;
+
+        pebble_connect(function() {
+            modal.modal();
+            mPebble.request_screenshot();
+        });
 
         var report_error = function(message) {
             modal.find('.modal-body > p').text(message);
@@ -451,10 +472,6 @@ CloudPebble.Compile = (function() {
         mPebble.on('colour', function(colour) {
             modal.find('.screenshot-holder').addClass('screenshot-holder-' + colour);
             mPebble.close();
-        });
-
-        mPebble.on('open', function() {
-            mPebble.request_screenshot();
         });
 
         mPebble.on('close', function() {
