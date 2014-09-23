@@ -213,7 +213,14 @@ CloudPebble.Compile = (function() {
             callback(mPebble);
             return;
         }
-        CloudPebble.Prompts.Progress.Show("Connecting...", "Establishing connection...");
+        var did_connect = false;
+        CloudPebble.Prompts.Progress.Show("Connecting...", "Establishing connection...", function() {
+            if(!did_connect && mPebble) {
+                mPebble.off();
+                mPebble.close();
+                mPebble = null;
+            }
+        });
         mPebble = new Pebble(USER_SETTINGS.token);
         mPebble.on('app_log', handle_app_log);
         mPebble.on('phone_log', handle_phone_log);
@@ -228,9 +235,10 @@ CloudPebble.Compile = (function() {
             CloudPebble.Prompts.Progress.Fail();
             CloudPebble.Prompts.Progress.Update("Connection interrupted.");
             mPebble = null;
-        }
+        };
         mPebble.on('close error', connection_error);
         mPebble.on('open', function() {
+            did_connect = true;
             mPebble.off(null, connection_error);
             mPebble.off('proxy:authenticating proxy:waiting');
             CloudPebble.Prompts.Progress.Hide();
