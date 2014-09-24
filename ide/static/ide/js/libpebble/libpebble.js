@@ -107,6 +107,7 @@ Pebble = function(ip, port) {
     };
 
     var handle_socket_message = function(data) {
+        console.log(hexify(data));
         var origin = data[0];
         if(origin == 5) {
             var result = unpack("I", data.subarray(1, 5));
@@ -168,10 +169,10 @@ Pebble = function(ip, port) {
         _.each(list, function(number) {
             var hex = number.toString(16);
             while(hex.length < 2) hex = '0' + hex;
-            result = hex + result;
+            result += hex;
         });
         return result;
-    }
+    };
 
     var handle_version = function(message) {
         result = unpack("BIS32S8BBBIS32S8BBBIS9S12BBBBBBIIS16", message);
@@ -196,7 +197,7 @@ Pebble = function(ip, port) {
             bootloader_version: result[13],
             board_revision: result[14],
             serial_number: result[15],
-            device_address: hexify(result.slice(16, 22)),
+            device_address: hexify(result.slice(16, 22).reverse()),
             resources: {
                 crc: result[22],
                 timestamp: result[23],

@@ -59,7 +59,6 @@
         };
 
         var handleFrameMessage = function(e) {
-            console.log("got message");
             var data = e.originalEvent.data; // boo jQuery.
             if(data.from != 'libpebble' || data.instance !== mInstanceID) {
                 return;
