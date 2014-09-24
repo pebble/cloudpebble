@@ -42,7 +42,7 @@ def project_info(request, project_id):
         'app_capabilities': project.app_capabilities,
         'app_jshint': project.app_jshint,
         'menu_icon': project.menu_icon.id if project.menu_icon else None,
-        'source_files': [{'name': f.file_name, 'id': f.id} for f in source_files],
+        'source_files': [{'name': f.file_name, 'id': f.id, 'target': f.target} for f in source_files],
         'resources': [{
             'id': x.id,
             'file_name': x.file_name,

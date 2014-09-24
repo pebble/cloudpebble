@@ -18,7 +18,9 @@ __author__ = 'katharine'
 def create_source_file(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     try:
-        f = SourceFile.objects.create(project=project, file_name=request.POST['name'])
+        f = SourceFile.objects.create(project=project,
+                                      file_name=request.POST['name'],
+                                      target=request.POST.get('target', 'app'))
         f.save_file(request.POST.get('content', ''))
     except IntegrityError as e:
         return json_failure(str(e))
@@ -26,7 +28,8 @@ def create_source_file(request, project_id):
         send_keen_event('cloudpebble', 'cloudpebble_create_file', data={
             'data': {
                 'filename': request.POST['name'],
-                'kind': 'source'
+                'kind': 'source',
+                'target': f.target,
             }
         }, project=project, request=request)
 

@@ -686,18 +686,30 @@ CloudPebble.Editor = (function() {
                     } else if (project_source_files[name]) {
                         error.text("A file called '" + name + "' already exists.").show();
                     } else {
+                        var target = prompt.find('#new-c-target').val();
                         // Should we create a header?
+                        var header = null;
                         if (prompt.find('#new-c-generate-h').is(':checked')) {
                             // Drop the .c to make a .h
                             var split_name = name.split('.');
                             if (split_name.pop() == 'c') {
+                                header = split_name.join('.') + '.h';
                                 create_remote_file({
-                                    name: split_name.join('.') + '.h',
-                                    content: "#pragma once\n"
+                                    name: header,
+                                    content: "#pragma once\n",
+                                    target: target
                                 });
                             }
                         }
-                        create_remote_file(name, function (data) {
+                        var content = "#include <pebble" + (target == 'worker' ? '_worker' : '') +".h>\n";
+                        if(header) {
+                            content += '#include "' + header + '"\n\n';
+                        }
+                        create_remote_file({
+                            name: name,
+                            content: content,
+                            target: target
+                        }, function (data) {
                             if (data.success) {
                                 prompt.modal('hide');
                                 edit_source_file(data.file);
