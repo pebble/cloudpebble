@@ -118,6 +118,12 @@ class SourceFile(IdeModel):
     file_name = models.CharField(max_length=100)
     last_modified = models.DateTimeField(blank=True, null=True, auto_now=True)
 
+    TARGETS = (
+        ('app', 'App'),
+        ('worker', 'Worker'),
+    )
+    target = models.CharField(max_length=10, choices=TARGETS, default='app')
+
     def get_local_filename(self):
         padded_id = '%05d' % self.id
         return '%ssources/%s/%s/%s' % (settings.FILE_STORAGE, padded_id[0], padded_id[1], padded_id)
