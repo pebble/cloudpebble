@@ -305,7 +305,7 @@ CloudPebble.Compile = (function() {
                 .removeClass('label-success label-error label-info')
                 .addClass('label-' + COMPILE_SUCCESS_STATES[build.state].label)
                 .text(COMPILE_SUCCESS_STATES[build.state].english);
-            mCrashAnalyser.set_debug_info_url(build.debug);
+            mCrashAnalyser.set_debug_info_url(build.debug, build.worker_debug);
         }
     };
 
@@ -367,7 +367,7 @@ CloudPebble.Compile = (function() {
         mLogHolder[0].scrollTop = mLogHolder[0].scrollHeight;
     };
 
-    var handle_crash = function(is_our_crash, pc, lr) {
+    var handle_crash = function(process, is_our_crash, pc, lr) {
         if(!is_our_crash) {
             append_log_html("<span class='log-warning'>Different app crashed. Only the active app has debugging information available.</span>");
             return;
@@ -376,7 +376,7 @@ CloudPebble.Compile = (function() {
         mPebble.on('version', function(pebble_version) {
             mPebble.off('version');
             append_log_html($("<span class='log-verbose'>Looking up debug information...</span>"));
-            mCrashAnalyser.find_source_lines(pebble_version, [pc, lr], function(results) {
+            mCrashAnalyser.find_source_lines(process, pebble_version, [pc, lr], function(results) {
                 var pc_result = results[0];
                 var lr_result = results[1];
                 CloudPebble.Analytics.addEvent('app_logged_crash', {
