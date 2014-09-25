@@ -129,6 +129,10 @@ ul.nav-pills {
     list-style: none;
 }
 
+#worker-files {
+    margin-top: 0;
+}
+
 /* Editor */
 
 .CodeMirror {

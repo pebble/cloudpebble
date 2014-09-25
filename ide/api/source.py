@@ -33,7 +33,7 @@ def create_source_file(request, project_id):
             }
         }, project=project, request=request)
 
-        return json_response({"file": {"id": f.id, "name": f.file_name}})
+        return json_response({"file": {"id": f.id, "name": f.file_name, "target": f.target}})
 
 
 @require_safe
