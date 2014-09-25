@@ -91,6 +91,7 @@
 
 {% block modals %}
 <!-- Create new file prompt -->
+<div id="help-prompt-holder"></div>
 <div id="editor-new-file-prompt" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
         <h3>Create new file</h3>
@@ -122,6 +123,7 @@
                             <option value="app" selected>App / Watchface</option>
                             <option value="worker">Background worker</option>
                         </select>
+                        <img src="{% static 'ide/img/help.png' %}" class="field-help">
                     </div>
                 </div>
                 <div class="control-group">

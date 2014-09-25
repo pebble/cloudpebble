@@ -780,6 +780,16 @@ CloudPebble.Editor = (function() {
                 })();
             }
         });
+
+        prompt.find('.field-help').popover({
+            trigger: 'hover',
+            content: "<p>If you want to create a background worker, use this dropdown to create files pointing at that target.</p>" +
+                     "<p>Note that targets are independent and code will not be shared between them.</p>",
+            html: true,
+            container: '#help-prompt-holder',
+            placement: 'bottom',
+            animation: false
+        });
     }
 
     function create_source_file() {
