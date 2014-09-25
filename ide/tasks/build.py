@@ -164,17 +164,30 @@ def run_compile(build_result):
                     with zipfile.ZipFile(temp_file, 'r') as z:
                         build_result.binary_size = z.getinfo('pebble-app.bin').file_size
                         build_result.resource_size = z.getinfo('app_resources.pbpack').file_size
+                        try:
+                            build_result.worker_size = z.getinfo('pebble-worker.bin').file_size
+                        except KeyError:
+                            pass
                 except Exception as e:
                     print "Couldn't extract filesizes: %s" % e
                 # Try pulling out debug information.
-                elf_file = os.path.join(base_dir, 'build', 'pebble-app.elf')
-                if os.path.exists(elf_file):
+                app_elf_file = os.path.join(base_dir, 'build', 'pebble-app.elf')
+                if os.path.exists(app_elf_file):
                     try:
-                        debug_info = apptools.addr2lines.create_coalesced_group(elf_file)
+                        debug_info = apptools.addr2lines.create_coalesced_group(app_elf_file)
                     except:
                         print traceback.format_exc()
                     else:
                         build_result.save_debug_info(debug_info)
+                worker_elf_file = os.path.join(base_dir, 'build', 'pebble-worker.elf')
+                if os.path.exists(worker_elf_file):
+                    try:
+                        debug_info = apptools.addr2lines.create_coalesced_group(worker_elf_file)
+                    except:
+                        print traceback.format_exc()
+                    else:
+                        build_result.save_worker_debug_info(debug_info)
+
 
                 build_result.save_pbw(temp_file)
             build_result.save_build_log(output)

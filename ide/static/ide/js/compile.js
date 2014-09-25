@@ -271,6 +271,11 @@ CloudPebble.Compile = (function() {
                         s.find('.total').text(Math.round(build.size.total / 1024));
                         s.find('.res').text(Math.round(build.size.resources / 1024)).removeClass('text-error text-warning');
                         s.find('.bin').text(Math.round(build.size.binary / 1024)).removeClass('text-error');
+                        if(build.size.worker) {
+                            s.find('.worker').show().find('span').text(Math.round(build.size.worker / 1024));
+                        } else {
+                            s.find('.worker').hide();
+                        }
                         if(build.size.resources > 65536) {
                             if(build.size.resources > 98304)
                                 s.find('.res').addClass('text-error');

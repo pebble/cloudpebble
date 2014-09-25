@@ -92,6 +92,7 @@ def last_build(request, project_id):
             'size': {
                 'total': build.total_size,
                 'binary': build.binary_size,
+                'worker': build.worker_size,
                 'resources': build.resource_size
             }
         }
@@ -121,6 +122,7 @@ def build_history(request, project_id):
                 'size': {
                     'total': build.total_size,
                     'binary': build.binary_size,
+                    'worker': build.worker_size,
                     'resources': build.resource_size
                 }
             })
