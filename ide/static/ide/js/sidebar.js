@@ -115,7 +115,7 @@ CloudPebble.Sidebar = (function() {
             if(file.target == 'worker') {
                 end = $('#end-worker-files');
                 $('#worker-files').show();
-                $('#source-files').find('span:first').text("App");
+                $('#source-files').find('span:first').text("App source");
             }
             var link = $('<a href="#"></a>');
             link.text(file.name + ' ');
