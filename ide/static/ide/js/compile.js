@@ -285,9 +285,16 @@ CloudPebble.Compile = (function() {
                         if(build.size.binary > 24576) {
                             s.find('.bin').addClass('text-error');
                         }
-                        var m = pane.find('#last-compilation-memory').removeClass('hide');
+                        var m = pane.find('#last-compilation-app-memory').removeClass('hide');
                         m.find('.free-bytes').text(24576 - build.size.binary);
                         m.find('.free-pct').text(Math.round((24576 - build.size.binary) / 245.76));
+                        if(build.size.worker) {
+                            var m = pane.find('#last-compilation-worker-memory').removeClass('hide');
+                            m.find('.free-bytes').text(12800 - build.size.binary);
+                            m.find('.free-pct').text(Math.round((12800 - build.size.binary) / 128.00));
+                        } else {
+                            pane.find('#last-compilation-worker-memory').addClass('hide')
+                        }
                     }
                 }
             } else {
@@ -295,6 +302,8 @@ CloudPebble.Compile = (function() {
                 pane.find('#last-compilation-log').addClass('hide');
                 pane.find('#compilation-run-build-button').attr('disabled', 'disabled');
                 pane.find('#last-compilation-size').addClass('hide');
+                pane.find('#last-compilation-app-memory').addClass('hide');
+                pane.find('#last-compilation-worker-memory').addClass('hide');
             }
             if(build.state != 3) {
                 pane.find('#last-compilation-pbw').addClass('hide');
