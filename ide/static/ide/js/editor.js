@@ -149,6 +149,7 @@ CloudPebble.Editor = (function() {
                     settings.gutters = ['CodeMirror-linenumbers', 'gutter-hint-warnings'];
                 }
                 var code_mirror = CodeMirror(pane[0], settings);
+                code_mirror.file_target = file.target;
                 code_mirror.parent_pane = pane;
                 open_codemirrors[file.id] = code_mirror;
                 code_mirror.cloudpebble_save = function(callback) {
