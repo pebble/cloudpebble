@@ -111,11 +111,36 @@ CloudPebble.Editor.Autocomplete = new (function() {
         mCurrentSummaryElement = null;
     };
 
+    function didPick(data, completion) {
+        console.log("picked");
+        console.log(data, completion);
+        mLastAutocompletePos = data.from;
+        mLastAutocompleteToken = completion.text;
+    }
+
     var mRunning = false;
+    var mLastAutocompleteToken = null;
+    var mLastAutocompletePos = null;
     this.complete = function(editor, finishCompletion, options) {
         if(mRunning) return;
-        mRunning = true;
         var cursor = editor.getCursor();
+        try {
+            var token = editor.getTokenAt(cursor);
+            console.log(token.string, mLastAutocompleteToken, token.start, mLastAutocompletePos);
+            if(token.string == mLastAutocompleteToken
+                && token.start == mLastAutocompletePos.ch
+                && cursor.line == mLastAutocompletePos.line) {
+                return;
+            }
+            console.log("token '" + token.string + "'");
+            if(!token || (token.string.trim().length < 2 && token.string != '.' && token.string != '->')) {
+                return;
+            }
+        } catch(e) {
+            return;
+        }
+        console.log('go go gadget autocomplete');
+        mRunning = true;
         var these_patches = editor.patch_list;
         editor.patch_list = [];
         $.ajax(mAutocompleteServer + 'ycm/' + mAutocompleteUUID + '/completions', {
@@ -137,12 +162,12 @@ CloudPebble.Editor.Autocomplete = new (function() {
         }).done(function(data) {
             console.log(data);
             var completions = _.map(data.completions.completions, function(item) {
-                if(item.kind == 'FUNCTION') {
+                if(item.kind == 'FUNCTION' || (item.kind == 'MACRO' && item.detailed_info.indexOf('(') > 0)) {
                     var params = item.detailed_info.substr(item.detailed_info.indexOf('(') + 1);
                     if (params[0] == ')') {
                         params = [];
                     } else {
-                        params = params.substring(1, params.length - 3).split(', ');
+                        params = params.substring(1, params.length - 2).split(', ');
                     }
                     return {
                         text: item.insertion_text + '(' + params.join(', ') + ')',
@@ -165,6 +190,7 @@ CloudPebble.Editor.Autocomplete = new (function() {
             CodeMirror.on(result, 'shown', showSummary);
             CodeMirror.on(result, 'select', renderSummary);
             CodeMirror.on(result, 'close', hideSummary);
+            CodeMirror.on(result, 'pick', _.partial(didPick, result));
         }).fail(function() {
             console.log("failed");
             editor.patch_list = these_patches.concat(editor.patch_list);
