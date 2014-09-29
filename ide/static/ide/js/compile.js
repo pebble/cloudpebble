@@ -1,5 +1,5 @@
 CloudPebble.Compile = (function() {
-    var MINIMUM_INSTALL_VERSION = "v2.1";
+    var MINIMUM_INSTALL_VERSION = "v2.6";
 
     var COMPILE_SUCCESS_STATES = {
         1: {english: "Pending", cls: "info", label: 'info'},
@@ -689,7 +689,7 @@ CloudPebble.Compile = (function() {
     var compare_version_strings = function(a, b) {
         var split = function(version) {
             return _.map(version.substr(1).split('-')[0].split('.'), _.partial(parseInt, _, 10));
-        }
+        };
 
         a = split(a);
         b = split(b);
