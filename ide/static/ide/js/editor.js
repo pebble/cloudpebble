@@ -506,6 +506,8 @@ CloudPebble.Editor = (function() {
         }
     };
 
+    var mAutocompleteUUID = null;
+    var mAutocompleteServer = null;
     function init() {
         init_create_prompt();
         CodeMirror.commands.autocomplete = function(cm) {
@@ -517,6 +519,18 @@ CloudPebble.Editor = (function() {
         CodeMirror.commands.saveAll = function(cm) {
             save_all();
         };
+        $.post('/ide/project/' + PROJECT_ID + '/autocomplete/init')
+            .done(handle_autocomplete_ready)
+            .fail(function() {
+                console.log("Autocomplete setup failed.");
+            })
+    }
+
+    function handle_autocomplete_ready(data) {
+        if(data.success) {
+            mAutocompleteServer = data.server;
+            mAutocompleteUUID = data.uuid;
+        }
     }
 
     function fullscreen(code_mirror, toggle) {
