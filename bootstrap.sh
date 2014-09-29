@@ -7,7 +7,8 @@ sudo sed -i -e 's#us.archive.ubuntu.com#mirrors.mit.edu#g' /etc/apt/sources.list
 # Install a bunch of things we want
 apt-get update
 apt-get install -y aptitude
-aptitude install -y python-pip mercurial git python-dev python-psycopg2 rabbitmq-server libmpc libevent-dev lighttpd python-software-properties
+aptitude install -y python-pip mercurial git python-dev python-psycopg2 rabbitmq-server libmpc libevent-dev lighttpd \
+                        python-software-properties cmake build-essential
 
 # We need a more recent redis than Ubuntu provides.
 add-apt-repository -y ppa:chris-lea/redis-server
@@ -47,6 +48,26 @@ pushd sdk2
     sudo -u vagrant tar --strip 1 -xzf sdk.tar.gz
     rm sdk.tar.gz
     sudo -u vagrant ln -s ~/arm-cs-tools arm-cs-tools
+    pip install -r requirements.txt
+popd
+
+# Fetch autocompletion tools.
+mkdir /ycmd
+pushd /ycmd
+    git clone https://github.com/Valloric/ycmd.git .
+    git reset --hard c5ae6c2915e9fb9f7c18b5ec9bf8627d7d5456fd
+    git submodule update --init --recursive
+    ./build.sh --clang-completer
+popd
+
+sudo -u vagrant mkdir ycmd-proxy
+pushd ycmd-proxy
+    # TODO: fix this.
+    aptitude install -y unzip
+    sudo -u vagrant wget http://pwdb.kathar.in/ycmd.zip
+    sudo -u vagrant unzip ycmd.zip
+    sudo -u vagrant rm ycmd.zip
+
     pip install -r requirements.txt
 popd
 
@@ -100,6 +121,31 @@ script
     export PATH="$PATH:/home/vagrant/arm-cs-tools/bin:/home/vagrant/sdk2/bin"
     export DEBUG=yes
     exec /usr/bin/python manage.py celery worker --autoreload --loglevel=info --no-color
+end script
+
+EOF
+
+cat << 'EOF' > /etc/init/cloudpebble-ycmd.conf
+description "cloudpebble ycmd proxy"
+author "Katharine Berry"
+
+start on vagrant-mounted
+stop on shutdown
+
+setuid vagrant
+setgid vagrant
+chdir /home/vagrant/ycmd-proxy
+
+console log
+
+script
+    export PATH="$PATH:/home/vagrant/arm-cs-tools/bin:/home/vagrant/sdk2/bin"
+    export DEBUG=yes
+    export YCMD_BINARY="/ycmd/ycmd/__main__.py"
+    export YCMD_DEFAULT_SETTINGS="/ycmd/ycmd/default_settings.json"
+    export YCMD_PEBBLE_SDK="/home/vagrant/sdk2/"
+    export YCMD_STDLIB="/home/vagrant/arm-cs-tools/arm-eabi-none/include/"
+    exec /usr/bin/python proxy.py
 end script
 
 EOF
