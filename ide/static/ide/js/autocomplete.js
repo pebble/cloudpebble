@@ -1,4 +1,4 @@
-CloudPebble.Editor.Autocomplete = (function() {
+CloudPebble.Editor.Autocomplete = new (function() {
     var Pos = CodeMirror.Pos;
 
     var mSelectionCallback = null;
@@ -103,40 +103,101 @@ CloudPebble.Editor.Autocomplete = (function() {
         clearTimeout(mWaiting);
     };
     var hideSummary = function() {
+        if(!mCurrentSummaryElement) {
+            return;
+        }
         mCurrentSummaryElement.remove();
         $('.CodeMirror-hints').find("li:last").remove();
         mCurrentSummaryElement = null;
     };
 
-    var getCompletions = function(editor, token) {
-        return [];
-    };
-
-    return {
-        Complete: function(editor, options) {
-            var token = editor.getTokenAt(editor.getCursor());
-            var completions = [];
-            if(token.string !== '') {
-                completions = getCompletions(editor, token);
-            }
+    var mRunning = false;
+    this.complete = function(editor, finishCompletion, options) {
+        if(mRunning) return;
+        mRunning = true;
+        var cursor = editor.getCursor();
+        var these_patches = editor.patch_list;
+        editor.patch_list = [];
+        $.ajax(mAutocompleteServer + 'ycm/' + mAutocompleteUUID + '/completions', {
+            data: JSON.stringify({
+                file: editor.file_path,
+                line: cursor.line,
+                ch: cursor.ch,
+                patches: _.map(these_patches, function(patch) {
+                    return {
+                        start: patch.from,
+                        end: patch.to,
+                        filename: editor.file_path,
+                        text: patch.text
+                    }
+                })
+            }),
+            contentType: 'application/json',
+            method: 'POST'
+        }).done(function(data) {
+            console.log(data);
+            var completions = _.map(data.completions.completions, function(item) {
+                if(item.kind == 'FUNCTION') {
+                    var params = item.detailed_info.substr(item.detailed_info.indexOf('(') + 1);
+                    if (params[0] == ')') {
+                        params = [];
+                    } else {
+                        params = params.substring(1, params.length - 3).split(', ');
+                    }
+                    return {
+                        text: item.insertion_text + '(' + params.join(', ') + ')',
+                        params: params,
+                        ret: item.extra_menu_info,
+                        name: item.insertion_text,
+                        hint: expandCompletion,
+                        render: renderCompletion
+                    }
+                } else {
+                    return {text: item.insertion_text};
+                }
+            });
             var result = {
                 list: completions,
-                from: Pos(editor.getCursor().line, token.start),
-                to: Pos(editor.getCursor().line, token.end)
+                from: Pos(cursor.line, data.completions.completion_start_column - 1),
+                to: Pos(cursor.line, cursor.ch)
             };
+            finishCompletion(result);
             CodeMirror.on(result, 'shown', showSummary);
             CodeMirror.on(result, 'select', renderSummary);
             CodeMirror.on(result, 'close', hideSummary);
-            return result;
-        },
-        Init: function() {
-            init();
-        },
-        IsInitialised: function() {
-            return true;
-        },
-        SelectPlaceholder: function(cm, pos) {
-            selectPlaceholder(cm, pos);
+        }).fail(function() {
+            console.log("failed");
+            editor.patch_list = these_patches.concat(editor.patch_list);
+        }).always(function() {
+            mRunning = false;
+        });
+    };
+    this.complete.async = true;
+
+    var mIsInitialised = false;
+    var mAutocompleteUUID = null;
+    var mAutocompleteServer = null;
+    function handle_autocomplete_ready(data) {
+        if(data.success) {
+            mIsInitialised = true;
+            mAutocompleteServer = data.server;
+            mAutocompleteUUID = data.uuid;
         }
+    }
+
+    this.init = function() {
+        $.post('/ide/project/' + PROJECT_ID + '/autocomplete/init')
+            .done(handle_autocomplete_ready)
+            .fail(function() {
+                console.log("Autocomplete setup failed.");
+            })
+    };
+
+    this.IsInitialised = function() {
+        return mIsInitialised;
+    };
+
+    this.SelectPlaceholder = function(cm, pos) {
+        selectPlaceholder(cm, pos);
     };
 })();

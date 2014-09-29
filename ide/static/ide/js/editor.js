@@ -149,8 +149,10 @@ CloudPebble.Editor = (function() {
                     settings.gutters = ['CodeMirror-linenumbers', 'gutter-hint-warnings'];
                 }
                 var code_mirror = CodeMirror(pane[0], settings);
+                code_mirror.file_path = (file.target  == 'worker' ? 'worker_src/' : 'src/') + file.name;
                 code_mirror.file_target = file.target;
                 code_mirror.parent_pane = pane;
+                code_mirror.patch_list = [];
                 open_codemirrors[file.id] = code_mirror;
                 code_mirror.cloudpebble_save = function(callback) {
                     save(callback);
@@ -182,7 +184,8 @@ CloudPebble.Editor = (function() {
                 }
 
                 if(!is_js && USER_SETTINGS.autocomplete === 1) {
-                    code_mirror.on('change', function() {
+                    code_mirror.on('changes', function(instance, changes) {
+                        update_patch_list(instance, changes);
                         if(!is_autocompleting)
                             CodeMirror.commands.autocomplete(code_mirror);
                     });
@@ -249,9 +252,17 @@ CloudPebble.Editor = (function() {
                             });
                         }
                     }, 1000);
+
                     code_mirror.on('change', throttled_hint);
                     // Make sure we're ready when we start.
                     throttled_hint();
+                }
+
+                function update_patch_list(instance, changes) {
+                    _.each(changes, function(change) {
+                        console.log({from: change.from, to: change.to, text: change.text});
+                        code_mirror.patch_list.push({from: change.from, to: change.to, text: change.text});
+                    });
                 }
 
                 var check_safe = function() {
@@ -506,12 +517,10 @@ CloudPebble.Editor = (function() {
         }
     };
 
-    var mAutocompleteUUID = null;
-    var mAutocompleteServer = null;
     function init() {
         init_create_prompt();
         CodeMirror.commands.autocomplete = function(cm) {
-            CodeMirror.showHint(cm, CloudPebble.Editor.Autocomplete.Complete, {completeSingle: false});
+            cm.showHint({hint: CloudPebble.Editor.Autocomplete.complete, completeSingle: false});
         };
         CodeMirror.commands.save = function(cm) {
             cm.cloudpebble_save();
@@ -519,18 +528,6 @@ CloudPebble.Editor = (function() {
         CodeMirror.commands.saveAll = function(cm) {
             save_all();
         };
-        $.post('/ide/project/' + PROJECT_ID + '/autocomplete/init')
-            .done(handle_autocomplete_ready)
-            .fail(function() {
-                console.log("Autocomplete setup failed.");
-            })
-    }
-
-    function handle_autocomplete_ready(data) {
-        if(data.success) {
-            mAutocompleteServer = data.server;
-            mAutocompleteUUID = data.uuid;
-        }
     }
 
     function fullscreen(code_mirror, toggle) {
