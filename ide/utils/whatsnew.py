@@ -21,7 +21,7 @@ NEW_THINGS = [
      "Check out <a href='https://developer.getpebble.com/2/changelog-2.5.html' target='_blank'>the full release notes</a>."],
     ["CloudPebble is now running SDK 2.6!",
      "You can now build apps that run in the background. Check out our <a href='https://developer.getpebble.com/2/guides/background-guide.html'>background guide</a> for more details.",
-     "Other new features include access to the watch colour, firmware version, and framebuffer. Check <a href='https://developer.getpebble.com/2/changelog-2.5.html'>the release notes</a> for more details."],
+     "Other new features include access to the watch colour, firmware version, and framebuffer. Check <a href='https://developer.getpebble.com/2/changelog-2.6.html'>the release notes</a> for more details."],
 ]
 
 
