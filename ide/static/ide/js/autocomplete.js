@@ -71,9 +71,13 @@ CloudPebble.Editor.Autocomplete = new (function() {
     var renderCompletion = function(elt, data, completion) {
         var type = completion.ret;
         var elem = $('<span>');
-        elem.append($('<span class="muted">').append(document.createTextNode(type + ' ')));
+        if(type) {
+            elem.append($('<span class="muted">').append(document.createTextNode(type + ' ')));
+        }
         elem.append(document.createTextNode(completion.name));
-        elem.append($('<span class="muted">').append('(' + completion.params.join(', ') + ')'));
+        if(completion.params) {
+            elem.append($('<span class="muted">').append('(' + completion.params.join(', ') + ')'));
+        }
         elt.appendChild(elem[0]);
     };
 
