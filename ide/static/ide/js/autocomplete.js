@@ -204,7 +204,16 @@ CloudPebble.Editor.Autocomplete = new (function() {
             mAutocompleteUUID = data.uuid;
             self.autocompleteServer = data.server;
             self.autocompleteUUID = data.uuid;
+            _.delay(pingServer, 250000);
         }
+    }
+
+    function pingServer() {
+        $.ajax(mAutocompleteServer + 'ycm/' + mAutocompleteUUID + '/ping', {
+            contentType: 'application/json',
+            method: 'POST'
+        });
+        _.delay(pingServer, 250000);
     }
 
     this.init = function() {
