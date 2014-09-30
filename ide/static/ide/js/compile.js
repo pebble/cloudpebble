@@ -1,5 +1,5 @@
 CloudPebble.Compile = (function() {
-    var MINIMUM_INSTALL_VERSION = "v2.1";
+    var MINIMUM_INSTALL_VERSION = "v2.6";
 
     var COMPILE_SUCCESS_STATES = {
         1: {english: "Pending", cls: "info", label: 'info'},
@@ -271,6 +271,11 @@ CloudPebble.Compile = (function() {
                         s.find('.total').text(Math.round(build.size.total / 1024));
                         s.find('.res').text(Math.round(build.size.resources / 1024)).removeClass('text-error text-warning');
                         s.find('.bin').text(Math.round(build.size.binary / 1024)).removeClass('text-error');
+                        if(build.size.worker) {
+                            s.find('.worker').show().find('span').text(Math.round(build.size.worker / 1024));
+                        } else {
+                            s.find('.worker').hide();
+                        }
                         if(build.size.resources > 65536) {
                             if(build.size.resources > 98304)
                                 s.find('.res').addClass('text-error');
@@ -280,9 +285,16 @@ CloudPebble.Compile = (function() {
                         if(build.size.binary > 24576) {
                             s.find('.bin').addClass('text-error');
                         }
-                        var m = pane.find('#last-compilation-memory').removeClass('hide');
+                        var m = pane.find('#last-compilation-app-memory').removeClass('hide');
                         m.find('.free-bytes').text(24576 - build.size.binary);
                         m.find('.free-pct').text(Math.round((24576 - build.size.binary) / 245.76));
+                        if(build.size.worker) {
+                            var m = pane.find('#last-compilation-worker-memory').removeClass('hide');
+                            m.find('.free-bytes').text(12800 - build.size.binary);
+                            m.find('.free-pct').text(Math.round((12800 - build.size.binary) / 128.00));
+                        } else {
+                            pane.find('#last-compilation-worker-memory').addClass('hide')
+                        }
                     }
                 }
             } else {
@@ -290,6 +302,8 @@ CloudPebble.Compile = (function() {
                 pane.find('#last-compilation-log').addClass('hide');
                 pane.find('#compilation-run-build-button').attr('disabled', 'disabled');
                 pane.find('#last-compilation-size').addClass('hide');
+                pane.find('#last-compilation-app-memory').addClass('hide');
+                pane.find('#last-compilation-worker-memory').addClass('hide');
             }
             if(build.state != 3) {
                 pane.find('#last-compilation-pbw').addClass('hide');
@@ -300,7 +314,7 @@ CloudPebble.Compile = (function() {
                 .removeClass('label-success label-error label-info')
                 .addClass('label-' + COMPILE_SUCCESS_STATES[build.state].label)
                 .text(COMPILE_SUCCESS_STATES[build.state].english);
-            mCrashAnalyser.set_debug_info_url(build.debug);
+            mCrashAnalyser.set_debug_info_url(build.debug, build.worker_debug);
         }
     };
 
@@ -362,7 +376,7 @@ CloudPebble.Compile = (function() {
         mLogHolder[0].scrollTop = mLogHolder[0].scrollHeight;
     };
 
-    var handle_crash = function(is_our_crash, pc, lr) {
+    var handle_crash = function(process, is_our_crash, pc, lr) {
         if(!is_our_crash) {
             append_log_html("<span class='log-warning'>Different app crashed. Only the active app has debugging information available.</span>");
             return;
@@ -371,7 +385,7 @@ CloudPebble.Compile = (function() {
         mPebble.on('version', function(pebble_version) {
             mPebble.off('version');
             append_log_html($("<span class='log-verbose'>Looking up debug information...</span>"));
-            mCrashAnalyser.find_source_lines(pebble_version, [pc, lr], function(results) {
+            mCrashAnalyser.find_source_lines(process, pebble_version, [pc, lr], function(results) {
                 var pc_result = results[0];
                 var lr_result = results[1];
                 CloudPebble.Analytics.addEvent('app_logged_crash', {
@@ -675,7 +689,7 @@ CloudPebble.Compile = (function() {
     var compare_version_strings = function(a, b) {
         var split = function(version) {
             return _.map(version.substr(1).split('-')[0].split('.'), _.partial(parseInt, _, 10));
-        }
+        };
 
         a = split(a);
         b = split(b);

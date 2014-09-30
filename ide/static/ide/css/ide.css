@@ -129,6 +129,10 @@ ul.nav-pills {
     list-style: none;
 }
 
+#worker-files {
+    margin-top: 0;
+}
+
 /* Editor */
 
 .CodeMirror {
@@ -763,4 +767,19 @@ span.cm-autofilled-end {
 
 .screenshot-holder-tintin-green {
     background-image: url('../img/pebbles/tintin-green.png');
+}
+
+.field-help {
+    vertical-align: middle;
+    margin-bottom: 5px;
+    margin-left: 10px;
+}
+
+#help-prompt-holder {
+    z-index: 2000;
+    position: relative;
+}
+
+#help-prompt-holder > .popover {
+    width: 300px;
 }
