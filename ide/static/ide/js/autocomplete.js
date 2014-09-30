@@ -184,11 +184,11 @@ CloudPebble.Editor.Autocomplete = new (function() {
                 from: Pos(cursor.line, data.completions.completion_start_column - 1),
                 to: Pos(cursor.line, cursor.ch)
             };
-            finishCompletion(result);
             CodeMirror.on(result, 'shown', showSummary);
             CodeMirror.on(result, 'select', renderSummary);
             CodeMirror.on(result, 'close', hideSummary);
             CodeMirror.on(result, 'pick', _.partial(didPick, result));
+            finishCompletion(result);
         }).fail(function() {
             console.log("failed");
             editor.patch_list = these_patches.concat(editor.patch_list);
