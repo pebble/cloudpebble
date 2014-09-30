@@ -284,6 +284,9 @@ CloudPebble.Editor = (function() {
                             code_mirror.clearGutter('gutter-errors');
                             if(data.errors) {
                                 _.each(data.errors, function(error) {
+                                    if(error.kind != "ERROR" && error.kind != "WARNING") {
+                                        return;
+                                    }
                                     console.log(error);
                                     var line = error.location.line_num - 1;
                                     var markers = code_mirror.lineInfo(line).gutterMarkers;
@@ -476,6 +479,13 @@ CloudPebble.Editor = (function() {
                                 CloudPebble.Sidebar.DestroyActive();
                                 delete project_source_files[file.name];
                                 CloudPebble.Sidebar.Remove('source-' + file.id);
+                                $.ajax(CloudPebble.Editor.Autocomplete.autocompleteServer + 'ycm/' + CloudPebble.Editor.Autocomplete.autocompleteUUID + '/delete', {
+                                    data: JSON.stringify({
+                                        filename: ((file.target == 'worker') ? 'worker_src/' : 'src/') + file.name
+                                    }),
+                                    contentType: 'application/json',
+                                    method: 'POST'
+                                });
                             } else {
                                 alert(data.error);
                             }
@@ -724,7 +734,16 @@ CloudPebble.Editor = (function() {
         }
         $.post("/ide/project/" + PROJECT_ID + "/create_source_file", params, function(data) {
             if(data.success) {
-                add_source_file(data.file);
+                $.ajax(CloudPebble.Editor.Autocomplete.autocompleteServer + 'ycm/' + CloudPebble.Editor.Autocomplete.autocompleteUUID + '/create', {
+                    data: JSON.stringify({
+                        filename: ((params.target == 'worker') ? 'worker_src/' : 'src/') + params.name,
+                        content: params.content || ''
+                    }),
+                    contentType: 'application/json',
+                    method: 'POST'
+                }).always(function() {
+                    add_source_file(data.file);
+                });
             }
             if(callback) {
                 callback(data);
