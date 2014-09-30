@@ -287,7 +287,6 @@ CloudPebble.Editor = (function() {
                                     if(error.kind != "ERROR" && error.kind != "WARNING") {
                                         return;
                                     }
-                                    console.log(error);
                                     var line = error.location.line_num - 1;
                                     var markers = code_mirror.lineInfo(line).gutterMarkers;
                                     if(markers && markers['gutter-errors']) {

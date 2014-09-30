@@ -117,8 +117,6 @@ CloudPebble.Editor.Autocomplete = new (function() {
     };
 
     function didPick(data, completion) {
-        console.log("picked");
-        console.log(data, completion);
         mLastAutocompletePos = data.from;
         mLastAutocompleteToken = completion.text;
     }
@@ -131,20 +129,17 @@ CloudPebble.Editor.Autocomplete = new (function() {
         var cursor = editor.getCursor();
         try {
             var token = editor.getTokenAt(cursor);
-            console.log(token.string, mLastAutocompleteToken, token.start, mLastAutocompletePos);
             if(token.string == mLastAutocompleteToken
                 && token.start == mLastAutocompletePos.ch
                 && cursor.line == mLastAutocompletePos.line) {
                 return;
             }
-            console.log("token '" + token.string + "'");
             if(!token || (token.string.trim().length < 2 && token.string != '.' && token.string != '->')) {
                 return;
             }
         } catch(e) {
             return;
         }
-        console.log('go go gadget autocomplete');
         mRunning = true;
         var these_patches = editor.patch_list;
         editor.patch_list = [];
@@ -158,7 +153,6 @@ CloudPebble.Editor.Autocomplete = new (function() {
             contentType: 'application/json',
             method: 'POST'
         }).done(function(data) {
-            console.log(data);
             var completions = _.map(data.completions.completions, function(item) {
                 if(item.kind == 'FUNCTION' || (item.kind == 'MACRO' && item.detailed_info.indexOf('(') > 0)) {
                     var params = item.detailed_info.substr(item.detailed_info.indexOf('(') + 1);
@@ -190,7 +184,6 @@ CloudPebble.Editor.Autocomplete = new (function() {
             CodeMirror.on(result, 'pick', _.partial(didPick, result));
             finishCompletion(result);
         }).fail(function() {
-            console.log("failed");
             editor.patch_list = these_patches.concat(editor.patch_list);
         }).always(function() {
             mRunning = false;
