@@ -1,4 +1,5 @@
 CloudPebble.Editor.Autocomplete = new (function() {
+    var self = this;
     var Pos = CodeMirror.Pos;
 
     var mSelectionCallback = null;
@@ -148,14 +149,7 @@ CloudPebble.Editor.Autocomplete = new (function() {
                 file: editor.file_path,
                 line: cursor.line,
                 ch: cursor.ch,
-                patches: _.map(these_patches, function(patch) {
-                    return {
-                        start: patch.from,
-                        end: patch.to,
-                        filename: editor.file_path,
-                        text: patch.text
-                    }
-                })
+                patches: these_patches
             }),
             contentType: 'application/json',
             method: 'POST'
@@ -208,6 +202,8 @@ CloudPebble.Editor.Autocomplete = new (function() {
             mIsInitialised = true;
             mAutocompleteServer = data.server;
             mAutocompleteUUID = data.uuid;
+            self.autocompleteServer = data.server;
+            self.autocompleteUUID = data.uuid;
         }
     }
 

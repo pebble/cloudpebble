@@ -655,8 +655,16 @@ span.cm-autofilled-end {
     width: 16px;
 }
 
-.line-hint-warning, .gutter-hint-warning {
-    background-color: #82000b;
+.gutter-errors {
+    width: 16px;
+}
+
+.line-hint-warning, .line-clang-warning {
+    background-color: #444623;
+}
+
+.line-clang-error {
+    background-color: #362025;
 }
 
 .cm-s-eclipse .line-hint-warning,

@@ -146,7 +146,9 @@ CloudPebble.Editor = (function() {
                     };
                 }
                 if(is_js) {
-                    settings.gutters = ['CodeMirror-linenumbers', 'gutter-hint-warnings'];
+                    settings.gutters = ['gutter-hint-warnings', 'CodeMirror-linenumbers'];
+                } else {
+                    settings.gutters = ['gutter-errors', 'CodeMirror-linenumbers'];
                 }
                 var code_mirror = CodeMirror(pane[0], settings);
                 code_mirror.file_path = (file.target  == 'worker' ? 'worker_src/' : 'src/') + file.name;
@@ -244,7 +246,7 @@ CloudPebble.Editor = (function() {
                                     var marker = $(markers['gutter-hint-warnings']);
                                     marker.attr('title', marker.attr('title') + "\n" + error.reason);
                                 } else {
-                                    var warning = $('<div class="line-hint-warning"><i class="icon-warning-sign icon-white"></span></div>');
+                                    var warning = $('<i class="icon-warning-sign icon-white"></span>');
                                     warning.attr('title', error.reason);
                                     code_mirror.setGutterMarker(error.line - 1, 'gutter-hint-warnings', warning[0]);
                                     warning_lines.push(code_mirror.addLineClass(error.line - 1, 'background', 'line-hint-warning'));
@@ -256,12 +258,68 @@ CloudPebble.Editor = (function() {
                     code_mirror.on('change', throttled_hint);
                     // Make sure we're ready when we start.
                     throttled_hint();
+                } else {
+                    var clang_lines = [];
+                    var sChecking = false;
+                    var throttled_check = _.throttle(function() {
+                        if(sChecking) return;
+                        sChecking = true;
+                        var these_patches = code_mirror.patch_list;
+                        code_mirror.patch_list = [];
+                        $.ajax(CloudPebble.Editor.Autocomplete.autocompleteServer + 'ycm/' + CloudPebble.Editor.Autocomplete.autocompleteUUID + '/errors', {
+                            data: JSON.stringify({
+                                file: code_mirror.file_path,
+                                line: 0,
+                                ch: 0,
+                                patches: these_patches
+                            }),
+                            contentType: 'application/json',
+                            method: 'POST'
+                        }).done(function(data) {
+                            _.each(clang_lines, function(line) {
+                                code_mirror.removeLineClass(line, 'background', 'line-clang-warning');
+                                code_mirror.removeLineClass(line, 'background', 'line-clang-error');
+                            });
+                            clang_lines = [];
+                            code_mirror.clearGutter('gutter-errors');
+                            if(data.errors) {
+                                _.each(data.errors, function(error) {
+                                    console.log(error);
+                                    var line = error.location.line_num - 1;
+                                    var markers = code_mirror.lineInfo(line).gutterMarkers;
+                                    if(markers && markers['gutter-errors']) {
+                                        var marker = $(markers['gutter-errors']);
+                                        marker.attr('title', marker.attr('title') + "\n" + error.text);
+                                    } else {
+                                        var cls = error.kind == 'ERROR' ? 'icon-remove-sign' : 'icon-warning-sign';
+                                        var warning = $('<i class="' + cls + ' icon-white"></span>');
+                                        warning.attr('title', error.text);
+                                        code_mirror.setGutterMarker(line, 'gutter-errors', warning[0]);
+                                        cls = error.kind == 'ERROR' ? 'line-clang-error' : 'line-clang-warning';
+                                        clang_lines.push(code_mirror.addLineClass(line, 'background', cls));
+                                    }
+                                });
+                            }
+                        }).fail(function() {
+                            code_mirror.patch_list = these_patches.concat(code_mirror.patch_list);
+                        }).always(function() {
+                            sChecking = false;
+                        });
+                    }, 5000);
+                    code_mirror.on('change', throttled_check);
+                    throttled_check();
                 }
 
+                var mPatchCount = 0;
                 function update_patch_list(instance, changes) {
                     _.each(changes, function(change) {
-                        console.log({from: change.from, to: change.to, text: change.text});
-                        code_mirror.patch_list.push({from: change.from, to: change.to, text: change.text});
+                        code_mirror.patch_list.push({
+                            sequence: mPatchCount++,
+                            start: change.from,
+                            end: change.to,
+                            text: change.text,
+                            filename: code_mirror.file_path
+                        });
                     });
                 }
 
