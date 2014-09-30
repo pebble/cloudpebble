@@ -126,7 +126,7 @@ CloudPebble.Editor.Autocomplete = (function() {
         ['dict_write_uint32', 'DictionaryResult', ['DictionaryIterator **iter', 'const uint32_t key', 'const uint32_t value'], true, true],
         ['dict_write_uint8', 'DictionaryResult', ['DictionaryIterator **iter', 'const uint32_t key', 'const uint8_t value'], true, true],
         ['fonts_get_system_font', 'GFont', ['const char **font_key'], true, false],
-        ['fonts_load_custom_font', 'GFont', ['uint32_t resource_id'], true, false],
+        ['fonts_load_custom_font', 'GFont', ['ResHandle handle'], true, false],
         ['fonts_unload_custom_font', 'void', ['GFont font'], true, false],
         ['gbitmap_create_as_sub_bitmap', 'GBitmap *', ['const GBitmap **base_bitmap', 'GRect sub_rect'], true, false],
         ['gbitmap_create_blank', 'GBitmap *', ['GSize size'], true, false],

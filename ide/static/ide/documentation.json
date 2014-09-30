@@ -4222,9 +4222,9 @@
         "name": "fonts_load_custom_font", 
         "params": [
             {
-                "description": "<p>The resource id of the font to load. See <code>resource_ids</code>.auto.h for a list of resource IDs </p>", 
-                "name": "resource_id", 
-                "type": "uint32_t"
+                "description": "<p>The resource handle of the font to load. See <code>resource_ids</code>.auto.h for a list of resource IDs, and use \ref resource_get_handle() to obtain the resource handle. </p>", 
+                "name": "handle", 
+                "type": "ResHandle"
             }
         ], 
         "return_desc": "<p>An opaque pointer to the loaded font, or a pointer to the default (fallback) font if the specified font cannot be loaded. </p>", 
