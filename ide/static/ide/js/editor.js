@@ -12,10 +12,13 @@ CloudPebble.Editor = (function() {
         project_source_files[file.name] = file;
     };
 
-    var edit_source_file = function(file, show_ui_editor) {
+    var edit_source_file = function(file, show_ui_editor, callback) {
         // See if we already had it open.
         CloudPebble.Sidebar.SuspendActive();
         if(CloudPebble.Sidebar.Restore('source-'+file.id)) {
+            if(callback) {
+                callback(open_codemirrors[file.id]);
+            }
             return;
         }
         CloudPebble.ProgressBar.Show();
@@ -310,6 +313,33 @@ CloudPebble.Editor = (function() {
                     }, 5000);
                     code_mirror.on('change', throttled_check);
                     throttled_check();
+
+                    code_mirror.on('mousedown', function(cm, e) {
+                        if(e.ctrlKey || e.metaKey) {
+                            e.preventDefault();
+                            var pos = cm.coordsChar({left: e.pageX, top: e.pageY});
+                            var these_patches = code_mirror.patch_list;
+                            code_mirror.patch_list = [];
+                            $.ajax(CloudPebble.Editor.Autocomplete.autocompleteServer + 'ycm/' + CloudPebble.Editor.Autocomplete.autocompleteUUID + '/goto', {
+                                data: JSON.stringify({
+                                    file: code_mirror.file_path,
+                                    line: pos.line,
+                                    ch: pos.ch,
+                                    patches: these_patches
+                                }),
+                                contentType: 'application/json',
+                                method: 'POST'
+                            }).done(function(data) {
+                                console.log(data);
+                                if(data.location) {
+                                    var location = data.location;
+                                    CloudPebble.Editor.GoTo(location.filepath.replace(/^(worker_)?src\//, ''), location.line, location.ch);
+                                }
+                            }).fail(function() {
+                                code_mirror.patch_list = these_patches.concat(code_mirror.patch_list);
+                            });
+                        }
+                    });
                 }
 
                 var mPatchCount = 0;
@@ -555,6 +585,10 @@ CloudPebble.Editor = (function() {
 
                 if(show_ui_editor === true) {
                     toggle_ib();
+                }
+
+                if(callback) {
+                    callback(code_mirror);
                 }
 
                 // Tell Google
@@ -888,6 +922,15 @@ CloudPebble.Editor = (function() {
         prompt.modal('show');
     }
 
+    function go_to(filename, line, ch) {
+        var file = project_source_files[filename];
+        edit_source_file(file, false, function(cm) {
+            cm.scrollIntoView({line: line, ch: ch});
+            cm.setCursor({line: line, ch: ch});
+            cm.focus();
+        });
+    }
+
     return {
         Create: function() {
             create_source_file();
@@ -906,6 +949,9 @@ CloudPebble.Editor = (function() {
         },
         SaveAll: function(callback) {
             save_all(callback);
+        },
+        GoTo: function(file, line, ch) {
+            go_to(file, line, ch);
         }
     };
 })();
