@@ -89,7 +89,7 @@ class BuildResult(IdeModel):
 
     def read_build_log(self):
         if not settings.AWS_ENABLED:
-            with open(self.build_log, 'w') as f:
+            with open(self.build_log, 'r') as f:
                 return f.read()
         else:
             return s3.read_file('builds', self.build_log)
