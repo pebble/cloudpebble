@@ -614,6 +614,11 @@ table.build-results tr.pending .build-state {
     font-weight: bold;
 }
 
+.filename-link {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
 .cm-s-cloudpebble span.cm-autofilled,
 .cm-s-monokai span.cm-autofilled,
 .cm-s-blackboard span.cm-autofilled,

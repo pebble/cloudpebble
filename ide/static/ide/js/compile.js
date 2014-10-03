@@ -57,9 +57,19 @@ CloudPebble.Compile = (function() {
             // JavaScript linting failures are errors:
             log = log.replace(/^(src\/js\/.*)$/gm, '<span class="log-error">$1</span>');
             log = log.replace(/^(JavaScript linting failed.*)$/gm, '<span class="log-note">$1</span>');
+            // Link the thingies.
+            log = log.replace(/([\/a-zA-Z0-9_]+\.[ch]):([0-9+]+)/g, '<span class="filename-link" data-filename="$1" data-line="$2">$1:$2</span>');
             log = '<pre class="build-log" style="height: 100%;">' + log + '</pre>';
             var browserHeight = document.documentElement.clientHeight;
             log = $(log).css({'height': (browserHeight - 130) + 'px', 'overflow': 'auto'});
+            // Make the links do something.
+            log.find('.filename-link').click(function() {
+                var thing = $(this);
+                var filename = thing.data('filename').replace(/^(\.\.)?\/?((worker_)?(src))?\/?/, '');
+                var line = parseInt(thing.data('line'), 10);
+                CloudPebble.Editor.GoTo(filename, line - 1, 0);
+            });
+
             CloudPebble.Sidebar.SetActivePane(log);
             // Scroll to the first error, if any.
             setTimeout(function() { if(log.find('.log-error').length) {
@@ -362,8 +372,19 @@ CloudPebble.Compile = (function() {
             if(log === null) {
                 append_log_html($('<hr>'));
             } else {
-                var display = get_log_label(log.priority) + ' ' + log.filename + ':' + log.line_number + ': ' + log.message;
-                append_log_html($('<span>').addClass(get_log_class(log.priority)).text(display));
+                var display = _.escape(get_log_label(log.priority) + ' ' + log.filename + ':' + log.line_number + ': ' + log.message);
+                display = display.replace(/([\/a-zA-Z0-9_]+\.[ch]):([0-9+]+)/, '<span class="filename-link" data-filename="$1" data-line="$2">$1:$2</span>');
+                var span = $('<span>').addClass(get_log_class(log.priority)).html(display);
+                span.find('.filename-link').click(function() {
+                    var thing = $(this);
+                    var filename = thing.data('filename');
+                    if(filename == 'ocess_manager.c') {
+                        return;
+                    }
+                    var line = parseInt(thing.data('line'), 10);
+                    CloudPebble.Editor.GoTo(filename, line - 1, 0);
+                });
+                append_log_html(span);
                 if(ignore_crashes !== true) {
                     mCrashAnalyser.check_line_for_crash(log.message, handle_crash);
                 }

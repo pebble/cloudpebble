@@ -924,6 +924,7 @@ CloudPebble.Editor = (function() {
 
     function go_to(filename, line, ch) {
         var file = project_source_files[filename];
+        if(!file) return;
         edit_source_file(file, false, function(cm) {
             cm.scrollIntoView({line: line, ch: ch});
             cm.setCursor({line: line, ch: ch});
