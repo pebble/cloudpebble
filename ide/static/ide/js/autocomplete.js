@@ -122,10 +122,22 @@ CloudPebble.Editor.Autocomplete = new (function() {
     }
 
     var mRunning = false;
+    var mLastInvocation = null;
     var mLastAutocompleteToken = null;
     var mLastAutocompletePos = null;
+    var run_last = _.debounce(function() {
+        if(mLastInvocation) {
+            console.log("running trailing completion.");
+            self.complete.apply(self, mLastInvocation);
+        }
+    }, 50);
     this.complete = function(editor, finishCompletion, options) {
-        if(mRunning) return;
+        console.log('completing');
+        if(mRunning) {
+            mLastInvocation = [editor, finishCompletion, options];
+            return;
+        }
+        mLastInvocation = null;
         var cursor = editor.getCursor();
         try {
             var token = editor.getTokenAt(cursor);
@@ -187,6 +199,7 @@ CloudPebble.Editor.Autocomplete = new (function() {
             editor.patch_list = these_patches.concat(editor.patch_list);
         }).always(function() {
             mRunning = false;
+            run_last();
         });
     };
     this.complete.async = true;
