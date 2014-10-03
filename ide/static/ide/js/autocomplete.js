@@ -215,6 +215,10 @@ CloudPebble.Editor.Autocomplete = new (function() {
             self.autocompleteServer = data.server;
             self.autocompleteUUID = data.uuid;
             _.delay(pingServer, 250000);
+            $('.prepare-autocomplete').hide();
+            $('.footer-credits').show();
+        } else {
+            $('.prepare-autocomplete').text("Autocompletion unavailable.");
         }
     }
 
@@ -231,6 +235,7 @@ CloudPebble.Editor.Autocomplete = new (function() {
             .done(handle_autocomplete_ready)
             .fail(function() {
                 console.log("Autocomplete setup failed.");
+                $('.prepare-autocomplete').text("Autocompletion unavailable.");
             })
     };
 
