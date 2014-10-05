@@ -13,7 +13,6 @@ __author__ = 'katharine'
 
 @login_required
 @require_POST
-@csrf_exempt
 def init_autocomplete(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     source_files = project.source_files.all()
