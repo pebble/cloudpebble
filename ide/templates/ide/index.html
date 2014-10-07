@@ -23,6 +23,10 @@
         </div>
             {% if my_projects %}
             <div class="well">
+                <p style="text-align: center;">
+                    Due to a recent Chrome update, we have been forced to disable TLS side-wide. Security will be re-enabled
+                    in a few days.
+                </p>
                 <table class="table">
                     <thead>
                         <tr><th style="min-width: 180px;">Project</th><th>Last modified</th><th>Last build</th></tr>
@@ -52,6 +56,10 @@
                 </table>
             </div>
             {% else %}
+                <p style="text-align: center;">
+                    Due to a recent Chrome update, we have been forced to disable TLS side-wide. Security will be re-enabled
+                    in a few days.
+                </p>
                 <p>You don't have any projects yet.</p>
             {% endif %}
 {% endblock %}
