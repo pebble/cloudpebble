@@ -77,8 +77,11 @@
             Questions? Email us at <a href="mailto:cloudpebble@getpebble.com">cloudpebble@getpebble.com</a>.
         </p>
         <div class="pebble-logo">
-            <span class="katharine-at">Katharine @</span>
-            <a href="http://pbldev.io" target="_blank"><img src="{% static 'root/images/pebble.png' %}"></a>
+            <div class="hide footer-credits">
+                <span class="katharine-at">Katharine @</span>
+                <a href="http://pbldev.io" target="_blank"><img src="{% static 'root/images/pebble.png' %}"></a>
+            </div>
+            <div class="prepare-autocomplete katharine-at">Preparing autocomplete…</div>
         </div>
 </div>
 
@@ -392,6 +395,7 @@ var LIBPEBBLE_
 <script src="{% static 'ide/js/cloudpebble.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/sidebar.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/radix.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/ycm.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/editor.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/syntax.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/autocomplete.js' %}" type="text/javascript"></script>

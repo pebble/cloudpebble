@@ -17,9 +17,11 @@ CloudPebble.Resources = (function() {
             resource.identifiers = [identifier + '_WHITE', identifier + '_BLACK'];
         }
         CloudPebble.Sidebar.SetPopover('resource-' + resource.id, 'Identifier' + (resource.identifiers.length != 1 ? 's' : ''), resource.identifiers.join('<br>'));
-        // We need to reinitialise the editor, which uses this information.
-        if(CloudPebble.Editor.Autocomplete.IsInitialised())
-            CloudPebble.Editor.Autocomplete.Init();
+        // We need to update code completion so it can include these identifiers.
+        // However, don't do this during initial setup; the server handle it for us.
+        if(CloudPebble.Ready) {
+            CloudPebble.YCM.updateResources(project_resources);
+        }
     };
 
     var PEBBLE_PPI = 175.2;

@@ -614,6 +614,11 @@ table.build-results tr.pending .build-state {
     font-weight: bold;
 }
 
+.filename-link {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
 .cm-s-cloudpebble span.cm-autofilled,
 .cm-s-monokai span.cm-autofilled,
 .cm-s-blackboard span.cm-autofilled,
@@ -655,8 +660,16 @@ span.cm-autofilled-end {
     width: 16px;
 }
 
-.line-hint-warning, .gutter-hint-warning {
-    background-color: #82000b;
+.gutter-errors {
+    width: 16px;
+}
+
+.line-hint-warning, .line-clang-warning {
+    background-color: #444623;
+}
+
+.line-clang-error {
+    background-color: #362025;
 }
 
 .cm-s-eclipse .line-hint-warning,

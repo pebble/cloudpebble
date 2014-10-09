@@ -167,6 +167,13 @@ class SourceFile(IdeModel):
         self.project.save()
         super(SourceFile, self).save(*args, **kwargs)
 
+    @property
+    def project_path(self):
+        if self.target == 'app':
+            return 'src/%s' % self.file_name
+        else:
+            return 'worker_src/%s' % self.file_name
+
     local_filename = property(get_local_filename)
     s3_path = property(get_s3_path)
 
