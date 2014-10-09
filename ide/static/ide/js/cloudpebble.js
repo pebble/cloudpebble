@@ -50,7 +50,7 @@ CloudPebble.Init = function() {
             CloudPebble.Resources.Add(value);
         });
 
-        CloudPebble.Editor.Autocomplete.init();
+        CloudPebble.YCM.initialise();
         CloudPebble.Sidebar.SetProjectType(data.type);
     });
 

@@ -17,9 +17,7 @@ CloudPebble.Resources = (function() {
             resource.identifiers = [identifier + '_WHITE', identifier + '_BLACK'];
         }
         CloudPebble.Sidebar.SetPopover('resource-' + resource.id, 'Identifier' + (resource.identifiers.length != 1 ? 's' : ''), resource.identifiers.join('<br>'));
-        // We need to reinitialise the editor, which uses this information.
-        if(CloudPebble.Editor.Autocomplete.IsInitialised())
-            CloudPebble.Editor.Autocomplete.Init();
+        // We need to update autocomplete (somehow?), because it cares.
     };
 
     var PEBBLE_PPI = 175.2;

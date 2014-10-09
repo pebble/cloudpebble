@@ -267,50 +267,38 @@ CloudPebble.Editor = (function() {
                     var throttled_check = _.throttle(function() {
                         if(sChecking) return;
                         sChecking = true;
-                        var these_patches = code_mirror.patch_list;
-                        code_mirror.patch_list = [];
-                        $.ajax(CloudPebble.Editor.Autocomplete.autocompleteServer + 'ycm/' + CloudPebble.Editor.Autocomplete.autocompleteUUID + '/errors', {
-                            data: JSON.stringify({
-                                file: code_mirror.file_path,
-                                line: 0,
-                                ch: 0,
-                                patches: these_patches
-                            }),
-                            contentType: 'application/json',
-                            method: 'POST'
-                        }).done(function(data) {
-                            _.each(clang_lines, function(line) {
-                                code_mirror.removeLineClass(line, 'background', 'line-clang-warning');
-                                code_mirror.removeLineClass(line, 'background', 'line-clang-error');
-                            });
-                            clang_lines = [];
-                            code_mirror.clearGutter('gutter-errors');
-                            if(data.errors) {
-                                _.each(data.errors, function(error) {
-                                    if(error.kind != "ERROR" && error.kind != "WARNING") {
-                                        return;
-                                    }
-                                    var line = error.location.line_num - 1;
-                                    var markers = code_mirror.lineInfo(line).gutterMarkers;
-                                    if(markers && markers['gutter-errors']) {
-                                        var marker = $(markers['gutter-errors']);
-                                        marker.attr('title', marker.attr('title') + "\n" + error.text);
-                                    } else {
-                                        var cls = error.kind == 'ERROR' ? 'icon-remove-sign' : 'icon-warning-sign';
-                                        var warning = $('<i class="' + cls + ' icon-white"></span>');
-                                        warning.attr('title', error.text);
-                                        code_mirror.setGutterMarker(line, 'gutter-errors', warning[0]);
-                                        cls = error.kind == 'ERROR' ? 'line-clang-error' : 'line-clang-warning';
-                                        clang_lines.push(code_mirror.addLineClass(line, 'background', cls));
-                                    }
+                        CloudPebble.YCM.request('errors', code_mirror)
+                            .done(function(data) {
+                                _.each(clang_lines, function(line) {
+                                    code_mirror.removeLineClass(line, 'background', 'line-clang-warning');
+                                    code_mirror.removeLineClass(line, 'background', 'line-clang-error');
                                 });
-                            }
-                        }).fail(function() {
-                            code_mirror.patch_list = these_patches.concat(code_mirror.patch_list);
-                        }).always(function() {
-                            sChecking = false;
-                        });
-                    }, 5000);
+                                clang_lines = [];
+                                code_mirror.clearGutter('gutter-errors');
+                                if(data.errors) {
+                                    _.each(data.errors, function(error) {
+                                        if(error.kind != "ERROR" && error.kind != "WARNING") {
+                                            return;
+                                        }
+                                        var line = error.location.line_num - 1;
+                                        var markers = code_mirror.lineInfo(line).gutterMarkers;
+                                        if(markers && markers['gutter-errors']) {
+                                            var marker = $(markers['gutter-errors']);
+                                            marker.attr('title', marker.attr('title') + "\n" + error.text);
+                                        } else {
+                                            var cls = error.kind == 'ERROR' ? 'icon-remove-sign' : 'icon-warning-sign';
+                                            var warning = $('<i class="' + cls + ' icon-white"></span>');
+                                            warning.attr('title', error.text);
+                                            code_mirror.setGutterMarker(line, 'gutter-errors', warning[0]);
+                                            cls = error.kind == 'ERROR' ? 'line-clang-error' : 'line-clang-warning';
+                                            clang_lines.push(code_mirror.addLineClass(line, 'background', cls));
+                                        }
+                                    });
+                                }
+                            }).always(function() {
+                                sChecking = false;
+                            });
+                    }, 2000);
                     code_mirror.on('change', throttled_check);
                     throttled_check();
 
@@ -318,26 +306,13 @@ CloudPebble.Editor = (function() {
                         if(e.ctrlKey || e.metaKey) {
                             e.preventDefault();
                             var pos = cm.coordsChar({left: e.pageX, top: e.pageY});
-                            var these_patches = code_mirror.patch_list;
-                            code_mirror.patch_list = [];
-                            $.ajax(CloudPebble.Editor.Autocomplete.autocompleteServer + 'ycm/' + CloudPebble.Editor.Autocomplete.autocompleteUUID + '/goto', {
-                                data: JSON.stringify({
-                                    file: code_mirror.file_path,
-                                    line: pos.line,
-                                    ch: pos.ch,
-                                    patches: these_patches
-                                }),
-                                contentType: 'application/json',
-                                method: 'POST'
-                            }).done(function(data) {
-                                console.log(data);
-                                if(data.location) {
-                                    var location = data.location;
-                                    CloudPebble.Editor.GoTo(location.filepath.replace(/^(worker_)?src\//, ''), location.line, location.ch);
-                                }
-                            }).fail(function() {
-                                code_mirror.patch_list = these_patches.concat(code_mirror.patch_list);
-                            });
+                            CloudPebble.YCM.request('goto', cm, pos)
+                                .done(function(data) {
+                                    if(data.location) {
+                                        var location = data.location;
+                                        CloudPebble.Editor.GoTo(location.filepath.replace(/^(worker_)?src\//, ''), location.line, location.ch);
+                                    }
+                                });
                         }
                     });
                 }
@@ -345,12 +320,12 @@ CloudPebble.Editor = (function() {
                 var mPatchCount = 0;
                 function update_patch_list(instance, changes) {
                     _.each(changes, function(change) {
-                        code_mirror.patch_list.push({
+                        instance.patch_list.push({
                             sequence: mPatchCount++,
                             start: change.from,
                             end: change.to,
                             text: change.text,
-                            filename: code_mirror.file_path
+                            filename: instance.file_path
                         });
                     });
                 }
@@ -508,13 +483,7 @@ CloudPebble.Editor = (function() {
                                 CloudPebble.Sidebar.DestroyActive();
                                 delete project_source_files[file.name];
                                 CloudPebble.Sidebar.Remove('source-' + file.id);
-                                $.ajax(CloudPebble.Editor.Autocomplete.autocompleteServer + 'ycm/' + CloudPebble.Editor.Autocomplete.autocompleteUUID + '/delete', {
-                                    data: JSON.stringify({
-                                        filename: ((file.target == 'worker') ? 'worker_src/' : 'src/') + file.name
-                                    }),
-                                    contentType: 'application/json',
-                                    method: 'POST'
-                                });
+                                CloudPebble.YCM.deleteFile(file);
                             } else {
                                 alert(data.error);
                             }
@@ -767,16 +736,10 @@ CloudPebble.Editor = (function() {
         }
         $.post("/ide/project/" + PROJECT_ID + "/create_source_file", params, function(data) {
             if(data.success) {
-                $.ajax(CloudPebble.Editor.Autocomplete.autocompleteServer + 'ycm/' + CloudPebble.Editor.Autocomplete.autocompleteUUID + '/create', {
-                    data: JSON.stringify({
-                        filename: ((params.target == 'worker') ? 'worker_src/' : 'src/') + params.name,
-                        content: params.content || ''
-                    }),
-                    contentType: 'application/json',
-                    method: 'POST'
-                }).always(function() {
-                    add_source_file(data.file);
-                });
+                CloudPebble.YCM.createFile(data.file, params.content)
+                    .always(function() {
+                        add_source_file(data.file);
+                    });
             }
             if(callback) {
                 callback(data);

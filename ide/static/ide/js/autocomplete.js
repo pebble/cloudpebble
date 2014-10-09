@@ -153,95 +153,45 @@ CloudPebble.Editor.Autocomplete = new (function() {
             return;
         }
         mRunning = true;
-        var these_patches = editor.patch_list;
-        editor.patch_list = [];
-        $.ajax(mAutocompleteServer + 'ycm/' + mAutocompleteUUID + '/completions', {
-            data: JSON.stringify({
-                file: editor.file_path,
-                line: cursor.line,
-                ch: cursor.ch,
-                patches: these_patches
-            }),
-            contentType: 'application/json',
-            method: 'POST'
-        }).done(function(data) {
-            var completions = _.map(data.completions.completions, function(item) {
-                if(item.kind == 'FUNCTION' || (item.kind == 'MACRO' && item.detailed_info.indexOf('(') > 0)) {
-                    var params = item.detailed_info.substr(item.detailed_info.indexOf('(') + 1);
-                    if (params[0] == ')') {
-                        params = [];
+
+        CloudPebble.YCM.request('completions', editor)
+            .done(function(data) {
+                var completions = _.map(data.completions.completions, function(item) {
+                    if(item.kind == 'FUNCTION' || (item.kind == 'MACRO' && item.detailed_info.indexOf('(') > 0)) {
+                        var params = item.detailed_info.substr(item.detailed_info.indexOf('(') + 1);
+                        if (params[0] == ')') {
+                            params = [];
+                        } else {
+                            params = params.substring(1, params.length - 2).split(', ');
+                        }
+                        return {
+                            text: item.insertion_text + '(' + params.join(', ') + ')',
+                            params: params,
+                            ret: item.extra_menu_info,
+                            name: item.insertion_text,
+                            hint: expandCompletion,
+                            render: renderCompletion
+                        }
                     } else {
-                        params = params.substring(1, params.length - 2).split(', ');
+                        return {text: item.insertion_text};
                     }
-                    return {
-                        text: item.insertion_text + '(' + params.join(', ') + ')',
-                        params: params,
-                        ret: item.extra_menu_info,
-                        name: item.insertion_text,
-                        hint: expandCompletion,
-                        render: renderCompletion
-                    }
-                } else {
-                    return {text: item.insertion_text};
-                }
+                });
+                var result = {
+                    list: completions,
+                    from: Pos(cursor.line, data.completions.completion_start_column - 1),
+                    to: Pos(cursor.line, cursor.ch)
+                };
+                CodeMirror.on(result, 'shown', showSummary);
+                CodeMirror.on(result, 'select', renderSummary);
+                CodeMirror.on(result, 'close', hideSummary);
+                CodeMirror.on(result, 'pick', _.partial(didPick, result));
+                finishCompletion(result);
+            }).always(function() {
+                mRunning = false;
+                run_last();
             });
-            var result = {
-                list: completions,
-                from: Pos(cursor.line, data.completions.completion_start_column - 1),
-                to: Pos(cursor.line, cursor.ch)
-            };
-            CodeMirror.on(result, 'shown', showSummary);
-            CodeMirror.on(result, 'select', renderSummary);
-            CodeMirror.on(result, 'close', hideSummary);
-            CodeMirror.on(result, 'pick', _.partial(didPick, result));
-            finishCompletion(result);
-        }).fail(function() {
-            editor.patch_list = these_patches.concat(editor.patch_list);
-        }).always(function() {
-            mRunning = false;
-            run_last();
-        });
     };
     this.complete.async = true;
-
-    var mIsInitialised = false;
-    var mAutocompleteUUID = null;
-    var mAutocompleteServer = null;
-    function handle_autocomplete_ready(data) {
-        if(data.success) {
-            mIsInitialised = true;
-            mAutocompleteServer = data.server;
-            mAutocompleteUUID = data.uuid;
-            self.autocompleteServer = data.server;
-            self.autocompleteUUID = data.uuid;
-            _.delay(pingServer, 250000);
-            $('.prepare-autocomplete').hide();
-            $('.footer-credits').show();
-        } else {
-            $('.prepare-autocomplete').text("Autocompletion unavailable.");
-        }
-    }
-
-    function pingServer() {
-        $.ajax(mAutocompleteServer + 'ycm/' + mAutocompleteUUID + '/ping', {
-            contentType: 'application/json',
-            method: 'POST'
-        });
-        _.delay(pingServer, 250000);
-    }
-
-    this.init = function() {
-        $.post('/ide/project/' + PROJECT_ID + '/autocomplete/init')
-            .done(handle_autocomplete_ready)
-            .fail(function() {
-                console.log("Autocomplete setup failed.");
-                $('.prepare-autocomplete').text("Autocompletion unavailable.");
-            })
-    };
-
-    this.IsInitialised = function() {
-        return mIsInitialised;
-    };
 
     this.SelectPlaceholder = function(cm, pos) {
         selectPlaceholder(cm, pos);
