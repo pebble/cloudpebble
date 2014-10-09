@@ -48,6 +48,10 @@ CloudPebble.YCM = new (function() {
 
     this.deleteFile = function(file) {
         var promise = $.Deferred();
+        if(!mInitialised) {
+            promise.reject();
+            return promise;
+        }
         $.ajax(mURL + '/delete', {
             data: JSON.stringify({
                 filename: ((file.target == 'worker') ? 'worker_src/' : 'src/') + file.name
@@ -64,6 +68,10 @@ CloudPebble.YCM = new (function() {
 
     this.createFile = function(file, content) {
         var promise = $.Deferred();
+        if(!mInitialised) {
+            promise.reject();
+            return promise;
+        }
         $.ajax(mURL + '/create', {
             data: JSON.stringify({
                 filename: ((file.target == 'worker') ? 'worker_src/' : 'src/') + file.name,
@@ -77,7 +85,36 @@ CloudPebble.YCM = new (function() {
             promise.reject();
         });
         return promise;
-    }
+    };
+
+    this.updateResources = function(resources) {
+        if(!mInitialised) {
+            return;
+        }
+        var defines = [];
+        var counter = 1;
+        _.each(resources, function(resource) {
+            if(resource.kind != 'png-trans') {
+                defines = defines.concat(_.map(resource.identifiers, function(id) {
+                    return '#define RESOURCE_ID_' + id + ' ' + (counter++);
+                }));
+            } else {
+                _.each(resource.identifiers, function(id) {
+                    defines.push('#define RESOURCE_ID_' + id + '_BLACK ' + (counter++));
+                    defines.push('#define RESOURCE_ID_' + id + '_WHITE ' + (counter++));
+                })
+            }
+        });
+        defines.push("");
+        $.ajax(mURL + '/create', {
+            data: JSON.stringify({
+                filename: 'build/src/resource_ids.auto.h',
+                content: defines.join("\n")
+            }),
+            contentType: 'application/json',
+            method: 'POST'
+        });
+    };
 
     this.request = function(endpoint, editor, cursor) {
         var promise = $.Deferred();

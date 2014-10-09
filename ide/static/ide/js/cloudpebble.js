@@ -1,4 +1,5 @@
 var CloudPebble = {};
+CloudPebble.Ready = false;
 
 CloudPebble.ProgressBar = (function() {
     function hide() {
@@ -52,6 +53,7 @@ CloudPebble.Init = function() {
 
         CloudPebble.YCM.initialise();
         CloudPebble.Sidebar.SetProjectType(data.type);
+        CloudPebble.Ready = true;
     });
 
     window.addEventListener('beforeunload', function(e) {
