@@ -22,6 +22,10 @@ NEW_THINGS = [
     ["CloudPebble is now running SDK 2.6!",
      "You can now build apps that run in the background. Check out our <a href='https://developer.getpebble.com/2/guides/background-guide.html'>background guide</a> for more details.",
      "Other new features include access to the watch colour, firmware version, and framebuffer. Check <a href='https://developer.getpebble.com/2/changelog-2.6.html'>the release notes</a> for more details."],
+    ["Significantly improved code completion!",
+     "Code completion now supports fuzzy matching and includes your own symbols!",
+     "CloudPebble will now also sanity check your file and highlight errors inline as you type.",
+     "Check out <a href='https://developer.getpebble.com/blog/2014/10/09/CloudPebble-code-completion/' target='_blank'>the blog post</a> for details and examples!"],
 ]
 
 
