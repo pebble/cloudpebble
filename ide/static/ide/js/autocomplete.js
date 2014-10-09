@@ -132,7 +132,6 @@ CloudPebble.Editor.Autocomplete = new (function() {
         }
     }, 50);
     this.complete = function(editor, finishCompletion, options) {
-        console.log('completing');
         if(mRunning) {
             mLastInvocation = [editor, finishCompletion, options];
             return;
@@ -146,7 +145,7 @@ CloudPebble.Editor.Autocomplete = new (function() {
                 && cursor.line == mLastAutocompletePos.line) {
                 return;
             }
-            if(!token || (token.string.trim().length < 2 && token.string != '.' && token.string != '->')) {
+            if(!token || (token.string.replace(/[^a-z0-9_]/gi, '').length < 1 && token.string != '.' && token.string != '->')) {
                 return;
             }
         } catch(e) {
