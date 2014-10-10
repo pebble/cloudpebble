@@ -672,9 +672,17 @@ span.cm-autofilled-end {
     background-color: #362025;
 }
 
+.cm-s-eclipse .line-clang-error,
+.cm-s-solarized.cm-s-light .line-clang-error {
+    background-color: #ffd9db;
+}
+
+
+.cm-s-eclipse .line-clang-warning,
+.cm-s-solarized.cm-s-light .line-clang-warning,
 .cm-s-eclipse .line-hint-warning,
 .cm-s-solarized.cm-s-light .line-hint-warning {
-    background-color: #FFCBC9;
+    background-color: #fff4b7;
 }
 
 /* Override white icons on the light themes. */
