@@ -62,12 +62,7 @@ popd
 
 sudo -u vagrant mkdir ycmd-proxy
 pushd ycmd-proxy
-    # TODO: fix this.
-    aptitude install -y unzip
-    sudo -u vagrant wget http://pwdb.kathar.in/ycmd.zip
-    sudo -u vagrant unzip ycmd.zip
-    sudo -u vagrant rm ycmd.zip
-
+    git clone https://github.com/pebble/cloudpebble-ycmd-proxy.git .
     pip install -r requirements.txt
 popd
 
