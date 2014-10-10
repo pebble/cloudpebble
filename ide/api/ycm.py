@@ -39,7 +39,8 @@ def init_autocomplete(request, project_id):
     server = _choose_ycm_server()
     request = {'files': file_contents}
     # Let's go!
-    result = requests.post('%sspinup' % server, json.dumps(request), headers={'Content-Type': 'application/json'})
+    # FIXME: verify=False is wrong.
+    result = requests.post('%sspinup' % server, json.dumps(request), headers={'Content-Type': 'application/json'}, verify=False)
     response = result.json()
     if response['success']:
         return json_response({'uuid': response['uuid'], 'server': server})
