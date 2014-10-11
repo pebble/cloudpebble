@@ -1,7 +1,7 @@
 CloudPebble = CloudPebble || {};
 CloudPebble.YCM = new (function() {
     var self = this;
-    var PING_INTERVAL = 250000;
+    var PING_INTERVAL = 90000;
 
     var mInitialised = false;
     var mIsInitialising = false;
