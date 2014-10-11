@@ -271,6 +271,8 @@ REDIS_URL = _environ.get('REDISCLOUD_URL', 'redis://localhost:6379/')
 
 YCM_URLS = _environ.get('YCM_URLS', 'http://localhost:8002/').split(',')
 
+COMPLETION_CERTS = _environ.get('COMPLETION_CERTS', os.getcwd() + '/completion-certs.crt')
+
 import djcelery
 djcelery.setup_loader()
 
