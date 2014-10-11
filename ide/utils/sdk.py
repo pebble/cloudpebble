@@ -42,9 +42,12 @@ def build(ctx):
 
     # Concatenate all our JS files (but not recursively), and only if any JS exists in the first place.
     ctx.path.make_node('src/js/').mkdir()
-    js_paths = [node.abspath() for node in ctx.path.ant_glob("src/*.js")]
+    js_paths = ctx.path.ant_glob(['src/*.js', 'src/**/*.js'])
     if js_paths:
-        ctx.exec_command(['cat'] + js_paths, stdout=open('src/js/pebble-js-app.js', 'a'))
+        ctx(rule='cat ${SRC} > ${TGT}', source=js_paths, target='pebble-js-app.js')
+        has_js = True
+    else:
+        has_js = False
 
     ctx.load('pebble_sdk')
 
@@ -56,10 +59,10 @@ def build(ctx):
                         target='pebble-worker.elf')
         ctx.pbl_bundle(elf='pebble-app.elf',
                         worker_elf='pebble-worker.elf',
-                        js=ctx.path.ant_glob('src/js/**/*.js'))
+                        js='pebble-js-app.js' if has_js else [])
     else:
         ctx.pbl_bundle(elf='pebble-app.elf',
-                       js=ctx.path.ant_glob('src/js/**/*.js'))
+                       js='pebble-js-app.js' if has_js else [])
 
 """
     return wscript.replace('{{jshint}}', 'True' if jshint and not for_export else 'False')
