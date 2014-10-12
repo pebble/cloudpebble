@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
-from ide.api import json_response
+from ide.api import json_response, json_failure
 from ide.models.project import Project
 import requests
 import random
@@ -36,14 +36,28 @@ def init_autocomplete(request, project_id):
                 count += 1
     file_contents['build/src/resource_ids.auto.h'] = '\n'.join(resource_ids) + "\n"
 
-    server = _choose_ycm_server()
     request = {'files': file_contents}
     # Let's go!
-    result = requests.post('%sspinup' % server, json.dumps(request), headers={'Content-Type': 'application/json'}, verify=settings.COMPLETION_CERTS)
-    response = result.json()
-    if response['success']:
-        return json_response({'uuid': response['uuid'], 'server': server})
+    return _spin_up_server(request)
 
 
 def _choose_ycm_server():
     return random.choice(settings.YCM_URLS)
+
+
+def _spin_up_server(request):
+    servers = set(settings.YCM_URLS)
+    while len(servers) > 0:
+        server = random.choice(list(servers))
+        servers.remove(server)
+        try:
+            result = requests.post('%sspinup' % server, json.dumps(request), headers={'Content-Type': 'application/json'}, verify=settings.COMPLETION_CERTS)
+            if result.ok:
+                response = result.json()
+                if response['success']:
+                    return json_response({'uuid': response['uuid'], 'server': server})
+        except (requests.RequestException, ValueError):
+            pass
+        print "Server %s failed; trying another." % server
+    # If we get out of here, something went wrong.
+    return json_failure({'success': False, 'error': 'No servers'})
