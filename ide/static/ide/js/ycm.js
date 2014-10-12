@@ -9,18 +9,14 @@ CloudPebble.YCM = new (function() {
     var mRestarting = false;
     var mURL = null;
     var mUUID = null;
+    var mPingTimer = null;
 
     function pingServer() {
         $.ajax(mURL + '/ping', {
             contentType: 'application/json',
             method: 'POST'
-        }).done(function() {
-            _.delay(pingServer, PING_INTERVAL);
-        }).fail(function() {
-            mInitialised = false;
-            mIsInitialising = false;
-            mURL = null;
-            self.initialise();
+        }).always(function() {
+            mPingTimer = _.delay(pingServer, PING_INTERVAL);
         });
     }
 
@@ -68,7 +64,7 @@ CloudPebble.YCM = new (function() {
                         sendBuffers();
                     } else {
                         mInitialised = true;
-                        _.delay(pingServer, PING_INTERVAL);
+                        mPingTimer = _.delay(pingServer, PING_INTERVAL);
                         $('.prepare-autocomplete').hide();
                         $('.footer-credits').show();
                     }
@@ -87,6 +83,8 @@ CloudPebble.YCM = new (function() {
         if(mRestarting) {
             return;
         }
+        clearTimeout(mPingTimer);
+        mPingTimer = null;
         mInitialised = false;
         mIsInitialising = false;
         mFailed = false;
