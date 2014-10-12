@@ -6,7 +6,9 @@ CloudPebble.YCM = new (function() {
     var mInitialised = false;
     var mIsInitialising = false;
     var mFailed = false;
+    var mRestarting = false;
     var mURL = null;
+    var mUUID = null;
 
     function pingServer() {
         $.ajax(mURL + '/ping', {
@@ -22,6 +24,36 @@ CloudPebble.YCM = new (function() {
         });
     }
 
+    function sendBuffers() {
+        var editors = CloudPebble.Editor.GetAllEditors();
+        var pending = 0;
+        _.each(editors, function(editor) {
+            editor.patch_list = [];
+            editor.patch_sequence = 0;
+            ++pending;
+
+            $.ajax(mURL + '/create', {
+                data: JSON.stringify({
+                    filename: editor.file_path,
+                    content: editor.getValue()
+                }),
+                contentType: 'application/json',
+                method: 'POST'
+            }).done(function() {
+                if(--pending == 0) {
+                    console.log('restart done.');
+                    $('.prepare-autocomplete').hide();
+                    $('.footer-credits').show();
+                    mInitialised = true;
+                }
+            }).fail(function() {
+                mFailed = true;
+                console.log('restart failed.');
+                $('.prepare-autocomplete').text("Code completion resync failed.");
+            });
+        });
+    }
+
     this.initialise = function() {
         if(mInitialised || mIsInitialising || mFailed) {
             return;
@@ -30,11 +62,16 @@ CloudPebble.YCM = new (function() {
         $.post('/ide/project/' + PROJECT_ID + '/autocomplete/init')
             .done(function(data) {
                 if(data.success) {
+                    mUUID = data.uuid;
                     mURL = data.server + 'ycm/' + data.uuid;
-                    mInitialised = true;
-                    $('.prepare-autocomplete').hide();
-                    $('.footer-credits').show();
-                    _.delay(pingServer, PING_INTERVAL);
+                    if(mRestarting) {
+                        sendBuffers();
+                    } else {
+                        mInitialised = true;
+                        _.delay(pingServer, PING_INTERVAL);
+                        $('.prepare-autocomplete').hide();
+                        $('.footer-credits').show();
+                    }
                 } else {
                     mFailed = true;
                     $('.prepare-autocomplete').text("Code completion unavailable.");
@@ -44,6 +81,25 @@ CloudPebble.YCM = new (function() {
                 mFailed = true;
                 $('.prepare-autocomplete').text("Code completion unavailable.");
             });
+    };
+
+    this.restart = function() {
+        if(mRestarting) {
+            return;
+        }
+        mInitialised = false;
+        mIsInitialising = false;
+        mFailed = false;
+        mRestarting = true;
+        mURL = false;
+        mUUID = null;
+        $('.prepare-autocomplete').text("Code completion lost; retrying...").show();
+        $('.footer-credits').hide();
+        this.initialise();
+    };
+
+    this.getUUID = function() {
+        return mUUID;
     };
 
     this.deleteFile = function(file) {
@@ -138,10 +194,13 @@ CloudPebble.YCM = new (function() {
             timeout: 2000
         }).done(function(data) {
             promise.resolve(data);
-        }).fail(function() {
+        }).fail(function(xhr) {
             editor.patch_list = these_patches.concat(editor.patch_list);
             promise.reject();
-            // TODO: This may imply that the server has gone away. Perhaps we should handle that.
+            // If we get a 404 status our session is definitively lost and we should create another.
+            if(xhr.status == 404) {
+                self.restart();
+            }
         });
         return promise.promise();
     };

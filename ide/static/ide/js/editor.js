@@ -158,6 +158,7 @@ CloudPebble.Editor = (function() {
                 code_mirror.file_target = file.target;
                 code_mirror.parent_pane = pane;
                 code_mirror.patch_list = [];
+                code_mirror.patch_sequence = 0;
                 open_codemirrors[file.id] = code_mirror;
                 code_mirror.cloudpebble_save = function(callback) {
                     save(callback);
@@ -317,11 +318,10 @@ CloudPebble.Editor = (function() {
                     });
                 }
 
-                var mPatchCount = 0;
                 function update_patch_list(instance, changes) {
                     _.each(changes, function(change) {
                         instance.patch_list.push({
-                            sequence: mPatchCount++,
+                            sequence: instance.patch_sequence++,
                             start: change.from,
                             end: change.to,
                             text: change.text,
@@ -916,6 +916,9 @@ CloudPebble.Editor = (function() {
         },
         GoTo: function(file, line, ch) {
             go_to(file, line, ch);
+        },
+        GetAllEditors: function() {
+            return open_codemirrors;
         }
     };
 })();
