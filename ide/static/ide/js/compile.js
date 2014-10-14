@@ -39,7 +39,7 @@ CloudPebble.Compile = (function() {
     var show_build_log = function(build) {
         $.getJSON('/ide/project/' + PROJECT_ID + '/build/' + build + '/log', function(data) {
             if(!data.success) {
-                alert(interpolate(gettext("Something went wrong:\n\n%s"), data.error));
+                alert(interpolate(gettext("Something went wrong:\n\n%s"), [data.error]));
                 return;
             }
             CloudPebble.Sidebar.SuspendActive();

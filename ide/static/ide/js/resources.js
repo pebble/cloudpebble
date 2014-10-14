@@ -93,7 +93,7 @@ CloudPebble.Resources = (function() {
                     return false;
                 }
                 if(!/[0-9]+$/.test(resource_id)) {
-                    report_error(interpolate(gettext("Font resource identifiers must end with the desired font size, e.g. %s_24"), resource_id));
+                    report_error(interpolate(gettext("Font resource identifiers must end with the desired font size, e.g. %s_24"), [resource_id]));
                     okay = false;
                     return false;
                 }
@@ -248,7 +248,7 @@ CloudPebble.Resources = (function() {
             }
 
             pane.find('#edit-resource-delete').removeClass('hide').click(function() {
-                CloudPebble.Prompts.Confirm(interpolate(gettext("Do you want to delete %s?"), resource.file_name), gettext("This cannot be undone."), function() {
+                CloudPebble.Prompts.Confirm(interpolate(gettext("Do you want to delete %s?"), [resource.file_name]), gettext("This cannot be undone."), function() {
                     pane.find('input, button, select').attr('disabled', 'disabled');
                     $.post("/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/delete", function(data) {
                         pane.find('input, button, select').removeAttr('disabled');

@@ -178,7 +178,7 @@ CloudPebble.GitHub = (function() {
                                 show_alert('success', gettext("Pull completed: Nothing to pull."));
                             }
                         } else {
-                            show_alert('error', interpolate(gettext('Error: %s'), state.result));
+                            show_alert('error', interpolate(gettext('Error: %s'), [state.result]));
                         }
                     } else {
                         setTimeout(function() { poll_pull_status(task_id); }, 1000);
@@ -223,7 +223,7 @@ CloudPebble.GitHub = (function() {
             $.post('/ide/project/' + PROJECT_ID + '/github/pull', function(data) {
                 if(!data.success) {
                     enable_all();
-                    show_alert('error', interpolate(gettext("Pull failed: %s"), data.error));
+                    show_alert('error', interpolate(gettext("Pull failed: %s"), [data.error]));
                     return;
                 }
                 var task = data.task_id;

@@ -52,7 +52,7 @@ $(function() {
                     window.location.href = '/ide/project/' + project_id;
                     return;
                 } else if(data.state.status == 'FAILURE') {
-                    active_set.find('.errors').removeClass('hide').text(interpolate(gettext("Error: %s"), data.state.result));
+                    active_set.find('.errors').removeClass('hide').text(interpolate(gettext("Error: %s"), [data.state.result]));
                     enable_import_controls();
                     active_set.find('.progress').addClass('hide');
                     return;

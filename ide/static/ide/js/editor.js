@@ -28,7 +28,7 @@ CloudPebble.Editor = (function() {
             CloudPebble.ProgressBar.Hide();
             if(!data.success) {
                 var error = $('<div class="alert alert-error"></div>');
-                error.text(interpolate(gettext("Something went wrong: %s"), data.error));
+                error.text(interpolate(gettext("Something went wrong: %s"), [data.error]));
                 CloudPebble.Sidebar.SetActivePane(error, '');
             } else {
                 var is_js = file.name.substr(-3) == '.js';
@@ -770,7 +770,7 @@ CloudPebble.Editor = (function() {
                     if (!(/.+\.h$/.test(name) || /.+\.c$/.test(name))) {
                         error.text(gettext("Source files must end in .c or .h")).show();
                     } else if (project_source_files[name]) {
-                        error.text(interpolate(gettext("A file called '%s' already exists."), name)).show();
+                        error.text(interpolate(gettext("A file called '%s' already exists."), [name])).show();
                     } else {
                         var target = prompt.find('#new-c-target').val();
                         // Should we create a header?
@@ -811,7 +811,7 @@ CloudPebble.Editor = (function() {
                     if(!/.+\.js$/.test(name)) {
                         error.text(gettext("Source files must end in .js")).show();
                     } else if(project_source_files[name]) {
-                        error.text(interpolate(gettext("A file called '%s' already exists."), name)).show();
+                        error.text(interpolate(gettext("A file called '%s' already exists."), [name])).show();
                     } else {
                         create_remote_file(name, function(data) {
                             if (data.success) {

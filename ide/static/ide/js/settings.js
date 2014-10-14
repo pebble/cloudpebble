@@ -134,7 +134,7 @@ CloudPebble.Settings = (function() {
                     display_success(gettext("Settings saved."));
                     CloudPebble.Editor.Autocomplete.Init();
                 } else {
-                    display_error(interpolate(gettext("Error: %s"), data.error));
+                    display_error(interpolate(gettext("Error: %s"), [data.error]));
                 }
             });
 
@@ -147,7 +147,7 @@ CloudPebble.Settings = (function() {
                     if(data.success) {
                         window.location.href = "/ide/";
                     } else {
-                        display_error(interpolate(gettext("Error: %s"), data.error));
+                        display_error(interpolate(gettext("Error: %s"), [data.error]));
                     }
                 });
                 ga('send', 'event', 'project', 'delete');
