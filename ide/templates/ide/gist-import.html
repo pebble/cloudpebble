@@ -1,13 +1,14 @@
 {% extends "common/base-narrow.html" %}
 {% load staticfiles %}
+{% load i18n %}
 {% block narrowcontent %}
 <div class="well" style="text-align: center;">
-    <p style="margin-bottom:20px;">You are going to create a project based on a template.</p>
+    <p style="margin-bottom:20px;">{% trans "You are going to create a project based on a template." %}</p>
     {% if blurb %}
     <p>{{ blurb }}</p>
     <hr>
     {% endif %}
-    <p><button class="btn btn-primary btn-large" id="import-btn" style="width: 200px;">Create Project</button></p>
+    <p><button class="btn btn-primary btn-large" id="import-btn" style="width: 200px;">{% trans "Create Project" %}</button></p>
 </div>
 {% endblock %}
 {% block scripts %}
