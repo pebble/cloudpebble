@@ -16,7 +16,7 @@ CloudPebble.Resources = (function() {
             var identifier = resource.identifiers[0];
             resource.identifiers = [identifier + '_WHITE', identifier + '_BLACK'];
         }
-        CloudPebble.Sidebar.SetPopover('resource-' + resource.id, 'Identifier' + (resource.identifiers.length != 1 ? 's' : ''), resource.identifiers.join('<br>'));
+        CloudPebble.Sidebar.SetPopover('resource-' + resource.id, ngettext('Identifier', 'Identifiers', resource.identifiers.length), resource.identifiers.join('<br>'));
         // We need to update code completion so it can include these identifiers.
         // However, don't do this during initial setup; the server handle it for us.
         if(CloudPebble.Ready) {
@@ -49,22 +49,22 @@ CloudPebble.Resources = (function() {
         var file = (files.length > 0) ? files[0] : null;
         if(is_new) {
             if(files.length != 1) {
-                report_error("You must upload a file.");
+                report_error(gettext("You must upload a file."));
                 return;
             }
             if(!!project_resources[file.name]) {
-                report_error("A resource called '" + file.name + "' already exists in the project.");
+                report_error(interpolate(gettext("A resource called '%(name)s' already exists in the project."), file));
                 return;
             }
         }
         var kind = form.find('#edit-resource-type').val();
         if(files.length == 1) {
             if((kind == 'png' || kind == 'png-trans') && file.type != "image/png") {
-                report_error("You must upload a PNG image.");
+                report_error(gettext("You must upload a PNG image."));
                 return;
             }
             if(kind == 'font' && !/\.ttf$/i.test(file.name)) {
-                report_error("You must upload a TrueType Font (.ttf)");
+                report_error(gettext("You must upload a TrueType Font (.ttf)"));
                 return;
             }
         }
@@ -73,7 +73,7 @@ CloudPebble.Resources = (function() {
             if(CloudPebble.ProjectInfo.type != 'pebblejs') {
                 var resource_id = form.find('#non-font-resource-group .edit-resource-id').val();
                 if(resource_id === '' || !validate_resource_id(resource_id)) {
-                    report_error("You must provide a valid resource identifier. Use only letters, numbers and underscores.");
+                    report_error(gettext("You must provide a valid resource identifier. Use only letters, numbers and underscores."));
                     return;
                 }
                 resources = [{'id': resource_id}];
@@ -88,22 +88,22 @@ CloudPebble.Resources = (function() {
                 var tracking = parseInt(value.find('.edit-resource-tracking').val() || '0', 10);
                 if(resource_id === '') return true; // continue
                 if(!validate_resource_id(resource_id)) {
-                    report_error("Invalid resource identifier. Use only letters, numbers and underscores.");
+                    report_error(gettext("Invalid resource identifier. Use only letters, numbers and underscores."));
                     okay = false;
                     return false;
                 }
                 if(!/[0-9]+$/.test(resource_id)) {
-                    report_error("Font resource identifiers must end with the desired font size, e.g. " + resource_id + "_24");
+                    report_error(interpolate(gettext("Font resource identifiers must end with the desired font size, e.g. %s_24"), resource_id));
                     okay = false;
                     return false;
                 }
                 if(!!resource_ids[resource_id]) {
-                    report_error("You can't have multiple identical identifiers. Please remove or change one.");
+                    report_error(gettext("You can't have multiple identical identifiers. Please remove or change one."));
                     okay = false;
                     return false;
                 }
                 if(tracking != tracking) {
-                    report_error("Tracking must be an integer.");
+                    report_error(gettext("Tracking must be an integer."));
                     okay = false;
                     return false;
                 }
@@ -112,7 +112,7 @@ CloudPebble.Resources = (function() {
             });
             if(!okay) return;
             if(resources.length === 0) {
-                report_error("You must specify at least one resource.");
+                report_error(gettext("You must specify at least one resource."));
                 return;
             }
         }
@@ -159,7 +159,7 @@ CloudPebble.Resources = (function() {
 
             CloudPebble.Sidebar.SetActivePane(pane, 'resource-' + resource.id);
             pane.find('#edit-resource-type').val(resource.kind).attr('disabled', 'disabled');
-            pane.find('#edit-resource-file').after($("<span class='help-block'>If specified, this file will replace the current file for this resource, regardless of its filename.</span>"));
+            pane.find('#edit-resource-file').after($("<span class='help-block'>" + gettext("If specified, this file will replace the current file for this resource, regardless of its filename.") + "</span>"));
 
             // Generate a preview.
             var preview_url = '/ide/project/' + PROJECT_ID + '/resource/' + resource.id +'/get';
@@ -181,12 +181,12 @@ CloudPebble.Resources = (function() {
                 var preview_regex = new RegExp('');
                 try {
                     preview_regex = new RegExp(regex_str ? regex_str : '.', 'g');
-                    group.find('.font-resource-regex-group').removeClass('error').find('.help-block').text("A PCRE regular expression that restricts characters.");
+                    group.find('.font-resource-regex-group').removeClass('error').find('.help-block').text(gettext("A PCRE regular expression that restricts characters."));
                 } catch(e) {
                     group.find('.font-resource-regex-group').addClass('error').find('.help-block').text(e);
                 }
                 var tracking = parseInt(group.find('.edit-resource-tracking').val(), 10) || 0;
-                var row = $('<div class="control-group font-preview"><label class="control-label">Preview</label>');
+                var row = $('<div class="control-group font-preview"><label class="control-label">' + gettext('Preview') + '</label>');
                 var preview_holder = $('<div class="controls">');
                 var preview = $('<div>').appendTo(preview_holder);
                 var line = ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789~!@#$%^& *()_+[]{}\\|;:\'"<>?`'.match(preview_regex)||[]).join('');
@@ -248,7 +248,7 @@ CloudPebble.Resources = (function() {
             }
 
             pane.find('#edit-resource-delete').removeClass('hide').click(function() {
-                CloudPebble.Prompts.Confirm("Do you want to delete " + resource.file_name + "?", "This cannot be undone.", function() {
+                CloudPebble.Prompts.Confirm(interpolate(gettext("Do you want to delete %s?"), resource.file_name), gettext("This cannot be undone."), function() {
                     pane.find('input, button, select').attr('disabled', 'disabled');
                     $.post("/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/delete", function(data) {
                         pane.find('input, button, select').removeAttr('disabled');

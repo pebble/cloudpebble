@@ -63,5 +63,6 @@ urlpatterns = patterns(
     url(r'^list_phones$', list_phones),
     url(r'^whats_new', whats_new, name='whats_new'),
     url(r'^gist/(?P<gist_id>[0-9a-f]+)$', import_gist),
-    url(r'^heartbeat$', heartbeat)
+    url(r'^heartbeat$', heartbeat),
+    url(r'^jsi18n/$', 'django.views.i18n.javascript_catalog', name='jsi18n'),
 )

@@ -2,9 +2,9 @@ CloudPebble.Compile = (function() {
     var MINIMUM_INSTALL_VERSION = "v2.6";
 
     var COMPILE_SUCCESS_STATES = {
-        1: {english: "Pending", cls: "info", label: 'info'},
-        2: {english: "Failed", cls: "error", label: 'error'},
-        3: {english: "Succeeded", cls: "success", label: 'success'}
+        1: {english: gettext("Pending"), cls: "info", label: 'info'},
+        2: {english: gettext("Failed"), cls: "error", label: 'error'},
+        3: {english: gettext("Succeeded"), cls: "success", label: 'success'}
     };
 
     var mPendingCallbacks = [];
@@ -20,7 +20,7 @@ CloudPebble.Compile = (function() {
         // Build log thingy.
         var td = $('<td class="build-log">');
         if(build.state > 1) {
-            var a = $('<a href="'+build.log+'" class="btn btn-small">build log</a>').click(function(e) {
+            var a = $('<a href="'+build.log+'" class="btn btn-small">' + gettext("build log") + '</a>').click(function(e) {
                 if(e.ctrlKey || e.metaKey) {
                     ga('send', 'event', 'build log', 'show', 'external');
                     return true;
@@ -39,7 +39,7 @@ CloudPebble.Compile = (function() {
     var show_build_log = function(build) {
         $.getJSON('/ide/project/' + PROJECT_ID + '/build/' + build + '/log', function(data) {
             if(!data.success) {
-                alert("Something went wrong:\n\n" + data.error);
+                alert(interpolate(gettext("Something went wrong:\n\n%s"), data.error));
                 return;
             }
             CloudPebble.Sidebar.SuspendActive();
@@ -399,13 +399,13 @@ CloudPebble.Compile = (function() {
 
     var handle_crash = function(process, is_our_crash, pc, lr) {
         if(!is_our_crash) {
-            append_log_html("<span class='log-warning'>Different app crashed. Only the active app has debugging information available.</span>");
+            append_log_html("<span class='log-warning'>" + gettext("Different app crashed. Only the active app has debugging information available.") + "</span>");
             return;
         }
         mPebble.request_version();
         mPebble.on('version', function(pebble_version) {
             mPebble.off('version');
-            append_log_html($("<span class='log-verbose'>Looking up debug information...</span>"));
+            append_log_html($("<span class='log-verbose'>" + gettext("Looking up debug information...") + "</span>"));
             mCrashAnalyser.find_source_lines(process, pebble_version, [pc, lr], function(results) {
                 var pc_result = results[0];
                 var lr_result = results[1];
@@ -438,17 +438,17 @@ CloudPebble.Compile = (function() {
                     }
                 });
                 if(pc_result === null) {
-                    append_log_html("<span class='log-error'>Crashed inside firmware call.</span>");
+                    append_log_html("<span class='log-error'>" + gettext("Crashed inside firmware call.") + "</span>");
                 } else {
-                    append_log_html($("<span class='log-error'>")
-                        .text("Crashed at " + pc_result.file + ":" + pc_result.line + ", in " +
-                            pc_result.fn_name + " (starts at " + pc_result.file + ":" + pc_result.fn_line + ")."));
+                    var fmt = gettext("Crashed at %(file)s:%(line)s, in %(fn_name)s (starts at %(file)s:%(fn_line)s).");
+                    append_log_html($("<span class='log-error'>"))
+                        .text(interpolate(fmt, pc_result));
                 }
                 if(lr_result !== null) {
                     if(pc_result === null || (lr_result.fn_name !== pc_result.fn_name)) {
-                        append_log_html($("<span class='log-error'>")
-                            .text("Which was called from " + lr_result.file + ":" + lr_result.line + ", in " +
-                                lr_result.fn_name + " (starts at " + lr_result.file + ":" + lr_result.fn_line + ")."));
+                        fmt = gettext("Which was called from %(file)s:%(line)s, in %(fn_name)s (starts at %(file)s:%(fn_line)s).");
+                        append_log_html($("<span class='log-error'>"))
+                            .text(interpolate(fmt, lr_result));
                     }
                 }
             });

@@ -28,7 +28,7 @@ CloudPebble.Editor = (function() {
             CloudPebble.ProgressBar.Hide();
             if(!data.success) {
                 var error = $('<div class="alert alert-error"></div>');
-                error.text("Something went wrong: " + data.error);
+                error.text(interpolate(gettext("Something went wrong: %s"), data.error));
                 CloudPebble.Sidebar.SetActivePane(error, '');
             } else {
                 var is_js = file.name.substr(-3) == '.js';
@@ -344,7 +344,7 @@ CloudPebble.Editor = (function() {
                                     code_mirror.setOption('readOnly', false);
                                 });
                             } else {
-                                alert("This file has been edited elsewhere; you will not be able to save your changes.");
+                                alert(gettext("This file has been edited elsewhere; you will not be able to save your changes."));
                             }
                         }
                     });
@@ -464,16 +464,17 @@ CloudPebble.Editor = (function() {
 
                 // Add some buttons
                 var button_holder = $('<p id="editor-button-wrapper">');
-                var run_btn = $('<button class="btn run-btn" title="Save, build, install and run"></button>');
-                var save_btn = $('<button class="btn save-btn" title="Save"></button>');
-                var discard_btn = $('<button class="btn reload-btn" title="Reload"></button>');
-                var delete_btn = $('<button class="btn delete-btn" title="Delete"></button>');
-                var ib_btn = $('<button class="btn ib-btn" title="UI Editor"></button>');
+                var run_btn = $('<button class="btn run-btn" title="' + gettext("Save, build, install and run") + '"></button>');
+                var save_btn = $('<button class="btn save-btn" title="' + gettext('Save') + '"></button>');
+                var discard_btn = $('<button class="btn reload-btn" title="' + gettext('Reload') + '"></button>');
+                var delete_btn = $('<button class="btn delete-btn" title="' + gettext('Delete') + '"></button>');
+                var ib_btn = $('<button class="btn ib-btn" title="' + gettext('UI Editor') + '"></button>');
                 var error_area = $('<div>');
 
                 save_btn.click(function() { save(); });
                 delete_btn.click(function() {
-                    CloudPebble.Prompts.Confirm("Do you want to delete " + file.name + "?", "This cannot be undone.", function() {
+                    var fmt = gettext("Do you want to delete %(name)s?");
+                    CloudPebble.Prompts.Confirm(interpolate(fmt, file), gettext("This cannot be undone."), function() {
                         save_btn.attr('disabled','disabled');
                         delete_btn.attr('disabled','disabled');
                         $.post("/ide/project/" + PROJECT_ID + "/source/" + file.id + "/delete", function(data) {
@@ -494,8 +495,8 @@ CloudPebble.Editor = (function() {
 
                 discard_btn.click(function() {
                     CloudPebble.Prompts.Confirm(
-                        "Do you want to reload " + file.name + "?",
-                        "This will discard your current changes and revert to the saved version.",
+                        interpolate(gettext("Do you want to reload %(name)s?"), file),
+                        gettext("This will discard your current changes and revert to the saved version."),
                         function() {
                             CloudPebble.Sidebar.DestroyActive();
                             mark_clean();
@@ -506,9 +507,9 @@ CloudPebble.Editor = (function() {
 
                 run_btn.click(function() {
                     var button = $(this);
-                    CloudPebble.Prompts.Progress.Show("Saving...");
+                    CloudPebble.Prompts.Progress.Show(gettext("Saving..."));
                     CloudPebble.Editor.SaveAll(function() {
-                        CloudPebble.Prompts.Progress.Show("Compiling...");
+                        CloudPebble.Prompts.Progress.Show(gettext("Compiling..."));
                         CloudPebble.Compile.RunBuild(function (success) {
                             CloudPebble.Prompts.Progress.Hide();
                             if(success) {
@@ -537,7 +538,7 @@ CloudPebble.Editor = (function() {
                 code_mirror.refresh();
 
                 // Add fullscreen icon and click event
-                var fullscreen_icon = $('<a href="#" class="fullscreen-icon open"></a><span class="fullscreen-icon-tooltip">Toggle Fullscreen</span>');
+                var fullscreen_icon = $('<a href="#" class="fullscreen-icon open"></a><span class="fullscreen-icon-tooltip">' + gettext("Toggle Fullscreen") + '</span>');
                 $(code_mirror.getWrapperElement()).append(fullscreen_icon);
                 fullscreen_icon.click(function(e) {
                     fullscreen(code_mirror, !is_fullscreen);
@@ -657,14 +658,14 @@ CloudPebble.Editor = (function() {
 
         var sig_element = $('<span class="popover-declaration">').text(signature);
 
-        var result = [['Declaration', sig_element]];
+        var result = [[gettext('Declaration'), sig_element]];
 
         if(doc.description) {
-            result.push(['Description', $('<div>').html(doc.description)]);
+            result.push([gettext('Description'), $('<div>').html(doc.description)]);
         }
 
         if(doc.return_desc) {
-            result.push(['Returns', doc.return_desc]);
+            result.push([gettext('Returns'), doc.return_desc]);
         }
 
         if(doc.params.length > 0) {
@@ -677,11 +678,11 @@ CloudPebble.Editor = (function() {
                 table.append(tr);
             });
             if(table.find('tr').length)
-                result.push(['Parameters', table]);
+                result.push([gettext('Parameters'), table]);
         }
 
         if(doc.warning) {
-            result.push(['Note', $('<strong>').html(doc.warning)]);
+            result.push([gettext('Note'), $('<strong>').html(doc.warning)]);
         }
 
         var final_table = $('<table>');
@@ -767,9 +768,9 @@ CloudPebble.Editor = (function() {
                 (function() { // for scoping reasons, mostly.
                     var name = prompt.find('#new-c-file-name').val();
                     if (!(/.+\.h$/.test(name) || /.+\.c$/.test(name))) {
-                        error.text("Source files must end in .c or .h").show();
+                        error.text(gettext("Source files must end in .c or .h")).show();
                     } else if (project_source_files[name]) {
-                        error.text("A file called '" + name + "' already exists.").show();
+                        error.text(interpolate(gettext("A file called '%s' already exists."), name)).show();
                     } else {
                         var target = prompt.find('#new-c-target').val();
                         // Should we create a header?
@@ -808,9 +809,9 @@ CloudPebble.Editor = (function() {
                 (function() {
                     var name = prompt.find('#new-js-file-name').val();
                     if(!/.+\.js$/.test(name)) {
-                        error.text("Source files must end in .js").show();
+                        error.text(gettext("Source files must end in .js")).show();
                     } else if(project_source_files[name]) {
-                        error.text("A file called '" + name + "' already exists.").show();
+                        error.text(interpolate(gettext("A file called '%s' already exists."), name)).show();
                     } else {
                         create_remote_file(name, function(data) {
                             if (data.success) {
@@ -826,9 +827,9 @@ CloudPebble.Editor = (function() {
                 (function() {
                     var name = prompt.find('#new-window-name').val();
                     if(!/^[a-z]([a-z0-9_]*[a-z0-9])?$/.test(name)) {
-                        error.text("You must specify a valid window name using lowercase letters and underscores.").show();
+                        error.text(gettext("You must specify a valid window name using lowercase letters and underscores.")).show();
                     } else if(project_source_files[name + ".h"] || project_source_files[name + ".c"]) {
-                        error.text("That name is already used in this project.").show();
+                        error.text(gettext("That name is already used in this project.")).show();
                     } else {
                         create_remote_file({
                             name: name + ".h",
@@ -868,8 +869,8 @@ CloudPebble.Editor = (function() {
 
         prompt.find('.field-help').popover({
             trigger: 'hover',
-            content: "<p>If you want to create a background worker, use this dropdown to create files pointing at that target.</p>" +
-                     "<p>Note that targets are independent and code will not be shared between them.</p>",
+            content: "<p>"+gettext("If you want to create a background worker, use this dropdown to create files pointing at that target.") + "</p>" +
+                     "<p>"+gettext("Note that targets are independent and code will not be shared between them.") + "</p>",
             html: true,
             container: '#help-prompt-holder',
             placement: 'bottom',

@@ -1,5 +1,6 @@
 import json
 import re
+from django.utils.translation import ugettext as _
 from ide.models.files import ResourceFile, ResourceIdentifier
 
 __author__ = 'katharine'
@@ -130,7 +131,7 @@ def generate_manifest(project, resources):
     elif project.project_type == 'simplyjs':
         return generate_simplyjs_manifest(project)
     else:
-        raise Exception("Unknown project type %s" % project.project_type)
+        raise Exception(_("Unknown project type %s") % project.project_type)
 
 
 def generate_v2_manifest(project, resources):
@@ -164,7 +165,7 @@ def generate_manifest_dict(project, resources):
     elif project.project_type == 'pebblejs':
         return generate_pebblejs_manifest_dict(project, resources)
     else:
-        raise Exception("Unknown project type %s" % project.project_type)
+        raise Exception(_("Unknown project type %s") % project.project_type)
 
 def generate_resource_map(project, resources):
     return dict_to_pretty_json(generate_resource_dict(project, resources))
@@ -182,7 +183,7 @@ def generate_resource_dict(project, resources):
     elif project.project_type == 'pebblejs':
         return generate_pebblejs_resource_dict(resources)
     else:
-        raise Exception("Unknown project type %s" % project.project_type)
+        raise Exception(_("Unknown project type %s") % project.project_type)
 
 
 def generate_v2_resource_dict(resources):

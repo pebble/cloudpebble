@@ -286,7 +286,7 @@ def import_github(request):
     add_remote = (request.POST['add_remote'] == 'true')
     match = re.match(r'^(?:https?://|git@|git://)?(?:www\.)?github\.com[/:]([\w.-]+)/([\w.-]+?)(?:\.git|/|$)', repo)
     if match is None:
-        return HttpResponse(json.dumps({"success": False, 'error': "Invalid GitHub URL."}),
+        return HttpResponse(json.dumps({"success": False, 'error': _("Invalid Github URL.")}),
                             content_type="application/json")
     github_user = match.group(1)
     github_project = match.group(2)

@@ -52,7 +52,7 @@ CloudPebble.Settings = (function() {
             app_capabilities = app_capabilities.join(',');
 
             if(name.replace(/\s/g, '') === '') {
-                display_error("You must specify a project name");
+                display_error(gettext("You must specify a project name"));
                 return;
             }
 
@@ -64,30 +64,30 @@ CloudPebble.Settings = (function() {
             };
 
             if(short_name.replace(/\s/g, '') == '') {
-                display_error("You must specify a short name.");
+                display_error(gettext("You must specify a short name."));
                 return;
             }
             if(long_name.replace(/\s/g, '') == '') {
-                display_error("You must specify a long name.");
+                display_error(gettext("You must specify a long name."));
                 return;
             }
             if(company_name.replace(/\s/g, '') == '') {
-                display_error("You must specify a company name.");
+                display_error(gettext("You must specify a company name."));
                 return;
             }
             if(version_code.replace(/\s/g, '') == '' || version_code.replace(/\d/g,'') != '') {
-                display_error("You must specify a positive integer version code.");
+                display_error(gettext("You must specify a positive integer version code."));
                 return;
             }
             // This is not an appropriate use of a regex, but we have to have it for the HTML5 pattern attribute anyway,
             // so we may as well reuse the effort here.
             // It validates that the format matches x[.y] with x, y in [0, 255].
             if(!version_label.match(/^(\d{1,2}|1\d{2}|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d{2}|2[0-4]\d|25[0-5]))?$/)) {
-                display_error("You must specify a valid version number.");
+                display_error(gettext("You must specify a valid version number."));
                 return;
             }
             if(!app_uuid.match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/)) {
-                display_error("You must specify a valid UUID (of the form 00000000-0000-0000-0000-000000000000)");
+                display_error(gettext("You must specify a valid UUID (of the form 00000000-0000-0000-0000-000000000000)"));
                 return;
             }
 
@@ -131,10 +131,10 @@ CloudPebble.Settings = (function() {
                     CloudPebble.ProjectInfo.app_jshint = app_jshint;
                     $('.project-name').text(name);
                     window.document.title = "CloudPebble – " + name;
-                    display_success("Settings saved.");
+                    display_success(gettext("Settings saved."));
                     CloudPebble.Editor.Autocomplete.Init();
                 } else {
-                    display_error("Error: " + data.error);
+                    display_error(interpolate(gettext("Error: %s"), data.error));
                 }
             });
 
@@ -142,12 +142,12 @@ CloudPebble.Settings = (function() {
         });
 
         pane.find('#project-delete').click(function() {
-            CloudPebble.Prompts.Confirm("Delete Project", "Are you sure you want to delete this project? THIS CANNOT BE UNDONE.", function() {
+            CloudPebble.Prompts.Confirm(gettext("Delete Project"), gettext("Are you sure you want to delete this project? THIS CANNOT BE UNDONE."), function() {
                 $.post('/ide/project/' + PROJECT_ID + '/delete', {confirm: true}, function(data) {
                     if(data.success) {
                         window.location.href = "/ide/";
                     } else {
-                        display_error("Error: " + data.error);
+                        display_error(interpolate(gettext("Error: %s"), data.error));
                     }
                 });
                 ga('send', 'event', 'project', 'delete');
@@ -199,7 +199,7 @@ CloudPebble.Settings = (function() {
             });
 
             var new_appkey = $('<tr class="appkey">' +
-                '<td><input class="appkey-name" type="text" placeholder="New Entry" /></td>' +
+                '<td><input class="appkey-name" type="text" placeholder="' + gettext("New Entry") + '" /></td>' +
                 '<td><input class="appkey-id" type="number" value="0" /></td>' +
                 '<td><button class="btn remove-appkey disabled">–</button></td>' +
                 '</tr>');

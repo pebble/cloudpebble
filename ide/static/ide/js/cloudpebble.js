@@ -59,7 +59,9 @@ CloudPebble.Init = function() {
     window.addEventListener('beforeunload', function(e) {
         var u = CloudPebble.Editor.GetUnsavedFiles();
         if(u > 0) {
-            var confirm = "You have " + u + " unsaved source file" + (u==1?'':'s') + ".\nIf you leave the page, you will lose them.";
+            var confirm = ngettext("You have one unsaved source file. If you leave this page, you will lose it.",
+                "You have %s unsaved source files. If you leave this page, you will lose them.", u);
+            confirm = interpolate(confirm, [u]);
             (e || window.event).returnValue = confirm;
             return confirm;
         }
