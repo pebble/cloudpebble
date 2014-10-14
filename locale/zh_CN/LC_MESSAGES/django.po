@@ -7,9 +7,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CloudPebble\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-14 01:12-0400\n"
-"PO-Revision-Date: 2014-10-13 22:07-0800\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2014-10-14 03:55-0400\n"
+"PO-Revision-Date: 2014-10-14 00:57-0800\n"
+"Last-Translator: Katharine Berry <katharine@kathar.in>\n"
 "Language-Team: Chinese <katharine@kathar.in>\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
@@ -17,6 +17,697 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Poedit 1.6.9\n"
+
+#: ide/templates/ide/gist-import.html:6
+msgid "You are going to create a project based on a template."
+msgstr "你要创建一个基于模板的项目。"
+
+#: ide/templates/ide/gist-import.html:11
+msgid "Create Project"
+msgstr "删除项目"
+
+#: ide/templates/ide/index.html:11 ide/templates/ide/project.html:33
+#: ide/templates/ide/settings.html:11
+msgid "Projects"
+msgstr "项目"
+
+#: ide/templates/ide/index.html:12 ide/templates/ide/project.html:34
+#: ide/templates/ide/project.html.py:46 ide/templates/ide/settings.html:12
+msgid "Settings"
+msgstr "的设置"
+
+#: ide/templates/ide/index.html:13 ide/templates/ide/project.html:35
+#: ide/templates/ide/settings.html:13
+msgid "Sign out"
+msgstr "登入"
+
+#: ide/templates/ide/index.html:19
+msgid "All your projects"
+msgstr "所有项目"
+
+#: ide/templates/ide/index.html:21 ide/templates/ide/index.html.py:123
+#: ide/templates/ide/project.html:163 ide/templates/ide/project.html.py:192
+msgid "Create"
+msgstr "创建"
+
+#: ide/templates/ide/index.html:22 ide/templates/ide/index.html.py:195
+msgid "Import"
+msgstr "导入"
+
+#: ide/templates/ide/index.html:34
+msgid "Project"
+msgstr "项目"
+
+#: ide/templates/ide/index.html:35
+msgid "Last modified"
+msgstr "最后修改"
+
+#: ide/templates/ide/index.html:36
+msgid "Last build"
+msgstr "编译运行"
+
+#: ide/templates/ide/index.html:47
+msgid "Successful"
+msgstr "成功"
+
+#: ide/templates/ide/index.html:49
+msgid "Failed"
+msgstr "失败"
+
+#: ide/templates/ide/index.html:51
+msgid "Pending"
+msgstr "等待"
+
+#: ide/templates/ide/index.html:54
+msgid "Never"
+msgstr "从来没有"
+
+#: ide/templates/ide/index.html:63
+msgid "You don't have any projects yet."
+msgstr "你没有任何的项目呢。"
+
+#: ide/templates/ide/index.html:70
+msgid "Create New Project"
+msgstr "删除项目"
+
+#: ide/templates/ide/index.html:76 ide/templates/ide/index.html.py:141
+#: ide/templates/ide/index.html:162 ide/templates/ide/project/settings.html:8
+msgid "Project name"
+msgstr "项目名称"
+
+#: ide/templates/ide/index.html:82
+msgid "Project type"
+msgstr "项目名称"
+
+#: ide/templates/ide/index.html:85
+msgid "Pebble C SDK"
+msgstr "卵石çSDK"
+
+#: ide/templates/ide/index.html:86
+msgid "Simply.js"
+msgstr "Simply.js"
+
+#: ide/templates/ide/index.html:87
+msgid "Pebble.js (beta)"
+msgstr "Pebble.js（测试版）"
+
+#: ide/templates/ide/index.html:92
+msgid "Template"
+msgstr "模板"
+
+#: ide/templates/ide/index.html:95
+msgid "Empty project"
+msgstr "空项目"
+
+#: ide/templates/ide/index.html:97
+msgid "Standard Templates"
+msgstr "标准模板"
+
+#: ide/templates/ide/index.html:104
+msgid "SDK demos"
+msgstr "SDK的演示"
+
+#: ide/templates/ide/index.html:111
+msgid "Examples"
+msgstr "示例"
+
+#: ide/templates/ide/index.html:124 ide/templates/ide/index.html.py:196
+#: ide/templates/ide/project.html:162 ide/templates/ide/project.html.py:191
+#: ide/templates/ide/project.html:221 ide/templates/ide/project.html.py:246
+#: ide/templates/ide/project.html:320 ide/templates/ide/project.html.py:333
+#: root/templates/root/index.html:111
+msgid "Cancel"
+msgstr "取消"
+
+#: ide/templates/ide/index.html:129
+msgid "Import Existing Project"
+msgstr "导入现有的项目"
+
+#: ide/templates/ide/index.html:133
+msgid "Upload Zip"
+msgstr "上传邮编"
+
+#: ide/templates/ide/index.html:134
+msgid "Import from GitHub"
+msgstr "从GitHub的进口"
+
+#: ide/templates/ide/index.html:147
+msgid "Zip file"
+msgstr "C文件"
+
+#: ide/templates/ide/index.html:150
+msgid "This must be a zip file containing a standard Pebble project."
+msgstr "这必须是包含一个标准的圆石滩项目的zip文件。"
+
+#: ide/templates/ide/index.html:168
+msgid "GitHub Project"
+msgstr "删除项目"
+
+#: ide/templates/ide/index.html:174
+msgid "Branch (optional)"
+msgstr "科（可选）"
+
+#: ide/templates/ide/index.html:181
+msgid "Use as Git remote"
+msgstr "用作远程Git"
+
+#: ide/templates/ide/project.html:47
+msgid "Compilation"
+msgstr "编制要领"
+
+#: ide/templates/ide/project.html:49
+msgid "Source files"
+msgstr "源代码文件"
+
+#: ide/templates/ide/project.html:50 ide/templates/ide/project.html.py:54
+msgid "Add new"
+msgstr "添加新"
+
+#: ide/templates/ide/project.html:52
+msgid "Worker source"
+msgstr "工源"
+
+#: ide/templates/ide/project.html:54
+msgid "Resources"
+msgstr "涉及的资源"
+
+#: ide/templates/ide/project.html:78
+msgid ""
+"\n"
+"            Please submit bug reports and feature requests on <a href="
+"\"https://github.com/pebble/cloudpebble\">GitHub</a>.\n"
+"            Questions? Email us at <a href=\"mailto:cloudpebble@getpebble.com"
+"\">cloudpebble@getpebble.com</a>.\n"
+"            "
+msgstr ""
+"\n"
+"请在<a href=\"https://github.com/pebble/cloudpebble\">GitHub上</a>提交bug报告"
+"和功能要求\n"
+"有问题吗？发送电​​子邮件到<a href=\"mailto:cloudpebble@getpebble.com\"> "
+"cloudpebble@getpebble.com</a>。\n"
+"            "
+
+#: ide/templates/ide/project.html:88
+msgid "Preparing autocomplete…"
+msgstr "准备自动完成..."
+
+#: ide/templates/ide/project.html:104
+msgid "Create new file"
+msgstr "创建新文件"
+
+#: ide/templates/ide/project.html:110
+msgid "File type"
+msgstr "文件类型"
+
+#: ide/templates/ide/project.html:113
+msgid "C file"
+msgstr "C文件"
+
+#: ide/templates/ide/project.html:114
+msgid "JavaScript file"
+msgstr "JavaScript文件"
+
+#: ide/templates/ide/project.html:115
+msgid "Window Layout"
+msgstr "窗口布局"
+
+#: ide/templates/ide/project.html:121 ide/templates/ide/project.html.py:145
+msgid "Filename"
+msgstr "用户名"
+
+#: ide/templates/ide/project.html:127
+msgctxt "compilation target"
+msgid "Target"
+msgstr "目标"
+
+#: ide/templates/ide/project.html:130
+msgid "App / Watchface"
+msgstr "APP / Watchface"
+
+#: ide/templates/ide/project.html:131
+msgid "Background worker"
+msgstr "后台工作"
+
+#: ide/templates/ide/project.html:137
+msgid "Create header"
+msgstr "创建头"
+
+#: ide/templates/ide/project.html:153
+msgid "Window name"
+msgstr "窗口名称"
+
+#: ide/templates/ide/project.html:173
+msgid "That repo does not exist. Would you like to create it?"
+msgstr "该软件库不存在。你想创建它吗？"
+
+#: ide/templates/ide/project.html:175
+msgid "Repo Name"
+msgstr "回购名称"
+
+#: ide/templates/ide/project.html:184
+msgid "Description <span class=\"muted\">(optional)</span>"
+msgstr "说明的<span class = \"静音\">（可选）</SPAN>"
+
+#: ide/templates/ide/project.html:199 ide/templates/ide/project/github.html:47
+msgid "Push New Commit"
+msgstr "推新提交"
+
+#: ide/templates/ide/project.html:205
+msgid "Commit Summary"
+msgstr "提交摘要"
+
+#: ide/templates/ide/project.html:207
+msgctxt "sample commit summary"
+msgid "Fix something useful."
+msgstr "修正了一些有用的东西。"
+
+#: ide/templates/ide/project.html:211
+msgid "Extended description <span class=\"muted\">(optional)</span>"
+msgstr "扩展描述的<span class=\"静音\">（可选）</SPAN>"
+
+#: ide/templates/ide/project.html:222
+msgid "Commit"
+msgstr "提交"
+
+#: ide/templates/ide/project.html:229 ide/templates/ide/project/github.html:48
+msgid "Pull Latest Commit"
+msgstr "拉最新提交"
+
+#: ide/templates/ide/project.html:233
+msgid ""
+"\n"
+"            <p>Are you sure you want to pull the latest commit? Doing so "
+"will <em>overwrite</em> everything currently in your project.</p>\n"
+"            <p>There will be no further warnings and no opportunity to "
+"merge. This cannot be undone.</p>\n"
+"            "
+msgstr ""
+"\n"
+" <p>您确定要拉的最新承诺？这样做将<EM>覆盖</em>的项目中的一切目前。</P> \n"
+" <P>将不会有进一步的警告，并没有机会进行合并。这不能被撤销。</P>"
+
+#: ide/templates/ide/project.html:239
+msgid "Pulling latest commit from GitHub…"
+msgstr "最新的拉动从GitHub的承诺..."
+
+#: ide/templates/ide/project.html:247
+msgctxt "button label"
+msgid "Pull"
+msgstr "开盘(Pull)"
+
+#: ide/templates/ide/project.html:275
+msgid "Install App"
+msgstr "安装应用程序"
+
+#: ide/templates/ide/project.html:278
+msgid "Installing app on your watch…"
+msgstr "在你的手表上安装的应用程序..."
+
+#: ide/templates/ide/project.html:284 ide/templates/ide/project.html.py:300
+msgid "Dismiss"
+msgstr "解除"
+
+#: ide/templates/ide/project.html:285
+msgctxt "button to look at logs"
+msgid "View logs"
+msgstr "查看日志"
+
+#: ide/templates/ide/project.html:291
+msgid "Taking Screenshot"
+msgstr "以截图"
+
+#: ide/templates/ide/project.html:294
+msgid "Taking screenshot…"
+msgstr "以截图..."
+
+#: ide/templates/ide/project.html:321 root/templates/common/base.html:47
+msgid "Okay"
+msgstr "好"
+
+#: ide/templates/ide/project.html:334
+msgid "Continue"
+msgstr "继续"
+
+#: ide/templates/ide/settings.html:20
+msgid "Editor settings"
+msgstr "的设置"
+
+#: ide/templates/ide/settings.html:24
+msgid "Settings saved!"
+msgstr "的设置"
+
+#: ide/templates/ide/settings.html:40
+msgid "Submit"
+msgstr "提交"
+
+#: ide/templates/ide/settings.html:41
+msgid "Reset"
+msgstr "重置"
+
+#: ide/templates/ide/settings.html:47
+msgid "GitHub Integration"
+msgstr "Github上集成"
+
+#: ide/templates/ide/settings.html:54
+msgid "Re-authenticate"
+msgstr "重新认证"
+
+#: ide/templates/ide/settings.html:55
+msgid "Unlink account"
+msgstr "取消连结帐户"
+
+#: ide/templates/ide/settings.html:57
+msgid "Link your GitHub account"
+msgstr "链接到您的卵石帐户"
+
+#: ide/templates/ide/settings.html:60
+msgid ""
+"Connecting your GitHub account enables you to connect your projects to "
+"GitHub repositories."
+msgstr "连接你的Github上的帐户，您可以在您的项目中连接到Github上库。"
+
+#: ide/templates/ide/project/compile.html:32
+msgid "Install and Run"
+msgstr "安装并运行"
+
+#: ide/templates/ide/project/compile.html:33
+msgid "View app logs"
+msgstr "查看应用程序日志"
+
+#: ide/templates/ide/project/compile.html:34
+msgid "Screenshot"
+msgstr "截图 "
+
+#: ide/templates/ide/project/compile.html:45
+msgid "Started:"
+msgstr "入门"
+
+#: ide/templates/ide/project/compile.html:46
+msgid "Build time:"
+msgstr "建造时间："
+
+#: ide/templates/ide/project/compile.html:47
+msgid "Status:"
+msgstr "现状："
+
+#: ide/templates/ide/project/compile.html:48
+msgid "Size:"
+msgstr "大小: "
+
+#: ide/templates/ide/project/compile.html:50
+msgid "Available App RAM:"
+msgstr "可用的应用程序内存："
+
+#: ide/templates/ide/project/compile.html:51
+msgid "Available Worker RAM:"
+msgstr "可用的工作内存​​："
+
+#: ide/templates/ide/project/compile.html:55
+msgid "Run build"
+msgstr "编译运行"
+
+#: ide/templates/ide/project/compile.html:56
+msgid "Get PBW"
+msgstr "获取PBW"
+
+#: ide/templates/ide/project/compile.html:57
+msgid "Build log"
+msgstr "生成日志"
+
+#: ide/templates/ide/project/compile.html:64
+msgctxt "number symbol"
+msgid "#"
+msgstr "＃"
+
+#: ide/templates/ide/project/compile.html:65
+msgid "Date"
+msgstr "日期 "
+
+#: ide/templates/ide/project/compile.html:66
+msgid "Status"
+msgstr "状态 "
+
+#: ide/templates/ide/project/compile.html:67
+msgid "Size"
+msgstr "大小"
+
+#: ide/templates/ide/project/github.html:8
+msgid "Github Repo"
+msgstr "Github上回购"
+
+#: ide/templates/ide/project/github.html:14
+msgctxt "git branch"
+msgid "Branch"
+msgstr "分公司"
+
+#: ide/templates/ide/project/github.html:20
+msgctxt "button label"
+msgid "Pull changes"
+msgstr "拉变化"
+
+#: ide/templates/ide/project/github.html:23
+msgid "Manually"
+msgstr "手动"
+
+#: ide/templates/ide/project/github.html:24
+msgid "Automatically"
+msgstr "自动"
+
+#: ide/templates/ide/project/github.html:26
+msgid ""
+"If you select 'Automatically', the contents of this project <em>will be "
+"overwritten</em> every time you push to your repo from elsewhere, "
+"<em>without prompting you</em>."
+msgstr ""
+"如果选择\"自动\"，该项目的<em>将被覆盖的内容</em>的每一个你从其他地方推到你的"
+"回购时间，<EM>，而不会提示你</em>的。"
+
+#: ide/templates/ide/project/github.html:30
+msgid "After pulling"
+msgstr "后拉"
+
+#: ide/templates/ide/project/github.html:33
+msgid "Do nothing"
+msgstr "什么都不做"
+
+#: ide/templates/ide/project/github.html:34
+msgid "Build automatically"
+msgstr "自动构建"
+
+#: ide/templates/ide/project/github.html:41
+#: ide/templates/ide/project/resource.html:73
+msgid "Save"
+msgstr "保存"
+
+#: ide/templates/ide/project/resource.html:8
+msgid "Resource type"
+msgstr "资源类型"
+
+#: ide/templates/ide/project/resource.html:11
+msgid "PNG image"
+msgstr "PNG图片"
+
+#: ide/templates/ide/project/resource.html:13
+msgid "PNG with transparency"
+msgstr "PNG格式的透明性"
+
+#: ide/templates/ide/project/resource.html:14
+msgid "TrueType font"
+msgstr "TrueType字体"
+
+#: ide/templates/ide/project/resource.html:15
+msgid "Raw binary blob"
+msgstr "原始二进制数据"
+
+#: ide/templates/ide/project/resource.html:21
+msgid "File"
+msgstr "用户名"
+
+#: ide/templates/ide/project/resource.html:24
+msgid ""
+"You can have multiple Pebble resources from a single file (for different "
+"sizes, etc.)"
+msgstr "您可以从一个单一的文件有多个卵石资源（不同的尺寸，等等）"
+
+#: ide/templates/ide/project/resource.html:36
+msgid "Download uploaded resource"
+msgstr "下载上传资源"
+
+#: ide/templates/ide/project/resource.html:40
+#: ide/templates/ide/project/resource.html:49
+msgid "Identifier"
+msgstr "标识"
+
+#: ide/templates/ide/project/resource.html:43
+#: ide/templates/ide/project/resource.html:52
+msgid "This is used in your code and must be a valid C identifier."
+msgstr "这是用来在你的代码，而且必须是有效的C标识符。"
+
+#: ide/templates/ide/project/resource.html:53
+msgid "It must end with the desired font size."
+msgstr "它必须以所需的字体大小。"
+
+#: ide/templates/ide/project/resource.html:57
+msgctxt "like letters and numbers"
+msgid "Characters"
+msgstr "人物"
+
+#: ide/templates/ide/project/resource.html:60
+msgid "A PCRE regular expression that restricts characters."
+msgstr "PCRE正则表达式限制字符。"
+
+#: ide/templates/ide/project/resource.html:64
+msgid "Tracking adjust"
+msgstr "跟踪调整"
+
+#: ide/templates/ide/project/resource.html:67
+msgid "Number of additional pixels by which to shift each character."
+msgstr "更多的像素，其转移的每个字符数。"
+
+#: ide/templates/ide/project/resource.html:74
+msgid "Delete"
+msgstr "删除"
+
+#: ide/templates/ide/project/resource.html:75
+msgid "Another font"
+msgstr "另一种字体"
+
+#: ide/templates/ide/project/settings.html:17
+msgid "App kind"
+msgstr "应用类"
+
+#: ide/templates/ide/project/settings.html:20
+msgid "Watchapp"
+msgstr "Watchapp"
+
+#: ide/templates/ide/project/settings.html:21
+msgid "Watchface"
+msgstr "Watchface"
+
+#: ide/templates/ide/project/settings.html:26
+msgid "Short App Name"
+msgstr "短的应用程序名称"
+
+#: ide/templates/ide/project/settings.html:28
+#: ide/templates/ide/project/settings.html:37
+msgctxt "sample app name"
+msgid "Demo App"
+msgstr "演示程序"
+
+#: ide/templates/ide/project/settings.html:30
+msgid "App's short name. This will appear on the watch."
+msgstr "应用程序的简称。这将出现在手表。"
+
+#: ide/templates/ide/project/settings.html:35
+msgid "Long App Name"
+msgstr "长期应用程式名称"
+
+#: ide/templates/ide/project/settings.html:39
+msgid "App's long name. This will appear in the app list on the phone."
+msgstr "应用程序的长文件名。这会出现在手机上的应用程序列表。"
+
+#: ide/templates/ide/project/settings.html:44
+msgid "Menu image"
+msgstr "菜单图像"
+
+#: ide/templates/ide/project/settings.html:47
+msgid "None"
+msgstr "无"
+
+#: ide/templates/ide/project/settings.html:47
+msgid "Default"
+msgstr "默认"
+
+#: ide/templates/ide/project/settings.html:50
+msgid ""
+"Displayed on the Pebble's main menu. Must be a 28x28 file in PNG format."
+msgstr "显示卵石的主菜单上。必须是PNG格式的28X28文件。"
+
+#: ide/templates/ide/project/settings.html:55
+msgid "Company Name"
+msgstr "公司名称"
+
+#: ide/templates/ide/project/settings.html:57
+msgctxt "sample company name"
+msgid "Demo Company"
+msgstr "示范企业"
+
+#: ide/templates/ide/project/settings.html:59
+msgid "Name of the app's developer."
+msgstr "应用程序的开发者的名称。"
+
+#: ide/templates/ide/project/settings.html:74
+msgid "Version label"
+msgstr "版本标签"
+
+#: ide/templates/ide/project/settings.html:79
+msgid ""
+"App version. Takes the format major[.minor], where major and minor are "
+"between 0 and 255."
+msgstr "应用程序版本。采用的主要格式[.minor]，其中主要的和次要的是0和255之间。"
+
+#: ide/templates/ide/project/settings.html:84
+msgid "App UUID"
+msgstr "应用程序的UUID"
+
+#: ide/templates/ide/project/settings.html:88
+msgid "A unique identifier for the app."
+msgstr "的唯一标识符的应用程序。"
+
+#: ide/templates/ide/project/settings.html:95
+msgid "PebbleKit JS Message Keys"
+msgstr "PebbleKit JS的消息键"
+
+#: ide/templates/ide/project/settings.html:100
+msgid "Key Name"
+msgstr "键位名称"
+
+#: ide/templates/ide/project/settings.html:101
+msgid "Key ID"
+msgstr "密钥ID"
+
+#: ide/templates/ide/project/settings.html:114
+msgid "New Entry"
+msgstr "新建条目"
+
+#: ide/templates/ide/project/settings.html:121
+msgid "A mapping from strings to integers used by PebbleKit JS."
+msgstr "映射的字符串使用PebbleKit JS整数。"
+
+#: ide/templates/ide/project/settings.html:126
+msgctxt "checkbox label"
+msgid "Check Javascript"
+msgstr "检查的Javascript"
+
+#: ide/templates/ide/project/settings.html:132
+msgctxt "checkbox label"
+msgid "Uses Location"
+msgstr "使用位置"
+
+#: ide/templates/ide/project/settings.html:138
+msgctxt "checkbox label"
+msgid "Configurable"
+msgstr "可配置的嵌套向量中断控制器"
+
+#: ide/templates/ide/project/settings.html:146
+msgid "Save changes"
+msgstr "保存更改"
+
+#: ide/templates/ide/project/settings.html:147
+msgid "Download as zip"
+msgstr "下载的ZIP"
+
+#: ide/templates/ide/project/settings.html:148
+msgid "Delete Project"
+msgstr "删除项目"
+
+#: ide/templates/ide/project/ui-editor.html:12
+msgid "Properties"
+msgstr "属性"
+
+#: ide/templates/ide/project/ui-editor.html:13
+msgid "Toolkit"
+msgstr "工具包"
 
 #: root/templates/common/base-narrow.html:23
 msgid ""
@@ -30,7 +721,12 @@ msgid ""
 "                "
 msgstr ""
 "\n"
-"CloudPebble由凯瑟琳·贝瑞创建，目前由卵石运行。"
+"CloudPebble由凯瑟琳·贝瑞创建，目前由卵石运行。有限公司<br>\n"
+"请提交bug报告和功能要求的<a href=\"https://github.com/pebble/cloudpebble\"> "
+"GitHub上</a>.\n"
+"问题？发送电​​子邮件到<a href=\"mailto:cloudpebble@getpebble.com\"> "
+"cloudpebble@getpebble.com </A>。\n"
+"                "
 
 #. Translators: Modal prompt header
 #: root/templates/common/base.html:39
@@ -41,10 +737,6 @@ msgstr "欢迎回来"
 #: root/templates/common/base.html:43
 msgid "Here's what's changed since the last time you were here:"
 msgstr "这里是自从上次你在这里有什么变化："
-
-#: root/templates/common/base.html:47
-msgid "Okay"
-msgstr "好"
 
 #: root/templates/root/index.html:11
 msgid "Sign in"
@@ -158,7 +850,3 @@ msgstr "密码"
 #: root/templates/root/index.html:110
 msgid "Log in"
 msgstr "登录"
-
-#: root/templates/root/index.html:111
-msgid "Cancel"
-msgstr "取消"
