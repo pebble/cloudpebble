@@ -65,6 +65,7 @@ LANGUAGE_CODE = 'en-gb'
 
 LANGUAGES = (
     ('en-gb', 'English'),
+    ('zh-cn', 'Chinese (Simplified)'),
 )
 
 LOCALE_PATHS = (os.getcwd() + "/locale",)
