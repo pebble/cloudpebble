@@ -104,7 +104,7 @@ CloudPebble.YCM = new (function() {
         var promise = $.Deferred();
         if(!mInitialised) {
             promise.reject();
-            return promise;
+            return promise.promise();
         }
         $.ajax(mURL + '/delete', {
             data: JSON.stringify({
@@ -117,14 +117,14 @@ CloudPebble.YCM = new (function() {
         }).fail(function() {
             promise.reject();
         });
-        return promise;
+        return promise.promise();
     };
 
     this.createFile = function(file, content) {
         var promise = $.Deferred();
         if(!mInitialised) {
             promise.reject();
-            return promise;
+            return promise.promise();
         }
         $.ajax(mURL + '/create', {
             data: JSON.stringify({
@@ -138,7 +138,7 @@ CloudPebble.YCM = new (function() {
         }).fail(function() {
             promise.reject();
         });
-        return promise;
+        return promise.promise();
     };
 
     this.updateResources = function(resources) {
