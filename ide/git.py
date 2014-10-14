@@ -1,4 +1,5 @@
 from ide.models.user import UserGithub
+from django.utils.translation import ugettext as _
 
 from github import Github, BadCredentialsException, UnknownObjectException
 from github.NamedUser import NamedUser
@@ -12,7 +13,7 @@ import re
 def git_auth_check(f):
     def g(user, *args, **kwargs):
         if not git_verify_tokens(user):
-            raise Exception("Invalid user GitHub tokens.")
+            raise Exception(_("Invalid user GitHub tokens."))
         try:
             return f(user, *args, **kwargs)
         except BadCredentialsException:
