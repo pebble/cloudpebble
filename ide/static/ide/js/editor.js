@@ -474,7 +474,7 @@ CloudPebble.Editor = (function() {
                 save_btn.click(function() { save(); });
                 delete_btn.click(function() {
                     var fmt = gettext("Do you want to delete %(name)s?");
-                    CloudPebble.Prompts.Confirm(interpolate(fmt, file), gettext("This cannot be undone."), function() {
+                    CloudPebble.Prompts.Confirm(interpolate(fmt, file, true), gettext("This cannot be undone."), function() {
                         save_btn.attr('disabled','disabled');
                         delete_btn.attr('disabled','disabled');
                         $.post("/ide/project/" + PROJECT_ID + "/source/" + file.id + "/delete", function(data) {
@@ -495,7 +495,7 @@ CloudPebble.Editor = (function() {
 
                 discard_btn.click(function() {
                     CloudPebble.Prompts.Confirm(
-                        interpolate(gettext("Do you want to reload %(name)s?"), file),
+                        interpolate(gettext("Do you want to reload %(name)s?"), file, true),
                         gettext("This will discard your current changes and revert to the saved version."),
                         function() {
                             CloudPebble.Sidebar.DestroyActive();

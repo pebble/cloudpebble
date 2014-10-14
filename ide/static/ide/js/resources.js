@@ -53,7 +53,7 @@ CloudPebble.Resources = (function() {
                 return;
             }
             if(!!project_resources[file.name]) {
-                report_error(interpolate(gettext("A resource called '%(name)s' already exists in the project."), file));
+                report_error(interpolate(gettext("A resource called '%(name)s' already exists in the project."), file, true));
                 return;
             }
         }
