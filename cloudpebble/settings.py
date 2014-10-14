@@ -64,8 +64,7 @@ TIME_ZONE = 'America/New_York'
 LANGUAGE_CODE = 'en-gb'
 
 LANGUAGES = (
-    ('en-gb', 'English'),
-    ('zh-cn', 'Chinese (Simplified)'),
+    ('en', 'English'),
 )
 
 LOCALE_PATHS = (os.getcwd() + "/locale",)
