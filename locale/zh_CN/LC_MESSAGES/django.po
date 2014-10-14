@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CloudPebble\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-14 03:55-0400\n"
-"PO-Revision-Date: 2014-10-14 00:57-0800\n"
+"POT-Creation-Date: 2014-10-14 04:47-0400\n"
+"PO-Revision-Date: 2014-10-14 02:11-0800\n"
 "Last-Translator: Katharine Berry <katharine@kathar.in>\n"
 "Language-Team: Chinese <katharine@kathar.in>\n"
 "Language: zh_CN\n"
@@ -17,6 +17,146 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Poedit 1.6.9\n"
+
+#: auth/views.py:31
+msgid "Invalid username or password"
+msgstr "无效的用户名或密码。"
+
+#: auth/views.py:34
+msgid "Account disabled."
+msgstr "账号被禁用。"
+
+#: ide/git.py:16
+msgid "Invalid user GitHub tokens."
+msgstr "无效的Github上的用户令牌。"
+
+#: ide/api/phone.py:44
+msgid "Tap to enable developer mode and install apps from CloudPebble."
+msgstr "轻按，使开发人员模式和CloudPebble安装应用程序。"
+
+#: ide/api/project.py:289
+msgid "Invalid Github URL."
+msgstr "无效Github上的网址。"
+
+#: ide/api/source.py:92
+msgid "Could not save: file has been modified since last save."
+msgstr "无法保存：自上次保存的文件已被修改。"
+
+#: ide/models/build.py:23 ide/templates/ide/index.html:51
+msgid "Pending"
+msgstr "等待"
+
+#: ide/models/build.py:24 ide/templates/ide/index.html:49
+msgid "Failed"
+msgstr "失败"
+
+#: ide/models/build.py:25
+msgid "Succeeded"
+msgstr "成功\t"
+
+#: ide/models/files.py:19
+msgid "Binary blob"
+msgstr "原始二进制数据"
+
+#: ide/models/files.py:20
+msgid "1-bit PNG"
+msgstr "1位PNG"
+
+#: ide/models/files.py:21
+msgid "1-bit PNG with transparency"
+msgstr "PNG格式的透明性"
+
+#: ide/models/files.py:22
+msgid "True-Type Font"
+msgstr "TrueType字体"
+
+#: ide/models/files.py:45
+msgid "Uploaded file too big."
+msgstr "上传文件过大。"
+
+#: ide/models/files.py:123
+msgid "App"
+msgstr "应用"
+
+#: ide/models/files.py:124
+msgid "Worker"
+msgstr "工源"
+
+#: ide/models/project.py:21 ide/templates/ide/index.html:85
+msgid "Pebble C SDK"
+msgstr "卵石çSDK"
+
+#: ide/models/project.py:22 ide/templates/ide/index.html:86
+msgid "Simply.js"
+msgstr "Simply.js"
+
+#: ide/models/project.py:23 ide/templates/ide/index.html:87
+msgid "Pebble.js (beta)"
+msgstr "Pebble.js（测试版）"
+
+#: ide/models/project.py:83 ide/templates/ide/index.html:92
+msgid "Template"
+msgstr "模板"
+
+#: ide/models/project.py:84
+msgid "SDK Demo"
+msgstr "SDK的演示"
+
+#: ide/models/project.py:85
+msgid "Example"
+msgstr "示例"
+
+#: ide/models/user.py:18
+msgid "As-you-type"
+msgstr "正如你型"
+
+#: ide/models/user.py:19
+msgid "When pressing Ctrl-Space"
+msgstr "当按下Ctrl-Space键"
+
+#: ide/models/user.py:20 ide/templates/ide/index.html:54
+msgid "Never"
+msgstr "从来没有"
+
+#: ide/models/user.py:27
+msgid "Standard"
+msgstr "标准模板"
+
+#: ide/models/user.py:28
+msgid "vim-like"
+msgstr "VIM样"
+
+#: ide/models/user.py:29
+msgid "emacs-like"
+msgstr "emacs的状"
+
+#: ide/models/user.py:42
+msgid "Using spaces"
+msgstr "使用空格"
+
+#: ide/models/user.py:43
+msgid "Using tabs"
+msgstr "使用标签"
+
+#: ide/models/user.py:49
+msgid "Autocompletion"
+msgstr "编制要领"
+
+#: ide/models/user.py:50
+msgid "Keybinds"
+msgstr "键绑定"
+
+#: ide/models/user.py:51
+msgid "Theme"
+msgstr "主题"
+
+#: ide/models/user.py:52
+msgid "Indents"
+msgstr "打算"
+
+#: ide/models/user.py:53
+msgid "Tab width"
+msgstr "标签宽度"
 
 #: ide/templates/ide/gist-import.html:6
 msgid "You are going to create a project based on a template."
@@ -70,18 +210,6 @@ msgstr "编译运行"
 msgid "Successful"
 msgstr "成功"
 
-#: ide/templates/ide/index.html:49
-msgid "Failed"
-msgstr "失败"
-
-#: ide/templates/ide/index.html:51
-msgid "Pending"
-msgstr "等待"
-
-#: ide/templates/ide/index.html:54
-msgid "Never"
-msgstr "从来没有"
-
 #: ide/templates/ide/index.html:63
 msgid "You don't have any projects yet."
 msgstr "你没有任何的项目呢。"
@@ -98,22 +226,6 @@ msgstr "项目名称"
 #: ide/templates/ide/index.html:82
 msgid "Project type"
 msgstr "项目名称"
-
-#: ide/templates/ide/index.html:85
-msgid "Pebble C SDK"
-msgstr "卵石çSDK"
-
-#: ide/templates/ide/index.html:86
-msgid "Simply.js"
-msgstr "Simply.js"
-
-#: ide/templates/ide/index.html:87
-msgid "Pebble.js (beta)"
-msgstr "Pebble.js（测试版）"
-
-#: ide/templates/ide/index.html:92
-msgid "Template"
-msgstr "模板"
 
 #: ide/templates/ide/index.html:95
 msgid "Empty project"
@@ -708,6 +820,20 @@ msgstr "属性"
 #: ide/templates/ide/project/ui-editor.html:13
 msgid "Toolkit"
 msgstr "工具包"
+
+#: ide/utils/prepreprocessor.py:28
+#, python-format
+msgid "Illegal include '%(include)s' -> '%(path)s'"
+msgstr "包括非法“%(include)s” - >“%(path)s”"
+
+#: ide/utils/project.py:34
+msgid "No project root found."
+msgstr "没有项目的根目录中。"
+
+#: ide/utils/sdk.py:134 ide/utils/sdk.py:168 ide/utils/sdk.py:186
+#, python-format
+msgid "Unknown project type %s"
+msgstr "未知项目类型%s"
 
 #: root/templates/common/base-narrow.html:23
 msgid ""
