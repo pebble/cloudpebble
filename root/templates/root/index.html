@@ -23,9 +23,8 @@
             <div class="box-holder">
                 <div class="box">
                     {% if sso_root %}
-                    <h3>{% blocktrans %}Already have a Pebble account?{% endblocktrans %}</h3>
-                    <p>{% blocktrans %}This is the same account you use to log in to the Pebble Forums, Developer Portal
-                       and phone app. Don't have a Pebble account? Create one!{% endblocktrans %}</p>
+                    <h3>{% trans "Already have a Pebble account?" %}</h3>
+                    <p>{% trans "This is the same account you use to log in to the Pebble Forums, Developer Portal and phone app. Don't have a Pebble account? Create one!" %}</p>
                     <p><a class="btn btn-primary" href="/login/pebble/?next={{ next }}">{% trans "Log in with your Pebble account" %}</a></p>
                     <p><a class="btn" href="{{ sso_root }}/users/sign_up">{% trans "Create Pebble account" %}</a></p>
                     {% else %}
@@ -40,10 +39,10 @@
                 <div class="box">
                     <h3>{% trans "Have a legacy CloudPebble account?" %}</h3>
                     <p>{% blocktrans %}Log in to link it with your Pebble account. Legacy
-                        accounts are being phased out in favour of the
-                        Pebble account system. Once you log in you will be
-                        required to link your accounts;
-                        henceforth you must log in with your pebble account.{% endblocktrans %}</p>
+accounts are being phased out in favour of the
+Pebble account system. Once you log in you will be
+required to link your accounts;
+henceforth you must log in with your pebble account.{% endblocktrans %}</p>
                     <p><button class="btn" id="legacy-trigger-btn">{% trans "Link to your Pebble account" %}</button></p>
                 </div>
             </div>
@@ -74,7 +73,7 @@
             </div>
             <div class="feature box">
                 <div class="feature-icon feature-icon-cloudy"></div>
-                {# Translators: This is "cloud" as in the internet. #}
+                {# Translators: This is "cloud" as in the internet, but used as a pun on cloud as in sky. #}
                 <h3>{% trans "Cloudy" %}</h3>
                 <p>{% trans "It's on the internet. Accessible from anywhere! That's a good thing, right?" %}</p>
             </div>
