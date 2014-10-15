@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 from ide.models.meta import IdeModel
 from ide.utils.whatsnew import count_things
@@ -49,7 +50,7 @@ class UserSettings(IdeModel):
     autocomplete = models.IntegerField(choices=AUTOCOMPLETE_CHOICES, verbose_name=_("Autocompletion"), default=AUTOCOMPLETE_ALWAYS)
     keybinds = models.CharField(max_length=20, verbose_name=_("Keybinds"), choices=KEYBIND_CHOICES, default=KEYBIND_STANDARD)
     theme = models.CharField(max_length=50, verbose_name=_("Theme"), choices=THEME_CHOICES, default='cloudpebble')
-    use_spaces = models.BooleanField(default=True, verbose_name=_("Indents"), choices=USE_SPACES_CHOICES)
+    use_spaces = models.BooleanField(default=True, verbose_name=pgettext_lazy("number of spaces", "Indents"), choices=USE_SPACES_CHOICES)
     tab_width = models.PositiveSmallIntegerField(default=2, verbose_name=_("Tab width"))
 
     # Used for the Pebble ownership transition, when it was set to False.
