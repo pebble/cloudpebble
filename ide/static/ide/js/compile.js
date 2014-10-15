@@ -20,7 +20,7 @@ CloudPebble.Compile = (function() {
         // Build log thingy.
         var td = $('<td class="build-log">');
         if(build.state > 1) {
-            var a = $('<a href="'+build.log+'" class="btn btn-small">' + gettext("build log") + '</a>').click(function(e) {
+            var a = $('<a href="'+build.log+'" class="btn btn-small">' + gettext("Build log") + '</a>').click(function(e) {
                 if(e.ctrlKey || e.metaKey) {
                     ga('send', 'event', 'build log', 'show', 'external');
                     return true;
@@ -83,7 +83,7 @@ CloudPebble.Compile = (function() {
             CloudPebble.ProgressBar.Hide();
             pane.removeClass('hide');
             if(!data.success) {
-                alert("Something went wrong:\n" + data.error); // This should be prettier.
+                alert(interpolate(gettext("Something went wrong:\n%s"), [data.error])); // This should be prettier.
                 CloudPebble.Sidebar.DestroyActive();
                 return;
             }
@@ -181,7 +181,7 @@ CloudPebble.Compile = (function() {
                         if(!build.size.worker) {
                             sfmt = gettext("%(total)s KiB (%(resources)s KiB resources, %(appbin)s KiB binary)");
                         } else {
-                            sfmt = gettext("%(total)s KiB (%(resources)s KiB resources, %(appbin)s KiB binary, %(workerbin)s KiB worker)")
+                            sfmt = gettext("%(total)s KiB (%(resources)s KiB resources, %(appbin)s KiB binary, %(workerbin)s KiB worker)");
                         }
                         var stext = interpolate(sfmt, {
                             total: Math.round(build.size.total / 1024),
@@ -244,7 +244,7 @@ CloudPebble.Compile = (function() {
             return;
         }
         var did_connect = false;
-        CloudPebble.Prompts.Progress.Show("Connecting...", "Establishing connection...", function() {
+        CloudPebble.Prompts.Progress.Show(gettext("Connecting..."), gettext("Establishing connection..."), function() {
             if(!did_connect && mPebble) {
                 mPebble.off();
                 mPebble.close();
@@ -255,15 +255,15 @@ CloudPebble.Compile = (function() {
         mPebble.on('app_log', handle_app_log);
         mPebble.on('phone_log', handle_phone_log);
         mPebble.on('proxy:authenticating', function() {
-            CloudPebble.Prompts.Progress.Update("Authenticating...");
+            CloudPebble.Prompts.Progress.Update(gettext("Authenticating..."));
         });
         mPebble.on('proxy:waiting', function() {
-            CloudPebble.Prompts.Progress.Update("Waiting for phone. Make sure the developer server is enabled.");
+            CloudPebble.Prompts.Progress.Update(gettext("Waiting for phone. Make sure the development server is enabled."));
         });
         var connection_error = function() {
             mPebble.off();
             CloudPebble.Prompts.Progress.Fail();
-            CloudPebble.Prompts.Progress.Update("Connection interrupted.");
+            CloudPebble.Prompts.Progress.Update(gettext("Connection interrupted."));
             mPebble = null;
         };
         mPebble.on('close error', connection_error);
@@ -416,7 +416,7 @@ CloudPebble.Compile = (function() {
         pebble_connect(function() {
             modal.modal();
             mPebble.once('version', function(version_info) {
-                modal.find('.modal-body > p').text("Installing app on your watch…");
+                modal.find('.modal-body > p').text(gettext("Installing app on your watch…"));
                 modal.find('.btn').addClass('hide');
                 modal.find('.progress').removeClass('progress-danger progress-success').addClass('progress-striped');
                 modal.off('hide');
@@ -429,11 +429,13 @@ CloudPebble.Compile = (function() {
                 } else {
                     mPebble.close();
                     mPebble = null;
-                    report_error(
-                        "Please <a href='https://developer.getpebble.com/2/getting-started/'>update your pebble</a>" +
-                            " to " + MINIMUM_INSTALL_VERSION + " to be able to install apps from CloudPebble and " +
-                            "the appstore (you're on version " + version_string + ")."
-                    );
+                    var fmt = gettext("Please <a href='%(update_url)s'>update your pebble</a> to %(min_version)s to install apps from CloudPebble and the appstore (you're on version %(real_version)s).");
+                    var str = interpolate(fmt, {
+                        update_url: 'https://developer.getpebble.com/2/getting-started/',
+                        min_version: MINIMUM_INSTALL_VERSION,
+                        real_version: version_string
+                    }, true);
+                    report_error(str);
                 }
             });
             mPebble.request_version();
@@ -442,7 +444,7 @@ CloudPebble.Compile = (function() {
             if(code === 0) {
                 mPreviousDisplayLogs.push(null);
                 mPebble.enable_app_logs();
-                modal.find('.modal-body > p').text("Installed successfully!");
+                modal.find('.modal-body > p').text(gettext("Installed successfully!"));
                 modal.find('.btn').removeClass('hide');
                 modal.find('.logs-btn').off('click').click(function() {
                     modal.off('hide');
@@ -454,7 +456,7 @@ CloudPebble.Compile = (function() {
                 ga('send', 'event', 'install', 'direct', 'success');
                 CloudPebble.Analytics.addEvent('app_install_succeeded');
             } else {
-                report_error("Installation failed with error code " + code + ". Check your phone for details.");
+                report_error(gettext("Installation failed. Check your phone for details."));
                 ga('send', 'event', 'install', 'direct', 'phone-error');
                 CloudPebble.Analytics.addEvent('app_install_failed', {cause: 'rejected'});
                 mPebble.close();
@@ -473,7 +475,7 @@ CloudPebble.Compile = (function() {
         var do_stuff = function() {
             mPebble.on('close', function() {
                 if(mLogHolder)
-                    mLogHolder.append($('<span>').addClass('log-error').text("Disconnected from phone.\n"));
+                    mLogHolder.append($('<span>').addClass('log-error').text(gettext("Disconnected from phone.") + "\n"));
             });
             CloudPebble.Sidebar.SuspendActive();
             if(!mLogHolder) {
@@ -490,8 +492,9 @@ CloudPebble.Compile = (function() {
         if(!mPebble || !mPebble.is_connected()) {
             pebble_connect(function() {
                 mPebble.enable_app_logs();
-                if(mLogHolder)
-                    mLogHolder.append($('<span>').addClass('log-success').text("Connected.\n"));
+                if(mLogHolder) {
+                    mLogHolder.append($('<span>').addClass('log-success').text(gettext("Connected.") + "\n"));
+                }
                 do_stuff();
             });
         } else {
@@ -525,7 +528,7 @@ CloudPebble.Compile = (function() {
 
         mPebble.on('close', function() {
             if(!finished) {
-                report_error("Disconnected from phone.");
+                report_error(gettext("Disconnected from phone."));
             }
         });
 
@@ -545,7 +548,7 @@ CloudPebble.Compile = (function() {
             modal.find('.modal-body')
                 .empty()
                 .append(screenshot_holder)
-                .append("<p>Right click -> Save Image as...</p>")
+                .append("<p>" + gettext("Right click -> Save Image as...") + "</p>")
                 .css({'text-align': 'center'});
             modal.find('.dismiss-btn').removeClass('hide');
             mPebble.request_colour();
