@@ -159,11 +159,11 @@ CloudPebble.Utils = {
         var minutes = String(date.getMinutes());
         while(minutes.length < 2) minutes = '0' + minutes;
 
-        var hours = date.getHours() % 12;
-        if(hours === 0) hours = 12;
+        var hours = String(date.getHours());
+        while(hours.length < 2) hours = '0' + hours;
 
         return date.getDate() + ' ' + months[date.getMonth()] +', \'' + (date.getFullYear() % 100) +
-            ' – ' + hours + ":" + minutes + ' ' + (date.getHours() < 12 ? gettext('AM') : gettext('PM'));
+            ' – ' + hours + ":" + minutes;
     },
     FormatInterval: function(s1, s2) {
         var t = Math.round(Math.abs(Date.parse(s2.replace(' ','T')) - Date.parse(s1.replace(' ','T'))) / 1000);

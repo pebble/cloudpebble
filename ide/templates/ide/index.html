@@ -38,10 +38,10 @@
                     {% for project in my_projects %}
                         <tr>
                             <td class="project-name"><a href="{% url 'ide:project' project.id %}">{{ project.name }}</a></td>
-                            <td class="project-last-modified">{{ project.last_modified | date:"j F, 'y – h:i A" }}</td>
+                            <td class="project-last-modified">{{ project.last_modified | date:"j F, 'y – h:i" }}</td>
                             <td class="project-last-build">
                                 {% if project.get_last_build %}
-                                    {{ project.last_build.started | date:"j F, 'y – h:i A" }}
+                                    {{ project.last_build.started | date:"j F, 'y – H:i" }}
                                     {% if project.last_build.state == 3 %}
                                         <span class="label label-success">{% trans "Successful" %}</span>
                                     {% elif project.last_build.state == 2 %}
