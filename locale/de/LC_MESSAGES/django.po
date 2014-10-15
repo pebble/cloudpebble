@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CloudPebble\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-15 04:58-0400\n"
+"POT-Creation-Date: 2014-10-15 06:16-0400\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -96,7 +96,7 @@ msgstr "Vorlage"
 
 #: ide/models/project.py:84
 msgid "SDK Demo"
-msgstr "SDK Beispiel"
+msgstr "SDK-Beispiel"
 
 #: ide/models/project.py:85
 msgid "Example"
@@ -136,7 +136,7 @@ msgstr "Mit Tabulatoren"
 
 #: ide/models/user.py:50
 msgid "Autocompletion"
-msgstr "Autoversvollständigung"
+msgstr "Autovervoll­ständigung"
 
 #: ide/models/user.py:51
 msgid "Keybinds"
@@ -157,7 +157,7 @@ msgstr "Tabweite"
 
 #: ide/templates/ide/gist-import.html:6
 msgid "You are going to create a project based on a template."
-msgstr "Du wirst ein Projekt basierend auf einem Template erstellen."
+msgstr "Du wirst ein Projekt basierend auf einer Vorlage erstellen."
 
 #: ide/templates/ide/gist-import.html:11
 msgid "Create Project"
@@ -209,6 +209,7 @@ msgid "Last modified"
 msgstr "Zuletzt modifiziert"
 
 #: ide/templates/ide/index.html:35 ide/templates/ide/project/compile.html:24
+#, fuzzy
 msgid "Last build"
 msgstr "Zuletzt gebaut"
 
@@ -287,7 +288,7 @@ msgstr "Branch (optional)"
 
 #: ide/templates/ide/index.html:180
 msgid "Use as Git remote"
-msgstr "Als Git remote verwenden"
+msgstr "Als Git-Remote verwenden"
 
 #: ide/templates/ide/project.html:47
 msgid "Compilation"
@@ -352,7 +353,7 @@ msgstr "Background-Worker"
 
 #: ide/templates/ide/project.html:149
 msgid "Create header"
-msgstr "Header erstellen"
+msgstr "Header-Datei erstellen"
 
 #: ide/templates/ide/project.html:165
 msgid "Window name"
@@ -381,7 +382,7 @@ msgstr "Zusammenfassung committen"
 #: ide/templates/ide/project.html:219
 msgctxt "sample commit summary"
 msgid "Fix something useful."
-msgstr "Folgendes Problem behoben..."
+msgstr "Ein behobenes Problem oder neues Feature..."
 
 #: ide/templates/ide/project.html:223
 msgid "Extended description <span class=\"muted\">(optional)</span>"
@@ -435,11 +436,11 @@ msgstr "Logs anschauen"
 
 #: ide/templates/ide/project.html:301
 msgid "Taking Screenshot"
-msgstr "Screenshot aufnehmen"
+msgstr "Screenshot wird aufgenommen"
 
 #: ide/templates/ide/project.html:304
 msgid "Taking screenshot…"
-msgstr "Screenshot aufnehmen..."
+msgstr "Screenshot wird aufgenommen..."
 
 #: ide/templates/ide/project.html:331 root/templates/common/base.html:47
 msgid "Okay"
@@ -495,13 +496,13 @@ msgid ""
 "are\n"
 "running at least iOS app version 2.5 or Android version 2.1 (beta)."
 msgstr ""
-"Stelle sicher, dass die Entwickler-Verbindung auf deinem Telefon aktiviert "
-"ist und das du mindestens Version 2.5 unter iOS oder 2.1 (beta) unter "
-"Android verwendest."
+"Stelle sicher, dass die Entwickler-Verbindung auf deinem Handy aktiviert ist "
+"und das du mindestens Version 2.5 unter iOS oder 2.1 (beta) unter Android "
+"verwendest."
 
 #: ide/templates/ide/project/compile.html:16
 msgid "Install and Run"
-msgstr "Installieren und Ausführen"
+msgstr "Installieren & Los"
 
 #: ide/templates/ide/project/compile.html:17
 msgid "View app logs"
@@ -514,12 +515,12 @@ msgstr "Screenshot"
 #: ide/templates/ide/project/compile.html:29
 msgctxt "date/time"
 msgid "Started:"
-msgstr "Gestarted:"
+msgstr "Gestartet:"
 
 #: ide/templates/ide/project/compile.html:30
 msgctxt "duration"
 msgid "Build time:"
-msgstr "Bauzeit:"
+msgstr "Baudauer:"
 
 #: ide/templates/ide/project/compile.html:31
 msgid "Status:"
@@ -728,7 +729,7 @@ msgstr "Langer App-Name."
 #: ide/templates/ide/project/settings.html:39
 msgid "App's long name. This will appear in the app list on the phone."
 msgstr ""
-"Der lange Name der App. Dieser wird in der Liste auf dem Telefon angezeigt."
+"Der lange Name der App. Dieser wird in der App-Liste auf dem Handy angezeigt."
 
 #: ide/templates/ide/project/settings.html:44
 msgid "Menu image"
@@ -954,7 +955,7 @@ msgstr "Ressourcen werden über eine freundliche Benutzeroberfläche verwaltet"
 #. Translators: This is "cloud" as in the internet, but used as a pun on cloud as in sky.
 #: root/templates/root/index.html:76
 msgid "Cloudy"
-msgstr "Wolkig"
+msgstr "In der Cloud"
 
 #: root/templates/root/index.html:77
 msgid ""

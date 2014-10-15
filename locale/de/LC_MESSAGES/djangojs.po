@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CloudPebble\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-15 04:58-0400\n"
+"POT-Creation-Date: 2014-10-15 06:16-0400\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -169,7 +169,7 @@ msgstr "Authentifizierung..."
 #: ide/static/ide/js/compile.js:261
 msgid "Waiting for phone. Make sure the development server is enabled."
 msgstr ""
-"Warte auf das Telefon. Stelle sicher, dass der Entwicklungs-Server aktiviert "
+"Warte auf das Handy. Stelle sicher, dass der Entwicklungs-Server aktiviert "
 "ist."
 
 #: ide/static/ide/js/compile.js:266
@@ -210,7 +210,7 @@ msgstr ""
 
 #: ide/static/ide/js/compile.js:399
 msgid "[PHONE]"
-msgstr "[TELEFON]"
+msgstr "[HANDY]"
 
 #: ide/static/ide/js/compile.js:400
 msgid "[ERROR]"
@@ -252,12 +252,11 @@ msgstr "Erfolgreich installiert."
 
 #: ide/static/ide/js/compile.js:459
 msgid "Installation failed. Check your phone for details."
-msgstr ""
-"Installation fehlgeschlagen. Prüfe dein Telefon um Details zu erfahren."
+msgstr "Installation fehlgeschlagen. Prüfe dein Handy um Details zu erfahren."
 
 #: ide/static/ide/js/compile.js:478 ide/static/ide/js/compile.js.c:531
 msgid "Disconnected from phone."
-msgstr "Vom Telefon getrennt."
+msgstr "Vom Handy getrennt."
 
 #: ide/static/ide/js/compile.js:496
 msgid "Connected."
@@ -385,8 +384,7 @@ msgstr ""
 #: ide/static/ide/js/editor.js:873
 msgid ""
 "Note that targets are independent and code will not be shared between them."
-msgstr ""
-"Targets sind unabhängig und Quelltext wird nicht zwischen ihnen geteilt."
+msgstr "Ziele sind unabhängig und Quelltext wird zwischen ihnen nicht geteilt."
 
 #: ide/static/ide/js/gist_import.js:24
 #, c-format

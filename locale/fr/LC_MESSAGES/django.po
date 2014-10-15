@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CloudPebble\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-15 04:58-0400\n"
+"POT-Creation-Date: 2014-10-15 06:16-0400\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -209,6 +209,7 @@ msgid "Last modified"
 msgstr "Dernière modification"
 
 #: ide/templates/ide/index.html:35 ide/templates/ide/project/compile.html:24
+#, fuzzy
 msgid "Last build"
 msgstr "Dernière compilation"
 
@@ -505,7 +506,7 @@ msgstr "Installer et Lancer"
 
 #: ide/templates/ide/project/compile.html:17
 msgid "View app logs"
-msgstr "Voir les logs de l'App"
+msgstr "Voir les logs"
 
 #: ide/templates/ide/project/compile.html:18
 msgid "Screenshot"
@@ -539,7 +540,7 @@ msgstr "RAM disponible pour le Worker :"
 
 #: ide/templates/ide/project/compile.html:38
 msgid "Run build"
-msgstr "Lancer la compilation"
+msgstr "Compiler"
 
 #: ide/templates/ide/project/compile.html:39
 msgid "Get PBW"
