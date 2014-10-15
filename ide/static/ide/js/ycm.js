@@ -45,7 +45,7 @@ CloudPebble.YCM = new (function() {
             }).fail(function() {
                 mFailed = true;
                 console.log('restart failed.');
-                $('.prepare-autocomplete').text("Code completion resync failed.");
+                $('.prepare-autocomplete').text(gettext("Code completion resync failed."));
             });
         });
     }
@@ -70,12 +70,12 @@ CloudPebble.YCM = new (function() {
                     }
                 } else {
                     mFailed = true;
-                    $('.prepare-autocomplete').text("Code completion unavailable.");
+                    $('.prepare-autocomplete').text(gettext("Code completion unavailable."));
                 }
             })
             .fail(function() {
                 mFailed = true;
-                $('.prepare-autocomplete').text("Code completion unavailable.");
+                $('.prepare-autocomplete').text(gettext("Code completion unavailable."));
             });
     };
 
@@ -91,7 +91,7 @@ CloudPebble.YCM = new (function() {
         mRestarting = true;
         mURL = false;
         mUUID = null;
-        $('.prepare-autocomplete').text("Code completion lost; retrying...").show();
+        $('.prepare-autocomplete').text(gettext("Code completion lost; retrying...")).show();
         $('.footer-credits').hide();
         this.initialise();
     };

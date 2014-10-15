@@ -1,10 +1,11 @@
+{% load i18n %}
 <!-- Settings template -->
 <div id="settings-pane-template" class="hide settings-pane">
     <form class="form-horizontal">
         <div class="well alert alert-error hide"></div>
         <div class="well">
             <div class="control-group">
-                <label class="control-label" for="settings-name">Project name</label>
+                <label class="control-label" for="settings-name">{% trans 'Project name' %}</label>
                 <div class="controls">
                     <input type="text" id="settings-name">
                 </div>
@@ -13,49 +14,49 @@
         <div>
             <div class="well">
                 <div class="control-group not-simplyjs">
-                    <label class="control-label" for="settings-app-is-watchface">App kind</label>
+                    <label class="control-label" for="settings-app-is-watchface">{% trans 'App kind' %}</label>
                     <div class="controls">
                         <select id="settings-app-is-watchface">
-                            <option value="0"{% if not project.app_is_watchface %}selected{% endif%}>Watch app</option>
-                            <option value="1"{% if project.app_is_watchface %}selected{% endif%}>Watchface</option>
+                            <option value="0"{% if not project.app_is_watchface %}selected{% endif%}>{% trans 'Watchapp' %}</option>
+                            <option value="1"{% if project.app_is_watchface %}selected{% endif%}>{% trans 'Watchface' %}</option>
                         </select>
                     </div>
                 </div>
                 <div class="control-group">
-                    <label class="control-label" for="settings-short-name">Short App Name</label>
+                    <label class="control-label" for="settings-short-name">{% trans 'Short App Name' %}</label>
                     <div class="controls">
-                        <input type="text" id="settings-short-name" placeholder="Demo App" value="{{project.app_short_name}}">
+                        <input type="text" id="settings-short-name" placeholder="{% trans 'Demo App' context "sample app name" %}" value="{{project.app_short_name}}">
                         <span class="help-block">
-                            App's short name. This will appear on the watch.
+                            {% trans "App's short name. This will appear on the watch." %}
                         </span>
                     </div>
                 </div>
                 <div class="control-group">
-                    <label class="control-label" for="settings-long-name">Long App Name</label>
+                    <label class="control-label" for="settings-long-name">{% trans 'Long App Name' %}</label>
                     <div class="controls">
-                        <input type="text" id="settings-long-name" placeholder="Demo App" value="{{project.app_long_name}}">
+                        <input type="text" id="settings-long-name" placeholder="{% trans 'Demo App' context "sample app name" %}" value="{{project.app_long_name}}">
                         <span class="help-block">
-                            App's long name. This will appear in the app list on the phone.
+                            {% trans "App's long name. This will appear in the app list on the phone." %}
                         </span>
                     </div>
                 </div>
                 <div class="control-group not-simplyjs">
-                    <label class="control-label" for="settings-menu-image">Menu image</label>
+                    <label class="control-label" for="settings-menu-image">{% trans 'Menu image' %}</label>
                     <div class="controls">
                         <select id="settings-menu-image">
-                            <option value="">{% if project.project_type == 'native' %}None{% else %}Default{% endif %}</option>
+                            <option value="">{% if project.project_type == 'native' %}{% trans 'None' %}{% else %}{% trans 'Default' %}{% endif %}</option>
                         </select>
                         <span class="help-block">
-                            Displayed on the Pebble's main menu. Must be a 28x28 file in PNG format.
+                            {% trans "Displayed on the Pebble's main menu. Must be a 28x28 file in PNG format." %}
                         </span>
                     </div>
                 </div>
                 <div class="control-group">
-                    <label class="control-label" for="settings-company-name">Company Name</label>
+                    <label class="control-label" for="settings-company-name">{% trans "Company Name" %}</label>
                     <div class="controls">
-                        <input type="text" id="settings-company-name" placeholder="Demo Company" value="{{project.app_company_name}}">
+                        <input type="text" id="settings-company-name" placeholder="{% trans "Demo Company" context "sample company name" %}" value="{{project.app_company_name}}">
                         <span class="help-block">
-                            Name of the app's developer.
+                            {% trans "Name of the app's developer." %}
                         </span>
                     </div>
                 </div>
@@ -70,34 +71,34 @@
                     </div>
                 </div>
                 <div class="control-group">
-                    <label class="control-label" for="settings-version-label">Version label</label>
+                    <label class="control-label" for="settings-version-label">{% trans "Version label" %}</label>
                     <div class="controls">
                         <input type="text" id="settings-version-label" placeholder="0.1" value="{{project.app_version_label}}"
                                 pattern="^(\d{1,2}|1\d{2}|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d{2}|2[0-4]\d|25[0-5]))?$">
                         <span class="help-block">
-                            App version. Takes the format major[.minor], where major and minor are between 0 and 255.
+                            {% trans "App version. Takes the format major[.minor], where major and minor are between 0 and 255." %}
                         </span>
                     </div>
                 </div>
                 <div class="control-group">
-                    <label class="control-label" for="settings-uuid">App UUID</label>
+                    <label class="control-label" for="settings-uuid">{% trans "App UUID" %}</label>
                     <div class="controls">
                         <input type="text" id="settings-uuid" pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" placeholder="00000000-0000-0000-0000-000000000000" value="{{project.app_uuid}}">
                         <span class="help-block">
-                            A unique identifier for the app.
+                            {% trans "A unique identifier for the app." %}
                         </span>
                     </div>
                 </div>
             </div>
             <div class="well">
                 <div class="control-group native-only">
-                    <label class="control-label" for="settings-app-keys">PebbleKit JS Message Keys</label>
+                    <label class="control-label" for="settings-app-keys">{% trans "PebbleKit JS Message Keys" %}</label>
                     <div class="controls">
                         <table id="settings-app-keys">
                             <thead>
                                 <tr>
-                                    <th>Key Name</th>
-                                    <th>Key ID</th>
+                                    <th>{% trans "Key Name" %}</th>
+                                    <th>{% trans "Key ID" %}</th>
                                     <th>&nbsp;</th>
                                 </tr>
                             </thead>
@@ -110,31 +111,31 @@
                                 </tr>
                                 {% endfor %}
                                 <tr class="appkey">
-                                    <td><input class="appkey-name" type="text" placeholder="New Entry" /></td>
+                                    <td><input class="appkey-name" type="text" placeholder="{% trans "New Entry" %}" /></td>
                                     <td><input class="appkey-id" type="number" value="0" /></td>
                                     <td><button class="btn remove-appkey disabled">–</button></td>
                                 </tr>
                             </tbody>
                         </table>
                         <div class="help-block">
-                            A mapping from strings to integers used by PebbleKit JS.
+                            {% trans "A mapping from strings to integers used by PebbleKit JS." %}
                         </div>
                     </div>
                 </div>
                 <div class="control-group native-only">
-                    <label class="control-label" for="settings-app-jshint">Check Javascript</label>
+                    <label class="control-label" for="settings-app-jshint">{% trans "Check Javascript" context "checkbox label" %}</label>
                     <div class="controls">
                         <input type="checkbox" id="settings-app-jshint" {%if project.app_jshint%}checked{%endif%}>
                     </div>
                 </div>
                 <div class="control-group">
-                    <label class="control-label" for="settings-capabilities-location">Uses Location</label>
+                    <label class="control-label" for="settings-capabilities-location">{% trans "Uses Location" context "checkbox label" %}</label>
                     <div class="controls">
                         <input type="checkbox" id="settings-capabilities-location" {%if 'location' in project.app_capabilities%}checked{%endif%}>
                     </div>
                 </div>
                 <div class="control-group">
-                    <label class="control-label" for="settings-capabilities-configuration">Configurable</label>
+                    <label class="control-label" for="settings-capabilities-configuration">{% trans "Configurable" context "checkbox label" %}</label>
                     <div class="controls">
                         <input type="checkbox" id="settings-capabilities-configuration" {%if 'configurable' in project.app_capabilities%}checked{%endif%}>
                     </div>
@@ -142,9 +143,9 @@
             </div>
         </div>
         <div class="well form-actions">
-            <button id="project-save" class="btn btn-affirmative">Save changes</button>
-            <button id="project-export-zip" class="btn">Download as zip</button>
-            <button id="project-delete" class="btn btn-danger">Delete Project</button>
+            <button id="project-save" class="btn btn-affirmative">{% trans "Save changes" %}</button>
+            <button id="project-export-zip" class="btn">{% trans "Download as zip" %}</button>
+            <button id="project-delete" class="btn btn-danger">{% trans "Delete Project" %}</button>
         </div>
     </form>
 </div>

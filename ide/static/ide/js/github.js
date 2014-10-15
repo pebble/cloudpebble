@@ -5,7 +5,7 @@ CloudPebble.GitHub = (function() {
         var prompt = $('#github-new-repo-prompt').modal();
         var repo_name = new_repo.match(/^(?:https?:\/\/|git@|git:\/\/)?(?:www\.)?github\.com[\/:]([\w.-]+)\/([\w.-]+?)(?:\.git|\/|$)/)[2];
         prompt.find('#github-new-repo').val(repo_name);
-        prompt.find('.alert').removeClass('alert-error').addClass('alert-warning').text("That repo does not exist. Would you like to create it?");
+        prompt.find('.alert').removeClass('alert-error').addClass('alert-warning').text(gettext("That repo does not exist. Would you like to create it?"));
     };
 
     var show_github_pane = function() {
@@ -62,7 +62,7 @@ CloudPebble.GitHub = (function() {
                         return;
                     }
                     if(data.updated) {
-                        show_alert('success', "Updated repo.");
+                        show_alert('success', gettext("Updated repo."));
                         CloudPebble.ProjectInfo.github.repo = new_repo;
                         CloudPebble.ProjectInfo.github.branch = repo_branch;
                         CloudPebble.ProjectInfo.github.auto_pull = auto_pull;
@@ -76,7 +76,7 @@ CloudPebble.GitHub = (function() {
                     }
                     if(!data.access) {
                         disable_needy();
-                        show_alert('error', "You don't have access to that repository.");
+                        show_alert('error', gettext("You don't have access to that repository."));
                         return;
                     }
                 });
@@ -105,7 +105,7 @@ CloudPebble.GitHub = (function() {
             e.preventDefault();
             var new_repo = $('#github-new-repo').val();
             if(new_repo.replace(/\s/g, '') === '') {
-                prompt.find('.alert').removeClass('alert-warning').addClass('alert-error').text("You must provide a repo URL.");
+                prompt.find('.alert').removeClass('alert-warning').addClass('alert-error').text(gettext("You must provide a repo URL."));
             }
             var description = $('#github-repo-description').val();
             prompt.find('input, button').attr('disabled', 'disabled');
@@ -168,17 +168,17 @@ CloudPebble.GitHub = (function() {
                         var prompt = $('#github-pull-prompt').modal('hide');
                         if(state.status == 'SUCCESS') {
                             if(state.result) {
-                                show_alert('success', "Pulled successfully.");
-                                alert("Pull completed successfully.");
+                                show_alert('success', gettext("Pulled successfully."));
+                                alert(gettext("Pull completed successfully."));
                                 // *NASTY HACK: Make sure it doesn't think we have unsaved files, thereby
                                 // preventing page reload.
                                 CloudPebble.Editor.GetUnsavedFiles = function() { return 0; };
                                 window.location.reload(true);
                             } else {
-                                show_alert('success', "Pull completed: Nothing to pull.");
+                                show_alert('success', gettext("Pull completed: Nothing to pull."));
                             }
                         } else {
-                            show_alert('error', 'Error: ' + state.result);
+                            show_alert('error', interpolate(gettext('Error: %s'), [state.result]));
                         }
                     } else {
                         setTimeout(function() { poll_pull_status(task_id); }, 1000);
@@ -192,7 +192,7 @@ CloudPebble.GitHub = (function() {
             var commit_summary = $('#github-commit-summary').val();
             var commit_description = $('#github-commit-description').val();
             if(commit_summary.replace(/\s/g, '') === '') {
-                $('#github-commit-prompt form').find('.alert').addClass('alert-error').removeClass('hide').text("You must provide a commit summary.");
+                $('#github-commit-prompt form').find('.alert').addClass('alert-error').removeClass('hide').text(gettext("You must provide a commit summary."));
                 return;
             }
             var commit_message = commit_summary;
@@ -223,7 +223,7 @@ CloudPebble.GitHub = (function() {
             $.post('/ide/project/' + PROJECT_ID + '/github/pull', function(data) {
                 if(!data.success) {
                     enable_all();
-                    show_alert('error', "Pull failed: " + data.error);
+                    show_alert('error', interpolate(gettext("Pull failed: %s"), [data.error]));
                     return;
                 }
                 var task = data.task_id;
@@ -240,7 +240,7 @@ CloudPebble.GitHub = (function() {
             github_template = $('#github-template').remove().removeClass('hide');
             if(!USER_SETTINGS.github) {
                 $('#sidebar-pane-github').addClass('disabled');
-                CloudPebble.Sidebar.SetPopover('github', '', 'GitHub integration can be enabled in your user settings by linking a GitHub account.')
+                CloudPebble.Sidebar.SetPopover('github', '', gettext('GitHub integration can be enabled in your user settings by linking a GitHub account.'))
             }
         },
         Show: function() {

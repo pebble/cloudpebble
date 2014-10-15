@@ -5,6 +5,7 @@ from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST, require_safe
+from django.utils.translation import ugettext as _
 from ide.api import json_failure, json_response
 from ide.models.project import Project
 from ide.models.files import SourceFile
@@ -88,7 +89,7 @@ def save_source_file(request, project_id, file_id):
                     'kind': 'source'
                 }
             }, project=project, request=request)
-            raise Exception("Could not save: file has been modified since last save.")
+            raise Exception(_("Could not save: file has been modified since last save."))
         source_file.save_file(request.POST['content'])
 
 

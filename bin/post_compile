@@ -33,4 +33,8 @@ echo "Performing database migration."
 python manage.py syncdb
 python manage.py migrate
 
+echo "Compiling gettext files"
+export PATH="/app/gettext/bin:$PATH"
+python manage.py compilemessages
+
 echo "Post-compile complete."

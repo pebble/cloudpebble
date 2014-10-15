@@ -2,9 +2,9 @@ CloudPebble.Compile = (function() {
     var MINIMUM_INSTALL_VERSION = "v2.6";
 
     var COMPILE_SUCCESS_STATES = {
-        1: {english: "Pending", cls: "info", label: 'info'},
-        2: {english: "Failed", cls: "error", label: 'error'},
-        3: {english: "Succeeded", cls: "success", label: 'success'}
+        1: {english: gettext("Pending"), cls: "info", label: 'info'},
+        2: {english: gettext("Failed"), cls: "error", label: 'error'},
+        3: {english: gettext("Succeeded"), cls: "success", label: 'success'}
     };
 
     var mPendingCallbacks = [];
@@ -16,11 +16,11 @@ CloudPebble.Compile = (function() {
         tr.append($('<td class="build-date">' + CloudPebble.Utils.FormatDatetime(build.started) + '</td>'));
         tr.append($('<td class="build-state">' + COMPILE_SUCCESS_STATES[build.state].english + '</td>'));
         tr.append($('<td class="build-size">' + (build.size.total !== null ? Math.round(build.size.total / 1024) + ' KiB' : '') + '</td>'));
-        tr.append($('<td class="build-pbw">' + (build.state == 3 ? ('<a href="'+build.pbw+'" class="btn btn-small">pbw</a>') : ' ') + '</td>'));
+        tr.append($('<td class="build-pbw">' + (build.state == 3 ? ('<a href="'+build.pbw+'" class="btn btn-small">' + gettext("pbw") + '</a>') : ' ') + '</td>'));
         // Build log thingy.
         var td = $('<td class="build-log">');
         if(build.state > 1) {
-            var a = $('<a href="'+build.log+'" class="btn btn-small">build log</a>').click(function(e) {
+            var a = $('<a href="'+build.log+'" class="btn btn-small">' + gettext("build log") + '</a>').click(function(e) {
                 if(e.ctrlKey || e.metaKey) {
                     ga('send', 'event', 'build log', 'show', 'external');
                     return true;
@@ -39,7 +39,7 @@ CloudPebble.Compile = (function() {
     var show_build_log = function(build) {
         $.getJSON('/ide/project/' + PROJECT_ID + '/build/' + build + '/log', function(data) {
             if(!data.success) {
-                alert("Something went wrong:\n\n" + data.error);
+                alert(interpolate(gettext("Something went wrong:\n\n%s"), [data.error]));
                 return;
             }
             CloudPebble.Sidebar.SuspendActive();
@@ -278,30 +278,36 @@ CloudPebble.Compile = (function() {
                     pane.find("#run-on-phone").removeClass('hide');
                     if(build.size.total !== null) {
                         var s = pane.find('#last-compilation-size').removeClass('hide');
-                        s.find('.total').text(Math.round(build.size.total / 1024));
-                        s.find('.res').text(Math.round(build.size.resources / 1024)).removeClass('text-error text-warning');
-                        s.find('.bin').text(Math.round(build.size.binary / 1024)).removeClass('text-error');
-                        if(build.size.worker) {
-                            s.find('.worker').show().find('span').text(Math.round(build.size.worker / 1024));
+                        var sfmt;
+                        if(!build.size.worker) {
+                            sfmt = gettext("%(total)s KiB (%(resources)s KiB resources, %(appbin)s KiB binary)");
                         } else {
-                            s.find('.worker').hide();
+                            sfmt = gettext("%(total)s KiB (%(resources)s KiB resources, %(appbin)s KiB binary, %(workerbin)s KiB worker)")
                         }
-                        if(build.size.resources > 65536) {
-                            if(build.size.resources > 98304)
-                                s.find('.res').addClass('text-error');
-                            else
-                                s.find('.res').addClass('text-warning');
-                        }
-                        if(build.size.binary > 24576) {
-                            s.find('.bin').addClass('text-error');
-                        }
+                        var stext = interpolate(sfmt, {
+                            total: Math.round(build.size.total / 1024),
+                            resources: Math.round(build.size.resources / 1024),
+                            appbin: Math.round(build.size.binary / 1024),
+                            workerbin: Math.round(build.size.worker / 1024)
+                        }, true);
+                        s.find('.text').text(stext);
+
+                        var memfmt = gettext("%(free)s / %(max)s bytes (%(percent)s%)");
+
                         var m = pane.find('#last-compilation-app-memory').removeClass('hide');
-                        m.find('.free-bytes').text(24576 - build.size.binary);
-                        m.find('.free-pct').text(Math.round((24576 - build.size.binary) / 245.76));
+                        m.find('.text').text(interpolate(memfmt, {
+                            free: 24576 - build.size.binary,
+                            max: 24576,
+                            percent: Math.round((24576 - build.size.binary) / 245.76)
+                        }, true));
+
                         if(build.size.worker) {
-                            var m = pane.find('#last-compilation-worker-memory').removeClass('hide');
-                            m.find('.free-bytes').text(12800 - build.size.binary);
-                            m.find('.free-pct').text(Math.round((12800 - build.size.binary) / 128.00));
+                            m = pane.find('#last-compilation-worker-memory').removeClass('hide');
+                            m.find('.text').text(interpolate(memfmt, {
+                                free: 12800 - build.size.worker,
+                                max: 12800,
+                                percent: Math.round((12800 - build.size.worker) / 128.00)
+                            }, true));
                         } else {
                             pane.find('#last-compilation-worker-memory').addClass('hide')
                         }
@@ -399,13 +405,13 @@ CloudPebble.Compile = (function() {
 
     var handle_crash = function(process, is_our_crash, pc, lr) {
         if(!is_our_crash) {
-            append_log_html("<span class='log-warning'>Different app crashed. Only the active app has debugging information available.</span>");
+            append_log_html("<span class='log-warning'>" + gettext("Different app crashed. Only the active app has debugging information available.") + "</span>");
             return;
         }
         mPebble.request_version();
         mPebble.on('version', function(pebble_version) {
             mPebble.off('version');
-            append_log_html($("<span class='log-verbose'>Looking up debug information...</span>"));
+            append_log_html($("<span class='log-verbose'>" + gettext("Looking up debug information...") + "</span>"));
             mCrashAnalyser.find_source_lines(process, pebble_version, [pc, lr], function(results) {
                 var pc_result = results[0];
                 var lr_result = results[1];
@@ -438,17 +444,17 @@ CloudPebble.Compile = (function() {
                     }
                 });
                 if(pc_result === null) {
-                    append_log_html("<span class='log-error'>Crashed inside firmware call.</span>");
+                    append_log_html("<span class='log-error'>" + gettext("Crashed inside firmware call.") + "</span>");
                 } else {
-                    append_log_html($("<span class='log-error'>")
-                        .text("Crashed at " + pc_result.file + ":" + pc_result.line + ", in " +
-                            pc_result.fn_name + " (starts at " + pc_result.file + ":" + pc_result.fn_line + ")."));
+                    var fmt = gettext("Crashed at %(file)s:%(line)s, in %(fn_name)s (starts at %(file)s:%(fn_line)s).");
+                    append_log_html($("<span class='log-error'>"))
+                        .text(interpolate(fmt, pc_result, true));
                 }
                 if(lr_result !== null) {
                     if(pc_result === null || (lr_result.fn_name !== pc_result.fn_name)) {
-                        append_log_html($("<span class='log-error'>")
-                            .text("Which was called from " + lr_result.file + ":" + lr_result.line + ", in " +
-                                lr_result.fn_name + " (starts at " + lr_result.file + ":" + lr_result.fn_line + ")."));
+                        fmt = gettext("Which was called from %(file)s:%(line)s, in %(fn_name)s (starts at %(file)s:%(fn_line)s).");
+                        append_log_html($("<span class='log-error'>"))
+                            .text(interpolate(fmt, lr_result, true));
                     }
                 }
             });
@@ -465,12 +471,12 @@ CloudPebble.Compile = (function() {
     };
 
     var get_log_label = function(priority) {
-        if(priority == -1) return '[PHONE]';
-        if(priority < 25) return '[ERROR]';
-        if(priority < 75) return '[WARNING]';
-        if(priority < 150) return '[INFO]';
-        if(priority < 225) return '[DEBUG]';
-        return '[VERBOSE]';
+        if(priority == -1) return gettext('[PHONE]');
+        if(priority < 25) return gettext('[ERROR]');
+        if(priority < 75) return gettext('[WARNING]');
+        if(priority < 150) return gettext('[INFO]');
+        if(priority < 225) return gettext('[DEBUG]');
+        return gettext('[VERBOSE]');
     };
 
     var install_on_watch = function() {

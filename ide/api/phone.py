@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.utils import simplejson as json, simplejson
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_safe, require_POST
+from django.utils.translation import ugettext as _
+
 import requests
 from ide.api import json_failure, json_response
 from utils.redis_helper import redis_client
@@ -39,7 +41,7 @@ def ping_phone(request):
         params={
             'admin_token': settings.PEBBLE_AUTH_ADMIN_TOKEN,
             # 'silent': True,
-            'message': "Tap to enable developer mode and install apps from CloudPebble.",
+            'message': _("Tap to enable developer mode and install apps from CloudPebble."),
             'custom': json.dumps({
                 'action': 'sdk_connect',
                 'token': check_token,

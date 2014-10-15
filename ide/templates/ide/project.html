@@ -1,5 +1,6 @@
 {% extends "common/base.html" %}
 {% load staticfiles %}
+{% load i18n %}
 
 {% block title %}CloudPebble – {{ project.name }}{% endblock %}
 
@@ -29,9 +30,9 @@
         </h1>
         <div class="header-right">
             <ul class="nav-pills">
-                <li><a href="{% url 'ide:index' %}" class="btn">Projects</a></li>
-                <li><a href="{% url 'ide:settings' %}" class="btn">Settings</a></li>
-                <li><a href="{% url 'logout' %}" class="btn">Sign out</a></li>
+                <li><a href="{% url 'ide:index' %}" class="btn">{% trans 'Projects' %}</a></li>
+                <li><a href="{% url 'ide:settings' %}" class="btn">{% trans 'Settings' %}</a></li>
+                <li><a href="{% url 'logout' %}" class="btn">{% trans 'Sign out' %}</a></li>
             </ul>
         </div>
 {#    </div>#}
@@ -42,14 +43,15 @@
             <div>
                 <ul class="nav-list" id="sidebar">
                     <li class="nav-header project-name">{{ project.name }}</li>
-                    <li class="nav-header" id="sidebar-pane-settings"><a href="#">Settings</a></li>
-                    <li class="nav-header" id="sidebar-pane-compile"><a href="#">Compilation</a></li>
+                    <li class="nav-header" id="sidebar-pane-settings"><a href="#">{% trans 'Settings' %}</a></li>
+                    <li class="nav-header" id="sidebar-pane-compile"><a href="#">{% trans 'Compilation' %}</a></li>
                     <li id="sidebar-pane-github" class="nav-header {%if not project.owner.github%}disabled{%endif%}"><a href="#">GitHub</a></li>
-                    <li class="nav-header nav-section" id="source-files"><span>Source files</span> <button class="btn btn-small" id="new-source-file">Add new</button></li>
+                    <li class="nav-header nav-section" id="source-files"><span>{% trans 'Source files' %}</span>
+                        <button class="btn btn-small" id="new-source-file">{% trans 'Add new' %}</button></li>
                     <li class="not-simplyjs" id="end-source-files"></li>
-                    <li class="hide native-only nav-header nav-section" id="worker-files">Worker source</li>
+                    <li class="hide native-only nav-header nav-section" id="worker-files">{% trans 'Worker source' %}</li>
                     <li class="hide nav-section" id="end-worker-files"></li>
-                    <li class="nav-header nav-section not-simplyjs">Resources <button class="btn btn-small" id="sidebar-pane-new-resource">Add new</button></li>
+                    <li class="nav-header nav-section not-simplyjs">{% trans 'Resources' %} <button class="btn btn-small" id="sidebar-pane-new-resource">{% trans 'Add new' %}</button></li>
                     <li class="hide not-simplyjs" id="end-resources"></li>
                 </ul>
             </div>
@@ -73,16 +75,30 @@
 </div>
 <div class="footer">
         <p class="small-print">
-            Please submit bug reports and feature requests on <a href="https://github.com/pebble/cloudpebble">GitHub</a>.
+            {% get_current_language as lang %}
+            {% if lang == 'en' %}
+            Please submit feature requests on <a href='https://github.com/pebble/cloudpebble'>Github</a>.
             Questions? Email us at <a href="mailto:cloudpebble@getpebble.com">cloudpebble@getpebble.com</a>.
+            {% endif %}
         </p>
         <div class="pebble-logo">
             <div class="hide footer-credits">
                 <span class="katharine-at">Katharine @</span>
                 <a href="http://pbldev.io" target="_blank"><img src="{% static 'root/images/pebble.png' %}"></a>
             </div>
-            <div class="prepare-autocomplete katharine-at">Preparing autocomplete…</div>
+            <div class="prepare-autocomplete katharine-at">{% trans 'Preparing autocomplete…' %}</div>
         </div>
+        <form action="/i18n/setlang/" method="post" id="lang-select-form" class="lang-select project-page">
+            {% csrf_token %}
+            <select name="language" onchange="$('#lang-select-form').submit();">
+                {% get_language_info_list for LANGUAGES as languages %}
+                {% for language in languages %}
+                <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected{% endif %}>
+                    {{ language.name_local }}
+                </option>
+                {% endfor %}
+            </select>
+        </form>
 </div>
 
 {% include "ide/project/resource.html" %}
@@ -97,40 +113,40 @@
 <div id="help-prompt-holder"></div>
 <div id="editor-new-file-prompt" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <h3>Create new file</h3>
+        <h3>{% trans 'Create new file' %}</h3>
     </div>
     <form class="form-horizontal">
         <div class="modal-body">
             <div class="alert alert-error hide"></div>
             <div class="control-group">
-                <label class="control-label" for="new-file-type">File type</label>
+                <label class="control-label" for="new-file-type">{% trans 'File type' %}</label>
                 <div class="controls">
                     <select id="new-file-type">
-                        <option value="c" selected>C file</option>
-                        <option value="js">JavaScript file</option>
-                        <option value="layout">Window Layout</option>
+                        <option value="c" selected>{% trans 'C file' %}</option>
+                        <option value="js">{% trans 'JavaScript file' %}</option>
+                        <option value="layout">{% trans 'Window Layout' %}</option>
                     </select>
                 </div>
             </div>
             <div class="c-file-options file-group">
                 <div class="control-group">
-                    <label class="control-label" for="new-c-file-name">Filename</label>
+                    <label class="control-label" for="new-c-file-name">{% trans 'Filename' %}</label>
                     <div class="controls">
                         <input type="text" id="new-c-file-name" pattern="[a-zA-Z0-9_-]+\.(c|h)$">
                     </div>
                 </div>
                 <div class="control-group">
-                    <label class="control-label" for="new-c-target">Target</label>
+                    <label class="control-label" for="new-c-target">{% trans 'Target' context "compilation target" %}</label>
                     <div class="controls">
                         <select id="new-c-target">
-                            <option value="app" selected>App / Watchface</option>
-                            <option value="worker">Background worker</option>
+                            <option value="app" selected>{% trans 'App / Watchface' %}</option>
+                            <option value="worker">{% trans 'Background worker' %}</option>
                         </select>
                         <img src="{% static 'ide/img/help.png' %}" class="field-help">
                     </div>
                 </div>
                 <div class="control-group">
-                    <label class="control-label" for="new-c-generate-h">Create header</label>
+                    <label class="control-label" for="new-c-generate-h">{% trans 'Create header' %}</label>
                     <div class="controls">
                         <input type="checkbox" id="new-c-generate-h">
                     </div>
@@ -138,7 +154,7 @@
             </div>
             <div class="js-file-options file-group hide">
                 <div class="control-group">
-                    <label class="control-label" for="new-js-file-name">Filename</label>
+                    <label class="control-label" for="new-js-file-name">{% trans 'Filename' %}</label>
                     <div class="controls">
                         <input type="text" id="new-js-file-name" pattern="[a-zA-Z0-9_-]+\.js$">
                     </div>
@@ -146,7 +162,7 @@
             </div>
             <div class="layout-file-options file-group hide">
                 <div class="control-group">
-                    <label class="control-label" for="new-window-name">Window name</label>
+                    <label class="control-label" for="new-window-name">{% trans 'Window name' %}</label>
                     <div class="controls">
                         <input type="text" id="new-window-name" pattern="^[a-z]([a-z0-9_]*[a-z0-9])?$">
                     </div>
@@ -155,8 +171,8 @@
         </div>
     </form>
     <div class="modal-footer">
-        <button class="btn" data-dismiss="modal">Cancel</button>
-        <button class="btn btn-primary" id="editor-create-file-button">Create</button>
+        <button class="btn" data-dismiss="modal">{% trans 'Cancel' %}</button>
+        <button class="btn btn-primary" id="editor-create-file-button">{% trans 'Create' %}</button>
     </div>
 </div>
 <!-- Create new repo prompt -->
@@ -166,9 +182,9 @@
     </div>
     <form class="form-horizontal" style="margin-bottom: 0px; padding-bottom: 0px;">
     <div class="modal-body">
-        <div class="alert alert-warning">That repo does not exist. Would you like to create it?</div>
+        <div class="alert alert-warning">{% trans 'That repo does not exist. Would you like to create it?' %}</div>
         <div class="control-group">
-            <label class="control-label" for="github-new-repo">Repo Name</label>
+            <label class="control-label" for="github-new-repo">{% trans 'Repo Name' %}</label>
             <div class="controls">
                 <div class="input-prepend">
                     <span class="add-on">{{ project.owner.github.username }}/</span>
@@ -177,34 +193,34 @@
             </div>
         </div>
         <div class="control-group">
-            <label class="control-label" for="github-repo-description">Description <span class="muted">(optional)</span></label>
+            <label class="control-label" for="github-repo-description">{% trans 'Description <span class="muted">(optional)</span>' %}</label>
             <div class="controls">
                 <input type="text" id="github-repo-description" class="span4">
             </div>
         </div>
     </div>
     <div class="modal-footer">
-        <button class="btn" data-dismiss="modal">Cancel</button>
-        <input type="submit" class="btn btn-primary" value="Create">
+        <button class="btn" data-dismiss="modal">{% trans 'Cancel' %}</button>
+        <input type="submit" class="btn btn-primary" value="{% trans 'Create' %}">
     </div>
     </form>
 </div>
 <!-- Commit prompt -->
 <div id="github-commit-prompt" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <h3>Push New Commit</h3>
+        <h3>{% trans 'Push New Commit' %}</h3>
     </div>
     <form class="form">
         <div class="modal-body">
             <div class="control-group">
                 <div class="alert hide"></div>
-                <label class="control-label" for="github-commit-summary">Commit Summary</label>
+                <label class="control-label" for="github-commit-summary">{% trans 'Commit Summary' %}</label>
                 <div class="controls">
-                    <input type="text" id="github-commit-summary" maxlength="50" placeholder="Fix something useful.">
+                    <input type="text" id="github-commit-summary" maxlength="50" placeholder="{% trans 'Fix something useful.' context "sample commit summary" %}">
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label" for="github-commit-description">Extended description <span class="muted">(optional)</span></label>
+                <label class="control-label" for="github-commit-description">{% trans 'Extended description <span class="muted">(optional)</span>' %}</label>
                 <div class="controls">
                     <textarea id="github-commit-description" rows="7"></textarea>
                 </div>
@@ -214,31 +230,31 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn" data-dismiss="modal">Cancel</button>
-            <input type="submit" class="btn btn-primary" value="Commit">
+            <button class="btn" data-dismiss="modal">{% trans 'Cancel' %}</button>
+            <input type="submit" class="btn btn-primary" value="{% trans 'Commit' %}">
         </div>
     </form>
 </div>
 <!-- Pull confirmation/progress -->
 <div id="github-pull-prompt" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <h3>Pull Latest Commit</h3>
+        <h3>{% trans 'Pull Latest Commit' %}</h3>
     </div>
     <div class="modal-body">
         <div class="dire-warning">
-            <p>Are you sure you want to pull the latest commit? Doing so will <em>overwrite</em> everything currently in your project.</p>
-            <p>There will be no further warnings and no opportunity to merge. This cannot be undone.</p>
+            {% blocktrans %}<p>Are you sure you want to pull the latest commit? Doing so will <em>overwrite</em> everything currently in your project.</p>
+<p>There will be no further warnings and no opportunity to merge. This cannot be undone.</p>{% endblocktrans %}
         </div>
         <div class="running hide">
-            <p>Pulling latest commit from GitHub…</p>
+            <p>{% trans 'Pulling latest commit from GitHub…' %}</p>
             <div class="progress progress-striped active">
                 <div class="bar" style="width: 100%;"></div>
             </div>
         </div>
     </div>
     <div class="modal-footer">
-        <button class="btn" data-dismiss="modal">Cancel</button>
-        <button class="btn btn-danger" id="github-pull-prompt-confirm">Pull</button>
+        <button class="btn" data-dismiss="modal">{% trans 'Cancel' %}</button>
+        <button class="btn btn-danger" id="github-pull-prompt-confirm">{% trans 'Pull' context "button label" %}</button>
     </div>
 </div>
 <!-- Phone waiting -->
@@ -266,32 +282,32 @@
 <!-- Phone install progress -->
 <div id="phone-install-progress" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <h3>Install App</h3>
+        <h3>{% trans 'Install App' %}</h3>
     </div>
     <div class="modal-body">
-        <p>Installing app on your watch…</p>
+        <p>{% trans 'Installing app on your watch…' %}</p>
         <div class="progress progress-striped active">
             <div class="bar" style="width: 100%;"></div>
         </div>
     </div>
     <div class="modal-footer">
-        <button data-dismiss="modal" class="btn hide dismiss-btn">Dismiss</button>
-        <button class="btn hide logs-btn btn-primary">View logs</button>
+        <button data-dismiss="modal" class="btn hide dismiss-btn">{% trans 'Dismiss' %}</button>
+        <button class="btn hide logs-btn btn-primary">{% trans 'View logs' context "button to look at logs" %}</button>
     </div>
 </div>
 <!-- Phone screenshot -->
 <div id="phone-screenshot-display" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <h3>Taking Screenshot</h3>
+        <h3>{% trans 'Taking Screenshot' %}</h3>
     </div>
     <div class="modal-body">
-        <p>Taking screenshot…</p>
+        <p>{% trans 'Taking screenshot…' %}</p>
         <div class="progress progress-striped active">
             <div class="bar" style="width: 0%;"></div>
         </div>
     </div>
     <div class="modal-footer">
-        <button data-dismiss="modal" class="btn hide dismiss-btn">Dismiss</button>
+        <button data-dismiss="modal" class="btn hide dismiss-btn">{% trans 'Dismiss' %}</button>
     </div>
 </div>
 <!-- Modal text prompt -->
@@ -311,8 +327,8 @@
         </form>
     </div>
     <div class="modal-footer">
-        <button class="btn" data-dismiss="modal">Cancel</button>
-        <button class="btn btn-primary" id="modal-text-confirm-button">Okay</button>
+        <button class="btn" data-dismiss="modal">{% trans 'Cancel' %}</button>
+        <button class="btn btn-primary" id="modal-text-confirm-button">{% trans 'Okay' %}</button>
     </div>
 </div>
 <!-- Modal boolean confirmation prompt -->
@@ -324,8 +340,8 @@
         <p id="modal-warning-prompt-warning">Modal warning</p>
     </div>
     <div class="modal-footer">
-        <button class="btn" data-dismiss="modal">Cancel</button>
-        <button class="btn btn-danger" id="modal-warning-prompt-button">Continue</button>
+        <button class="btn" data-dismiss="modal">{% trans 'Cancel' %}</button>
+        <button class="btn btn-danger" id="modal-warning-prompt-button">{% trans 'Continue' %}</button>
     </div>
 </div>
 <div id="export-progress" class="modal hide fade" tabindex="-1" role="dialog">
@@ -391,6 +407,7 @@ var LIBPEBBLE_
 <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.2.0/mode/javascript/javascript.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.2.0/keymap/emacs.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.2.0/keymap/vim.js"></script>
+<script src="/ide/jsi18n/"></script>
 <script src="{% static 'ide/js/csrf.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/cloudpebble.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/sidebar.js' %}" type="text/javascript"></script>

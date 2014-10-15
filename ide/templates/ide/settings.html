@@ -1,5 +1,6 @@
 {% extends "common/base-narrow.html" %}
 {% load staticfiles %}
+{% load i18n %}
 
 {% block head %}
     <link rel="stylesheet" type="text/css" href="{% static 'ide/css/settings.css' %}">
@@ -7,20 +8,20 @@
 
 {% block headercontent %}
 <ul class="nav-pills">
-    <li><a href="{% url 'ide:index' %}" class="btn">Projects</a></li>
-    <li><a class="active btn">Settings</a></li>
-    <li><a href="{% url 'logout' %}" class="btn">Sign out</a></li>
+    <li><a href="{% url 'ide:index' %}" class="btn">{% trans 'Projects' %}</a></li>
+    <li><a class="active btn">{% trans 'Settings' %}</a></li>
+    <li><a href="{% url 'logout' %}" class="btn">{% trans 'Sign out' %}</a></li>
 </ul>
 {% endblock %}
 
 {% block narrowcontent %}
 <div class="settings-container">
     <div class="editor-settings">
-        <h2 class="section-heading">Editor settings</h2>
+        <h2 class="section-heading">{% trans 'Editor settings' %}</h2>
         <div class="well">
             <form method="post" class="form-horizontal">
                 {% if saved %}
-                    <div class="alert alert-success">Settings saved!</div>
+                    <div class="alert alert-success">{% trans 'Settings saved!' %}</div>
                 {% endif %}
                 {%csrf_token%}
                 {% for hidden in form.hidden_fields %}
@@ -36,27 +37,27 @@
                 </div>
                 {% endfor %}
                 <div class="form-actions">
-                    <input type="submit" class="btn btn-primary" value="Submit">
-                    <input type="reset" class="btn" value="Reset">
+                    <input type="submit" class="btn btn-primary" value="{% trans 'Submit' %}">
+                    <input type="reset" class="btn" value="{% trans 'Reset' %}">
                 </div>
             </form>
         </div>
     </div>
     <div class="github-settings">
-        <h2 class="section-heading">GitHub Integration</h2>
+        <h2 class="section-heading">{% trans 'GitHub Integration' %}</h2>
         <div class="well">
             <form action="{% url 'ide:remove_github_auth' %}" method="post" id="unlink-form">{%csrf_token%}</form>
             {% if github and github.token %}
             <img src="{{ github.avatar }}" class="github-avatar">
             <h2 class="github-username">{{ github.username }}</h2>
             <div class="github-options">
-                <p><a href="{% url 'ide:start_github_auth' %}" class="btn btn-primary">Re-authenticate</a></p>
-                <p><a href="{% url 'ide:remove_github_auth' %}" class="btn btn-primary">Unlink account</a></p>
+                <p><a href="{% url 'ide:start_github_auth' %}" class="btn btn-primary">{% trans 'Re-authenticate' %}</a></p>
+                <p><a href="{% url 'ide:remove_github_auth' %}" class="btn btn-primary">{% trans 'Unlink account' %}</a></p>
                 {% else %}
-                <p><a href="{% url 'ide:start_github_auth' %}" class="btn btn-primary">Link your GitHub account</a></p>
+                <p><a href="{% url 'ide:start_github_auth' %}" class="btn btn-primary">{% trans 'Link your GitHub account' %}</a></p>
                 {% endif %}
                 <hr>
-                <p>Connecting your GitHub account enables you to connect your projects to GitHub repositories.</p>
+                <p>{% trans 'Connecting your GitHub account enables you to connect your projects to GitHub repositories.' %}</p>
             </div>
         </div>
     </div>

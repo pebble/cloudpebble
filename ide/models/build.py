@@ -6,6 +6,7 @@ import os.path
 from django.conf import settings
 from django.db import models
 from ide.models.project import Project
+from django.utils.translation import ugettext as _
 
 from ide.models.meta import IdeModel
 
@@ -19,9 +20,9 @@ class BuildResult(IdeModel):
     STATE_FAILED = 2
     STATE_SUCCEEDED = 3
     STATE_CHOICES = (
-        (STATE_WAITING, 'Pending'),
-        (STATE_FAILED, 'Failed'),
-        (STATE_SUCCEEDED, 'Succeeded')
+        (STATE_WAITING, _('Pending')),
+        (STATE_FAILED, _('Failed')),
+        (STATE_SUCCEEDED, _('Succeeded'))
     )
 
     project = models.ForeignKey(Project, related_name='builds')

@@ -3,6 +3,7 @@ import uuid
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils.translation import ugettext as _
 
 from ide.models.files import ResourceFile, ResourceIdentifier, SourceFile
 from ide.utils import generate_half_uuid
@@ -17,9 +18,9 @@ class Project(IdeModel):
     last_modified = models.DateTimeField(auto_now_add=True)
 
     PROJECT_TYPES = (
-        ('native', 'Pebble C SDK'),
-        ('simplyjs', 'Simply.js'),
-        ('pebblejs', 'Pebble.js (beta)'),
+        ('native', _('Pebble C SDK')),
+        ('simplyjs', _('Simply.js')),
+        ('pebblejs', _('Pebble.js (beta)')),
     )
     project_type = models.CharField(max_length=10, choices=PROJECT_TYPES, default='native')
 
@@ -79,9 +80,9 @@ class TemplateProject(Project):
     KIND_SDK_DEMO = 2
     KIND_EXAMPLE = 3
     KIND_CHOICES = (
-        (KIND_TEMPLATE, 'Template'),
-        (KIND_SDK_DEMO, 'SDK Demo'),
-        (KIND_EXAMPLE, 'Example')
+        (KIND_TEMPLATE, _('Template')),
+        (KIND_SDK_DEMO, _('SDK Demo')),
+        (KIND_EXAMPLE, _('Example')),
     )
 
     template_kind = models.IntegerField(choices=KIND_CHOICES, db_index=True)

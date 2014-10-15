@@ -597,3 +597,23 @@ select:invalid {
     margin-left: 12px;
     margin-bottom: 20px;
 }
+
+.lang-select {
+    float: right;
+    padding-top: 20px;
+    padding-right: 20px;
+}
+
+.lang-select select {
+    width: 150px;
+    text-transform: capitalize;
+}
+
+.project-page.lang-select  {
+    padding-top: 11px;
+}
+
+.project-page.lang-select select {
+    height: 30px;
+    padding-top: 2px;
+}
