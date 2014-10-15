@@ -514,6 +514,7 @@ table.build-results tr.pending .build-state {
 
 .resource-actions .btn {
     margin-right: 20px;
+    width: 188px;
 }
 
 /* UI Editor pane */

@@ -473,7 +473,7 @@ msgstr "Une ressource nommée \"%(name)s\" existe déjà dans ce projet."
 
 #: ide/static/ide/js/resources.js:63
 msgid "You must upload a PNG image."
-msgstr "Vous devez uploader une image .PNG\n"
+msgstr "Vous devez uploader une image .PNG"
 
 #: ide/static/ide/js/resources.js:67
 msgid "You must upload a TrueType Font (.ttf)"

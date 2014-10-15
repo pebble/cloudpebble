@@ -68,6 +68,8 @@ LANGUAGE_CODE = 'en-gb'
 LANGUAGES = (
     ('en', 'English'),
     ('es', 'Spanish'),
+    ('fr', 'French'),
+    ('de', 'German'),
 )
 
 LOCALE_PATHS = (os.getcwd() + "/locale",)
