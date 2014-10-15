@@ -76,8 +76,8 @@
 <div class="footer">
         <p class="small-print">
             {% get_current_language as lang %}
-            {% if lang == 'en-gb' %}
-            Please submit bug reports and feature requests on <a href='https://github.com/pebble/cloudpebble'>Github</a>.
+            {% if lang == 'en' %}
+            Please submit feature requests on <a href='https://github.com/pebble/cloudpebble'>Github</a>.
             Questions? Email us at <a href="mailto:cloudpebble@getpebble.com">cloudpebble@getpebble.com</a>.
             {% endif %}
         </p>
@@ -88,6 +88,17 @@
             </div>
             <div class="prepare-autocomplete katharine-at">{% trans 'Preparing autocomplete…' %}</div>
         </div>
+        <form action="/i18n/setlang/" method="post" id="lang-select-form" class="lang-select project-page">
+            {% csrf_token %}
+            <select name="language" onchange="$('#lang-select-form').submit();">
+                {% get_language_info_list for LANGUAGES as languages %}
+                {% for language in languages %}
+                <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected{% endif %}>
+                    {{ language.name_local }}
+                </option>
+                {% endfor %}
+            </select>
+        </form>
 </div>
 
 {% include "ide/project/resource.html" %}

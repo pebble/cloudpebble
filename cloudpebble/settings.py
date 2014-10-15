@@ -1,3 +1,4 @@
+# encoding: utf-8
 # Django settings for cloudpebble project.
 
 import os
@@ -36,6 +37,7 @@ else:
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__)) + '/../'
 
+LANGUAGE_COOKIE_NAME = 'cloudpebble_language'
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.auth.context_processors.auth",
@@ -65,6 +67,7 @@ LANGUAGE_CODE = 'en-gb'
 
 LANGUAGES = (
     ('en', 'English'),
+    ('es', 'Spanish'),
 )
 
 LOCALE_PATHS = (os.getcwd() + "/locale",)
