@@ -20,7 +20,7 @@ CloudPebble.Compile = (function() {
         // Build log thingy.
         var td = $('<td class="build-log">');
         if(build.state > 1) {
-            var a = $('<a href="'+build.log+'" class="btn btn-small">' + gettext("build log") + '</a>').click(function(e) {
+            var a = $('<a href="'+build.log+'" class="btn btn-small">' + gettext("Build log") + '</a>').click(function(e) {
                 if(e.ctrlKey || e.metaKey) {
                     ga('send', 'event', 'build log', 'show', 'external');
                     return true;
@@ -83,7 +83,7 @@ CloudPebble.Compile = (function() {
             CloudPebble.ProgressBar.Hide();
             pane.removeClass('hide');
             if(!data.success) {
-                alert("Something went wrong:\n" + data.error); // This should be prettier.
+                alert(interpolate(gettext("Something went wrong:\n%s"), [data.error])); // This should be prettier.
                 CloudPebble.Sidebar.DestroyActive();
                 return;
             }
@@ -123,44 +123,9 @@ CloudPebble.Compile = (function() {
             e.preventDefault();
             take_screenshot();
         });
-        pane.find('#show-legacy-link').click(function(e) {
-            e.preventDefault();
-            show_legacy_ip_input();
-        });
-        pane.find('#show-phone-list-link').click(function(e) {
-            e.preventDefault();
-            show_phone_picker();
-        });
-        update_phone_list();
         mCrashAnalyser = new CloudPebble.CrashChecker(CloudPebble.ProjectInfo.app_uuid);
         pane.find('#compilation-run-build-button').click(function() { run_build(); });
-
-
-        if(localStorage['cp-last-phone-ip']) {
-            pane.find('#phone-ip').val(localStorage['cp-last-phone-ip']);
-        }
-
-        pane.find('#phone').change(function() {
-            var selected = $(this).val();
-            console.log(selected);
-            if(_.has(mKnownPhones, selected)) {
-                mSelectedPhoneID = selected;
-                localStorage['cp-last-picked-phone'] = mSelectedPhoneID;
-            }
-        });
     };
-
-    var show_phone_picker = function() {
-        pane.find('.phone-listing').show();
-        pane.find('.legacy-ip').hide();
-        mUsingLegacyIP = false;
-    };
-
-    var show_legacy_ip_input = function() {
-        pane.find('.legacy-ip').show();
-        pane.find('.phone-listing').hide();
-        mUsingLegacyIP = true;
-    }
 
     var m_build_count = 0;
     var show_compile_pane = function() {
@@ -173,72 +138,6 @@ CloudPebble.Compile = (function() {
         CloudPebble.Sidebar.SetActivePane(pane, 'compile');
         CloudPebble.ProgressBar.Show();
     };
-
-    var update_phone_list = function() {
-        $.getJSON("/ide/list_phones", function(data) {
-            if(data.success) {
-                pane.find('#phone').empty();
-                var usable_devices = [];
-                _.each(data.devices, function(device) {
-                    if(!device_is_usable(device)) return;
-                    usable_devices.push(device);
-                    mKnownPhones[device.id] = device;
-                    pane.find('#phone')
-                        .append($('<option>')
-                            .attr('value', device.id)
-                            .text(device_name(device)));
-                });
-                if(usable_devices.length > 0) {
-                    var last_phone = localStorage['cp-last-picked-phone'];
-                    if(last_phone && _.has(mKnownPhones, last_phone)) {
-                        mSelectedPhoneID = last_phone;
-                        pane.find('#phone').val(last_phone);
-                    } else if(usable_devices.length == 1) {
-                        mSelectedPhoneID = usable_devices[0].id;
-                        pane.find('#phone').val(mSelectedPhoneID);
-                    }
-                } else {
-                    show_legacy_ip_input();
-                }
-            }
-        })
-    };
-
-    var device_is_usable = function(device) {
-        if(!device.push_enabled) {
-            return false;
-        }
-        if(device.type == 'ios') {
-            if(device.app_version) { // if version is not null, it's good enough for us.
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            // Nothing other than iOS works.
-            return false;
-        }
-        // Or: return !!(device.type == 'ios' && device.version) - but that's less clear.
-    };
-
-    var device_name = function(device) {
-        var platform_names = {
-            'ios': 'iOS device',
-            'android': 'Android device'
-        };
-        var name = device.name || (platform_names[device.type] + ' ' + device.id.substring(20));
-        if(device.type == 'ios') {
-            if(device.environment != 'appstore-production') {
-                environments = {
-                    'appstore-development': 'internal dev',
-                    'enterprise-production': 'beta',
-                    'enterprise-development': 'alpha?'
-                };
-                name += ' (' + environments[device.environment] + ')';
-            }
-        }
-        return name;
-    }
 
     var run_build = function(callback) {
         var temp_build = {started: (new Date()).toISOString(), finished: null, state: 1, uuid: null, id: null, size: {total: null, binary: null, resources: null}};
@@ -282,7 +181,7 @@ CloudPebble.Compile = (function() {
                         if(!build.size.worker) {
                             sfmt = gettext("%(total)s KiB (%(resources)s KiB resources, %(appbin)s KiB binary)");
                         } else {
-                            sfmt = gettext("%(total)s KiB (%(resources)s KiB resources, %(appbin)s KiB binary, %(workerbin)s KiB worker)")
+                            sfmt = gettext("%(total)s KiB (%(resources)s KiB resources, %(appbin)s KiB binary, %(workerbin)s KiB worker)");
                         }
                         var stext = interpolate(sfmt, {
                             total: Math.round(build.size.total / 1024),
@@ -338,17 +237,43 @@ CloudPebble.Compile = (function() {
     var mPebble = null;
     var mLogHolder = null;
     var mCrashAnalyser = null;
-    var mUsingLegacyIP = false;
-    var mPhoneIPs = {};
-    var mKnownPhones = {};
-    var mSelectedPhoneID = null;
 
-    var pebble_connect = function(ip) {
-        if(mPebble) return mPebble;
-        mPebble = new Pebble(ip);
+    var pebble_connect = function(callback) {
+        if(mPebble) {
+            callback(mPebble);
+            return;
+        }
+        var did_connect = false;
+        CloudPebble.Prompts.Progress.Show(gettext("Connecting..."), gettext("Establishing connection..."), function() {
+            if(!did_connect && mPebble) {
+                mPebble.off();
+                mPebble.close();
+                mPebble = null;
+            }
+        });
+        mPebble = new Pebble(USER_SETTINGS.token);
         mPebble.on('app_log', handle_app_log);
         mPebble.on('phone_log', handle_phone_log);
-        return mPebble;
+        mPebble.on('proxy:authenticating', function() {
+            CloudPebble.Prompts.Progress.Update(gettext("Authenticating..."));
+        });
+        mPebble.on('proxy:waiting', function() {
+            CloudPebble.Prompts.Progress.Update(gettext("Waiting for phone. Make sure the development server is enabled."));
+        });
+        var connection_error = function() {
+            mPebble.off();
+            CloudPebble.Prompts.Progress.Fail();
+            CloudPebble.Prompts.Progress.Update(gettext("Connection interrupted."));
+            mPebble = null;
+        };
+        mPebble.on('close error', connection_error);
+        mPebble.on('open', function() {
+            did_connect = true;
+            mPebble.off(null, connection_error);
+            mPebble.off('proxy:authenticating proxy:waiting');
+            CloudPebble.Prompts.Progress.Hide();
+            callback(mPebble);
+        });
     };
 
     var handle_app_log = function(priority, filename, line_number, message) {
@@ -480,79 +405,69 @@ CloudPebble.Compile = (function() {
     };
 
     var install_on_watch = function() {
-        get_phone_ip(function(ip) {
-            var modal = $('#phone-install-progress').modal();
-            modal.find('.modal-body > p').text("Installing app on your watch…");
-            modal.find('.btn').addClass('hide');
-            modal.find('.progress').removeClass('progress-danger progress-success').addClass('progress-striped');
-            modal.off('hide');
+        var modal = $('#phone-install-progress');
 
-            var report_error = function(message) {
-                modal.find('.modal-body > p').html(message);
-                modal.find('.dismiss-btn').removeClass('hide');
-                modal.find('.progress').addClass('progress-danger').removeClass('progress-striped');
-            };
+        var report_error = function(message) {
+            modal.find('.modal-body > p').html(message);
+            modal.find('.dismiss-btn').removeClass('hide');
+            modal.find('.progress').addClass('progress-danger').removeClass('progress-striped');
+        };
 
-            if(ip == '') {
-                report_error("You must specify your phone's IP to install to your watch.");
-                return;
-            }
-
-            try {
-                mPebble = pebble_connect(ip);
-            } catch(e) {
-                report_error("Failed to create socket.");
-            }
-
-            mPebble.on('open', function() {
-                mPebble.once('version', function(version_info) {
-                    var version_string = version_info.running.version;
-                    console.log(version_string);
-                    // Make sure that we have the required version - but also assume that anyone who has the string 'test'
-                    // in their firmware version number (e.g. me) knows what they're doing.
-                    if(/test/.test(version_string) || compare_version_strings(version_string, MINIMUM_INSTALL_VERSION) >= 0) {
-                        mPebble.install_app(pane.find('#last-compilation-pbw').attr('href'));
-                    } else {
-                        mPebble.close();
-                        mPebble = null;
-                        report_error(
-                            "Please <a href='https://developer.getpebble.com/2/getting-started/'>update your pebble</a>" +
-                                " to " + MINIMUM_INSTALL_VERSION + " to be able to install apps from CloudPebble and " +
-                                "the appstore (you're on version " + version_string + ")."
-                        );
-                    }
-                });
-                mPebble.request_version();
-            });
-            mPebble.on('status', function(code) {
-                if(code === 0) {
-                    mPreviousDisplayLogs.push(null);
-                    mPebble.enable_app_logs();
-                    modal.find('.modal-body > p').text("Installed successfully!");
-                    modal.find('.btn').removeClass('hide');
-                    modal.find('.logs-btn').off('click').click(function() {
-                        modal.off('hide');
-                        show_app_logs();
-                        modal.modal('hide');
-                    });
-                    modal.on('hide', stop_logs);
-                    modal.find('.progress').addClass('progress-success').removeClass('progress-striped');
-                    ga('send', 'event', 'install', 'direct', 'success');
-                    CloudPebble.Analytics.addEvent('app_install_succeeded', {target_ip: ip});
+        pebble_connect(function() {
+            modal.modal();
+            mPebble.once('version', function(version_info) {
+                modal.find('.modal-body > p').text(gettext("Installing app on your watch…"));
+                modal.find('.btn').addClass('hide');
+                modal.find('.progress').removeClass('progress-danger progress-success').addClass('progress-striped');
+                modal.off('hide');
+                var version_string = version_info.running.version;
+                console.log(version_string);
+                // Make sure that we have the required version - but also assume that anyone who has the string 'test'
+                // in their firmware version number (e.g. me) knows what they're doing.
+                if(/test/.test(version_string) || compare_version_strings(version_string, MINIMUM_INSTALL_VERSION) >= 0) {
+                    mPebble.install_app(pane.find('#last-compilation-pbw').attr('href'));
                 } else {
-                    report_error("Installation failed with error code " + code + ". Check your phone for details.");
-                    ga('send', 'event', 'install', 'direct', 'phone-error');
-                    CloudPebble.Analytics.addEvent('app_install_failed', {target_ip: ip, cause: 'rejected'});
                     mPebble.close();
                     mPebble = null;
+                    var fmt = gettext("Please <a href='%(update_url)s'>update your pebble</a> to %(min_version)s to install apps from CloudPebble and the appstore (you're on version %(real_version)s).");
+                    var str = interpolate(fmt, {
+                        update_url: 'https://developer.getpebble.com/2/getting-started/',
+                        min_version: MINIMUM_INSTALL_VERSION,
+                        real_version: version_string
+                    }, true);
+                    report_error(str);
                 }
             });
-            mPebble.on('error', function(e) {
-                report_error("Installation failed: " + e);
-                ga('send', 'event', 'install', 'direct', 'connection-error');
-                CloudPebble.Analytics.addEvent('app_install_failed', {target_ip: ip, cause: 'phone_disconnected'});
+            mPebble.request_version();
+        });
+        mPebble.on('status', function(code) {
+            if(code === 0) {
+                mPreviousDisplayLogs.push(null);
+                mPebble.enable_app_logs();
+                modal.find('.modal-body > p').text(gettext("Installed successfully!"));
+                modal.find('.btn').removeClass('hide');
+                modal.find('.logs-btn').off('click').click(function() {
+                    modal.off('hide');
+                    show_app_logs();
+                    modal.modal('hide');
+                });
+                modal.on('hide', stop_logs);
+                modal.find('.progress').addClass('progress-success').removeClass('progress-striped');
+                ga('send', 'event', 'install', 'direct', 'success');
+                CloudPebble.Analytics.addEvent('app_install_succeeded');
+            } else {
+                report_error(gettext("Installation failed. Check your phone for details."));
+                ga('send', 'event', 'install', 'direct', 'phone-error');
+                CloudPebble.Analytics.addEvent('app_install_failed', {cause: 'rejected'});
+                mPebble.close();
                 mPebble = null;
-            });
+            }
+        });
+        mPebble.on('error', function(e) {
+            report_error("Installation failed: " + e);
+            ga('send', 'event', 'install', 'direct', 'connection-error');
+            CloudPebble.Analytics.addEvent('app_install_failed', {cause: 'phone_disconnected'});
+            mPebble = null;
         });
     };
 
@@ -560,7 +475,7 @@ CloudPebble.Compile = (function() {
         var do_stuff = function() {
             mPebble.on('close', function() {
                 if(mLogHolder)
-                    mLogHolder.append($('<span>').addClass('log-error').text("Disconnected from phone.\n"));
+                    mLogHolder.append($('<span>').addClass('log-error').text(gettext("Disconnected from phone.") + "\n"));
             });
             CloudPebble.Sidebar.SuspendActive();
             if(!mLogHolder) {
@@ -571,135 +486,80 @@ CloudPebble.Compile = (function() {
             }
             _.each(mPreviousDisplayLogs, _.partial(show_log_line, _, true));
             CloudPebble.Sidebar.SetActivePane(mLogHolder, undefined, undefined, stop_logs);
-            CloudPebble.Analytics.addEvent('app_log_view'/*, {target_ip: ip}*/);
+            CloudPebble.Analytics.addEvent('app_log_view');
         };
 
         if(!mPebble || !mPebble.is_connected()) {
-            get_phone_ip(function(ip) {
-                mPebble = pebble_connect(ip);
-                mPebble.on('open', function() {
-                    mPebble.enable_app_logs();
-                    if(mLogHolder)
-                        mLogHolder.append($('<span>').addClass('log-success').text("Connected.\n"));
-                    do_stuff();
-                });
+            pebble_connect(function() {
+                mPebble.enable_app_logs();
+                if(mLogHolder) {
+                    mLogHolder.append($('<span>').addClass('log-success').text(gettext("Connected.") + "\n"));
+                }
+                do_stuff();
             });
         } else {
             do_stuff();
         }
     };
 
-    var get_phone_ip = function(callback) {
-        if(mUsingLegacyIP || !mSelectedPhoneID) {
-            var ip = pane.find('#phone-ip').val();
-            localStorage['cp-last-phone-ip'] = ip;
-            callback(ip);
-        } else {
-            if(mPhoneIPs[mSelectedPhoneID]) {
-                callback(mPhoneIPs[mSelectedPhoneID]);
-            } else {
-                wake_phone(mSelectedPhoneID, callback);
-            }
+    var take_screenshot = function() {
+        var modal = $('#phone-screenshot-display').clone();
+        var finished = false;
+
+        pebble_connect(function() {
+            modal.modal();
+            mPebble.request_screenshot();
+        });
+
+        var report_error = function(message) {
+            modal.find('.modal-body > p').text(message);
+            modal.find('.dismiss-btn').removeClass('hide');
+            modal.find('.progress').addClass('progress-danger').removeClass('progress-striped');
+        };
+
+        var report_progress = function(percent) {
+            modal.find('.progress').removeClass('progress-striped').find('.bar').css({width: percent + '%'});
         }
-    };
 
-    var mPendingPhoneID;
-    var mCheckToken;
-    var mPendingCallback;
-    var wake_phone = function(phone_id, callback) {
-        mPendingPhoneID = phone_id;
-        $('#phone-waiting').modal();
-        $('#phone-waiting').find('.error').hide();
-        $('#phone-waiting').find('.pending').show();
-        $.post('/ide/ping_phone', {'device': phone_id}, function(data) {
-            mCheckToken = data.token;
-            mPendingCallback = callback;
-            setTimeout(check_for_phone, 2000);
-        })
-    }
+        mPebble.on('colour', function(colour) {
+            modal.find('.screenshot-holder').addClass('screenshot-holder-' + colour);
+            mPebble.close();
+        });
 
-    var check_for_phone = function() {
-        $.getJSON('/ide/check_phone/' + mCheckToken, function(data) {
-            console.log(data);
-            if(data.pending) {
-                setTimeout(check_for_phone, 2000);
-            } else {
-                if(data.response.success) {
-                    var ip = data.response.ip;
-                    console.log("got " + ip);
-                    mPhoneIPs[mPendingPhoneID] = ip;
-                    $('#phone-waiting').modal('hide');
-                    mPendingCallback(ip);
-                    mPendingCallback = null;
-                } else {
-                    console.log("got error response");
-                    $('#phone-waiting').find('.error').show().text(data.response.reason);
-                    $('#phone-waiting').find('.pending').hide();
-                }
+        mPebble.on('close', function() {
+            if(!finished) {
+                report_error(gettext("Disconnected from phone."));
             }
         });
-    };
 
-    var take_screenshot = function() {
-        get_phone_ip(function(ip) {
-            mPebble = new Pebble(ip);
-            var modal = $('#phone-screenshot-display').clone().modal();
-            var finished = false;
+        mPebble.on('screenshot:failed', function(reason) {
+            CloudPebble.Analytics.addEvent('app_screenshot_failed');
+            report_error("Screenshot failed: " + reason);
+            mPebble.close();
+        });
 
-            var report_error = function(message) {
-                modal.find('.modal-body > p').text(message);
-                modal.find('.dismiss-btn').removeClass('hide');
-                modal.find('.progress').addClass('progress-danger').removeClass('progress-striped');
-            };
+        mPebble.on('screenshot:progress', function(received, expected) {
+            report_progress((received / expected) * 100);
+        });
 
-            var report_progress = function(percent) {
-                modal.find('.progress').removeClass('progress-striped').find('.bar').css({width: percent + '%'});
+        mPebble.on('screenshot:complete', function(screenshot) {
+            finished = true;
+            var screenshot_holder = $('<div class="screenshot-holder">').append(screenshot);
+            modal.find('.modal-body')
+                .empty()
+                .append(screenshot_holder)
+                .append("<p>" + gettext("Right click -> Save Image as...") + "</p>")
+                .css({'text-align': 'center'});
+            modal.find('.dismiss-btn').removeClass('hide');
+            mPebble.request_colour();
+            CloudPebble.Analytics.addEvent('app_screenshot_succeeded');
+        });
+
+        modal.on('hide', function() {
+            if(mPebble) {
+                mPebble.close();
+                mPebble = null;
             }
-
-            mPebble.on('colour', function(colour) {
-                modal.find('.screenshot-holder').addClass('screenshot-holder-' + colour);
-                mPebble.close();
-            });
-
-            mPebble.on('open', function() {
-                mPebble.request_screenshot();
-            });
-
-            mPebble.on('close', function() {
-                if(!finished) {
-                    report_error("Disconnected from phone.");
-                }
-            });
-
-            mPebble.on('screenshot:failed', function(reason) {
-                CloudPebble.Analytics.addEvent('app_screenshot_failed', {target_ip: ip});
-                report_error("Screenshot failed: " + reason);
-                mPebble.close();
-            });
-
-            mPebble.on('screenshot:progress', function(received, expected) {
-                report_progress((received / expected) * 100);
-            });
-
-            mPebble.on('screenshot:complete', function(screenshot) {
-                finished = true;
-                var screenshot_holder = $('<div class="screenshot-holder">').append(screenshot);
-                modal.find('.modal-body')
-                    .empty()
-                    .append(screenshot_holder)
-                    .append("<p>Right click -> Save Image as...</p>")
-                    .css({'text-align': 'center'});
-                modal.find('.dismiss-btn').removeClass('hide');
-                mPebble.request_colour();
-                CloudPebble.Analytics.addEvent('app_screenshot_succeeded', {target_ip: ip});
-            });
-
-            modal.on('hide', function() {
-                if(mPebble) {
-                    mPebble.close();
-                    mPebble = null;
-                }
-            });
         });
     };
 

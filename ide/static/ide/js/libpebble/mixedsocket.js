@@ -78,12 +78,6 @@
                 $(window).off('message', handleFrameMessage);
             } else if(data.event == 'message') {
                 data.eventData = new Uint8Array(data.eventData);
-            } else if(data.event == 'dns_survey') {
-                CloudPebble.Analytics.addEvent('cloudpebble_dns_survey', {
-                    resolved: data.eventData.resolved,
-                    target_ip: mIP,
-                    rev: 2
-                });
             }
             self.trigger(data.event, data.eventData);
         };
@@ -93,10 +87,6 @@
     // It also can't use things that use libraries - so reusing PebbleWebSocket is out, for instance.
     var INNER_CODE = function() {
         var mSocket = null;
-        var mTargetIP = null;
-        var mTargetPort = null;
-        var mTestingDNS = true;
-        var mDidConnect = false;
 
         // This should be a no-op but makes my editor stop whining about undefined variables.
         if(!window.gParentWindow) {
@@ -106,40 +96,15 @@
             window.gInstanceID = 0;
         }
 
-        function ipToHostname(ip) {
-            return 'ip-' + ip.split('.').join('-') + '.ip.pebble-sockets.com';
-        }
-
-        function createWebSocket(url) {
-            mSocket = new WebSocket(url);
-            mSocket.binaryType = "arraybuffer";
-            mSocket.onopen = handleOpen;
-            mSocket.onclose = handleClose;
-            mSocket.onerror = handleError;
-            mSocket.onmessage = handleMessage;
-        }
-
-        function destroyWebsocket() {
-            mSocket.onerror = null;
-            mSocket.onclose = null;
-            mSocket.onmessage = null;
-            mSocket.onopen = null;
-            mSocket = null;
-        }
-
-        function doFallback() {
-            mTestingDNS = false;
-            destroyWebsocket();
-            createWebSocket('ws://' + mTargetIP + ':' + mTargetPort + '/');
-        }
-
         function handleFrameMessage(e) {
             var data = e.data;
             if(data.action == 'connect') {
-                mTestingDNS = true;
-                mTargetIP = data.ip;
-                mTargetPort = data.port;
-                createWebSocket('ws://' + ipToHostname(data.ip) + ':' + data.port + '/');
+                mSocket = new WebSocket('ws://' + data.ip + ':' + data.port + '/');
+                mSocket.binaryType = "arraybuffer";
+                mSocket.onopen = handleOpen;
+                mSocket.onclose = handleClose;
+                mSocket.onerror = handleError;
+                mSocket.onmessage = handleMessage;
             } else if(data.action == 'send') {
                 mSocket.send(new Uint8Array(data.data));
             } else if(data.action == 'close') {
@@ -158,24 +123,14 @@
         }
 
         function handleOpen() {
-            mDidConnect = true;
             sendEvent('open');
-            sendEvent('dns_survey', {resolved: mTestingDNS});
         }
 
         function handleClose(e) {
-            if(!mDidConnect && !e.wasClean && mTestingDNS) {
-                doFallback();
-                return;
-            }
             sendEvent('close', {wasClean: e.wasClean});
         }
 
         function handleError(e) {
-            if(!mDidConnect && mTestingDNS) {
-                doFallback();
-                return;
-            }
             var object = {};
             for(var prop in e) {
                 // The lack of a hasOwnProperty check here is intentional.

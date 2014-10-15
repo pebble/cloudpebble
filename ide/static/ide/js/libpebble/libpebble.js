@@ -1,7 +1,6 @@
-Pebble = function(ip, port) {
+Pebble = function(token) {
     var self = this;
-    var mIP = ip;
-    var mPort = port || 9000;
+    var mToken = token;
     var mSocket;
     var mAppLogEnabled = false;
     var mHasConnected = false;
@@ -10,11 +9,13 @@ Pebble = function(ip, port) {
     _.extend(this, Backbone.Events);
 
     var init = function() {
-        mSocket = new PebbleMixedContent(mIP, mPort);
+        mSocket = new PebbleProxySocket(mToken);
         mSocket.on('error', handle_socket_error);
         mSocket.on('close', handle_socket_close);
         mSocket.on('open', handle_socket_open);
         mSocket.on('message', handle_socket_message);
+        mSocket.on('all', handle_proxysocket_event); // special message
+        console.log("Starting connection");
         mSocket.connect();
     };
 
@@ -23,6 +24,7 @@ Pebble = function(ip, port) {
     };
 
     this.install_app = function(url) {
+        console.log("Starting install process.");
         var request = new XMLHttpRequest();
         request.open('get', url, true);
         request.responseType = "arraybuffer";
@@ -34,6 +36,7 @@ Pebble = function(ip, port) {
                 final_buffer.set(buffer, 1);
                 final_buffer.set([4]);
                 mSocket.send(final_buffer);
+                console.log("Sent install message.");
             }
         };
         request.send();
@@ -64,6 +67,7 @@ Pebble = function(ip, port) {
 
     var enable_app_logs = function() {
         if(!mAppLogEnabled) {
+            console.log("Enabling app logs.");
             send_message("APP_LOGS", [1]);
             mAppLogEnabled = true;
         }
@@ -71,6 +75,7 @@ Pebble = function(ip, port) {
 
     var disable_app_logs = function() {
         if(mAppLogEnabled) {
+            console.log("Disabling app logs.");
             send_message("APP_LOGS", [0]);
             mAppLogEnabled = false;
         }
@@ -85,7 +90,7 @@ Pebble = function(ip, port) {
     var handle_socket_open = function(e) {
         console.log("Socket open");
         mHasConnected = true;
-        ga('send', 'event', 'phone-connect', 'success', mIP);
+        ga('send', 'event', 'phone-connect', 'success');
         self.trigger('open');
     };
 
@@ -95,13 +100,13 @@ Pebble = function(ip, port) {
             console.log("Close was unexpected.");
             if(!mHasConnected) {
                 self.trigger("error", "Connection to the phone failed. Check the IP and that developer mode is active.");
-                ga('send', 'event', 'phone-connect', 'failed', mIP);
+                ga('send', 'event', 'phone-connect', 'failed');
             } else {
                 self.trigger("error", "Connection to the phone was interrupted.");
-                ga('send', 'event', 'phone-disconnect', 'dirty', mIP);
+                ga('send', 'event', 'phone-disconnect', 'dirty');
             }
         } else {
-            ga('send', 'event', 'phone-disconnect', 'clean', mIP);
+            ga('send', 'event', 'phone-disconnect', 'clean');
         }
         self.trigger('close');
     };
@@ -134,7 +139,14 @@ Pebble = function(ip, port) {
         }
     };
 
+    var handle_proxysocket_event = function(event) {
+        if(event.substr(0, 6) == "proxy:") {
+            self.trigger(event);
+        }
+    };
+
     var handle_app_log = function(data) {
+        console.log("Received app log.");
         var metadata = unpack("IBBH", data.subarray(16, 24));
         var filename = bytes_to_string(data.subarray(24, 40));
         var message = bytes_to_string(data.subarray(40, 40+metadata[2]));
@@ -161,6 +173,7 @@ Pebble = function(ip, port) {
     }
 
     this.request_version = function() {
+        console.log("Requesting watch version.");
         send_message('VERSION', pack("B", 0x00));
     };
 
@@ -175,6 +188,7 @@ Pebble = function(ip, port) {
     };
 
     var handle_version = function(message) {
+        console.log("Received watch version.");
         result = unpack("BIS32S8BBBIS32S8BBBIS9S12BBBBBBIIS16", message);
         if(result[0] != 1) return;
         self.trigger('version', {
@@ -207,10 +221,12 @@ Pebble = function(ip, port) {
     };
 
     var request_factory_setting = function(key) {
+        console.log("Requesting factory settings.");
         send_message('FACTORY_SETTINGS', pack('BB', [0x00, key.length]).concat(string_to_bytes(key)));
     };
 
     this.request_colour = function() {
+        console.log("Requesting colour");
         request_factory_setting('mfg_color');
 
         var colour_mapping = {
@@ -245,6 +261,7 @@ Pebble = function(ip, port) {
 
 
     var handle_factory_setting = function(data) {
+        console.log("Received factory settings.");
         if(data.length < 2) {
             self.trigger('factory_setting:error');
             return;
@@ -259,6 +276,7 @@ Pebble = function(ip, port) {
     }
 
     this.request_screenshot = function() {
+        console.log("Requesting screenshot.");
         if(mIncomingImage !== null) {
             self.trigger('screenshot:error', "Cannot take a screenshot while a previous screenshot is processing.");
             return;
@@ -267,6 +285,7 @@ Pebble = function(ip, port) {
     };
 
     var handle_screenshot = function(data) {
+        console.log("Received screenshot fragment.");
         if(mIncomingImage === null) {
             data = read_screenshot_header(data);
             if(data === null) {
@@ -361,6 +380,7 @@ Pebble = function(ip, port) {
     };
 
     var send_message = function(endpoint, message) {
+        console.log("Sending message to " + endpoint + "(" + ENDPOINTS[endpoint] + ")");
         var data = new Uint8Array([1].concat(build_message(ENDPOINTS[endpoint], message)));
         if(!mSocket.isOpen()) {
             throw new Error("Cannot send on non-open socket.");

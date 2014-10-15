@@ -364,6 +364,7 @@
         <h3>Doing a thing…</h3>
     </div>
     <div class="modal-body text-center" id="generic-progress-text">
+        <p></p>
         <div class="progress progress-striped active">
             <div class="bar" style="width: 100%;"></div>
         </div>
@@ -390,10 +391,10 @@ var USER_SETTINGS = {
         avatar: "{{ project.owner.github.avatar }}"
     },
     {% endif %}
-    dummy: null // For IE.
+    token: "{{ token }}"
 };
 var DOC_JSON = "{% static 'ide/documentation.json' %}";
-var LIBPEBBLE_
+var LIBPEBBLE_PROXY = {{ libpebble_proxy | safe }};
 </script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.2.0/codemirror.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.2.0/addon/dialog/dialog.js"></script>
@@ -420,8 +421,7 @@ var LIBPEBBLE_
 <script src="{% static 'ide/js/resources.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/settings.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/github.js' %}" type="text/javascript"></script>
-<script src="{% static 'ide/js/libpebble/websocket.js' %}" type="text/javascript"></script>
-<script src="{% static 'ide/js/libpebble/mixedsocket.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/libpebble/proxysocket.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/libpebble/libpebble.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/crash_handler.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/analytics.js' %}" type="text/javascript"></script>
