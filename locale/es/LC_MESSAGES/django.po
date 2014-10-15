@@ -46,7 +46,7 @@ msgstr "Exitoso"
 
 #: ide/models/files.py:19
 msgid "Binary blob"
-msgstr ""
+msgstr "Objeto binario"
 
 #: ide/models/files.py:20
 msgid "1-bit PNG"
@@ -288,7 +288,7 @@ msgstr "Añadir nuevo"
 
 #: ide/templates/ide/project.html:52
 msgid "Worker source"
-msgstr "Origen del trabajador"
+msgstr "Código trabajador"
 
 #: ide/templates/ide/project.html:54
 msgid "Resources"
@@ -510,7 +510,7 @@ msgstr "Obtener PBW"
 
 #: ide/templates/ide/project/compile.html:56
 msgid "Build log"
-msgstr "Registro de la construcción "
+msgstr "Registro construcción"
 
 #: ide/templates/ide/project/compile.html:63
 msgctxt "number symbol"
@@ -589,7 +589,7 @@ msgstr "Fuente TrueType"
 
 #: ide/templates/ide/project/resource.html:15
 msgid "Raw binary blob"
-msgstr ""
+msgstr "Objeto binario opaco"
 
 #: ide/templates/ide/project/resource.html:21
 msgid "File"
@@ -892,7 +892,7 @@ msgstr "¡Esto es sólo el principio!<br>Hay mucho más por llegar."
 
 #: root/templates/root/index.html:92
 msgid "Log in with legacy account"
-msgstr ""
+msgstr "Accede con una cuenta antigua"
 
 #: root/templates/root/index.html:97
 msgid "Username"
@@ -918,7 +918,7 @@ msgstr "pbw"
 
 #: ide/static/ide/js/compile.js:23
 msgid "build log"
-msgstr "Registro de construcción "
+msgstr "Registro construcción"
 
 #: ide/static/ide/js/compile.js:42
 msgid "Something went wrong:\n"
@@ -932,7 +932,7 @@ msgstr "%(total)s KiB (%(resources)s KiB recursos, %(appbin)s KiB binarios)"
 
 #: ide/static/ide/js/compile.js:285
 msgid "%(total)s KiB (%(resources)s KiB resources, %(appbin)s KiB binary, %(workerbin)s KiB worker)"
-msgstr ""
+msgstr "%(total)s KiB (%(resources)s KiB recursos, %(appbin)s KiB binario, %(workerbin)s KiB trabajador en segundo plano) "
 
 #: ide/static/ide/js/compile.js:295
 msgid "%(free)s / %(max)s bytes (%(percent)s%)"
@@ -980,7 +980,7 @@ msgstr "[DEPURAR]"
 
 #: ide/static/ide/js/compile.js:479
 msgid "[VERBOSE]"
-msgstr ""
+msgstr "[VERBOSO]"
 
 #: ide/static/ide/js/editor.js:31
 msgid "Something went wrong: %s"
@@ -1229,17 +1229,17 @@ msgstr "¿Seguro que quieres eliminar este proyecto?ESTO NO SE PUEDE DESHACER."
 
 #: ide/static/ide/js/sidebar.js:118
 msgid "App source"
-msgstr ""
+msgstr "Código aplicación"
 
 #: ide/static/ide/js/ycm.js:48
 msgid "Code completion resync failed."
-msgstr ""
+msgstr "Ha fallado la sincronización del completado de código."
 
 #: ide/static/ide/js/ycm.js:73 ide/static/ide/js/ycm.js.c:78
 msgid "Code completion unavailable."
-msgstr ""
+msgstr "Completado de código no disponible"
 
 #: ide/static/ide/js/ycm.js:94
 msgid "Code completion lost; retrying..."
-msgstr ""
+msgstr "Completado de código desconectado; reintentando…"
 

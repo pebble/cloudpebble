@@ -122,8 +122,20 @@ CloudPebble.Prompts = {
 CloudPebble.Utils = {
     FormatDatetime: function(str) {
         var date = new Date(Date.parse(str.replace(' ', 'T')));
-        var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
-            'August', 'September', 'October', 'November', 'December'];
+        var months = [
+            pgettext('month name', 'January'),
+            pgettext('month name', 'February'),
+            pgettext('month name', 'March'),
+            pgettext('month name', 'April'),
+            pgettext('month name', 'May'),
+            pgettext('month name', 'June'),
+            pgettext('month name', 'July'),
+            pgettext('month name', 'August'),
+            pgettext('month name', 'September'),
+            pgettext('month name', 'October'),
+            pgettext('month name', 'November'),
+            pgettext('month name', 'December')
+        ];
 
         var minutes = String(date.getMinutes());
         while(minutes.length < 2) minutes = '0' + minutes;
@@ -132,10 +144,11 @@ CloudPebble.Utils = {
         if(hours === 0) hours = 12;
 
         return date.getDate() + ' ' + months[date.getMonth()] +', \'' + (date.getFullYear() % 100) +
-            ' – ' + hours + ":" + minutes + ' ' + (date.getHours() < 12 ? 'AM' : 'PM');
+            ' – ' + hours + ":" + minutes + ' ' + (date.getHours() < 12 ? gettext('AM') : gettext('PM'));
     },
     FormatInterval: function(s1, s2) {
         var t = Math.round(Math.abs(Date.parse(s2.replace(' ','T')) - Date.parse(s1.replace(' ','T'))) / 1000);
-        return t.toFixed(0) + " second" + (t == 1 ? '' : 's');
+        var n = t.toFixed(0);
+        return interpolate(ngettext("%s second", "%s seconds", n), [n]);
     }
 };
