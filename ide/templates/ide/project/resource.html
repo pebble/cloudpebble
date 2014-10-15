@@ -1,26 +1,27 @@
+{% load i18n %}
 <!-- Resource editing template -->
 <div id="resource-pane-template" class="hide resource-pane">
     <form class="form-horizontal">
         <div class="well alert alert-error hide"></div>
         <div class="well">
             <div class="control-group">
-                <label class="control-label" for="edit-resource-type">Resource type</label>
+                <label class="control-label" for="edit-resource-type">{% trans 'Resource type' %}</label>
                 <div class="controls">
                     <select id="edit-resource-type">
-                        <option value="png">PNG image</option>
+                        <option value="png">{% trans 'PNG image' %}</option>
                         {% if project.project_type == 'native' %}
-                        <option value="png-trans">PNG with transparency</option>
-                        <option value="font">TrueType font</option>
-                        <option value="raw">Raw binary blob</option>
+                        <option value="png-trans">{% trans 'PNG with transparency' %}</option>
+                        <option value="font">{% trans 'TrueType font' %}</option>
+                        <option value="raw">{% trans 'Raw binary blob' %}</option>
                         {% endif %}
                     </select>
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label" for="edit-resource-file">File</label>
+                <label class="control-label" for="edit-resource-file">{% trans 'File' %}</label>
                 <div class="controls">
                     <input type="file" id="edit-resource-file">
-                    <span class="help-block hide">You can have multiple Pebble resources from a single file (for different sizes, etc.)</span>
+                    <span class="help-block hide">{% trans 'You can have multiple Pebble resources from a single file (for different sizes, etc.)' %}</span>
                 </div>
             </div>
             <div class="image-resource-preview hide">
@@ -32,46 +33,47 @@
             </div>
             <div class="resource-download-link hide">
                 <hr>
-                <a href="#" class="btn">Download uploaded resource</a>
+                <a href="#" class="btn">{% trans 'Download uploaded resource' %}</a>
             </div>
         </div>
         <div class="control-group well native-only" id="non-font-resource-group">
-            <label class="control-label" for="edit-resource-id">Identifier</label>
+            <label class="control-label" for="edit-resource-id">{% trans 'Identifier' %}</label>
             <div class="controls">
                 <input type="text" class="edit-resource-id" placeholder="IMAGE_EXAMPLE_IDENTIFIER" pattern="[A-Za-z0-9_]+">
-                <span class="help-block">This is used in your code and must be a valid C identifier.</span>
+                <span class="help-block">{% trans 'This is used in your code and must be a valid C identifier.' %}</span>
             </div>
         </div>
         <div id="font-resource-group" class="hide">
             <div class="well font-resource-group-single">
                 <div class="control-group">
-                    <label class="control-label">Identifier</label>
+                    <label class="control-label">{% trans 'Identifier' %}</label>
                     <div class="controls">
                         <input type="text" class="span6 edit-resource-id" placeholder="FONT_EXAMPLE_BOLD_SUBSET_24" pattern="[A-Za-z0-9_]*[0-9]+">
-                        <span class="help-block">This is used in your code and must be a valid C identifier.<br>
-                            It must end with the desired font size.</span>
+                        <span class="help-block">{% trans 'This is used in your code and must be a valid C identifier.' %}<br>
+                            {% trans 'It must end with the desired font size.' %}</span>
                     </div>
                 </div>
                 <div class="control-group font-resource-regex-group">
-                    <label class="control-label">Characters</label>
+                    <label class="control-label">{% trans 'Characters' context "like letters and numbers" %}</label>
                     <div class="controls">
                         <input type="text" class="span4 edit-resource-regex" placeholder="[0-9:. ]">
-                        <span class="help-block">A PCRE regular expression that restricts characters.</span>
+                        <span class="help-block">{% trans 'A PCRE regular expression that restricts characters.' %}</span>
                     </div>
                 </div>
                 <div class="control-group font-resource-tracking-group">
-                    <label class="control-label">Tracking adjust</label>
+                    {# Translators: This refers to the number of additional pixels by which to shift each character #}
+                    <label class="control-label">{% trans 'Tracking adjust' %}</label>
                     <div class="controls">
                         <input type="number" class="span1 edit-resource-tracking" value="0">
-                        <span class="help-block">Number of additional pixels by which to shift each character.</span>
+                        <span class="help-block">{% trans 'Number of additional pixels by which to shift each character.' %}</span>
                     </div>
                 </div>
             </div>
         </div>
         <div id="edit-resource-buttons" class="well resource-actions">
-            <button type="submit" class="btn btn-affirmative">Save</button>
-            <button type="button" class="btn btn-danger hide" id="edit-resource-delete">Delete</button>
-            <button type="button" class="btn hide" id="add-font-resource">Another font</button>
+            <button type="submit" class="btn btn-affirmative">{% trans 'Save' %}</button>
+            <button type="button" class="btn btn-danger hide" id="edit-resource-delete">{% trans 'Delete' %}</button>
+            <button type="button" class="btn hide" id="add-font-resource">{% trans 'Another font' %}</button>
         </div>
     </form>
 </div>

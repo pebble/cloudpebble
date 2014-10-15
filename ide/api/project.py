@@ -42,7 +42,7 @@ def project_info(request, project_id):
         'app_capabilities': project.app_capabilities,
         'app_jshint': project.app_jshint,
         'menu_icon': project.menu_icon.id if project.menu_icon else None,
-        'source_files': [{'name': f.file_name, 'id': f.id} for f in source_files],
+        'source_files': [{'name': f.file_name, 'id': f.id, 'target': f.target} for f in source_files],
         'resources': [{
             'id': x.id,
             'file_name': x.file_name,
@@ -89,9 +89,12 @@ def last_build(request, project_id):
             'id': build.id,
             'pbw': build.pbw_url,
             'log': build.build_log_url,
+            'debug': build.debug_info_url,
+            'worker_debug': build.worker_debug_info_url,
             'size': {
                 'total': build.total_size,
                 'binary': build.binary_size,
+                'worker': build.worker_size,
                 'resources': build.resource_size
             }
         }
@@ -118,9 +121,11 @@ def build_history(request, project_id):
                 'pbw': build.pbw_url,
                 'log': build.build_log_url,
                 'debug': build.debug_info_url,
+                'worker_debug': build.worker_debug_info_url,
                 'size': {
                     'total': build.total_size,
                     'binary': build.binary_size,
+                    'worker': build.worker_size,
                     'resources': build.resource_size
                 }
             })
@@ -281,7 +286,7 @@ def import_github(request):
     add_remote = (request.POST['add_remote'] == 'true')
     match = re.match(r'^(?:https?://|git@|git://)?(?:www\.)?github\.com[/:]([\w.-]+)/([\w.-]+?)(?:\.git|/|$)', repo)
     if match is None:
-        return HttpResponse(json.dumps({"success": False, 'error': "Invalid GitHub URL."}),
+        return HttpResponse(json.dumps({"success": False, 'error': _("Invalid Github URL.")}),
                             content_type="application/json")
     github_user = match.group(1)
     github_project = match.group(2)

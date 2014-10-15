@@ -1,3 +1,4 @@
+{% load i18n %}
 <!-- Compilation pane -->
 <div id="compilation-pane-template" class="hide compilation-pane">
     <div id="last-compilation" class="hide">
@@ -12,40 +13,41 @@
                 <hr>
 
                 <div>
-                    <button class="btn btn-primary" id="install-on-phone-btn">Install and Run</button>
-                    <button class="btn" id="show-app-logs-btn">View app logs</button>
-                    <button class="btn" id="screenshot-btn">Screenshot</button>
+                    <button class="btn btn-primary" id="install-on-phone-btn">{% trans 'Install and Run' %}</button>
+                    <button class="btn" id="show-app-logs-btn">{% trans 'View app logs' %}</button>
+                    <button class="btn" id="screenshot-btn">{% trans 'Screenshot' %}</button>
                 </div>
             </form>
         </div>
     </div>
     <div class="well">
-        <h3>Last build</h3>
+        <h3>{% trans 'Last build' %}</h3>
         <div class="hide" id="last-compilation-qr-code">
             <img src="">
         </div>
         <div class="build-stats">
-            <p><label>Started:</label> <span id="last-compilation-started">April 17, 2013, 11:50 a.m.</span></p>
-            <p id="last-compilation-time"><label>Build time:</label> <span>0.98 seconds</span></p>
-            <p><label>Status:</label> <span id="last-compilation-status" class="label label-success">Successful</span></p>
-            <p id="last-compilation-size" class="hide"><label>Size:</label> <span class="total">27</span> KiB (<span class="res">10</span> KiB resources, <span class="bin">17</span> KiB binary)</p>
-            <p id="last-compilation-memory" class="hide"><label>Available RAM:</label> <span class="free-bytes"></span> / <span class="available-bytes">24576</span> bytes (<span class="free-pct"></span>%)</p>
+            <p><label>{% trans 'Started:' %}</label> <span id="last-compilation-started">April 17, 2013, 11:50 a.m.</span></p>
+            <p id="last-compilation-time"><label>{% trans 'Build time:' %}</label> <span>0.98 seconds</span></p>
+            <p><label>{% trans 'Status:' %}</label> <span id="last-compilation-status" class="label label-success">Successful</span></p>
+            <p id="last-compilation-size" class="hide"><label>{% trans 'Size:' %}</label> <span class="text"></span></p>
+            <p id="last-compilation-app-memory" class="hide"><label>{% trans 'Available App RAM:' %}</label> <span class="text"></span></p>
+            <p id="last-compilation-worker-memory" class="hide"><label>{% trans 'Available Worker RAM:' %}</label> <span class="text"></span></p>
         </div>
         <hr>
         <div class="build-buttons">
-            <button class="btn btn-affirmative" id="compilation-run-build-button">Run build</button>
-            <a id="last-compilation-pbw" href="#" class="btn hide">Get PBW</a>
-            <a id="last-compilation-log" class="btn hide" href="#">Build log</a>
+            <button class="btn btn-affirmative" id="compilation-run-build-button">{% trans 'Run build' %}</button>
+            <a id="last-compilation-pbw" href="#" class="btn hide">{% trans 'Get PBW' %}</a>
+            <a id="last-compilation-log" class="btn hide" href="#">{% trans 'Build log' %}</a>
         </div>
     </div>
     <div class="well">
         <table class="table build-results">
             <thead>
                 <tr>
-                    <th>#</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Size</th>
+                    <th>{% trans '#' context 'number symbol' %}</th>
+                    <th>{% trans 'Date' %}</th>
+                    <th>{% trans 'Status' %}</th>
+                    <th>{% trans 'Size' %}</th>
                     <th colspan="2"></th>
                 </tr>
             </thead>

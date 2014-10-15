@@ -6,6 +6,7 @@ import os.path
 from django.conf import settings
 from django.db import models
 from ide.models.project import Project
+from django.utils.translation import ugettext as _
 
 from ide.models.meta import IdeModel
 
@@ -19,9 +20,9 @@ class BuildResult(IdeModel):
     STATE_FAILED = 2
     STATE_SUCCEEDED = 3
     STATE_CHOICES = (
-        (STATE_WAITING, 'Pending'),
-        (STATE_FAILED, 'Failed'),
-        (STATE_SUCCEEDED, 'Succeeded')
+        (STATE_WAITING, _('Pending')),
+        (STATE_FAILED, _('Failed')),
+        (STATE_SUCCEEDED, _('Succeeded'))
     )
 
     project = models.ForeignKey(Project, related_name='builds')
@@ -33,6 +34,7 @@ class BuildResult(IdeModel):
     total_size = models.IntegerField(blank=True, null=True)
     binary_size = models.IntegerField(blank=True, null=True)
     resource_size = models.IntegerField(blank=True, null=True)
+    worker_size = models.IntegerField(blank=True, null=True)
 
     def _get_dir(self):
         if settings.AWS_ENABLED:
@@ -67,6 +69,12 @@ class BuildResult(IdeModel):
     def get_debug_info_url(self):
         return '%sdebug_info.json' % self.get_url()
 
+    def get_worker_debug_info_filename(self):
+        return '%sworker_debug_info.json' % self._get_dir()
+
+    def get_worker_debug_info_url(self):
+        return '%sworker_debug_info.json' % self.get_url()
+
     def get_simplyjs(self):
         return '%ssimply.js' % self._get_dir()
 
@@ -82,7 +90,7 @@ class BuildResult(IdeModel):
 
     def read_build_log(self):
         if not settings.AWS_ENABLED:
-            with open(self.build_log, 'w') as f:
+            with open(self.build_log, 'r') as f:
                 return f.read()
         else:
             return s3.read_file('builds', self.build_log)
@@ -94,6 +102,14 @@ class BuildResult(IdeModel):
                 f.write(text)
         else:
             s3.save_file('builds', self.debug_info, text, public=True, content_type='application/json')
+
+    def save_worker_debug_info(self, json_info):
+        text = json.dumps(json_info)
+        if not settings.AWS_ENABLED:
+            with open(self.worker_debug_info, 'w') as f:
+                f.write(text)
+        else:
+            s3.save_file('builds', self.worker_debug_info, text, public=True, content_type='application/json')
 
     def save_pbw(self, pbw_path):
         if not settings.AWS_ENABLED:
@@ -116,6 +132,9 @@ class BuildResult(IdeModel):
 
     debug_info = property(get_debug_info_filename)
     debug_info_url = property(get_debug_info_url)
+
+    worker_debug_info = property(get_worker_debug_info_filename)
+    worker_debug_info_url = property(get_worker_debug_info_url)
 
     simplyjs = property(get_simplyjs)
     simplyjs_url = property(get_simplyjs_url)

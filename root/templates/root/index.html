@@ -1,5 +1,6 @@
 {% extends 'common/base-narrow.html' %}
 {% load staticfiles %}
+{% load i18n %}
 
 {% block head %}
     <link rel="stylesheet" type="text/css" href="{% static 'root/css/splash.css' %}">
@@ -7,38 +8,41 @@
 
 {% block headercontent %}
     <div class="header-login">
-        <button class="btn btn-primary btn-show-login">Sign in</button>
-        <button class="btn btn-cancel btn-hide-login">Close</button>
+        <button class="btn btn-primary btn-show-login">{% trans "Sign in" %}</button>
+        <button class="btn btn-cancel btn-hide-login">{% trans "Close" %}</button>
     </div>
 {% endblock %}
 
 {% block precontent %}
     <div class="login">
         <div class="container">
+            <p style="text-align: center;">
+                {% trans "Due to a recent Chrome update, we have been forced to disable TLS site-wide. Security will be re-enabled in a few days." %}
+            </p>
             <div class="box-holder">
                 <div class="box">
                     {% if sso_root %}
-                    <h3>Already have a Pebble account?</h3>
-                    <p>This is the same account you use to log in to the Pebble Forums, Developer Portal
-                       and phone app. Don't have a Pebble account? Create one!</p>
-                    <p><a class="btn btn-primary" href="/login/pebble/?next={{ next }}">Log in with your Pebble account</a></p>
-                    <p><a class="btn" href="{{ sso_root }}/users/sign_up">Create Pebble account</a></p>
+                    <h3>{% trans "Already have a Pebble account?" %}</h3>
+                    <p>{% trans "This is the same account you use to log in to the Pebble Forums, Developer Portal and phone app. Don't have a Pebble account? Create one!" %}</p>
+                    <p><a class="btn btn-primary" href="/login/pebble/?next={{ next }}">{% trans "Log in with your Pebble account" %}</a></p>
+                    <p><a class="btn" href="{{ sso_root }}/users/sign_up">{% trans "Create Pebble account" %}</a></p>
                     {% else %}
+                    {# This doesn't show up in production so isn't worth translating. #}
                     <h3>This build is running without SSO support</h3>
                     <p>You create an account with the button below,
                        then use the "link" button on the right to log in.
                        It won't actually link anything, and this does not work in production.</p>
-                    <p><a class="btn"href="/accounts/register">Create Local Account</a></p>
+                    <p><a class="btn" href="/accounts/register">Create Local Account</a></p>
                     {% endif %}
                 </div>
                 <div class="box">
-                    <h3>Have a legacy CloudPebble account?</h3>
-                    <p>Log in to link it with your Pebble account. Legacy
-                        accounts are being phased out in favour of the
-                        Pebble account system. Once you log in you will be
-                        required to link your accounts;
-                        henceforth you must log in with your pebble account.</p>
-                    <p><button class="btn" id="legacy-trigger-btn">Link to your Pebble account</button></p>
+                    <h3>{% trans "Have a legacy CloudPebble account?" %}</h3>
+                    <p>{% blocktrans %}Log in to link it with your Pebble account. Legacy
+accounts are being phased out in favour of the
+Pebble account system. Once you log in you will be
+required to link your accounts;
+henceforth you must log in with your pebble account.{% endblocktrans %}</p>
+                    <p><button class="btn" id="legacy-trigger-btn">{% trans "Link to your Pebble account" %}</button></p>
                 </div>
             </div>
         </div>
@@ -51,30 +55,31 @@
             <div class="hero-logo">
                 <img src="{% static 'root/images/cloudpebble.png' %}">
             </div>
-            <h2 class="hero-lead">Online Pebble Development</h2>
-            <p class="hero-sub">Write apps without dealing with Linux, virtual machines, compilers, or Python.</p>
-            <p class="hero-button"><button class="btn btn-show-login">Get Started</button></p>
+            <h2 class="hero-lead">{% trans "Online Pebble Development" %}</h2>
+            <p class="hero-sub">{% trans "Write apps without dealing with Linux, virtual machines, compilers, or Python." %}</p>
+            <p class="hero-button"><button class="btn btn-show-login">{% trans "Get Started" %}</button></p>
         </div>
         <div class="features box-holder">
             <div class="feature box">
                 <div class="feature-icon feature-icon-install"></div>
-                <h3>Nothing to install</h3>
-                <p>Write apps directly in your browser. Skip all setup instructions!</p>
+                <h3>{% trans "Nothing to install" %}</h3>
+                <p>{% trans "Write apps directly in your browser. Skip all setup instructions!" %}</p>
             </div>
             <div class="feature box">
                 <div class="feature-icon feature-icon-json"></div>
-                <h3>No JSON to edit</h3>
-                <p>Resources are managed through a friendly user interface</p>
+                <h3>{% trans "No JSON to edit" %}</h3>
+                <p>{% trans "Resources are managed through a friendly user interface" %}</p>
             </div>
             <div class="feature box">
                 <div class="feature-icon feature-icon-cloudy"></div>
-                <h3>Cloudy</h3>
-                <p>It's on the internet. Accessible from anywhere! That's a good thing, right?</p>
+                {# Translators: This is "cloud" as in the internet, but used as a pun on cloud as in sky. #}
+                <h3>{% trans "Cloudy" %}</h3>
+                <p>{% trans "It's on the internet. Accessible from anywhere! That's a good thing, right?" %}</p>
             </div>
             <div class="feature box">
                 <div class="feature-icon feature-icon-unfinished"></div>
-                <h3>More to come</h3>
-                <p>This is only the beginning!<br>There's much more to come.</p>
+                <h3>{% trans "More to come" %}</h3>
+                <p>{% trans "This is only the beginning!<br>There's much more to come." %}</p>
             </div>
         </div>
     </div>
@@ -83,16 +88,16 @@
 {% block modals %}
 <div id="legacy-login" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <h3 id="modal-warning-prompt-title">Log in with legacy account</h3>
+        <h3 id="modal-warning-prompt-title">{% trans "Log in with legacy account" %}</h3>
     </div>
     <div class="modal-body">
         <form class="form-horizontal">
             <div class="control-group">
-                <label for="legacy-username">Username</label>
+                <label for="legacy-username">{% trans "Username" %}</label>
                 <div class="controls">
                     <input type="text" id="legacy-username">
                 </div>
-                <label for="legacy-password">Password</label>
+                <label for="legacy-password">{% trans "Password" %}</label>
                 <div class="controls">
                     <input type="password" id="legacy-password">
                 </div>
@@ -100,8 +105,8 @@
         </form>
     </div>
     <div class="modal-footer">
-        <button class="btn btn-primary" id="legacy-login-btn">Log in</button>
-        <button class="btn" data-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" id="legacy-login-btn">{% trans "Log in" %}</button>
+        <button class="btn" data-dismiss="modal">{% trans "Cancel" %}</button>
     </div>
 </div>
 {% endblock %}

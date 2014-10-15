@@ -5,6 +5,7 @@ from django.db import models
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.utils.timezone import now
+from django.utils.translation import ugettext as _
 import utils.s3 as s3
 
 from ide.models.meta import IdeModel
@@ -15,10 +16,10 @@ __author__ = 'katharine'
 class ResourceFile(IdeModel):
     project = models.ForeignKey('Project', related_name='resources')
     RESOURCE_KINDS = (
-        ('raw', 'Binary blob'),
-        ('png', '1-bit PNG'),
-        ('png-trans', '1-bit PNG with transparency'),
-        ('font', 'True-Type Font')
+        ('raw', _('Binary blob')),
+        ('png', _('1-bit PNG')),
+        ('png-trans', _('1-bit PNG with transparency')),
+        ('font', _('True-Type Font'))
     )
 
     file_name = models.CharField(max_length=100)
@@ -41,7 +42,7 @@ class ResourceFile(IdeModel):
 
     def save_file(self, stream, file_size=0):
         if file_size > 5*1024*1024:
-            raise Exception("Uploaded file too big.");
+            raise Exception(_("Uploaded file too big."))
         if not settings.AWS_ENABLED:
             if not os.path.exists(os.path.dirname(self.local_filename)):
                 os.makedirs(os.path.dirname(self.local_filename))
@@ -118,6 +119,12 @@ class SourceFile(IdeModel):
     file_name = models.CharField(max_length=100)
     last_modified = models.DateTimeField(blank=True, null=True, auto_now=True)
 
+    TARGETS = (
+        ('app', _('App')),
+        ('worker', _('Worker')),
+    )
+    target = models.CharField(max_length=10, choices=TARGETS, default='app')
+
     def get_local_filename(self):
         padded_id = '%05d' % self.id
         return '%ssources/%s/%s/%s' % (settings.FILE_STORAGE, padded_id[0], padded_id[1], padded_id)
@@ -160,6 +167,13 @@ class SourceFile(IdeModel):
         self.project.last_modified = now()
         self.project.save()
         super(SourceFile, self).save(*args, **kwargs)
+
+    @property
+    def project_path(self):
+        if self.target == 'app':
+            return 'src/%s' % self.file_name
+        else:
+            return 'worker_src/%s' % self.file_name
 
     local_filename = property(get_local_filename)
     s3_path = property(get_s3_path)

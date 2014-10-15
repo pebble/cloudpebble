@@ -21,7 +21,7 @@ $(function() {
                 if(data.state.status == 'SUCCESS') {
                     window.location.href = '/ide/project/' + data.state.result;
                 } else if(data.state.status == 'FAILURE') {
-                    alert("Import failed: " + data.state.result);
+                    alert(interpolate(gettext("Import failed: %s"), [data.state.result]));
                 } else {
                     setTimeout(check, 500);
                 }

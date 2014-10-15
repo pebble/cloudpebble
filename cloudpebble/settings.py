@@ -1,3 +1,4 @@
+# encoding: utf-8
 # Django settings for cloudpebble project.
 
 import os
@@ -36,6 +37,7 @@ else:
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__)) + '/../'
 
+LANGUAGE_COOKIE_NAME = 'cloudpebble_language'
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.auth.context_processors.auth",
@@ -61,7 +63,14 @@ TIME_ZONE = 'America/New_York'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en-gb'
+
+LANGUAGES = (
+    ('en', 'English'),
+    ('es', 'Spanish'),
+)
+
+LOCALE_PATHS = (os.getcwd() + "/locale",)
 
 SITE_ID = 1
 
@@ -130,8 +139,9 @@ if not DEBUG:
 
 
 MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -270,6 +280,9 @@ TYPOGRAPHY_CSS = _environ.get('TYPOGRAPHY_CSS', None)
 REDIS_URL = _environ.get('REDISCLOUD_URL', 'redis://localhost:6379/')
 
 LIBPEBBLE_PROXY = _environ.get('LIBPEBBLE_PROXY', None)
+
+YCM_URLS = _environ.get('YCM_URLS', 'http://localhost:8002/').split(',')
+COMPLETION_CERTS = _environ.get('COMPLETION_CERTS', os.getcwd() + '/completion-certs.crt')
 
 import djcelery
 djcelery.setup_loader()

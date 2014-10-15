@@ -31,18 +31,40 @@ def _set_resource_limits():
     resource.setrlimit(resource.RLIMIT_FSIZE, (5 * 1024 * 1024, 5 * 1024 * 1024)) # 5 MB output files.
 
 
-def create_source_files(source_files, src_dir):
+def create_source_files(project, base_dir):
+    """
+    :param project: Project
+    """
+    source_files = project.source_files.all()
+    src_dir = os.path.join(base_dir, 'src')
+    if project.project_type == 'pebblejs':
+        src_dir = os.path.join(src_dir, 'js')
+    worker_dir = None
+    try:
+        os.mkdir(src_dir)
+    except OSError as e:
+        if e.errno == 17:  # file exists
+            pass
+        else:
+            raise
     for f in source_files:
-        abs_target = os.path.abspath(os.path.join(src_dir, f.file_name))
-        if not abs_target.startswith(src_dir):
+        target_dir = src_dir
+        if f.target == 'worker' and project.project_type == 'native':
+            if worker_dir is None:
+                worker_dir = os.path.join(base_dir, 'worker_src')
+                os.mkdir(worker_dir)
+            target_dir = worker_dir
+
+        abs_target = os.path.abspath(os.path.join(target_dir, f.file_name))
+        if not abs_target.startswith(target_dir):
             raise Exception("Suspicious filename: %s" % f.file_name)
         abs_target_dir = os.path.dirname(abs_target)
         if not os.path.exists(abs_target_dir):
             os.makedirs(abs_target_dir)
         f.copy_to_path(abs_target)
         # Make sure we don't duplicate downloading effort; just open the one we created.
-        with open(abs_target) as f:
-            check_preprocessor_directives(f.read())
+        with open(abs_target) as fh:
+            check_preprocessor_directives(fh.read())
 
 
 @task(ignore_result=True, acks_late=True)
@@ -64,9 +86,7 @@ def run_compile(build_result):
 
         if project.project_type == 'native':
             # Source code
-            src_dir = os.path.join(base_dir, 'src')
-            os.mkdir(src_dir)
-            create_source_files(source_files, src_dir)
+            create_source_files(project, base_dir)
 
             manifest_dict = generate_v2_manifest_dict(project, resources)
             open(os.path.join(base_dir, 'appinfo.json'), 'w').write(json.dumps(manifest_dict))
@@ -100,7 +120,7 @@ def run_compile(build_result):
             shutil.rmtree(base_dir)
             shutil.copytree(settings.PEBBLEJS_ROOT, base_dir)
             manifest_dict = generate_pebblejs_manifest_dict(project, resources)
-            create_source_files(source_files, os.path.join(base_dir, 'src', 'js'))
+            create_source_files(project, base_dir)
 
             for f in resources:
                 if f.kind != 'png':
@@ -144,17 +164,30 @@ def run_compile(build_result):
                     with zipfile.ZipFile(temp_file, 'r') as z:
                         build_result.binary_size = z.getinfo('pebble-app.bin').file_size
                         build_result.resource_size = z.getinfo('app_resources.pbpack').file_size
+                        try:
+                            build_result.worker_size = z.getinfo('pebble-worker.bin').file_size
+                        except KeyError:
+                            pass
                 except Exception as e:
                     print "Couldn't extract filesizes: %s" % e
                 # Try pulling out debug information.
-                elf_file = os.path.join(base_dir, 'build', 'pebble-app.elf')
-                if os.path.exists(elf_file):
+                app_elf_file = os.path.join(base_dir, 'build', 'pebble-app.elf')
+                if os.path.exists(app_elf_file):
                     try:
-                        debug_info = apptools.addr2lines.create_coalesced_group(elf_file)
+                        debug_info = apptools.addr2lines.create_coalesced_group(app_elf_file)
                     except:
                         print traceback.format_exc()
                     else:
                         build_result.save_debug_info(debug_info)
+                worker_elf_file = os.path.join(base_dir, 'build', 'pebble-worker.elf')
+                if os.path.exists(worker_elf_file):
+                    try:
+                        debug_info = apptools.addr2lines.create_coalesced_group(worker_elf_file)
+                    except:
+                        print traceback.format_exc()
+                    else:
+                        build_result.save_worker_debug_info(debug_info)
+
 
                 build_result.save_pbw(temp_file)
             build_result.save_build_log(output)

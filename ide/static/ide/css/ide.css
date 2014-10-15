@@ -129,6 +129,10 @@ ul.nav-pills {
     list-style: none;
 }
 
+#worker-files {
+    margin-top: 0;
+}
+
 /* Editor */
 
 .CodeMirror {
@@ -610,6 +614,11 @@ table.build-results tr.pending .build-state {
     font-weight: bold;
 }
 
+.filename-link {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
 .cm-s-cloudpebble span.cm-autofilled,
 .cm-s-monokai span.cm-autofilled,
 .cm-s-blackboard span.cm-autofilled,
@@ -651,13 +660,29 @@ span.cm-autofilled-end {
     width: 16px;
 }
 
-.line-hint-warning, .gutter-hint-warning {
-    background-color: #82000b;
+.gutter-errors {
+    width: 16px;
 }
 
+.line-hint-warning, .line-clang-warning {
+    background-color: #444623;
+}
+
+.line-clang-error {
+    background-color: #362025;
+}
+
+.cm-s-eclipse .line-clang-error,
+.cm-s-solarized.cm-s-light .line-clang-error {
+    background-color: #ffd9db;
+}
+
+
+.cm-s-eclipse .line-clang-warning,
+.cm-s-solarized.cm-s-light .line-clang-warning,
 .cm-s-eclipse .line-hint-warning,
 .cm-s-solarized.cm-s-light .line-hint-warning {
-    background-color: #FFCBC9;
+    background-color: #fff4b7;
 }
 
 /* Override white icons on the light themes. */
@@ -763,4 +788,19 @@ span.cm-autofilled-end {
 
 .screenshot-holder-tintin-green {
     background-image: url('../img/pebbles/tintin-green.png');
+}
+
+.field-help {
+    vertical-align: middle;
+    margin-bottom: 5px;
+    margin-left: 10px;
+}
+
+#help-prompt-holder {
+    z-index: 2000;
+    position: relative;
+}
+
+#help-prompt-holder > .popover {
+    width: 300px;
 }

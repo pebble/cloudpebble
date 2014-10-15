@@ -1,4 +1,5 @@
 __author__ = 'katharine'
+from django.utils.translation import ugettext as _
 
 
 def find_project_root(contents):
@@ -30,5 +31,5 @@ def find_project_root(contents):
             continue
         break
     else:
-        raise Exception("No project root found.")
+        raise Exception(_("No project root found."))
     return base_dir
