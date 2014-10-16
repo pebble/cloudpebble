@@ -98,6 +98,51 @@
         "returns": "", 
         "warning": null
     }, 
+    "APP_LAUNCH_PHONE": {
+        "description": "<p>App launched by mobile or companion app. </p>", 
+        "kind": "enum", 
+        "name": "APP_LAUNCH_PHONE", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "APP_LAUNCH_SYSTEM": {
+        "description": "<p>App launched by the system. </p>", 
+        "kind": "enum", 
+        "name": "APP_LAUNCH_SYSTEM", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "APP_LAUNCH_USER": {
+        "description": "<p>App launched by user selection. </p>", 
+        "kind": "enum", 
+        "name": "APP_LAUNCH_USER", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "APP_LAUNCH_WAKEUP": {
+        "description": "<p>App launched by wakeup event. </p>", 
+        "kind": "enum", 
+        "name": "APP_LAUNCH_WAKEUP", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "APP_LAUNCH_WORKER": {
+        "description": "<p>App launched by worker calling <code>worker_launch_app()</code> </p>", 
+        "kind": "enum", 
+        "name": "APP_LAUNCH_WORKER", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
     "APP_LOG": {
         "description": "<p>A helper macro that simplifies the use of the <code>app_log</code> function. </p>", 
         "kind": "def", 
@@ -359,6 +404,15 @@
         "returns": "", 
         "warning": null
     }, 
+    "AccelAxisType": {
+        "description": "", 
+        "kind": "typedef", 
+        "name": "AccelAxisType", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
     "AccelDataHandler": {
         "description": "<p>Callback type for accelerometer data events. </p>", 
         "kind": "typedef", 
@@ -377,6 +431,15 @@
         "returns": "void(*", 
         "warning": null
     }, 
+    "AccelSamplingRate": {
+        "description": "<p>Valid accelerometer sampling rates, in Hz. </p>", 
+        "kind": "typedef", 
+        "name": "AccelSamplingRate", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
     "AccelTapHandler": {
         "description": "<p>Callback type for accelerometer tap events. </p>", 
         "kind": "typedef", 
@@ -393,6 +456,15 @@
         "params": [], 
         "return_desc": null, 
         "returns": "struct ActionBarLayer", 
+        "warning": null
+    }, 
+    "AnimationCurve": {
+        "description": "<p>Values that are used to indicate the different animation curves, which determine the speed at which the animated value(s) change(s). </p>", 
+        "kind": "typedef", 
+        "name": "AnimationCurve", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
         "warning": null
     }, 
     "AnimationCurveCustomFunction": {
@@ -444,6 +516,33 @@
         "description": "<p>Linear curve: the velocity is constant. </p>", 
         "kind": "enum", 
         "name": "AnimationCurveLinear", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "AnimationCurve_Reserved1": {
+        "description": "<p>Reserved for forward-compatibility use. </p>", 
+        "kind": "enum", 
+        "name": "AnimationCurve_Reserved1", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "AnimationCurve_Reserved2": {
+        "description": "", 
+        "kind": "enum", 
+        "name": "AnimationCurve_Reserved2", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "AnimationCurve_Reserved3": {
+        "description": "", 
+        "kind": "enum", 
+        "name": "AnimationCurve_Reserved3", 
         "params": [], 
         "return_desc": null, 
         "returns": "", 
@@ -503,6 +602,24 @@
         "returns": "void(*", 
         "warning": null
     }, 
+    "AppLaunchReason": {
+        "description": "<p>AppLaunchReason is used to inform the application about how it was launched. </p>", 
+        "kind": "typedef", 
+        "name": "AppLaunchReason", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "AppLogLevel": {
+        "description": "<p>Suggested log level values. </p>", 
+        "kind": "typedef", 
+        "name": "AppLogLevel", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
     "AppMessageInboxDropped": {
         "description": "<p><code>app_message_outbox_begin()</code> from this handler to prepare a new message. This will invalidate the previous dictionary iterator; do not use it after calling <code>app_message_outbox_begin()</code>. </p>", 
         "kind": "typedef", 
@@ -537,6 +654,15 @@
         "params": [], 
         "return_desc": null, 
         "returns": "void(*", 
+        "warning": null
+    }, 
+    "AppMessageResult": {
+        "description": "<p>AppMessage result codes. </p>", 
+        "kind": "typedef", 
+        "name": "AppMessageResult", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
         "warning": null
     }, 
     "AppSyncErrorCallback": {
@@ -582,6 +708,15 @@
         "params": [], 
         "return_desc": null, 
         "returns": "void(*", 
+        "warning": null
+    }, 
+    "AppWorkerResult": {
+        "description": "<p>Possible error codes from <code>app_worker_launch</code>, <code>app_worker_kill</code>. </p>", 
+        "kind": "typedef", 
+        "name": "AppWorkerResult", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
         "warning": null
     }, 
     "BUTTON_ID_BACK": {
@@ -647,6 +782,15 @@
         "returns": "void(*", 
         "warning": null
     }, 
+    "ButtonId": {
+        "description": "<p>Button ID values. </p>", 
+        "kind": "typedef", 
+        "name": "ButtonId", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
     "ClickConfigProvider": {
         "description": "<p>Subscribe to click events using <code>window_single_click_subscribe()</code> <code>window_single_repeating_click_subscribe()</code> <code>window_multi_click_subscribe()</code> <code>window_long_click_subscribe()</code> <code>window_raw_click_subscribe()</code> These subscriptions will get used by the click recognizers of each of the 4 buttons.", 
         "kind": "typedef", 
@@ -690,6 +834,15 @@
         "params": [], 
         "return_desc": null, 
         "returns": "void(*", 
+        "warning": null
+    }, 
+    "CompassStatus": {
+        "description": "<p>Enum describing the current state of the Compass Service calibration. </p>", 
+        "kind": "typedef", 
+        "name": "CompassStatus", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
         "warning": null
     }, 
     "CompassStatusCalibrated": {
@@ -854,6 +1007,24 @@
         "returns": "", 
         "warning": null
     }, 
+    "DataLoggingItemType": {
+        "description": "<p>The different types of session data that Pebble supports. This type describes the type of a singular item in the data session. Every item in a given session is the same type and size. </p>", 
+        "kind": "typedef", 
+        "name": "DataLoggingItemType", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "DataLoggingResult": {
+        "description": "", 
+        "kind": "typedef", 
+        "name": "DataLoggingResult", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
     "DataLoggingSessionRef": {
         "description": "", 
         "kind": "typedef", 
@@ -879,6 +1050,15 @@
         "params": [], 
         "return_desc": null, 
         "returns": "void(*", 
+        "warning": null
+    }, 
+    "DictionaryResult": {
+        "description": "<p>Return values for dictionary write/conversion functions. </p>", 
+        "kind": "typedef", 
+        "name": "DictionaryResult", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
         "warning": null
     }, 
     "DictionarySerializeCallback": {
@@ -989,6 +1169,24 @@
         "returns": "", 
         "warning": null
     }, 
+    "FRIDAY": {
+        "description": "<p>Friday. </p>", 
+        "kind": "enum", 
+        "name": "FRIDAY", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "GAlign": {
+        "description": "<p>Values to specify how two things should be aligned relative to each other. .\n </p>", 
+        "kind": "typedef", 
+        "name": "GAlign", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
     "GAlignBottom": {
         "description": "<p>Align by making the bottom edges overlap and centered horizontally. </p>", 
         "kind": "enum", 
@@ -1070,6 +1268,15 @@
         "returns": "", 
         "warning": null
     }, 
+    "GColor": {
+        "description": "<p>Color values. </p>", 
+        "kind": "typedef", 
+        "name": "GColor", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
     "GColorBlack": {
         "description": "<p>Represents black. </p>", 
         "kind": "enum", 
@@ -1092,6 +1299,15 @@
         "description": "<p>Represents white. </p>", 
         "kind": "enum", 
         "name": "GColorWhite", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "GCompOp": {
+        "description": "<p>There is no notion of \"transparency\" in the graphics system. However, the effect of transparency can be created by masking and using compositing modes. \n Contrived example of how the different compositing modes affect drawing. Often, the \"destination image\" is the render buffer and thus contains the image of what has been drawn before or \"underneath\". \n\n\n</p>", 
+        "kind": "typedef", 
+        "name": "GCompOp", 
         "params": [], 
         "return_desc": null, 
         "returns": "", 
@@ -1173,6 +1389,15 @@
         "description": "<p>Bottom-Right corner. </p>", 
         "kind": "enum", 
         "name": "GCornerBottomRight", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "GCornerMask": {
+        "description": "<p>Bit mask values to specify the corners of a rectangle. The values can be combines using binary OR (|), For example: the mask to indicate top left and bottom right corners can: be created as follows: (GCornerTopLeft | GCornerBottomRight) </p>", 
+        "kind": "typedef", 
+        "name": "GCornerMask", 
         "params": [], 
         "return_desc": null, 
         "returns": "", 
@@ -1367,6 +1592,15 @@
         "returns": "", 
         "warning": null
     }, 
+    "GTextAlignment": {
+        "description": "<p>Text aligment controls the way the text is aligned inside the box the text is drawn into. </p>", 
+        "kind": "typedef", 
+        "name": "GTextAlignment", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
     "GTextAlignmentCenter": {
         "description": "<p>Aligns the text centered inside the drawing box. </p>", 
         "kind": "enum", 
@@ -1401,6 +1635,15 @@
         "params": [], 
         "return_desc": null, 
         "returns": "TextLayout *", 
+        "warning": null
+    }, 
+    "GTextOverflowMode": {
+        "description": "<p>Text overflow mode controls the way text overflows when the string that is drawn does not fit inside the area constraint. </p>", 
+        "kind": "typedef", 
+        "name": "GTextOverflowMode", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
         "warning": null
     }, 
     "GTextOverflowModeFill": {
@@ -1515,6 +1758,15 @@
         "description": "<p>Flag to represent the \"minutes\" time unit. </p>", 
         "kind": "enum", 
         "name": "MINUTE_UNIT", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "MONDAY": {
+        "description": "<p>Monday. </p>", 
+        "kind": "enum", 
+        "name": "MONDAY", 
         "params": [], 
         "return_desc": null, 
         "returns": "", 
@@ -1637,6 +1889,15 @@
         "returns": "void(*", 
         "warning": null
     }, 
+    "MenuRowAlign": {
+        "description": "<p>Values to specify how a (selected) row should be aligned relative to the visible area of the MenuLayer. </p>", 
+        "kind": "typedef", 
+        "name": "MenuRowAlign", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
     "MenuRowAlignBottom": {
         "description": "<p>Scroll the contents of the MenuLayer in such way that the selected row is at the bottom of the visible area. </p>", 
         "kind": "enum", 
@@ -1686,15 +1947,6 @@
         "description": "<p>Total number of buttons. </p>", 
         "kind": "enum", 
         "name": "NUM_BUTTONS", 
-        "params": [], 
-        "return_desc": null, 
-        "returns": "", 
-        "warning": null
-    }, 
-    "NumSystemAnimationCurve": {
-        "description": "<p>Number of available system AnimationCurve types. </p>", 
-        "kind": "enum", 
-        "name": "NumSystemAnimationCurve", 
         "params": [], 
         "return_desc": null, 
         "returns": "", 
@@ -1754,13 +2006,22 @@
         "returns": "", 
         "warning": null
     }, 
+    "RESOURCE_ID_FONT_FALLBACK": {
+        "description": "", 
+        "kind": "def", 
+        "name": "RESOURCE_ID_FONT_FALLBACK", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
     "ResHandle": {
         "description": "<p>Opaque reference to a resource. </p>", 
         "kind": "typedef", 
         "name": "ResHandle", 
         "params": [], 
         "return_desc": null, 
-        "returns": "uint32_t", 
+        "returns": "void *", 
         "warning": null
     }, 
     "RotBitmapLayer": {
@@ -1770,6 +2031,15 @@
         "params": [], 
         "return_desc": null, 
         "returns": "struct RotBitmapLayer", 
+        "warning": null
+    }, 
+    "SATURDAY": {
+        "description": "<p>Saturday. </p>", 
+        "kind": "enum", 
+        "name": "SATURDAY", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
         "warning": null
     }, 
     "SECOND_UNIT": {
@@ -1794,6 +2064,15 @@
         "description": "<p>Reduce the sniff interval to increase the responsiveness of the radio at the expense of increasing Bluetooth energy consumption by a multiple of 2-5 (very significant) </p>", 
         "kind": "enum", 
         "name": "SNIFF_INTERVAL_REDUCED", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "SUNDAY": {
+        "description": "<p>Sunday. </p>", 
+        "kind": "enum", 
+        "name": "SUNDAY", 
         "params": [], 
         "return_desc": null, 
         "returns": "", 
@@ -1880,6 +2159,42 @@
         "returns": "void(*", 
         "warning": null
     }, 
+    "SniffInterval": {
+        "description": "<p>Intervals during which the Bluetooth module may enter a low power mode. The sniff interval defines the period during which the Bluetooth module may not exchange (ACL) packets. The longer the sniff interval, the more time the Bluetooth module may spend in a low power mode. It may be necessary to reduce the sniff interval if an app requires reduced latency when sending messages. </p>", 
+        "kind": "typedef", 
+        "name": "SniffInterval", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": "<p>These settings have a dramatic effect on the Pebble's energy consumption. Use the normal sniff interval whenever possible. Note, however, that switching between modes increases power consumption during the process. Frequent switching between modes is thus discouraged. Ensure you do not drop to normal frequently. The Bluetooth module is a major consumer of the Pebble's energy. </p>"
+    }, 
+    "StatusCode": {
+        "description": "<p>Status codes. See <code>status_t</code>. </p>", 
+        "kind": "typedef", 
+        "name": "StatusCode", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "THURSDAY": {
+        "description": "<p>Thursday. </p>", 
+        "kind": "enum", 
+        "name": "THURSDAY", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "TODAY": {
+        "description": "<p>Today. </p>", 
+        "kind": "enum", 
+        "name": "TODAY", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
     "TRIGANGLE_TO_DEG": {
         "description": "<p>Converts from a fixed point value representation of <code>trig_angle</code> to the equivalent value in degrees. </p>", 
         "kind": "def", 
@@ -1902,6 +2217,15 @@
         "description": "<p>The largest value that can result from a call to <code>sin_lookup</code> or <code>cos_lookup</code>. For a code example, see the detailed description at the top of this chapter: Math. </p>", 
         "kind": "def", 
         "name": "TRIG_MAX_RATIO", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "TUESDAY": {
+        "description": "<p>Tuesday. </p>", 
+        "kind": "enum", 
+        "name": "TUESDAY", 
         "params": [], 
         "return_desc": null, 
         "returns": "", 
@@ -1968,6 +2292,24 @@
         "params": [], 
         "return_desc": null, 
         "returns": "void(*", 
+        "warning": null
+    }, 
+    "TimeUnits": {
+        "description": "<p>Time unit flags that can be used to create a bitmask for use in <code>tick_timer_service_subscribe()</code>. This will also be passed to TickHandler. </p>", 
+        "kind": "typedef", 
+        "name": "TimeUnits", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "TupleType": {
+        "description": "<p>Values representing the type of data that the value field of a Tuple contains. </p>", 
+        "kind": "typedef", 
+        "name": "TupleType", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
         "warning": null
     }, 
     "TupletBytes": {
@@ -2163,6 +2505,60 @@
         "description": "<p>Unknown model. </p>", 
         "kind": "enum", 
         "name": "WATCH_INFO_MODEL_UNKNOWN", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "WEDNESDAY": {
+        "description": "<p>Wednesday. </p>", 
+        "kind": "enum", 
+        "name": "WEDNESDAY", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "WakeupHandler": {
+        "description": "<p>The type of function which can be called when a wakeup event occurs. The arguments will be the id of the wakeup event that occurred, as well as the scheduled cookie provided to <code>app_wakeup_schedule</code>. </p>", 
+        "kind": "typedef", 
+        "name": "WakeupHandler", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "void(*", 
+        "warning": null
+    }, 
+    "WakeupId": {
+        "description": "<p>WakeupId is an identifier for a wakeup event. </p>", 
+        "kind": "typedef", 
+        "name": "WakeupId", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "int32_t", 
+        "warning": null
+    }, 
+    "WatchInfoColor": {
+        "description": "<p>The different watch colors. </p>", 
+        "kind": "typedef", 
+        "name": "WatchInfoColor", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "WatchInfoModel": {
+        "description": "<p>The different watch models. </p>", 
+        "kind": "typedef", 
+        "name": "WatchInfoModel", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "WeekDay": {
+        "description": "<p>Weekday values. </p>", 
+        "kind": "typedef", 
+        "name": "WeekDay", 
         "params": [], 
         "return_desc": null, 
         "returns": "", 
@@ -3502,6 +3898,40 @@
         "returns": "bool", 
         "warning": null
     }, 
+    "clock_is_timezone_set": {
+        "description": "<p>Checks if timezone is currently set, otherwise gmtime == localtime. </p>", 
+        "kind": "fn", 
+        "name": "clock_is_timezone_set", 
+        "params": [], 
+        "return_desc": "<p>true if timezone has been set, false otherwise </p>", 
+        "returns": "bool", 
+        "warning": "<p>This function was added in preparation of timezone support, currently always returns false </p>"
+    }, 
+    "clock_to_timestamp": {
+        "description": "<p>Converts a (day, hour, minute) specification to a UTC timestamp occurring in the future Always returns a timestamp for the next occurring instance, example: specifying TODAY@14:30 when it is 14:40 will return a timestamp for 7 days from now at 14:30. </p>", 
+        "kind": "fn", 
+        "name": "clock_to_timestamp", 
+        "params": [
+            {
+                "description": "<p>WeekDay day of week including support for specifying TODAY </p>", 
+                "name": "day", 
+                "type": "WeekDay"
+            }, 
+            {
+                "description": "<p>hour specified in 24-hour format [0-23] </p>", 
+                "name": "hour", 
+                "type": "int"
+            }, 
+            {
+                "description": "<p>minute [0-59] </p>", 
+                "name": "minute", 
+                "type": "int"
+            }
+        ], 
+        "return_desc": null, 
+        "returns": "time_t", 
+        "warning": "<p>This function does not support Daylight Saving Time (DST) changes, events scheduled during a DST change will be off by an hour. </p>"
+    }, 
     "compass_service_peek": {
         "description": "<p>Peek at the last recorded reading. </p>", 
         "kind": "fn", 
@@ -4222,7 +4652,7 @@
         "name": "fonts_load_custom_font", 
         "params": [
             {
-                "description": "<p>The resource handle of the font to load. See <code>resource_ids</code>.auto.h for a list of resource IDs, and use \ref resource_get_handle() to obtain the resource handle. </p>", 
+                "description": null, 
                 "name": "handle", 
                 "type": "ResHandle"
             }
@@ -4348,7 +4778,7 @@
         "params": [
             {
                 "description": null, 
-                "name": "path", 
+                "name": "gpath", 
                 "type": "GPath *"
             }
         ], 
@@ -4360,26 +4790,6 @@
         "description": "<p>Draws the fill of a path into a graphics context, using the current fill color, relative to the drawing area as set up by the layering system. </p>", 
         "kind": "fn", 
         "name": "gpath_draw_filled", 
-        "params": [
-            {
-                "description": "<p>The graphics context to draw into </p>", 
-                "name": "ctx", 
-                "type": "GContext *"
-            }, 
-            {
-                "description": "<p>The path to fill </p>", 
-                "name": "path", 
-                "type": "GPath *"
-            }
-        ], 
-        "return_desc": null, 
-        "returns": "void", 
-        "warning": null
-    }, 
-    "gpath_draw_filled_legacy": {
-        "description": "<p>Version of <code>gpath_draw_filled()</code> with legacy fill behaviour and strange rounding quirks, noticable when filling and outlining the same shape. This function is not recommended for use in new apps. It is provided here for app developers who were relying on the previous buggy behaviour, in order to allow a more gradual migration to the new behaviour. </p>", 
-        "kind": "fn", 
-        "name": "gpath_draw_filled_legacy", 
         "params": [
             {
                 "description": "<p>The graphics context to draw into </p>", 
@@ -5117,6 +5527,15 @@
         ], 
         "return_desc": "<p>The \"root\" Layer of the inverter layer. </p>", 
         "returns": "Layer *", 
+        "warning": null
+    }, 
+    "launch_reason": {
+        "description": "<p>Provides the method used to launch the current application. </p>", 
+        "kind": "fn", 
+        "name": "launch_reason", 
+        "params": [], 
+        "return_desc": "<p>The method or reason the current application was launched </p>", 
+        "returns": "AppLaunchReason", 
         "warning": null
     }, 
     "layer_add_child": {
@@ -7318,6 +7737,110 @@
         "kind": "fn", 
         "name": "vibes_short_pulse", 
         "params": [], 
+        "return_desc": null, 
+        "returns": "void", 
+        "warning": null
+    }, 
+    "wakeup_cancel": {
+        "description": "<p>Cancels a wakeup event. </p>", 
+        "kind": "fn", 
+        "name": "wakeup_cancel", 
+        "params": [
+            {
+                "description": "<p>Wakeup event to cancel </p>", 
+                "name": "wakeup_id", 
+                "type": "WakeupId"
+            }
+        ], 
+        "return_desc": null, 
+        "returns": "void", 
+        "warning": null
+    }, 
+    "wakeup_cancel_all": {
+        "description": "<p>Cancels all wakeup event for the app. </p>", 
+        "kind": "fn", 
+        "name": "wakeup_cancel_all", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "void", 
+        "warning": null
+    }, 
+    "wakeup_get_launch_event": {
+        "description": "<p>Retrieves the wakeup event info for an app that was launched by a <code>wakeup_event</code> (ie. <code>launch_reason()</code> === <code>APP_LAUNCH_WAKEUP</code>) so that an app may display information regarding the wakeup event. </p>", 
+        "kind": "fn", 
+        "name": "wakeup_get_launch_event", 
+        "params": [
+            {
+                "description": "<p>WakeupId for the wakeup event that caused the app to wakeup </p>", 
+                "name": "wakeup_id", 
+                "type": "WakeupId *"
+            }, 
+            {
+                "description": "<p>App provided reason for the wakeup event </p>", 
+                "name": "cookie", 
+                "type": "int32_t *"
+            }
+        ], 
+        "return_desc": "<p>True if app was launched due to a wakeup event, false otherwise </p>", 
+        "returns": "bool", 
+        "warning": null
+    }, 
+    "wakeup_query": {
+        "description": "<p>Checks if the current WakeupId is still scheduled and therefore valid,. </p>", 
+        "kind": "fn", 
+        "name": "wakeup_query", 
+        "params": [
+            {
+                "description": "<p>Wakeup event to query for validity and scheduled time </p>", 
+                "name": "wakeup_id", 
+                "type": "WakeupId"
+            }, 
+            {
+                "description": "<p>Time (in UTC, but local time when <code>clock_is_timezone_set</code> returns false) that the wakeup event is scheduled to occur </p>", 
+                "name": "timestamp", 
+                "type": "time_t *"
+            }
+        ], 
+        "return_desc": "<p>True if WakeupId is still scheduled, false if it doesn't exist or has already occurred </p>", 
+        "returns": "bool", 
+        "warning": null
+    }, 
+    "wakeup_schedule": {
+        "description": "<p>Registers a wakeup event that triggers a callback at the specified time. Applications may only schedule up to 8 wakeup events. Wakeup events are given a 1 minute duration window, in that no application may schedule a wakeup event with 1 minute of a currently scheduled wakeup event. </p>", 
+        "kind": "fn", 
+        "name": "wakeup_schedule", 
+        "params": [
+            {
+                "description": "<p>The requested time (UTC) for the wakeup event to occur </p>", 
+                "name": "timestamp", 
+                "type": "time_t"
+            }, 
+            {
+                "description": "<p>The application specific reason for the wakeup event </p>", 
+                "name": "cookie", 
+                "type": "int32_t"
+            }, 
+            {
+                "description": "<p>On powering on Pebble, will alert user when notifications were missed due to Pebble being off. </p>", 
+                "name": "notify_if_missed", 
+                "type": "bool"
+            }
+        ], 
+        "return_desc": "<p>negative values indicate errors (StatusCode) <code>E_RANGE</code> if the event cannot be scheduled due to another event in that period. <code>E_INVALID_ARGUMENT</code> if the time requested is in the past. <code>E_OUT_OF_RESOURCES</code> if the application has already scheduled all 8 wakeup events. <code>E_INTERNAL</code> if a system error occurred during scheduling. </p>", 
+        "returns": "WakeupId", 
+        "warning": null
+    }, 
+    "wakeup_service_subscribe": {
+        "description": "<p>Registers a WakeupHandler to be called when wakeup events occur. </p>", 
+        "kind": "fn", 
+        "name": "wakeup_service_subscribe", 
+        "params": [
+            {
+                "description": "<p>The callback that gets called when the wakeup event occurs </p>", 
+                "name": "handler", 
+                "type": "WakeupHandler"
+            }
+        ], 
         "return_desc": null, 
         "returns": "void", 
         "warning": null
