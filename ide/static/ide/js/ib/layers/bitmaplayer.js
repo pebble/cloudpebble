@@ -9,7 +9,7 @@
     IB.BitmapLayer = function(canvas, id) {
         IB.Layer.call(this, canvas, id);
         this._resource = new IB.Properties.Bitmap(gettext("Image"), '');
-        this._bg_colour = new IB.Properties.Colour(gettext("Background"), IB.ColourClear);
+        this._bg_colour = new IB.Properties.Colour(pgettext("background colour", "Background"), IB.ColourClear);
         this._has_changed_image = false;
         this._node.addClass('ib-bitmaplayer');
         this.setSize(40, 40);

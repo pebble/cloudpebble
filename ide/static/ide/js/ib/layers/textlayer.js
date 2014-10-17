@@ -15,7 +15,7 @@
             text: new IB.Properties.Text(gettext("Text"), pgettext("sample text", "Text layer")),
             font: new IB.Properties.Font(gettext("Font"), "GOTHIC_14_BOLD"),
             fg: new IB.Properties.Colour(gettext("Text colour"), IB.ColourBlack),
-            bg: new IB.Properties.Colour(gettext("Background"), IB.ColourWhite),
+            bg: new IB.Properties.Colour(pgettext("background colour", "Background"), IB.ColourWhite),
             align: new IB.Properties.MultipleChoice(pgettext("horizontal text positioning", "Alignment"), {
                 "GTextAlignmentLeft": gettext("Left"),
                 "GTextAlignmentCenter": gettext("Centre"),

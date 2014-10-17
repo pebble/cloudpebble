@@ -28,7 +28,7 @@
 
         // Window properties
         var mProperties = {
-            bg: new IB.Properties.Colour(gettext("Background"), IB.ColourWhite),
+            bg: new IB.Properties.Colour(pgettext("background colour", "Background"), IB.ColourWhite),
             fullscreen: new IB.Properties.Bool(gettext("Fullscreen"), CloudPebble.ProjectInfo.app_is_watchface)
         };
         mProperties.bg.on('change', handleBackgroundChange, this);
