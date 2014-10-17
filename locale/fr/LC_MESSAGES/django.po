@@ -861,6 +861,59 @@ msgstr "Ecrivez des applis sans vous soucier de Linux, de machines virtuelles, d
 msgid "Get Started"
 msgstr "Démarrer"
 
+#: root/templates/root/index.html:65
+msgid "Nothing to install"
+msgstr "Rien à installer"
+
+#: root/templates/root/index.html:66
+msgid "Write apps directly in your browser. Skip all setup instructions!"
+msgstr "Ecrivez des applis directement depuis votre navigateur. Aucune installation !"
+
+#: root/templates/root/index.html:70
+msgid "No JSON to edit"
+msgstr "Pas de JSON à modifier"
+
+#: root/templates/root/index.html:71
+msgid "Resources are managed through a friendly user interface"
+msgstr "Les ressources sont gérées par le biais d'une interface conviviale"
+
+#. Translators: This is "cloud" as in the internet, but used as a pun on cloud as in sky.
+#: root/templates/root/index.html:76
+msgid "Cloudy"
+msgstr "Dans le Cloud"
+
+#: root/templates/root/index.html:77
+msgid "It's on the internet. Accessible from anywhere! That's a good thing, right?"
+msgstr "C'est sur internet. Accessible depuis n'importe où ! C'est une bonne chose, non ?"
+
+#: root/templates/root/index.html:81
+msgid "More to come"
+msgstr "Et plus à venir"
+
+#: root/templates/root/index.html:82
+msgid "This is only the beginning!<br>There's much more to come."
+msgstr "C'est juste le début !<br>Bien plus à venir."
+
+#: root/templates/root/index.html:91
+msgid "Log in with legacy account"
+msgstr "Se connecter avec un compte historique"
+
+#: root/templates/root/index.html:96
+msgid "Username"
+msgstr "Identifiant"
+
+#: root/templates/root/index.html:100
+msgid "Password"
+msgstr "Mot de passe"
+
+#: root/templates/root/index.html:108
+msgid "Log in"
+msgstr "Se Connecter"
+
+#: ide/templates/ide/index.html:28 root/templates/root/index.html:20
+msgid "Due to a recent Chrome update, we have been forced to disable TLS site-wide. Security will be re-enabled in a few days."
+msgstr "En raison d'une récente mise à jour de Chrome, nous avons été contraints de désactiver le TLS sur l'ensemble du site. La sécurité sera réactivée dans quelques jours."
+
 #: ide/templates/ide/project/compile.html:9
 msgid "Make sure that the Developer Connection is enabled on your phone, and you are\n"
 "running at least iOS app version 2.5 or Android version 2.1 (beta)."

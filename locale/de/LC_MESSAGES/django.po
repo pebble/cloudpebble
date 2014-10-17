@@ -846,6 +846,59 @@ msgstr "Schreibe Apps ohne dich mit Linux, virtuellen Maschinen, Kompilern oder 
 msgid "Get Started"
 msgstr "Lernen, wie du loslegst"
 
+#: root/templates/root/index.html:65
+msgid "Nothing to install"
+msgstr "Nichts zu installieren"
+
+#: root/templates/root/index.html:66
+msgid "Write apps directly in your browser. Skip all setup instructions!"
+msgstr "Apps direkt in deinem Browser entwickeln und so alle Vorbereitungsschritte überspringen."
+
+#: root/templates/root/index.html:70
+msgid "No JSON to edit"
+msgstr "Kein JSON zum editieren"
+
+#: root/templates/root/index.html:71
+msgid "Resources are managed through a friendly user interface"
+msgstr "Ressourcen werden über eine freundliche Benutzeroberfläche verwaltet"
+
+#. Translators: This is "cloud" as in the internet, but used as a pun on cloud as in sky.
+#: root/templates/root/index.html:76
+msgid "Cloudy"
+msgstr "In der Cloud"
+
+#: root/templates/root/index.html:77
+msgid "It's on the internet. Accessible from anywhere! That's a good thing, right?"
+msgstr "Es ist im Internet. Erreichbar von überall. Das ist gut, oder nicht?"
+
+#: root/templates/root/index.html:81
+msgid "More to come"
+msgstr "Und bald noch viel mehr"
+
+#: root/templates/root/index.html:82
+msgid "This is only the beginning!<br>There's much more to come."
+msgstr "Dies ist nur der Anfang<br>Bald gibt es noch viel mehr."
+
+#: root/templates/root/index.html:91
+msgid "Log in with legacy account"
+msgstr "Mit einem alten CloudPebble-Konto anmelden"
+
+#: root/templates/root/index.html:96
+msgid "Username"
+msgstr "Benutzername"
+
+#: root/templates/root/index.html:100
+msgid "Password"
+msgstr "Passwort"
+
+#: root/templates/root/index.html:108
+msgid "Log in"
+msgstr "Anmelden"
+
+#: ide/templates/ide/index.html:28 root/templates/root/index.html:20
+msgid "Due to a recent Chrome update, we have been forced to disable TLS site-wide. Security will be re-enabled in a few days."
+msgstr "Wegen eines kürzlich erschienenen Chrome-Updates sind wir gezwungen gewesen, TLS auf der gesamten Seite abzuschalten. Sicherheit wird in einigen Tagen wiederhergestellt."
+
 #: ide/templates/ide/project/compile.html:9
 msgid "Make sure that the Developer Connection is enabled on your phone, and you are\n"
 "running at least iOS app version 2.5 or Android version 2.1 (beta)."

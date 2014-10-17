@@ -470,10 +470,6 @@ msgid_plural "%s seconds"
 msgstr[0] "%s seconde"
 msgstr[1] "%s secondes"
 
-#: ide/templates/ide/index.html:28 root/templates/root/index.html:20
-msgid "Due to a recent Chrome update, we have been forced to disable TLS site-wide. Security will be re-enabled in a few days."
-msgstr "En raison d'une récente mise à jour de Chrome, nous avons été contraints de désactiver le TLS sur l'ensemble du site. La sécurité sera réactivée dans quelques jours."
-
 #: ide/static/ide/js/compile.js:86
 msgid "Something went wrong:\n"
 "%s"
