@@ -469,11 +469,11 @@ msgstr "Dissocier compte"
 
 #: ide/templates/ide/settings.html:57
 msgid "Link your GitHub account"
-msgstr "Lier à GitHub"
+msgstr "Associer à GitHub"
 
 #: ide/templates/ide/settings.html:60
 msgid "Connecting your GitHub account enables you to connect your projects to GitHub repositories."
-msgstr "Se lier avec votre compte GitHub permet de connecter vos projets à vos repositories GitHub."
+msgstr "Associer votre compte GitHub permet de connecter vos projets à vos repositories GitHub."
 
 #: ide/templates/ide/project/compile.html:16
 msgid "Install and Run"
@@ -530,7 +530,7 @@ msgstr "Date"
 msgid "Status"
 msgstr "Etat"
 
-#: ide/templates/ide/project/compile.html:50
+#: ide/static/ide/js/ib/layer.js:20
 msgid "Size"
 msgstr "Taille"
 
@@ -880,4 +880,8 @@ msgstr "Démarré:"
 msgctxt "duration"
 msgid "Build time:"
 msgstr "Compilé en:"
+
+#: 
+msgid "Last build"
+msgstr "Dernière compilation"
 

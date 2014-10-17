@@ -202,15 +202,15 @@ msgstr "Nota"
 
 #: ide/static/ide/js/editor.js:771
 msgid "Source files must end in .c or .h"
-msgstr "Los ficheros fuente deben acabar en .c o .h"
+msgstr "Los archivos de código deben acabar en .c o .h"
 
 #: ide/static/ide/js/editor.js:773 ide/static/ide/js/editor.js.c:814
 msgid "A file called '%s' already exists."
-msgstr "Ya existe un fichero llamado'%s'. "
+msgstr "Ya existe un archivo llamado'%s'. "
 
 #: ide/static/ide/js/editor.js:812
 msgid "Source files must end in .js"
-msgstr "Los ficheros fuente deben acabar en .js"
+msgstr "Los archivos de código deben acabar en .js"
 
 #: ide/static/ide/js/editor.js:830
 msgid "You must specify a valid window name using lowercase letters and underscores."
@@ -263,7 +263,7 @@ msgstr "Error: %s"
 
 #: ide/static/ide/js/github.js:195
 msgid "You must provide a commit summary."
-msgstr "Debes proporcionar un resumen de salvado."
+msgstr "Debes proporcionar un resumen de la instantanea."
 
 #: ide/static/ide/js/github.js:226
 msgid "Pull failed: %s"
@@ -331,7 +331,7 @@ msgstr "Debes especificar al menos un recurso."
 
 #: ide/static/ide/js/resources.js:162
 msgid "If specified, this file will replace the current file for this resource, regardless of its filename."
-msgstr "Si se especifica, este archivo reemplazará el fichero actual para este recurso independientemente del nombre del archivo."
+msgstr "Si se especifica, este archivo reemplazará el archivo actual para este recurso independientemente del nombre del archivo."
 
 #: ide/static/ide/js/resources.js:189
 msgid "Preview"
@@ -519,4 +519,111 @@ msgstr "Conectado."
 #: ide/static/ide/js/compile.js:551
 msgid "Right click -> Save Image as..."
 msgstr "Click derecho -> Guardar Imagen como..."
+
+#. If context is the screen, this translation is "Fondo de pantalla"
+#: ide/static/ide/js/ib/canvas.js:31
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:14
+#: ide/static/ide/js/ib/layers/bitmaplayer.js:12
+#: ide/static/ide/js/ib/layers/textlayer.js:18
+msgctxt "background colour"
+msgid "Background"
+msgstr "Fondo"
+
+#: ide/static/ide/js/ib/canvas.js:32
+msgid "Fullscreen"
+msgstr "Pantalla completa"
+
+#: ide/static/ide/js/ib/layer.js:19
+msgid "Position"
+msgstr "Posición"
+
+#: ide/static/ide/js/ib/layer.js:21
+msgid "ID"
+msgstr "ID"
+
+#: ide/static/ide/js/ib/property_view.js:13
+msgid "Delete layer"
+msgstr "Borrar capa"
+
+#: ide/static/ide/js/ib/utils.js:34
+msgid "White"
+msgstr "Blanco"
+
+#: ide/static/ide/js/ib/utils.js:35
+msgid "Black"
+msgstr "Negro"
+
+#: ide/static/ide/js/ib/utils.js:36
+msgid "Transparent"
+msgstr "Transparente"
+
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:15
+msgid "Top icon"
+msgstr "Icono superior"
+
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:16
+msgid "Middle icon"
+msgstr "Icono medio"
+
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:17
+msgid "Bottom icon"
+msgstr "Icono inferior"
+
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:43
+msgid "ActionBarLayer is a Layer that displays a bar on the right edge of the window. The bar can contain up to 3 icons, each corresponding with one of the buttons on the right side of the watch."
+msgstr "ActionBarLayer es una Capa que muestra una barra en el márgen derecho de la ventana. La barra puede contener hasta 3 iconos, cada uno correspondiente con uno de los botones en el lado derecho del reloj."
+
+#: ide/static/ide/js/ib/layers/bitmaplayer.js:11
+msgid "Image"
+msgstr "Imagen"
+
+#: ide/static/ide/js/ib/layers/bitmaplayer.js:27
+msgid "BitmapLayer will display an opaque bitmap image."
+msgstr "BitmapLayer mostrará una imagen en mapa de bits opaco."
+
+#: ide/static/ide/js/ib/layers/inverterlayer.js:16
+msgid "Inverts the colours of the rectangle behind it. Layers in front are unaffected."
+msgstr "Invierte los colores del rectangulo tras él. Las capas de delante no están afectadas."
+
+#: ide/static/ide/js/ib/layers/menulayer.js:18
+msgid "A menu that pulls its content from programmatic callbacks."
+msgstr "Un menú que trae su contenido de llamadas programáticas."
+
+#: ide/static/ide/js/ib/layers/textlayer.js:15
+msgid "Text"
+msgstr "Texto"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:15
+msgctxt "sample text"
+msgid "Text layer"
+msgstr "Capa de Texto"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:16
+msgid "Font"
+msgstr "Fuente"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:17
+msgid "Text colour"
+msgstr "Color de la fuente"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:19
+msgctxt "horizontal text positioning"
+msgid "Alignment"
+msgstr "Alineación"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:20
+msgid "Left"
+msgstr "Izquierda"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:21
+msgid "Centre"
+msgstr "Centro"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:22
+msgid "Right"
+msgstr "Derecha"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:43
+msgid "Displays text."
+msgstr "Muestra texto"
 

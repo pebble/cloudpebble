@@ -50,15 +50,15 @@ msgstr "Binäre Daten"
 
 #: ide/models/files.py:20
 msgid "1-bit PNG"
-msgstr "1-bit PNG"
+msgstr "1-Bit-PNG"
 
 #: ide/models/files.py:21
 msgid "1-bit PNG with transparency"
-msgstr "1-bit PNG mit Transparenz"
+msgstr "1-Bit-PNG mit Transparenz"
 
 #: ide/models/files.py:22
 msgid "True-Type Font"
-msgstr "True-Type-Schrift"
+msgstr "TrueType-Schrift"
 
 #: ide/models/files.py:45
 msgid "Uploaded file too big."
@@ -516,7 +516,7 @@ msgstr "Datum"
 msgid "Status"
 msgstr "Status"
 
-#: ide/templates/ide/project/compile.html:50
+#: ide/static/ide/js/ib/layer.js:20
 msgid "Size"
 msgstr "Größe"
 
@@ -576,7 +576,7 @@ msgstr "PNG mit Transparenz"
 
 #: ide/templates/ide/project/resource.html:14
 msgid "TrueType font"
-msgstr "True-Type-Schrift"
+msgstr "TrueType-Schrift"
 
 #: ide/templates/ide/project/resource.html:15
 msgid "Raw binary blob"
@@ -865,4 +865,8 @@ msgstr "Gestartet:"
 msgctxt "duration"
 msgid "Build time:"
 msgstr "Baudauer:"
+
+#: 
+msgid "Last build"
+msgstr "Letzter Bau"
 

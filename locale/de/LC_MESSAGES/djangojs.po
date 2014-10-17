@@ -521,3 +521,109 @@ msgstr "Verbunden."
 msgid "Right click -> Save Image as..."
 msgstr "Rechtsklick -> Speichere Bild als..."
 
+#: ide/static/ide/js/ib/canvas.js:31
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:14
+#: ide/static/ide/js/ib/layers/bitmaplayer.js:12
+#: ide/static/ide/js/ib/layers/textlayer.js:18
+msgctxt "background colour"
+msgid "Background"
+msgstr "Hintergrund"
+
+#: ide/static/ide/js/ib/canvas.js:32
+msgid "Fullscreen"
+msgstr "Vollbild"
+
+#: ide/static/ide/js/ib/layer.js:19
+msgid "Position"
+msgstr "Position"
+
+#: ide/static/ide/js/ib/layer.js:21
+msgid "ID"
+msgstr "ID"
+
+#: ide/static/ide/js/ib/property_view.js:13
+msgid "Delete layer"
+msgstr "Layer löschen"
+
+#: ide/static/ide/js/ib/utils.js:34
+msgid "White"
+msgstr "Weiß"
+
+#: ide/static/ide/js/ib/utils.js:35
+msgid "Black"
+msgstr "Schwarz"
+
+#: ide/static/ide/js/ib/utils.js:36
+msgid "Transparent"
+msgstr "Transparent"
+
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:15
+msgid "Top icon"
+msgstr "Icon oben"
+
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:16
+msgid "Middle icon"
+msgstr "Icon mitte"
+
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:17
+msgid "Bottom icon"
+msgstr "Icon unten"
+
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:43
+msgid "ActionBarLayer is a Layer that displays a bar on the right edge of the window. The bar can contain up to 3 icons, each corresponding with one of the buttons on the right side of the watch."
+msgstr "ActionBarLayer ist ein Layer, der einen Balken am rechten Rand des Fensters anzeigt. Der Balken kann bis zu 3 Icons enthalten, wobei jedes mit den Knöpfen an der rechten Seite der Uhr korrespondiert."
+
+#: ide/static/ide/js/ib/layers/bitmaplayer.js:11
+msgid "Image"
+msgstr "Bild"
+
+#: ide/static/ide/js/ib/layers/bitmaplayer.js:27
+msgid "BitmapLayer will display an opaque bitmap image."
+msgstr "BitmapLayer wird ein opaques Bild anzeigen."
+
+#: ide/static/ide/js/ib/layers/inverterlayer.js:16
+msgid "Inverts the colours of the rectangle behind it. Layers in front are unaffected."
+msgstr "Invertiert die Farben hinter dem Rechteck. Die Layer im Vordergrund werden davon nicht beeinflusst."
+
+#: ide/static/ide/js/ib/layers/menulayer.js:18
+msgid "A menu that pulls its content from programmatic callbacks."
+msgstr "Ein Menü, das seinen Inhalt durch Callbacks bestimmt."
+
+#: ide/static/ide/js/ib/layers/textlayer.js:15
+msgid "Text"
+msgstr "Text"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:15
+msgctxt "sample text"
+msgid "Text layer"
+msgstr "Textebene"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:16
+msgid "Font"
+msgstr "Schrift"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:17
+msgid "Text colour"
+msgstr "Textfarbe"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:19
+msgctxt "horizontal text positioning"
+msgid "Alignment"
+msgstr "Ausrichtung"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:20
+msgid "Left"
+msgstr "Links"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:21
+msgid "Centre"
+msgstr "Mitte"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:22
+msgid "Right"
+msgstr "Rechts"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:43
+msgid "Displays text."
+msgstr "Zeigt Text an."
+

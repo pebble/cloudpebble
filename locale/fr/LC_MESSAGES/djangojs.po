@@ -524,3 +524,112 @@ msgstr "Connecté"
 msgid "Right click -> Save Image as..."
 msgstr "Clic droit-> Enregistrer l'image sous ..."
 
+#: ide/static/ide/js/ib/canvas.js:31
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:14
+#: ide/static/ide/js/ib/layers/bitmaplayer.js:12
+#: ide/static/ide/js/ib/layers/textlayer.js:18
+msgctxt "background colour"
+msgid "Background"
+msgstr "Arrière-plan"
+
+#: ide/static/ide/js/ib/canvas.js:32
+msgid "Fullscreen"
+msgstr "Plein écran"
+
+#: ide/static/ide/js/ib/layer.js:19
+msgid "Position"
+msgstr "Position"
+
+#: ide/static/ide/js/ib/layer.js:21
+msgid "ID"
+msgstr "ID"
+
+#. Bonjour,
+#. On fait quoi? On traduit "layer" par "couche" ou on laisse "layer"?
+#. Avis souhaités, merci.
+#: ide/static/ide/js/ib/property_view.js:13
+msgid "Delete layer"
+msgstr "Supprimer le layer "
+
+#: ide/static/ide/js/ib/utils.js:34
+msgid "White"
+msgstr "Blanc"
+
+#: ide/static/ide/js/ib/utils.js:35
+msgid "Black"
+msgstr "Noir"
+
+#: ide/static/ide/js/ib/utils.js:36
+msgid "Transparent"
+msgstr "Transparent "
+
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:15
+msgid "Top icon"
+msgstr "Icône du haut"
+
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:16
+msgid "Middle icon"
+msgstr "Icône du milieu "
+
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:17
+msgid "Bottom icon"
+msgstr "Icône du bas"
+
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:43
+msgid "ActionBarLayer is a Layer that displays a bar on the right edge of the window. The bar can contain up to 3 icons, each corresponding with one of the buttons on the right side of the watch."
+msgstr "ActionBarLayer est un layer qui affiche une barre sur le côte droit de la fenêtre. La barre peut contenir jusqu'à 3 icônes, chacune correspondant à un des boutons du côté droit de la montre."
+
+#: ide/static/ide/js/ib/layers/bitmaplayer.js:11
+msgid "Image"
+msgstr "Image"
+
+#: ide/static/ide/js/ib/layers/bitmaplayer.js:27
+msgid "BitmapLayer will display an opaque bitmap image."
+msgstr "BitmapLayer affichera une image bitmap opaque."
+
+#: ide/static/ide/js/ib/layers/inverterlayer.js:16
+msgid "Inverts the colours of the rectangle behind it. Layers in front are unaffected."
+msgstr "Inverse les couleurs du rectangle en-dessous de celui-ci. Les layers au-dessus ne sont pas affectés."
+
+#: ide/static/ide/js/ib/layers/menulayer.js:18
+msgid "A menu that pulls its content from programmatic callbacks."
+msgstr "Un menu qui construit son contenu à partir de callbacks "
+
+#: ide/static/ide/js/ib/layers/textlayer.js:15
+msgid "Text"
+msgstr "Texte "
+
+#: ide/static/ide/js/ib/layers/textlayer.js:15
+msgctxt "sample text"
+msgid "Text layer"
+msgstr "Layer de texte"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:16
+msgid "Font"
+msgstr "Police "
+
+#: ide/static/ide/js/ib/layers/textlayer.js:17
+msgid "Text colour"
+msgstr "Couleur du texte "
+
+#: ide/static/ide/js/ib/layers/textlayer.js:19
+msgctxt "horizontal text positioning"
+msgid "Alignment"
+msgstr "Alignement "
+
+#: ide/static/ide/js/ib/layers/textlayer.js:20
+msgid "Left"
+msgstr "Gauche"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:21
+msgid "Centre"
+msgstr "Centre"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:22
+msgid "Right"
+msgstr "Droite"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:43
+msgid "Displays text."
+msgstr "Affiche du texte. "
+

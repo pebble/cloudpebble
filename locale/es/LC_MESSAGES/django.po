@@ -30,7 +30,7 @@ msgstr "URL de GitHub no válida."
 
 #: ide/api/source.py:92
 msgid "Could not save: file has been modified since last save."
-msgstr "No se puede salvar: el archivo ha sido modificado desde el último guardado."
+msgstr "No se puede guardar: el archivo ha sido modificado desde la última vez."
 
 #: ide/static/ide/js/compile.js:5
 msgid "Pending"
@@ -92,7 +92,7 @@ msgstr "Plantilla"
 #. This should be there same than the other word in the dictionary 'SDK Demos': or 'Ejemplos de SDK' or 'Demos de SDK' but no different translations like now.
 #: ide/models/project.py:84
 msgid "SDK Demo"
-msgstr "Ejemplo de SDK"
+msgstr "Ejemplo del SDK"
 
 #: ide/models/project.py:85
 msgid "Example"
@@ -226,7 +226,7 @@ msgstr "Plantillas Estándar"
 
 #: ide/templates/ide/index.html:103
 msgid "SDK demos"
-msgstr "Demos de SDK"
+msgstr "Ejemplos del SDK"
 
 #: ide/templates/ide/index.html:110
 msgid "Examples"
@@ -355,11 +355,11 @@ msgstr "Descripción <span class=\"muted\">(opcional)</span>"
 
 #: ide/templates/ide/project.html:211 ide/templates/ide/project/github.html:47
 msgid "Push New Commit"
-msgstr "Enviar salvado nuevo"
+msgstr "Enviar nueva instantanea"
 
 #: ide/templates/ide/project.html:217
 msgid "Commit Summary"
-msgstr "Resumen del salvado"
+msgstr "Resumen de la instantanea"
 
 #: ide/templates/ide/project.html:219
 msgctxt "sample commit summary"
@@ -372,20 +372,20 @@ msgstr "Descripción extendida <span class=\"muted\">(opcional)</span>"
 
 #: ide/templates/ide/project.html:234
 msgid "Commit"
-msgstr "Salvado"
+msgstr "Instantanea"
 
 #: ide/templates/ide/project.html:241 ide/templates/ide/project/github.html:48
 msgid "Pull Latest Commit"
-msgstr "Recuperar último salvado"
+msgstr "Recibir instantanea más reciente"
 
 #: ide/templates/ide/project.html:245
 msgid "<p>Are you sure you want to pull the latest commit? Doing so will <em>overwrite</em> everything currently in your project.</p>\n"
 "<p>There will be no further warnings and no opportunity to merge. This cannot be undone.</p>"
-msgstr "<p>¿Estás seguro de querer recuperar el último salvado? Si lo haces <em>sobreescribirás</em> todo en tu proyecto actual.</p> <p>No habrán más avisos ni ocasión de mezclar. No se puede deshacer.</p>"
+msgstr "<p>¿Estás seguro de querer recuperar la instantanea más reciente? Si lo haces <em>sobreescribirás</em> todo en tu proyecto actual.</p> <p>No habrán más avisos ni ocasión de mezclar. No se puede deshacer.</p>"
 
 #: ide/templates/ide/project.html:249
 msgid "Pulling latest commit from GitHub…"
-msgstr "Recuperando último salvado desde GitHub..."
+msgstr "Recuperando instantanea más reciente desde GitHub…"
 
 #: ide/templates/ide/project.html:257
 msgctxt "button label"
@@ -515,7 +515,7 @@ msgstr "Fecha"
 msgid "Status"
 msgstr "Estado"
 
-#: ide/templates/ide/project/compile.html:50
+#: ide/static/ide/js/ib/layer.js:20
 msgid "Size"
 msgstr "Tamaño"
 
@@ -866,4 +866,8 @@ msgstr "Empezado:"
 msgctxt "duration"
 msgid "Build time:"
 msgstr "Tiempo de compilación:"
+
+#: 
+msgid "Last build"
+msgstr "Última compilación"
 
