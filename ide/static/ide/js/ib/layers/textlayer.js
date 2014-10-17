@@ -12,14 +12,14 @@
         this._expectingFontChange = false;
 
         _.extend(this._properties, {
-            text: new IB.Properties.Text("Text", "Text layer"),
-            font: new IB.Properties.Font("Font", "GOTHIC_14_BOLD"),
-            fg: new IB.Properties.Colour("Text colour", IB.ColourBlack),
-            bg: new IB.Properties.Colour("Background", IB.ColourWhite),
-            align: new IB.Properties.MultipleChoice("Alignment", {
-                "GTextAlignmentLeft": "Left",
-                "GTextAlignmentCenter": "Centre",
-                "GTextAlignmentRight": "Right"
+            text: new IB.Properties.Text(gettext("Text"), pgettext("sample text", "Text layer")),
+            font: new IB.Properties.Font(gettext("Font"), "GOTHIC_14_BOLD"),
+            fg: new IB.Properties.Colour(gettext("Text colour"), IB.ColourBlack),
+            bg: new IB.Properties.Colour(gettext("Background"), IB.ColourWhite),
+            align: new IB.Properties.MultipleChoice(pgettext("horizontal text positioning", "Alignment"), {
+                "GTextAlignmentLeft": gettext("Left"),
+                "GTextAlignmentCenter": gettext("Centre"),
+                "GTextAlignmentRight": gettext("Right")
             }, "GTextAlignmentLeft"),
         });
         this._text = this._properties.text;
@@ -40,7 +40,7 @@
     IB.TextLayer.prototype = Object.create(IB.Layer.prototype);
     IB.TextLayer.prototype.constructor = IB.TextLayer;
     IB.TextLayer.className = 'TextLayer';
-    IB.TextLayer.description = "Displays text.";
+    IB.TextLayer.description = gettext("Displays text.");
     _.extend(IB.TextLayer.prototype, {
         render: function(parent) {
             IB.Layer.prototype.render.call(this, parent);

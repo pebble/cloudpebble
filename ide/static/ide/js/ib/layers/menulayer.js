@@ -15,7 +15,7 @@
     IB.MenuLayer.prototype = Object.create(IB.Layer.prototype);
     IB.MenuLayer.prototype.constructor = IB.MenuLayer;
     IB.MenuLayer.className = 'MenuLayer';
-    IB.MenuLayer.description = 'A menu that pulls its content from programmatic callbacks.';
+    IB.MenuLayer.description = gettext('A menu that pulls its content from programmatic callbacks.');
     _.extend(IB.MenuLayer.prototype, {
         render: function(parent) {
             IB.Layer.prototype.render.call(this, parent);

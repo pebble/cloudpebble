@@ -16,9 +16,9 @@
                             position: 'absolute'
                         });
         this._properties = {
-            pos: new IB.Properties.Pos("Position", new IB.Pos(20, 20)),
-            size: new IB.Properties.Size("Size", new IB.Size(40, 40)),
-            id: new IB.Properties.Text("ID", this._ID, false)
+            pos: new IB.Properties.Pos(gettext("Position"), new IB.Pos(20, 20)),
+            size: new IB.Properties.Size(gettext("Size"), new IB.Size(40, 40)),
+            id: new IB.Properties.Text(gettext("ID"), this._ID, false)
         };
         this._size = this._properties.size;
         this._pos = this._properties.pos;

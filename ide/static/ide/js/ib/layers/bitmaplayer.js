@@ -8,8 +8,8 @@
      */
     IB.BitmapLayer = function(canvas, id) {
         IB.Layer.call(this, canvas, id);
-        this._resource = new IB.Properties.Bitmap("Image", '');
-        this._bg_colour = new IB.Properties.Colour("Background", IB.ColourClear);
+        this._resource = new IB.Properties.Bitmap(gettext("Image"), '');
+        this._bg_colour = new IB.Properties.Colour(gettext("Background"), IB.ColourClear);
         this._has_changed_image = false;
         this._node.addClass('ib-bitmaplayer');
         this.setSize(40, 40);
@@ -24,7 +24,7 @@
     IB.BitmapLayer.prototype = Object.create(IB.Layer.prototype);
     IB.BitmapLayer.prototype.constructor = IB.BitmapLayer;
     IB.BitmapLayer.className = 'BitmapLayer';
-    IB.BitmapLayer.description = "BitmapLayer will display an opaque bitmap image.";
+    IB.BitmapLayer.description = gettext("BitmapLayer will display an opaque bitmap image.");
     _.extend(IB.BitmapLayer.prototype, {
         render: function(parent) {
             IB.Layer.prototype.render.call(this, parent);
