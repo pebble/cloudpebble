@@ -120,7 +120,7 @@ Pebble = function(token) {
             self.trigger("status", result[0]);
             return;
         } else if(origin == 2) {
-            var phone_log = bytes_to_string(data.subarray(1));
+            var phone_log = decoder.decode(data.subarray(1));
             self.trigger('phone_log', phone_log);
         }
         if(origin !== 0) return;
@@ -147,21 +147,13 @@ Pebble = function(token) {
 
     var handle_app_log = function(data) {
         console.log("Received app log.");
+        var decoder = new TextDecoder('utf-8');
         var metadata = unpack("IBBH", data.subarray(16, 24));
-        var filename = bytes_to_string(data.subarray(24, 40));
-        var message = bytes_to_string(data.subarray(40, 40+metadata[2]));
+        var filename = decoder.decode(data.subarray(24, 40));
+        var message = decoder.decode(data.subarray(40, 40+metadata[2]));
         var level = metadata[1];
         var line = metadata[3];
         self.trigger("app_log", level, filename, line, message);
-    };
-
-    var bytes_to_string = function(bytes) {
-        var chars = [];
-        for(var i = 0; i < bytes.length; ++i) {
-            if(bytes[i] === 0) break;
-            chars.push(String.fromCharCode(bytes[i]));
-        }
-        return chars.join('');
     };
 
     var string_to_bytes = function(string) {
@@ -428,6 +420,7 @@ Pebble = function(token) {
     var unpack = function(format, bytes) {
         var pointer = 0;
         var data = [];
+        var decoder = new TextDecoder('utf-8');
         for(var i = 0; i < format.length; ++i) {
             if(pointer >= bytes.length) {
                 throw new Error("Expected more bytes");
@@ -456,13 +449,15 @@ Pebble = function(token) {
                     len += format.charAt(++i);
                 }
                 len = parseInt(len, 10);
+                var start = pointer;
                 var end = pointer + len;
-                var output = '';
                 while(pointer < end) {
                     if(bytes[pointer] === 0) break; // assume null-terminated strings.
-                    output += String.fromCharCode(bytes[pointer]);
                     ++pointer;
                 }
+                var stop = pointer;
+                var stringBytes = bytes.subarray(start, stop);
+                var output = decoder.decode(stringBytes);
                 pointer = end;
                 data.push(output);
                 break;
