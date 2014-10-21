@@ -31,9 +31,9 @@
         };
     };
 
-    IB.ColourWhite = new IB.Colour('GColorWhite', 'white', 'White');
-    IB.ColourBlack = new IB.Colour('GColorBlack', 'black', 'Black');
-    IB.ColourClear = new IB.Colour('GColorClear', 'rgba(0, 0, 0, 0)', 'Transparent');
+    IB.ColourWhite = new IB.Colour('GColorWhite', 'white', gettext('White'));
+    IB.ColourBlack = new IB.Colour('GColorBlack', 'black', gettext('Black'));
+    IB.ColourClear = new IB.Colour('GColorClear', 'rgba(0, 0, 0, 0)', gettext('Transparent'));
 
     IB.ColourMap = {
         GColorWhite: IB.ColourWhite,

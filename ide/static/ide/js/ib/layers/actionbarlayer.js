@@ -11,10 +11,10 @@
         IB.Layer.call(this, canvas, id);
 
         _.extend(this._properties, {
-            bg: new IB.Properties.Colour("Background", IB.ColourBlack),
-            icon_up: new IB.Properties.Bitmap("Top icon", ""),
-            icon_select: new IB.Properties.Bitmap("Middle icon", ""),
-            icon_down: new IB.Properties.Bitmap("Bottom icon", "")
+            bg: new IB.Properties.Colour(pgettext("background colour", "Background"), IB.ColourBlack),
+            icon_up: new IB.Properties.Bitmap(gettext("Top icon"), ""),
+            icon_select: new IB.Properties.Bitmap(gettext("Middle icon"), ""),
+            icon_down: new IB.Properties.Bitmap(gettext("Bottom icon"), "")
         });
         this._backgroundColour = this._properties.bg;
         this._propListener(this._backgroundColour, 'backgroundColourChange');
@@ -40,7 +40,7 @@
     IB.ActionBarLayer.prototype = Object.create(IB.Layer.prototype);
     IB.ActionBarLayer.prototype.constructor = IB.ActionBarLayer;
     IB.ActionBarLayer.className = 'ActionBarLayer';
-    IB.ActionBarLayer.description = "ActionBarLayer is a Layer that displays a bar on the right edge of the window. The bar can contain up to 3 icons, each corresponding with one of the buttons on the right side of the watch.";
+    IB.ActionBarLayer.description = gettext("ActionBarLayer is a Layer that displays a bar on the right edge of the window. The bar can contain up to 3 icons, each corresponding with one of the buttons on the right side of the watch.");
     _.extend(IB.ActionBarLayer.prototype, {
         render: function(parent) {
             IB.Layer.prototype.render.call(this, parent);

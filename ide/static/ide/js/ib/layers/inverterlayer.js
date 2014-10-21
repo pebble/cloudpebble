@@ -13,7 +13,7 @@
     };
     IB.InverterLayer.className = 'InverterLayer';
     IB.InverterLayer.prototype = Object.create(IB.Layer.prototype);
-    IB.InverterLayer.description = "Inverts the colours of the rectangle behind it. Layers in front are unaffected.";
+    IB.InverterLayer.description = gettext("Inverts the colours of the rectangle behind it. Layers in front are unaffected.");
     _.extend(IB.InverterLayer.prototype, {
         constructor: IB.InverterLayer,
         // Rendering works by duplicating all layers *below* the current layer as children of our node,

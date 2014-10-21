@@ -2,10 +2,11 @@ Special thanks to the following for helping to translate CloudPebble:
 
 ## French
 - Jnm
-- Romain Lespinasse
 - Grégoire Sage
+- Romain Lespinasse
 - CHARAVNER
 - Allanco2
+- Denis
 - Martial Lienert
 - Thomas Sarlandie
 
@@ -18,3 +19,4 @@ Special thanks to the following for helping to translate CloudPebble:
 - Jaime
 - Daniel Rodríguez Troitino
 - Thomas Hunsaker
+- Antonio Calatrava

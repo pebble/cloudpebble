@@ -10,7 +10,7 @@
         this._layer = layer;
         this._root = $('<div class="form-horizontal">');
         this._delete =
-            $('<div style="text-align: center;"><button class="btn btn-danger">Delete layer</button></div>')
+            $('<div style="text-align: center;"><button class="btn btn-danger">' + gettext("Delete layer") + '</button></div>')
                 .on('click', _.bind(this._deleteLayer, this));
     };
     IB.PropertyView.prototype = {
