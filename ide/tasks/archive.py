@@ -27,7 +27,8 @@ def add_project_to_archive(z, project, prefix=''):
     prefix += re.sub(r'[^\w]+', '_', project.name).strip('_').lower()
 
     for source in source_files:
-        z.writestr('%s/src/%s' % (prefix, source.file_name), source.get_contents())
+        src_dir = 'worker_src' if source.target == 'worker' else 'src'
+        z.writestr('%s/%s/%s' % (prefix, src_dir, source.file_name), source.get_contents())
 
     for resource in resources:
         res_path = 'resources'

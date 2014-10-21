@@ -1,0 +1,526 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: CloudPebble\n"
+"Language: fr\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: ide/static/ide/js/compile.js:5
+msgid "Pending"
+msgstr "En attente"
+
+#: ide/static/ide/js/compile.js:6
+msgid "Failed"
+msgstr "Echec"
+
+#: ide/static/ide/js/compile.js:7
+msgid "Succeeded"
+msgstr "Succès"
+
+#: ide/static/ide/js/github.js:8
+msgid "That repo does not exist. Would you like to create it?"
+msgstr "Ce repo n'existe pas. Voulez-vous le créer?"
+
+#: ide/static/ide/js/compile.js:419
+msgid "Installing app on your watch…"
+msgstr "Installation de l'app sur votre Pebble en cours..."
+
+#: ide/static/ide/js/compile.js:23
+msgid "Build log"
+msgstr "Log de compilation"
+
+#: ide/static/ide/js/editor.js:468
+msgid "Save"
+msgstr "Enregistrer"
+
+#: ide/static/ide/js/resources.js:19
+msgid "Identifier"
+msgid_plural "Identifiers"
+msgstr[0] "Identifiant"
+msgstr[1] "identifiants"
+
+#: ide/static/ide/js/resources.js:184
+msgid "A PCRE regular expression that restricts characters."
+msgstr "Une expression régulière PCRE qui restreint les caractères."
+
+#: ide/static/ide/js/editor.js:470
+msgid "Delete"
+msgstr "Supprimer"
+
+#: ide/static/ide/js/settings.js:202
+msgid "New Entry"
+msgstr "Nouvelle entrée"
+
+#: ide/static/ide/js/settings.js:145
+msgid "Delete Project"
+msgstr "Supprimer le projet"
+
+#: ide/static/ide/js/cloudpebble.js:62
+msgid "You have one unsaved source file. If you leave this page, you will lose it."
+msgid_plural "You have %s unsaved source files. If you leave this page, you will lose them."
+msgstr[0] "Un fichier source n'a pas été enregistré. Si vous quittez cette page, il sera perdu."
+msgstr[1] "%s fichiers sources n'ont pas été enregistrés. Si vous quittez cette page, ils seront perdus."
+
+#: ide/static/ide/js/compile.js:19
+msgid "pbw"
+msgstr "pbw"
+
+#: ide/static/ide/js/compile.js:42
+msgid "Something went wrong:\n"
+"\n"
+"%s"
+msgstr "Quelque chose s'est mal passé :\n"
+"\n"
+"%s"
+
+#: ide/static/ide/js/compile.js:182
+msgid "%(total)s KiB (%(resources)s KiB resources, %(appbin)s KiB binary)"
+msgstr "%(total)s KiB (%(resources)s KiB ressources, %(appbin)s KiB code)"
+
+#: ide/static/ide/js/compile.js:184
+msgid "%(total)s KiB (%(resources)s KiB resources, %(appbin)s KiB binary, %(workerbin)s KiB worker)"
+msgstr "%(total)s KiB (%(resources)s KiB ressources, %(appbin)s KiB code, %(workerbin)s KiB worker)"
+
+#: ide/static/ide/js/compile.js:194
+msgid "%(free)s / %(max)s bytes (%(percent)s%)"
+msgstr "%(free)s / %(max)s octets (%(percent)s%)"
+
+#. Need for explanations. What is meant by 'Different App crashed'??
+#: ide/static/ide/js/compile.js:333
+msgid "Different app crashed. Only the active app has debugging information available."
+msgstr "Une autre application a crashé. Seule l'application active dispose des informations de débug."
+
+#: ide/static/ide/js/compile.js:339
+msgid "Looking up debug information..."
+msgstr "Recherche d'informations de debug..."
+
+#: ide/static/ide/js/compile.js:372
+msgid "Crashed inside firmware call."
+msgstr "Crash dans un appel firmware."
+
+#: ide/static/ide/js/compile.js:374
+msgid "Crashed at %(file)s:%(line)s, in %(fn_name)s (starts at %(file)s:%(fn_line)s)."
+msgstr "Crash ligne %(file)s:%(line)s, dans %(fn_name)s (début %(file)s:%(fn_line)s)."
+
+#. je suis pas sur qu'il faut renommer la variable de ( start at % en ( début at...
+#: ide/static/ide/js/compile.js:380
+msgid "Which was called from %(file)s:%(line)s, in %(fn_name)s (starts at %(file)s:%(fn_line)s)."
+msgstr "Qui a été appelé depuis %(file)s:%(line)s, dans %(fn_name)s (début %(file)s:%(fn_line)s). "
+
+#. I think we should not translate those words in brackets as they are used only in logs.
+#: ide/static/ide/js/compile.js:399
+msgid "[PHONE]"
+msgstr "[PHONE]"
+
+#: ide/static/ide/js/compile.js:400
+msgid "[ERROR]"
+msgstr "[ERROR]"
+
+#: ide/static/ide/js/compile.js:401
+msgid "[WARNING]"
+msgstr "[WARNING]"
+
+#: ide/static/ide/js/compile.js:402
+msgid "[INFO]"
+msgstr "[INFO]"
+
+#: ide/static/ide/js/compile.js:403
+msgid "[DEBUG]"
+msgstr "[DEBUG]"
+
+#: ide/static/ide/js/compile.js:404
+msgid "[VERBOSE]"
+msgstr "[VERBOSE]"
+
+#: ide/static/ide/js/editor.js:31
+msgid "Something went wrong: %s"
+msgstr "Quelque chose s'est mal passé : %s"
+
+#: ide/static/ide/js/editor.js:347
+msgid "This file has been edited elsewhere; you will not be able to save your changes."
+msgstr "Ce fichier a été modifié en parallèle. Vos modifications ne pourront pas être enregistrées."
+
+#: ide/static/ide/js/editor.js:467
+msgid "Save, build, install and run"
+msgstr "Enregistrer, compiler, installer et lancer"
+
+#: ide/static/ide/js/editor.js:469
+msgid "Reload"
+msgstr "Recharger"
+
+#: ide/static/ide/js/editor.js:471
+msgid "UI Editor"
+msgstr "Editeur d'interface"
+
+#: ide/static/ide/js/editor.js:476
+msgid "Do you want to delete %(name)s?"
+msgstr "Souhaitez-vous supprimer %(name)s ?"
+
+#: ide/static/ide/js/editor.js:477 ide/static/ide/js/resources.js:251
+msgid "This cannot be undone."
+msgstr "Cela ne peut être annulé."
+
+#: ide/static/ide/js/editor.js:498
+msgid "Do you want to reload %(name)s?"
+msgstr "Souhaitez-vous recharger %(name)s ?"
+
+#: ide/static/ide/js/editor.js:499
+msgid "This will discard your current changes and revert to the saved version."
+msgstr "Ceci annulera vous modifications en cours et rechargera la version enregistrée."
+
+#: ide/static/ide/js/editor.js:510
+msgid "Saving..."
+msgstr "Enregistrement..."
+
+#: ide/static/ide/js/editor.js:512
+msgid "Compiling..."
+msgstr "Compilation..."
+
+#: ide/static/ide/js/editor.js:541
+msgid "Toggle Fullscreen"
+msgstr "Basculer en plein écran"
+
+#: ide/static/ide/js/editor.js:661
+msgid "Declaration"
+msgstr "Déclaration"
+
+#: ide/static/ide/js/editor.js:664
+msgid "Description"
+msgstr "Description"
+
+#: ide/static/ide/js/editor.js:668
+msgid "Returns"
+msgstr "Retour"
+
+#: ide/static/ide/js/editor.js:681
+msgid "Parameters"
+msgstr "Paramètres"
+
+#: ide/static/ide/js/editor.js:685
+msgid "Note"
+msgstr "Remarque"
+
+#: ide/static/ide/js/editor.js:771
+msgid "Source files must end in .c or .h"
+msgstr "Les fichiers source doivent finir par .c ou .h"
+
+#: ide/static/ide/js/editor.js:773 ide/static/ide/js/editor.js.c:814
+msgid "A file called '%s' already exists."
+msgstr "Un fichier nommé '%s' existe déjà."
+
+#: ide/static/ide/js/editor.js:812
+msgid "Source files must end in .js"
+msgstr "Les fichiers source doit finir par .js"
+
+#: ide/static/ide/js/editor.js:830
+msgid "You must specify a valid window name using lowercase letters and underscores."
+msgstr "Vous devez spécifier une nom de fenêtre valide en utilisant des minuscules et des underscores."
+
+#: ide/static/ide/js/editor.js:832
+msgid "That name is already used in this project."
+msgstr "Ce nom est déjà utilisé dans ce projet."
+
+#: ide/static/ide/js/editor.js:872
+msgid "If you want to create a background worker, use this dropdown to create files pointing at that target."
+msgstr "Si vous souhaitez créer un \"background worker\", utilisez ce menu déroulant pour créer les fichiers correspondants."
+
+#: ide/static/ide/js/editor.js:873
+msgid "Note that targets are independent and code will not be shared between them."
+msgstr "Remarquez que les cibles sont indépendantes et le code ne sera pas partagé entre elles."
+
+#: ide/static/ide/js/gist_import.js:24
+msgid "Import failed: %s"
+msgstr "L'importation a échoué : %s"
+
+#: ide/static/ide/js/github.js:65
+msgid "Updated repo."
+msgstr "Repo mis à jour."
+
+#: ide/static/ide/js/github.js:79
+msgid "You don't have access to that repository."
+msgstr "Vous n'avez pas accès à ce repository."
+
+#: ide/static/ide/js/github.js:108
+msgid "You must provide a repo URL."
+msgstr "Vous devez fournir une URL de repository."
+
+#: ide/static/ide/js/github.js:171
+msgid "Pulled successfully."
+msgstr "Pull réussi."
+
+#: ide/static/ide/js/github.js:172
+msgid "Pull completed successfully."
+msgstr "Pull effectué avec succès."
+
+#: ide/static/ide/js/github.js:178
+msgid "Pull completed: Nothing to pull."
+msgstr "Pull terminé : rien à récupérer."
+
+#: ide/static/ide/js/github.js:181 ide/static/ide/js/project_list.js:55
+#: ide/static/ide/js/settings.js:137 ide/static/ide/js/settings.js.c:150
+msgid "Error: %s"
+msgstr "Erreur : %s"
+
+#: ide/static/ide/js/github.js:195
+msgid "You must provide a commit summary."
+msgstr "Vous devez fournir un résumé pour le commit."
+
+#: ide/static/ide/js/github.js:226
+msgid "Pull failed: %s"
+msgstr "Echec du Pull : %s"
+
+#: ide/static/ide/js/github.js:243
+msgid "GitHub integration can be enabled in your user settings by linking a GitHub account."
+msgstr "L'intégration GitHub peut être activée dans votre profil en saisissant un compte GitHub."
+
+#: ide/static/ide/js/project_list.js:20
+msgid "You must enter a name."
+msgstr "Vous devez entrer un nom."
+
+#: ide/static/ide/js/project_list.js:70 ide/static/ide/js/project_list.js:116
+msgid "You must specify a project name."
+msgstr "Vous devez entrer un nom de projet."
+
+#: ide/static/ide/js/project_list.js:75
+msgid "You must upload a zip file."
+msgstr "Vous devez uploader un fichier zip."
+
+#: ide/static/ide/js/project_list.js:121
+msgid "You must specify a complete GitHub project URL"
+msgstr "Vous devez spécifier une URL de projet GitHub"
+
+#: ide/static/ide/js/resources.js:52
+msgid "You must upload a file."
+msgstr "Vous devez uploader un fichier."
+
+#: ide/static/ide/js/resources.js:56
+msgid "A resource called '%(name)s' already exists in the project."
+msgstr "Une ressource nommée \"%(name)s\" existe déjà dans ce projet."
+
+#: ide/static/ide/js/resources.js:63
+msgid "You must upload a PNG image."
+msgstr "Vous devez uploader une image .PNG"
+
+#: ide/static/ide/js/resources.js:67
+msgid "You must upload a TrueType Font (.ttf)"
+msgstr "Vous devez uploader une police True Type (.ttf)"
+
+#: ide/static/ide/js/resources.js:76
+msgid "You must provide a valid resource identifier. Use only letters, numbers and underscores."
+msgstr "Vous devez saisir un identifiant de ressource valide (uniquement des lettres, chiffres et underscore)."
+
+#: ide/static/ide/js/resources.js:91
+msgid "Invalid resource identifier. Use only letters, numbers and underscores."
+msgstr "Identifiant de ressource invalide. Utilisez uniquement des lettres, des chiffres et des underscores."
+
+#: ide/static/ide/js/resources.js:96
+msgid "Font resource identifiers must end with the desired font size, e.g. %s_24"
+msgstr "Les identifiants de ressources de polices doivent finir avec la taille désirée, ex. %s_24"
+
+#: ide/static/ide/js/resources.js:101
+msgid "You can't have multiple identical identifiers. Please remove or change one."
+msgstr "Vous ne pouvez pas avoir plusieurs identifiants identiques. Veuillez en supprimer ou modifier une."
+
+#: ide/static/ide/js/resources.js:106
+msgid "Tracking must be an integer."
+msgstr "L'espacement entre les caractères doit être un entier."
+
+#: ide/static/ide/js/resources.js:115
+msgid "You must specify at least one resource."
+msgstr "Vous devez spécifier au moins une ressource."
+
+#: ide/static/ide/js/resources.js:162
+msgid "If specified, this file will replace the current file for this resource, regardless of its filename."
+msgstr "Si spécifié, ce fichier remplacera le fichier actuel pour cette ressource, indépendamment du nom de fichier."
+
+#: ide/static/ide/js/resources.js:189
+msgid "Preview"
+msgstr "Aperçu"
+
+#: ide/static/ide/js/resources.js:251
+msgid "Do you want to delete %s?"
+msgstr "Souhaitez-vous supprimer %s ?"
+
+#: ide/static/ide/js/settings.js:55
+msgid "You must specify a project name"
+msgstr "Vous devez définir un nom de projet."
+
+#: ide/static/ide/js/settings.js:67
+msgid "You must specify a short name."
+msgstr "Vous devez définir un nom court."
+
+#: ide/static/ide/js/settings.js:71
+msgid "You must specify a long name."
+msgstr "Vous devez définir un nom long."
+
+#: ide/static/ide/js/settings.js:75
+msgid "You must specify a company name."
+msgstr "Vous devez définir un nom de compagnie."
+
+#: ide/static/ide/js/settings.js:79
+msgid "You must specify a positive integer version code."
+msgstr "Vous devez définir un numéro de version (entier positif)."
+
+#: ide/static/ide/js/settings.js:86
+msgid "You must specify a valid version number."
+msgstr "Vous devez définir un numéro de version valide."
+
+#: ide/static/ide/js/settings.js:90
+msgid "You must specify a valid UUID (of the form 00000000-0000-0000-0000-000000000000)"
+msgstr "Vous devez définir un UUID valide (du type 000000000-0000-0000-0000-000000000000)"
+
+#: ide/static/ide/js/settings.js:134
+msgid "Settings saved."
+msgstr "Paramètres enregistrés."
+
+#: ide/static/ide/js/settings.js:145
+msgid "Are you sure you want to delete this project? THIS CANNOT BE UNDONE."
+msgstr "Êtes-vous sûr de vouloir supprimer ce projet ? CETTE ACTION NE PEUT ÊTRE ANNULÉE."
+
+#: ide/static/ide/js/sidebar.js:118
+msgid "App source"
+msgstr "Source de l'application"
+
+#: ide/static/ide/js/ycm.js:48
+msgid "Code completion resync failed."
+msgstr "La synchro de la complétion de code a échoué."
+
+#: ide/static/ide/js/ycm.js:73 ide/static/ide/js/ycm.js.c:78
+msgid "Code completion unavailable."
+msgstr "La complétion de code n'est pas disponible."
+
+#: ide/static/ide/js/ycm.js:94
+msgid "Code completion lost; retrying..."
+msgstr "Complétion de code perdue : nouvel essai..."
+
+#: ide/static/ide/js/cloudpebble.js:145
+msgctxt "month name"
+msgid "January"
+msgstr "Janvier"
+
+#: ide/static/ide/js/cloudpebble.js:146
+msgctxt "month name"
+msgid "February"
+msgstr "Février"
+
+#: ide/static/ide/js/cloudpebble.js:147
+msgctxt "month name"
+msgid "March"
+msgstr "Mars"
+
+#: ide/static/ide/js/cloudpebble.js:148
+msgctxt "month name"
+msgid "April"
+msgstr "Avril"
+
+#: ide/static/ide/js/cloudpebble.js:149
+msgctxt "month name"
+msgid "May"
+msgstr "Mai"
+
+#: ide/static/ide/js/cloudpebble.js:150
+msgctxt "month name"
+msgid "June"
+msgstr "Juin"
+
+#: ide/static/ide/js/cloudpebble.js:151
+msgctxt "month name"
+msgid "July"
+msgstr "Juillet"
+
+#: ide/static/ide/js/cloudpebble.js:152
+msgctxt "month name"
+msgid "August"
+msgstr "Août"
+
+#: ide/static/ide/js/cloudpebble.js:153
+msgctxt "month name"
+msgid "September"
+msgstr "Septembre"
+
+#: ide/static/ide/js/cloudpebble.js:154
+msgctxt "month name"
+msgid "October"
+msgstr "Octobre"
+
+#: ide/static/ide/js/cloudpebble.js:155
+msgctxt "month name"
+msgid "November"
+msgstr "Novembre"
+
+#: ide/static/ide/js/cloudpebble.js:156
+msgctxt "month name"
+msgid "December"
+msgstr "Décembre"
+
+#: ide/static/ide/js/cloudpebble.js:166
+msgid "AM"
+msgstr "AM"
+
+#: ide/static/ide/js/cloudpebble.js:166
+msgid "PM"
+msgstr "PM"
+
+#: ide/static/ide/js/cloudpebble.js:171
+msgid "%s second"
+msgid_plural "%s seconds"
+msgstr[0] "%s seconde"
+msgstr[1] "%s secondes"
+
+#: ide/templates/ide/index.html:28 root/templates/root/index.html:20
+msgid "Due to a recent Chrome update, we have been forced to disable TLS site-wide. Security will be re-enabled in a few days."
+msgstr "En raison d'une récente mise à jour de Chrome, nous avons été contraints de désactiver le TLS sur l'ensemble du site. La sécurité sera réactivée dans quelques jours."
+
+#: ide/static/ide/js/compile.js:86
+msgid "Something went wrong:\n"
+"%s"
+msgstr "Quelque chose s'est mal passé :\n"
+"%s"
+
+#: ide/static/ide/js/compile.js:247
+msgid "Connecting..."
+msgstr "Connexion..."
+
+#: ide/static/ide/js/compile.js:247
+msgid "Establishing connection..."
+msgstr "En cours de connexion..."
+
+#: ide/static/ide/js/compile.js:258
+msgid "Authenticating..."
+msgstr "Authentification..."
+
+#: ide/static/ide/js/compile.js:261
+msgid "Waiting for phone. Make sure the development server is enabled."
+msgstr "En attente du téléphone. Assurez-vous que le serveur de développement est activé."
+
+#: ide/static/ide/js/compile.js:266
+msgid "Connection interrupted."
+msgstr "Connexion interrompue."
+
+#: ide/static/ide/js/compile.js:432
+msgid "Please <a href='%(update_url)s'>update your pebble</a> to %(min_version)s to install apps from CloudPebble and the appstore (you're on version %(real_version)s)."
+msgstr "Pour installer des apps à partir de CloudPebble ou de l'appstore, veuillez <a href='%(update_url)s'>mettre à jour votre Pebble</a> vers la version %(min_version) (Vous êtes actuellement en version %(real_version)s)."
+
+#: ide/static/ide/js/compile.js:447
+msgid "Installed successfully!"
+msgstr "Installation réussie"
+
+#: ide/static/ide/js/compile.js:459
+msgid "Installation failed. Check your phone for details."
+msgstr "Echec de l'Installation. Vérifiez votre téléphone pour plus de détails."
+
+#: ide/static/ide/js/compile.js:478 ide/static/ide/js/compile.js.c:531
+msgid "Disconnected from phone."
+msgstr "Déconnecté de votre téléphone"
+
+#: ide/static/ide/js/compile.js:496
+msgid "Connected."
+msgstr "Connecté"
+
+#: ide/static/ide/js/compile.js:551
+msgid "Right click -> Save Image as..."
+msgstr "Clic droit-> Enregistrer l'image sous ..."
+

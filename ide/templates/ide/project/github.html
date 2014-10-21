@@ -1,49 +1,50 @@
+{% load i18n %}
 <!-- GitHub panel -->
 <div id="github-template" class="hide github-pane">
     <div class="well alert hide"></div>
     <div class="well">
         <form class="form-horizontal" id="github-repo-form">
             <div class="control-group">
-                <label class="control-label" for="github-repo">GitHub Repo</label>
+                <label class="control-label" for="github-repo">{% trans 'Github Repo' %}</label>
                 <div class="controls">
                     <input type="text" class="span6" id="github-repo" pattern="(?:https?://|git@|git://)?(?:www\.)?github\.com[/:]([\w.-]+)/([\w.-]+?)(?:\.git|/|$)" placeholder="github.com/{{ project.owner.github.username }}/PebbleFace">
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label" for="github-branch">Branch</label>
+                <label class="control-label" for="github-branch">{% trans 'Branch' context "git branch" %}</label>
                 <div class="controls">
                     <input type="text" class="span6" id="github-branch" placeholder="master" />
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label" for="github-repo-hook">Pull changes</label>
+                <label class="control-label" for="github-repo-hook">{% trans 'Pull changes' context "button label" %}</label>
                 <div class="controls">
                     <select id="github-repo-hook">
-                        <option value="0">Manually</option>
-                        <option value="1">Automatically</option>
+                        <option value="0">{% trans 'Manually' %}</option>
+                        <option value="1">{% trans 'Automatically' %}</option>
                     </select>
-                    <span class="help-block">If you select 'Automatically', the contents of this project <em>will be overwritten</em> every time you push to your repo from elsewhere, <em>without prompting you</em>.</span>
+                    <span class="help-block">{% trans "If you select 'Automatically', the contents of this project <em>will be overwritten</em> every time you push to your repo from elsewhere, <em>without prompting you</em>." %}</span>
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label" for="github-repo-build">After pulling</label>
+                <label class="control-label" for="github-repo-build">{% trans 'After pulling' %}</label>
                 <div class="controls">
                     <select id="github-repo-build">
-                        <option value="0">Do nothing</option>
-                        <option value="1">Build automatically</option>
+                        <option value="0">{% trans 'Do nothing' %}</option>
+                        <option value="1">{% trans 'Build automatically' %}</option>
                     </select>
                 </div>
             </div>
             <div class="control-group">
                 <label class="control-label">&nbsp;</label>
                 <div class="controls">
-                    <input type="submit" class="btn btn-primary" value="Save">
+                    <input type="submit" class="btn btn-primary" value="{% trans 'Save' %}">
                 </div>
             </div>
         </form>
     </div>
     <div class="well github-actions">
-        <button class="btn btn-affirmative" id="github-push-btn" disabled>Push New Commit</button>
-        <button class="btn btn-affirmative" id="github-pull-btn" disabled>Pull Latest Commit</button>
+        <button class="btn btn-affirmative" id="github-push-btn" disabled>{% trans 'Push New Commit' %}</button>
+        <button class="btn btn-affirmative" id="github-pull-btn" disabled>{% trans 'Pull Latest Commit' %}</button>
     </div>
 </div>

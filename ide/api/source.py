@@ -5,6 +5,7 @@ from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST, require_safe
+from django.utils.translation import ugettext as _
 from ide.api import json_failure, json_response
 from ide.models.project import Project
 from ide.models.files import SourceFile
@@ -18,7 +19,9 @@ __author__ = 'katharine'
 def create_source_file(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     try:
-        f = SourceFile.objects.create(project=project, file_name=request.POST['name'])
+        f = SourceFile.objects.create(project=project,
+                                      file_name=request.POST['name'],
+                                      target=request.POST.get('target', 'app'))
         f.save_file(request.POST.get('content', ''))
     except IntegrityError as e:
         return json_failure(str(e))
@@ -26,11 +29,12 @@ def create_source_file(request, project_id):
         send_keen_event('cloudpebble', 'cloudpebble_create_file', data={
             'data': {
                 'filename': request.POST['name'],
-                'kind': 'source'
+                'kind': 'source',
+                'target': f.target,
             }
         }, project=project, request=request)
 
-        return json_response({"file": {"id": f.id, "name": f.file_name}})
+        return json_response({"file": {"id": f.id, "name": f.file_name, "target": f.target}})
 
 
 @require_safe
@@ -85,7 +89,7 @@ def save_source_file(request, project_id, file_id):
                     'kind': 'source'
                 }
             }, project=project, request=request)
-            raise Exception("Could not save: file has been modified since last save.")
+            raise Exception(_("Could not save: file has been modified since last save."))
         source_file.save_file(request.POST['content'])
 
 

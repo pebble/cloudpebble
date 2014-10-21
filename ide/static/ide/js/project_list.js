@@ -17,7 +17,7 @@ $(function() {
         var value = $('#project-prompt-value').val();
         $('project-prompt-errors').addClass("hide");
         if(value === '') {
-            $('#project-prompt-errors').removeClass('hide').text("You must enter a name.");
+            $('#project-prompt-errors').removeClass('hide').text(gettext("You must enter a name."));
             return;
         }
         $('#create-project').find('input button select').attr('disabled', 'disabled');
@@ -52,7 +52,7 @@ $(function() {
                     window.location.href = '/ide/project/' + project_id;
                     return;
                 } else if(data.state.status == 'FAILURE') {
-                    active_set.find('.errors').removeClass('hide').text("Error: " + data.state.result);
+                    active_set.find('.errors').removeClass('hide').text(interpolate(gettext("Error: %s"), [data.state.result]));
                     enable_import_controls();
                     active_set.find('.progress').addClass('hide');
                     return;
@@ -67,12 +67,12 @@ $(function() {
     var import_archive = function(active_set) {
         var name = active_set.find('#import-zip-name').val();
         if(name.replace(/\s/g, '') === '') {
-            active_set.find('.errors').removeClass('hide').text("You must specify a project name.");
+            active_set.find('.errors').removeClass('hide').text(gettext("You must specify a project name."));
             return;
         }
         var files = active_set.find('input[type=file]').get(0).files;
         if(files.length != 1) {
-            active_set.find('.errors').removeClass('hide').text("You must upload a zip file.");
+            active_set.find('.errors').removeClass('hide').text(gettext("You must upload a zip file."));
             return;
         }
         var file = files[0];
@@ -113,12 +113,12 @@ $(function() {
         var branch = active_set.find('#import-github-branch').val();
         var add_remote = !!active_set.find('#import-github-add-remote').is(':checked');
         if(name.replace(/\s/g, '') === '') {
-            active_set.find('.errors').removeClass('hide').text("You must specify a project name.");
+            active_set.find('.errors').removeClass('hide').text(gettext("You must specify a project name."));
             return;
         }
         // This is identical to the regex used on the server.
         if(!/^(?:https?:\/\/|git@|git:\/\/)?(?:www\.)?github\.com[\/:]([\w.-]+)\/([\w.-]+?)(?:\.git|\/|$)/.test(url)) {
-            active_set.find('.errors').removeClass('hide').text("You must specify a complete GitHub project URL");
+            active_set.find('.errors').removeClass('hide').text(gettext("You must specify a complete GitHub project URL"));
             return;
         }
         if(branch.length == 0) {

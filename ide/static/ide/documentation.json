@@ -78,10 +78,10 @@
         "params": [], 
         "return_desc": null, 
         "returns": "", 
-        "warning": "<p>Note that <code>time_normalized</code> parameter that is passed into the .update implementation is meaningless in when an infinite duration is used. </p>"
+        "warning": "<p>Note that <code>distance_normalized</code> parameter that is passed into the .update implementation is meaningless in when an infinite duration is used. </p>"
     }, 
     "ANIMATION_NORMALIZED_MAX": {
-        "description": "<p>The normalized time at the end of the animation. </p>", 
+        "description": "<p>The normalized distance at the end of the animation. </p>", 
         "kind": "def", 
         "name": "ANIMATION_NORMALIZED_MAX", 
         "params": [], 
@@ -90,7 +90,7 @@
         "warning": null
     }, 
     "ANIMATION_NORMALIZED_MIN": {
-        "description": "<p>The normalized time at the start of the animation. </p>", 
+        "description": "<p>The normalized distance at the start of the animation. </p>", 
         "kind": "def", 
         "name": "ANIMATION_NORMALIZED_MIN", 
         "params": [], 
@@ -98,8 +98,53 @@
         "returns": "", 
         "warning": null
     }, 
+    "APP_LAUNCH_PHONE": {
+        "description": "<p>App launched by mobile or companion app. </p>", 
+        "kind": "enum", 
+        "name": "APP_LAUNCH_PHONE", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "APP_LAUNCH_SYSTEM": {
+        "description": "<p>App launched by the system. </p>", 
+        "kind": "enum", 
+        "name": "APP_LAUNCH_SYSTEM", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "APP_LAUNCH_USER": {
+        "description": "<p>App launched by user selection. </p>", 
+        "kind": "enum", 
+        "name": "APP_LAUNCH_USER", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "APP_LAUNCH_WAKEUP": {
+        "description": "<p>App launched by wakeup event. </p>", 
+        "kind": "enum", 
+        "name": "APP_LAUNCH_WAKEUP", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "APP_LAUNCH_WORKER": {
+        "description": "<p>App launched by worker calling <code>worker_launch_app()</code> </p>", 
+        "kind": "enum", 
+        "name": "APP_LAUNCH_WORKER", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
     "APP_LOG": {
-        "description": "", 
+        "description": "<p>A helper macro that simplifies the use of the <code>app_log</code> function. </p>", 
         "kind": "def", 
         "name": "APP_LOG", 
         "params": [], 
@@ -296,10 +341,73 @@
         "returns": "", 
         "warning": null
     }, 
+    "APP_WORKER_RESULT_ALREADY_RUNNING": {
+        "description": "<p>The worker is already running. </p>", 
+        "kind": "enum", 
+        "name": "APP_WORKER_RESULT_ALREADY_RUNNING", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "APP_WORKER_RESULT_ASKING_CONFIRMATION": {
+        "description": "<p>The user will be asked for confirmation. </p>", 
+        "kind": "enum", 
+        "name": "APP_WORKER_RESULT_ASKING_CONFIRMATION", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "APP_WORKER_RESULT_DIFFERENT_APP": {
+        "description": "<p>A worker for a different app is already running. </p>", 
+        "kind": "enum", 
+        "name": "APP_WORKER_RESULT_DIFFERENT_APP", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "APP_WORKER_RESULT_NOT_RUNNING": {
+        "description": "<p>The worker is not running. </p>", 
+        "kind": "enum", 
+        "name": "APP_WORKER_RESULT_NOT_RUNNING", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "APP_WORKER_RESULT_NO_WORKER": {
+        "description": "<p>No worker found for the current app. </p>", 
+        "kind": "enum", 
+        "name": "APP_WORKER_RESULT_NO_WORKER", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "APP_WORKER_RESULT_SUCCESS": {
+        "description": "<p>Success. </p>", 
+        "kind": "enum", 
+        "name": "APP_WORKER_RESULT_SUCCESS", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
     "ARRAY_LENGTH": {
         "description": "", 
         "kind": "def", 
         "name": "ARRAY_LENGTH", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "AccelAxisType": {
+        "description": "", 
+        "kind": "typedef", 
+        "name": "AccelAxisType", 
         "params": [], 
         "return_desc": null, 
         "returns": "", 
@@ -312,6 +420,24 @@
         "params": [], 
         "return_desc": null, 
         "returns": "void(*", 
+        "warning": null
+    }, 
+    "AccelRawDataHandler": {
+        "description": "<p>Callback type for accelerometer raw data events. </p>", 
+        "kind": "typedef", 
+        "name": "AccelRawDataHandler", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "void(*", 
+        "warning": null
+    }, 
+    "AccelSamplingRate": {
+        "description": "<p>Valid accelerometer sampling rates, in Hz. </p>", 
+        "kind": "typedef", 
+        "name": "AccelSamplingRate", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
         "warning": null
     }, 
     "AccelTapHandler": {
@@ -330,6 +456,24 @@
         "params": [], 
         "return_desc": null, 
         "returns": "struct ActionBarLayer", 
+        "warning": null
+    }, 
+    "AnimationCurve": {
+        "description": "<p>Values that are used to indicate the different animation curves, which determine the speed at which the animated value(s) change(s). </p>", 
+        "kind": "typedef", 
+        "name": "AnimationCurve", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "AnimationCurveCustomFunction": {
+        "description": "<p>Custom (user-provided) animation curve. </p>", 
+        "kind": "enum", 
+        "name": "AnimationCurveCustomFunction", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
         "warning": null
     }, 
     "AnimationCurveEaseIn": {
@@ -359,10 +503,46 @@
         "returns": "", 
         "warning": null
     }, 
+    "AnimationCurveFunction": {
+        "description": "<p>The function pointer type of a custom animation curve. </p>", 
+        "kind": "typedef", 
+        "name": "AnimationCurveFunction", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "uint32_t(*", 
+        "warning": null
+    }, 
     "AnimationCurveLinear": {
         "description": "<p>Linear curve: the velocity is constant. </p>", 
         "kind": "enum", 
         "name": "AnimationCurveLinear", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "AnimationCurve_Reserved1": {
+        "description": "<p>Reserved for forward-compatibility use. </p>", 
+        "kind": "enum", 
+        "name": "AnimationCurve_Reserved1", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "AnimationCurve_Reserved2": {
+        "description": "", 
+        "kind": "enum", 
+        "name": "AnimationCurve_Reserved2", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "AnimationCurve_Reserved3": {
+        "description": "", 
+        "kind": "enum", 
+        "name": "AnimationCurve_Reserved3", 
         "params": [], 
         "return_desc": null, 
         "returns": "", 
@@ -404,17 +584,8 @@
         "returns": "void(*", 
         "warning": null
     }, 
-    "AnimationTimingFunction": {
-        "description": "", 
-        "kind": "typedef", 
-        "name": "AnimationTimingFunction", 
-        "params": [], 
-        "return_desc": null, 
-        "returns": "int32_t(*", 
-        "warning": null
-    }, 
     "AnimationUpdateImplementation": {
-        "description": "<p>Pointer to function that updates the animation according to the given normalized time. This callback will be called repeatedly by the animation scheduler whenever the animation needs to be updated. </p>", 
+        "description": "<p>Pointer to function that updates the animation according to the given normalized distance. This callback will be called repeatedly by the animation scheduler whenever the animation needs to be updated. </p>", 
         "kind": "typedef", 
         "name": "AnimationUpdateImplementation", 
         "params": [], 
@@ -429,6 +600,24 @@
         "params": [], 
         "return_desc": null, 
         "returns": "void(*", 
+        "warning": null
+    }, 
+    "AppLaunchReason": {
+        "description": "<p>AppLaunchReason is used to inform the application about how it was launched. </p>", 
+        "kind": "typedef", 
+        "name": "AppLaunchReason", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "AppLogLevel": {
+        "description": "<p>Suggested log level values. </p>", 
+        "kind": "typedef", 
+        "name": "AppLogLevel", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
         "warning": null
     }, 
     "AppMessageInboxDropped": {
@@ -467,6 +656,15 @@
         "returns": "void(*", 
         "warning": null
     }, 
+    "AppMessageResult": {
+        "description": "<p>AppMessage result codes. </p>", 
+        "kind": "typedef", 
+        "name": "AppMessageResult", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
     "AppSyncErrorCallback": {
         "description": "<p>Called whenever there was an error. </p>", 
         "kind": "typedef", 
@@ -501,6 +699,24 @@
         "params": [], 
         "return_desc": null, 
         "returns": "void(*", 
+        "warning": null
+    }, 
+    "AppWorkerMessageHandler": {
+        "description": "<p>Callback type for worker messages. Messages can be sent from worker to app or vice versa. </p>", 
+        "kind": "typedef", 
+        "name": "AppWorkerMessageHandler", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "void(*", 
+        "warning": null
+    }, 
+    "AppWorkerResult": {
+        "description": "<p>Possible error codes from <code>app_worker_launch</code>, <code>app_worker_kill</code>. </p>", 
+        "kind": "typedef", 
+        "name": "AppWorkerResult", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
         "warning": null
     }, 
     "BUTTON_ID_BACK": {
@@ -566,6 +782,15 @@
         "returns": "void(*", 
         "warning": null
     }, 
+    "ButtonId": {
+        "description": "<p>Button ID values. </p>", 
+        "kind": "typedef", 
+        "name": "ButtonId", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
     "ClickConfigProvider": {
         "description": "<p>Subscribe to click events using <code>window_single_click_subscribe()</code> <code>window_single_repeating_click_subscribe()</code> <code>window_multi_click_subscribe()</code> <code>window_long_click_subscribe()</code> <code>window_raw_click_subscribe()</code> These subscriptions will get used by the click recognizers of each of the 4 buttons.", 
         "kind": "typedef", 
@@ -591,6 +816,60 @@
         "params": [], 
         "return_desc": null, 
         "returns": "void *", 
+        "warning": null
+    }, 
+    "CompassHeading": {
+        "description": "<p>Represents an angle relative to a reference direction, e.g. (magnetic) north. The angle value is scaled linearly, such that a value of <code>TRIG_MAX_ANGLE</code> corresponds to 360 degrees or 2 PI radians. Thus, if heading towards north, north is 0, east is <code>TRIG_MAX_ANGLE</code>/4, south is <code>TRIG_MAX_ANGLE</code>/2, and so on. </p>", 
+        "kind": "typedef", 
+        "name": "CompassHeading", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "int32_t", 
+        "warning": null
+    }, 
+    "CompassHeadingHandler": {
+        "description": "<p>Callback type for compass heading events. </p>", 
+        "kind": "typedef", 
+        "name": "CompassHeadingHandler", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "void(*", 
+        "warning": null
+    }, 
+    "CompassStatus": {
+        "description": "<p>Enum describing the current state of the Compass Service calibration. </p>", 
+        "kind": "typedef", 
+        "name": "CompassStatus", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "CompassStatusCalibrated": {
+        "description": "<p>Compass data is valid and the calibration has completed. </p>", 
+        "kind": "enum", 
+        "name": "CompassStatusCalibrated", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "CompassStatusCalibrating": {
+        "description": "<p>Compass is calibrating: the data is valid but the calibration is still being refined. </p>", 
+        "kind": "enum", 
+        "name": "CompassStatusCalibrating", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "CompassStatusDataInvalid": {
+        "description": "<p>Compass is calibrating: data is invalid and should not be used. </p>", 
+        "kind": "enum", 
+        "name": "CompassStatusDataInvalid", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
         "warning": null
     }, 
     "DATA_LOGGING_BUSY": {
@@ -728,6 +1007,24 @@
         "returns": "", 
         "warning": null
     }, 
+    "DataLoggingItemType": {
+        "description": "<p>The different types of session data that Pebble supports. This type describes the type of a singular item in the data session. Every item in a given session is the same type and size. </p>", 
+        "kind": "typedef", 
+        "name": "DataLoggingItemType", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "DataLoggingResult": {
+        "description": "", 
+        "kind": "typedef", 
+        "name": "DataLoggingResult", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
     "DataLoggingSessionRef": {
         "description": "", 
         "kind": "typedef", 
@@ -753,6 +1050,15 @@
         "params": [], 
         "return_desc": null, 
         "returns": "void(*", 
+        "warning": null
+    }, 
+    "DictionaryResult": {
+        "description": "<p>Return values for dictionary write/conversion functions. </p>", 
+        "kind": "typedef", 
+        "name": "DictionaryResult", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
         "warning": null
     }, 
     "DictionarySerializeCallback": {
@@ -863,6 +1169,24 @@
         "returns": "", 
         "warning": null
     }, 
+    "FRIDAY": {
+        "description": "<p>Friday. </p>", 
+        "kind": "enum", 
+        "name": "FRIDAY", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "GAlign": {
+        "description": "<p>Values to specify how two things should be aligned relative to each other. .\n </p>", 
+        "kind": "typedef", 
+        "name": "GAlign", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
     "GAlignBottom": {
         "description": "<p>Align by making the bottom edges overlap and centered horizontally. </p>", 
         "kind": "enum", 
@@ -944,6 +1268,15 @@
         "returns": "", 
         "warning": null
     }, 
+    "GColor": {
+        "description": "<p>Color values. </p>", 
+        "kind": "typedef", 
+        "name": "GColor", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
     "GColorBlack": {
         "description": "<p>Represents black. </p>", 
         "kind": "enum", 
@@ -966,6 +1299,15 @@
         "description": "<p>Represents white. </p>", 
         "kind": "enum", 
         "name": "GColorWhite", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "GCompOp": {
+        "description": "<p>There is no notion of \"transparency\" in the graphics system. However, the effect of transparency can be created by masking and using compositing modes. \n Contrived example of how the different compositing modes affect drawing. Often, the \"destination image\" is the render buffer and thus contains the image of what has been drawn before or \"underneath\". \n\n\n</p>", 
+        "kind": "typedef", 
+        "name": "GCompOp", 
         "params": [], 
         "return_desc": null, 
         "returns": "", 
@@ -1047,6 +1389,15 @@
         "description": "<p>Bottom-Right corner. </p>", 
         "kind": "enum", 
         "name": "GCornerBottomRight", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "GCornerMask": {
+        "description": "<p>Bit mask values to specify the corners of a rectangle. The values can be combines using binary OR (|), For example: the mask to indicate top left and bottom right corners can: be created as follows: (GCornerTopLeft | GCornerBottomRight) </p>", 
+        "kind": "typedef", 
+        "name": "GCornerMask", 
         "params": [], 
         "return_desc": null, 
         "returns": "", 
@@ -1134,7 +1485,7 @@
         "warning": null
     }, 
     "GPoint": {
-        "description": "", 
+        "description": "<p>Convenience macro to make a GPoint. </p>", 
         "kind": "def", 
         "name": "GPoint", 
         "params": [], 
@@ -1148,7 +1499,7 @@
         "name": "GPointGetter", 
         "params": [], 
         "return_desc": null, 
-        "returns": "GPointReturn", 
+        "returns": "GPointReturn(*", 
         "warning": null
     }, 
     "GPointReturn": {
@@ -1179,7 +1530,7 @@
         "warning": null
     }, 
     "GRect": {
-        "description": "", 
+        "description": "<p>Convenience macro to make a GRect. </p>", 
         "kind": "def", 
         "name": "GRect", 
         "params": [], 
@@ -1193,7 +1544,7 @@
         "name": "GRectGetter", 
         "params": [], 
         "return_desc": null, 
-        "returns": "GRectReturn", 
+        "returns": "GRectReturn(*", 
         "warning": null
     }, 
     "GRectReturn": {
@@ -1224,7 +1575,7 @@
         "warning": null
     }, 
     "GSize": {
-        "description": "", 
+        "description": "<p>Convenience macro to make a GSize. </p>", 
         "kind": "def", 
         "name": "GSize", 
         "params": [], 
@@ -1236,6 +1587,15 @@
         "description": "<p>Convenience macro to make a GSize of (0, 0). </p>", 
         "kind": "def", 
         "name": "GSizeZero", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "GTextAlignment": {
+        "description": "<p>Text aligment controls the way the text is aligned inside the box the text is drawn into. </p>", 
+        "kind": "typedef", 
+        "name": "GTextAlignment", 
         "params": [], 
         "return_desc": null, 
         "returns": "", 
@@ -1275,6 +1635,15 @@
         "params": [], 
         "return_desc": null, 
         "returns": "TextLayout *", 
+        "warning": null
+    }, 
+    "GTextOverflowMode": {
+        "description": "<p>Text overflow mode controls the way text overflows when the string that is drawn does not fit inside the area constraint. </p>", 
+        "kind": "typedef", 
+        "name": "GTextOverflowMode", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
         "warning": null
     }, 
     "GTextOverflowModeFill": {
@@ -1394,6 +1763,15 @@
         "returns": "", 
         "warning": null
     }, 
+    "MONDAY": {
+        "description": "<p>Monday. </p>", 
+        "kind": "enum", 
+        "name": "MONDAY", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
     "MONTH_UNIT": {
         "description": "<p>Flag to represent the \"months\" time unit. </p>", 
         "kind": "enum", 
@@ -1404,7 +1782,7 @@
         "warning": null
     }, 
     "MenuIndex": {
-        "description": "", 
+        "description": "<p>Macro to create a MenuIndex. </p>", 
         "kind": "def", 
         "name": "MenuIndex", 
         "params": [], 
@@ -1472,7 +1850,7 @@
         "name": "MenuLayerGetNumberOfRowsInSectionsCallback", 
         "params": [], 
         "return_desc": "<p>The number of rows in the given section in the menu </p>", 
-        "returns": "uint16_t", 
+        "returns": "uint16_t(*", 
         "warning": null
     }, 
     "MenuLayerGetNumberOfSectionsCallback": {
@@ -1481,7 +1859,7 @@
         "name": "MenuLayerGetNumberOfSectionsCallback", 
         "params": [], 
         "return_desc": "<p>The number of sections in the menu </p>", 
-        "returns": "uint16_t", 
+        "returns": "uint16_t(*", 
         "warning": null
     }, 
     "MenuLayerGetSeparatorHeightCallback": {
@@ -1509,6 +1887,15 @@
         "params": [], 
         "return_desc": null, 
         "returns": "void(*", 
+        "warning": null
+    }, 
+    "MenuRowAlign": {
+        "description": "<p>Values to specify how a (selected) row should be aligned relative to the visible area of the MenuLayer. </p>", 
+        "kind": "typedef", 
+        "name": "MenuRowAlign", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
         "warning": null
     }, 
     "MenuRowAlignBottom": {
@@ -1556,28 +1943,10 @@
         "returns": "", 
         "warning": null
     }, 
-    "NUM_ANIMATION_CURVE": {
-        "description": "", 
-        "kind": "def", 
-        "name": "NUM_ANIMATION_CURVE", 
-        "params": [], 
-        "return_desc": null, 
-        "returns": "", 
-        "warning": null
-    }, 
     "NUM_BUTTONS": {
         "description": "<p>Total number of buttons. </p>", 
         "kind": "enum", 
         "name": "NUM_BUTTONS", 
-        "params": [], 
-        "return_desc": null, 
-        "returns": "", 
-        "warning": null
-    }, 
-    "NumAnimationCurve": {
-        "description": "<p>Number of available AnimationCurve types. </p>", 
-        "kind": "enum", 
-        "name": "NumAnimationCurve", 
         "params": [], 
         "return_desc": null, 
         "returns": "", 
@@ -1637,13 +2006,22 @@
         "returns": "", 
         "warning": null
     }, 
+    "RESOURCE_ID_FONT_FALLBACK": {
+        "description": "", 
+        "kind": "def", 
+        "name": "RESOURCE_ID_FONT_FALLBACK", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
     "ResHandle": {
         "description": "<p>Opaque reference to a resource. </p>", 
         "kind": "typedef", 
         "name": "ResHandle", 
         "params": [], 
         "return_desc": null, 
-        "returns": "const void *", 
+        "returns": "void *", 
         "warning": null
     }, 
     "RotBitmapLayer": {
@@ -1653,6 +2031,15 @@
         "params": [], 
         "return_desc": null, 
         "returns": "struct RotBitmapLayer", 
+        "warning": null
+    }, 
+    "SATURDAY": {
+        "description": "<p>Saturday. </p>", 
+        "kind": "enum", 
+        "name": "SATURDAY", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
         "warning": null
     }, 
     "SECOND_UNIT": {
@@ -1677,6 +2064,15 @@
         "description": "<p>Reduce the sniff interval to increase the responsiveness of the radio at the expense of increasing Bluetooth energy consumption by a multiple of 2-5 (very significant) </p>", 
         "kind": "enum", 
         "name": "SNIFF_INTERVAL_REDUCED", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "SUNDAY": {
+        "description": "<p>Sunday. </p>", 
+        "kind": "enum", 
+        "name": "SUNDAY", 
         "params": [], 
         "return_desc": null, 
         "returns": "", 
@@ -1763,6 +2159,51 @@
         "returns": "void(*", 
         "warning": null
     }, 
+    "SniffInterval": {
+        "description": "<p>Intervals during which the Bluetooth module may enter a low power mode. The sniff interval defines the period during which the Bluetooth module may not exchange (ACL) packets. The longer the sniff interval, the more time the Bluetooth module may spend in a low power mode. It may be necessary to reduce the sniff interval if an app requires reduced latency when sending messages. </p>", 
+        "kind": "typedef", 
+        "name": "SniffInterval", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": "<p>These settings have a dramatic effect on the Pebble's energy consumption. Use the normal sniff interval whenever possible. Note, however, that switching between modes increases power consumption during the process. Frequent switching between modes is thus discouraged. Ensure you do not drop to normal frequently. The Bluetooth module is a major consumer of the Pebble's energy. </p>"
+    }, 
+    "StatusCode": {
+        "description": "<p>Status codes. See <code>status_t</code>. </p>", 
+        "kind": "typedef", 
+        "name": "StatusCode", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "THURSDAY": {
+        "description": "<p>Thursday. </p>", 
+        "kind": "enum", 
+        "name": "THURSDAY", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "TODAY": {
+        "description": "<p>Today. </p>", 
+        "kind": "enum", 
+        "name": "TODAY", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "TRIGANGLE_TO_DEG": {
+        "description": "<p>Converts from a fixed point value representation of <code>trig_angle</code> to the equivalent value in degrees. </p>", 
+        "kind": "def", 
+        "name": "TRIGANGLE_TO_DEG", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
     "TRIG_MAX_ANGLE": {
         "description": "<p>Angle value that corresponds to 360 degrees or 2 PI radians. </p>", 
         "kind": "def", 
@@ -1776,6 +2217,15 @@
         "description": "<p>The largest value that can result from a call to <code>sin_lookup</code> or <code>cos_lookup</code>. For a code example, see the detailed description at the top of this chapter: Math. </p>", 
         "kind": "def", 
         "name": "TRIG_MAX_RATIO", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "TUESDAY": {
+        "description": "<p>Tuesday. </p>", 
+        "kind": "enum", 
+        "name": "TUESDAY", 
         "params": [], 
         "return_desc": null, 
         "returns": "", 
@@ -1844,8 +2294,26 @@
         "returns": "void(*", 
         "warning": null
     }, 
+    "TimeUnits": {
+        "description": "<p>Time unit flags that can be used to create a bitmask for use in <code>tick_timer_service_subscribe()</code>. This will also be passed to TickHandler. </p>", 
+        "kind": "typedef", 
+        "name": "TimeUnits", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "TupleType": {
+        "description": "<p>Values representing the type of data that the value field of a Tuple contains. </p>", 
+        "kind": "typedef", 
+        "name": "TupleType", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
     "TupletBytes": {
-        "description": "", 
+        "description": "<p>Macro to create a Tuplet with a byte array value. </p>", 
         "kind": "def", 
         "name": "TupletBytes", 
         "params": [], 
@@ -1854,7 +2322,7 @@
         "warning": null
     }, 
     "TupletCString": {
-        "description": "", 
+        "description": "<p>Macro to create a Tuplet with a c-string value. </p>", 
         "kind": "def", 
         "name": "TupletCString", 
         "params": [], 
@@ -1863,9 +2331,234 @@
         "warning": null
     }, 
     "TupletInteger": {
-        "description": "", 
+        "description": "<p>Macro to create a Tuplet with an integer value. </p>", 
         "kind": "def", 
         "name": "TupletInteger", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "UUID_SIZE": {
+        "description": "", 
+        "kind": "def", 
+        "name": "UUID_SIZE", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "UUID_STRING_BUFFER_LENGTH": {
+        "description": "<p>The minimum required length of a string used to hold a uuid (including null). </p>", 
+        "kind": "def", 
+        "name": "UUID_STRING_BUFFER_LENGTH", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "UuidMake": {
+        "description": "", 
+        "kind": "def", 
+        "name": "UuidMake", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "UuidMakeFromBEBytes": {
+        "description": "<p>Creates a Uuid from an array of bytes with 16 bytes in Big Endian order. </p>", 
+        "kind": "def", 
+        "name": "UuidMakeFromBEBytes", 
+        "params": [], 
+        "return_desc": "<p>The created Uuid </p>", 
+        "returns": "", 
+        "warning": null
+    }, 
+    "UuidMakeFromLEBytes": {
+        "description": "<p>Creates a Uuid from an array of bytes with 16 bytes in Little Endian order. </p>", 
+        "kind": "def", 
+        "name": "UuidMakeFromLEBytes", 
+        "params": [], 
+        "return_desc": "<p>The created Uuid </p>", 
+        "returns": "", 
+        "warning": null
+    }, 
+    "WATCH_INFO_COLOR_BLACK": {
+        "description": "<p>Black. </p>", 
+        "kind": "enum", 
+        "name": "WATCH_INFO_COLOR_BLACK", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "WATCH_INFO_COLOR_BLUE": {
+        "description": "<p>Blue. </p>", 
+        "kind": "enum", 
+        "name": "WATCH_INFO_COLOR_BLUE", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "WATCH_INFO_COLOR_GREEN": {
+        "description": "<p>Green. </p>", 
+        "kind": "enum", 
+        "name": "WATCH_INFO_COLOR_GREEN", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "WATCH_INFO_COLOR_GREY": {
+        "description": "<p>Grey. </p>", 
+        "kind": "enum", 
+        "name": "WATCH_INFO_COLOR_GREY", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "WATCH_INFO_COLOR_MATTE_BLACK": {
+        "description": "<p>Matte Black. </p>", 
+        "kind": "enum", 
+        "name": "WATCH_INFO_COLOR_MATTE_BLACK", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "WATCH_INFO_COLOR_ORANGE": {
+        "description": "<p>Orange. </p>", 
+        "kind": "enum", 
+        "name": "WATCH_INFO_COLOR_ORANGE", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "WATCH_INFO_COLOR_PINK": {
+        "description": "<p>Pink. </p>", 
+        "kind": "enum", 
+        "name": "WATCH_INFO_COLOR_PINK", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "WATCH_INFO_COLOR_RED": {
+        "description": "<p>Red. </p>", 
+        "kind": "enum", 
+        "name": "WATCH_INFO_COLOR_RED", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "WATCH_INFO_COLOR_STAINLESS_STEEL": {
+        "description": "<p>Stainless Steel. </p>", 
+        "kind": "enum", 
+        "name": "WATCH_INFO_COLOR_STAINLESS_STEEL", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "WATCH_INFO_COLOR_UNKNOWN": {
+        "description": "<p>Unknown color. </p>", 
+        "kind": "enum", 
+        "name": "WATCH_INFO_COLOR_UNKNOWN", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "WATCH_INFO_COLOR_WHITE": {
+        "description": "<p>White. </p>", 
+        "kind": "enum", 
+        "name": "WATCH_INFO_COLOR_WHITE", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "WATCH_INFO_MODEL_PEBBLE_ORIGINAL": {
+        "description": "<p>Original Pebble. </p>", 
+        "kind": "enum", 
+        "name": "WATCH_INFO_MODEL_PEBBLE_ORIGINAL", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "WATCH_INFO_MODEL_PEBBLE_STEEL": {
+        "description": "<p>Pebble Steel. </p>", 
+        "kind": "enum", 
+        "name": "WATCH_INFO_MODEL_PEBBLE_STEEL", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "WATCH_INFO_MODEL_UNKNOWN": {
+        "description": "<p>Unknown model. </p>", 
+        "kind": "enum", 
+        "name": "WATCH_INFO_MODEL_UNKNOWN", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "WEDNESDAY": {
+        "description": "<p>Wednesday. </p>", 
+        "kind": "enum", 
+        "name": "WEDNESDAY", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "WakeupHandler": {
+        "description": "<p>The type of function which can be called when a wakeup event occurs. The arguments will be the id of the wakeup event that occurred, as well as the scheduled cookie provided to <code>app_wakeup_schedule</code>. </p>", 
+        "kind": "typedef", 
+        "name": "WakeupHandler", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "void(*", 
+        "warning": null
+    }, 
+    "WakeupId": {
+        "description": "<p>WakeupId is an identifier for a wakeup event. </p>", 
+        "kind": "typedef", 
+        "name": "WakeupId", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "int32_t", 
+        "warning": null
+    }, 
+    "WatchInfoColor": {
+        "description": "<p>The different watch colors. </p>", 
+        "kind": "typedef", 
+        "name": "WatchInfoColor", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "WatchInfoModel": {
+        "description": "<p>The different watch models. </p>", 
+        "kind": "typedef", 
+        "name": "WatchInfoModel", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
+    "WeekDay": {
+        "description": "<p>Weekday values. </p>", 
+        "kind": "typedef", 
+        "name": "WeekDay", 
         "params": [], 
         "return_desc": null, 
         "returns": "", 
@@ -1936,6 +2629,26 @@
         "returns": "void", 
         "warning": null
     }, 
+    "accel_raw_data_service_subscribe": {
+        "description": "<p>Subscribe to the accelerometer raw data event service. Once subscribed, the handler gets called every time there are new accelerometer samples available. </p>", 
+        "kind": "fn", 
+        "name": "accel_raw_data_service_subscribe", 
+        "params": [
+            {
+                "description": "<p>the number of samples to buffer, between 0 and 25. </p>", 
+                "name": "samples_per_update", 
+                "type": "uint32_t"
+            }, 
+            {
+                "description": "<p>A callback to be executed on accelerometer data events </p>", 
+                "name": "handler", 
+                "type": "AccelRawDataHandler"
+            }
+        ], 
+        "return_desc": null, 
+        "returns": "void", 
+        "warning": "<p>Cannot use <code>accel_service_peek()</code> when subscribed to accelerometer data events. </p>"
+    }, 
     "accel_service_peek": {
         "description": "<p><p>-2 if subscribed to accelerometer events. </p>\n</p>", 
         "kind": "fn", 
@@ -1944,7 +2657,7 @@
             {
                 "description": "<p>a pointer to a pre-allocated AccelData item </p>", 
                 "name": "data", 
-                "type": "AccelData"
+                "type": "AccelData *"
             }
         ], 
         "return_desc": "<p>-1 if the accel is not running </p>", 
@@ -2177,7 +2890,7 @@
             {
                 "description": "<p>Pointer to the GBitmap icon </p>", 
                 "name": "icon", 
-                "type": "GBitmap"
+                "type": "const GBitmap *"
             }
         ], 
         "return_desc": null, 
@@ -2271,7 +2984,27 @@
         ], 
         "return_desc": null, 
         "returns": "void", 
-        "warning": "<p>It is up to the implementation of the animation to actually use the curve. Because a curve type is often used for animations, it is included in the animation base layer. </p>"
+        "warning": null
+    }, 
+    "animation_set_custom_curve": {
+        "description": "<p>Sets a custom animation curve function. </p>", 
+        "kind": "fn", 
+        "name": "animation_set_custom_curve", 
+        "params": [
+            {
+                "description": "<p>The animation for which to set the curve. </p>", 
+                "name": "animation", 
+                "type": "struct Animation *"
+            }, 
+            {
+                "description": "<p>The custom animation curve function. </p>", 
+                "name": "curve_function", 
+                "type": "AnimationCurveFunction"
+            }
+        ], 
+        "return_desc": null, 
+        "returns": "void", 
+        "warning": null
     }, 
     "animation_set_delay": {
         "description": "<p>Sets an optional delay for the animation. </p>", 
@@ -2351,7 +3084,7 @@
             {
                 "description": "<p>The structure with function pointers to the implementation of the setup, update and teardown functions. </p>", 
                 "name": "implementation", 
-                "type": "AnimationImplementation"
+                "type": "const AnimationImplementation *"
             }
         ], 
         "return_desc": null, 
@@ -2399,7 +3132,7 @@
             {
                 "description": null, 
                 "name": "interval", 
-                "type": "SniffInterval"
+                "type": "const SniffInterval"
             }
         ], 
         "return_desc": null, 
@@ -2440,7 +3173,7 @@
         "warning": null
     }, 
     "app_log": {
-        "description": "<p>Log an app message. Refer the snprintf manpage for details about the C formatting string format. </p>", 
+        "description": "<p>Log an app message. </p>", 
         "kind": "fn", 
         "name": "app_log", 
         "params": [
@@ -2467,7 +3200,7 @@
         ], 
         "return_desc": null, 
         "returns": "void", 
-        "warning": "<p>We do not have floating point number support in formatting strings </p>"
+        "warning": null
     }, 
     "app_message_deregister_callbacks": {
         "description": "<p>Deregisters all callbacks and their context. </p>", 
@@ -2504,12 +3237,12 @@
             {
                 "description": "<p>The required size for the Inbox buffer </p>", 
                 "name": "size_inbound", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }, 
             {
                 "description": "<p>The required size for the Outbox buffer</p>", 
                 "name": "size_outbound", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }
         ], 
         "return_desc": "<p>A result code such as <code>APP_MSG_OK</code> or <code>APP_MSG_OUT_OF_MEMORY</code>.</p>", 
@@ -2524,7 +3257,7 @@
             {
                 "description": "<p>Location to write the DictionaryIterator pointer. This will be NULL on failure.</p>", 
                 "name": "iterator", 
-                "type": "DictionaryIterator"
+                "type": "DictionaryIterator **"
             }
         ], 
         "return_desc": "<p>A result code, including but not limited to <code>APP_MSG_OK</code>, <code>APP_MSG_INVALID_ARGS</code> or <code>APP_MSG_BUSY</code>.</p>", 
@@ -2652,11 +3385,11 @@
             {
                 "description": "<p>The key for which to find a Tuple </p>", 
                 "name": "key", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }
         ], 
         "return_desc": "<p>Pointer to a found Tuple, or NULL if there was no Tuple with the specified key. </p>", 
-        "returns": "Tuple", 
+        "returns": "const Tuple *", 
         "warning": null
     }, 
     "app_sync_init": {
@@ -2677,12 +3410,12 @@
             {
                 "description": "<p>The size of the backing storage of the \"current\" dictionary. Use <code>dict_calc_buffer_size_from_tuplets()</code> to estimate the size you need. </p>", 
                 "name": "buffer_size", 
-                "type": "uint16_t"
+                "type": "const uint16_t"
             }, 
             {
                 "description": "<p>An array of Tuplets with the initial keys and values. </p>", 
                 "name": "keys_and_initial_values", 
-                "type": "Tuplet"
+                "type": "const Tuplet *const"
             }, 
             {
                 "description": "<p>The number of Tuplets in the <code>keys_and_initial_values</code> array. </p>", 
@@ -2722,7 +3455,7 @@
             {
                 "description": "<p>An array of Tuplets with the keys and values to update. The data in the Tuplets are copied during the call, so the array can be stack-allocated. </p>", 
                 "name": "keys_and_values_to_update", 
-                "type": "Tuplet"
+                "type": "const Tuplet *const"
             }, 
             {
                 "description": "<p>The number of Tuplets in the <code>keys_and_values_to_update</code> array. </p>", 
@@ -2794,6 +3527,77 @@
         "returns": "bool", 
         "warning": null
     }, 
+    "app_worker_is_running": {
+        "description": "<p>Determine if the worker for the current app is running. </p>", 
+        "kind": "fn", 
+        "name": "app_worker_is_running", 
+        "params": [], 
+        "return_desc": "<p>true if running </p>", 
+        "returns": "bool", 
+        "warning": null
+    }, 
+    "app_worker_kill": {
+        "description": "<p>Kill the worker for the current app. Note that this is an asynchronous operation, a result code of <code>APP_WORKER_RESULT_SUCCESS</code> merely means that the request was successfully queued up. </p>", 
+        "kind": "fn", 
+        "name": "app_worker_kill", 
+        "params": [], 
+        "return_desc": "<p>result code </p>", 
+        "returns": "AppWorkerResult", 
+        "warning": null
+    }, 
+    "app_worker_launch": {
+        "description": "<p>Launch the worker for the current app. Note that this is an asynchronous operation, a result code of <code>APP_WORKER_RESULT_SUCCESS</code> merely means that the request was successfully queued up. </p>", 
+        "kind": "fn", 
+        "name": "app_worker_launch", 
+        "params": [], 
+        "return_desc": "<p>result code </p>", 
+        "returns": "AppWorkerResult", 
+        "warning": null
+    }, 
+    "app_worker_message_subscribe": {
+        "description": "<p>Subscribe to worker messages. Once subscribed, the handler gets called on every message emitted by the other task (either worker or app). </p>", 
+        "kind": "fn", 
+        "name": "app_worker_message_subscribe", 
+        "params": [
+            {
+                "description": "<p>A callback to be executed when the event is received </p>", 
+                "name": "handler", 
+                "type": "AppWorkerMessageHandler"
+            }
+        ], 
+        "return_desc": "<p>true on success </p>", 
+        "returns": "bool", 
+        "warning": null
+    }, 
+    "app_worker_message_unsubscribe": {
+        "description": "<p>Unsubscribe from worker messages. Once unsubscribed, the previously registered handler will no longer be called. </p>", 
+        "kind": "fn", 
+        "name": "app_worker_message_unsubscribe", 
+        "params": [], 
+        "return_desc": "<p>true on success </p>", 
+        "returns": "bool", 
+        "warning": null
+    }, 
+    "app_worker_send_message": {
+        "description": "<p>Send a message to the other task (either worker or app). </p>", 
+        "kind": "fn", 
+        "name": "app_worker_send_message", 
+        "params": [
+            {
+                "description": "<p>An application defined message type </p>", 
+                "name": "type", 
+                "type": "uint8_t"
+            }, 
+            {
+                "description": "<p>the message data structure </p>", 
+                "name": "data", 
+                "type": "AppWorkerMessage *"
+            }
+        ], 
+        "return_desc": null, 
+        "returns": "void", 
+        "warning": null
+    }, 
     "atan2_lookup": {
         "description": "<p>Look-up the arctangent of a given x, y pair The angle value is scaled linearly, such that a value of 0x10000 corresponds to 360 degrees or 2 PI radians. </p>", 
         "kind": "fn", 
@@ -2819,7 +3623,7 @@
         "kind": "fn", 
         "name": "battery_state_service_peek", 
         "params": [], 
-        "return_desc": "<p>a BatterChargeState containing the last known data </p>", 
+        "return_desc": "<p>a BatteryChargeState containing the last known data </p>", 
         "returns": "BatteryChargeState", 
         "warning": null
     }, 
@@ -2889,7 +3693,7 @@
             }
         ], 
         "return_desc": "<p>A pointer to the bitmap image that the BitmapLayer is using </p>", 
-        "returns": "GBitmap", 
+        "returns": "const GBitmap *", 
         "warning": null
     }, 
     "bitmap_layer_get_layer": {
@@ -2960,7 +3764,7 @@
             {
                 "description": "<p>The new GBitmap to set onto the BitmapLayer </p>", 
                 "name": "bitmap", 
-                "type": "GBitmap"
+                "type": "const GBitmap *"
             }
         ], 
         "return_desc": null, 
@@ -3094,6 +3898,94 @@
         "returns": "bool", 
         "warning": null
     }, 
+    "clock_is_timezone_set": {
+        "description": "<p>Checks if timezone is currently set, otherwise gmtime == localtime. </p>", 
+        "kind": "fn", 
+        "name": "clock_is_timezone_set", 
+        "params": [], 
+        "return_desc": "<p>true if timezone has been set, false otherwise </p>", 
+        "returns": "bool", 
+        "warning": "<p>This function was added in preparation of timezone support, currently always returns false </p>"
+    }, 
+    "clock_to_timestamp": {
+        "description": "<p>Converts a (day, hour, minute) specification to a UTC timestamp occurring in the future Always returns a timestamp for the next occurring instance, example: specifying TODAY@14:30 when it is 14:40 will return a timestamp for 7 days from now at 14:30. </p>", 
+        "kind": "fn", 
+        "name": "clock_to_timestamp", 
+        "params": [
+            {
+                "description": "<p>WeekDay day of week including support for specifying TODAY </p>", 
+                "name": "day", 
+                "type": "WeekDay"
+            }, 
+            {
+                "description": "<p>hour specified in 24-hour format [0-23] </p>", 
+                "name": "hour", 
+                "type": "int"
+            }, 
+            {
+                "description": "<p>minute [0-59] </p>", 
+                "name": "minute", 
+                "type": "int"
+            }
+        ], 
+        "return_desc": null, 
+        "returns": "time_t", 
+        "warning": "<p>This function does not support Daylight Saving Time (DST) changes, events scheduled during a DST change will be off by an hour. </p>"
+    }, 
+    "compass_service_peek": {
+        "description": "<p>Peek at the last recorded reading. </p>", 
+        "kind": "fn", 
+        "name": "compass_service_peek", 
+        "params": [
+            {
+                "description": "<p>a pointer to a pre-allocated CompassHeadingData </p>", 
+                "name": "data", 
+                "type": "CompassHeadingData *"
+            }
+        ], 
+        "return_desc": "<p>Always returns 0 to indicate success. </p>", 
+        "returns": "int", 
+        "warning": null
+    }, 
+    "compass_service_set_heading_filter": {
+        "description": "<p>Set the minimum angular change required to generate new compass heading events. The angular distance is measured relative to the last delivered heading event. Use 0 to be notified of all movements. Negative values and values > <code>TRIG_MAX_ANGLE</code> / 2 are not valid. The default value of this property is <code>TRIG_MAX_ANGLE</code> / 360. </p>", 
+        "kind": "fn", 
+        "name": "compass_service_set_heading_filter", 
+        "params": [
+            {
+                "description": null, 
+                "name": "filter", 
+                "type": "CompassHeading"
+            }
+        ], 
+        "return_desc": "<p>0, success. </p>", 
+        "returns": "int", 
+        "warning": null
+    }, 
+    "compass_service_subscribe": {
+        "description": "<p>Subscribe to the compass heading event service. Once subscribed, the handler gets called every time the angular distance relative to the previous value exceeds the configured filter. </p>", 
+        "kind": "fn", 
+        "name": "compass_service_subscribe", 
+        "params": [
+            {
+                "description": "<p>A callback to be executed on heading events </p>", 
+                "name": "handler", 
+                "type": "CompassHeadingHandler"
+            }
+        ], 
+        "return_desc": null, 
+        "returns": "void", 
+        "warning": null
+    }, 
+    "compass_service_unsubscribe": {
+        "description": "<p>Unsubscribe from the compass heading event service. Once unsubscribed, the previously registered handler will no longer be called. </p>", 
+        "kind": "fn", 
+        "name": "compass_service_unsubscribe", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "void", 
+        "warning": null
+    }, 
     "cos_lookup": {
         "description": "<p>Look-up the cosine of the given angle from a pre-computed table. This is equivalent to calling <code>sin_lookup</code>(angle + <code>MAX_ANGLE</code> / 4). </p>", 
         "kind": "fn", 
@@ -3202,7 +4094,7 @@
             {
                 "description": "<p>An array of Tuplets that need to be stored in the dictionary. </p>", 
                 "name": "tuplets", 
-                "type": "Tuplet"
+                "type": "const Tuplet *const"
             }, 
             {
                 "description": "<p>The total number of Tuplets that follow. </p>", 
@@ -3222,16 +4114,16 @@
             {
                 "description": "<p>Iterator to the dictionary to search in. </p>", 
                 "name": "iter", 
-                "type": "DictionaryIterator"
+                "type": "const DictionaryIterator *"
             }, 
             {
                 "description": "<p>The key for which to find a Tuple </p>", 
                 "name": "key", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }
         ], 
         "return_desc": "<p>Pointer to a found Tuple, or NULL if there was no Tuple with the specified key. </p>", 
-        "returns": "Tuple", 
+        "returns": "Tuple *", 
         "warning": null
     }, 
     "dict_merge": {
@@ -3242,17 +4134,17 @@
             {
                 "description": "<p>The destination dictionary to update </p>", 
                 "name": "dest", 
-                "type": "DictionaryIterator"
+                "type": "DictionaryIterator *"
             }, 
             {
                 "description": "<p>In: the maximum size of buffer backing dest. Out: the final size of the updated dictionary. </p>", 
                 "name": "dest_max_size_in_out", 
-                "type": "uint32_t"
+                "type": "uint32_t *"
             }, 
             {
                 "description": "<p>The source dictionary of which its Tuples will be used to update dest. </p>", 
                 "name": "source", 
-                "type": "DictionaryIterator"
+                "type": "DictionaryIterator *"
             }, 
             {
                 "description": "<p>Specify True if only the existing keys in dest should be updated. </p>", 
@@ -3262,7 +4154,7 @@
             {
                 "description": "<p>The callback that will be called for each Tuple in the merged destination dictionary. </p>", 
                 "name": "key_callback", 
-                "type": "DictionaryKeyUpdatedCallback"
+                "type": "const DictionaryKeyUpdatedCallback"
             }, 
             {
                 "description": "<p>Pointer to app specific data that will get passed in when <code>update_key_callback</code> is called. </p>", 
@@ -3282,7 +4174,7 @@
             {
                 "description": "<p>The dictionary iterator </p>", 
                 "name": "iter", 
-                "type": "DictionaryIterator"
+                "type": "DictionaryIterator *"
             }, 
             {
                 "description": "<p>The storage of the dictionary </p>", 
@@ -3292,11 +4184,11 @@
             {
                 "description": "<p>The storage size of the dictionary </p>", 
                 "name": "size", 
-                "type": "uint16_t"
+                "type": "const uint16_t"
             }
         ], 
         "return_desc": "<p>The first tuple in the dictionary, or NULL in case the dictionary was empty or if there was a parsing error. </p>", 
-        "returns": "Tuple", 
+        "returns": "Tuple *", 
         "warning": null
     }, 
     "dict_read_first": {
@@ -3307,11 +4199,11 @@
             {
                 "description": "<p>The dictionary iterator </p>", 
                 "name": "iter", 
-                "type": "DictionaryIterator"
+                "type": "DictionaryIterator *"
             }
         ], 
         "return_desc": "<p>The first tuple in the dictionary, or NULL in case the dictionary was empty or if there was a parsing error. </p>", 
-        "returns": "Tuple", 
+        "returns": "Tuple *", 
         "warning": null
     }, 
     "dict_read_next": {
@@ -3322,11 +4214,11 @@
             {
                 "description": "<p>The dictionary iterator </p>", 
                 "name": "iter", 
-                "type": "DictionaryIterator"
+                "type": "DictionaryIterator *"
             }
         ], 
         "return_desc": "<p>The next tuple in the dictionary, or NULL in case the end has been reached or if there was a parsing error. </p>", 
-        "returns": "Tuple", 
+        "returns": "Tuple *", 
         "warning": null
     }, 
     "dict_serialize_tuplets": {
@@ -3347,7 +4239,7 @@
             {
                 "description": "<p>An array of Tuplets that need to be serialized into the dictionary. </p>", 
                 "name": "tuplets", 
-                "type": "Tuplet"
+                "type": "const Tuplet *const"
             }, 
             {
                 "description": "<p>The number of tuplets that follow. </p>", 
@@ -3367,7 +4259,7 @@
             {
                 "description": "<p>The array of tuplets </p>", 
                 "name": "tuplets", 
-                "type": "Tuplet"
+                "type": "const Tuplet *const"
             }, 
             {
                 "description": "<p>The number of tuplets in the array </p>", 
@@ -3382,7 +4274,7 @@
             {
                 "description": "<p>The number of bytes written </p>", 
                 "name": "size_in_out", 
-                "type": "uint32_t"
+                "type": "uint32_t *"
             }
         ], 
         "return_desc": "<p><code>DICT_OK</code>, <code>DICT_NOT_ENOUGH_STORAGE</code> or <code>DICT_INVALID_ARGS</code> </p>", 
@@ -3397,12 +4289,12 @@
             {
                 "description": "<p>The dictionary iterator </p>", 
                 "name": "iter", 
-                "type": "DictionaryIterator"
+                "type": "DictionaryIterator *"
             }, 
             {
                 "description": "<p>The array of tuplets </p>", 
                 "name": "tuplets", 
-                "type": "Tuplet"
+                "type": "const Tuplet *const"
             }, 
             {
                 "description": "<p>The number of tuplets in the array </p>", 
@@ -3417,7 +4309,7 @@
             {
                 "description": "<p>The number of bytes written </p>", 
                 "name": "size_in_out", 
-                "type": "uint32_t"
+                "type": "uint32_t *"
             }
         ], 
         "return_desc": "<p><code>DICT_OK</code>, <code>DICT_NOT_ENOUGH_STORAGE</code> or <code>DICT_INVALID_ARGS</code> </p>", 
@@ -3432,7 +4324,7 @@
             {
                 "description": "<p>The dictionary iterator </p>", 
                 "name": "iter", 
-                "type": "DictionaryIterator"
+                "type": "DictionaryIterator *"
             }
         ], 
         "return_desc": "<p>The total number of bytes which have been written to the dictionary. </p>", 
@@ -3447,7 +4339,7 @@
             {
                 "description": "<p>The dictionary iterator </p>", 
                 "name": "iter", 
-                "type": "DictionaryIterator"
+                "type": "DictionaryIterator *"
             }, 
             {
                 "description": "<p>The storage of the dictionary </p>", 
@@ -3457,7 +4349,7 @@
             {
                 "description": "<p>The storage size of the dictionary </p>", 
                 "name": "size", 
-                "type": "uint16_t"
+                "type": "const uint16_t"
             }
         ], 
         "return_desc": "<p><code>DICT_OK</code>, <code>DICT_NOT_ENOUGH_STORAGE</code> or <code>DICT_INVALID_ARGS</code> </p>", 
@@ -3472,12 +4364,12 @@
             {
                 "description": "<p>The dictionary iterator </p>", 
                 "name": "iter", 
-                "type": "DictionaryIterator"
+                "type": "DictionaryIterator *"
             }, 
             {
                 "description": "<p>The key </p>", 
                 "name": "key", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }, 
             {
                 "description": "<p>Pointer to the zero-terminated C string </p>", 
@@ -3497,12 +4389,12 @@
             {
                 "description": "<p>The dictionary iterator </p>", 
                 "name": "iter", 
-                "type": "DictionaryIterator"
+                "type": "DictionaryIterator *"
             }, 
             {
                 "description": "<p>The key </p>", 
                 "name": "key", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }, 
             {
                 "description": "<p>Pointer to the byte array </p>", 
@@ -3512,7 +4404,7 @@
             {
                 "description": "<p>Length of the byte array </p>", 
                 "name": "size", 
-                "type": "uint16_t"
+                "type": "const uint16_t"
             }
         ], 
         "return_desc": "<p><code>DICT_OK</code>, <code>DICT_NOT_ENOUGH_STORAGE</code> or <code>DICT_INVALID_ARGS</code> </p>", 
@@ -3527,7 +4419,7 @@
             {
                 "description": "<p>The dictionary iterator </p>", 
                 "name": "iter", 
-                "type": "DictionaryIterator"
+                "type": "DictionaryIterator *"
             }
         ], 
         "return_desc": "<p>The size in bytes of the finalized dictionary, or 0 if the parameters were invalid. </p>", 
@@ -3542,12 +4434,12 @@
             {
                 "description": "<p>The dictionary iterator </p>", 
                 "name": "iter", 
-                "type": "DictionaryIterator"
+                "type": "DictionaryIterator *"
             }, 
             {
                 "description": "<p>The key </p>", 
                 "name": "key", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }, 
             {
                 "description": "<p>Pointer to the integer value </p>", 
@@ -3577,12 +4469,12 @@
             {
                 "description": null, 
                 "name": "iter", 
-                "type": "DictionaryIterator"
+                "type": "DictionaryIterator *"
             }, 
             {
                 "description": null, 
                 "name": "key", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }, 
             {
                 "description": null, 
@@ -3602,12 +4494,12 @@
             {
                 "description": null, 
                 "name": "iter", 
-                "type": "DictionaryIterator"
+                "type": "DictionaryIterator *"
             }, 
             {
                 "description": null, 
                 "name": "key", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }, 
             {
                 "description": null, 
@@ -3627,12 +4519,12 @@
             {
                 "description": null, 
                 "name": "iter", 
-                "type": "DictionaryIterator"
+                "type": "DictionaryIterator *"
             }, 
             {
                 "description": null, 
                 "name": "key", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }, 
             {
                 "description": null, 
@@ -3652,12 +4544,12 @@
             {
                 "description": "<p>The dictionary iterator </p>", 
                 "name": "iter", 
-                "type": "DictionaryIterator"
+                "type": "DictionaryIterator *"
             }, 
             {
                 "description": "<p>The Tuplet describing the key/value pair to write </p>", 
                 "name": "tuplet", 
-                "type": "Tuplet"
+                "type": "const Tuplet *const"
             }
         ], 
         "return_desc": "<p><code>DICT_OK</code>, <code>DICT_NOT_ENOUGH_STORAGE</code> or <code>DICT_INVALID_ARGS</code> </p>", 
@@ -3672,17 +4564,17 @@
             {
                 "description": null, 
                 "name": "iter", 
-                "type": "DictionaryIterator"
+                "type": "DictionaryIterator *"
             }, 
             {
                 "description": null, 
                 "name": "key", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }, 
             {
                 "description": null, 
                 "name": "value", 
-                "type": "uint16_t"
+                "type": "const uint16_t"
             }
         ], 
         "return_desc": null, 
@@ -3697,17 +4589,17 @@
             {
                 "description": null, 
                 "name": "iter", 
-                "type": "DictionaryIterator"
+                "type": "DictionaryIterator *"
             }, 
             {
                 "description": null, 
                 "name": "key", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }, 
             {
                 "description": null, 
                 "name": "value", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }
         ], 
         "return_desc": null, 
@@ -3722,12 +4614,12 @@
             {
                 "description": "<p>The dictionary iterator </p>", 
                 "name": "iter", 
-                "type": "DictionaryIterator"
+                "type": "DictionaryIterator *"
             }, 
             {
                 "description": "<p>The key </p>", 
                 "name": "key", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }, 
             {
                 "description": "<p>The unsigned, 8-bit integer value </p>", 
@@ -3760,8 +4652,8 @@
         "name": "fonts_load_custom_font", 
         "params": [
             {
-                "description": "<p>The resource handle of the font to load. See <code>resource_ids</code>.auto.h for a list of resource IDs, and use <code>resource_get_handle()</code> to obtain the resource handle. </p>", 
-                "name": "resource", 
+                "description": null, 
+                "name": "handle", 
                 "type": "ResHandle"
             }
         ], 
@@ -3785,14 +4677,14 @@
         "warning": "<p>When an application exits, the system automatically unloads all fonts that have been loaded. </p>"
     }, 
     "gbitmap_create_as_sub_bitmap": {
-        "description": "<p>Create a new GBitmap on the heap as a sub-bitmap of a 'base' GBitmap, using a GRect to indicate what portion of the base to use. The sub-bitmap will just reference the image data of the base bitmap. No deep-copying occurs as a result of calling this function, thus the caller is responsible for making sure the base bitmap will remain available when using the sub-bitmap. Note that you should not destroy the parent bitmap until the <code>sub_bitmap</code> has been destroyed. </p>", 
+        "description": "<p>Create a new GBitmap on the heap as a sub-bitmap of a 'base' GBitmap, using a GRect to indicate what portion of the base to use. The sub-bitmap will just reference the image data of the base bitmap. No deep-copying occurs as a result of calling this function, thus the caller is responsible for making sure the base bitmap will remain available when using the sub-bitmap. Note that you should not destroy the parent bitmap until the <code>sub_bitmap</code> has been destroyed. The resulting GBitmap must be destroyed using <code>gbitmap_destroy()</code>. </p>", 
         "kind": "fn", 
         "name": "gbitmap_create_as_sub_bitmap", 
         "params": [
             {
                 "description": "<p>The bitmap that the sub-bitmap of which the image data will be used by the sub-bitmap </p>", 
                 "name": "base_bitmap", 
-                "type": "GBitmap"
+                "type": "const GBitmap *"
             }, 
             {
                 "description": "<p>The rectangle within the image data of the base bitmap. The bounds of the base bitmap will be used to clip <code>sub_rect</code>. </p>", 
@@ -3801,11 +4693,11 @@
             }
         ], 
         "return_desc": "<p>A pointer to the GBitmap. NULL if the GBitmap could not be created </p>", 
-        "returns": "GBitmap", 
+        "returns": "GBitmap *", 
         "warning": null
     }, 
     "gbitmap_create_blank": {
-        "description": "<p>Creates a new blank GBitmap on the heap initialized to zeroes. </p>", 
+        "description": "<p>Creates a new blank GBitmap on the heap initialized to zeroes. The resulting GBitmap must be destroyed using <code>gbitmap_destroy()</code>. </p>", 
         "kind": "fn", 
         "name": "gbitmap_create_blank", 
         "params": [
@@ -3816,26 +4708,26 @@
             }
         ], 
         "return_desc": "<p>A pointer to the GBitmap. NULL if the GBitmap could not be created </p>", 
-        "returns": "GBitmap", 
+        "returns": "GBitmap *", 
         "warning": null
     }, 
     "gbitmap_create_with_data": {
-        "description": "<p>Creates a new GBitmap on the heap initialized with a Pebble image file data (.pbi), as output by bitmapgen.py. </p>", 
+        "description": "<p>The resulting GBitmap must be destroyed using <code>gbitmap_destroy()</code> but the image data will not be freed automatically. The developer is responsible for keeping the image data in memory as long as the bitmap is used and releasing it after the bitmap is destroyed.", 
         "kind": "fn", 
         "name": "gbitmap_create_with_data", 
         "params": [
             {
-                "description": "<p>The Pebble image file data. Must not be NULL. The function assumes the data to be correct; there are no sanity checks performed on the data. </p>", 
+                "description": "<p>The Pebble image data. Must not be NULL. The function assumes the data to be correct; there are no sanity checks performed on the data. The data will not be copied and the pointer must remain valid for the lifetime of this GBitmap. </p>", 
                 "name": "data", 
                 "type": "const uint8_t *"
             }
         ], 
         "return_desc": "<p>A pointer to the GBitmap. NULL if the GBitmap could not be created </p>", 
-        "returns": "GBitmap", 
-        "warning": null
+        "returns": "GBitmap *", 
+        "warning": "<p>One way to generate Pebble image data is to use bitmapgen.py in the Pebble SDK to generate a .pbi file. </p>"
     }, 
     "gbitmap_create_with_resource": {
-        "description": "<p>Creates a new GBitmap on the heap using a Pebble image file stored as a resource. The resulting GBitmap must be destroyed using <code>gbitmap_destroy</code>. </p>", 
+        "description": "<p>Creates a new GBitmap on the heap using a Pebble image file stored as a resource. The resulting GBitmap must be destroyed using <code>gbitmap_destroy()</code>. </p>", 
         "kind": "fn", 
         "name": "gbitmap_create_with_resource", 
         "params": [
@@ -3846,18 +4738,18 @@
             }
         ], 
         "return_desc": "<p>A pointer to the GBitmap. NULL if the GBitmap could not be created </p>", 
-        "returns": "GBitmap", 
+        "returns": "GBitmap *", 
         "warning": null
     }, 
     "gbitmap_destroy": {
-        "description": "<p>Destroy a GBitmap; free the GBitmap's data if it is dynamically allocated. This must be called for every bitmap that's been created with <code>gbitmap_create_</code>*. </p>", 
+        "description": "<p>This function will also free the memory of the bitmap data (bitmap->addr) if the bitmap was created with <code>gbitmap_create_blank()</code> or <code>gbitmap_create_with_resource()</code>.</p><p>If the GBitmap was created with <code>gbitmap_create_with_data()</code>, you must release the memory after calling <code>gbitmap_destroy()</code>. </p>", 
         "kind": "fn", 
         "name": "gbitmap_destroy", 
         "params": [
             {
                 "description": null, 
                 "name": "bitmap", 
-                "type": "GBitmap"
+                "type": "GBitmap *"
             }
         ], 
         "return_desc": null, 
@@ -3872,11 +4764,11 @@
             {
                 "description": null, 
                 "name": "init", 
-                "type": "GPathInfo"
+                "type": "const GPathInfo *"
             }
         ], 
         "return_desc": "<p>A pointer to the GPath. NULL if the GPath could not be created </p>", 
-        "returns": "GPath", 
+        "returns": "GPath *", 
         "warning": null
     }, 
     "gpath_destroy": {
@@ -3887,7 +4779,7 @@
             {
                 "description": null, 
                 "name": "gpath", 
-                "type": "GPath"
+                "type": "GPath *"
             }
         ], 
         "return_desc": null, 
@@ -3907,7 +4799,7 @@
             {
                 "description": "<p>The path to fill </p>", 
                 "name": "path", 
-                "type": "GPath"
+                "type": "GPath *"
             }
         ], 
         "return_desc": null, 
@@ -3927,7 +4819,7 @@
             {
                 "description": "<p>The path to fill </p>", 
                 "name": "path", 
-                "type": "GPath"
+                "type": "GPath *"
             }
         ], 
         "return_desc": null, 
@@ -3942,7 +4834,7 @@
             {
                 "description": "<p>The path onto which to set the translation </p>", 
                 "name": "path", 
-                "type": "GPath"
+                "type": "GPath *"
             }, 
             {
                 "description": "<p>The point which is used as the vector for the translation. </p>", 
@@ -3962,7 +4854,7 @@
             {
                 "description": "<p>The path onto which to set the rotation </p>", 
                 "name": "path", 
-                "type": "GPath"
+                "type": "GPath *"
             }, 
             {
                 "description": "<p>The absolute angle of the rotation. The angle is represented in the same way that is used with <code>sin_lookup()</code>. See <code>TRIG_MAX_ANGLE</code> for more information. </p>", 
@@ -3982,16 +4874,31 @@
             {
                 "description": "<p>Pointer to the first point </p>", 
                 "name": "point_a", 
-                "type": "GPoint"
+                "type": "const GPoint *const"
             }, 
             {
                 "description": "<p>Pointer to the second point </p>", 
                 "name": "point_b", 
-                "type": "GPoint"
+                "type": "const GPoint *const"
             }
         ], 
         "return_desc": "<p>true if both points are equal, false if not. </p>", 
         "returns": "bool", 
+        "warning": null
+    }, 
+    "graphics_capture_frame_buffer": {
+        "description": "<p>Captures the frame buffer for direct access. Graphics functions will not affect the frame buffer while it is captured. The frame buffer is released when <code>graphics_release_frame_buffer</code> is called. The frame buffer must be released before the end of a layer's .<code>update_proc</code> for the layer to be drawn properly. </p>", 
+        "kind": "fn", 
+        "name": "graphics_capture_frame_buffer", 
+        "params": [
+            {
+                "description": "<p>The graphics context providing the frame buffer </p>", 
+                "name": "ctx", 
+                "type": "GContext *"
+            }
+        ], 
+        "return_desc": "<p>A pointer to the frame buffer. NULL if failed. </p>", 
+        "returns": "GBitmap *", 
         "warning": null
     }, 
     "graphics_context_set_compositing_mode": {
@@ -4087,7 +4994,7 @@
             {
                 "description": "<p>The bitmap to draw </p>", 
                 "name": "bitmap", 
-                "type": "GBitmap"
+                "type": "const GBitmap *"
             }, 
             {
                 "description": "<p>The rectangle in which to draw the bitmap </p>", 
@@ -4232,27 +5139,27 @@
             {
                 "description": "<p>The font in which the text should be set </p>", 
                 "name": "font", 
-                "type": "GFont"
+                "type": "GFont const"
             }, 
             {
                 "description": "<p>The bounding box in which to draw the text. The first line of text will be drawn against the top of the box. </p>", 
                 "name": "box", 
-                "type": "GRect"
+                "type": "const GRect"
             }, 
             {
                 "description": "<p>The overflow behavior, in case the text is larger than what fits inside the box. </p>", 
                 "name": "overflow_mode", 
-                "type": "GTextOverflowMode"
+                "type": "const GTextOverflowMode"
             }, 
             {
                 "description": "<p>The horizontal alignment of the text </p>", 
                 "name": "alignment", 
-                "type": "GTextAlignment"
+                "type": "const GTextAlignment"
             }, 
             {
                 "description": "<p>Optional layout cache data. Supply NULL to ignore the layout caching mechanism. </p>", 
                 "name": "layout", 
-                "type": "GTextLayoutCacheRef"
+                "type": "const GTextLayoutCacheRef"
             }
         ], 
         "return_desc": null, 
@@ -4314,6 +5221,41 @@
         "returns": "void", 
         "warning": null
     }, 
+    "graphics_frame_buffer_is_captured": {
+        "description": "<p>Whether or not the frame buffer has been captured by <code>graphics_capture_frame_buffer</code>. Graphics functions will not affect the frame buffer until it has been released by <code>graphics_release_frame_buffer</code>. </p>", 
+        "kind": "fn", 
+        "name": "graphics_frame_buffer_is_captured", 
+        "params": [
+            {
+                "description": "<p>The graphics context providing the frame buffer </p>", 
+                "name": "ctx", 
+                "type": "GContext *"
+            }
+        ], 
+        "return_desc": "<p>True if the frame buffer has been captured </p>", 
+        "returns": "bool", 
+        "warning": null
+    }, 
+    "graphics_release_frame_buffer": {
+        "description": "<p>If buffer does not point to the address previously returned by <code>graphics_capture_frame_buffer</code> the frame buffer will not be released.", 
+        "kind": "fn", 
+        "name": "graphics_release_frame_buffer", 
+        "params": [
+            {
+                "description": "<p>The graphics context providing the frame buffer </p>", 
+                "name": "ctx", 
+                "type": "GContext *"
+            }, 
+            {
+                "description": "<p>The pointer to frame buffer </p>", 
+                "name": "buffer", 
+                "type": "GBitmap *"
+            }
+        ], 
+        "return_desc": "<p>True if the frame buffer was released successfully </p>", 
+        "returns": "bool", 
+        "warning": null
+    }, 
     "graphics_text_layout_get_content_size": {
         "description": "<p>Obtain the maximum size that a text with given font, overflow mode and alignment occupies within a given rectangular constraint. </p>", 
         "kind": "fn", 
@@ -4327,22 +5269,22 @@
             {
                 "description": "<p>The font in which the text should be set while calculating the size </p>", 
                 "name": "font", 
-                "type": "GFont"
+                "type": "GFont const"
             }, 
             {
                 "description": "<p>The bounding box in which the text should be constrained </p>", 
                 "name": "box", 
-                "type": "GRect"
+                "type": "const GRect"
             }, 
             {
                 "description": "<p>The overflow behavior, in case the text is larger than what fits inside the box. </p>", 
                 "name": "overflow_mode", 
-                "type": "GTextOverflowMode"
+                "type": "const GTextOverflowMode"
             }, 
             {
                 "description": "<p>The horizontal alignment of the text </p>", 
                 "name": "alignment", 
-                "type": "GTextAlignment"
+                "type": "const GTextAlignment"
             }
         ], 
         "return_desc": "<p>The maximum size occupied by the text </p>", 
@@ -4357,17 +5299,17 @@
             {
                 "description": "<p>The aligned and optionally clipped rectangle </p>", 
                 "name": "rect", 
-                "type": "GRect"
+                "type": "GRect *"
             }, 
             {
                 "description": "<p>The rectangle in which to align rect </p>", 
                 "name": "inside_rect", 
-                "type": "GRect"
+                "type": "const GRect *"
             }, 
             {
                 "description": "<p>Determines the alignment of rect within <code>inside_rect</code> by specifying what edges of should overlap. </p>", 
                 "name": "alignment", 
-                "type": "GAlign"
+                "type": "const GAlign"
             }, 
             {
                 "description": "<p>Determines whether rect should be trimmed using the edges of <code>inside_rect</code> in case rect extends outside of the area that <code>inside_rect</code> covers after the alignment. </p>", 
@@ -4387,7 +5329,7 @@
             {
                 "description": "<p>The rectangle for which to calculate the center point. </p>", 
                 "name": "rect", 
-                "type": "GRect"
+                "type": "const GRect *"
             }
         ], 
         "return_desc": "<p>The point at the center of rect </p>", 
@@ -4402,12 +5344,12 @@
             {
                 "description": "<p>The clipped rectangle. </p>", 
                 "name": "rect_to_clip", 
-                "type": "GRect"
+                "type": "GRect *const"
             }, 
             {
                 "description": "<p>The rectangle of which the edges will serve as \"scissors\" in order to trim <code>rect_to_clip</code>. </p>", 
                 "name": "rect_clipper", 
-                "type": "GRect"
+                "type": "const GRect *const"
             }
         ], 
         "return_desc": null, 
@@ -4422,12 +5364,12 @@
             {
                 "description": "<p>The rectangle </p>", 
                 "name": "rect", 
-                "type": "GRect"
+                "type": "const GRect *"
             }, 
             {
                 "description": "<p>The point </p>", 
                 "name": "point", 
-                "type": "GPoint"
+                "type": "const GPoint *"
             }
         ], 
         "return_desc": "<p>true if the rectangle contains the point, or false if it does not. </p>", 
@@ -4462,12 +5404,12 @@
             {
                 "description": "<p>Pointer to the first rectangle </p>", 
                 "name": "rect_a", 
-                "type": "GRect"
+                "type": "const GRect *const"
             }, 
             {
                 "description": "<p>Pointer to the second rectangle </p>", 
                 "name": "rect_b", 
-                "type": "GRect"
+                "type": "const GRect *const"
             }
         ], 
         "return_desc": "<p>true if both rectangles are equal, false if not. </p>", 
@@ -4482,7 +5424,7 @@
             {
                 "description": "<p>Pointer to the rectangle </p>", 
                 "name": "rect", 
-                "type": "GRect"
+                "type": "const GRect *const"
             }
         ], 
         "return_desc": "<p>true if the rectangle its size is (0, 0), or false if not. </p>", 
@@ -4497,7 +5439,7 @@
             {
                 "description": "<p>The standardized rectangle. </p>", 
                 "name": "rect", 
-                "type": "GRect"
+                "type": "GRect *"
             }
         ], 
         "return_desc": null, 
@@ -4512,16 +5454,34 @@
             {
                 "description": "<p>Pointer to the first size </p>", 
                 "name": "size_a", 
-                "type": "GSize"
+                "type": "const GSize *"
             }, 
             {
                 "description": "<p>Pointer to the second size </p>", 
                 "name": "size_b", 
-                "type": "GSize"
+                "type": "const GSize *"
             }
         ], 
         "return_desc": "<p>true if both sizes are equal, false if not. </p>", 
         "returns": "bool", 
+        "warning": null
+    }, 
+    "heap_bytes_free": {
+        "description": "<p>Calculates the number of bytes of heap memory not currently being used by the application. </p>", 
+        "kind": "fn", 
+        "name": "heap_bytes_free", 
+        "params": [], 
+        "return_desc": "<p>The number of bytes on the heap not currently being used. </p>", 
+        "returns": "size_t", 
+        "warning": null
+    }, 
+    "heap_bytes_used": {
+        "description": "<p>Calculates the number of bytes of heap memory currently being used by the application. </p>", 
+        "kind": "fn", 
+        "name": "heap_bytes_used", 
+        "params": [], 
+        "return_desc": "<p>The number of bytes on the heap currently being used. </p>", 
+        "returns": "size_t", 
         "warning": null
     }, 
     "inverter_layer_create": {
@@ -4567,6 +5527,15 @@
         ], 
         "return_desc": "<p>The \"root\" Layer of the inverter layer. </p>", 
         "returns": "Layer *", 
+        "warning": null
+    }, 
+    "launch_reason": {
+        "description": "<p>Provides the method used to launch the current application. </p>", 
+        "kind": "fn", 
+        "name": "launch_reason", 
+        "params": [], 
+        "return_desc": "<p>The method or reason the current application was launched </p>", 
+        "returns": "AppLaunchReason", 
         "warning": null
     }, 
     "layer_add_child": {
@@ -4966,7 +5935,7 @@
             {
                 "description": "<p>If non-null, draws an icon to the left of the text. If NULL, the icon will be omitted and the leftover space is used for the title and subtitle. </p>", 
                 "name": "icon", 
-                "type": "GBitmap"
+                "type": "GBitmap *"
             }
         ], 
         "return_desc": null, 
@@ -5031,12 +6000,12 @@
             {
                 "description": "<p>Pointer to the menu index of the first item </p>", 
                 "name": "a", 
-                "type": "MenuIndex"
+                "type": "MenuIndex *"
             }, 
             {
                 "description": "<p>Pointer to the menu index of the second item </p>", 
                 "name": "b", 
-                "type": "MenuIndex"
+                "type": "MenuIndex *"
             }
         ], 
         "return_desc": "<p>0 if A and B are equal, 1 if A has a higher section & row combination than B or else -1 </p>", 
@@ -5416,7 +6385,7 @@
             {
                 "description": "<p>The key of the field to delete from. </p>", 
                 "name": "key", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }
         ], 
         "return_desc": null, 
@@ -5431,7 +6400,7 @@
             {
                 "description": "<p>The key of the field to check. </p>", 
                 "name": "key", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }
         ], 
         "return_desc": "<p>true if a value exists, otherwise false. </p>", 
@@ -5446,7 +6415,7 @@
             {
                 "description": "<p>The key of the field to lookup the data size. </p>", 
                 "name": "key", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }
         ], 
         "return_desc": "<p>The size of the value in bytes or <code>E_DOES_NOT_EXIST</code> if there is no field matching the given key. </p>", 
@@ -5461,7 +6430,7 @@
             {
                 "description": "<p>The key of the field to read from. </p>", 
                 "name": "key", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }
         ], 
         "return_desc": "<p>The bool value of the key to read from. </p>", 
@@ -5476,7 +6445,7 @@
             {
                 "description": "<p>The key of the field to read from. </p>", 
                 "name": "key", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }, 
             {
                 "description": "<p>The pointer to a buffer to be written to. </p>", 
@@ -5486,7 +6455,7 @@
             {
                 "description": "<p>The maximum size of the given buffer. </p>", 
                 "name": "buffer_size", 
-                "type": "size_t"
+                "type": "const size_t"
             }
         ], 
         "return_desc": "<p>The number of bytes written into the buffer or <code>E_DOES_NOT_EXIST</code> if there is no field matching the given key. </p>", 
@@ -5501,7 +6470,7 @@
             {
                 "description": "<p>The key of the field to read from. </p>", 
                 "name": "key", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }
         ], 
         "return_desc": "<p>The int value of the key to read from. </p>", 
@@ -5516,7 +6485,7 @@
             {
                 "description": "<p>The key of the field to read from. </p>", 
                 "name": "key", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }, 
             {
                 "description": "<p>The pointer to a buffer to be written to. </p>", 
@@ -5526,7 +6495,7 @@
             {
                 "description": "<p>The maximum size of the given buffer. This includes the null character. </p>", 
                 "name": "buffer_size", 
-                "type": "size_t"
+                "type": "const size_t"
             }
         ], 
         "return_desc": "<p>The number of bytes written into the buffer or <code>E_DOES_NOT_EXIST</code> if there is no field matching the given key. </p>", 
@@ -5541,7 +6510,7 @@
             {
                 "description": "<p>The key of the field to write to. </p>", 
                 "name": "key", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }, 
             {
                 "description": "<p>The boolean value to write. </p>", 
@@ -5561,7 +6530,7 @@
             {
                 "description": "<p>The key of the field to write to. </p>", 
                 "name": "key", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }, 
             {
                 "description": "<p>The pointer to the blob of data. </p>", 
@@ -5571,7 +6540,7 @@
             {
                 "description": "<p>The size in bytes. </p>", 
                 "name": "size", 
-                "type": "size_t"
+                "type": "const size_t"
             }
         ], 
         "return_desc": "<p>The number of bytes written. </p>", 
@@ -5586,7 +6555,7 @@
             {
                 "description": "<p>The key of the field to write to. </p>", 
                 "name": "key", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }, 
             {
                 "description": "<p>The int value to write. </p>", 
@@ -5606,7 +6575,7 @@
             {
                 "description": "<p>The key of the field to write to. </p>", 
                 "name": "key", 
-                "type": "uint32_t"
+                "type": "const uint32_t"
             }, 
             {
                 "description": "<p>The pointer to null terminated string. </p>", 
@@ -5626,7 +6595,7 @@
             {
                 "description": "<p>Pointer to the implementation of the animation. In most cases, it makes sense to pass in a static const struct pointer. </p>", 
                 "name": "implementation", 
-                "type": "PropertyAnimationImplementation"
+                "type": "const struct PropertyAnimationImplementation *"
             }, 
             {
                 "description": "<p>Pointer to the \"subject\" being animated. This will be passed in when the getter/setter accessors are called, see PropertyAnimationAccessors, GPointSetter, and friends. The value of this pointer will be copied into the .subject field of the PropertyAnimation struct. </p>", 
@@ -5661,12 +6630,12 @@
             {
                 "description": "<p>the frame that the layer should animate from </p>", 
                 "name": "from_frame", 
-                "type": "GRect"
+                "type": "GRect *"
             }, 
             {
                 "description": "<p>the frame that the layer should animate to </p>", 
                 "name": "to_frame", 
-                "type": "GRect"
+                "type": "GRect *"
             }
         ], 
         "return_desc": "<p>A pointer to the property animation. NULL if animation could not be created </p>", 
@@ -5699,9 +6668,9 @@
                 "type": "struct PropertyAnimation *"
             }, 
             {
-                "description": "<p>The current normalized time. See AnimationUpdateImplementation </p>", 
-                "name": "time_normalized", 
-                "type": "uint32_t"
+                "description": "<p>The current normalized distance. See AnimationUpdateImplementation </p>", 
+                "name": "distance_normalized", 
+                "type": "const uint32_t"
             }
         ], 
         "return_desc": null, 
@@ -5719,9 +6688,9 @@
                 "type": "struct PropertyAnimation *"
             }, 
             {
-                "description": "<p>The current normalized time. See AnimationUpdateImplementation </p>", 
-                "name": "time_normalized", 
-                "type": "uint32_t"
+                "description": "<p>The current normalized distance. See AnimationUpdateImplementation </p>", 
+                "name": "distance_normalized", 
+                "type": "const uint32_t"
             }
         ], 
         "return_desc": null, 
@@ -5739,9 +6708,9 @@
                 "type": "struct PropertyAnimation *"
             }, 
             {
-                "description": "<p>The current normalized time. See AnimationUpdateImplementation </p>", 
-                "name": "time_normalized", 
-                "type": "uint32_t"
+                "description": "<p>The current normalized distance. See AnimationUpdateImplementation </p>", 
+                "name": "distance_normalized", 
+                "type": "const uint32_t"
             }
         ], 
         "return_desc": null, 
@@ -5764,12 +6733,12 @@
         "warning": null
     }, 
     "resource_get_handle": {
-        "description": "<p>Gets the resource handle for a file identifier. </p>", 
+        "description": "<p>appinfo.json. The \"name\" field of each resource is prefixed by <code>RESOURCE_ID_</code> and made visible to the application (through the build/src/<code>resource_ids</code>.auto.h header which is automatically included).</p><p>For example, given the following fragment of appinfo.json: ...\n\"resources\":{\n\"media\":[\n{\n\"name\":\"<code>MY_ICON</code>\",\n\"file\":\"img/icon.png\",\n\"type\":\"png\",\n},\n...\n The generated file identifier for this resource is <code>RESOURCE_ID_MY_ICON</code>. To get a resource handle for that resource write: ResHandlerh=<code>resource_get_handle</code>(<code>RESOURCE_ID_MY_ICON</code>);\n </p>", 
         "kind": "fn", 
         "name": "resource_get_handle", 
         "params": [
             {
-                "description": null, 
+                "description": "<p>The resource ID</p>", 
                 "name": "resource_id", 
                 "type": "uint32_t"
             }
@@ -5819,7 +6788,7 @@
                 "type": "uint32_t"
             }, 
             {
-                "description": null, 
+                "description": "<p>The buffer to load the resource data into </p>", 
                 "name": "buffer", 
                 "type": "uint8_t *"
             }, 
@@ -5849,14 +6818,14 @@
         "warning": null
     }, 
     "rot_bitmap_layer_create": {
-        "description": "", 
+        "description": "<p><ul><li><p>Angle: 0</p></li><li><p>Compositing mode: GCompOpAssign</p></li><li><p>Corner clip color: GColorClear</p></li></ul>\n</p><p>", 
         "kind": "fn", 
         "name": "rot_bitmap_layer_create", 
         "params": [
             {
-                "description": null, 
+                "description": "<p>The bitmap to display in this RotBitmapLayer </p>", 
                 "name": "bitmap", 
-                "type": "GBitmap"
+                "type": "GBitmap *"
             }
         ], 
         "return_desc": "<p>A pointer to the RotBitmapLayer. NULL if the RotBitmapLayer could not be created </p>", 
@@ -5864,32 +6833,32 @@
         "warning": null
     }, 
     "rot_bitmap_layer_destroy": {
-        "description": "", 
+        "description": "<p>Destroys a RotBitmapLayer and frees all associated memory. </p>", 
         "kind": "fn", 
         "name": "rot_bitmap_layer_destroy", 
         "params": [
             {
-                "description": null, 
+                "description": "<p>The RotBitmapLayer to destroy. </p>", 
                 "name": "bitmap", 
                 "type": "RotBitmapLayer *"
             }
         ], 
         "return_desc": null, 
         "returns": "void", 
-        "warning": null
+        "warning": "<p>It is the developer responsibility to free the GBitmap. </p>"
     }, 
     "rot_bitmap_layer_increment_angle": {
-        "description": "<p>changes the rotation by the given amount </p>", 
+        "description": "<p>Change the rotation angle of this RotBitmapLayer. </p>", 
         "kind": "fn", 
         "name": "rot_bitmap_layer_increment_angle", 
         "params": [
             {
-                "description": null, 
-                "name": "image", 
+                "description": "<p>The RotBitmapLayer on which to change the rotation </p>", 
+                "name": "bitmap", 
                 "type": "RotBitmapLayer *"
             }, 
             {
-                "description": null, 
+                "description": "<p>The rotation angle change </p>", 
                 "name": "angle_change", 
                 "type": "int32_t"
             }
@@ -5899,17 +6868,17 @@
         "warning": null
     }, 
     "rot_bitmap_layer_set_angle": {
-        "description": "<p>sets rotation to the given angle </p>", 
+        "description": "<p>Sets the rotation angle of this RotBitmapLayer. </p>", 
         "kind": "fn", 
         "name": "rot_bitmap_layer_set_angle", 
         "params": [
             {
-                "description": null, 
-                "name": "image", 
+                "description": "<p>The RotBitmapLayer on which to change the rotation </p>", 
+                "name": "bitmap", 
                 "type": "RotBitmapLayer *"
             }, 
             {
-                "description": null, 
+                "description": "<p>Rotation is an integer between 0 (no rotation) and 0x10000 (360 degree rotation). </p>", 
                 "name": "angle", 
                 "type": "int32_t"
             }
@@ -5919,17 +6888,17 @@
         "warning": null
     }, 
     "rot_bitmap_layer_set_corner_clip_color": {
-        "description": "", 
+        "description": "<p>Defines what color to use in areas that are not covered by the source bitmap. By default this is GColorClear. </p>", 
         "kind": "fn", 
         "name": "rot_bitmap_layer_set_corner_clip_color", 
         "params": [
             {
-                "description": null, 
-                "name": "image", 
+                "description": "<p>The RotBitmapLayer on which to change the corner clip color </p>", 
+                "name": "bitmap", 
                 "type": "RotBitmapLayer *"
             }, 
             {
-                "description": null, 
+                "description": "<p>The corner clip color </p>", 
                 "name": "color", 
                 "type": "GColor"
             }
@@ -5939,17 +6908,17 @@
         "warning": null
     }, 
     "rot_bitmap_set_compositing_mode": {
-        "description": "", 
+        "description": "<p>Sets the compositing mode of how the bitmap image is composited onto what has been drawn beneath the RotBitmapLayer. By default this is GCompOpAssign. The RotBitmapLayer is automatically marked dirty after this operation. </p>", 
         "kind": "fn", 
         "name": "rot_bitmap_set_compositing_mode", 
         "params": [
             {
-                "description": null, 
-                "name": "image", 
+                "description": "<p>The RotBitmapLayer on which to change the rotation </p>", 
+                "name": "bitmap", 
                 "type": "RotBitmapLayer *"
             }, 
             {
-                "description": null, 
+                "description": "<p>The compositing mode to set </p>", 
                 "name": "mode", 
                 "type": "GCompOp"
             }
@@ -5959,17 +6928,17 @@
         "warning": null
     }, 
     "rot_bitmap_set_src_ic": {
-        "description": "", 
+        "description": "<p>For example, if you pass GPoint(0, 0), the image will rotate around the top-left corner.</p><p>This point is always projected at the center of the RotBitmapLayer. Calling this function automatically adjusts the width and height of the RotBitmapLayer so that the entire bitmap can fit inside the layer at all rotation angles.</p><p>", 
         "kind": "fn", 
         "name": "rot_bitmap_set_src_ic", 
         "params": [
             {
-                "description": null, 
-                "name": "image", 
+                "description": "<p>The RotBitmapLayer on which to change the rotation </p>", 
+                "name": "bitmap", 
                 "type": "RotBitmapLayer *"
             }, 
             {
-                "description": null, 
+                "description": "<p>The only point in the original image that will not be affected by the rotation. </p>", 
                 "name": "ic", 
                 "type": "GPoint"
             }
@@ -6291,7 +7260,7 @@
             {
                 "description": "<p>Array with sections that need to be displayed in the menu </p>", 
                 "name": "sections", 
-                "type": "SimpleMenuSection"
+                "type": "const SimpleMenuSection *"
             }, 
             {
                 "description": "<p>The number of sections in the sections array. </p>", 
@@ -6409,7 +7378,7 @@
         "warning": null
     }, 
     "status_t": {
-        "description": "", 
+        "description": "<p>Return value for system operations. See StatusCode for possible values. </p>", 
         "kind": "typedef", 
         "name": "status_t", 
         "params": [], 
@@ -6565,7 +7534,7 @@
             {
                 "description": "<p>The new size for the TextLayer </p>", 
                 "name": "max_size", 
-                "type": "GSize"
+                "type": "const GSize"
             }
         ], 
         "return_desc": null, 
@@ -6638,7 +7607,7 @@
         "name": "tick_timer_service_subscribe", 
         "params": [
             {
-                "description": "<p>the unit change we want to handle (seconds, minutes, hours) </p>", 
+                "description": "<p>a bitmask of all the units that have changed </p>", 
                 "name": "tick_units", 
                 "type": "TimeUnits"
             }, 
@@ -6669,16 +7638,56 @@
             {
                 "description": "<p>if provided receives current Unix Time seconds portion </p>", 
                 "name": "tloc", 
-                "type": "time_t"
+                "type": "time_t *"
             }, 
             {
                 "description": "<p>if provided receives current Unix Time milliseconds portion </p>", 
                 "name": "out_ms", 
-                "type": "uint16_t"
+                "type": "uint16_t *"
             }
         ], 
         "return_desc": "<p>Current Unix Time milliseconds portion </p>", 
         "returns": "uint16_t", 
+        "warning": null
+    }, 
+    "uuid_equal": {
+        "description": "<p>Compares two UUIDs. </p>", 
+        "kind": "fn", 
+        "name": "uuid_equal", 
+        "params": [
+            {
+                "description": null, 
+                "name": "uu1", 
+                "type": "const Uuid *"
+            }, 
+            {
+                "description": null, 
+                "name": "uu2", 
+                "type": "const Uuid *"
+            }
+        ], 
+        "return_desc": "<p>True if the two UUIDs are equal, false if they are not. </p>", 
+        "returns": "bool", 
+        "warning": null
+    }, 
+    "uuid_to_string": {
+        "description": "<p>Writes UUID in a string form into buffer that looks like the following... {12345678-1234-5678-1234-567812345678}. </p>", 
+        "kind": "fn", 
+        "name": "uuid_to_string", 
+        "params": [
+            {
+                "description": "<p>The Uuid to write </p>", 
+                "name": "uuid", 
+                "type": "const Uuid *"
+            }, 
+            {
+                "description": "<p>Memory to write the string to. Must be at least <code>UUID_STRING_BUFFER_LENGTH</code> bytes long. </p>", 
+                "name": "buffer", 
+                "type": "char *"
+            }
+        ], 
+        "return_desc": null, 
+        "returns": "void", 
         "warning": null
     }, 
     "vibes_cancel": {
@@ -6730,6 +7739,137 @@
         "params": [], 
         "return_desc": null, 
         "returns": "void", 
+        "warning": null
+    }, 
+    "wakeup_cancel": {
+        "description": "<p>Cancels a wakeup event. </p>", 
+        "kind": "fn", 
+        "name": "wakeup_cancel", 
+        "params": [
+            {
+                "description": "<p>Wakeup event to cancel </p>", 
+                "name": "wakeup_id", 
+                "type": "WakeupId"
+            }
+        ], 
+        "return_desc": null, 
+        "returns": "void", 
+        "warning": null
+    }, 
+    "wakeup_cancel_all": {
+        "description": "<p>Cancels all wakeup event for the app. </p>", 
+        "kind": "fn", 
+        "name": "wakeup_cancel_all", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "void", 
+        "warning": null
+    }, 
+    "wakeup_get_launch_event": {
+        "description": "<p>Retrieves the wakeup event info for an app that was launched by a <code>wakeup_event</code> (ie. <code>launch_reason()</code> === <code>APP_LAUNCH_WAKEUP</code>) so that an app may display information regarding the wakeup event. </p>", 
+        "kind": "fn", 
+        "name": "wakeup_get_launch_event", 
+        "params": [
+            {
+                "description": "<p>WakeupId for the wakeup event that caused the app to wakeup </p>", 
+                "name": "wakeup_id", 
+                "type": "WakeupId *"
+            }, 
+            {
+                "description": "<p>App provided reason for the wakeup event </p>", 
+                "name": "cookie", 
+                "type": "int32_t *"
+            }
+        ], 
+        "return_desc": "<p>True if app was launched due to a wakeup event, false otherwise </p>", 
+        "returns": "bool", 
+        "warning": null
+    }, 
+    "wakeup_query": {
+        "description": "<p>Checks if the current WakeupId is still scheduled and therefore valid,. </p>", 
+        "kind": "fn", 
+        "name": "wakeup_query", 
+        "params": [
+            {
+                "description": "<p>Wakeup event to query for validity and scheduled time </p>", 
+                "name": "wakeup_id", 
+                "type": "WakeupId"
+            }, 
+            {
+                "description": "<p>Time (in UTC, but local time when <code>clock_is_timezone_set</code> returns false) that the wakeup event is scheduled to occur </p>", 
+                "name": "timestamp", 
+                "type": "time_t *"
+            }
+        ], 
+        "return_desc": "<p>True if WakeupId is still scheduled, false if it doesn't exist or has already occurred </p>", 
+        "returns": "bool", 
+        "warning": null
+    }, 
+    "wakeup_schedule": {
+        "description": "<p>Registers a wakeup event that triggers a callback at the specified time. Applications may only schedule up to 8 wakeup events. Wakeup events are given a 1 minute duration window, in that no application may schedule a wakeup event with 1 minute of a currently scheduled wakeup event. </p>", 
+        "kind": "fn", 
+        "name": "wakeup_schedule", 
+        "params": [
+            {
+                "description": "<p>The requested time (UTC) for the wakeup event to occur </p>", 
+                "name": "timestamp", 
+                "type": "time_t"
+            }, 
+            {
+                "description": "<p>The application specific reason for the wakeup event </p>", 
+                "name": "cookie", 
+                "type": "int32_t"
+            }, 
+            {
+                "description": "<p>On powering on Pebble, will alert user when notifications were missed due to Pebble being off. </p>", 
+                "name": "notify_if_missed", 
+                "type": "bool"
+            }
+        ], 
+        "return_desc": "<p>negative values indicate errors (StatusCode) <code>E_RANGE</code> if the event cannot be scheduled due to another event in that period. <code>E_INVALID_ARGUMENT</code> if the time requested is in the past. <code>E_OUT_OF_RESOURCES</code> if the application has already scheduled all 8 wakeup events. <code>E_INTERNAL</code> if a system error occurred during scheduling. </p>", 
+        "returns": "WakeupId", 
+        "warning": null
+    }, 
+    "wakeup_service_subscribe": {
+        "description": "<p>Registers a WakeupHandler to be called when wakeup events occur. </p>", 
+        "kind": "fn", 
+        "name": "wakeup_service_subscribe", 
+        "params": [
+            {
+                "description": "<p>The callback that gets called when the wakeup event occurs </p>", 
+                "name": "handler", 
+                "type": "WakeupHandler"
+            }
+        ], 
+        "return_desc": null, 
+        "returns": "void", 
+        "warning": null
+    }, 
+    "watch_info_get_color": {
+        "description": "<p>Provides the color of the watch. </p>", 
+        "kind": "fn", 
+        "name": "watch_info_get_color", 
+        "params": [], 
+        "return_desc": "<p>WatchInfoColor representing the color of the watch. </p>", 
+        "returns": "WatchInfoColor", 
+        "warning": null
+    }, 
+    "watch_info_get_firmware_version": {
+        "description": "<p>Provides the version of the firmware running on the watch. </p>", 
+        "kind": "fn", 
+        "name": "watch_info_get_firmware_version", 
+        "params": [], 
+        "return_desc": "<p>WatchInfoVersion representing the version of the firmware running on the watch. </p>", 
+        "returns": "WatchInfoVersion", 
+        "warning": null
+    }, 
+    "watch_info_get_model": {
+        "description": "<p>Provides the model of the watch. </p>", 
+        "kind": "fn", 
+        "name": "watch_info_get_model", 
+        "params": [], 
+        "return_desc": "<p>WatchInfoModel representing the model of the watch. </p>", 
+        "returns": "WatchInfoModel", 
         "warning": null
     }, 
     "window_create": {
@@ -7064,7 +8204,7 @@
             {
                 "description": "<p>The new status bar icon </p>", 
                 "name": "icon", 
-                "type": "GBitmap"
+                "type": "const GBitmap *"
             }
         ], 
         "return_desc": null, 
@@ -7082,7 +8222,7 @@
                 "type": "Window *"
             }, 
             {
-                "description": null, 
+                "description": "<p>A pointer to user data. </p>", 
                 "name": "data", 
                 "type": "void *"
             }
@@ -7249,5 +8389,23 @@
         "return_desc": "<p>True if window was successfully removed, false otherwise. </p>", 
         "returns": "bool", 
         "warning": "<p>If there are no windows for the app left on the stack, the app will be killed by the system, shortly. To avoid this, make sure to push another window shortly after or before removing the last window. </p>"
+    }, 
+    "worker_event_loop": {
+        "description": "<p>The event loop for workers, to be used in worker's main(). Will block until the worker is ready to exit. </p>", 
+        "kind": "fn", 
+        "name": "worker_event_loop", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "void", 
+        "warning": null
+    }, 
+    "worker_launch_app": {
+        "description": "<p>Launch the foreground app for this worker. </p>", 
+        "kind": "fn", 
+        "name": "worker_launch_app", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "void", 
+        "warning": null
     }
 }

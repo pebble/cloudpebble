@@ -4,6 +4,7 @@ from django.views.generic import View
 from django.shortcuts import render, redirect
 from django.http.response import Http404
 from django.conf import settings
+from django.utils.translation import ugettext as _
 from ide.api import json_failure, json_response
 
 
@@ -27,10 +28,10 @@ def login_action(request):
     password = request.REQUEST['password']
     user = authenticate(username=username, password=password)
     if user is None:
-        return json_failure("Invalid username or password")
+        return json_failure(_("Invalid username or password"))
 
     if not user.is_active:
-        return json_failure("Account disabled.")
+        return json_failure(_("Account disabled."))
 
     login(request, user)
     return json_response()

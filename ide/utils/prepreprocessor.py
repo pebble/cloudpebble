@@ -1,6 +1,7 @@
 import re
 import uuid
 import os.path
+from django.utils.translation import ugettext as _
 
 def fix_newlines(source):
     return re.sub(r'\r\n|\r|\n', '\n', source)
@@ -24,7 +25,7 @@ def check_include_legal(include):
     prefix = '/%s/' % uuid.uuid4()
     path = os.path.normpath(os.path.join(prefix, include))
     if not path.startswith(prefix):
-        raise Exception("Illegal include '%s' -> '%s'" % (include, path))
+        raise Exception(_("Illegal include '%(include)s' -> '%(path)s'") % {'include': include, 'path': path})
     return True
 
 

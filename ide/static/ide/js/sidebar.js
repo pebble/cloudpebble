@@ -112,6 +112,11 @@ CloudPebble.Sidebar = (function() {
         },
         AddSourceFile: function(file, on_click) {
             var end = $('#end-source-files');
+            if(file.target == 'worker') {
+                end = $('#end-worker-files');
+                $('#worker-files').show();
+                $('#source-files').find('span:first').text(gettext("App source"));
+            }
             var link = $('<a href="#"></a>');
             link.text(file.name + ' ');
             link.click(on_click);

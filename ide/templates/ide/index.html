@@ -1,5 +1,6 @@
 {% extends 'common/base-narrow.html' %}
 {% load staticfiles %}
+{% load i18n %}
 
 {% block head %}
     <link rel="stylesheet" type="text/css" href="{% static 'ide/css/project-list.css' %}">
@@ -7,43 +8,49 @@
 
 {% block headercontent %}
     <ul class="nav-pills">
-        <li><a class="active btn">Projects</a></li>
-        <li><a href="{% url 'ide:settings' %}" class="btn">Settings</a></li>
-        <li><a href="{% url 'logout' %}" class="btn">Sign out</a></li>
+        <li><a class="active btn">{% trans "Projects" %}</a></li>
+        <li><a href="{% url 'ide:settings' %}" class="btn">{% trans "Settings" %}</a></li>
+        <li><a href="{% url 'logout' %}" class="btn">{% trans "Sign out" %}</a></li>
     </ul>
 {% endblock %}
 
 {% block narrowcontent %}
         <div class="project-list-header">
-            <h2 class="section-heading">All your projects</h2>
+            <h2 class="section-heading">{% trans "All your projects" %}</h2>
             <p class="buttons">
-                <button id="create-project" class="btn btn-primary">Create</button>
-                <button id="import-project" class="btn">Import</button>
+                <button id="create-project" class="btn btn-primary">{% trans "Create" %}</button>
+                <button id="import-project" class="btn">{% trans "Import" %}</button>
             </p>
         </div>
             {% if my_projects %}
             <div class="well">
+                <p style="text-align: center;">
+                    {% trans "Due to a recent Chrome update, we have been forced to disable TLS site-wide. Security will be re-enabled in a few days." %}
+                </p>
                 <table class="table">
                     <thead>
-                        <tr><th style="min-width: 180px;">Project</th><th>Last modified</th><th>Last build</th></tr>
+                        <tr>
+                            <th style="min-width: 180px;">{% trans "Project" %}</th>
+                            <th>{% trans "Last modified" %}</th>
+                            <th>{% trans "Last built" %}</th></tr>
                     </thead>
                     <tbody>
                     {% for project in my_projects %}
                         <tr>
                             <td class="project-name"><a href="{% url 'ide:project' project.id %}">{{ project.name }}</a></td>
-                            <td class="project-last-modified">{{ project.last_modified | date:"j F, 'y – h:i A" }}</td>
+                            <td class="project-last-modified">{{ project.last_modified | date:"j F, 'y – h:i" }}</td>
                             <td class="project-last-build">
                                 {% if project.get_last_build %}
-                                    {{ project.last_build.started | date:"j F, 'y – h:i A" }}
+                                    {{ project.last_build.started | date:"j F, 'y – H:i" }}
                                     {% if project.last_build.state == 3 %}
-                                        <span class="label label-success">Successful</span>
+                                        <span class="label label-success">{% trans "Successful" %}</span>
                                     {% elif project.last_build.state == 2 %}
-                                        <span class="label label-error">Failed</span>
+                                        <span class="label label-error">{% trans "Failed" %}</span>
                                     {% else %}
-                                        <span class="label label-info">Pending</span>
+                                        <span class="label label-info">{% trans "Pending" %}</span>
                                     {% endif %}
                                 {% else %}
-                                    <span class="muted">Never</span>
+                                    <span class="muted">{% trans "Never" %}</span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -52,55 +59,55 @@
                 </table>
             </div>
             {% else %}
-                <p>You don't have any projects yet.</p>
+                <p>{% trans "You don't have any projects yet." %}</p>
             {% endif %}
 {% endblock %}
 
 {% block modals %}
 <div id="project-prompt" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <h3 id="project-prompt-title">Create New Project</h3>
+        <h3 id="project-prompt-title">{% trans "Create New Project" %}</h3>
     </div>
     <div class="modal-body">
         <div id="project-prompt-errors" class="alert alert-error hide"></div>
         <form class="form-horizontal">
             <div class="control-group">
-                <label class="control-label" for="project-prompt-value">Project name</label>
+                <label class="control-label" for="project-prompt-value">{% trans "Project name" %}</label>
                 <div class="controls">
                     <input type="text" id="project-prompt-value">
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label" for="project-type">Project type</label>
+                <label class="control-label" for="project-type">{% trans "Project type" %}</label>
                 <div class="controls">
                     <select id="project-type">
-                        <option value="native" selected="selected">Pebble C SDK</option>
-                        <option value="simplyjs">Simply.js</option>
-                        <option value="pebblejs">Pebble.js (beta)</option>
+                        <option value="native" selected="selected">{% trans "Pebble C SDK" %}</option>
+                        <option value="simplyjs">{% trans "Simply.js" %}</option>
+                        <option value="pebblejs">{% trans "Pebble.js (beta)" %}</option>
                     </select>
                 </div>
             </div>
             <div class="control-group" id="template-holder">
-                <label class="control-label" for="project-template">Template</label>
+                <label class="control-label" for="project-template">{% trans "Template" %}</label>
                 <div class="controls">
                     <select id="project-template">
-                        <option value="0">Empty project</option>
+                        <option value="0">{% trans "Empty project" %}</option>
                         {% if sdk_templates %}
-                        <optgroup label="Standard Templates">
+                        <optgroup label="{% trans "Standard Templates" %}">
                             {% for template in sdk_templates %}
                                 <option value="{{ template.id }}" {%if template.id == default_template_id%}selected="selected"{%endif%}>{{ template.name }}</option>
                             {% endfor %}
                         </optgroup>
                         {% endif %}
                         {% if demo_templates %}
-                        <optgroup label="SDK demos">
+                        <optgroup label="{% trans "SDK demos" %}">
                             {% for template in demo_templates %}
                                 <option value="{{ template.id }}" {%if template.id == default_template_id%}selected="selected"{%endif%}>{{ template.name }}</option>
                             {% endfor %}
                         </optgroup>
                         {% endif %}
                         {% if example_templates %}
-                        <optgroup label="Examples">
+                        <optgroup label="{% trans "Examples" %}">
                             {% for template in example_templates %}
                                 <option value="{{ template.id }}" {%if template.id == default_template_id%}selected="selected"{%endif%}>{{ template.name }}</option>
                             {% endfor %}
@@ -112,34 +119,34 @@
         </form>
     </div>
     <div class="modal-footer">
-        <button class="btn btn-primary" id="project-confirm-button">Create</button>
-        <button class="btn" data-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" id="project-confirm-button">{% trans "Create" %}</button>
+        <button class="btn" data-dismiss="modal">{% trans "Cancel" %}</button>
     </div>
 </div>
 <div id="import-prompt" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
-        <h3>Import Existing Project</h3>
+        <h3>{% trans "Import Existing Project" %}</h3>
     </div>
     <div class="modal-body">
         <ul class="nav nav-tabs">
-            <li class="active"><a href="#import-zip" data-toggle="tab">Upload Zip</a></li>
-            <li><a href="#import-github" data-toggle="tab">Import from GitHub</a></li>
+            <li class="active"><a href="#import-zip" data-toggle="tab">{% trans "Upload Zip" %}</a></li>
+            <li><a href="#import-github" data-toggle="tab">{% trans "Import from GitHub" %}</a></li>
         </ul>
         <div class="tab-content">
             <div id="import-zip" class="tab-pane active">
                 <div class="errors alert alert-error hide"></div>
                 <form class="form-horizontal">
                     <div class="control-group">
-                        <label class="control-label" for="import-zip-name">Project name</label>
+                        <label class="control-label" for="import-zip-name">{% trans "Project name" %}</label>
                         <div class="controls">
                             <input type="text" id="import-zip-name">
                         </div>
                     </div>
                     <div class="control-group">
-                        <label class="control-label">Zip file</label>
+                        <label class="control-label">{% trans "Zip file" %}</label>
                         <div class="controls">
                             <input type="file" accept="application/zip,application/x-zip-compressed">
-                            <span class="help-block">This must be a zip file containing a standard Pebble project.</span>
+                            <span class="help-block">{% trans "This must be a zip file containing a standard Pebble project." %}</span>
                         </div>
                     </div>
                 </form>
@@ -151,26 +158,26 @@
                 <div class="errors alert alert-error hide"></div>
                 <form class="form-horizontal">
                     <div class="control-group">
-                        <label class="control-label" for="import-github-name">Project name</label>
+                        <label class="control-label" for="import-github-name">{% trans "Project name" %}</label>
                         <div class="controls">
                             <input type="text" id="import-github-name">
                         </div>
                     </div>
                     <div class="control-group">
-                        <label class="control-label" for="import-github-url">GitHub Project</label>
+                        <label class="control-label" for="import-github-url">{% trans "GitHub Project" %}</label>
                         <div class="controls">
                             <input class="span4" type="text" id="import-github-url" placeholder="github.com/Katharine/pebble-stopwatch" pattern="(https?://)?(www\.)?github.com/.+/.+">
                         </div>
                     </div>
                     <div class="control-group">
-                        <label class="control-label" for="import-github-branch">Branch (optional)</label>
+                        <label class="control-label" for="import-github-branch">{% trans "Branch (optional)" %}</label>
                         <div class="controls">
                             <input type="text" id="import-github-branch" placeholder="master" />
                         </div>
                     </div>
                     {% if user.github %}
                     <div class="control-group">
-                        <label class="control-label" for="import-github-add-remote">Use as Git remote</label>
+                        <label class="control-label" for="import-github-add-remote">{% trans "Use as Git remote" %}</label>
                         <div class="controls">
                             <input type="checkbox" id="import-github-add-remote">
                         </div>
@@ -184,8 +191,8 @@
         </div>
     </div>
     <div class="modal-footer">
-        <button class="btn btn-primary" id="run-import">Import</button>
-        <button class="btn" data-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" id="run-import">{% trans "Import" %}</button>
+        <button class="btn" data-dismiss="modal">{% trans "Cancel" %}</button>
     </div>
 </div>
 {% endblock %}

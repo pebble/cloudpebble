@@ -1,3 +1,4 @@
+{% load i18n %}
 <div id="ui-editor-pane-template" class="ui-pane hide">
     <div class="ui-canvas-things">
         <div class="ui-canvas"></div>
@@ -8,8 +9,8 @@
     </div>
     <div class="ui-thingies">
         <ul class="nav nav-tabs">
-            <li class="active"><a href="#ui-properties" data-toggle="tab">Properties</a></li>
-            <li><a href="#ui-toolkit" data-toggle="tab">Toolkit</a></li>
+            <li class="active"><a href="#ui-properties" data-toggle="tab">{% trans "Properties" %}</a></li>
+            <li><a href="#ui-toolkit" data-toggle="tab">{% trans "Toolkit" %}</a></li>
         </ul>
         <div id="ui-properties" class="tab-pane active"></div>
         <div id="ui-toolkit" class="tab-pane"></div>
