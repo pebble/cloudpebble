@@ -163,6 +163,7 @@ Pebble = function(token) {
     };
 
     var handle_message_to_watch = function(data) {
+        data = decode_pebble_protocol(data);
         if(data.command == ENDPOINTS.PUTBYTES) {
             handle_send_putbytes(data.message);
         }
@@ -178,7 +179,7 @@ Pebble = function(token) {
     var putbytes_pending_ack = 0;
     var putbytes_cookie = null;
     var handle_send_putbytes = function(message) {
-        var command = unpack("B", message[0]);
+        var command = unpack("B", [message[0]]);
         if(command == 0x02) { // put
             var parts = unpack("II", message.subarray(1, 9));
             putbytes_cookie = parts[0];
