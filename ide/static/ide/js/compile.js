@@ -10,6 +10,8 @@ CloudPebble.Compile = (function() {
     var mPendingCallbacks = [];
     var mRunningBuild = false;
 
+    var mLastBuild = null;
+
     var build_history_row = function(build) {
         var tr = $('<tr>');
         tr.append($('<td class="build-id">' + (build.id === null ? '?' : build.id) + '</td>'));
@@ -154,6 +156,7 @@ CloudPebble.Compile = (function() {
     };
 
     var update_last_build = function(pane, build) {
+        mLastBuild = build;
         if(build === null) {
             pane.find('#last-compilation, .build-stats').addClass('hide');
             pane.find('#compilation-run-build-button').removeAttr('disabled');
@@ -415,17 +418,22 @@ CloudPebble.Compile = (function() {
 
         pebble_connect(function() {
             modal.modal();
+            modal.find('.modal-body > p').text(gettext("Preparing to install app…"));
+            modal.find('.btn').addClass('hide');
+            modal.find('.progress').removeClass('progress-danger progress-success').addClass('progress-striped').find('.bar').css({width: '100%'});
+            modal.off('hide');
             mPebble.once('version', function(version_info) {
-                modal.find('.modal-body > p').text(gettext("Installing app on your watch…"));
-                modal.find('.btn').addClass('hide');
-                modal.find('.progress').removeClass('progress-danger progress-success').addClass('progress-striped');
-                modal.off('hide');
                 var version_string = version_info.running.version;
                 console.log(version_string);
                 // Make sure that we have the required version - but also assume that anyone who has the string 'test'
                 // in their firmware version number (e.g. me) knows what they're doing.
                 if(/test/.test(version_string) || compare_version_strings(version_string, MINIMUM_INSTALL_VERSION) >= 0) {
-                    mPebble.install_app(pane.find('#last-compilation-pbw').attr('href'));
+                    mPebble.install_app(mLastBuild.pbw);
+                    var expectedBytes = (mLastBuild.size.binary + mLastBuild.size.worker + mLastBuild.size.resources);
+                    mPebble.on('install:progress', function(bytes) {
+                modal.find('.modal-body > p').text(gettext("Installing app on watch…"));
+                        modal.find('.progress').removeClass('progress-striped').find('.bar').css({width: (bytes * 100 / expectedBytes) + '%'})
+                    });
                 } else {
                     mPebble.close();
                     mPebble = null;
@@ -441,6 +449,7 @@ CloudPebble.Compile = (function() {
             mPebble.request_version();
         });
         mPebble.on('status', function(code) {
+            mPebble.off('install:progress');
             if(code === 0) {
                 mPreviousDisplayLogs.push(null);
                 mPebble.enable_app_logs();
@@ -452,7 +461,7 @@ CloudPebble.Compile = (function() {
                     modal.modal('hide');
                 });
                 modal.on('hide', stop_logs);
-                modal.find('.progress').addClass('progress-success').removeClass('progress-striped');
+                modal.find('.progress').addClass('progress-success').removeClass('progress-striped').find('.bar').css({width: '100%'});
                 ga('send', 'event', 'install', 'direct', 'success');
                 CloudPebble.Analytics.addEvent('app_install_succeeded');
             } else {

@@ -23,6 +23,7 @@ Pebble = function(token) {
         send_message("PING", pack("bL", [0, 0xDEADBEEF]));
     };
 
+    var mIsInstalling = false;
     this.install_app = function(url) {
         console.log("Starting install process.");
         var request = new XMLHttpRequest();
@@ -36,6 +37,7 @@ Pebble = function(token) {
                 final_buffer.set(buffer, 1);
                 final_buffer.set([4]);
                 mSocket.send(final_buffer);
+                mIsInstalling = true;
                 console.log("Sent install message.");
             }
         };
@@ -114,20 +116,39 @@ Pebble = function(token) {
     var handle_socket_message = function(data) {
         console.log(hexify(data));
         var origin = data[0];
+        console.log(origin);
         if(origin == 5) {
             var result = unpack("I", data.subarray(1, 5));
             console.log("Received status update: ", result);
+            mIsInstalling = false;
             self.trigger("status", result[0]);
             return;
         } else if(origin == 2) {
             var phone_log = decoder.decode(data.subarray(1));
             self.trigger('phone_log', phone_log);
+        } else if(origin == 1) {
+            handle_message_to_watch(data.subarray(1));
+        } else if(origin === 0) {
+            handle_message_from_watch(data.subarray(1));
         }
-        if(origin !== 0) return;
-        var parts = unpack("HH", data.subarray(1, 5));
+    };
+
+    var decode_pebble_protocol = function(data) {
+        var parts = unpack("HH", data.subarray(0, 4));
         var command = parts[1];
         var size = parts[0];
-        var message = data.subarray(5);
+        var message = data.subarray(4);
+        return {
+            command: command,
+            size: size,
+            message: message
+        }
+    };
+
+    var handle_message_from_watch = function(data) {
+        data = decode_pebble_protocol(data);
+        var command = data.command;
+        var message = data.message;
         if(command == ENDPOINTS.APP_LOGS) {
             handle_app_log(message);
         } else if(command == ENDPOINTS.SCREENSHOT) {
@@ -136,12 +157,47 @@ Pebble = function(token) {
             handle_version(message);
         } else if(command == ENDPOINTS.FACTORY_SETTINGS) {
             handle_factory_setting(message);
+        } else if(command == ENDPOINTS.PUTBYTES) {
+            handle_receive_putbytes(message);
+        }
+    };
+
+    var handle_message_to_watch = function(data) {
+        data = decode_pebble_protocol(data);
+        if(data.command == ENDPOINTS.PUTBYTES) {
+            handle_send_putbytes(data.message);
         }
     };
 
     var handle_proxysocket_event = function(event) {
         if(event.substr(0, 6) == "proxy:") {
             self.trigger(event);
+        }
+    };
+
+    var putbytes_sent = 0;
+    var putbytes_pending_ack = 0;
+    var putbytes_cookie = null;
+    var handle_send_putbytes = function(message) {
+        var command = unpack("B", [message[0]]);
+        if(command == 0x02) { // put
+            var parts = unpack("II", message.subarray(1, 9));
+            putbytes_cookie = parts[0];
+            putbytes_pending_ack = parts[1];
+        }
+    };
+    var handle_receive_putbytes = function(message) {
+        var parts = unpack("BI", message);
+        if(parts[1] === putbytes_cookie) {
+            if(parts[0] == 0x01) { // ACK
+                putbytes_sent += putbytes_pending_ack;
+                if(mIsInstalling) {
+                    console.log("Install progress: " + putbytes_sent + " bytes.");
+                    self.trigger('install:progress', putbytes_sent);
+                }
+            }
+            putbytes_pending_ack = 0;
+            putbytes_cookie = null;
         }
     };
 
