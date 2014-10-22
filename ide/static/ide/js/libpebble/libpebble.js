@@ -124,6 +124,7 @@ Pebble = function(token) {
             self.trigger("status", result[0]);
             return;
         } else if(origin == 2) {
+            var decoder = new TextDecoder('utf-8');
             var phone_log = decoder.decode(data.subarray(1));
             self.trigger('phone_log', phone_log);
         } else if(origin == 1) {
