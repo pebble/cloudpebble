@@ -206,7 +206,7 @@ Pebble = function(token) {
         console.log("Received app log.");
         var decoder = new TextDecoder('utf-8');
         var metadata = unpack("IBBH", data.subarray(16, 24));
-        var filename = decoder.decode(data.subarray(24, 40));
+        var filename = bytes_to_string(data.subarray(24, 40));
         var message = decoder.decode(data.subarray(40, 40+metadata[2]));
         var level = metadata[1];
         var line = metadata[3];
@@ -219,7 +219,22 @@ Pebble = function(token) {
             bytes.push(string.charCodeAt(i));
         }
         return bytes;
-    }
+    };
+
+    var bytes_to_string = function(bytes) {
+        var end = null;
+        for(var i = 0; i  < bytes.length; ++i) {
+            if(bytes[i] == 0) {
+                end = i;
+                break;
+            }
+        }
+        if(end !== null) {
+            bytes = bytes.subarray(0, end);
+        }
+        var decoder = new TextDecoder('utf-8');
+        return decoder.decode(bytes);
+    };
 
     this.request_version = function() {
         console.log("Requesting watch version.");
