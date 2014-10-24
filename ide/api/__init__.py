@@ -39,6 +39,8 @@ def proxy_keen(request, project_id):
         'cloudpebble_created_ui_layout',
         'cloudpebble_ib_displayed',
         'cloudpebble_ib_created_layer',
+        'cloudpebble_android_beta_modal',
+        'cloudpebble_android_beta_download',
     }
 
     event = request.POST['event']
