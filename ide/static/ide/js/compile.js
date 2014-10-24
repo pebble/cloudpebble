@@ -125,6 +125,10 @@ CloudPebble.Compile = (function() {
             e.preventDefault();
             take_screenshot();
         });
+        pane.find('#android-beta-link').click(function(e) {
+            e.preventDefault();
+            $('#modal-android-notes').modal();
+        });
         mCrashAnalyser = new CloudPebble.CrashChecker(CloudPebble.ProjectInfo.app_uuid);
         pane.find('#compilation-run-build-button').click(function() { run_build(); });
     };

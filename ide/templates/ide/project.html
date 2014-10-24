@@ -370,6 +370,39 @@
         </div>
     </div>
 </div>
+<!-- Android 2.1 beta download prompt -->
+<div id="modal-android-notes" class="modal hide fade" tabindex="-1" role="dialog">
+    <div class="modal-header">
+        <h3>Android App v2.1.0-beta5</h3>
+    </div>
+    <div class="modal-body">
+        <ul>
+            <li>This version of the Pebble Android app has been rewritten from the ground up to be more reliable
+                and give a better user experience.</li>
+            <li>Notifications are now available from all apps. You should now disable Pebble Notifier or similar apps
+                <ul>
+                    <li>The new <em>Notifications</em> menu includes an <em>All apps</em> option, where you can choose
+                        to receive notifications from any app on your device.</li>
+                    <li>Some popular apps are selected by default.</li>
+                    <li>Some apps in this list will be disabled if you have enabled built-in notifications (e.g. Gmail
+                        or calendar) to avoid generating duplicate notifications.</li>
+                </ul>
+            </li>
+            <li>In-progress phone calls can now be ended from your watch.</li>
+        </ul>
+        <strong>Please note:</strong>
+        <ul>
+            <li>This release is only supported on Android 4.3 and above.</li>
+            <li>Developers: datalogging compatibility is broken in this release. You will need to use the updated
+                PebbleKit 2.6 in order to use datalogging with this release.</li>
+            <li>You will be asked to log in to your Pebble account again after installing this release.</li>
+        </ul>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">{% trans 'Dismiss' %}</button>
+        <a href="https://www.dropbox.com/s/8qs98nhazxuc24l/pebble-release-2.1.0-beta5-510.apk" class="btn btn-primary">{% trans 'Download' %}</a>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
