@@ -26,6 +26,8 @@ NEW_THINGS = [
      "Code completion now supports fuzzy matching and includes your own symbols!",
      "CloudPebble will now also sanity check your file and highlight errors inline as you type.",
      "Check out <a href='https://developer.getpebble.com/blog/2014/10/09/CloudPebble-code-completion/' target='_blank'>the blog post</a> for details and examples!"],
+    ["CloudPebble is now available in English, German, French and Spanish, with the ironic exception of this message."],
+    ["App installation is now simpler and works without your computer and phone on the same network. Make sure you have the latest software, enable the development server, and use the new buttons."],
 ]
 
 
