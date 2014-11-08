@@ -269,7 +269,7 @@ CloudPebble.Compile = (function() {
             CloudPebble.Prompts.Progress.Update(gettext("Authenticating..."));
         });
         mPebble.on('proxy:waiting', function() {
-            CloudPebble.Prompts.Progress.Update(gettext("Waiting for phone. Make sure the development server is enabled."));
+            CloudPebble.Prompts.Progress.Update(gettext("Waiting for phone. Make sure the developer connection is enabled."));
         });
         var connection_error = function() {
             mPebble.off();
