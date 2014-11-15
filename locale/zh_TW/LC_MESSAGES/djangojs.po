@@ -1,0 +1,638 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: CloudPebble\n"
+"Language: zh-TW\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: ide/static/ide/js/compile.js:5
+msgid "Pending"
+msgstr "等待中"
+
+#: ide/static/ide/js/compile.js:6
+msgid "Failed"
+msgstr "失敗"
+
+#: ide/static/ide/js/compile.js:7
+msgid "Succeeded"
+msgstr "成功"
+
+#: ide/static/ide/js/github.js:8
+msgid "That repo does not exist. Would you like to create it?"
+msgstr "該存放庫不存在。是否建立一個？"
+
+#: ide/templates/ide/project.html:288
+msgid "Installing app on your watch…"
+msgstr "正在為您的手錶安裝應用程式……"
+
+#: ide/static/ide/js/compile.js:25
+msgid "Build log"
+msgstr "組建記錄"
+
+#: ide/static/ide/js/ib/layer.js:20
+msgid "Size"
+msgstr "大小"
+
+#: ide/static/ide/js/editor.js:469
+msgid "Save"
+msgstr "儲存"
+
+#: ide/static/ide/js/resources.js:19
+msgid "Identifier"
+msgid_plural "Identifiers"
+msgstr[0] "識別碼"
+
+#: ide/static/ide/js/resources.js:185
+msgid "A PCRE regular expression that restricts characters."
+msgstr "限制字元的 PCRE 規則運算式。"
+
+#: ide/static/ide/js/editor.js:471
+msgid "Delete"
+msgstr "刪除"
+
+#: ide/static/ide/js/settings.js:202
+msgid "New Entry"
+msgstr "新增條目"
+
+#: ide/static/ide/js/settings.js:145
+msgid "Delete Project"
+msgstr "刪除項目"
+
+#: ide/static/ide/js/cloudpebble.js:62
+msgid "You have one unsaved source file. If you leave this page, you will lose it."
+msgid_plural "You have %s unsaved source files. If you leave this page, you will lose them."
+msgstr[0] "您有一個未儲存的來源檔案。若離開此頁面，該檔案將會丟失。您有%s個未儲存的來源檔案。若離開此頁面，這些檔案將會丟失。"
+
+#: ide/static/ide/js/compile.js:21
+msgid "pbw"
+msgstr "pbw"
+
+#: ide/static/ide/js/compile.js:44
+msgid "Something went wrong:\n"
+"\n"
+"%s"
+msgstr "發生錯誤：\n"
+"\n"
+"%s"
+
+#: ide/static/ide/js/compile.js:193
+msgid "%(total)s KiB (%(resources)s KiB resources, %(appbin)s KiB binary)"
+msgstr "%(total)s KiB (%(resources)s KiB 資源，%(appbin)s KiB 二進位)"
+
+#: ide/static/ide/js/compile.js:195
+msgid "%(total)s KiB (%(resources)s KiB resources, %(appbin)s KiB binary, %(workerbin)s KiB worker)"
+msgstr "%(total)s KiB (%(resources)s KiB 資源，%(appbin)s KiB 二進位，%(workerbin)s KiB 工作者)"
+
+#: ide/static/ide/js/compile.js:205
+msgid "%(free)s / %(max)s bytes (%(percent)s%)"
+msgstr "%(free)s / %(max)s 位元組 (%(percent)s%)"
+
+#: ide/static/ide/js/compile.js:344
+msgid "Different app crashed. Only the active app has debugging information available."
+msgstr "不同的應用程式故障。僅使用中的應用程式正在對可用資訊進行偵錯。"
+
+#: ide/static/ide/js/compile.js:350
+msgid "Looking up debug information..."
+msgstr "正在查找偵錯資訊……"
+
+#: ide/static/ide/js/compile.js:383
+msgid "Crashed inside firmware call."
+msgstr "內部韌體通話發生故障。"
+
+#: ide/static/ide/js/compile.js:385
+msgid "Crashed at %(file)s:%(line)s, in %(fn_name)s (starts at %(file)s:%(fn_line)s)."
+msgstr "在 %(fn_name)s 中的 %(file)s:%(line)s 發生故障（從 %(file)s:%(fn_line)s 開始）。"
+
+#: ide/static/ide/js/compile.js:391
+msgid "Which was called from %(file)s:%(line)s, in %(fn_name)s (starts at %(file)s:%(fn_line)s)."
+msgstr "來自 %(fn_name)s 中 %(file)s:%(line)s 的通話（從 %(file)s:%(fn_line)s 開始）。"
+
+#: ide/static/ide/js/compile.js:410
+msgid "[PHONE]"
+msgstr "[手機]"
+
+#: ide/static/ide/js/compile.js:411
+msgid "[ERROR]"
+msgstr "[錯誤]"
+
+#: ide/static/ide/js/compile.js:412
+msgid "[WARNING]"
+msgstr "[警告]"
+
+#: ide/static/ide/js/compile.js:413
+msgid "[INFO]"
+msgstr "[資訊]"
+
+#: ide/static/ide/js/compile.js:414
+msgid "[DEBUG]"
+msgstr "[偵錯]"
+
+#: ide/static/ide/js/compile.js:415
+msgid "[VERBOSE]"
+msgstr "[詳細資訊]"
+
+#: ide/static/ide/js/editor.js:31
+msgid "Something went wrong: %s"
+msgstr "發生錯誤：%s"
+
+#: ide/static/ide/js/editor.js:348
+msgid "This file has been edited elsewhere; you will not be able to save your changes."
+msgstr "此檔案已在其他位置編輯；您將無法儲存您的更改。"
+
+#: ide/static/ide/js/editor.js:468
+msgid "Save, build, install and run"
+msgstr "儲存、組建、安裝和執行"
+
+#: ide/static/ide/js/editor.js:470
+msgid "Reload"
+msgstr "重新載入"
+
+#: ide/static/ide/js/editor.js:472
+msgid "UI Editor"
+msgstr "UI 編輯器"
+
+#: ide/static/ide/js/editor.js:477
+msgid "Do you want to delete %(name)s?"
+msgstr "是否要刪除 %(name)s？"
+
+#: ide/static/ide/js/editor.js:478 ide/static/ide/js/resources.js:253
+msgid "This cannot be undone."
+msgstr "此操作無法取消。"
+
+#: ide/static/ide/js/editor.js:499
+msgid "Do you want to reload %(name)s?"
+msgstr "是否要重新載入 %(name)s？"
+
+#: ide/static/ide/js/editor.js:500
+msgid "This will discard your current changes and revert to the saved version."
+msgstr "此操作將放棄您的當前變更，並還原至已儲存的版本。"
+
+#: ide/static/ide/js/editor.js:511
+msgid "Saving..."
+msgstr "正在儲存……"
+
+#: ide/static/ide/js/editor.js:513
+msgid "Compiling..."
+msgstr "正在編製……"
+
+#: ide/static/ide/js/editor.js:542
+msgid "Toggle Fullscreen"
+msgstr "切換全螢幕"
+
+#: ide/static/ide/js/editor.js:662
+msgid "Declaration"
+msgstr "聲明"
+
+#: ide/static/ide/js/editor.js:665
+msgid "Description"
+msgstr "說明"
+
+#: ide/static/ide/js/editor.js:669
+msgid "Returns"
+msgstr "返回"
+
+#: ide/static/ide/js/editor.js:682
+msgid "Parameters"
+msgstr "參數"
+
+#: ide/static/ide/js/editor.js:686
+msgid "Note"
+msgstr "備註"
+
+#: ide/static/ide/js/editor.js:772
+msgid "Source files must end in .c or .h"
+msgstr "來源檔案必須以 .c 或 .h 結尾"
+
+#: ide/static/ide/js/editor.js:774 ide/static/ide/js/editor.js.c:815
+msgid "A file called '%s' already exists."
+msgstr "已存在名為『%s』的檔案。"
+
+#: ide/static/ide/js/editor.js:813
+msgid "Source files must end in .js"
+msgstr "來源檔案必須以 .js 結尾"
+
+#: ide/static/ide/js/editor.js:831
+msgid "You must specify a valid window name using lowercase letters and underscores."
+msgstr "您必須使用小寫字母和底線指定一個有效的視窗名稱。"
+
+#: ide/static/ide/js/editor.js:833
+msgid "That name is already used in this project."
+msgstr "該名稱已在此項目中使用。"
+
+#: ide/static/ide/js/editor.js:873
+msgid "If you want to create a background worker, use this dropdown to create files pointing at that target."
+msgstr "若想建立背景 Worker，請使用此下拉清單，建立指向該目標的檔案。"
+
+#: ide/static/ide/js/editor.js:874
+msgid "Note that targets are independent and code will not be shared between them."
+msgstr "請注意，目標均獨立存在，無法在目標之間分享代碼。"
+
+#: ide/static/ide/js/gist_import.js:24
+msgid "Import failed: %s"
+msgstr "匯入失敗：%s"
+
+#: ide/static/ide/js/github.js:65
+msgid "Updated repo."
+msgstr "已更新的存放庫。"
+
+#: ide/static/ide/js/github.js:79
+msgid "You don't have access to that repository."
+msgstr "您無法存取該存放庫。"
+
+#: ide/static/ide/js/github.js:108
+msgid "You must provide a repo URL."
+msgstr "您必須提供一個存放庫 URL。"
+
+#: ide/static/ide/js/github.js:171
+msgid "Pulled successfully."
+msgstr "已成功提取。"
+
+#: ide/static/ide/js/github.js:172
+msgid "Pull completed successfully."
+msgstr "提取已成功完成。"
+
+#: ide/static/ide/js/github.js:178
+msgid "Pull completed: Nothing to pull."
+msgstr "提取已完成：無需提取。"
+
+#: ide/static/ide/js/github.js:181 ide/static/ide/js/project_list.js:55
+#: ide/static/ide/js/settings.js:137 ide/static/ide/js/settings.js.c:150
+msgid "Error: %s"
+msgstr "錯誤：%s"
+
+#: ide/static/ide/js/github.js:195
+msgid "You must provide a commit summary."
+msgstr "您必須提供認可摘要。"
+
+#: ide/static/ide/js/github.js:226
+msgid "Pull failed: %s"
+msgstr "提取失敗：%s"
+
+#: ide/static/ide/js/github.js:243
+msgid "GitHub integration can be enabled in your user settings by linking a GitHub account."
+msgstr "可透過連結 GitHub 帳戶，在您的使用者設定中啟用 GitHub 整合。"
+
+#: ide/static/ide/js/project_list.js:20
+msgid "You must enter a name."
+msgstr "您必須輸入一個名稱。"
+
+#: ide/static/ide/js/project_list.js:70 ide/static/ide/js/project_list.js:116
+msgid "You must specify a project name."
+msgstr "您必須指定一個項目名稱。"
+
+#: ide/static/ide/js/project_list.js:75
+msgid "You must upload a zip file."
+msgstr "您必須上載一個 zip 檔案。"
+
+#: ide/static/ide/js/project_list.js:121
+msgid "You must specify a complete GitHub project URL"
+msgstr "您必須指定一個完整的 GitHub 項目 URL"
+
+#: ide/static/ide/js/resources.js:52
+msgid "You must upload a file."
+msgstr "您必須上載一個檔案。"
+
+#: ide/static/ide/js/resources.js:56
+msgid "A resource called '%(name)s' already exists in the project."
+msgstr "項目中已存在名為『%(name)s』的資源。"
+
+#: ide/static/ide/js/resources.js:63
+msgid "You must upload a PNG image."
+msgstr "您必須上載一個 PNG 圖像。"
+
+#: ide/static/ide/js/resources.js:67
+msgid "You must upload a TrueType Font (.ttf)"
+msgstr "您必須上載一個 TrueType 字型 (.ttf)"
+
+#: ide/static/ide/js/resources.js:76
+msgid "You must provide a valid resource identifier. Use only letters, numbers and underscores."
+msgstr "您必須提供一個有效的資源識別碼。僅能使用字母、數字和底線。"
+
+#: ide/static/ide/js/resources.js:92
+msgid "Invalid resource identifier. Use only letters, numbers and underscores."
+msgstr "無效的資源識別碼。僅能使用字母、數字和底線。"
+
+#: ide/static/ide/js/resources.js:97
+msgid "Font resource identifiers must end with the desired font size, e.g. %s_24"
+msgstr "字型資源識別碼必須以所需的字型大小結尾，如 %s_24"
+
+#: ide/static/ide/js/resources.js:102
+msgid "You can't have multiple identical identifiers. Please remove or change one."
+msgstr "您不能有多個相同的識別碼。請刪除或更改一個。"
+
+#: ide/static/ide/js/resources.js:107
+msgid "Tracking must be an integer."
+msgstr "追蹤必須為整數。"
+
+#: ide/static/ide/js/resources.js:116
+msgid "You must specify at least one resource."
+msgstr "您必須至少指定一個資源。"
+
+#: ide/static/ide/js/resources.js:163
+msgid "If specified, this file will replace the current file for this resource, regardless of its filename."
+msgstr "若已指定，此檔案不論檔案名稱為何，均將為此資源替換現有檔案。"
+
+#: ide/static/ide/js/resources.js:190
+msgid "Preview"
+msgstr "預覽"
+
+#: ide/static/ide/js/resources.js:253
+msgid "Do you want to delete %s?"
+msgstr "是否要刪除 %s？"
+
+#: ide/static/ide/js/settings.js:55
+msgid "You must specify a project name"
+msgstr "您必須指定一個項目名稱"
+
+#: ide/static/ide/js/settings.js:67
+msgid "You must specify a short name."
+msgstr "您必須指定一個簡稱。"
+
+#: ide/static/ide/js/settings.js:71
+msgid "You must specify a long name."
+msgstr "您必須指定一個全稱。"
+
+#: ide/static/ide/js/settings.js:75
+msgid "You must specify a company name."
+msgstr "您必須指定一個公司名稱。"
+
+#: ide/static/ide/js/settings.js:79
+msgid "You must specify a positive integer version code."
+msgstr "您必須指定一個正整數版本代碼。"
+
+#: ide/static/ide/js/settings.js:86
+msgid "You must specify a valid version number."
+msgstr "您必須指定一個有效的版本號碼。"
+
+#: ide/static/ide/js/settings.js:90
+msgid "You must specify a valid UUID (of the form 00000000-0000-0000-0000-000000000000)"
+msgstr "您必須指定一個有效的 UUID（格式為 00000000-0000-0000-0000-000000000000）"
+
+#: ide/static/ide/js/settings.js:134
+msgid "Settings saved."
+msgstr "設定已儲存。"
+
+#: ide/static/ide/js/settings.js:145
+msgid "Are you sure you want to delete this project? THIS CANNOT BE UNDONE."
+msgstr "您確定要刪除此項目嗎？此操作無法取消。"
+
+#: ide/static/ide/js/sidebar.js:118
+msgid "App source"
+msgstr "應用程式來源"
+
+#: ide/static/ide/js/ycm.js:48
+msgid "Code completion resync failed."
+msgstr "代碼補全重新同步失敗。"
+
+#: ide/static/ide/js/ycm.js:73 ide/static/ide/js/ycm.js.c:78
+msgid "Code completion unavailable."
+msgstr "代碼補全不可用。"
+
+#: ide/static/ide/js/ycm.js:94
+msgid "Code completion lost; retrying..."
+msgstr "代碼補全遺失；正在重試……"
+
+#: ide/static/ide/js/cloudpebble.js:145
+msgctxt "month name"
+msgid "January"
+msgstr "一月"
+
+#: ide/static/ide/js/cloudpebble.js:146
+msgctxt "month name"
+msgid "February"
+msgstr "二月"
+
+#: ide/static/ide/js/cloudpebble.js:147
+msgctxt "month name"
+msgid "March"
+msgstr "三月"
+
+#: ide/static/ide/js/cloudpebble.js:148
+msgctxt "month name"
+msgid "April"
+msgstr "四月"
+
+#: ide/static/ide/js/cloudpebble.js:149
+msgctxt "month name"
+msgid "May"
+msgstr "五月"
+
+#: ide/static/ide/js/cloudpebble.js:150
+msgctxt "month name"
+msgid "June"
+msgstr "六月"
+
+#: ide/static/ide/js/cloudpebble.js:151
+msgctxt "month name"
+msgid "July"
+msgstr "七月"
+
+#: ide/static/ide/js/cloudpebble.js:152
+msgctxt "month name"
+msgid "August"
+msgstr "八月"
+
+#: ide/static/ide/js/cloudpebble.js:153
+msgctxt "month name"
+msgid "September"
+msgstr "九月"
+
+#: ide/static/ide/js/cloudpebble.js:154
+msgctxt "month name"
+msgid "October"
+msgstr "十月"
+
+#: ide/static/ide/js/cloudpebble.js:155
+msgctxt "month name"
+msgid "November"
+msgstr "十一月"
+
+#: ide/static/ide/js/cloudpebble.js:156
+msgctxt "month name"
+msgid "December"
+msgstr "十二月"
+
+#: ide/static/ide/js/cloudpebble.js:166
+msgid "AM"
+msgstr ""
+
+#: ide/static/ide/js/cloudpebble.js:166
+msgid "PM"
+msgstr ""
+
+#: ide/static/ide/js/cloudpebble.js:171
+msgid "%s second"
+msgid_plural "%s seconds"
+msgstr[0] "%s 秒"
+
+#: ide/static/ide/js/compile.js:88
+msgid "Something went wrong:\n"
+"%s"
+msgstr "發生錯誤：\n"
+"%s"
+
+#: ide/static/ide/js/compile.js:258
+msgid "Connecting..."
+msgstr "正在連接…"
+
+#: ide/static/ide/js/compile.js:258
+msgid "Establishing connection..."
+msgstr "正在建立連接…"
+
+#: ide/static/ide/js/compile.js:269
+msgid "Authenticating..."
+msgstr "正在驗證…"
+
+#: ide/static/ide/js/compile.js:261
+msgid "Waiting for phone. Make sure the development server is enabled."
+msgstr "正在等待手機。請確保已啟用開發伺服器。"
+
+#: ide/static/ide/js/compile.js:277
+msgid "Connection interrupted."
+msgstr "連接中斷。"
+
+#: ide/static/ide/js/compile.js:448
+msgid "Please <a href='%(update_url)s'>update your pebble</a> to %(min_version)s to install apps from CloudPebble and the appstore (you're on version %(real_version)s)."
+msgstr "請<a href='%(update_url)s'>更新您的 pebble</a> 至 %(min_version)s，以便從 CloudPebble 和應用程式商店安裝應用程式（您的版本為 %(real_version)s）。"
+
+#: ide/static/ide/js/compile.js:464
+msgid "Installed successfully!"
+msgstr "已成功安裝！"
+
+#: ide/static/ide/js/compile.js:476
+msgid "Installation failed. Check your phone for details."
+msgstr "安裝失敗。請檢查您的手機，獲取詳細資料。"
+
+#: ide/static/ide/js/compile.js:495 ide/static/ide/js/compile.js.c:548
+msgid "Disconnected from phone."
+msgstr "已中斷與手機的連接。"
+
+#: ide/static/ide/js/compile.js:513
+msgid "Connected."
+msgstr "已連接。"
+
+#: ide/static/ide/js/compile.js:568
+msgid "Right click -> Save Image as..."
+msgstr "按滑鼠右鍵 -> 另存圖像為……"
+
+#: ide/static/ide/js/ib/canvas.js:31
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:14
+#: ide/static/ide/js/ib/layers/bitmaplayer.js:12
+#: ide/static/ide/js/ib/layers/textlayer.js:18
+msgctxt "background colour"
+msgid "Background"
+msgstr "背景"
+
+#: ide/static/ide/js/ib/canvas.js:32
+msgid "Fullscreen"
+msgstr "全螢幕"
+
+#: ide/static/ide/js/ib/layer.js:19
+msgid "Position"
+msgstr "位置"
+
+#: ide/static/ide/js/ib/layer.js:21
+msgid "ID"
+msgstr "識別碼"
+
+#: ide/static/ide/js/ib/property_view.js:13
+msgid "Delete layer"
+msgstr "刪除層"
+
+#: ide/static/ide/js/ib/utils.js:34
+msgid "White"
+msgstr "白色"
+
+#: ide/static/ide/js/ib/utils.js:35
+msgid "Black"
+msgstr "黑色"
+
+#: ide/static/ide/js/ib/utils.js:36
+msgid "Transparent"
+msgstr "透明"
+
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:15
+msgid "Top icon"
+msgstr "頂部圖示"
+
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:16
+msgid "Middle icon"
+msgstr "中間圖示"
+
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:17
+msgid "Bottom icon"
+msgstr "底部圖示"
+
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:43
+msgid "ActionBarLayer is a Layer that displays a bar on the right edge of the window. The bar can contain up to 3 icons, each corresponding with one of the buttons on the right side of the watch."
+msgstr "ActionBarLayer 是在視窗右邊緣顯示長條圖的圖層。此長條圖最多可包含 3 個圖示，每個圖示對應一個手錶右側的按鈕。"
+
+#: ide/static/ide/js/ib/layers/bitmaplayer.js:11
+msgid "Image"
+msgstr "圖像"
+
+#: ide/static/ide/js/ib/layers/bitmaplayer.js:27
+msgid "BitmapLayer will display an opaque bitmap image."
+msgstr "BitmapLayer 將顯示一個不透明的點陣圖圖像。"
+
+#: ide/static/ide/js/ib/layers/inverterlayer.js:16
+msgid "Inverts the colours of the rectangle behind it. Layers in front are unaffected."
+msgstr "對換其後方矩形的色彩。前方圖層不受影響。"
+
+#: ide/static/ide/js/ib/layers/menulayer.js:18
+msgid "A menu that pulls its content from programmatic callbacks."
+msgstr "從程式設計回撥中提取其內容的功能表。"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:15
+msgid "Text"
+msgstr "文字"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:15
+msgctxt "sample text"
+msgid "Text layer"
+msgstr "文字層"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:16
+msgid "Font"
+msgstr "字型"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:17
+msgid "Text colour"
+msgstr "文字色彩"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:19
+msgctxt "horizontal text positioning"
+msgid "Alignment"
+msgstr "對齊"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:20
+msgid "Left"
+msgstr "左"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:21
+msgid "Centre"
+msgstr "中"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:22
+msgid "Right"
+msgstr "右"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:43
+msgid "Displays text."
+msgstr "顯示文字。"
+
+#: ide/static/ide/js/compile.js:272
+msgid "Waiting for phone. Make sure the developer connection is enabled."
+msgstr ""
+
+#: ide/static/ide/js/compile.js:429
+msgid "Preparing to install app…"
+msgstr "正在準備安裝應用程式……"
+
+#: ide/static/ide/js/compile.js:442
+msgid "Installing app on watch…"
+msgstr "正在為手錶安裝應用程式……"
+
