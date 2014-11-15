@@ -70,6 +70,8 @@ LANGUAGES = (
     ('es', 'Spanish'),
     ('fr', 'French'),
     ('de', 'German'),
+    ('zh-cn', 'Chinese (simplified'),
+    ('zh-tw', 'Chinese (traditional)'),
 )
 
 LOCALE_PATHS = (os.getcwd() + "/locale",)

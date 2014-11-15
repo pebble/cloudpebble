@@ -1,0 +1,972 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 无\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-11-14 20:00-0500\n"
+"PO-Revision-Date: 2014-11-14 18:43+0800\n"
+"Last-Translator: terrie_bai <terrie_bai@i-len.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: zh_HK\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 1.6.10\n"
+
+#: auth/views.py:31
+msgid "Invalid username or password"
+msgstr "無效的使用者名稱或密碼"
+
+#: auth/views.py:34
+msgid "Account disabled."
+msgstr "帳戶已停用。"
+
+#: ide/git.py:16
+msgid "Invalid user GitHub tokens."
+msgstr "無效的使用者 GitHub 權杖。"
+
+#: ide/api/phone.py:44
+msgid "Tap to enable developer mode and install apps from CloudPebble."
+msgstr "輕觸以啟用開發人員模式並從 CloudPebble 安裝應用程式。"
+
+#: ide/api/project.py:289
+msgid "Invalid Github URL."
+msgstr "無效的 Github URL。"
+
+#: ide/api/source.py:92
+msgid "Could not save: file has been modified since last save."
+msgstr "無法儲存：上一次儲存後檔案已被修改。"
+
+#: ide/models/build.py:23 ide/templates/ide/index.html:47
+msgid "Pending"
+msgstr "等待中"
+
+#: ide/models/build.py:24 ide/templates/ide/index.html:45
+msgid "Failed"
+msgstr "失敗"
+
+#: ide/models/build.py:25
+msgid "Succeeded"
+msgstr "成功"
+
+#: ide/models/files.py:19
+msgid "Binary blob"
+msgstr "二進位大型物件"
+
+#: ide/models/files.py:20
+msgid "1-bit PNG"
+msgstr "1 位元 PNG"
+
+#: ide/models/files.py:21
+msgid "1-bit PNG with transparency"
+msgstr "具透明度的 1 位元 PNG"
+
+#: ide/models/files.py:22
+msgid "True-Type Font"
+msgstr "True-Type 字型"
+
+#: ide/models/files.py:45
+msgid "Uploaded file too big."
+msgstr "上載檔案過大。"
+
+#: ide/models/files.py:123
+msgid "App"
+msgstr "應用程式"
+
+#: ide/models/files.py:124
+msgid "Worker"
+msgstr "Worker"
+
+#: ide/models/project.py:21 ide/templates/ide/index.html:81
+msgid "Pebble C SDK"
+msgstr "Pebble C SDK"
+
+#: ide/models/project.py:22 ide/templates/ide/index.html:82
+msgid "Simply.js"
+msgstr "Simply.js"
+
+#: ide/models/project.py:23 ide/templates/ide/index.html:83
+msgid "Pebble.js (beta)"
+msgstr "Pebble.js（測試版）"
+
+#: ide/models/project.py:83 ide/templates/ide/index.html:88
+msgid "Template"
+msgstr "範本"
+
+#: ide/models/project.py:84
+msgid "SDK Demo"
+msgstr "SDK 示範版"
+
+#: ide/models/project.py:85
+msgid "Example"
+msgstr "範例"
+
+#: ide/models/user.py:19
+msgid "As-you-type"
+msgstr "在您輸入時"
+
+#: ide/models/user.py:20
+msgid "When pressing Ctrl-Space"
+msgstr "當按住 Ctrl+Space 時"
+
+#: ide/models/user.py:21 ide/templates/ide/index.html:50
+msgid "Never"
+msgstr "從不"
+
+#: ide/models/user.py:28
+msgid "Standard"
+msgstr "標準"
+
+#: ide/models/user.py:29
+msgid "vim-like"
+msgstr "與 vim 類似"
+
+#: ide/models/user.py:30
+msgid "emacs-like"
+msgstr "與 emacs 類似"
+
+#: ide/models/user.py:43
+msgid "Using spaces"
+msgstr "使用空格"
+
+#: ide/models/user.py:44
+msgid "Using tabs"
+msgstr "使用標籤"
+
+#: ide/models/user.py:50
+msgid "Autocompletion"
+msgstr "自動完成"
+
+#: ide/models/user.py:51
+msgid "Keybinds"
+msgstr "快速鍵"
+
+#: ide/models/user.py:52
+msgid "Theme"
+msgstr "主題"
+
+#: ide/models/user.py:53
+msgctxt "number of spaces"
+msgid "Indents"
+msgstr "縮排"
+
+#: ide/models/user.py:54
+msgid "Tab width"
+msgstr "標籤寬度"
+
+#: ide/templates/ide/gist-import.html:6
+msgid "You are going to create a project based on a template."
+msgstr "您將使用範本建立項目。"
+
+#: ide/templates/ide/gist-import.html:11
+msgid "Create Project"
+msgstr "建立項目"
+
+#: ide/templates/ide/index.html:11 ide/templates/ide/project.html:33
+#: ide/templates/ide/settings.html:11
+msgid "Projects"
+msgstr "項目"
+
+#: ide/templates/ide/index.html:12 ide/templates/ide/project.html:34
+#: ide/templates/ide/project.html.py:46 ide/templates/ide/settings.html:12
+msgid "Settings"
+msgstr "設定"
+
+#: ide/templates/ide/index.html:13 ide/templates/ide/project.html:35
+#: ide/templates/ide/settings.html:13
+msgid "Sign out"
+msgstr "登出"
+
+#: ide/templates/ide/index.html:19
+msgid "All your projects"
+msgstr "您的全部項目"
+
+#: ide/templates/ide/index.html:21 ide/templates/ide/index.html.py:119
+#: ide/templates/ide/project.html:175 ide/templates/ide/project.html.py:204
+msgid "Create"
+msgstr "建立"
+
+#: ide/templates/ide/index.html:22 ide/templates/ide/index.html.py:191
+msgid "Import"
+msgstr "匯入"
+
+#: ide/templates/ide/index.html:30
+msgid "Project"
+msgstr "項目"
+
+#: ide/templates/ide/index.html:31
+msgid "Last modified"
+msgstr "上次修改日期"
+
+#: ide/templates/ide/index.html:32
+msgid "Last built"
+msgstr "上次組建日期"
+
+#: ide/templates/ide/index.html:43
+msgid "Successful"
+msgstr "成功"
+
+#: ide/templates/ide/index.html:59
+msgid "You don't have any projects yet."
+msgstr "您尚未建立任何項目。"
+
+#: ide/templates/ide/index.html:66
+msgid "Create New Project"
+msgstr "建立新項目"
+
+#: ide/templates/ide/index.html:72 ide/templates/ide/index.html.py:137
+#: ide/templates/ide/index.html:158 ide/templates/ide/project/settings.html:8
+msgid "Project name"
+msgstr "項目名稱"
+
+#: ide/templates/ide/index.html:78
+msgid "Project type"
+msgstr "項目類型"
+
+#: ide/templates/ide/index.html:91
+msgid "Empty project"
+msgstr "空白項目"
+
+#: ide/templates/ide/index.html:93
+msgid "Standard Templates"
+msgstr "標準範本"
+
+#: ide/templates/ide/index.html:100
+msgid "SDK demos"
+msgstr "SDK 示範版"
+
+#: ide/templates/ide/index.html:107
+msgid "Examples"
+msgstr "範例"
+
+#: ide/templates/ide/index.html:120 ide/templates/ide/index.html.py:192
+#: ide/templates/ide/project.html:174 ide/templates/ide/project.html.py:203
+#: ide/templates/ide/project.html:233 ide/templates/ide/project.html.py:256
+#: ide/templates/ide/project.html:330 ide/templates/ide/project.html.py:343
+#: root/templates/root/index.html:106
+msgid "Cancel"
+msgstr "取消"
+
+#: ide/templates/ide/index.html:125
+msgid "Import Existing Project"
+msgstr "匯入現有項目"
+
+#: ide/templates/ide/index.html:129
+msgid "Upload Zip"
+msgstr "上載 Zip"
+
+#: ide/templates/ide/index.html:130
+msgid "Import from GitHub"
+msgstr "從 GitHub 匯入"
+
+#: ide/templates/ide/index.html:143
+msgid "Zip file"
+msgstr "Zip 檔案"
+
+#: ide/templates/ide/index.html:146
+msgid "This must be a zip file containing a standard Pebble project."
+msgstr "這必須是包含一個標準 Pebble 項目的 zip 檔案。"
+
+#: ide/templates/ide/index.html:164
+msgid "GitHub Project"
+msgstr "GitHub 項目"
+
+#: ide/templates/ide/index.html:170
+msgid "Branch (optional)"
+msgstr "子目錄（可選）"
+
+#: ide/templates/ide/index.html:177
+msgid "Use as Git remote"
+msgstr "作為 Git 遠端使用"
+
+#: ide/templates/ide/project.html:47
+msgid "Compilation"
+msgstr "編製"
+
+#: ide/templates/ide/project.html:49
+msgid "Source files"
+msgstr "來源檔案"
+
+#: ide/templates/ide/project.html:50 ide/templates/ide/project.html.py:54
+msgid "Add new"
+msgstr "新增"
+
+#: ide/templates/ide/project.html:52
+msgid "Worker source"
+msgstr "Worker 來源"
+
+#: ide/templates/ide/project.html:54
+msgid "Resources"
+msgstr "資源"
+
+#: ide/templates/ide/project.html:89
+msgid "Preparing autocomplete…"
+msgstr "正在準備自動完成…"
+
+#: ide/templates/ide/project.html:116
+msgid "Create new file"
+msgstr "建立新檔案"
+
+#: ide/templates/ide/project.html:122
+msgid "File type"
+msgstr "檔案類型"
+
+#: ide/templates/ide/project.html:125
+msgid "C file"
+msgstr "C 檔案"
+
+#: ide/templates/ide/project.html:126
+msgid "JavaScript file"
+msgstr "JavaScript 檔案"
+
+#: ide/templates/ide/project.html:127
+msgid "Window Layout"
+msgstr "視窗配置"
+
+#: ide/templates/ide/project.html:133 ide/templates/ide/project.html.py:157
+msgid "Filename"
+msgstr "檔案名稱"
+
+#: ide/templates/ide/project.html:139
+msgctxt "compilation target"
+msgid "Target"
+msgstr "目標"
+
+#: ide/templates/ide/project.html:142
+msgid "App / Watchface"
+msgstr "應用程式/錶盤"
+
+#: ide/templates/ide/project.html:143
+msgid "Background worker"
+msgstr "背景 Worker"
+
+#: ide/templates/ide/project.html:149
+msgid "Create header"
+msgstr "建立標頭"
+
+#: ide/templates/ide/project.html:165
+msgid "Window name"
+msgstr "視窗名稱"
+
+#: ide/templates/ide/project.html:185
+msgid "That repo does not exist. Would you like to create it?"
+msgstr "該存放庫不存在。是否建立一個？"
+
+#: ide/templates/ide/project.html:187
+msgid "Repo Name"
+msgstr "存放庫名稱"
+
+#: ide/templates/ide/project.html:196
+msgid "Description <span class=\"muted\">(optional)</span>"
+msgstr "描述<span class=\"muted\">（可選）</span>"
+
+#: ide/templates/ide/project.html:211 ide/templates/ide/project/github.html:47
+msgid "Push New Commit"
+msgstr "推送新的認可"
+
+#: ide/templates/ide/project.html:217
+msgid "Commit Summary"
+msgstr "認可摘要"
+
+#: ide/templates/ide/project.html:219
+msgctxt "sample commit summary"
+msgid "Fix something useful."
+msgstr "修復實用內容。"
+
+#: ide/templates/ide/project.html:223
+msgid "Extended description <span class=\"muted\">(optional)</span>"
+msgstr "延伸描述<span class=\"muted\">（可選）</span>"
+
+#: ide/templates/ide/project.html:234
+msgid "Commit"
+msgstr "認可"
+
+#: ide/templates/ide/project.html:241 ide/templates/ide/project/github.html:48
+msgid "Pull Latest Commit"
+msgstr "提取最新認可"
+
+#: ide/templates/ide/project.html:245
+msgid ""
+"<p>Are you sure you want to pull the latest commit? Doing so will "
+"<em>overwrite</em> everything currently in your project.</p>\n"
+"<p>There will be no further warnings and no opportunity to merge. This "
+"cannot be undone.</p>"
+msgstr ""
+"<p>是否確定要提取最新認可？此操作將會<em>覆寫</em>您當前項目中的所有內容。</"
+"p>\n"
+"<p>系統不會發出進一步警告，亦無合併機會。此操作無法取消。</p>"
+
+#: ide/templates/ide/project.html:249
+msgid "Pulling latest commit from GitHub…"
+msgstr "正在從 GitHub 提取最新認可……"
+
+#: ide/templates/ide/project.html:257
+msgctxt "button label"
+msgid "Pull"
+msgstr "提取"
+
+#: ide/templates/ide/project.html:285
+msgid "Install App"
+msgstr "安裝應用程式"
+
+#: ide/templates/ide/project.html:288
+msgid "Installing app on your watch…"
+msgstr "正在為您的手錶安裝應用程式……"
+
+#: ide/templates/ide/project.html:294 ide/templates/ide/project.html.py:310
+#: ide/templates/ide/project.html:402
+msgid "Dismiss"
+msgstr "解除"
+
+#: ide/templates/ide/project.html:295
+msgctxt "button to look at logs"
+msgid "View logs"
+msgstr "檢視記錄"
+
+#: ide/templates/ide/project.html:301
+msgid "Taking Screenshot"
+msgstr "正在抓取螢幕擷取畫面"
+
+#: ide/templates/ide/project.html:304
+msgid "Taking screenshot…"
+msgstr "正在抓取螢幕擷取畫面……"
+
+#: ide/templates/ide/project.html:331 root/templates/common/base.html:47
+msgid "Okay"
+msgstr "確定"
+
+#: ide/templates/ide/project.html:344
+msgid "Continue"
+msgstr "繼續"
+
+#: ide/templates/ide/project.html:403
+msgid "Download"
+msgstr "下載"
+
+#: ide/templates/ide/settings.html:20
+msgid "Editor settings"
+msgstr "編輯器設定"
+
+#: ide/templates/ide/settings.html:24
+msgid "Settings saved!"
+msgstr "設定已儲存！"
+
+#: ide/templates/ide/settings.html:40
+msgid "Submit"
+msgstr "提交"
+
+#: ide/templates/ide/settings.html:41
+msgid "Reset"
+msgstr "重設"
+
+#: ide/templates/ide/settings.html:47
+msgid "GitHub Integration"
+msgstr "GitHub 整合"
+
+#: ide/templates/ide/settings.html:54
+msgid "Re-authenticate"
+msgstr "重新驗證"
+
+#: ide/templates/ide/settings.html:55
+msgid "Unlink account"
+msgstr "取消連結帳戶"
+
+#: ide/templates/ide/settings.html:57
+msgid "Link your GitHub account"
+msgstr "連結您的 GitHub 帳戶"
+
+#: ide/templates/ide/settings.html:60
+msgid ""
+"Connecting your GitHub account enables you to connect your projects to "
+"GitHub repositories."
+msgstr "連接您的 GitHub 帳戶後，您可將您的項目連接至 GitHub 存放庫。"
+
+#: ide/templates/ide/project/compile.html:9
+msgid ""
+"Make sure that the Developer Connection is enabled on your phone, and you "
+"are\n"
+"running at least phone app version 2.5 (iOS) or <a id=\"android-beta-link\" "
+"href=\"#\">2.1.0-beta9 (Android)</a>."
+msgstr ""
+"請確保您的手機已啟用開發人員連接，且您\n"
+"正在執行的手機應用程式版本至少為 2.5  (iOS) 或 <a id=\"android-beta-link\" "
+"href=\"#\">2.1.0-beta9 (Android)</a>。"
+
+#: ide/templates/ide/project/compile.html:16
+msgid "Install and Run"
+msgstr "安裝和執行"
+
+#: ide/templates/ide/project/compile.html:17
+msgid "View app logs"
+msgstr "檢視應用程式記錄"
+
+#: ide/templates/ide/project/compile.html:18
+msgid "Screenshot"
+msgstr "螢幕擷取畫面"
+
+#: ide/templates/ide/project/compile.html:24
+msgid "Last build"
+msgstr "上次組建日期"
+
+#: ide/templates/ide/project/compile.html:29
+msgctxt "date/time"
+msgid "Started:"
+msgstr "開始日期："
+
+#: ide/templates/ide/project/compile.html:30
+msgctxt "duration"
+msgid "Build time:"
+msgstr "組建時間："
+
+#: ide/templates/ide/project/compile.html:31
+msgid "Status:"
+msgstr "狀態："
+
+#: ide/templates/ide/project/compile.html:32
+msgid "Size:"
+msgstr "大小："
+
+#: ide/templates/ide/project/compile.html:33
+msgid "Available App RAM:"
+msgstr "可用的應用程式 RAM："
+
+#: ide/templates/ide/project/compile.html:34
+#, fuzzy
+msgid "Available Worker RAM:"
+msgstr "可用的 Worker RMA："
+
+#: ide/templates/ide/project/compile.html:38
+msgid "Run build"
+msgstr "執行組建"
+
+#: ide/templates/ide/project/compile.html:39
+msgid "Get PBW"
+msgstr "獲取 PBW"
+
+#: ide/templates/ide/project/compile.html:40
+msgid "Build log"
+msgstr "組建記錄"
+
+#: ide/templates/ide/project/compile.html:47
+msgctxt "number symbol"
+msgid "#"
+msgstr "編號"
+
+#: ide/templates/ide/project/compile.html:48
+msgid "Date"
+msgstr "日期"
+
+#: ide/templates/ide/project/compile.html:49
+msgid "Status"
+msgstr "狀態"
+
+#: ide/templates/ide/project/compile.html:50
+msgid "Size"
+msgstr "大小"
+
+#: ide/templates/ide/project/github.html:8
+msgid "Github Repo"
+msgstr "Github 存放庫"
+
+#: ide/templates/ide/project/github.html:14
+msgctxt "git branch"
+msgid "Branch"
+msgstr "子目錄"
+
+#: ide/templates/ide/project/github.html:20
+msgctxt "button label"
+msgid "Pull changes"
+msgstr "提取變更"
+
+#: ide/templates/ide/project/github.html:23
+msgid "Manually"
+msgstr "手動"
+
+#: ide/templates/ide/project/github.html:24
+msgid "Automatically"
+msgstr "自動"
+
+#: ide/templates/ide/project/github.html:26
+msgid ""
+"If you select 'Automatically', the contents of this project <em>will be "
+"overwritten</em> every time you push to your repo from elsewhere, "
+"<em>without prompting you</em>."
+msgstr ""
+"如果您選擇『自動』，則在您每次從其他位置推送至您的存放庫時，此項目的內容<em>"
+"將被覆寫</em>，<em>且不會向您發出提示</em>。"
+
+#: ide/templates/ide/project/github.html:30
+msgid "After pulling"
+msgstr "提取後"
+
+#: ide/templates/ide/project/github.html:33
+msgid "Do nothing"
+msgstr "無任何操作"
+
+#: ide/templates/ide/project/github.html:34
+msgid "Build automatically"
+msgstr "自動組建"
+
+#: ide/templates/ide/project/github.html:41
+#: ide/templates/ide/project/resource.html:74
+msgid "Save"
+msgstr "儲存"
+
+#: ide/templates/ide/project/resource.html:8
+msgid "Resource type"
+msgstr "資源類型"
+
+#: ide/templates/ide/project/resource.html:11
+msgid "PNG image"
+msgstr "PNG 圖像"
+
+#: ide/templates/ide/project/resource.html:13
+msgid "PNG with transparency"
+msgstr "具透明度的 PNG"
+
+#: ide/templates/ide/project/resource.html:14
+msgid "TrueType font"
+msgstr "TrueType 字型"
+
+#: ide/templates/ide/project/resource.html:15
+msgid "Raw binary blob"
+msgstr "原始二進位大型物件"
+
+#: ide/templates/ide/project/resource.html:21
+msgid "File"
+msgstr "檔案"
+
+#: ide/templates/ide/project/resource.html:24
+msgid ""
+"You can have multiple Pebble resources from a single file (for different "
+"sizes, etc.)"
+msgstr "您可從單一檔案獲得多種 Pebble 資源（針對不同大小等）。"
+
+#: ide/templates/ide/project/resource.html:36
+msgid "Download uploaded resource"
+msgstr "下載已上載的資源"
+
+#: ide/templates/ide/project/resource.html:40
+#: ide/templates/ide/project/resource.html:49
+msgid "Identifier"
+msgstr "識別碼"
+
+#: ide/templates/ide/project/resource.html:43
+#: ide/templates/ide/project/resource.html:52
+msgid "This is used in your code and must be a valid C identifier."
+msgstr "識別碼在您的代碼中使用，必須為有效的 C 識別碼。"
+
+#: ide/templates/ide/project/resource.html:53
+msgid "It must end with the desired font size."
+msgstr "它必須以所需的字型大小結尾。"
+
+#: ide/templates/ide/project/resource.html:57
+msgctxt "like letters and numbers"
+msgid "Characters"
+msgstr "字元"
+
+#: ide/templates/ide/project/resource.html:60
+msgid "A PCRE regular expression that restricts characters."
+msgstr "限制字元的 PCRE 規則運算式。"
+
+#. Translators: This refers to the number of additional pixels by which to shift each character
+#: ide/templates/ide/project/resource.html:65
+msgid "Tracking adjust"
+msgstr "正在追蹤調整"
+
+#: ide/templates/ide/project/resource.html:68
+msgid "Number of additional pixels by which to shift each character."
+msgstr "轉換各字元所用的額外像素數量。"
+
+#: ide/templates/ide/project/resource.html:75
+msgid "Delete"
+msgstr "刪除"
+
+#: ide/templates/ide/project/resource.html:76
+msgid "Another font"
+msgstr "其他字型"
+
+#: ide/templates/ide/project/settings.html:17
+msgid "App kind"
+msgstr "應用程式類型"
+
+#: ide/templates/ide/project/settings.html:20
+msgid "Watchapp"
+msgstr "手錶應用程式"
+
+#: ide/templates/ide/project/settings.html:21
+msgid "Watchface"
+msgstr "錶盤"
+
+#: ide/templates/ide/project/settings.html:26
+msgid "Short App Name"
+msgstr "應用程式簡稱"
+
+#: ide/templates/ide/project/settings.html:28
+#: ide/templates/ide/project/settings.html:37
+msgctxt "sample app name"
+msgid "Demo App"
+msgstr "應用程式示範版"
+
+#: ide/templates/ide/project/settings.html:30
+msgid "App's short name. This will appear on the watch."
+msgstr "應用程式簡稱。簡稱將在手錶上顯示。"
+
+#: ide/templates/ide/project/settings.html:35
+msgid "Long App Name"
+msgstr "應用程式全稱"
+
+#: ide/templates/ide/project/settings.html:39
+msgid "App's long name. This will appear in the app list on the phone."
+msgstr "應用程式全稱。全稱將在手機上的應用程式清單中顯示。"
+
+#: ide/templates/ide/project/settings.html:44
+msgid "Menu image"
+msgstr "功能表圖像"
+
+#: ide/templates/ide/project/settings.html:47
+msgid "None"
+msgstr "無"
+
+#: ide/templates/ide/project/settings.html:47
+msgid "Default"
+msgstr "預設"
+
+#: ide/templates/ide/project/settings.html:50
+msgid ""
+"Displayed on the Pebble's main menu. Must be a 28x28 file in PNG format."
+msgstr "在 Pebble 的主功能表上顯示。必須為 PNG 格式的 28x28 檔案。"
+
+#: ide/templates/ide/project/settings.html:55
+msgid "Company Name"
+msgstr "公司名稱"
+
+#: ide/templates/ide/project/settings.html:57
+msgctxt "sample company name"
+msgid "Demo Company"
+msgstr "示範公司"
+
+#: ide/templates/ide/project/settings.html:59
+msgid "Name of the app's developer."
+msgstr "應用程式開發人員的名稱。"
+
+#: ide/templates/ide/project/settings.html:74
+msgid "Version label"
+msgstr "版本標籤"
+
+#: ide/templates/ide/project/settings.html:79
+msgid ""
+"App version. Takes the format major[.minor], where major and minor are "
+"between 0 and 255."
+msgstr ""
+"應用程式版本。採用格式「主要[.次要]」，主要和次要的數值介於 0 至 255 之間。"
+
+#: ide/templates/ide/project/settings.html:84
+msgid "App UUID"
+msgstr "應用程式 UUID"
+
+#: ide/templates/ide/project/settings.html:88
+msgid "A unique identifier for the app."
+msgstr "應用程式的唯一識別碼。"
+
+#: ide/templates/ide/project/settings.html:95
+msgid "PebbleKit JS Message Keys"
+msgstr "PebbleKit JS 訊息機碼"
+
+#: ide/templates/ide/project/settings.html:100
+msgid "Key Name"
+msgstr "機碼名稱"
+
+#: ide/templates/ide/project/settings.html:101
+msgid "Key ID"
+msgstr "機碼識別碼"
+
+#: ide/templates/ide/project/settings.html:114
+msgid "New Entry"
+msgstr "新增條目"
+
+#: ide/templates/ide/project/settings.html:121
+msgid "A mapping from strings to integers used by PebbleKit JS."
+msgstr "字串與 PebbleKit JS 所使用整數的對應。"
+
+#: ide/templates/ide/project/settings.html:126
+msgctxt "checkbox label"
+msgid "Check Javascript"
+msgstr "檢查 JavaScript"
+
+#: ide/templates/ide/project/settings.html:132
+msgctxt "checkbox label"
+msgid "Uses Location"
+msgstr "使用位置"
+
+#: ide/templates/ide/project/settings.html:138
+msgctxt "checkbox label"
+msgid "Configurable"
+msgstr "可設定"
+
+#: ide/templates/ide/project/settings.html:146
+msgid "Save changes"
+msgstr "儲存變更"
+
+#: ide/templates/ide/project/settings.html:147
+msgid "Download as zip"
+msgstr "下載為 Zip"
+
+#: ide/templates/ide/project/settings.html:148
+msgid "Delete Project"
+msgstr "刪除項目"
+
+#: ide/templates/ide/project/ui-editor.html:12
+msgid "Properties"
+msgstr "屬性"
+
+#: ide/templates/ide/project/ui-editor.html:13
+msgid "Toolkit"
+msgstr "工具組"
+
+#: ide/utils/prepreprocessor.py:28
+#, python-format
+msgid "Illegal include '%(include)s' -> '%(path)s'"
+msgstr "不合法包括 '%(include)s' -> '%(path)s'"
+
+#: ide/utils/project.py:34
+msgid "No project root found."
+msgstr "未找到項目根目錄。"
+
+#: ide/utils/sdk.py:134 ide/utils/sdk.py:168 ide/utils/sdk.py:186
+#, python-format
+msgid "Unknown project type %s"
+msgstr "未知的項目類型 %s"
+
+#: root/templates/common/base-narrow.html:24
+msgid "CloudPebble was created by Katharine Berry and is now run by Pebble."
+msgstr "CloudPebble 由 Katharine Berry 建立，目前由 Pebble 營運。"
+
+#. Translators: Modal prompt header
+#: root/templates/common/base.html:39
+msgid "Welcome Back"
+msgstr "歡迎回來"
+
+#. Translators: This is followed by a list of changes.
+#: root/templates/common/base.html:43
+msgid "Here's what's changed since the last time you were here:"
+msgstr "下面是自您上次使用後的最新更新："
+
+#: root/templates/root/index.html:11
+msgid "Sign in"
+msgstr "登入"
+
+#: root/templates/root/index.html:12
+msgid "Close"
+msgstr "關閉"
+
+#: root/templates/root/index.html:22
+msgid "Already have a Pebble account?"
+msgstr "已有 Pebble 帳戶？"
+
+#: root/templates/root/index.html:23
+msgid ""
+"This is the same account you use to log in to the Pebble Forums, Developer "
+"Portal and phone app. Don't have a Pebble account? Create one!"
+msgstr ""
+"此帳戶與您登入 Pebble 論壇、開發人員入口網站和手機應用程式所使用的帳戶相同。"
+"尚未擁有 Pebble 帳戶？請建立一個！"
+
+#: root/templates/root/index.html:24
+msgid "Log in with your Pebble account"
+msgstr "使用您的 Pebble 帳戶登入"
+
+#: root/templates/root/index.html:25
+msgid "Create Pebble account"
+msgstr "建立 Pebble 帳戶"
+
+#: root/templates/root/index.html:36
+msgid "Have a legacy CloudPebble account?"
+msgstr "是否有舊版的 CloudPebble 帳戶？"
+
+#: root/templates/root/index.html:37
+msgid ""
+"Log in to link it with your Pebble account. Legacy\n"
+"accounts are being phased out in favour of the\n"
+"Pebble account system. Once you log in you will be\n"
+"required to link your accounts;\n"
+"henceforth you must log in with your pebble account."
+msgstr ""
+"登入後，將其與您的 Pebble 帳戶連接。舊版\n"
+"帳戶因 \n"
+"Pebble 帳戶系統的考量將被逐步淘汰。登入後，您\n"
+"需要連結您的帳戶；\n"
+"然後，您必須使用您的 pebble 帳戶登入。"
+
+#: root/templates/root/index.html:42
+msgid "Link to your Pebble account"
+msgstr "連結至您的 Pebble 帳戶"
+
+#: root/templates/root/index.html:55
+msgid "Online Pebble Development"
+msgstr "線上 Pebble 開發"
+
+#: root/templates/root/index.html:56
+msgid ""
+"Write apps without dealing with Linux, virtual machines, compilers, or "
+"Python."
+msgstr "無需使用 Linux、虛擬機器、編譯器或 Python 即可編寫應用程式。"
+
+#: root/templates/root/index.html:57
+msgid "Get Started"
+msgstr "現在開始"
+
+#: root/templates/root/index.html:62
+msgid "Nothing to install"
+msgstr "無需安裝"
+
+#: root/templates/root/index.html:63
+msgid "Write apps directly in your browser. Skip all setup instructions!"
+msgstr "直接在您的瀏覽器中編寫應用程式。跳過所有安裝指示！"
+
+#: root/templates/root/index.html:67
+msgid "No JSON to edit"
+msgstr "沒有可編輯的 JSON"
+
+#: root/templates/root/index.html:68
+msgid "Resources are managed through a friendly user interface"
+msgstr "透過易用的使用者介面管理資源"
+
+#. Translators: This is "cloud" as in the internet, but used as a pun on cloud as in sky.
+#: root/templates/root/index.html:73
+msgid "Cloudy"
+msgstr "雲端"
+
+#: root/templates/root/index.html:74
+msgid ""
+"It's on the internet. Accessible from anywhere! That's a good thing, right?"
+msgstr "一切盡在互聯網上，可隨時隨地獲取！棒極了，不是麼？"
+
+#: root/templates/root/index.html:78
+msgid "More to come"
+msgstr "更多期待"
+
+#: root/templates/root/index.html:79
+msgid "This is only the beginning!<br>There's much more to come."
+msgstr "豈止於此！<br>更多新功能即將推出。"
+
+#: root/templates/root/index.html:88
+msgid "Log in with legacy account"
+msgstr "使用舊帳戶登入"
+
+#: root/templates/root/index.html:93
+msgid "Username"
+msgstr "使用者名稱"
+
+#: root/templates/root/index.html:97
+msgid "Password"
+msgstr "密碼"
+
+#: root/templates/root/index.html:105
+msgid "Log in"
+msgstr "登入"
