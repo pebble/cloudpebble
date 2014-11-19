@@ -6,14 +6,14 @@ set -e
 # Make sure we have the SDK in place.
 
 echo "Downloading the SDK"
-curl -o /tmp/pebblesdk.tar.gz http://assets.getpebble.com.s3-website-us-east-1.amazonaws.com/sdk2/PebbleSDK-2.7.tar.gz
+curl -o /tmp/pebblesdk.tar.gz http://assets.getpebble.com.s3-website-us-east-1.amazonaws.com/sdk2/PebbleSDK-2.8.tar.gz
 
 echo "Downloading the toolchain"
 curl -o /tmp/arm-cs-tools.tar https://cloudpebble-vagrant.s3.amazonaws.com/arm-cs-tools-stripped.tar
 
 echo "Extracting the SDK"
 tar -xf /tmp/pebblesdk.tar.gz
-mv PebbleSDK-2.7 sdk2
+mv PebbleSDK-2.8 sdk2
 pushd sdk2
     echo "Extracting the toolchain"
     tar -xf /tmp/arm-cs-tools.tar
