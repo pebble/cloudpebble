@@ -74,12 +74,13 @@ def resource_info(request, project_id, resource_id):
             'resource_ids': [{
                                  'id': x.resource_id,
                                  'regex': x.character_regex,
-                                 'tracking': x.tracking
+                                 'tracking': x.tracking,
+                                 'compatibility': x.compatibility
                              } for x in resources],
             'id': resource.id,
             'file_name': resource.file_name,
             'kind': resource.kind,
-            "extra": {y.resource_id: {'regex': y.character_regex, 'tracking': y.tracking} for y in resource.identifiers.all()}
+            "extra": {y.resource_id: {'regex': y.character_regex, 'tracking': y.tracking, 'compatibility': y.compatibility} for y in resource.identifiers.all()}
         }
     })
 
@@ -120,7 +121,8 @@ def update_resource(request, project_id, resource_id):
             for r in resource_ids:
                 regex = r['regex'] if 'regex' in r else None
                 tracking = int(r['tracking']) if 'tracking' in r else None
-                resources.append(ResourceIdentifier.objects.create(resource_file=resource, resource_id=r['id'], character_regex=regex, tracking=tracking))
+                compat = r['compatibility'] if 'compatibility' in r else None
+                resources.append(ResourceIdentifier.objects.create(resource_file=resource, resource_id=r['id'], character_regex=regex, tracking=tracking, compatibility=compat))
 
             if 'file' in request.FILES:
                 resource.save_file(request.FILES['file'], request.FILES['file'].size)
@@ -138,9 +140,9 @@ def update_resource(request, project_id, resource_id):
             "id": resource.id,
             "kind": resource.kind,
             "file_name": resource.file_name,
-            "resource_ids": [{'id': x.resource_id, 'regex': x.character_regex} for x in resources],
+            "resource_ids": [{'id': x.resource_id, 'regex': x.character_regex, 'compatibility': x.compatibility} for x in resources],
             "identifiers": [x.resource_id for x in resources],
-            "extra": {y.resource_id: {'regex': y.character_regex, 'tracking': y.tracking} for y in resource.identifiers.all()}
+            "extra": {y.resource_id: {'regex': y.character_regex, 'tracking': y.tracking, 'compatibility': y.compatibility} for y in resource.identifiers.all()}
         }})
 
 

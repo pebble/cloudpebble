@@ -68,6 +68,16 @@
                         <span class="help-block">{% trans 'Number of additional pixels by which to shift each character.' %}</span>
                     </div>
                 </div>
+                <div class="control-group font-resource-compatibility-group">
+                    <label class="control-label">{% trans 'Compatibility' %}</label>
+                    <div class="controls">
+                        <select class="font-compat-option">
+                            <option value="">{% trans "Latest" %}</option>
+                            <option value="2.7">{% trans "2.7 and earlier" %}</option>
+                        </select>
+                        <span class="help-block">{% trans 'Determines the font rendering algorithm to use. The latest looks better, but can produce slightly larger characters.' %}</span>
+                    </div>
+                </div>
             </div>
         </div>
         <div id="edit-resource-buttons" class="well resource-actions">

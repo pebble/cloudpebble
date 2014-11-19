@@ -104,6 +104,7 @@ class ResourceIdentifier(IdeModel):
     resource_id = models.CharField(max_length=100)
     character_regex = models.CharField(max_length=100, blank=True, null=True)
     tracking = models.IntegerField(blank=True, null=True)
+    compatibility = models.CharField(max_length=10, blank=True, null=True)
 
     def save(self, *args, **kwargs):
         self.resource_file.project.last_modified = now()

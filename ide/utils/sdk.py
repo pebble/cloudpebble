@@ -202,6 +202,8 @@ def generate_v2_resource_dict(resources):
                 d['trackingAdjust'] = resource_id.tracking
             if resource.is_menu_icon:
                 d['menuIcon'] = True
+            if resource_id.compatibility is not None:
+                d['compatibility'] = resource_id.compatibility
             resource_map['media'].append(d)
     return resource_map
 
