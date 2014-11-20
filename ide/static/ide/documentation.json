@@ -107,6 +107,15 @@
         "returns": "", 
         "warning": null
     }, 
+    "APP_LAUNCH_QUICK_LAUNCH": {
+        "description": "<p>App launched by user using quick launch. </p>", 
+        "kind": "enum", 
+        "name": "APP_LAUNCH_QUICK_LAUNCH", 
+        "params": [], 
+        "return_desc": null, 
+        "returns": "", 
+        "warning": null
+    }, 
     "APP_LAUNCH_SYSTEM": {
         "description": "<p>App launched by the system. </p>", 
         "kind": "enum", 
@@ -117,7 +126,7 @@
         "warning": null
     }, 
     "APP_LAUNCH_USER": {
-        "description": "<p>App launched by user selection. </p>", 
+        "description": "<p>App launched by user selection in launcher menu. </p>", 
         "kind": "enum", 
         "name": "APP_LAUNCH_USER", 
         "params": [], 
@@ -609,7 +618,7 @@
         "params": [], 
         "return_desc": null, 
         "returns": "", 
-        "warning": null
+        "warning": "<p>New launch reasons may be added in the future. As a best practice, it is recommended to only handle the cases that the app needs to know about, rather than trying to handle all possible launch reasons. </p>"
     }, 
     "AppLogLevel": {
         "description": "<p>Suggested log level values. </p>", 
@@ -5483,6 +5492,15 @@
         "return_desc": "<p>The number of bytes on the heap currently being used. </p>", 
         "returns": "size_t", 
         "warning": null
+    }, 
+    "i18n_get_system_locale": {
+        "description": "<p>Get the ISO locale name for the language currently set on the watch. </p>", 
+        "kind": "fn", 
+        "name": "i18n_get_system_locale", 
+        "params": [], 
+        "return_desc": "<p>A string containing the ISO locale name (e.g. \"fr\", \"<code>en_US</code>\", ...) </p>", 
+        "returns": "const char *", 
+        "warning": "<p>It is possible for the locale to change while your app is running. And thus, two calls to <code>i18n_get_system_locale</code> may return different values. </p>"
     }, 
     "inverter_layer_create": {
         "description": "<p>Creates a new InverterLayer on the heap and initializes it with the default values. </p>", 

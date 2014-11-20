@@ -54,6 +54,7 @@ CloudPebble.Editor.PebbleMode = {
         'ACCEL_SAMPLING_25HZ': true,
         'ACCEL_SAMPLING_50HZ': true,
         'APP_LAUNCH_PHONE': true,
+        'APP_LAUNCH_QUICK_LAUNCH': true,
         'APP_LAUNCH_SYSTEM': true,
         'APP_LAUNCH_USER': true,
         'APP_LAUNCH_WAKEUP': true,

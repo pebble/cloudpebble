@@ -40,7 +40,7 @@ CloudPebble.Resources = (function() {
             if(is_new) {
                 form.find('input, button, select').removeAttr('disabled');
             } else {
-                form.find('input, button').removeAttr('disabled');
+                form.find('input, button, .font-compat-option').removeAttr('disabled');
             }
         };
 
@@ -86,6 +86,7 @@ CloudPebble.Resources = (function() {
                 var resource_id = value.find('.edit-resource-id').val();
                 var regex = value.find('.edit-resource-regex').val();
                 var tracking = parseInt(value.find('.edit-resource-tracking').val() || '0', 10);
+                var compat = value.find('.font-compat-option').val() || null;
                 if(resource_id === '') return true; // continue
                 if(!validate_resource_id(resource_id)) {
                     report_error(gettext("Invalid resource identifier. Use only letters, numbers and underscores."));
@@ -108,7 +109,7 @@ CloudPebble.Resources = (function() {
                     return false;
                 }
                 resource_ids[resource_id] = true;
-                resources.push({'id': resource_id, 'regex': regex, 'tracking': tracking});
+                resources.push({'id': resource_id, 'regex': regex, 'tracking': tracking, 'compatibility': compat});
             });
             if(!okay) return;
             if(resources.length === 0) {
@@ -228,6 +229,7 @@ CloudPebble.Resources = (function() {
                     group.find('.edit-resource-id').val(value.id);
                     group.find('.edit-resource-regex').val(value.regex);
                     group.find('.edit-resource-tracking').val(value.tracking || '0');
+                    group.find('.font-compat-option').val(value.compatibility || "");
                     update_font_preview(group);
                     group.find('input[type=text], input[type=number]').on('input', function() {
                         update_font_preview(group);
