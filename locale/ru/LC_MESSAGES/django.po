@@ -1,0 +1,933 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: CloudPebble\n"
+"Language: ru\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: auth/views.py:31
+msgid "Invalid username or password"
+msgstr "Неверный логин или пароль"
+
+#: auth/views.py:34
+msgid "Account disabled."
+msgstr "Аккаунт заблокирован."
+
+#: ide/git.py:16
+msgid "Invalid user GitHub tokens."
+msgstr "Неверный токен GitHub."
+
+#: ide/api/phone.py:44
+msgid "Tap to enable developer mode and install apps from CloudPebble."
+msgstr "Нажмите чтобы включить режим разработчика и разрешить установку приложений с CloudPebble."
+
+#: ide/api/project.py:289
+msgid "Invalid Github URL."
+msgstr "Неверный URL GitHub."
+
+#: ide/api/source.py:92
+msgid "Could not save: file has been modified since last save."
+msgstr "Невозможно сохранить: файл изменился после предыдущего сохранения."
+
+#: ide/static/ide/js/compile.js:5
+msgid "Pending"
+msgstr "В ожидании"
+
+#: ide/static/ide/js/compile.js:6
+msgid "Failed"
+msgstr "Неудачно"
+
+#: ide/static/ide/js/compile.js:7
+msgid "Succeeded"
+msgstr "Успешно"
+
+#: ide/models/files.py:19
+msgid "Binary blob"
+msgstr "Бинарный файл"
+
+#: ide/models/files.py:20
+msgid "1-bit PNG"
+msgstr "1-бит PNG"
+
+#: ide/models/files.py:21
+msgid "1-bit PNG with transparency"
+msgstr "1-бит PNG с прозрачностью"
+
+#: ide/models/files.py:22
+msgid "True-Type Font"
+msgstr "Шрифт TrueType"
+
+#: ide/models/files.py:45
+msgid "Uploaded file too big."
+msgstr "Слишком большой файл."
+
+#: ide/models/files.py:123
+msgid "App"
+msgstr "Приложение"
+
+#: ide/models/files.py:124
+msgid "Worker"
+msgstr "Работник"
+
+#: ide/models/project.py:21 ide/templates/ide/index.html:81
+msgid "Pebble C SDK"
+msgstr "Pebble C SDK"
+
+#: ide/models/project.py:22 ide/templates/ide/index.html:82
+msgid "Simply.js"
+msgstr "Simply.js"
+
+#: ide/models/project.py:23 ide/templates/ide/index.html:83
+msgid "Pebble.js (beta)"
+msgstr "Pebble.js (бета)"
+
+#: ide/models/project.py:83 ide/templates/ide/index.html:88
+msgid "Template"
+msgstr "Шаблон"
+
+#: ide/models/project.py:84
+msgid "SDK Demo"
+msgstr "Демо SDK"
+
+#: ide/models/project.py:85
+msgid "Example"
+msgstr "Пример"
+
+#: ide/models/user.py:19
+msgid "As-you-type"
+msgstr "По ходу"
+
+#: ide/models/user.py:20
+msgid "When pressing Ctrl-Space"
+msgstr "По нажатию Ctrl+пробел"
+
+#: ide/models/user.py:21 ide/templates/ide/index.html:50
+msgid "Never"
+msgstr "Никогда"
+
+#: ide/models/user.py:28
+msgid "Standard"
+msgstr "Стандартные"
+
+#: ide/models/user.py:29
+msgid "vim-like"
+msgstr "В стиле vim"
+
+#: ide/models/user.py:30
+msgid "emacs-like"
+msgstr "В стиле emacs"
+
+#: ide/models/user.py:43
+msgid "Using spaces"
+msgstr "Пробелами"
+
+#: ide/models/user.py:44
+msgid "Using tabs"
+msgstr "Табами"
+
+#: ide/models/user.py:50
+msgid "Autocompletion"
+msgstr "Автодополнение"
+
+#: ide/models/user.py:51
+msgid "Keybinds"
+msgstr "Комбинации клавиш"
+
+#: ide/models/user.py:52
+msgid "Theme"
+msgstr "Тема"
+
+#: ide/models/user.py:54
+msgid "Tab width"
+msgstr "Ширина таба"
+
+#: ide/templates/ide/gist-import.html:6
+msgid "You are going to create a project based on a template."
+msgstr "Вы собираетесь создать проект по шаблону."
+
+#: ide/templates/ide/gist-import.html:11
+msgid "Create Project"
+msgstr "Создать проект"
+
+#: ide/templates/ide/index.html:11 ide/templates/ide/project.html:33
+#: ide/templates/ide/settings.html:11
+msgid "Projects"
+msgstr "Проекты"
+
+#: ide/templates/ide/index.html:12 ide/templates/ide/project.html:34
+#: ide/templates/ide/project.html.py:46 ide/templates/ide/settings.html:12
+msgid "Settings"
+msgstr "Настройки"
+
+#: ide/templates/ide/index.html:13 ide/templates/ide/project.html:35
+#: ide/templates/ide/settings.html:13
+msgid "Sign out"
+msgstr "Выход"
+
+#: ide/templates/ide/index.html:19
+msgid "All your projects"
+msgstr "Все проекты"
+
+#: ide/templates/ide/index.html:21 ide/templates/ide/index.html.py:119
+#: ide/templates/ide/project.html:175 ide/templates/ide/project.html.py:204
+msgid "Create"
+msgstr "Создать"
+
+#: ide/templates/ide/index.html:22 ide/templates/ide/index.html.py:191
+msgid "Import"
+msgstr "Импорт"
+
+#: ide/templates/ide/index.html:30
+msgid "Project"
+msgstr "Проект"
+
+#: ide/templates/ide/index.html:31
+msgid "Last modified"
+msgstr "Последняя правка"
+
+#: ide/templates/ide/index.html:32
+msgid "Last built"
+msgstr "Последняя сборка"
+
+#: ide/templates/ide/index.html:43
+msgid "Successful"
+msgstr "Успешно"
+
+#: ide/templates/ide/index.html:59
+msgid "You don't have any projects yet."
+msgstr "У вас пока ещё нет проектов."
+
+#: ide/templates/ide/index.html:66
+msgid "Create New Project"
+msgstr "Создать проект"
+
+#: ide/templates/ide/index.html:72 ide/templates/ide/index.html.py:137
+#: ide/templates/ide/index.html:158 ide/templates/ide/project/settings.html:8
+msgid "Project name"
+msgstr "Имя проекта"
+
+#: ide/templates/ide/index.html:78
+msgid "Project type"
+msgstr "Тип проекта"
+
+#: ide/templates/ide/index.html:91
+msgid "Empty project"
+msgstr "Пустой проект"
+
+#: ide/templates/ide/index.html:93
+msgid "Standard Templates"
+msgstr "Стандартные шаблоны"
+
+#: ide/templates/ide/index.html:100
+msgid "SDK demos"
+msgstr "Демо SDK"
+
+#: ide/templates/ide/index.html:107
+msgid "Examples"
+msgstr "Примеры"
+
+#: ide/templates/ide/index.html:120 ide/templates/ide/index.html.py:192
+#: ide/templates/ide/project.html:174 ide/templates/ide/project.html.py:203
+#: ide/templates/ide/project.html:233 ide/templates/ide/project.html.py:256
+#: ide/templates/ide/project.html:330 ide/templates/ide/project.html.py:343
+#: root/templates/root/index.html:106
+msgid "Cancel"
+msgstr "Отмена"
+
+#: ide/templates/ide/index.html:125
+msgid "Import Existing Project"
+msgstr "Импортировать существующий проект"
+
+#: ide/templates/ide/index.html:129
+msgid "Upload Zip"
+msgstr "Загрузить Zip"
+
+#: ide/templates/ide/index.html:130
+msgid "Import from GitHub"
+msgstr "Импорт из GitHub"
+
+#: ide/templates/ide/index.html:143
+msgid "Zip file"
+msgstr "Zip файл"
+
+#: ide/templates/ide/index.html:146
+msgid "This must be a zip file containing a standard Pebble project."
+msgstr "Это должен быть zip файл со стандартным проектом Pebble."
+
+#: ide/templates/ide/index.html:164
+msgid "GitHub Project"
+msgstr "Проект на GitHub"
+
+#: ide/templates/ide/index.html:170
+msgid "Branch (optional)"
+msgstr "Ветка (опционально)"
+
+#: ide/templates/ide/index.html:177
+msgid "Use as Git remote"
+msgstr "Использовать как git remote"
+
+#: ide/templates/ide/project.html:47
+msgid "Compilation"
+msgstr "Компиляция"
+
+#: ide/templates/ide/project.html:49
+msgid "Source files"
+msgstr "Исходные файлы"
+
+#: ide/templates/ide/project.html:50 ide/templates/ide/project.html.py:54
+msgid "Add new"
+msgstr "Добавить"
+
+#: ide/templates/ide/project.html:52
+msgid "Worker source"
+msgstr "Код работника"
+
+#: ide/templates/ide/project.html:54
+msgid "Resources"
+msgstr "Ресурсы"
+
+#: ide/templates/ide/project.html:89
+msgid "Preparing autocomplete…"
+msgstr "Готовим автодополнение…"
+
+#: ide/templates/ide/project.html:116
+msgid "Create new file"
+msgstr "Создать файл"
+
+#: ide/templates/ide/project.html:122
+msgid "File type"
+msgstr "Тип файла"
+
+#: ide/templates/ide/project.html:125
+msgid "C file"
+msgstr "Файл C"
+
+#: ide/templates/ide/project.html:126
+msgid "JavaScript file"
+msgstr "Файл JavaScript"
+
+#: ide/templates/ide/project.html:127
+msgid "Window Layout"
+msgstr "Макет окна"
+
+#: ide/templates/ide/project.html:133 ide/templates/ide/project.html.py:157
+msgid "Filename"
+msgstr "Имя файла"
+
+#: ide/templates/ide/project.html:139
+msgctxt "compilation target"
+msgid "Target"
+msgstr "Цель"
+
+#: ide/templates/ide/project.html:142
+msgid "App / Watchface"
+msgstr "App / Watchface"
+
+#: ide/templates/ide/project.html:143
+msgid "Background worker"
+msgstr "Фоновый процесс"
+
+#: ide/templates/ide/project.html:149
+msgid "Create header"
+msgstr "Создать заголовок"
+
+#: ide/templates/ide/project.html:165
+msgid "Window name"
+msgstr "Имя окна"
+
+#: ide/static/ide/js/github.js:8
+msgid "That repo does not exist. Would you like to create it?"
+msgstr "Такой репозиторий не существует. Хотите создать его?"
+
+#: ide/templates/ide/project.html:187
+msgid "Repo Name"
+msgstr "Имя репозитория"
+
+#: ide/templates/ide/project.html:196
+msgid "Description <span class=\"muted\">(optional)</span>"
+msgstr "Описание <span class=\"muted\">(опционально)</span>"
+
+#: ide/templates/ide/project.html:211 ide/templates/ide/project/github.html:47
+msgid "Push New Commit"
+msgstr "Сделать push нового коммита"
+
+#: ide/templates/ide/project.html:217
+msgid "Commit Summary"
+msgstr "Кратко о коммите"
+
+#: ide/templates/ide/project.html:219
+msgctxt "sample commit summary"
+msgid "Fix something useful."
+msgstr "Какое-то полезное исправление."
+
+#: ide/templates/ide/project.html:223
+msgid "Extended description <span class=\"muted\">(optional)</span>"
+msgstr "Расширенное описание <span class=\"muted\">(опционально)</span>"
+
+#: ide/templates/ide/project.html:234
+msgid "Commit"
+msgstr "Коммит"
+
+#: ide/templates/ide/project.html:241 ide/templates/ide/project/github.html:48
+msgid "Pull Latest Commit"
+msgstr "Сделать pull последнего коммита"
+
+#: ide/templates/ide/project.html:245
+msgid "<p>Are you sure you want to pull the latest commit? Doing so will <em>overwrite</em> everything currently in your project.</p>\n"
+"<p>There will be no further warnings and no opportunity to merge. This cannot be undone.</p>"
+msgstr "<p>Вы точно хотите сделать pull последнего коммита? Это <em>перезапишет</em> все, что у вас сейчас есть в проекте.</p>\n"
+"<p>Больше не будет предупреждений и не будет возможности сделать merge. Это не может быть отменено.</p>"
+
+#: ide/templates/ide/project.html:249
+msgid "Pulling latest commit from GitHub…"
+msgstr "Делаем pull последнего коммита с GitHub…"
+
+#: ide/templates/ide/project.html:257
+msgctxt "button label"
+msgid "Pull"
+msgstr "Pull"
+
+#: ide/templates/ide/project.html:285
+msgid "Install App"
+msgstr "Установить"
+
+#: ide/static/ide/js/compile.js:419
+msgid "Installing app on your watch…"
+msgstr "Устанавливаем приложение на часы…"
+
+#: ide/templates/ide/project.html:294 ide/templates/ide/project.html.py:310
+#: ide/templates/ide/project.html:402
+msgid "Dismiss"
+msgstr "Закрыть"
+
+#: ide/templates/ide/project.html:295
+msgctxt "button to look at logs"
+msgid "View logs"
+msgstr "Логи"
+
+#: ide/templates/ide/project.html:301
+msgid "Taking Screenshot"
+msgstr "Делаем скриншот"
+
+#: ide/templates/ide/project.html:304
+msgid "Taking screenshot…"
+msgstr "Делаем скриншот…"
+
+#: ide/templates/ide/project.html:331 root/templates/common/base.html:47
+msgid "Okay"
+msgstr "ОК"
+
+#: ide/templates/ide/project.html:344
+msgid "Continue"
+msgstr "Продолжить"
+
+#: ide/templates/ide/settings.html:20
+msgid "Editor settings"
+msgstr "Настройки редактора"
+
+#: ide/templates/ide/settings.html:24
+msgid "Settings saved!"
+msgstr "Настройки сохранены!"
+
+#: ide/templates/ide/settings.html:40
+msgid "Submit"
+msgstr "Применить"
+
+#: ide/templates/ide/settings.html:41
+msgid "Reset"
+msgstr "Сбросить"
+
+#: ide/templates/ide/settings.html:47
+msgid "GitHub Integration"
+msgstr "Интеграция с GitHub"
+
+#: ide/templates/ide/settings.html:54
+msgid "Re-authenticate"
+msgstr "Войти снова"
+
+#: ide/templates/ide/settings.html:55
+msgid "Unlink account"
+msgstr "Отвязать аккаунт"
+
+#: ide/templates/ide/settings.html:57
+msgid "Link your GitHub account"
+msgstr "Привязать аккаунт GitHub"
+
+#: ide/templates/ide/settings.html:60
+msgid "Connecting your GitHub account enables you to connect your projects to GitHub repositories."
+msgstr "Подключение вашего аккаунта GitHub позволяет подключать ваши проекты к репозиториям GitHub."
+
+#: ide/templates/ide/project/compile.html:16
+msgid "Install and Run"
+msgstr "Установить и запустить"
+
+#: ide/templates/ide/project/compile.html:17
+msgid "View app logs"
+msgstr "Посмотреть логи"
+
+#: ide/templates/ide/project/compile.html:18
+msgid "Screenshot"
+msgstr "Скриншот"
+
+#: ide/templates/ide/project/compile.html:31
+msgid "Status:"
+msgstr "Статус:"
+
+#: ide/templates/ide/project/compile.html:32
+msgid "Size:"
+msgstr "Размер:"
+
+#: ide/templates/ide/project/compile.html:33
+msgid "Available App RAM:"
+msgstr "Доступная приложению RAM:"
+
+#: ide/templates/ide/project/compile.html:34
+msgid "Available Worker RAM:"
+msgstr "Доступная работнику RAM:"
+
+#: ide/templates/ide/project/compile.html:38
+msgid "Run build"
+msgstr "Собрать"
+
+#. "Get" as in "Download" or...?
+#: ide/templates/ide/project/compile.html:39
+msgid "Get PBW"
+msgstr "Скачать PBW"
+
+#: ide/static/ide/js/compile.js:23
+msgid "Build log"
+msgstr "Лог сборки"
+
+#: ide/templates/ide/project/compile.html:47
+msgctxt "number symbol"
+msgid "#"
+msgstr "№"
+
+#: ide/templates/ide/project/compile.html:48
+msgid "Date"
+msgstr "Дата"
+
+#: ide/templates/ide/project/compile.html:49
+msgid "Status"
+msgstr "Статус"
+
+#: ide/templates/ide/project/compile.html:50
+msgid "Size"
+msgstr "Размер"
+
+#: ide/templates/ide/project/github.html:8
+msgid "Github Repo"
+msgstr "Репозиторий GitHub"
+
+#: ide/templates/ide/project/github.html:14
+msgctxt "git branch"
+msgid "Branch"
+msgstr "Ветка"
+
+#: ide/templates/ide/project/github.html:20
+msgctxt "button label"
+msgid "Pull changes"
+msgstr "Сделать pull изменений"
+
+#: ide/templates/ide/project/github.html:23
+msgid "Manually"
+msgstr "Вручную"
+
+#: ide/templates/ide/project/github.html:24
+msgid "Automatically"
+msgstr "Автоматически"
+
+#: ide/templates/ide/project/github.html:26
+msgid "If you select 'Automatically', the contents of this project <em>will be overwritten</em> every time you push to your repo from elsewhere, <em>without prompting you</em>."
+msgstr "Если вы выберите 'Автоматически', содержимое этого проекта <em>будет перезаписываться</em> каждый раз вы будете делать push в ваш репозиторий откуда-то ещё <em>не спрашивая вас</em>."
+
+#: ide/templates/ide/project/github.html:30
+msgid "After pulling"
+msgstr "После pull"
+
+#: ide/templates/ide/project/github.html:33
+msgid "Do nothing"
+msgstr "Ничего не делать"
+
+#: ide/templates/ide/project/github.html:34
+msgid "Build automatically"
+msgstr "Собирать автоматически"
+
+#: ide/static/ide/js/editor.js:468
+msgid "Save"
+msgstr "Сохранить"
+
+#: ide/templates/ide/project/resource.html:8
+msgid "Resource type"
+msgstr "Тип ресурса"
+
+#: ide/templates/ide/project/resource.html:11
+msgid "PNG image"
+msgstr "Картинка PNG"
+
+#: ide/templates/ide/project/resource.html:13
+msgid "PNG with transparency"
+msgstr "PNG с прозрачностью"
+
+#: ide/templates/ide/project/resource.html:14
+msgid "TrueType font"
+msgstr "Шрифт TrueType"
+
+#: ide/templates/ide/project/resource.html:15
+msgid "Raw binary blob"
+msgstr "Бинарный файл"
+
+#: ide/templates/ide/project/resource.html:21
+msgid "File"
+msgstr "Файл"
+
+#: ide/templates/ide/project/resource.html:24
+msgid "You can have multiple Pebble resources from a single file (for different sizes, etc.)"
+msgstr "У вас может быть несколько ресурсов из одного файла (для разных размеров, и т. д.)"
+
+#: ide/templates/ide/project/resource.html:36
+msgid "Download uploaded resource"
+msgstr "Скачать загруженный ресурс"
+
+#: ide/static/ide/js/resources.js:19
+msgid "Identifier"
+msgid_plural "Identifiers"
+msgstr[0] "Идентификатор"
+msgstr[1] "Идентификатора"
+msgstr[2] "Идентификаторы"
+
+#: ide/templates/ide/project/resource.html:43
+#: ide/templates/ide/project/resource.html:52
+msgid "This is used in your code and must be a valid C identifier."
+msgstr "Это используется в коде и должно быть валидным идентификатором в языке C."
+
+#: ide/templates/ide/project/resource.html:53
+msgid "It must end with the desired font size."
+msgstr "Он должен заканчиваться предпочитаемым размером шрифта."
+
+#: ide/templates/ide/project/resource.html:57
+msgctxt "like letters and numbers"
+msgid "Characters"
+msgstr "Символы"
+
+#: ide/static/ide/js/resources.js:184
+msgid "A PCRE regular expression that restricts characters."
+msgstr "Регулярное выражение (PCRE) для ограничения символов."
+
+#: ide/templates/ide/project/resource.html:65
+msgid "Tracking adjust"
+msgstr "Подстройка"
+
+#: ide/templates/ide/project/resource.html:68
+msgid "Number of additional pixels by which to shift each character."
+msgstr "Количество дополнительных пикселей, на которое сдвинется каждый символ."
+
+#: ide/static/ide/js/editor.js:470
+msgid "Delete"
+msgstr "Удалить"
+
+#: ide/templates/ide/project/resource.html:76
+msgid "Another font"
+msgstr "Другой шрифт"
+
+#: ide/templates/ide/project/settings.html:17
+msgid "App kind"
+msgstr "Вид приложения"
+
+#: ide/templates/ide/project/settings.html:20
+msgid "Watchapp"
+msgstr "Watchapp"
+
+#: ide/templates/ide/project/settings.html:21
+msgid "Watchface"
+msgstr "Watchface"
+
+#: ide/templates/ide/project/settings.html:26
+msgid "Short App Name"
+msgstr "Короткое имя приложения"
+
+#: ide/templates/ide/project/settings.html:28
+#: ide/templates/ide/project/settings.html:37
+msgctxt "sample app name"
+msgid "Demo App"
+msgstr "Демо-приложение"
+
+#: ide/templates/ide/project/settings.html:30
+msgid "App's short name. This will appear on the watch."
+msgstr "Короткое название, которое отображается на часах."
+
+#: ide/templates/ide/project/settings.html:35
+msgid "Long App Name"
+msgstr "Длинное имя приложения"
+
+#: ide/templates/ide/project/settings.html:39
+msgid "App's long name. This will appear in the app list on the phone."
+msgstr "Длинное название, которое отображается в списке на телефоне."
+
+#: ide/templates/ide/project/settings.html:44
+msgid "Menu image"
+msgstr "Изображение в меню"
+
+#: ide/templates/ide/project/settings.html:47
+msgid "None"
+msgstr "Нет"
+
+#: ide/templates/ide/project/settings.html:47
+msgid "Default"
+msgstr "По умолчанию"
+
+#: ide/templates/ide/project/settings.html:50
+msgid "Displayed on the Pebble's main menu. Must be a 28x28 file in PNG format."
+msgstr "Отображается в главном меню. Должно быть PNG размера 28x28."
+
+#: ide/templates/ide/project/settings.html:55
+msgid "Company Name"
+msgstr "Имя компании"
+
+#: ide/templates/ide/project/settings.html:57
+msgctxt "sample company name"
+msgid "Demo Company"
+msgstr "Демо-компания"
+
+#: ide/templates/ide/project/settings.html:59
+msgid "Name of the app's developer."
+msgstr "Название разработчика приложения."
+
+#: ide/templates/ide/project/settings.html:74
+msgid "Version label"
+msgstr "Номер версии"
+
+#: ide/templates/ide/project/settings.html:79
+msgid "App version. Takes the format major[.minor], where major and minor are between 0 and 255."
+msgstr "Версия приложения. Формат major[.minor], где major и minor между 0 и 255."
+
+#: ide/templates/ide/project/settings.html:84
+msgid "App UUID"
+msgstr "UUID приложения"
+
+#: ide/templates/ide/project/settings.html:88
+msgid "A unique identifier for the app."
+msgstr "Уникальный идентификатор приложения."
+
+#: ide/templates/ide/project/settings.html:95
+msgid "PebbleKit JS Message Keys"
+msgstr "Ключи PebbleKit JS"
+
+#: ide/templates/ide/project/settings.html:100
+msgid "Key Name"
+msgstr "Имя ключа"
+
+#: ide/templates/ide/project/settings.html:101
+msgid "Key ID"
+msgstr "ID ключа"
+
+#: ide/static/ide/js/settings.js:202
+msgid "New Entry"
+msgstr "Новая запись"
+
+#: ide/templates/ide/project/settings.html:121
+msgid "A mapping from strings to integers used by PebbleKit JS."
+msgstr "Конвертация из строк в числа используется PebbleKit JS."
+
+#: ide/templates/ide/project/settings.html:126
+msgctxt "checkbox label"
+msgid "Check Javascript"
+msgstr "Проверять JavaScript"
+
+#: ide/templates/ide/project/settings.html:132
+msgctxt "checkbox label"
+msgid "Uses Location"
+msgstr "Использует местоположение"
+
+#: ide/templates/ide/project/settings.html:138
+msgctxt "checkbox label"
+msgid "Configurable"
+msgstr "Настраиваемое"
+
+#: ide/templates/ide/project/settings.html:146
+msgid "Save changes"
+msgstr "Сохранить"
+
+#: ide/templates/ide/project/settings.html:147
+msgid "Download as zip"
+msgstr "Скачать как zip"
+
+#: ide/static/ide/js/settings.js:145
+msgid "Delete Project"
+msgstr "Удалить проект"
+
+#: ide/templates/ide/project/ui-editor.html:12
+msgid "Properties"
+msgstr "Свойства"
+
+#: ide/templates/ide/project/ui-editor.html:13
+msgid "Toolkit"
+msgstr "Тулкит"
+
+#: ide/utils/prepreprocessor.py:28
+msgid "Illegal include '%(include)s' -> '%(path)s'"
+msgstr "Неверный include '%(include)s' -> '%(path)s'"
+
+#: ide/utils/project.py:34
+msgid "No project root found."
+msgstr "Не найден корень проекта."
+
+#: ide/utils/sdk.py:134 ide/utils/sdk.py:168 ide/utils/sdk.py:186
+msgid "Unknown project type %s"
+msgstr "Неизвестный тип проекта %s"
+
+#: root/templates/common/base-narrow.html:24
+msgid "CloudPebble was created by Katharine Berry and is now run by Pebble."
+msgstr "CloudPebble был создан Katharine Berry и сейчас в ведении Pebble."
+
+#. Translators: Modal prompt header
+#: root/templates/common/base.html:39
+msgid "Welcome Back"
+msgstr "Добро пожаловать"
+
+#. Translators: This is followed by a list of changes.
+#: root/templates/common/base.html:43
+msgid "Here's what's changed since the last time you were here:"
+msgstr "Вот что поменялось с последнего вашего входа:"
+
+#: root/templates/root/index.html:11
+msgid "Sign in"
+msgstr "Войти"
+
+#: root/templates/root/index.html:12
+msgid "Close"
+msgstr "Закрыть"
+
+#: root/templates/root/index.html:22
+msgid "Already have a Pebble account?"
+msgstr "Уже есть аккаунт Pebble?"
+
+#: root/templates/root/index.html:23
+msgid "This is the same account you use to log in to the Pebble Forums, Developer Portal and phone app. Don't have a Pebble account? Create one!"
+msgstr "Это тот же аккаунт, что вы используете для входа в форумы Pebble, портал разработчиков и приложение на телефоне. Нет аккаунта Pebble? Создайте!"
+
+#: root/templates/root/index.html:24
+msgid "Log in with your Pebble account"
+msgstr "Войти при помощи аккаунта Pebble"
+
+#: root/templates/root/index.html:25
+msgid "Create Pebble account"
+msgstr "Создать аккаунт Pebble"
+
+#: root/templates/root/index.html:36
+msgid "Have a legacy CloudPebble account?"
+msgstr "Есть старый аккаунт CloudPebble?"
+
+#: root/templates/root/index.html:37
+msgid "Log in to link it with your Pebble account. Legacy\n"
+"accounts are being phased out in favour of the\n"
+"Pebble account system. Once you log in you will be\n"
+"required to link your accounts;\n"
+"henceforth you must log in with your pebble account."
+msgstr "Войдите, чтобы связать его с вашим аккаунтом Pebble. Старые аккаунты заменяются на систему аккаунтов Pebble. После входа будет необходимо связять аккаунты."
+
+#: root/templates/root/index.html:42
+msgid "Link to your Pebble account"
+msgstr "Связать с аккаунтом Pebble"
+
+#: root/templates/root/index.html:55
+msgid "Online Pebble Development"
+msgstr "Онлайн-разработка для Pebble"
+
+#: root/templates/root/index.html:56
+msgid "Write apps without dealing with Linux, virtual machines, compilers, or Python."
+msgstr "Пишите приложения без настройки виртуальных машин, компиляторов, Linux и Python."
+
+#: root/templates/root/index.html:57
+msgid "Get Started"
+msgstr "Начните сейчас"
+
+#: root/templates/root/index.html:62
+msgid "Nothing to install"
+msgstr "Не надо ничего устанавливать"
+
+#: root/templates/root/index.html:63
+msgid "Write apps directly in your browser. Skip all setup instructions!"
+msgstr "Пишите приложения прямо в браузере – без всякой установки!"
+
+#: root/templates/root/index.html:67
+msgid "No JSON to edit"
+msgstr "Не надо редактировать JSON"
+
+#: root/templates/root/index.html:68
+msgid "Resources are managed through a friendly user interface"
+msgstr "Управление ресурсами через удобный интерфейс"
+
+#. Translators: This is "cloud" as in the internet, but used as a pun on cloud as in sky.
+#: root/templates/root/index.html:73
+msgid "Cloudy"
+msgstr "Облачная"
+
+#: root/templates/root/index.html:74
+msgid "It's on the internet. Accessible from anywhere! That's a good thing, right?"
+msgstr "Она в интернете. Доступна откуда угодно! Это хорошо, так ведь?"
+
+#: root/templates/root/index.html:78
+msgid "More to come"
+msgstr "Дальше – больше"
+
+#: root/templates/root/index.html:79
+msgid "This is only the beginning!<br>There's much more to come."
+msgstr "Это только начало!<br>Дальше – гораздо больше."
+
+#: root/templates/root/index.html:88
+msgid "Log in with legacy account"
+msgstr "Войти при помощи старым аккаунтом"
+
+#: root/templates/root/index.html:93
+msgid "Username"
+msgstr "Логин"
+
+#: root/templates/root/index.html:97
+msgid "Password"
+msgstr "Пароль"
+
+#: root/templates/root/index.html:105
+msgid "Log in"
+msgstr "Войти"
+
+#: ide/templates/ide/index.html:28 root/templates/root/index.html:20
+msgid "Due to a recent Chrome update, we have been forced to disable TLS site-wide. Security will be re-enabled in a few days."
+msgstr "Из-за недавнего обновления Chrome мы были вынуждены отключить TLS. Безопасность будет вновь включена вскоре."
+
+#: ide/templates/ide/project/compile.html:9
+msgid "Make sure that the Developer Connection is enabled on your phone, and you are\n"
+"running at least iOS app version 2.5 or Android version 2.1 (beta)."
+msgstr "Убедитесь, что на телефоне включен Developer Connection, и что версия приложения хотя бы 2.5 (iOS) или 2.1 beta (Android)."
+
+#: ide/models/user.py:53
+msgctxt "number of spaces"
+msgid "Indents"
+msgstr "Отступы"
+
+#: ide/templates/ide/project/compile.html:29
+msgctxt "date/time"
+msgid "Started:"
+msgstr "Начало:"
+
+#: ide/templates/ide/project/compile.html:30
+msgctxt "duration"
+msgid "Build time:"
+msgstr "Время:"
+
+#: ide/templates/ide/project/compile.html:24
+msgid "Last build"
+msgstr "Последняя сборка"
+
+#: ide/templates/ide/project.html:403
+msgid "Download"
+msgstr "Скачать"
+
+#: ide/templates/ide/project/compile.html:9
+msgid "Make sure that the Developer Connection is enabled on your phone, and you are\n"
+"running at least phone app version 2.5 (iOS) or <a id=\"android-beta-link\" href=\"#\">2.1.0-beta6 (Android)</a>."
+msgstr "Убедитесь, что Developer Connection включен на вашем телефоне, и у версия приложения как минимум 2.5 (iOS) или <a id=\"android-beta-link\" href=\"#\">2.1.0-beta6 (Android)</a>."
+

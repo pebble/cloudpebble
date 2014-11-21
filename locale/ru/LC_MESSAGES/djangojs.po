@@ -1,0 +1,628 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: CloudPebble\n"
+"Language: ru\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: ide/static/ide/js/compile.js:5
+msgid "Pending"
+msgstr "В ожидании"
+
+#: ide/static/ide/js/compile.js:6
+msgid "Failed"
+msgstr "Неудачно"
+
+#: ide/static/ide/js/compile.js:7
+msgid "Succeeded"
+msgstr "Успешно"
+
+#: ide/static/ide/js/github.js:8
+msgid "That repo does not exist. Would you like to create it?"
+msgstr "Такой репозиторий не существует. Хотите создать его?"
+
+#: ide/static/ide/js/compile.js:419
+msgid "Installing app on your watch…"
+msgstr "Устанавливаем приложение на часы…"
+
+#: ide/static/ide/js/compile.js:23
+msgid "Build log"
+msgstr "Лог сборки"
+
+#: ide/static/ide/js/editor.js:468
+msgid "Save"
+msgstr "Сохранить"
+
+#: ide/static/ide/js/resources.js:19
+msgid "Identifier"
+msgid_plural "Identifiers"
+msgstr[0] "Идентификатор"
+msgstr[1] "Идентификатора"
+msgstr[2] "Идентификаторы"
+
+#: ide/static/ide/js/resources.js:184
+msgid "A PCRE regular expression that restricts characters."
+msgstr "Регулярное выражение (PCRE) для ограничения символов."
+
+#: ide/static/ide/js/editor.js:470
+msgid "Delete"
+msgstr "Удалить"
+
+#: ide/static/ide/js/settings.js:202
+msgid "New Entry"
+msgstr "Новая запись"
+
+#: ide/static/ide/js/settings.js:145
+msgid "Delete Project"
+msgstr "Удалить проект"
+
+#: ide/static/ide/js/cloudpebble.js:62
+msgid "You have one unsaved source file. If you leave this page, you will lose it."
+msgid_plural "You have %s unsaved source files. If you leave this page, you will lose them."
+msgstr[0] "У вас есть несохраненный файл. Если вы покинете эту страницу, вы его потеряете."
+msgstr[1] "У вас есть %s несохраненных файла. Если вы покинете эту страницу, вы их потеряете."
+msgstr[2] "У вас есть %s несохраненных файлов. Если вы покинете эту страницу, вы их потеряете."
+
+#: ide/static/ide/js/compile.js:19
+msgid "pbw"
+msgstr "pbw"
+
+#: ide/static/ide/js/compile.js:42
+msgid "Something went wrong:\n"
+"\n"
+"%s"
+msgstr "Что-то пошло не так:\n"
+"\n"
+"%s"
+
+#: ide/static/ide/js/compile.js:182
+msgid "%(total)s KiB (%(resources)s KiB resources, %(appbin)s KiB binary)"
+msgstr "%(total)s КиБ (%(resources)s КиБ ресурсов, %(appbin)s КиБ код)"
+
+#: ide/static/ide/js/compile.js:184
+msgid "%(total)s KiB (%(resources)s KiB resources, %(appbin)s KiB binary, %(workerbin)s KiB worker)"
+msgstr "%(total)s КиБ (%(resources)s КиБ ресурсов, %(appbin)s КиБ код, %(workerbin)s КиБ работник)"
+
+#: ide/static/ide/js/compile.js:194
+msgid "%(free)s / %(max)s bytes (%(percent)s%)"
+msgstr "%(free)s / %(max)s байт (%(percent)s%) "
+
+#: ide/static/ide/js/compile.js:333
+msgid "Different app crashed. Only the active app has debugging information available."
+msgstr "Другое приложение упало. Информация для отладки доступна только для активного приложения."
+
+#: ide/static/ide/js/compile.js:339
+msgid "Looking up debug information..."
+msgstr "Просматривая информацию для отладки…"
+
+#: ide/static/ide/js/compile.js:372
+msgid "Crashed inside firmware call."
+msgstr "Приложение упало внутри вызова прошивки."
+
+#: ide/static/ide/js/compile.js:374
+msgid "Crashed at %(file)s:%(line)s, in %(fn_name)s (starts at %(file)s:%(fn_line)s)."
+msgstr "Приложение упало на %(file)s:%(line)s, функция %(fn_name)s (начиная с %(file)s:%(fn_line)s)."
+
+#: ide/static/ide/js/compile.js:380
+msgid "Which was called from %(file)s:%(line)s, in %(fn_name)s (starts at %(file)s:%(fn_line)s)."
+msgstr "Которая была вызвана из %(file)s:%(line)s, функция %(fn_name)s (начиная с %(file)s:%(fn_line)s)."
+
+#: ide/static/ide/js/compile.js:399
+msgid "[PHONE]"
+msgstr "[PHONE]"
+
+#: ide/static/ide/js/compile.js:400
+msgid "[ERROR]"
+msgstr "[ERROR]"
+
+#: ide/static/ide/js/compile.js:401
+msgid "[WARNING]"
+msgstr "[WARNING]"
+
+#: ide/static/ide/js/compile.js:402
+msgid "[INFO]"
+msgstr "[INFO]"
+
+#: ide/static/ide/js/compile.js:403
+msgid "[DEBUG]"
+msgstr "[DEBUG]"
+
+#: ide/static/ide/js/compile.js:404
+msgid "[VERBOSE]"
+msgstr "[VERBOSE]"
+
+#: ide/static/ide/js/editor.js:31
+msgid "Something went wrong: %s"
+msgstr "Что-то пошло не так: %s"
+
+#: ide/static/ide/js/editor.js:347
+msgid "This file has been edited elsewhere; you will not be able to save your changes."
+msgstr "Этот файл был изменен где-то ещё; вы не сможете сохранить изменения здесь."
+
+#: ide/static/ide/js/editor.js:467
+msgid "Save, build, install and run"
+msgstr "Сохранить, собрать, установить и запустить"
+
+#: ide/static/ide/js/editor.js:469
+msgid "Reload"
+msgstr "Откат"
+
+#: ide/static/ide/js/editor.js:471
+msgid "UI Editor"
+msgstr "Редактор UI"
+
+#: ide/static/ide/js/editor.js:476
+msgid "Do you want to delete %(name)s?"
+msgstr "Вы хотите удалить %(name)s?"
+
+#: ide/static/ide/js/resources.js:251
+msgid "This cannot be undone."
+msgstr "Это невозможно отменить."
+
+#: ide/static/ide/js/editor.js:498
+msgid "Do you want to reload %(name)s?"
+msgstr "Вы хотите откатить %(name)s?"
+
+#: ide/static/ide/js/editor.js:499
+msgid "This will discard your current changes and revert to the saved version."
+msgstr "Это отменит текущие изменения и вернет код к сохраненной версии."
+
+#: ide/static/ide/js/editor.js:510
+msgid "Saving..."
+msgstr "Сохраняем…"
+
+#: ide/static/ide/js/editor.js:512
+msgid "Compiling..."
+msgstr "Компилируем…"
+
+#: ide/static/ide/js/editor.js:541
+msgid "Toggle Fullscreen"
+msgstr "Полноэкранный режим"
+
+#: ide/static/ide/js/editor.js:661
+msgid "Declaration"
+msgstr "Объявление"
+
+#: ide/static/ide/js/editor.js:664
+msgid "Description"
+msgstr "Описание"
+
+#: ide/static/ide/js/editor.js:668
+msgid "Returns"
+msgstr "Возвращает"
+
+#: ide/static/ide/js/editor.js:681
+msgid "Parameters"
+msgstr "Параметры"
+
+#: ide/static/ide/js/editor.js:685
+msgid "Note"
+msgstr "Заметка"
+
+#: ide/static/ide/js/editor.js:771
+msgid "Source files must end in .c or .h"
+msgstr "Исходные файлы должны заканчиваться на .c или .h"
+
+#: ide/static/ide/js/editor.js:773 ide/static/ide/js/editor.js.c:814
+msgid "A file called '%s' already exists."
+msgstr "Файл '%s' уже существует."
+
+#: ide/static/ide/js/editor.js:812
+msgid "Source files must end in .js"
+msgstr "Исходные файлы должны заканчиваться на .js"
+
+#: ide/static/ide/js/editor.js:830
+msgid "You must specify a valid window name using lowercase letters and underscores."
+msgstr "Вы должны указать валидное название окна используя строчные латинские буквы и подчеркивания."
+
+#: ide/static/ide/js/editor.js:832
+msgid "That name is already used in this project."
+msgstr "Это имя уже используется в проекте."
+
+#: ide/static/ide/js/editor.js:872
+msgid "If you want to create a background worker, use this dropdown to create files pointing at that target."
+msgstr "Если вы хотите создать фоновый процесс, используйте этот выпадающий список, что бы создать файлы, указывающие а эту цель."
+
+#: ide/static/ide/js/editor.js:873
+msgid "Note that targets are independent and code will not be shared between them."
+msgstr "Заметьте, что цели независимы, и код не будет связан между ними."
+
+#: ide/static/ide/js/gist_import.js:24
+msgid "Import failed: %s"
+msgstr "Импорт не удался: %s"
+
+#: ide/static/ide/js/github.js:65
+msgid "Updated repo."
+msgstr "Обновили репозиторий."
+
+#: ide/static/ide/js/github.js:79
+msgid "You don't have access to that repository."
+msgstr "У вас нет доступа к этому репозиторию."
+
+#: ide/static/ide/js/github.js:108
+msgid "You must provide a repo URL."
+msgstr "Вы должны предоставить URL репозитория."
+
+#: ide/static/ide/js/github.js:171
+msgid "Pulled successfully."
+msgstr "Pull выполнен успешно."
+
+#: ide/static/ide/js/github.js:172
+msgid "Pull completed successfully."
+msgstr "Pull успешно завершен."
+
+#: ide/static/ide/js/github.js:178
+msgid "Pull completed: Nothing to pull."
+msgstr "Pull завершен: Нет изменений."
+
+#: ide/static/ide/js/settings.js:137 ide/static/ide/js/settings.js.c:150
+msgid "Error: %s"
+msgstr "Ошибка: %s"
+
+#: ide/static/ide/js/github.js:195
+msgid "You must provide a commit summary."
+msgstr "Вы должны кратко описать коммит."
+
+#: ide/static/ide/js/github.js:226
+msgid "Pull failed: %s"
+msgstr "Pull не удался: %s"
+
+#: ide/static/ide/js/github.js:243
+msgid "GitHub integration can be enabled in your user settings by linking a GitHub account."
+msgstr "Интеграция с GitHub может быть включена в настройках привязкой аккаунта GitHub."
+
+#: ide/static/ide/js/project_list.js:20
+msgid "You must enter a name."
+msgstr "Вы должны указать имя."
+
+#: ide/static/ide/js/project_list.js:70
+#: ide/static/ide/js/project_list.js:116
+msgid "You must specify a project name."
+msgstr "Вы должны указать имя проекта."
+
+#: ide/static/ide/js/project_list.js:75
+msgid "You must upload a zip file."
+msgstr "Вы должны загрузить zip файл."
+
+#: ide/static/ide/js/project_list.js:121
+msgid "You must specify a complete GitHub project URL"
+msgstr "Вы должны указать полный URL проекта на GitHub."
+
+#: ide/static/ide/js/resources.js:52
+msgid "You must upload a file."
+msgstr "Вы должны загрузить файл."
+
+#: ide/static/ide/js/resources.js:56
+msgid "A resource called '%(name)s' already exists in the project."
+msgstr "Ресурс '%(name)s' уже есть в проекте."
+
+#: ide/static/ide/js/resources.js:63
+msgid "You must upload a PNG image."
+msgstr "Вы должны загрузить картинку PNG."
+
+#: ide/static/ide/js/resources.js:67
+msgid "You must upload a TrueType Font (.ttf)"
+msgstr "Вы должны загрузить шрифт TrueType (.ttf)."
+
+#: ide/static/ide/js/resources.js:76
+msgid "You must provide a valid resource identifier. Use only letters, numbers and underscores."
+msgstr "Вы должны указать валидный идентификатор ресурса. Используйте только буквы, цифры и подчеркивание."
+
+#: ide/static/ide/js/resources.js:91
+msgid "Invalid resource identifier. Use only letters, numbers and underscores."
+msgstr "Идентификатор ресурса не валидный. Используйте только буквы, цифры и подчеркивание."
+
+#: ide/static/ide/js/resources.js:96
+msgid "Font resource identifiers must end with the desired font size, e.g. %s_24"
+msgstr "Идентификаторы ресурсов шрифтов должны заканчиваться предпочитаемым размером шрифта, например %s_24"
+
+#: ide/static/ide/js/resources.js:101
+msgid "You can't have multiple identical identifiers. Please remove or change one."
+msgstr "У вас не может быть одинаковых идентификаторов. Удалите или измените один."
+
+#: ide/static/ide/js/resources.js:106
+msgid "Tracking must be an integer."
+msgstr "Трекинг должен быть целым числом."
+
+#: ide/static/ide/js/resources.js:115
+msgid "You must specify at least one resource."
+msgstr "Обязательно указать хотя бы один ресурс."
+
+#: ide/static/ide/js/resources.js:162
+msgid "If specified, this file will replace the current file for this resource, regardless of its filename."
+msgstr "Если указано, этот файл заменит текущий файл для этого ресурса, вне зависимости от его названия."
+
+#: ide/static/ide/js/resources.js:189
+msgid "Preview"
+msgstr "Предпросмотр"
+
+#: ide/static/ide/js/resources.js:251
+msgid "Do you want to delete %s?"
+msgstr "Вы хотите удалить %s?"
+
+#: ide/static/ide/js/settings.js:55
+msgid "You must specify a project name"
+msgstr "Вы должны указать имя проекта."
+
+#: ide/static/ide/js/settings.js:67
+msgid "You must specify a short name."
+msgstr "Вы должны указать короткое имя."
+
+#: ide/static/ide/js/settings.js:71
+msgid "You must specify a long name."
+msgstr "Вы должны указать длинное имя."
+
+#: ide/static/ide/js/settings.js:75
+msgid "You must specify a company name."
+msgstr "Вы должны указать имя компании."
+
+#: ide/static/ide/js/settings.js:79
+msgid "You must specify a positive integer version code."
+msgstr "Вы должны указать код версии (положительное целое число)."
+
+#: ide/static/ide/js/settings.js:86
+msgid "You must specify a valid version number."
+msgstr "Вы должны указать валидный номер версии."
+
+#: ide/static/ide/js/settings.js:90
+msgid "You must specify a valid UUID (of the form 00000000-0000-0000-0000-000000000000)"
+msgstr "Вы должны указать валидный UUID (вида 00000000-0000-0000-0000-000000000000)"
+
+#: ide/static/ide/js/settings.js:134
+msgid "Settings saved."
+msgstr "Настройки сохранены."
+
+#: ide/static/ide/js/settings.js:145
+msgid "Are you sure you want to delete this project? THIS CANNOT BE UNDONE."
+msgstr "Вы точно хотите удалить этот проект? ЭТО НЕЛЬЗЯ ОТМЕНИТЬ."
+
+#: ide/static/ide/js/sidebar.js:118
+msgid "App source"
+msgstr "Код прил-я"
+
+#: ide/static/ide/js/ycm.js:48
+msgid "Code completion resync failed."
+msgstr "Ресинхронизация автодопления не удалась."
+
+#: ide/static/ide/js/ycm.js:73 ide/static/ide/js/ycm.js.c:78
+msgid "Code completion unavailable."
+msgstr "Автодополнение недоступно."
+
+#: ide/static/ide/js/ycm.js:94
+msgid "Code completion lost; retrying..."
+msgstr "Автодополнение потеряно; повтор…"
+
+#: ide/static/ide/js/cloudpebble.js:145
+msgctxt "month name"
+msgid "January"
+msgstr "Январь"
+
+#: ide/static/ide/js/cloudpebble.js:146
+msgctxt "month name"
+msgid "February"
+msgstr "Февраль"
+
+#: ide/static/ide/js/cloudpebble.js:147
+msgctxt "month name"
+msgid "March"
+msgstr "Март"
+
+#: ide/static/ide/js/cloudpebble.js:148
+msgctxt "month name"
+msgid "April"
+msgstr "Апрель"
+
+#: ide/static/ide/js/cloudpebble.js:149
+msgctxt "month name"
+msgid "May"
+msgstr "Май"
+
+#: ide/static/ide/js/cloudpebble.js:150
+msgctxt "month name"
+msgid "June"
+msgstr "Июнь"
+
+#: ide/static/ide/js/cloudpebble.js:151
+msgctxt "month name"
+msgid "July"
+msgstr "Июль"
+
+#: ide/static/ide/js/cloudpebble.js:152
+msgctxt "month name"
+msgid "August"
+msgstr "Август"
+
+#: ide/static/ide/js/cloudpebble.js:153
+msgctxt "month name"
+msgid "September"
+msgstr "Сентябрь"
+
+#: ide/static/ide/js/cloudpebble.js:154
+msgctxt "month name"
+msgid "October"
+msgstr "Октябрь"
+
+#: ide/static/ide/js/cloudpebble.js:155
+msgctxt "month name"
+msgid "November"
+msgstr "Ноябрь"
+
+#: ide/static/ide/js/cloudpebble.js:156
+msgctxt "month name"
+msgid "December"
+msgstr "Декабрь"
+
+#: ide/static/ide/js/cloudpebble.js:166
+msgid "AM"
+msgstr "AM"
+
+#: ide/static/ide/js/cloudpebble.js:166
+msgid "PM"
+msgstr "PM"
+
+#: ide/static/ide/js/cloudpebble.js:171
+msgid "%s second"
+msgid_plural "%s seconds"
+msgstr[0] "одна секунда"
+msgstr[1] "%s секунды"
+msgstr[2] "%s секунд"
+
+#: ide/static/ide/js/compile.js:86
+msgid "Something went wrong:\n"
+"%s"
+msgstr "Что-то пошло не так:\n"
+"%s"
+
+#: ide/static/ide/js/compile.js:247
+msgid "Connecting..."
+msgstr "Подключаемся…"
+
+#: ide/static/ide/js/compile.js:247
+msgid "Establishing connection..."
+msgstr "Устанавливаем соединение…"
+
+#: ide/static/ide/js/compile.js:258
+msgid "Authenticating..."
+msgstr "Входим…"
+
+#: ide/static/ide/js/compile.js:261
+msgid "Waiting for phone. Make sure the development server is enabled."
+msgstr "Ожидание телефона. Убедитесь, что сервер разработки включен."
+
+#: ide/static/ide/js/compile.js:266
+msgid "Connection interrupted."
+msgstr "Соединение прервано."
+
+#: ide/static/ide/js/compile.js:432
+msgid "Please <a href='%(update_url)s'>update your pebble</a> to %(min_version)s to install apps from CloudPebble and the appstore (you're on version %(real_version)s)."
+msgstr "Пожалуйста, <a href='%(update_url)s'>обновите ваш Pebble</a> до %(min_version)s для установки приложений из CloudPebble и App Store (сейчас у вас %(real_version)s)."
+
+#: ide/static/ide/js/compile.js:447
+msgid "Installed successfully!"
+msgstr "Успешно установлено!"
+
+#: ide/static/ide/js/compile.js:459
+msgid "Installation failed. Check your phone for details."
+msgstr "Не получилость установить. Проверьте ваш телефон."
+
+#: ide/static/ide/js/compile.js:478 ide/static/ide/js/compile.js.c:531
+msgid "Disconnected from phone."
+msgstr "Отключено от телефона."
+
+#: ide/static/ide/js/compile.js:496
+msgid "Connected."
+msgstr "Подключено."
+
+#: ide/static/ide/js/compile.js:551
+msgid "Right click -> Save Image as..."
+msgstr "Правый клик -> Сохранить изображение как…"
+
+#: ide/static/ide/js/ib/canvas.js:31
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:14
+#: ide/static/ide/js/ib/layers/bitmaplayer.js:12
+#: ide/static/ide/js/ib/layers/textlayer.js:18
+msgctxt "background colour"
+msgid "Background"
+msgstr "Цвет фона"
+
+#: ide/static/ide/js/ib/canvas.js:32
+msgid "Fullscreen"
+msgstr "Полный экран"
+
+#: ide/static/ide/js/ib/layer.js:19
+msgid "Position"
+msgstr "Позиция"
+
+#: ide/static/ide/js/ib/layer.js:21
+msgid "ID"
+msgstr "ID"
+
+#: ide/static/ide/js/ib/property_view.js:13
+msgid "Delete layer"
+msgstr "Удалить слой"
+
+#: ide/static/ide/js/ib/utils.js:34
+msgid "White"
+msgstr "Белый"
+
+#: ide/static/ide/js/ib/utils.js:35
+msgid "Black"
+msgstr "Черный"
+
+#: ide/static/ide/js/ib/utils.js:36
+msgid "Transparent"
+msgstr "Прозрачный"
+
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:15
+msgid "Top icon"
+msgstr "Верхняя иконка"
+
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:16
+msgid "Middle icon"
+msgstr "Средняя иконка"
+
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:17
+msgid "Bottom icon"
+msgstr "Нижняя иконка"
+
+#: ide/static/ide/js/ib/layers/actionbarlayer.js:43
+msgid "ActionBarLayer is a Layer that displays a bar on the right edge of the window. The bar can contain up to 3 icons, each corresponding with one of the buttons on the right side of the watch."
+msgstr "ActionBarLayer – это слой, отображающий полосу справа окна. Полоса может содержать до трех иконок, каждая из которых соответствует одной из кнопок на правом торце часов."
+
+#: ide/static/ide/js/ib/layers/bitmaplayer.js:11
+msgid "Image"
+msgstr "Изображение"
+
+#: ide/static/ide/js/ib/layers/bitmaplayer.js:27
+msgid "BitmapLayer will display an opaque bitmap image."
+msgstr "BitmapLayer отобразит непрозрачное изображение."
+
+#: ide/static/ide/js/ib/layers/inverterlayer.js:16
+msgid "Inverts the colours of the rectangle behind it. Layers in front are unaffected."
+msgstr "Инвертирует цвета внутри прямоугольника под ним. Верхние слои не затрагиваются."
+
+#: ide/static/ide/js/ib/layers/menulayer.js:18
+msgid "A menu that pulls its content from programmatic callbacks."
+msgstr "Меню, которое получает содержимое из обратных вызовов."
+
+#: ide/static/ide/js/ib/layers/textlayer.js:15
+msgid "Text"
+msgstr "Текст"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:15
+msgctxt "sample text"
+msgid "Text layer"
+msgstr "Слой текста"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:16
+msgid "Font"
+msgstr "Шрифт"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:17
+msgid "Text colour"
+msgstr "Цвет текста"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:19
+msgctxt "horizontal text positioning"
+msgid "Alignment"
+msgstr "Расположение"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:20
+msgid "Left"
+msgstr "Слева"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:21
+msgid "Centre"
+msgstr "Справа"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:22
+msgid "Right"
+msgstr "По центру"
+
+#: ide/static/ide/js/ib/layers/textlayer.js:43
+msgid "Displays text."
+msgstr "Отображает текст."
+

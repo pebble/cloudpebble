@@ -70,6 +70,7 @@ LANGUAGES = (
     ('es', 'Spanish'),
     ('fr', 'French'),
     ('de', 'German'),
+    ('ru', 'Russian'),
 )
 
 LOCALE_PATHS = (os.getcwd() + "/locale",)
