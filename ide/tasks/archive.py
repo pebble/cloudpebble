@@ -165,6 +165,7 @@ def do_import_archive(project_id, archive, delete_project=False):
                                 regex = resource.get('characterRegex', None)
                                 tracking = resource.get('trackingAdjust', None)
                                 is_menu_icon = resource.get('menuIcon', False)
+                                compatibility = resource.get('compatibility', None)
                                 if file_name not in resources:
                                     resources[file_name] = ResourceFile.objects.create(project=project, file_name=os.path.basename(file_name), kind=kind, is_menu_icon=is_menu_icon)
                                     res_path = 'resources'
@@ -173,7 +174,8 @@ def do_import_archive(project_id, archive, delete_project=False):
                                     resource_file=resources[file_name],
                                     resource_id=def_name,
                                     character_regex=regex,
-                                    tracking=tracking
+                                    tracking=tracking,
+                                    compatibility=compatibility
                                 )
 
                         elif filename.startswith(SRC_DIR):

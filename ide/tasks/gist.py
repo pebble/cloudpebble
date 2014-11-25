@@ -83,6 +83,7 @@ def import_gist(user_id, gist_id):
                 regex = resource.get('characterRegex', None)
                 tracking = resource.get('trackingAdjust', None)
                 is_menu_icon = resource.get('menuIcon', False)
+                compatibility = resource.get('compatibility', None)
                 if filename not in gist.files:
                     continue
 
@@ -96,7 +97,8 @@ def import_gist(user_id, gist_id):
                     resource_file=resources[filename],
                     resource_id=def_name,
                     character_regex=regex,
-                    tracking=tracking
+                    tracking=tracking,
+                    compatibility=compatibility
                 )
         else:
             source_file = SourceFile.objects.create(project=project, file_name='app.js')
