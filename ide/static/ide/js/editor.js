@@ -216,7 +216,8 @@ CloudPebble.Editor = (function() {
                             XMLHttpRequest: true,
                             navigator: true, // For navigator.geolocation
                             localStorage: true,
-                            setTimeout: true
+                            setTimeout: true,
+                            setInterval: true
                         };
                         if(CloudPebble.ProjectInfo.type == 'simplyjs') {
                             _.extend(jshint_globals, {

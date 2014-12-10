@@ -84,7 +84,8 @@ def generate_jshint_file(project):
     "XMLHttpRequest": true,
     "navigator": true, // For navigator.geolocation
     "localStorage": true,
-    "setTimeout": true
+    "setTimeout": true,
+    "setInterval": true
   },
 
   // Do not mess with standard JavaScript objects (Array, Date, etc)
