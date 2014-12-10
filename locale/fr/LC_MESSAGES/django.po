@@ -65,27 +65,27 @@ msgstr "Police True-Type"
 msgid "Uploaded file too big."
 msgstr "Fichier uploadé trop gros."
 
-#: ide/models/files.py:123
+#: ide/models/files.py:124
 msgid "App"
 msgstr "App"
 
-#: ide/models/files.py:124
+#: ide/models/files.py:125
 msgid "Worker"
 msgstr "Worker"
 
-#: ide/models/project.py:21 ide/templates/ide/index.html:84
+#: ide/models/project.py:21 ide/templates/ide/index.html:81
 msgid "Pebble C SDK"
 msgstr "Pebble C SDK"
 
-#: ide/models/project.py:22 ide/templates/ide/index.html:85
+#: ide/models/project.py:22 ide/templates/ide/index.html:82
 msgid "Simply.js"
 msgstr "Simply.js"
 
-#: ide/models/project.py:23 ide/templates/ide/index.html:86
+#: ide/models/project.py:23 ide/templates/ide/index.html:83
 msgid "Pebble.js (beta)"
 msgstr "Pebble.js (beta)"
 
-#: ide/models/project.py:83 ide/templates/ide/index.html:91
+#: ide/models/project.py:83 ide/templates/ide/index.html:88
 msgid "Template"
 msgstr "Modèle"
 
@@ -106,7 +106,7 @@ msgstr "Durant la saisie"
 msgid "When pressing Ctrl-Space"
 msgstr "En appuyant sur Ctrl + Espace"
 
-#: ide/models/user.py:21 ide/templates/ide/index.html:53
+#: ide/models/user.py:21 ide/templates/ide/index.html:50
 msgid "Never"
 msgstr "Jamais"
 
@@ -178,105 +178,105 @@ msgstr "Déconnexion"
 msgid "All your projects"
 msgstr "Tous vos projets"
 
-#: ide/templates/ide/index.html:21 ide/templates/ide/index.html.py:122
+#: ide/templates/ide/index.html:21 ide/templates/ide/index.html.py:119
 #: ide/templates/ide/project.html:175 ide/templates/ide/project.html.py:204
 msgid "Create"
 msgstr "Créer"
 
-#: ide/templates/ide/index.html:22 ide/templates/ide/index.html.py:194
+#: ide/templates/ide/index.html:22 ide/templates/ide/index.html.py:191
 msgid "Import"
 msgstr "Importer"
 
-#: ide/templates/ide/index.html:33
+#: ide/templates/ide/index.html:30
 msgid "Project"
 msgstr "Projet"
 
-#: ide/templates/ide/index.html:34
+#: ide/templates/ide/index.html:31
 msgid "Last modified"
 msgstr "Dernière modification"
 
 #. Dernière compilation ?
-#: ide/templates/ide/index.html:35 ide/templates/ide/project/compile.html:24
+#: ide/templates/ide/index.html:32
 msgid "Last built"
 msgstr "Dernière compilation"
 
-#: ide/templates/ide/index.html:46
+#: ide/templates/ide/index.html:43
 msgid "Successful"
 msgstr "Reussi"
 
-#: ide/templates/ide/index.html:62
+#: ide/templates/ide/index.html:59
 msgid "You don't have any projects yet."
 msgstr "Vous n'avez pas encore de projets"
 
-#: ide/templates/ide/index.html:69
+#: ide/templates/ide/index.html:66
 msgid "Create New Project"
 msgstr "Créer un nouveau projet"
 
-#: ide/templates/ide/index.html:75 ide/templates/ide/index.html.py:140
-#: ide/templates/ide/index.html:161 ide/templates/ide/project/settings.html:8
+#: ide/templates/ide/index.html:72 ide/templates/ide/index.html.py:137
+#: ide/templates/ide/index.html:158 ide/templates/ide/project/settings.html:8
 msgid "Project name"
 msgstr "Nom du projet"
 
-#: ide/templates/ide/index.html:81
+#: ide/templates/ide/index.html:78
 msgid "Project type"
 msgstr "Type du projet"
 
-#: ide/templates/ide/index.html:94
+#: ide/templates/ide/index.html:91
 msgid "Empty project"
 msgstr "Projet vide"
 
 #. Ou Modèles Standard
-#: ide/templates/ide/index.html:96
+#: ide/templates/ide/index.html:93
 msgid "Standard Templates"
 msgstr "Modèles standard"
 
-#: ide/templates/ide/index.html:103
+#: ide/templates/ide/index.html:100
 msgid "SDK demos"
 msgstr "SDK démos"
 
-#: ide/templates/ide/index.html:110
+#: ide/templates/ide/index.html:107
 msgid "Examples"
 msgstr "Exemples"
 
-#: ide/templates/ide/index.html:123 ide/templates/ide/index.html.py:195
+#: ide/templates/ide/index.html:120 ide/templates/ide/index.html.py:192
 #: ide/templates/ide/project.html:174 ide/templates/ide/project.html.py:203
 #: ide/templates/ide/project.html:233 ide/templates/ide/project.html.py:256
 #: ide/templates/ide/project.html:330 ide/templates/ide/project.html.py:343
-#: root/templates/root/index.html:109
+#: root/templates/root/index.html:106
 msgid "Cancel"
 msgstr "Annuler"
 
-#: ide/templates/ide/index.html:128
+#: ide/templates/ide/index.html:125
 msgid "Import Existing Project"
 msgstr "Importer un projet existant"
 
-#: ide/templates/ide/index.html:132
+#: ide/templates/ide/index.html:129
 msgid "Upload Zip"
 msgstr "Uploader un Zip"
 
-#: ide/templates/ide/index.html:133
+#: ide/templates/ide/index.html:130
 msgid "Import from GitHub"
 msgstr "Importer depuis GitHub"
 
-#: ide/templates/ide/index.html:146
+#: ide/templates/ide/index.html:143
 msgid "Zip file"
 msgstr "Fichier zip"
 
 #. Guessing that 'Ceci n'est pas un zip' won't work here :)
-#: ide/templates/ide/index.html:149
+#: ide/templates/ide/index.html:146
 msgid "This must be a zip file containing a standard Pebble project."
 msgstr "Ce doit être un fichier Zip contenant un projet Pebble standard"
 
-#: ide/templates/ide/index.html:167
+#: ide/templates/ide/index.html:164
 msgid "GitHub Project"
 msgstr "Projet GitHub"
 
-#: ide/templates/ide/index.html:173
+#: ide/templates/ide/index.html:170
 msgid "Branch (optional)"
-msgstr "Branche (optionnel)"
+msgstr "Branch (optionnel)"
 
 #. Utilisé en temps que 'Git remote', je sais pas si on peut traduire "Git remote"
-#: ide/templates/ide/index.html:180
+#: ide/templates/ide/index.html:177
 msgid "Use as Git remote"
 msgstr "Utilisé en temps que Git remote"
 
@@ -409,11 +409,12 @@ msgstr "Pull"
 msgid "Install App"
 msgstr "Installer l'App"
 
-#: ide/static/ide/js/compile.js:419
+#: ide/templates/ide/project.html:288
 msgid "Installing app on your watch…"
 msgstr "Installation de l'app sur votre Pebble en cours..."
 
 #: ide/templates/ide/project.html:294 ide/templates/ide/project.html.py:310
+#: ide/templates/ide/project.html:402
 msgid "Dismiss"
 msgstr "Abandonner"
 
@@ -513,7 +514,7 @@ msgstr "Compiler"
 msgid "Get PBW"
 msgstr "Télécharger le PBW"
 
-#: ide/static/ide/js/compile.js:23
+#: ide/static/ide/js/compile.js:25
 msgid "Build log"
 msgstr "Log de compilation"
 
@@ -572,7 +573,7 @@ msgstr "Ne rien faire"
 msgid "Build automatically"
 msgstr "Compiler automatiquement"
 
-#: ide/static/ide/js/editor.js:468
+#: ide/static/ide/js/editor.js:469
 msgid "Save"
 msgstr "Enregistrer"
 
@@ -628,7 +629,7 @@ msgctxt "like letters and numbers"
 msgid "Characters"
 msgstr "Caractères"
 
-#: ide/static/ide/js/resources.js:184
+#: ide/static/ide/js/resources.js:185
 msgid "A PCRE regular expression that restricts characters."
 msgstr "Une expression régulière PCRE qui restreint les caractères."
 
@@ -640,11 +641,11 @@ msgstr "Espacement entre les caractères"
 msgid "Number of additional pixels by which to shift each character."
 msgstr "Nombre de pixels supplémentaires pour décaler chaque caractère."
 
-#: ide/static/ide/js/editor.js:470
+#: ide/static/ide/js/editor.js:471
 msgid "Delete"
 msgstr "Supprimer"
 
-#: ide/templates/ide/project/resource.html:76
+#: ide/templates/ide/project/resource.html:86
 msgid "Another font"
 msgstr "Autre police"
 
@@ -791,7 +792,7 @@ msgstr "Include invalide '%(include)s' -> '%(path)s'"
 msgid "No project root found."
 msgstr "Racine du projet introuvable."
 
-#: ide/utils/sdk.py:134 ide/utils/sdk.py:168 ide/utils/sdk.py:186
+#: ide/utils/sdk.py:135 ide/utils/sdk.py:169 ide/utils/sdk.py:187
 msgid "Unknown project type %s"
 msgstr "Type de projet inconnu %s"
 
@@ -817,27 +818,27 @@ msgstr "Se Connecter"
 msgid "Close"
 msgstr "Fermer"
 
-#: root/templates/root/index.html:25
+#: root/templates/root/index.html:22
 msgid "Already have a Pebble account?"
 msgstr "Déjà inscrit ?"
 
-#: root/templates/root/index.html:26
+#: root/templates/root/index.html:23
 msgid "This is the same account you use to log in to the Pebble Forums, Developer Portal and phone app. Don't have a Pebble account? Create one!"
 msgstr "C'est le même compte que pour le Forum Pebble, le Portail Développeur et l'application smartphone. Vous n'avez pas de compte ? Créez-en un !"
 
-#: root/templates/root/index.html:27
+#: root/templates/root/index.html:24
 msgid "Log in with your Pebble account"
 msgstr "Se connecter avec votre compte Pebble"
 
-#: root/templates/root/index.html:28
+#: root/templates/root/index.html:25
 msgid "Create Pebble account"
 msgstr "Créer un compte Pebble"
 
-#: root/templates/root/index.html:39
+#: root/templates/root/index.html:36
 msgid "Have a legacy CloudPebble account?"
 msgstr "Vous avez un compte historique CloudPebble ?"
 
-#: root/templates/root/index.html:40
+#: root/templates/root/index.html:37
 msgid "Log in to link it with your Pebble account. Legacy\n"
 "accounts are being phased out in favour of the\n"
 "Pebble account system. Once you log in you will be\n"
@@ -845,68 +846,68 @@ msgid "Log in to link it with your Pebble account. Legacy\n"
 "henceforth you must log in with your pebble account."
 msgstr "Connectez-vous pour le lier à votre compte Pebble. Les comptes historiques CloudPebble sont remplacés par les comptes Pebble. Une fois connecté, vous devrez lier vos comptes, puis vous devrez vous connecter avec votre compte Pebble."
 
-#: root/templates/root/index.html:45
+#: root/templates/root/index.html:42
 msgid "Link to your Pebble account"
 msgstr "Lier à votre compte Pebble"
 
-#: root/templates/root/index.html:58
+#: root/templates/root/index.html:55
 msgid "Online Pebble Development"
 msgstr "Développement Pebble en ligne"
 
-#: root/templates/root/index.html:59
+#: root/templates/root/index.html:56
 msgid "Write apps without dealing with Linux, virtual machines, compilers, or Python."
 msgstr "Ecrivez des applis sans vous soucier de Linux, de machines virtuelles, de compilateurs ou de Python."
 
-#: root/templates/root/index.html:60
+#: root/templates/root/index.html:57
 msgid "Get Started"
 msgstr "Démarrer"
 
-#: root/templates/root/index.html:65
+#: root/templates/root/index.html:62
 msgid "Nothing to install"
 msgstr "Rien à installer"
 
-#: root/templates/root/index.html:66
+#: root/templates/root/index.html:63
 msgid "Write apps directly in your browser. Skip all setup instructions!"
 msgstr "Ecrivez des applis directement depuis votre navigateur. Aucune installation !"
 
-#: root/templates/root/index.html:70
+#: root/templates/root/index.html:67
 msgid "No JSON to edit"
 msgstr "Pas de JSON à modifier"
 
-#: root/templates/root/index.html:71
+#: root/templates/root/index.html:68
 msgid "Resources are managed through a friendly user interface"
 msgstr "Les ressources sont gérées par le biais d'une interface conviviale"
 
 #. Translators: This is "cloud" as in the internet, but used as a pun on cloud as in sky.
-#: root/templates/root/index.html:76
+#: root/templates/root/index.html:73
 msgid "Cloudy"
 msgstr "Dans le Cloud"
 
-#: root/templates/root/index.html:77
+#: root/templates/root/index.html:74
 msgid "It's on the internet. Accessible from anywhere! That's a good thing, right?"
 msgstr "C'est sur internet. Accessible depuis n'importe où ! C'est une bonne chose, non ?"
 
-#: root/templates/root/index.html:81
+#: root/templates/root/index.html:78
 msgid "More to come"
 msgstr "Et plus à venir"
 
-#: root/templates/root/index.html:82
+#: root/templates/root/index.html:79
 msgid "This is only the beginning!<br>There's much more to come."
 msgstr "C'est juste le début !<br>Bien plus à venir."
 
-#: root/templates/root/index.html:91
+#: root/templates/root/index.html:88
 msgid "Log in with legacy account"
 msgstr "Se connecter avec un compte historique"
 
-#: root/templates/root/index.html:96
+#: root/templates/root/index.html:93
 msgid "Username"
 msgstr "Identifiant"
 
-#: root/templates/root/index.html:100
+#: root/templates/root/index.html:97
 msgid "Password"
 msgstr "Mot de passe"
 
-#: root/templates/root/index.html:108
+#: root/templates/root/index.html:105
 msgid "Log in"
 msgstr "Se Connecter"
 
@@ -934,7 +935,32 @@ msgctxt "duration"
 msgid "Build time:"
 msgstr "Compilé en:"
 
-#: 
+#: ide/templates/ide/project/compile.html:24
 msgid "Last build"
 msgstr "Dernière compilation"
+
+#: ide/templates/ide/project.html:403
+msgid "Download"
+msgstr ""
+
+#: ide/templates/ide/project/compile.html:9
+msgid "Make sure that the Developer Connection is enabled on your phone, and you are\n"
+"running at least phone app version 2.5 (iOS) or 2.1 (Android)."
+msgstr ""
+
+#: ide/templates/ide/project/resource.html:72
+msgid "Compatibility"
+msgstr ""
+
+#: ide/templates/ide/project/resource.html:75
+msgid "Latest"
+msgstr ""
+
+#: ide/templates/ide/project/resource.html:76
+msgid "2.7 and earlier"
+msgstr ""
+
+#: ide/templates/ide/project/resource.html:78
+msgid "Determines the font rendering algorithm to use. The latest looks better, but can produce slightly larger characters."
+msgstr ""
 

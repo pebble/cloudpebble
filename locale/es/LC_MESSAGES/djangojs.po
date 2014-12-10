@@ -24,15 +24,19 @@ msgstr "Exitoso"
 msgid "That repo does not exist. Would you like to create it?"
 msgstr "El repositorio no existe. ¿Quieres crearlo?"
 
-#: ide/static/ide/js/compile.js:419
+#: ide/templates/ide/project.html:288
 msgid "Installing app on your watch…"
 msgstr "Instalando la aplicación en tu reloj..."
 
-#: ide/static/ide/js/compile.js:23
+#: ide/static/ide/js/compile.js:25
 msgid "Build log"
 msgstr "Registro compilación"
 
-#: ide/static/ide/js/editor.js:468
+#: ide/static/ide/js/ib/layer.js:20
+msgid "Size"
+msgstr "Tamaño"
+
+#: ide/static/ide/js/editor.js:469
 msgid "Save"
 msgstr "Guardar"
 
@@ -42,11 +46,11 @@ msgid_plural "Identifiers"
 msgstr[0] "Identificador"
 msgstr[1] "Identificadores"
 
-#: ide/static/ide/js/resources.js:184
+#: ide/static/ide/js/resources.js:185
 msgid "A PCRE regular expression that restricts characters."
-msgstr "Una expresión regular de PCRE que restringa caracteres."
+msgstr "Una expresión regular de PCRE que restrinja caracteres."
 
-#: ide/static/ide/js/editor.js:470
+#: ide/static/ide/js/editor.js:471
 msgid "Delete"
 msgstr "Borrar"
 
@@ -65,69 +69,69 @@ msgid_plural "You have %s unsaved source files. If you leave this page, you will
 msgstr[0] "Tienes un archivo sin guardar. Si abandonas esta página lo perderás."
 msgstr[1] "Tienes %s archivos sin guardar. Si abandonas esta página los perderás."
 
-#: ide/static/ide/js/compile.js:19
+#: ide/static/ide/js/compile.js:21
 msgid "pbw"
 msgstr "pbw"
 
-#: ide/static/ide/js/compile.js:42
+#: ide/static/ide/js/compile.js:44
 msgid "Something went wrong:\n"
 "\n"
 "%s"
 msgstr "Algo fué mal: %s"
 
-#: ide/static/ide/js/compile.js:182
+#: ide/static/ide/js/compile.js:193
 msgid "%(total)s KiB (%(resources)s KiB resources, %(appbin)s KiB binary)"
 msgstr "%(total)s KiB (%(resources)s KiB recursos, %(appbin)s KiB binarios)"
 
-#: ide/static/ide/js/compile.js:184
+#: ide/static/ide/js/compile.js:195
 msgid "%(total)s KiB (%(resources)s KiB resources, %(appbin)s KiB binary, %(workerbin)s KiB worker)"
 msgstr "%(total)s KiB (%(resources)s KiB recursos, %(appbin)s KiB binario, %(workerbin)s KiB trabajador en segundo plano) "
 
-#: ide/static/ide/js/compile.js:194
+#: ide/static/ide/js/compile.js:205
 msgid "%(free)s / %(max)s bytes (%(percent)s%)"
 msgstr "%(free)s / %(max)s bytes (%(percent)s%)"
 
-#: ide/static/ide/js/compile.js:333
+#: ide/static/ide/js/compile.js:344
 msgid "Different app crashed. Only the active app has debugging information available."
 msgstr "Una aplicación distinta falló. Sólo la aplicación activa tiene disponible información de depuración."
 
-#: ide/static/ide/js/compile.js:339
+#: ide/static/ide/js/compile.js:350
 msgid "Looking up debug information..."
 msgstr "Buscando información de debug..."
 
-#: ide/static/ide/js/compile.js:372
+#: ide/static/ide/js/compile.js:383
 msgid "Crashed inside firmware call."
 msgstr "Fallo dentro de una llamada al firmware."
 
-#: ide/static/ide/js/compile.js:374
+#: ide/static/ide/js/compile.js:385
 msgid "Crashed at %(file)s:%(line)s, in %(fn_name)s (starts at %(file)s:%(fn_line)s)."
 msgstr "Falló en %(file)s:%(line)s, en %(fn_name)s (comienzo en %(file)s:%(fn_line)s)."
 
-#: ide/static/ide/js/compile.js:380
+#: ide/static/ide/js/compile.js:391
 msgid "Which was called from %(file)s:%(line)s, in %(fn_name)s (starts at %(file)s:%(fn_line)s)."
 msgstr "El cual fue llamado desde %(file)s:%(line)s, in %(fn_name)s (comienza en %(file)s:%(fn_line)s)."
 
-#: ide/static/ide/js/compile.js:399
+#: ide/static/ide/js/compile.js:410
 msgid "[PHONE]"
 msgstr "[TELÉFONO]"
 
-#: ide/static/ide/js/compile.js:400
+#: ide/static/ide/js/compile.js:411
 msgid "[ERROR]"
 msgstr "[ERROR]"
 
-#: ide/static/ide/js/compile.js:401
+#: ide/static/ide/js/compile.js:412
 msgid "[WARNING]"
 msgstr "[ADVERTENCIA]"
 
-#: ide/static/ide/js/compile.js:402
+#: ide/static/ide/js/compile.js:413
 msgid "[INFO]"
 msgstr "[INFO]"
 
-#: ide/static/ide/js/compile.js:403
+#: ide/static/ide/js/compile.js:414
 msgid "[DEBUG]"
 msgstr "[DEPURAR]"
 
-#: ide/static/ide/js/compile.js:404
+#: ide/static/ide/js/compile.js:415
 msgid "[VERBOSE]"
 msgstr "[VERBOSO]"
 
@@ -136,95 +140,95 @@ msgid "Something went wrong: %s"
 msgstr "Algo fué mal: %s"
 
 #. Fichero vs archivo? Which is more globally recognized as the Spanish word for "file"?
-#: ide/static/ide/js/editor.js:347
+#: ide/static/ide/js/editor.js:348
 msgid "This file has been edited elsewhere; you will not be able to save your changes."
 msgstr "Este archivo ha sido editado desde otro sitio; no podrás guardar tus cambios."
 
-#: ide/static/ide/js/editor.js:467
+#: ide/static/ide/js/editor.js:468
 msgid "Save, build, install and run"
 msgstr "Guardar, compilar, instalar y ejecutar"
 
-#: ide/static/ide/js/editor.js:469
+#: ide/static/ide/js/editor.js:470
 msgid "Reload"
 msgstr "Recargar"
 
-#: ide/static/ide/js/editor.js:471
+#: ide/static/ide/js/editor.js:472
 msgid "UI Editor"
 msgstr "Editor UI"
 
-#: ide/static/ide/js/editor.js:476
+#: ide/static/ide/js/editor.js:477
 msgid "Do you want to delete %(name)s?"
 msgstr "¿Deseas borrar %(name)s?"
 
-#: ide/static/ide/js/editor.js:477 ide/static/ide/js/resources.js:251
+#: ide/static/ide/js/editor.js:478 ide/static/ide/js/resources.js:253
 msgid "This cannot be undone."
 msgstr "No se puede deshacer."
 
-#: ide/static/ide/js/editor.js:498
+#: ide/static/ide/js/editor.js:499
 msgid "Do you want to reload %(name)s?"
 msgstr "¿Deseas recargar %(name)s?"
 
-#: ide/static/ide/js/editor.js:499
+#: ide/static/ide/js/editor.js:500
 msgid "This will discard your current changes and revert to the saved version."
 msgstr "Se descartarán los cambios actuales y volverá a la versión guardada."
 
-#: ide/static/ide/js/editor.js:510
+#: ide/static/ide/js/editor.js:511
 msgid "Saving..."
 msgstr "Guardando..."
 
-#: ide/static/ide/js/editor.js:512
+#: ide/static/ide/js/editor.js:513
 msgid "Compiling..."
 msgstr "Compilando..."
 
-#: ide/static/ide/js/editor.js:541
+#: ide/static/ide/js/editor.js:542
 msgid "Toggle Fullscreen"
-msgstr "Cambiar a Pantalla Completa"
+msgstr "Cambiar a pantalla completa"
 
-#: ide/static/ide/js/editor.js:661
+#: ide/static/ide/js/editor.js:662
 msgid "Declaration"
 msgstr "Declaración"
 
-#: ide/static/ide/js/editor.js:664
+#: ide/static/ide/js/editor.js:665
 msgid "Description"
 msgstr "Descripción"
 
-#: ide/static/ide/js/editor.js:668
+#: ide/static/ide/js/editor.js:669
 msgid "Returns"
 msgstr "Volver"
 
-#: ide/static/ide/js/editor.js:681
+#: ide/static/ide/js/editor.js:682
 msgid "Parameters"
 msgstr "Parámetros"
 
-#: ide/static/ide/js/editor.js:685
+#: ide/static/ide/js/editor.js:686
 msgid "Note"
 msgstr "Nota"
 
-#: ide/static/ide/js/editor.js:771
+#: ide/static/ide/js/editor.js:772
 msgid "Source files must end in .c or .h"
 msgstr "Los archivos de código deben acabar en .c o .h"
 
-#: ide/static/ide/js/editor.js:773 ide/static/ide/js/editor.js.c:814
+#: ide/static/ide/js/editor.js:774 ide/static/ide/js/editor.js.c:815
 msgid "A file called '%s' already exists."
 msgstr "Ya existe un archivo llamado'%s'. "
 
-#: ide/static/ide/js/editor.js:812
+#: ide/static/ide/js/editor.js:813
 msgid "Source files must end in .js"
 msgstr "Los archivos de código deben acabar en .js"
 
-#: ide/static/ide/js/editor.js:830
+#: ide/static/ide/js/editor.js:831
 msgid "You must specify a valid window name using lowercase letters and underscores."
 msgstr "Debes especificar un nombre de ventana válido usando letras minúsculas y guiones bajos."
 
-#: ide/static/ide/js/editor.js:832
+#: ide/static/ide/js/editor.js:833
 msgid "That name is already used in this project."
 msgstr "Ese nombre ya está en uso en este proyecto."
 
-#: ide/static/ide/js/editor.js:872
-msgid "If you want to create a background worker, use this dropdown to create files pointing at that target."
-msgstr "Si quieres crear n trabajador en segundo plano, usa este desplegable para crear archivos apuntando a ese destino."
-
 #: ide/static/ide/js/editor.js:873
+msgid "If you want to create a background worker, use this dropdown to create files pointing at that target."
+msgstr "Si quieres crear un trabajador en segundo plano, usa este desplegable para crear archivos apuntando a ese destino."
+
+#: ide/static/ide/js/editor.js:874
 msgid "Note that targets are independent and code will not be shared between them."
 msgstr "Ten en cuenta que los destinos son independientes y el código no se compartirá entre ellos."
 
@@ -263,7 +267,7 @@ msgstr "Error: %s"
 
 #: ide/static/ide/js/github.js:195
 msgid "You must provide a commit summary."
-msgstr "Debes proporcionar un resumen de la instantanea."
+msgstr "Debes proporcionar un resumen de la instantánea."
 
 #: ide/static/ide/js/github.js:226
 msgid "Pull failed: %s"
@@ -309,35 +313,35 @@ msgstr "Debes cargar una fuente TrueType (.ttf)"
 msgid "You must provide a valid resource identifier. Use only letters, numbers and underscores."
 msgstr "Debe introducir un identificador de recurso válido. Utilice solo letras, números y guiones bajos."
 
-#: ide/static/ide/js/resources.js:91
+#: ide/static/ide/js/resources.js:92
 msgid "Invalid resource identifier. Use only letters, numbers and underscores."
 msgstr "Identificador de recurso inválido. Utilice solamente letras, números y guiones bajos."
 
-#: ide/static/ide/js/resources.js:96
+#: ide/static/ide/js/resources.js:97
 msgid "Font resource identifiers must end with the desired font size, e.g. %s_24"
 msgstr "Los identificados de recursos de Fuente deben terminar con el tamaño de fuente deseado, p.ej. %s_24"
 
-#: ide/static/ide/js/resources.js:101
+#: ide/static/ide/js/resources.js:102
 msgid "You can't have multiple identical identifiers. Please remove or change one."
 msgstr "No puedes tener múltiples identificadores idénticos. Por favor, elimina o cambia uno."
 
-#: ide/static/ide/js/resources.js:106
+#: ide/static/ide/js/resources.js:107
 msgid "Tracking must be an integer."
-msgstr "Ajuste debe ser un entero"
+msgstr "Interletraje debe ser un entero"
 
-#: ide/static/ide/js/resources.js:115
+#: ide/static/ide/js/resources.js:116
 msgid "You must specify at least one resource."
 msgstr "Debes especificar al menos un recurso."
 
-#: ide/static/ide/js/resources.js:162
+#: ide/static/ide/js/resources.js:163
 msgid "If specified, this file will replace the current file for this resource, regardless of its filename."
 msgstr "Si se especifica, este archivo reemplazará el archivo actual para este recurso independientemente del nombre del archivo."
 
-#: ide/static/ide/js/resources.js:189
+#: ide/static/ide/js/resources.js:190
 msgid "Preview"
 msgstr "Previsualizar"
 
-#: ide/static/ide/js/resources.js:251
+#: ide/static/ide/js/resources.js:253
 msgid "Do you want to delete %s?"
 msgstr "¿Deseas eliminar %s?"
 
@@ -467,20 +471,20 @@ msgid_plural "%s seconds"
 msgstr[0] "un segundo"
 msgstr[1] "%s segundos"
 
-#: ide/static/ide/js/compile.js:86
+#: ide/static/ide/js/compile.js:88
 msgid "Something went wrong:\n"
 "%s"
 msgstr "Algo falló: %s"
 
-#: ide/static/ide/js/compile.js:247
+#: ide/static/ide/js/compile.js:258
 msgid "Connecting..."
 msgstr "Conectando..."
 
-#: ide/static/ide/js/compile.js:247
+#: ide/static/ide/js/compile.js:258
 msgid "Establishing connection..."
 msgstr "Estableciendo conexión..."
 
-#: ide/static/ide/js/compile.js:258
+#: ide/static/ide/js/compile.js:269
 msgid "Authenticating..."
 msgstr "Autorizando..."
 
@@ -488,31 +492,31 @@ msgstr "Autorizando..."
 msgid "Waiting for phone. Make sure the development server is enabled."
 msgstr "Esperando al dispositivo. Asegúrese que el servidor de desarrollo esta funcionando."
 
-#: ide/static/ide/js/compile.js:266
+#: ide/static/ide/js/compile.js:277
 msgid "Connection interrupted."
-msgstr "Conexión interrumpido..."
+msgstr "Conexión interrumpida..."
 
-#: ide/static/ide/js/compile.js:432
+#: ide/static/ide/js/compile.js:448
 msgid "Please <a href='%(update_url)s'>update your pebble</a> to %(min_version)s to install apps from CloudPebble and the appstore (you're on version %(real_version)s)."
-msgstr "Por favor <a href='%(update_url)s'>actualiza  su Pebble</a> a %(min_version)s para instalar apps desde CloudPebble y el appstore (su Pebble esta usando %(real_version)s). "
+msgstr "Por favor <a href='%(update_url)s'>actualice  su Pebble</a> a %(min_version)s para instalar apps desde CloudPebble y el appstore (su Pebble esta usando %(real_version)s). "
 
-#: ide/static/ide/js/compile.js:447
+#: ide/static/ide/js/compile.js:464
 msgid "Installed successfully!"
 msgstr "¡Instalado!"
 
-#: ide/static/ide/js/compile.js:459
+#: ide/static/ide/js/compile.js:476
 msgid "Installation failed. Check your phone for details."
-msgstr "Instalación falló. Véase al dispositivo para detalles."
+msgstr "La instalación falló. Consulte los detalles en su móvil."
 
-#: ide/static/ide/js/compile.js:478 ide/static/ide/js/compile.js.c:531
+#: ide/static/ide/js/compile.js:495 ide/static/ide/js/compile.js.c:548
 msgid "Disconnected from phone."
-msgstr "Desconectado del dispositivo"
+msgstr "Desconectado del móvil."
 
-#: ide/static/ide/js/compile.js:496
+#: ide/static/ide/js/compile.js:513
 msgid "Connected."
 msgstr "Conectado."
 
-#: ide/static/ide/js/compile.js:551
+#: ide/static/ide/js/compile.js:568
 msgid "Right click -> Save Image as..."
 msgstr "Click derecho -> Guardar Imagen como..."
 
@@ -567,7 +571,7 @@ msgstr "Icono inferior"
 
 #: ide/static/ide/js/ib/layers/actionbarlayer.js:43
 msgid "ActionBarLayer is a Layer that displays a bar on the right edge of the window. The bar can contain up to 3 icons, each corresponding with one of the buttons on the right side of the watch."
-msgstr "ActionBarLayer es una Capa que muestra una barra en el márgen derecho de la ventana. La barra puede contener hasta 3 iconos, cada uno correspondiente con uno de los botones en el lado derecho del reloj."
+msgstr "ActionBarLayer es una Capa que muestra una barra en el margen derecho de la ventana. La barra puede contener hasta 3 iconos, cada uno correspondiente con uno de los botones en el lado derecho del reloj."
 
 #: ide/static/ide/js/ib/layers/bitmaplayer.js:11
 msgid "Image"
@@ -622,4 +626,16 @@ msgstr "Derecha"
 #: ide/static/ide/js/ib/layers/textlayer.js:43
 msgid "Displays text."
 msgstr "Muestra texto"
+
+#: ide/static/ide/js/compile.js:272
+msgid "Waiting for phone. Make sure the developer connection is enabled."
+msgstr ""
+
+#: ide/static/ide/js/compile.js:429
+msgid "Preparing to install app…"
+msgstr ""
+
+#: ide/static/ide/js/compile.js:442
+msgid "Installing app on watch…"
+msgstr ""
 

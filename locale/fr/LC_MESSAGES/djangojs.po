@@ -24,15 +24,19 @@ msgstr "Succès"
 msgid "That repo does not exist. Would you like to create it?"
 msgstr "Ce repo n'existe pas. Voulez-vous le créer?"
 
-#: ide/static/ide/js/compile.js:419
+#: ide/templates/ide/project.html:288
 msgid "Installing app on your watch…"
 msgstr "Installation de l'app sur votre Pebble en cours..."
 
-#: ide/static/ide/js/compile.js:23
+#: ide/static/ide/js/compile.js:25
 msgid "Build log"
 msgstr "Log de compilation"
 
-#: ide/static/ide/js/editor.js:468
+#: ide/static/ide/js/ib/layer.js:20
+msgid "Size"
+msgstr "Taille"
+
+#: ide/static/ide/js/editor.js:469
 msgid "Save"
 msgstr "Enregistrer"
 
@@ -42,11 +46,11 @@ msgid_plural "Identifiers"
 msgstr[0] "Identifiant"
 msgstr[1] "identifiants"
 
-#: ide/static/ide/js/resources.js:184
+#: ide/static/ide/js/resources.js:185
 msgid "A PCRE regular expression that restricts characters."
 msgstr "Une expression régulière PCRE qui restreint les caractères."
 
-#: ide/static/ide/js/editor.js:470
+#: ide/static/ide/js/editor.js:471
 msgid "Delete"
 msgstr "Supprimer"
 
@@ -64,11 +68,11 @@ msgid_plural "You have %s unsaved source files. If you leave this page, you will
 msgstr[0] "Un fichier source n'a pas été enregistré. Si vous quittez cette page, il sera perdu."
 msgstr[1] "%s fichiers sources n'ont pas été enregistrés. Si vous quittez cette page, ils seront perdus."
 
-#: ide/static/ide/js/compile.js:19
+#: ide/static/ide/js/compile.js:21
 msgid "pbw"
 msgstr "pbw"
 
-#: ide/static/ide/js/compile.js:42
+#: ide/static/ide/js/compile.js:44
 msgid "Something went wrong:\n"
 "\n"
 "%s"
@@ -76,62 +80,62 @@ msgstr "Quelque chose s'est mal passé :\n"
 "\n"
 "%s"
 
-#: ide/static/ide/js/compile.js:182
+#: ide/static/ide/js/compile.js:193
 msgid "%(total)s KiB (%(resources)s KiB resources, %(appbin)s KiB binary)"
 msgstr "%(total)s KiB (%(resources)s KiB ressources, %(appbin)s KiB code)"
 
-#: ide/static/ide/js/compile.js:184
+#: ide/static/ide/js/compile.js:195
 msgid "%(total)s KiB (%(resources)s KiB resources, %(appbin)s KiB binary, %(workerbin)s KiB worker)"
 msgstr "%(total)s KiB (%(resources)s KiB ressources, %(appbin)s KiB code, %(workerbin)s KiB worker)"
 
-#: ide/static/ide/js/compile.js:194
+#: ide/static/ide/js/compile.js:205
 msgid "%(free)s / %(max)s bytes (%(percent)s%)"
 msgstr "%(free)s / %(max)s octets (%(percent)s%)"
 
 #. Need for explanations. What is meant by 'Different App crashed'??
-#: ide/static/ide/js/compile.js:333
+#: ide/static/ide/js/compile.js:344
 msgid "Different app crashed. Only the active app has debugging information available."
 msgstr "Une autre application a crashé. Seule l'application active dispose des informations de débug."
 
-#: ide/static/ide/js/compile.js:339
+#: ide/static/ide/js/compile.js:350
 msgid "Looking up debug information..."
 msgstr "Recherche d'informations de debug..."
 
-#: ide/static/ide/js/compile.js:372
+#: ide/static/ide/js/compile.js:383
 msgid "Crashed inside firmware call."
 msgstr "Crash dans un appel firmware."
 
-#: ide/static/ide/js/compile.js:374
+#: ide/static/ide/js/compile.js:385
 msgid "Crashed at %(file)s:%(line)s, in %(fn_name)s (starts at %(file)s:%(fn_line)s)."
 msgstr "Crash ligne %(file)s:%(line)s, dans %(fn_name)s (début %(file)s:%(fn_line)s)."
 
 #. je suis pas sur qu'il faut renommer la variable de ( start at % en ( début at...
-#: ide/static/ide/js/compile.js:380
+#: ide/static/ide/js/compile.js:391
 msgid "Which was called from %(file)s:%(line)s, in %(fn_name)s (starts at %(file)s:%(fn_line)s)."
 msgstr "Qui a été appelé depuis %(file)s:%(line)s, dans %(fn_name)s (début %(file)s:%(fn_line)s). "
 
 #. I think we should not translate those words in brackets as they are used only in logs.
-#: ide/static/ide/js/compile.js:399
+#: ide/static/ide/js/compile.js:410
 msgid "[PHONE]"
 msgstr "[PHONE]"
 
-#: ide/static/ide/js/compile.js:400
+#: ide/static/ide/js/compile.js:411
 msgid "[ERROR]"
 msgstr "[ERROR]"
 
-#: ide/static/ide/js/compile.js:401
+#: ide/static/ide/js/compile.js:412
 msgid "[WARNING]"
 msgstr "[WARNING]"
 
-#: ide/static/ide/js/compile.js:402
+#: ide/static/ide/js/compile.js:413
 msgid "[INFO]"
 msgstr "[INFO]"
 
-#: ide/static/ide/js/compile.js:403
+#: ide/static/ide/js/compile.js:414
 msgid "[DEBUG]"
 msgstr "[DEBUG]"
 
-#: ide/static/ide/js/compile.js:404
+#: ide/static/ide/js/compile.js:415
 msgid "[VERBOSE]"
 msgstr "[VERBOSE]"
 
@@ -139,95 +143,95 @@ msgstr "[VERBOSE]"
 msgid "Something went wrong: %s"
 msgstr "Quelque chose s'est mal passé : %s"
 
-#: ide/static/ide/js/editor.js:347
+#: ide/static/ide/js/editor.js:348
 msgid "This file has been edited elsewhere; you will not be able to save your changes."
 msgstr "Ce fichier a été modifié en parallèle. Vos modifications ne pourront pas être enregistrées."
 
-#: ide/static/ide/js/editor.js:467
+#: ide/static/ide/js/editor.js:468
 msgid "Save, build, install and run"
 msgstr "Enregistrer, compiler, installer et lancer"
 
-#: ide/static/ide/js/editor.js:469
+#: ide/static/ide/js/editor.js:470
 msgid "Reload"
 msgstr "Recharger"
 
-#: ide/static/ide/js/editor.js:471
+#: ide/static/ide/js/editor.js:472
 msgid "UI Editor"
 msgstr "Editeur d'interface"
 
-#: ide/static/ide/js/editor.js:476
+#: ide/static/ide/js/editor.js:477
 msgid "Do you want to delete %(name)s?"
 msgstr "Souhaitez-vous supprimer %(name)s ?"
 
-#: ide/static/ide/js/editor.js:477 ide/static/ide/js/resources.js:251
+#: ide/static/ide/js/editor.js:478 ide/static/ide/js/resources.js:253
 msgid "This cannot be undone."
 msgstr "Cela ne peut être annulé."
 
-#: ide/static/ide/js/editor.js:498
+#: ide/static/ide/js/editor.js:499
 msgid "Do you want to reload %(name)s?"
 msgstr "Souhaitez-vous recharger %(name)s ?"
 
-#: ide/static/ide/js/editor.js:499
+#: ide/static/ide/js/editor.js:500
 msgid "This will discard your current changes and revert to the saved version."
 msgstr "Ceci annulera vous modifications en cours et rechargera la version enregistrée."
 
-#: ide/static/ide/js/editor.js:510
+#: ide/static/ide/js/editor.js:511
 msgid "Saving..."
 msgstr "Enregistrement..."
 
-#: ide/static/ide/js/editor.js:512
+#: ide/static/ide/js/editor.js:513
 msgid "Compiling..."
 msgstr "Compilation..."
 
-#: ide/static/ide/js/editor.js:541
+#: ide/static/ide/js/editor.js:542
 msgid "Toggle Fullscreen"
 msgstr "Basculer en plein écran"
 
-#: ide/static/ide/js/editor.js:661
+#: ide/static/ide/js/editor.js:662
 msgid "Declaration"
 msgstr "Déclaration"
 
-#: ide/static/ide/js/editor.js:664
+#: ide/static/ide/js/editor.js:665
 msgid "Description"
 msgstr "Description"
 
-#: ide/static/ide/js/editor.js:668
+#: ide/static/ide/js/editor.js:669
 msgid "Returns"
 msgstr "Retour"
 
-#: ide/static/ide/js/editor.js:681
+#: ide/static/ide/js/editor.js:682
 msgid "Parameters"
 msgstr "Paramètres"
 
-#: ide/static/ide/js/editor.js:685
+#: ide/static/ide/js/editor.js:686
 msgid "Note"
 msgstr "Remarque"
 
-#: ide/static/ide/js/editor.js:771
+#: ide/static/ide/js/editor.js:772
 msgid "Source files must end in .c or .h"
 msgstr "Les fichiers source doivent finir par .c ou .h"
 
-#: ide/static/ide/js/editor.js:773 ide/static/ide/js/editor.js.c:814
+#: ide/static/ide/js/editor.js:774 ide/static/ide/js/editor.js.c:815
 msgid "A file called '%s' already exists."
 msgstr "Un fichier nommé '%s' existe déjà."
 
-#: ide/static/ide/js/editor.js:812
+#: ide/static/ide/js/editor.js:813
 msgid "Source files must end in .js"
 msgstr "Les fichiers source doit finir par .js"
 
-#: ide/static/ide/js/editor.js:830
+#: ide/static/ide/js/editor.js:831
 msgid "You must specify a valid window name using lowercase letters and underscores."
 msgstr "Vous devez spécifier une nom de fenêtre valide en utilisant des minuscules et des underscores."
 
-#: ide/static/ide/js/editor.js:832
+#: ide/static/ide/js/editor.js:833
 msgid "That name is already used in this project."
 msgstr "Ce nom est déjà utilisé dans ce projet."
 
-#: ide/static/ide/js/editor.js:872
+#: ide/static/ide/js/editor.js:873
 msgid "If you want to create a background worker, use this dropdown to create files pointing at that target."
 msgstr "Si vous souhaitez créer un \"background worker\", utilisez ce menu déroulant pour créer les fichiers correspondants."
 
-#: ide/static/ide/js/editor.js:873
+#: ide/static/ide/js/editor.js:874
 msgid "Note that targets are independent and code will not be shared between them."
 msgstr "Remarquez que les cibles sont indépendantes et le code ne sera pas partagé entre elles."
 
@@ -312,35 +316,35 @@ msgstr "Vous devez uploader une police True Type (.ttf)"
 msgid "You must provide a valid resource identifier. Use only letters, numbers and underscores."
 msgstr "Vous devez saisir un identifiant de ressource valide (uniquement des lettres, chiffres et underscore)."
 
-#: ide/static/ide/js/resources.js:91
+#: ide/static/ide/js/resources.js:92
 msgid "Invalid resource identifier. Use only letters, numbers and underscores."
 msgstr "Identifiant de ressource invalide. Utilisez uniquement des lettres, des chiffres et des underscores."
 
-#: ide/static/ide/js/resources.js:96
+#: ide/static/ide/js/resources.js:97
 msgid "Font resource identifiers must end with the desired font size, e.g. %s_24"
 msgstr "Les identifiants de ressources de polices doivent finir avec la taille désirée, ex. %s_24"
 
-#: ide/static/ide/js/resources.js:101
+#: ide/static/ide/js/resources.js:102
 msgid "You can't have multiple identical identifiers. Please remove or change one."
 msgstr "Vous ne pouvez pas avoir plusieurs identifiants identiques. Veuillez en supprimer ou modifier une."
 
-#: ide/static/ide/js/resources.js:106
+#: ide/static/ide/js/resources.js:107
 msgid "Tracking must be an integer."
 msgstr "L'espacement entre les caractères doit être un entier."
 
-#: ide/static/ide/js/resources.js:115
+#: ide/static/ide/js/resources.js:116
 msgid "You must specify at least one resource."
 msgstr "Vous devez spécifier au moins une ressource."
 
-#: ide/static/ide/js/resources.js:162
+#: ide/static/ide/js/resources.js:163
 msgid "If specified, this file will replace the current file for this resource, regardless of its filename."
 msgstr "Si spécifié, ce fichier remplacera le fichier actuel pour cette ressource, indépendamment du nom de fichier."
 
-#: ide/static/ide/js/resources.js:189
+#: ide/static/ide/js/resources.js:190
 msgid "Preview"
 msgstr "Aperçu"
 
-#: ide/static/ide/js/resources.js:251
+#: ide/static/ide/js/resources.js:253
 msgid "Do you want to delete %s?"
 msgstr "Souhaitez-vous supprimer %s ?"
 
@@ -470,21 +474,21 @@ msgid_plural "%s seconds"
 msgstr[0] "%s seconde"
 msgstr[1] "%s secondes"
 
-#: ide/static/ide/js/compile.js:86
+#: ide/static/ide/js/compile.js:88
 msgid "Something went wrong:\n"
 "%s"
 msgstr "Quelque chose s'est mal passé :\n"
 "%s"
 
-#: ide/static/ide/js/compile.js:247
+#: ide/static/ide/js/compile.js:258
 msgid "Connecting..."
 msgstr "Connexion..."
 
-#: ide/static/ide/js/compile.js:247
+#: ide/static/ide/js/compile.js:258
 msgid "Establishing connection..."
 msgstr "En cours de connexion..."
 
-#: ide/static/ide/js/compile.js:258
+#: ide/static/ide/js/compile.js:269
 msgid "Authenticating..."
 msgstr "Authentification..."
 
@@ -492,31 +496,31 @@ msgstr "Authentification..."
 msgid "Waiting for phone. Make sure the development server is enabled."
 msgstr "En attente du téléphone. Assurez-vous que le serveur de développement est activé."
 
-#: ide/static/ide/js/compile.js:266
+#: ide/static/ide/js/compile.js:277
 msgid "Connection interrupted."
 msgstr "Connexion interrompue."
 
-#: ide/static/ide/js/compile.js:432
+#: ide/static/ide/js/compile.js:448
 msgid "Please <a href='%(update_url)s'>update your pebble</a> to %(min_version)s to install apps from CloudPebble and the appstore (you're on version %(real_version)s)."
 msgstr "Pour installer des apps à partir de CloudPebble ou de l'appstore, veuillez <a href='%(update_url)s'>mettre à jour votre Pebble</a> vers la version %(min_version) (Vous êtes actuellement en version %(real_version)s)."
 
-#: ide/static/ide/js/compile.js:447
+#: ide/static/ide/js/compile.js:464
 msgid "Installed successfully!"
 msgstr "Installation réussie"
 
-#: ide/static/ide/js/compile.js:459
+#: ide/static/ide/js/compile.js:476
 msgid "Installation failed. Check your phone for details."
 msgstr "Echec de l'Installation. Vérifiez votre téléphone pour plus de détails."
 
-#: ide/static/ide/js/compile.js:478 ide/static/ide/js/compile.js.c:531
+#: ide/static/ide/js/compile.js:495 ide/static/ide/js/compile.js.c:548
 msgid "Disconnected from phone."
 msgstr "Déconnecté de votre téléphone"
 
-#: ide/static/ide/js/compile.js:496
+#: ide/static/ide/js/compile.js:513
 msgid "Connected."
 msgstr "Connecté"
 
-#: ide/static/ide/js/compile.js:551
+#: ide/static/ide/js/compile.js:568
 msgid "Right click -> Save Image as..."
 msgstr "Clic droit-> Enregistrer l'image sous ..."
 
@@ -534,7 +538,7 @@ msgstr "Plein écran"
 
 #: ide/static/ide/js/ib/layer.js:19
 msgid "Position"
-msgstr "Position"
+msgstr "Position "
 
 #: ide/static/ide/js/ib/layer.js:21
 msgid "ID"
@@ -628,4 +632,16 @@ msgstr "Droite"
 #: ide/static/ide/js/ib/layers/textlayer.js:43
 msgid "Displays text."
 msgstr "Affiche du texte. "
+
+#: ide/static/ide/js/compile.js:272
+msgid "Waiting for phone. Make sure the developer connection is enabled."
+msgstr ""
+
+#: ide/static/ide/js/compile.js:429
+msgid "Preparing to install app…"
+msgstr ""
+
+#: ide/static/ide/js/compile.js:442
+msgid "Installing app on watch…"
+msgstr ""
 
