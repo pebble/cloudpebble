@@ -31,6 +31,17 @@ html, body {
     font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: large;
     padding-left: 40px;
+
+    -webkit-transition: top 0.5s, padding-top 0.5s;
+    -moz-transition: top 0.5s, padding-top 0.5s;
+    -ms-transition: top 0.5s, padding-top 0.5s;
+    -o-transition: top 0.5s, padding-top 0.5s;
+    transition: top 0.5s, padding-top 0.5s;
+}
+
+#sidebar.with-emulator {
+    top: 230px;
+    padding-top: 20px;
 }
 
 .header {
@@ -136,6 +147,37 @@ ul.nav-pills {
 
 #worker-files {
     margin-top: 0;
+}
+
+/* Emulator */
+
+#emulator-container {
+    -webkit-transition: height 0.5s;
+    -moz-transition: height 0.5s;
+    -ms-transition: height 0.5s;
+    -o-transition: height 0.5s;
+    transition: height 0.5s;
+    width: 250px;
+    height: 230px;
+    margin-bottom: 20px;
+    text-align: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: #292929;
+    background-repeat: no-repeat;
+    background-origin: content-box;
+    background-position: center -76px;
+    background-image: url('../img/pebbles/tintin-black.png');
+}
+
+#emulator-container canvas {
+    position: absolute;
+    top: 28px;
+    left: 53px;
+    background-color: #aaa;
+    height: 168px;
+    width: 144px;
 }
 
 /* Editor */
@@ -373,12 +415,14 @@ ul.nav-pills {
 }
 
 .compilation-pane #run-on-phone .btn,
+.compilation-pane #run-on-qemu .btn,
 .compilation-pane .build-buttons .btn {
     width: 188px;
     margin-right: 9px;
 }
 
 .compilation-pane #run-on-phone .btn:last-of-type,
+.compilation-pane #run-on-qemu .btn:last-of-type,
 .compilation-pane .build-buttons .btn:last-child {
     margin-right: 0;
 }

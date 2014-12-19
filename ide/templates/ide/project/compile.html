@@ -4,18 +4,32 @@
     <div id="last-compilation" class="hide">
         <div class="hide well" id="run-on-phone">
             <form class="form-horizontal">
-                <div class="control-group text-center">
-                    <p>
-                        {% blocktrans %}Make sure that the Developer Connection is enabled on your phone, and you are
-running at least phone app version 2.5 (iOS) or 2.1 (Android).{% endblocktrans %}
-                    </p>
-                </div>
-                <hr>
+                <ul class="nav nav-tabs">
+                    <li class="active"><a href="#run-device" data-toggle="tab">{% trans "Phone" %}</a></li>
+                    <li><a href="#run-qemu" data-toggle="tab">{% trans "Emulator" %}</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div id="run-device" class="tab-pane active">
+                        <div class="control-group text-center">
+                            <p>
+                                {% blocktrans %}Make sure that the Developer Connection is enabled on your phone, and you are
+        running at least phone app version 2.5 (iOS) or 2.1 (Android).{% endblocktrans %}
+                            </p>
+                        </div>
+                        <hr>
 
-                <div>
-                    <button class="btn btn-primary" id="install-on-phone-btn">{% trans 'Install and Run' %}</button>
-                    <button class="btn" id="show-app-logs-btn">{% trans 'View app logs' %}</button>
-                    <button class="btn" id="screenshot-btn">{% trans 'Screenshot' %}</button>
+                        <div>
+                            <button class="btn btn-primary" id="install-on-phone-btn">{% trans 'Install and Run' %}</button>
+                            <button class="btn" id="show-app-logs-btn">{% trans 'View app logs' %}</button>
+                            <button class="btn" id="screenshot-btn">{% trans 'Screenshot' %}</button>
+                        </div>
+                    </div>
+                    <div id="run-qemu" class="tab-pane">
+                        <hr>
+                        <button class="btn btn-primary" id="install-in-qemu-btn">{% trans 'Install and Run' %}</button>
+                        <button class="btn" id="show-qemu-logs-btn">{% trans 'View app logs' %}</button>
+                        <button class="btn" id="screenshot-qemu-btn">{% trans 'Screenshot' %}</button>
+                    </div>
                 </div>
             </form>
         </div>

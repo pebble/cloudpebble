@@ -1,7 +1,5 @@
 (function() {
-    var PROXY_SERVER = LIBPEBBLE_PROXY;
-
-    window.PebbleProxySocket = function(token) {
+    window.PebbleProxySocket = function(proxy, token) {
         var self = this;
         var mToken = token;
         var mSocket = null;
@@ -11,20 +9,20 @@
         _.extend(this, Backbone.Events);
 
         this.connect = function() {
-            if(!PROXY_SERVER) {
+            if(!proxy) {
                 console.log("No proxy server available.");
                 _.defer(function() {
                     self.trigger('error', "Websocket proxy not specified.");
                 });
                 return;
             }
-            mSocket = new WebSocket(PROXY_SERVER);
+            mSocket = new WebSocket(proxy);
             mSocket.binaryType = "arraybuffer";
             mSocket.onerror = handle_socket_error;
             mSocket.onerror = handle_socket_close;
             mSocket.onmessage = handle_socket_message;
             mSocket.onopen = handle_socket_open;
-            console.log("Connecting to " + PROXY_SERVER);
+            console.log("Connecting to " + proxy);
         };
 
         this.close = function() {

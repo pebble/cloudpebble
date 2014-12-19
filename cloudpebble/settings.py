@@ -288,6 +288,8 @@ LIBPEBBLE_PROXY = _environ.get('LIBPEBBLE_PROXY', None)
 YCM_URLS = _environ.get('YCM_URLS', 'http://localhost:8002/').split(',')
 COMPLETION_CERTS = _environ.get('COMPLETION_CERTS', os.getcwd() + '/completion-certs.crt')
 
+QEMU_URLS = _environ.get('QEMU_URLS', 'http://ec2-54-198-244-197.compute-1.amazonaws.com:5001/').split(',')
+
 import djcelery
 djcelery.setup_loader()
 

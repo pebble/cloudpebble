@@ -1,5 +1,6 @@
-Pebble = function(token) {
+Pebble = function(proxy, token) {
     var self = this;
+    var mProxy = proxy;
     var mToken = token;
     var mSocket;
     var mAppLogEnabled = false;
@@ -9,7 +10,7 @@ Pebble = function(token) {
     _.extend(this, Backbone.Events);
 
     var init = function() {
-        mSocket = new PebbleProxySocket(mToken);
+        mSocket = new PebbleProxySocket(mProxy, mToken);
         mSocket.on('error', handle_socket_error);
         mSocket.on('close', handle_socket_close);
         mSocket.on('open', handle_socket_open);
