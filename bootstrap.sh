@@ -141,7 +141,7 @@ console log
 script
     export PATH="$PATH:/home/vagrant/arm-cs-tools/bin:/home/vagrant/sdk2/bin"
     export DEBUG=yes
-    exec /usr/bin/python manage.py celery worker --autoreload --loglevel=info --no-color
+    exec /usr/bin/python manage.py celery worker -P gevent --autoreload --loglevel=info --no-color
 end script
 
 EOF
