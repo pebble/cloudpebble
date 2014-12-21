@@ -940,8 +940,8 @@ var RFB;
             this._display.set_true_color(this._true_color);
             this._onFBResize(this, this._fb_width, this._fb_height);
             this._display.resize(this._fb_width, this._fb_height);
-            this._keyboard.grab();
-            this._mouse.grab();
+            //this._keyboard.grab();
+            //this._mouse.grab();
 
             if (this._true_color) {
                 this._fb_Bpp = 4;

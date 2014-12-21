@@ -73,13 +73,13 @@ popd
 # Set up emulation tools
 mkdir /qemu
 pushd /qemu
-    git clone --depth 1 https://github.com/pebble/qemu.git .
+    git clone --depth 5 https://github.com/pebble/qemu.git .
     ./configure --disable-werror --enable-debug --target-list="arm-softmmu" --extra-cflags="-DSTM32_UART_NO_BAUD_DELAY -std=gnu99" --enable-vnc-ws
     make -j4
 popd
 mkdir /pypkjs
 pushd /pypkjs
-    git clone https://github.com/pebble/pypkjs.git .
+    git clone git@github.com:pebble/pypkjs.git .
     virtualenv .env
     source .env/bin/activate
     pip install -r requirements.txt
@@ -88,7 +88,7 @@ popd
 
 sudo -u vagrant mkdir qemu-controller
 pushd qemu-controller
-    git clone https://github.com/pebble/cloudpebble-qemu-controller.git .
+    git clone git@github.com:pebble/cloudpebble-qemu-controller.git .
     pip install -r requirements.txt
 popd
 

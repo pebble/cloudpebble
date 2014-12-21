@@ -264,6 +264,18 @@ CloudPebble.Compile = (function() {
     var mLogHolder = null;
     var mCrashAnalyser = null;
 
+    $('#emulator-container .power').click(function() {
+        if(mEmulator) {
+            mEmulator.disconnect();
+            mEmulator = null;
+            if(mPebble) {
+                mPebble.off();
+                mPebble.close();
+                mPebble = null;
+            }
+        }
+    });
+
     var pebble_connect = function(virtual, callback) {
         if(mPebble) {
             if(virtual == mPebble.virtual) {
@@ -278,49 +290,62 @@ CloudPebble.Compile = (function() {
         var promise;
         if(virtual && !mEmulator) {
             CloudPebble.Prompts.Progress.Show(gettext("Preparing"), gettext("Booting emulator..."));
-            mEmulator = new QEmu(USER_SETTINGS.token, $('#emulator-container canvas'));
+            mEmulator = new QEmu(USER_SETTINGS.token, $('#emulator-container canvas'), {
+                up: $('#emulator-container .up'),
+                select: $('#emulator-container .select'),
+                down: $('#emulator-container .down'),
+                back: $('#emulator-container .back'),
+            });
+            mEmulator.on('disconnected', function() {
+                $('#sidebar').removeClass('with-emulator');
+                mEmulator = null;
+            });
             promise = mEmulator.connect();
+            $('#sidebar').addClass('with-emulator');
         } else {
             promise = $.Deferred().resolve();
         }
-        promise.done(function() {
-            if(virtual) {
-                $('#sidebar').addClass('with-emulator');
-            }
-            var did_connect = false;
-            CloudPebble.Prompts.Progress.Show(gettext("Connecting..."), gettext("Establishing connection..."), function() {
-                if(!did_connect && mPebble) {
+        promise
+            .done(function() {
+                var did_connect = false;
+                CloudPebble.Prompts.Progress.Show(gettext("Connecting..."), gettext("Establishing connection..."), function() {
+                    if(!did_connect && mPebble) {
+                        mPebble.off();
+                        mPebble.close();
+                        mPebble = null;
+                    }
+                });
+                mPebble = new Pebble(virtual ? mEmulator.getWebsocketURL() : LIBPEBBLE_PROXY, USER_SETTINGS.token);
+                window.mPebble = mPebble;
+                mPebble.on('app_log', handle_app_log);
+                mPebble.on('phone_log', handle_phone_log);
+                mPebble.on('proxy:authenticating', function() {
+                    CloudPebble.Prompts.Progress.Update(gettext("Authenticating..."));
+                });
+                mPebble.on('proxy:waiting', function() {
+                    CloudPebble.Prompts.Progress.Update(gettext("Waiting for phone. Make sure the developer connection is enabled."));
+                });
+                var connection_error = function() {
                     mPebble.off();
-                    mPebble.close();
+                    CloudPebble.Prompts.Progress.Fail();
+                    CloudPebble.Prompts.Progress.Update(gettext("Connection interrupted."));
                     mPebble = null;
-                }
-            });
-            console.log(mEmulator.getWebsocketURL());
-            mPebble = new Pebble(virtual ? mEmulator.getWebsocketURL() : LIBPEBBLE_PROXY, USER_SETTINGS.token);
-            window.mPebble = mPebble;
-            mPebble.on('app_log', handle_app_log);
-            mPebble.on('phone_log', handle_phone_log);
-            mPebble.on('proxy:authenticating', function() {
-                CloudPebble.Prompts.Progress.Update(gettext("Authenticating..."));
-            });
-            mPebble.on('proxy:waiting', function() {
-                CloudPebble.Prompts.Progress.Update(gettext("Waiting for phone. Make sure the developer connection is enabled."));
-            });
-            var connection_error = function() {
-                mPebble.off();
+                };
+                mPebble.on('close error', connection_error);
+                mPebble.on('open', function() {
+                    did_connect = true;
+                    mPebble.off(null, connection_error);
+                    mPebble.off('proxy:authenticating proxy:waiting');
+                    CloudPebble.Prompts.Progress.Hide();
+                    callback(mPebble);
+                });
+            })
+            .fail(function(reason) {
+                mEmulator = null;
                 CloudPebble.Prompts.Progress.Fail();
-                CloudPebble.Prompts.Progress.Update(gettext("Connection interrupted."));
-                mPebble = null;
-            };
-            mPebble.on('close error', connection_error);
-            mPebble.on('open', function() {
-                did_connect = true;
-                mPebble.off(null, connection_error);
-                mPebble.off('proxy:authenticating proxy:waiting');
-                CloudPebble.Prompts.Progress.Hide();
-                callback(mPebble);
+                CloudPebble.Prompts.Progress.Update(interpolate(gettext("Emulator boot failed: %s"), ["out of capacity."]));
+                $('#sidebar').removeClass('with-emulator');
             });
-        });
     };
 
     var handle_app_log = function(priority, filename, line_number, message) {
