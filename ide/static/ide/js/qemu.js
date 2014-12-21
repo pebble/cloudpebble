@@ -116,7 +116,7 @@
                 mRFB = new RFB({
                     target: mCanvas[0],
                     encrypt: mSecure,
-                    true_color: true,
+                    true_color: true, // Ideally this would be false, but qemu doesn't support that.
                     local_cursor: false,
                     shared: true,
                     view_only: false,

@@ -263,6 +263,15 @@ CloudPebble.Compile = (function() {
     var mPebble = null;
     var mLogHolder = null;
     var mCrashAnalyser = null;
+    var LOADING_STATEMENTS = [
+        gettext("Reticulating splines…"),
+        gettext("Eroding cliffs…"),
+        gettext("Charging watches…"),
+        gettext("Focusing camera…"),
+        gettext("Rendering cats…"),
+        gettext("Solving climate change…"),
+        gettext("Kickstarting emulator project…")
+    ];
 
     $('#emulator-container .power').click(function() {
         if(mEmulator) {
@@ -276,6 +285,14 @@ CloudPebble.Compile = (function() {
         }
     });
 
+    function pick_element(elements) {
+        if(elements.length == 0) {
+            return "…";
+        }
+        var index = Math.floor(Math.random() * elements.length);
+        return elements.splice(index, 1)[0];
+    }
+
     var pebble_connect = function(virtual, callback) {
         if(mPebble) {
             if(virtual == mPebble.virtual) {
@@ -288,8 +305,15 @@ CloudPebble.Compile = (function() {
             }
         }
         var promise;
+        var statementInterval = null;
         if(virtual && !mEmulator) {
-            CloudPebble.Prompts.Progress.Show(gettext("Preparing"), gettext("Booting emulator..."));
+            var randomStatements = LOADING_STATEMENTS.slice(0);
+
+            CloudPebble.Prompts.Progress.Show(gettext("Booting emulator…"), pick_element(randomStatements));
+            statementInterval = setInterval(function() {
+                if(statementInterval === null) return;
+                CloudPebble.Prompts.Progress.Update(pick_element(randomStatements));
+            }, 4000);
             mEmulator = new QEmu(USER_SETTINGS.token, $('#emulator-container canvas'), {
                 up: $('#emulator-container .up'),
                 select: $('#emulator-container .select'),
@@ -345,6 +369,10 @@ CloudPebble.Compile = (function() {
                 CloudPebble.Prompts.Progress.Fail();
                 CloudPebble.Prompts.Progress.Update(interpolate(gettext("Emulator boot failed: %s"), ["out of capacity."]));
                 $('#sidebar').removeClass('with-emulator');
+            })
+            .always(function() {
+                clearInterval(statementInterval);
+                statementInterval = null;
             });
     };
 
