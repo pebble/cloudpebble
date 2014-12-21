@@ -683,7 +683,7 @@ CloudPebble.Compile = (function() {
             run_build(callback);
         },
         DoInstall: function() {
-            install_on_watch();
+            install_on_watch(!!mEmulator);
         }
     };
 })();

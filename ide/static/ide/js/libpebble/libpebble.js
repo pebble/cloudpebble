@@ -115,9 +115,7 @@ Pebble = function(proxy, token) {
     };
 
     var handle_socket_message = function(data) {
-        console.log(hexify(data));
         var origin = data[0];
-        console.log(origin);
         if(origin == 5) {
             var result = unpack("I", data.subarray(1, 5));
             console.log("Received status update: ", result);
