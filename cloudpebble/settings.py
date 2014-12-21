@@ -289,6 +289,7 @@ YCM_URLS = _environ.get('YCM_URLS', 'http://localhost:8002/').split(',')
 COMPLETION_CERTS = _environ.get('COMPLETION_CERTS', os.getcwd() + '/completion-certs.crt')
 
 QEMU_URLS = _environ.get('QEMU_URLS', 'https://qemu-us1.pebble-sockets.com/').split(',')
+QEMU_LAUNCH_AUTH_HEADER = _environ.get('QEMU_LAUNCH_AUTH_HEADER', 'secret')
 
 import djcelery
 djcelery.setup_loader()
@@ -301,8 +302,9 @@ except ImportError:
     pass
 
 # Don't keep these hanging around in the environment.
-for key in _environ.keys():
-    # We need these ones to run.
-    if key in {'PATH', 'TZ', 'RUN_MAIN', 'CELERY_LOADER', 'DJANGO_SETTINGS_MODULE', 'DEBUG'}:
-        continue
-    del _environ[key]
+if not DEBUG:
+    for key in _environ.keys():
+        # We need these ones to run.
+        if key in {'PATH', 'TZ', 'RUN_MAIN', 'CELERY_LOADER', 'DJANGO_SETTINGS_MODULE', 'DEBUG'}:
+            continue
+        del _environ[key]

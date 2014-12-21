@@ -42,7 +42,11 @@ def launch_emulator(request):
         server = random.choice(list(servers))
         servers.remove(server)
         try:
-            result = requests.post(server + 'qemu/launch', data={'token': token}, timeout=15, verify=settings.COMPLETION_CERTS)
+            result = requests.post(server + 'qemu/launch',
+                                   data={'token': token},
+                                   headers={'Authorization': settings.QEMU_LAUNCH_AUTH_HEADER},
+                                   timeout=15,
+                                   verify=settings.COMPLETION_CERTS)
             result.raise_for_status()
             response = result.json()
             url = urlparse.urlsplit(server)
