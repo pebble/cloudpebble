@@ -56,6 +56,11 @@ var RFB;
             ['xvp',                -309 ]
         ];
 
+        if(/Apple Computer/.test(navigator.vendor)) {
+            Util.Warn("Disabling TIGHT_PNG due to Safari hanging bug.");
+            this._encodings.splice(1, 1);
+        }
+
         this._encHandlers = {};
         this._encNames = {};
         this._encStats = {};

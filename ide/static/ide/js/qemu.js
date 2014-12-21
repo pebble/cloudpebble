@@ -62,6 +62,15 @@
                 });
         }
 
+        var mKickInterval = null;
+
+        function kickRFB() {
+            if(!mRFB) {
+                return;
+            }
+            mRFB.sendKey(XK_Shift_L);
+        }
+
         function handleStateUpdate(rfb, state, oldstate, msg) {
             if(mPendingDeferred) {
                 if(state == 'normal') {
@@ -72,6 +81,7 @@
                         mPendingDeferred = null;
                     }, 2000);
                     self.trigger('connected');
+                    mKickInterval = setInterval(kickRFB, 2000); // By doing this we make sure it keeps updating.
                 } else if(state == 'failed' || state == 'fatal') {
                     mPendingDeferred.reject();
                     mPendingDeferred = null;
@@ -82,6 +92,7 @@
             }
             if(mConnected && state != 'normal') {
                 mConnected = false;
+                clearInterval(mKickInterval);
                 clearInterval(mPingTimer);
                 self.trigger('disconnected');
             }
