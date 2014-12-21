@@ -53,6 +53,11 @@ Pebble = function(proxy, token) {
         disable_app_logs();
     };
 
+    this.set_time = function(time) {
+        time = (time / 1000) | 0;
+        send_message("TIME", pack("bI", [0x02, time]));
+    };
+
     this.close = function() {
         try {
             disable_app_logs();
@@ -477,6 +482,8 @@ Pebble = function(proxy, token) {
                 break;
             case "l":
             case "L":
+            case "i":
+            case "I":
                 bytes.push((data[pointer] >> 24) & 0xFF);
                 bytes.push((data[pointer] >> 16) & 0xFF);
                 bytes.push((data[pointer] >> 8) & 0xFF);
