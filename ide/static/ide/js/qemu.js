@@ -5,10 +5,10 @@
 (function() {
     var sLoadedScripts = false;
     window.INCLUDE_URI = "";
-    window.QEmu = function (token, canvas, button_map) {
+    window.QEmu = function (canvas, button_map) {
         var self = this;
         var mCanvas = $(canvas);
-        var mToken = token;
+        var mToken = null;
         var mVNCPort = null;
         var mWSPort = null;
         var mInstanceID = null;
@@ -26,9 +26,9 @@
 
         _.extend(this, Backbone.Events);
 
-        function spawn(token) {
+        function spawn() {
             var deferred = $.Deferred();
-            $.post('/ide/emulator/launch', {token: token})
+            $.post('/ide/emulator/launch')
                 .done(function (data) {
                     console.log(data);
                     if (data.success) {
@@ -39,6 +39,7 @@
                         mPingURL = data.ping_url;
                         mKillURL = data.kill_url;
                         mInstanceID = data.uuid;
+                        mToken = data.token;
                         deferred.resolve();
                     } else {
                         deferred.reject(data.error); // for some reason this doesn't make it to its handler.
@@ -139,7 +140,7 @@
                     data: mSplashURL
                 };
                 mRFB.get_display().clear();
-                mRFB.connect(mHost, mVNCPort, mToken, '');
+                mRFB.connect(mHost, mVNCPort, mToken.substr(0, 8), '');
             });
         }
 
@@ -176,7 +177,7 @@
             }
             showLaunchSplash();
             mPendingDeferred = $.Deferred();
-            spawn(mToken)
+            spawn()
                 .done(function() {
                     startVNC();
                 })
@@ -202,6 +203,10 @@
 
         this.getWebsocketURL = function() {
             return (mSecure ? 'wss' : 'ws') + '://' + mHost + ':' + mWSPort + '/';
+        };
+
+        this.getToken = function() {
+            return mToken;
         };
 
         this.handleButton = function(button, down) {

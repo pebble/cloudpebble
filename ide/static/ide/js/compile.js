@@ -314,7 +314,7 @@ CloudPebble.Compile = (function() {
                 if(statementInterval === null) return;
                 CloudPebble.Prompts.Progress.Update(pick_element(randomStatements));
             }, 4000);
-            mEmulator = new QEmu(USER_SETTINGS.token, $('#emulator-container canvas'), {
+            mEmulator = new QEmu($('#emulator-container canvas'), {
                 up: $('#emulator-container .up'),
                 select: $('#emulator-container .select'),
                 down: $('#emulator-container .down'),
@@ -339,7 +339,7 @@ CloudPebble.Compile = (function() {
                         mPebble = null;
                     }
                 });
-                mPebble = new Pebble(virtual ? mEmulator.getWebsocketURL() : LIBPEBBLE_PROXY, USER_SETTINGS.token);
+                mPebble = new Pebble(virtual ? mEmulator.getWebsocketURL() : LIBPEBBLE_PROXY, virtual ? mEmulator.getToken() : USER_SETTINGS.token);
                 window.mPebble = mPebble;
                 mPebble.on('app_log', handle_app_log);
                 mPebble.on('phone_log', handle_phone_log);

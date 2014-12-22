@@ -11,6 +11,7 @@ from ide.models.project import Project
 import requests
 import random
 import urlparse
+import string
 from utils.redis_helper import redis_client
 
 
@@ -36,7 +37,7 @@ def launch_emulator(request):
                 print "old instance is dead."
 
 
-    token = request.POST['token']
+    token = _generate_token()
     servers = set(settings.QEMU_URLS)
     while len(servers) > 0:
         server = random.choice(list(servers))
@@ -54,6 +55,7 @@ def launch_emulator(request):
             response['secure'] = (url.scheme == 'https')
             response['ping_url'] = '%sqemu/%s/ping' % (server, response['uuid'])
             response['kill_url'] = '%sqemu/%s/kill' % (server, response['uuid'])
+            response['token'] = token
             redis_client.set(redis_key, json.dumps(response))
             return json_response(response)
         except requests.HTTPError as e:
@@ -62,3 +64,8 @@ def launch_emulator(request):
             print e
             pass
     return json_failure("No capacity available.")
+
+
+def _generate_token():
+    valid = string.ascii_letters + string.digits + string.punctuation
+    return ''.join(random.choice(valid) for i in xrange(30))
