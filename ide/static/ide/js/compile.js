@@ -357,13 +357,12 @@ CloudPebble.Compile = (function() {
                 };
                 mPebble.on('close error', connection_error);
                 mPebble.on('open', function() {
-                    // This doesn't work; it reverts back to UTC in short order.
-                    //if(virtual) {
-                    //    // Set the clock to localtime.
-                    //    var date = new Date();
-                    //    mPebble.set_time(date.getTime() + date.getTimezoneOffset() * 60000);
-                    //    console.log("setting pebble clock to localtime.");
-                    //}
+                    if(virtual) {
+                        // Set the clock to localtime.
+                        var date = new Date();
+                        mPebble.set_time(date.getTime() - date.getTimezoneOffset() * 60000);
+                        console.log("setting pebble clock to localtime.");
+                    }
                     did_connect = true;
                     mPebble.off(null, connection_error);
                     mPebble.off('proxy:authenticating proxy:waiting');
