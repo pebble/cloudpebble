@@ -67,5 +67,6 @@ def launch_emulator(request):
 
 
 def _generate_token():
+    rng = random.SystemRandom()
     valid = string.ascii_letters + string.digits + string.punctuation
-    return ''.join(random.choice(valid) for i in xrange(30))
+    return ''.join(rng.choice(valid) for i in xrange(30))
