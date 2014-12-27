@@ -1,2 +1,2 @@
 web: newrelic-admin run-program gunicorn -c gunicorn.py cloudpebble.wsgi
-celery: python manage.py celery worker -P gevent -E -l info
+celery: newrelic-admin run-program python manage.py celeryd -E -l info
