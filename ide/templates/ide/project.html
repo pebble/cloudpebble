@@ -80,9 +80,9 @@
         <p class="small-print">
             {% get_current_language as lang %}
             {% if lang == 'en' %}
-            Please submit feature requests on <a href='https://github.com/pebble/cloudpebble'>GitHub</a>.
             Questions? Email us at <a href="mailto:cloudpebble@getpebble.com">cloudpebble@getpebble.com</a>.
             {% endif %}
+            {% blocktrans with cookie="https://getpebble.com/legal/cookies/" privacy="https://getpebble.com/legal/privacy/" %}See our <a href="{{ cookie }}" target="_blank">cookie</a> and <a href="{{ privacy }}" target="_blank">privacy</a> policies.{% endblocktrans %}
         </p>
         <div class="pebble-logo">
             <div class="hide footer-credits">
