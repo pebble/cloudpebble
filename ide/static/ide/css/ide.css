@@ -180,6 +180,45 @@ ul.nav-pills {
     width: 144px;
 }
 
+.qemu-button {
+    position: absolute;
+    cursor: pointer;
+}
+
+.qemu-button.up, .qemu-button.down, .qemu-button.back {
+    width: 35px;
+    height: 73px;
+}
+
+.qemu-button.up {
+    top: 5px;
+    left: 208px;
+}
+
+.qemu-button.select {
+    width: 35px;
+    height: 37px;
+    left: 208px;
+    top: 93px;
+}
+
+.qemu-button.down {
+    top: 147px;
+    left: 208px;
+}
+
+.qemu-button.back {
+    top: 37px;
+    left: 8px;
+}
+
+#emulator-container .power {
+    position: absolute;
+    cursor: pointer;
+    top: 196px;
+    left: 20px;
+}
+
 /* Editor */
 
 .CodeMirror {

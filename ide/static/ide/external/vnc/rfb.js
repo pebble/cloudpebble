@@ -38,8 +38,8 @@ var RFB;
         // In preference order
         this._encodings = [
             ['COPYRECT',         0x01 ],
-            ['TIGHT',            0x07 ],
             ['TIGHT_PNG',        -260 ],
+            ['TIGHT',            0x07 ],
             ['HEXTILE',          0x05 ],
             ['RRE',              0x02 ],
             ['RAW',              0x00 ],
@@ -55,6 +55,11 @@ var RFB;
             ['last_rect',          -224 ],
             ['xvp',                -309 ]
         ];
+
+        if(/Apple Computer/.test(navigator.vendor)) {
+            Util.Warn("Disabling TIGHT_PNG due to Safari hanging bug.");
+            this._encodings.splice(1, 1);
+        }
 
         this._encHandlers = {};
         this._encNames = {};
@@ -940,8 +945,8 @@ var RFB;
             this._display.set_true_color(this._true_color);
             this._onFBResize(this, this._fb_width, this._fb_height);
             this._display.resize(this._fb_width, this._fb_height);
-            this._keyboard.grab();
-            this._mouse.grab();
+            //this._keyboard.grab();
+            //this._mouse.grab();
 
             if (this._true_color) {
                 this._fb_Bpp = 4;
