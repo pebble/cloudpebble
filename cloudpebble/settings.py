@@ -288,7 +288,7 @@ LIBPEBBLE_PROXY = _environ.get('LIBPEBBLE_PROXY', None)
 YCM_URLS = _environ.get('YCM_URLS', 'http://localhost:8002/').split(',')
 COMPLETION_CERTS = _environ.get('COMPLETION_CERTS', os.getcwd() + '/completion-certs.crt')
 
-QEMU_URLS = _environ.get('QEMU_URLS', 'https://qemu-us1.pebble-sockets.com/').split(',')
+QEMU_URLS = _environ.get('QEMU_URLS', 'http://192.168.42.42:8003/').split(',')
 QEMU_LAUNCH_AUTH_HEADER = _environ.get('QEMU_LAUNCH_AUTH_HEADER', 'secret')
 
 import djcelery
