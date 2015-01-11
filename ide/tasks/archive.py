@@ -113,7 +113,7 @@ def do_import_archive(project_id, archive, delete_project=False):
                 # - Parse resource_map.json and import files it references
                 MANIFEST = 'appinfo.json'
                 SRC_DIR = 'src/'
-                if len(contents) > 200:
+                if len(contents) > 400:
                     raise Exception("Too many files in zip file.")
                 file_list = [x.filename for x in contents]
 
