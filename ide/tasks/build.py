@@ -9,9 +9,6 @@ import resource
 
 from celery import task
 
-import gevent
-import gevent.pool
-
 from django.conf import settings
 from django.utils.timezone import now
 
@@ -29,7 +26,7 @@ __author__ = 'katharine'
 
 def _set_resource_limits():
     resource.setrlimit(resource.RLIMIT_CPU, (20, 20)) # 20 seconds of CPU time
-    resource.setrlimit(resource.RLIMIT_NOFILE, (200, 200)) # 200 open files
+    resource.setrlimit(resource.RLIMIT_NOFILE, (100, 100)) # 100 open files
     resource.setrlimit(resource.RLIMIT_RSS, (20 * 1024 * 1024, 20 * 1024 * 1024)) # 20 MB of memory
     resource.setrlimit(resource.RLIMIT_FSIZE, (5 * 1024 * 1024, 5 * 1024 * 1024)) # 5 MB output files.
 
@@ -50,7 +47,6 @@ def create_source_files(project, base_dir):
             pass
         else:
             raise
-    to_copy = []
     for f in source_files:
         target_dir = src_dir
         if f.target == 'worker' and project.project_type == 'native':
@@ -65,20 +61,10 @@ def create_source_files(project, base_dir):
         abs_target_dir = os.path.dirname(abs_target)
         if not os.path.exists(abs_target_dir):
             os.makedirs(abs_target_dir)
-        to_copy.append((f, abs_target))
-    copy_multiple_files(to_copy)
-    for f, abs_target in to_copy:
         f.copy_to_path(abs_target)
         # Make sure we don't duplicate downloading effort; just open the one we created.
         with open(abs_target) as fh:
             check_preprocessor_directives(fh.read())
-
-
-def copy_multiple_files(files):
-    group = gevent.pool.Pool(size=100)
-    for f, target in files:
-        group.spawn(f.copy_to_path, target)
-    group.join()
 
 
 @task(ignore_result=True, acks_late=True)
@@ -98,8 +84,6 @@ def run_compile(build_result):
         os.makedirs(os.path.join(base_dir, resource_root, 'fonts'))
         os.makedirs(os.path.join(base_dir, resource_root, 'data'))
 
-        to_copy = []
-
         if project.project_type == 'native':
             # Source code
             create_source_files(project, base_dir)
@@ -112,7 +96,7 @@ def run_compile(build_result):
                 abs_target = os.path.abspath(os.path.join(target_dir, f.file_name))
                 if not abs_target.startswith(target_dir):
                     raise Exception("Suspicious filename: %s" % f.file_name)
-                to_copy.append((f, abs_target))
+                f.copy_to_path(abs_target)
 
             # Reconstitute the SDK
             open(os.path.join(base_dir, 'wscript'), 'w').write(generate_wscript_file(project))
@@ -146,22 +130,17 @@ def run_compile(build_result):
                 if not abs_target.startswith(target_dir):
                     raise Exception("Suspicious filename: %s" % f.file_name)
                 f.copy_to_path(abs_target)
-                to_copy.append((f, abs_target))
 
             open(os.path.join(base_dir, 'appinfo.json'), 'w').write(json.dumps(manifest_dict))
-
-        copy_multiple_files(to_copy)
 
         # Build the thing
         cwd = os.getcwd()
         success = False
         output = 'Failed to get output'
         build_start_time = now()
-
-        group = gevent.pool.Group()
         try:
             os.chdir(base_dir)
-            output = subprocess.check_output([settings.PEBBLE_TOOL, "build"], stderr=subprocess.STDOUT, preexec_fn=_set_resource_limits, close_fds=True)
+            output = subprocess.check_output([settings.PEBBLE_TOOL, "build"], stderr=subprocess.STDOUT, preexec_fn=_set_resource_limits)
         except subprocess.CalledProcessError as e:
             output = e.output
             print output
@@ -199,7 +178,7 @@ def run_compile(build_result):
                     except:
                         print traceback.format_exc()
                     else:
-                        group.spawn(build_result.save_worker_debug_info, debug_info)
+                        build_result.save_debug_info(debug_info)
                 worker_elf_file = os.path.join(base_dir, 'build', 'pebble-worker.elf')
                 if os.path.exists(worker_elf_file):
                     try:
@@ -207,12 +186,11 @@ def run_compile(build_result):
                     except:
                         print traceback.format_exc()
                     else:
-                        group.spawn(build_result.save_worker_debug_info, debug_info)
+                        build_result.save_worker_debug_info(debug_info)
 
 
-                group.spawn(build_result.save_pbw, temp_file)
-            group.spawn(build_result.save_build_log, output)
-            group.join()
+                build_result.save_pbw(temp_file)
+            build_result.save_build_log(output)
             build_result.state = BuildResult.STATE_SUCCEEDED if success else BuildResult.STATE_FAILED
             build_result.finished = now()
             build_result.save()
