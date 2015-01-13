@@ -144,6 +144,10 @@ CloudPebble.Compile = (function() {
             e.preventDefault();
             take_screenshot(true);
         });
+        var targetTabs = pane.find('#run-target-tabs');
+        targetTabs.on('shown', function(e) {
+            localStorage['activeTarget'] = $(e.target).data('run-target');
+        });
 
         $('#modal-android-notes a.btn-primary').click(function(e) {
             CloudPebble.Analytics.addEvent('cloudpebble_android_beta_download', null, null, ['cloudpebble']);
@@ -162,6 +166,12 @@ CloudPebble.Compile = (function() {
         update_build_history(pane);
         CloudPebble.Sidebar.SetActivePane(pane, 'compile');
         CloudPebble.ProgressBar.Show();
+
+        var targetTabs = pane.find('#run-target-tabs');
+        if(localStorage['activeTarget']) {
+            var target = localStorage['activeTarget'];
+            targetTabs.find('a[data-run-target=' + target + ']').tab('show');
+        }
     };
 
     var run_build = function(callback) {
@@ -730,7 +740,7 @@ CloudPebble.Compile = (function() {
             run_build(callback);
         },
         DoInstall: function() {
-            install_on_watch(!!mEmulator);
+            install_on_watch(localStorage['activeTarget'] == 'qemu');
         }
     };
 })();
