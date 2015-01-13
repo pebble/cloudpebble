@@ -285,6 +285,14 @@ CloudPebble.Compile = (function() {
         }
     });
 
+    $('#emulator-container .configure').click(function() {
+        if(mEmulator) {
+            pebble_connect(true, function(pebble) {
+                pebble.request_config_page();
+            });
+        }
+    });
+
     function pick_element(elements) {
         if(elements.length == 0) {
             return "…";
@@ -340,6 +348,7 @@ CloudPebble.Compile = (function() {
                     }
                 });
                 mPebble = new Pebble(virtual ? mEmulator.getWebsocketURL() : LIBPEBBLE_PROXY, virtual ? mEmulator.getToken() : USER_SETTINGS.token);
+                mPebble.virtual = virtual;
                 window.mPebble = mPebble;
                 mPebble.on('app_log', handle_app_log);
                 mPebble.on('phone_log', handle_phone_log);
@@ -632,7 +641,9 @@ CloudPebble.Compile = (function() {
 
             mPebble.on('colour', function(colour) {
                 modal.find('.screenshot-holder').addClass('screenshot-holder-' + colour);
-                mPebble.close();
+                if(!mEmulator) {
+                    mPebble.close();
+                }
             });
 
             mPebble.on('close', function() {
@@ -644,7 +655,9 @@ CloudPebble.Compile = (function() {
             mPebble.on('screenshot:failed', function(reason) {
                 CloudPebble.Analytics.addEvent('app_screenshot_failed');
                 report_error("Screenshot failed: " + reason);
-                mPebble.close();
+                if(!mEmulator) {
+                    mPebble.close();
+                }
             });
 
             mPebble.on('screenshot:progress', function(received, expected) {
@@ -668,7 +681,7 @@ CloudPebble.Compile = (function() {
         });
 
         modal.on('hide', function() {
-            if(mPebble) {
+            if(mPebble && !mEmulator) {
                 mPebble.close();
                 mPebble = null;
             }
@@ -676,7 +689,7 @@ CloudPebble.Compile = (function() {
     };
 
     var stop_logs = function() {
-        if(mPebble) {
+        if(mPebble && !mEmulator) {
             mPebble.close();
             mPebble = null;
         }

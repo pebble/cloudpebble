@@ -219,6 +219,13 @@ ul.nav-pills {
     left: 20px;
 }
 
+#emulator-container .configure {
+    position: absolute;
+    cursor: pointer;
+    top: 200px;
+    left: 60px;
+}
+
 /* Editor */
 
 .CodeMirror {
