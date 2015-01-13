@@ -126,7 +126,6 @@ Pebble = function(proxy, token) {
             console.log("Received status update: ", result);
             mIsInstalling = false;
             self.trigger("status", result[0]);
-            return;
         } else if(origin == 2) {
             var decoder = new TextDecoder('utf-8');
             var phone_log = decoder.decode(data.subarray(1));
@@ -135,6 +134,8 @@ Pebble = function(proxy, token) {
             handle_message_to_watch(data.subarray(1));
         } else if(origin === 0) {
             handle_message_from_watch(data.subarray(1));
+        } else if(origin == 0x0a) {
+            handle_config_message(data.subarray(1));
         }
     };
 
@@ -177,6 +178,55 @@ Pebble = function(proxy, token) {
     var handle_proxysocket_event = function(event) {
         if(event.substr(0, 6) == "proxy:") {
             self.trigger(event);
+        }
+    };
+
+    var handle_config_message = function(data) {
+        var command = data[0];
+        if(command == 0x01) {
+            console.log(data);
+            var length = unpack("I", data.subarray(1))[0];
+            console.log(length);
+            var url = unpack("S" + length, data.subarray(5))[0];
+            console.log("opening url: " + url);
+            var hash_parts = url.split('#');
+            var query_parts = url.split('?');
+            console.log(hash_parts, query_parts);
+            if(query_parts.length == 1) {
+                query_parts.push('');
+            }
+            if(query_parts[1] != '') {
+                query_parts[1] += '&';
+            }
+            query_parts[1] += 'return_to=' + escape(location.protocol + '//' + location.host + '/ide/emulator/config?');
+            var new_url = query_parts.join('?');
+            if(hash_parts.length > 1) {
+                new_url += '#' + hash_parts[1];
+            }
+            console.log("new url: " + new_url);
+            var configWindow = window.open(new_url, "emu_config", "width=375,height=567");
+            var spamInterval = setInterval(function() {
+                if(configWindow.location && configWindow.location.host) {
+                    $(configWindow).off();
+                    clearInterval(spamInterval);
+                    console.log("there!");
+                    configWindow.postMessage('hi', '*');
+                    $(window).one('message', function(event) {
+                        var config = event.originalEvent.data;
+                        console.log('got config data: ', config);
+                        var data = new Uint8Array(pack("BBIS", [0x0a, 0x02, config.length, config]));
+                        console.log(data);
+                        mSocket.send(data);
+                        configWindow.close();
+                    });
+                } else if(configWindow.closed) {
+                    console.log('it closed.');
+                    clearInterval(spamInterval);
+                    $(window).off('message');
+                    var data = new Uint8Array(pack("BB", [0x0a, 0x03]));
+                    mSocket.send(data);
+                }
+            }, 1000);
         }
     };
 
@@ -257,7 +307,7 @@ Pebble = function(proxy, token) {
 
     var handle_version = function(message) {
         console.log("Received watch version.");
-        result = unpack("BIS32S8BBBIS32S8BBBIS9S12BBBBBBIIS16", message);
+        var result = unpack("BIS32S8BBBIS32S8BBBIS9S12BBBBBBIIS16", message);
         if(result[0] != 1) return;
         self.trigger('version', {
             running: {
@@ -341,7 +391,7 @@ Pebble = function(proxy, token) {
             var value = data.subarray(2, 2 + strlen);
             self.trigger('factory_setting:result', value);
         }
-    }
+    };
 
     this.request_screenshot = function() {
         console.log("Requesting screenshot.");
@@ -350,6 +400,14 @@ Pebble = function(proxy, token) {
             return;
         }
         send_message("SCREENSHOT", "\x00");
+    };
+
+    this.request_config_page = function() {
+        if(!mSocket.isOpen()) {
+            throw new Error("Cannot send on non-open socket.");
+        }
+        var data = new Uint8Array([0x0a, 0x01]);
+        mSocket.send(data);
     };
 
     var handle_screenshot = function(data) {
@@ -368,7 +426,7 @@ Pebble = function(proxy, token) {
             self.trigger('screenshot:complete', decode_image(mIncomingImage));
             mIncomingImage = null;
         }
-    }
+    };
 
     var decode_image = function(incoming_image) {
         var canvas = document.createElement('canvas');
@@ -396,7 +454,7 @@ Pebble = function(proxy, token) {
         var image = document.createElement('img');
         image.src = canvas.toDataURL();
         return image;
-    }
+    };
 
     var read_screenshot_header = function(data) {
         var header_data = unpack("BIII", data.subarray(0, 13));
@@ -422,7 +480,7 @@ Pebble = function(proxy, token) {
             received: 0
         };
         return data;
-    }
+    };
 
     var ENDPOINTS = {
         "TIME": 11,
@@ -464,6 +522,7 @@ Pebble = function(proxy, token) {
     var pack = function(format, data) {
         var pointer = 0;
         var bytes = [];
+        var encoder = new TextEncoder('utf-8');
         for(var i = 0; i < format.length; ++i) {
             if(pointer >= data.length) {
                 throw new Error("Expected more data.");
@@ -488,6 +547,10 @@ Pebble = function(proxy, token) {
                 bytes.push((data[pointer] >> 16) & 0xFF);
                 bytes.push((data[pointer] >> 8) & 0xFF);
                 bytes.push(data[pointer] & 0xFF);
+                ++pointer;
+                break;
+            case "S":
+                bytes = bytes.concat(Array.prototype.slice.call(encoder.encode(data[pointer])));
                 ++pointer;
                 break;
             }
