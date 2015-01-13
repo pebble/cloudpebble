@@ -658,9 +658,7 @@ CloudPebble.Compile = (function() {
 
             mPebble.on('colour', function(colour) {
                 modal.find('.screenshot-holder').addClass('screenshot-holder-' + colour);
-                if(!mEmulator) {
-                    mPebble.close();
-                }
+                mPebble.close();
             });
 
             mPebble.on('close', function() {
@@ -672,9 +670,7 @@ CloudPebble.Compile = (function() {
             mPebble.on('screenshot:failed', function(reason) {
                 CloudPebble.Analytics.addEvent('app_screenshot_failed');
                 report_error("Screenshot failed: " + reason);
-                if(!mEmulator) {
-                    mPebble.close();
-                }
+                mPebble.close();
             });
 
             mPebble.on('screenshot:progress', function(received, expected) {
@@ -698,7 +694,7 @@ CloudPebble.Compile = (function() {
         });
 
         modal.on('hide', function() {
-            if(mPebble && !mEmulator) {
+            if(mPebble) {
                 mPebble.close();
                 mPebble = null;
             }
@@ -706,7 +702,7 @@ CloudPebble.Compile = (function() {
     };
 
     var stop_logs = function() {
-        if(mPebble && !mEmulator) {
+        if(mPebble) {
             mPebble.close();
             mPebble = null;
         }
