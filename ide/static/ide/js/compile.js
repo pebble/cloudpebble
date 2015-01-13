@@ -280,7 +280,14 @@ CloudPebble.Compile = (function() {
         gettext("Focusing camera…"),
         gettext("Rendering cats…"),
         gettext("Solving climate change…"),
-        gettext("Kickstarting emulator project…")
+        gettext("Kickstarting emulator project…"),
+        gettext("Herding cats…"),
+        gettext("Polishing monocles…"),
+        gettext("Drafting master plans…"),
+        gettext("Petting unicorns…"),
+        gettext("Firing missiles…"),
+        gettext("Never giving you up…"),
+        gettext("Never letting you down…")
     ];
 
     $('#emulator-container .power').click(function() {
@@ -327,11 +334,11 @@ CloudPebble.Compile = (function() {
         if(virtual && !mEmulator) {
             var randomStatements = LOADING_STATEMENTS.slice(0);
 
-            CloudPebble.Prompts.Progress.Show(gettext("Booting emulator…"), pick_element(randomStatements));
+            CloudPebble.Prompts.Progress.Show(gettext("Booting emulator…"), gettext("Booting emulator..."));
             statementInterval = setInterval(function() {
                 if(statementInterval === null) return;
                 CloudPebble.Prompts.Progress.Update(pick_element(randomStatements));
-            }, 4000);
+            }, 2500);
             mEmulator = new QEmu($('#emulator-container canvas'), {
                 up: $('#emulator-container .up'),
                 select: $('#emulator-container .select'),
