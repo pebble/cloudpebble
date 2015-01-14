@@ -285,7 +285,7 @@ function Websock() {
                     this._mode = this._websocket.protocol;
                     Util.Info("Server choose sub-protocol: " + this._websocket.protocol);
                 } else {
-                    this._mode = 'base64';
+                    this._mode = 'binary';
                     Util.Error('Server select no sub-protocol!: ' + this._websocket.protocol);
                 }
                 this._eventHandlers.open();

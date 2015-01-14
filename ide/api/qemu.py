@@ -53,6 +53,7 @@ def launch_emulator(request):
             url = urlparse.urlsplit(server)
             response['host'] = url.hostname
             response['secure'] = (url.scheme == 'https')
+            response['api_port'] = url.port
             response['ping_url'] = '%sqemu/%s/ping' % (server, response['uuid'])
             response['kill_url'] = '%sqemu/%s/kill' % (server, response['uuid'])
             response['token'] = token

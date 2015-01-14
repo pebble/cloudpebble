@@ -20,8 +20,7 @@
         var mSplashURL = null;
         var mGrabbedKeyboard = false;
         var mPingTimer = null;
-        var mPingURL = null;
-        var mKillURL = null;
+        var mAPIPort = null;
         var mButtonMap = button_map;
 
         _.extend(this, Backbone.Events);
@@ -36,10 +35,9 @@
                         mVNCPort = data.vnc_ws_port;
                         mWSPort = data.ws_port;
                         mSecure = data.secure;
-                        mPingURL = data.ping_url;
-                        mKillURL = data.kill_url;
                         mInstanceID = data.uuid;
                         mToken = data.token;
+                        mAPIPort = data.api_port;
                         deferred.resolve();
                     } else {
                         deferred.reject(data.error); // for some reason this doesn't make it to its handler.
@@ -52,8 +50,12 @@
             return deferred.promise();
         }
 
+        function buildURL(endpoint) {
+            return (mSecure ? 'https': 'http') + '://' + mHost + ':' + mAPIPort + '/qemu/' + mInstanceID + '/' + endpoint;
+        }
+
         function sendPing() {
-            $.post(mPingURL)
+            $.post(buildURL('ping'))
                 .done(function() {
                     console.log('qemu ping!');
                 })
@@ -140,7 +142,7 @@
                     data: mSplashURL
                 };
                 mRFB.get_display().clear();
-                mRFB.connect(mHost, mVNCPort, mToken.substr(0, 8), '');
+                mRFB.connect(mHost, mAPIPort, mToken.substr(0, 8), 'qemu/' + mInstanceID + '/ws/vnc');
             });
         }
 
@@ -192,7 +194,7 @@
                 return;
             }
             mRFB.disconnect();
-            $.post(mKillURL)
+            $.post(buildURL('kill'))
                 .done(function() {
                     console.log('killed emulator.');
                 })
@@ -202,7 +204,7 @@
         };
 
         this.getWebsocketURL = function() {
-            return (mSecure ? 'wss' : 'ws') + '://' + mHost + ':' + mWSPort + '/';
+            return (mSecure ? 'wss' : 'ws') + '://' + mHost + ':' + mAPIPort + '/qemu/' + mInstanceID + '/ws/phone';
         };
 
         this.getToken = function() {
