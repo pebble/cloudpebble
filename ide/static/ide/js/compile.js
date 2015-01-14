@@ -591,7 +591,13 @@ CloudPebble.Compile = (function() {
                     mPebble.install_app(mLastBuild.pbw);
                     var expectedBytes = (mLastBuild.size.binary + mLastBuild.size.worker + mLastBuild.size.resources);
                     mPebble.on('install:progress', function(bytes) {
-                modal.find('.modal-body > p').text(gettext("Installing app on watch…"));
+                        modal.find('.modal-body > p').text(gettext("Installing app on watch…"));
+                        if(modal.find('.progress').hasClass('progress-striped')) {
+                            modal.find('.progress').addClass('no-animation');
+                            _.defer(function() {
+                                modal.find('.progress').removeClass('no-animation');
+                            });
+                        }
                         modal.find('.progress').removeClass('progress-striped').find('.bar').css({width: (bytes * 100 / expectedBytes) + '%'})
                     });
                 } else {

@@ -30,6 +30,7 @@ Pebble = function(proxy, token) {
         var request = new XMLHttpRequest();
         request.open('get', url, true);
         request.responseType = "arraybuffer";
+        putbytes_sent = 0;
         request.onload = function(event) {
             var buffer = request.response;
             if(buffer) {
