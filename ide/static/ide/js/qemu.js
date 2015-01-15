@@ -102,9 +102,9 @@
         }
 
         function handleCanvasClick() {
-            if(!mRFB || mGrabbedKeyboard) return true;
+            if(mGrabbedKeyboard) return true;
             setTimeout(function() {
-                mRFB.get_keyboard().grab();
+                grabKeyboard();
                 $(document).on('click', handleNonCanvasClick);
             }, 50);
             mGrabbedKeyboard = true;
@@ -118,8 +118,7 @@
             }
             $(document).off('click', handleNonCanvasClick);
             mGrabbedKeyboard = false;
-            if(!mRFB) return true;
-            mRFB.get_keyboard().ungrab();
+            releaseKeyboard();
             return true;
         }
 
@@ -166,6 +165,47 @@
                 mCanvas[0].getContext('2d').drawImage(img, 0, 0);
                 mSplashURL = mCanvas[0].toDataURL();
             };
+        }
+
+        function grabKeyboard() {
+            console.log('emulator grabbed keyboard');
+            $(document).keydown(handleKeydown);
+            $(document).keyup(handleKeyup);
+        }
+
+        function releaseKeyboard() {
+            console.log('emulator released keyboard');
+            $(document).off('keyup', handleKeyup);
+            $(document).off('keydown', handleKeydown);
+        }
+
+        var keymap = {
+            37: Pebble.Button.Back,    // left arrow
+            38: Pebble.Button.Up,      // up arrow
+            39: Pebble.Button.Select,  //
+            40: Pebble.Button.Down,
+            81: Pebble.Button.Back,
+            87: Pebble.Button.Up,
+            83: Pebble.Button.Select,
+            88: Pebble.Button.Down
+        };
+
+        function handleKeydown(e) {
+            var button = keymap[e.keyCode];
+            if(button=== undefined) {
+                return;
+            }
+            e.preventDefault();
+            mPebble.emu_press_button(button, true);
+        }
+
+        function handleKeyup(e) {
+            var button = keymap[e.keyCode];
+            if(button === undefined) {
+                return;
+            }
+            e.preventDefault();
+            mPebble.emu_press_button(button, false);
         }
 
         this.connect = function() {
