@@ -214,16 +214,16 @@
         this.handleButton = function(button, down) {
             if(!mRFB) return;
             var buttonMap = {
-                'up': XK_Up,
-                'select': XK_Right,
-                'down': XK_Down,
-                'back': XK_Left
+                'up': Pebble.Button.Up,
+                'select': Pebble.Button.Select,
+                'down': Pebble.Button.Down,
+                'back': Pebble.Button.Back
             };
-            if(!buttonMap[button]) {
+            if(buttonMap[button] === undefined) {
                 console.error("unknown button " + button);
                 return;
             }
-            mRFB.sendKey(buttonMap[button], down)
+            mPebble.emu_press_button(buttonMap[button], down);
         };
 
         _.each(mButtonMap, function(element, button) {

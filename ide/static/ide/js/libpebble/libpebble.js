@@ -422,6 +422,38 @@ Pebble = function(proxy, token) {
         mSocket.send(data);
     };
 
+    this.emu_set_battery_state = function(percent, charging) {
+        send_qemu_command(QEmu.Battery, pack("bb", [percent, charging|0]));
+    };
+
+    var mButtonState = 0;
+    var mButtonStateQueue = [];
+    var mButtonStateTimer = null;
+
+    this.emu_press_button = function(button, down) {
+        var bit = 1 << button;
+        if(down) {
+            mButtonState |= bit;
+        } else {
+            mButtonState &= ~bit;
+        }
+        mButtonStateQueue.push(mButtonState);
+        if(mButtonStateTimer === null) {
+            handle_queue();
+        }
+    };
+
+    var handle_queue = function() {
+        mButtonStateTimer = null;
+        if(mButtonStateQueue.length === 0) {
+            return;
+        }
+        var state = mButtonStateQueue.shift();
+        console.log(state);
+        send_qemu_command(QEmu.Button, [state]);
+        mButtonStateTimer = setTimeout(handle_queue, 100);
+    };
+
     var handle_screenshot = function(data) {
         console.log("Received screenshot fragment.");
         if(mIncomingImage === null) {
@@ -517,6 +549,17 @@ Pebble = function(proxy, token) {
         "PUTBYTES": 48879
     };
 
+    var QEmu = {
+        SPP: 1,
+        Tap: 2,
+        BluetoothConnection: 3,
+        Compass: 4,
+        Battery: 5,
+        Accel: 6,
+        VibrationNotification: 7,
+        Button: 8
+    };
+
     var send_message = function(endpoint, message) {
         console.log("Sending message to " + endpoint + "(" + ENDPOINTS[endpoint] + ")");
         var data = new Uint8Array([1].concat(build_message(ENDPOINTS[endpoint], message)));
@@ -528,6 +571,10 @@ Pebble = function(proxy, token) {
 
     var build_message = function(endpoint, data) {
         return pack('HH', [data.length, endpoint]).concat(data);
+    };
+
+    var send_qemu_command = function(protocol, message) {
+        mSocket.send(new Uint8Array([0xb, protocol].concat(message)))
     };
 
     // Handy utility function to pack data.
@@ -620,4 +667,11 @@ Pebble = function(proxy, token) {
     };
 
     init();
+};
+
+Pebble.Button = {
+    Back: 0,
+    Up: 1,
+    Select: 2,
+    Down: 3
 };
