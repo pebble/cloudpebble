@@ -51,10 +51,11 @@ var SharedPebble = new (function() {
 
         var deferred = $.Deferred();
         mEmulator.connect().done(function() {
-            clearInterval(statementInterval);
             deferred.resolve();
         }).fail(function(reason) {
             deferred.reject(reason);
+        }).always(function() {
+            clearInterval(statementInterval);
         });
 
         return deferred.promise();
@@ -129,10 +130,6 @@ var SharedPebble = new (function() {
                 CloudPebble.Prompts.Progress.Update(interpolate(gettext("Emulator boot failed: %s"), ["out of capacity."]));
                 $('#sidebar').removeClass('with-emulator');
                 deferred.reject(reason);
-            })
-            .always(function() {
-                clearInterval(statementInterval);
-                statementInterval = null;
             });
         return deferred.promise();
     };
