@@ -205,29 +205,40 @@ Pebble = function(proxy, token) {
                 new_url += '#' + hash_parts[1];
             }
             console.log("new url: " + new_url);
+
             var configWindow = window.open(new_url, "emu_config", "width=375,height=567");
-            var spamInterval = setInterval(function() {
-                if(configWindow.location && configWindow.location.host) {
-                    $(configWindow).off();
-                    clearInterval(spamInterval);
-                    console.log("there!");
-                    configWindow.postMessage('hi', '*');
-                    $(window).one('message', function(event) {
-                        var config = event.originalEvent.data;
-                        console.log('got config data: ', config);
-                        var data = new Uint8Array(pack("BBIS", [0x0a, 0x02, config.length, config]));
-                        console.log(data);
+            function poll() {
+                var spamInterval = setInterval(function () {
+                    if (configWindow.location && configWindow.location.host) {
+                        $(configWindow).off();
+                        clearInterval(spamInterval);
+                        console.log("there!");
+                        configWindow.postMessage('hi', '*');
+                        $(window).one('message', function (event) {
+                            var config = event.originalEvent.data;
+                            console.log('got config data: ', config);
+                            var data = new Uint8Array(pack("BBIS", [0x0a, 0x02, config.length, config]));
+                            console.log(data);
+                            mSocket.send(data);
+                            configWindow.close();
+                        });
+                    } else if (configWindow.closed) {
+                        console.log('it closed.');
+                        clearInterval(spamInterval);
+                        $(window).off('message');
+                        var data = new Uint8Array(pack("BB", [0x0a, 0x03]));
                         mSocket.send(data);
-                        configWindow.close();
-                    });
-                } else if(configWindow.closed) {
-                    console.log('it closed.');
-                    clearInterval(spamInterval);
-                    $(window).off('message');
-                    var data = new Uint8Array(pack("BB", [0x0a, 0x03]));
-                    mSocket.send(data);
-                }
-            }, 1000);
+                    }
+                }, 1000);
+            }
+            if(!configWindow) {
+                CloudPebble.Prompts.Confirm("Config page", "It looks like you have a popup blocker enabled. Click continue to open the config page.", function() {
+                    configWindow = window.open(new_url, "emu_config", "width=375,height=567");
+                    poll();
+                });
+            } else {
+                poll();
+            }
         }
     };
 
