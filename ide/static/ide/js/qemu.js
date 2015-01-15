@@ -196,7 +196,9 @@
                 return;
             }
             e.preventDefault();
-            mPebble.emu_press_button(button, true);
+            SharedPebble.getPebble(true).done(function(pebble) {
+                pebble.emu_press_button(button, true);
+            });
         }
 
         function handleKeyup(e) {
@@ -205,7 +207,9 @@
                 return;
             }
             e.preventDefault();
-            mPebble.emu_press_button(button, false);
+            SharedPebble.getPebble().done(function(pebble) {
+                pebble.emu_press_button(button, false)
+            });
         }
 
         this.connect = function() {
@@ -263,7 +267,9 @@
                 console.error("unknown button " + button);
                 return;
             }
-            mPebble.emu_press_button(buttonMap[button], down);
+            SharedPebble.getPebble(true).done(function(pebble){
+                pebble.emu_press_button(buttonMap[button], down);
+            })
         };
 
         _.each(mButtonMap, function(element, button) {

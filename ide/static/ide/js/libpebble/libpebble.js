@@ -60,6 +60,7 @@ Pebble = function(proxy, token) {
     };
 
     this.close = function() {
+        console.error('closing');
         try {
             disable_app_logs();
         } catch(e) {
