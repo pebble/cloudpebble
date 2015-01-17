@@ -57,9 +57,17 @@ var SharedPebble = new (function() {
         }).always(function() {
             clearInterval(statementInterval);
         });
+        mEmulator.on('disconnected', handleEmulatorDisconnected);
 
         return deferred.promise();
     };
+
+    function handleEmulatorDisconnected() {
+        if(mPebble && mVirtual) {
+            mPebble.disconnect();
+            mEmulator = null;
+        }
+    }
 
     this.getPebble = function(virtual) {
         var deferred = $.Deferred();

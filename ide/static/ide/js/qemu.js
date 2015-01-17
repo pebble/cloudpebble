@@ -74,6 +74,10 @@
             mRFB.sendKey(XK_Shift_L);
         }
 
+        function killEmulator() {
+            return $.post(buildURL('kill'));
+        }
+
         function handleStateUpdate(rfb, state, oldstate, msg) {
             if(mPendingDeferred) {
                 if(state == 'normal') {
@@ -95,6 +99,7 @@
             }
             if(mConnected && state != 'normal') {
                 mConnected = false;
+                killEmulator();
                 clearInterval(mKickInterval);
                 clearInterval(mPingTimer);
                 self.trigger('disconnected');
@@ -238,13 +243,13 @@
                 return;
             }
             mRFB.disconnect();
-            $.post(buildURL('kill'))
+            killEmulator()
                 .done(function() {
                     console.log('killed emulator.');
                 })
                 .fail(function() {
                     console.warn('failed to kill emulator.');
-                })
+                });
         };
 
         this.getWebsocketURL = function() {
