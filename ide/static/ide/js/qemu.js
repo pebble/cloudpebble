@@ -230,11 +230,14 @@
             mPendingDeferred = $.Deferred();
             spawn()
                 .done(function() {
+                    CloudPebble.Analytics.addEvent('qemu_launched', {success: true});
                     startVNC();
                 })
                 .fail(function() {
+                    CloudPebble.Analytics.addEvent('qemu_launched', {success: false});
                     mPendingDeferred.reject();
                 });
+
             return mPendingDeferred.promise();
         };
 

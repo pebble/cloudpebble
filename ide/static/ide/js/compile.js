@@ -377,7 +377,8 @@ CloudPebble.Compile = (function() {
                         pointer: lr,
                         symbol: lr_result
                     },
-                    did_resolve: !!(pc_result || lr_result)
+                    did_resolve: !!(pc_result || lr_result),
+                    virtual: SharedPebble.isVirtual()
                 }, {
                     // This matches what Android reports, which is completely different from what iOS reports.
                     // Someone should probably fix this.
@@ -457,17 +458,17 @@ CloudPebble.Compile = (function() {
                     modal.on('hide', stop_logs);
                     modal.find('.progress').addClass('progress-success').removeClass('progress-striped').find('.bar').css({width: '100%'});
                     ga('send', 'event', 'install', 'direct', 'success');
-                    CloudPebble.Analytics.addEvent('app_install_succeeded');
+                    CloudPebble.Analytics.addEvent('app_install_succeeded', {virtual: SharedPebble.isVirtual()});
                 } else {
                     report_error(gettext("Installation failed. Check your phone for details."));
                     ga('send', 'event', 'install', 'direct', 'phone-error');
-                    CloudPebble.Analytics.addEvent('app_install_failed', {cause: 'rejected'});
+                    CloudPebble.Analytics.addEvent('app_install_failed', {cause: 'rejected', virtual: SharedPebble.isVirtual()});
                 }
             });
             pebble.on('error', function(e) {
                 report_error("Installation failed: " + e);
                 ga('send', 'event', 'install', 'direct', 'connection-error');
-                CloudPebble.Analytics.addEvent('app_install_failed', {cause: 'phone_disconnected'});
+                CloudPebble.Analytics.addEvent('app_install_failed', {cause: 'phone_disconnected', virtual: SharedPebble.isVirtual()});
             });
 
             modal.modal();
@@ -522,7 +523,7 @@ CloudPebble.Compile = (function() {
             }
             _.each(mPreviousDisplayLogs, _.partial(show_log_line, _, true));
             CloudPebble.Sidebar.SetActivePane(mLogHolder, undefined, undefined, stop_logs);
-            CloudPebble.Analytics.addEvent('app_log_view');
+            CloudPebble.Analytics.addEvent('app_log_view', {virtual: SharedPebble.isVirtual()});
         });
     };
 
@@ -550,7 +551,7 @@ CloudPebble.Compile = (function() {
             });
 
             pebble.on('screenshot:failed', function(reason) {
-                CloudPebble.Analytics.addEvent('app_screenshot_failed');
+                CloudPebble.Analytics.addEvent('app_screenshot_failed', {virtual: SharedPebble.isVirtual()});
                 report_error("Screenshot failed: " + reason);
             });
 
@@ -568,7 +569,7 @@ CloudPebble.Compile = (function() {
                     .css({'text-align': 'center'});
                 modal.find('.dismiss-btn').removeClass('hide');
                 pebble.request_colour();
-                CloudPebble.Analytics.addEvent('app_screenshot_succeeded');
+                CloudPebble.Analytics.addEvent('app_screenshot_succeeded', {virtual: SharedPebble.isVirtual()});
             });
             modal.modal();
             pebble.request_screenshot();

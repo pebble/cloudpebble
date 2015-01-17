@@ -41,6 +41,7 @@ def proxy_keen(request, project_id):
         'cloudpebble_ib_created_layer',
         'cloudpebble_android_beta_modal',
         'cloudpebble_android_beta_download',
+        'qemu_launched',
     }
 
     event = request.POST['event']
