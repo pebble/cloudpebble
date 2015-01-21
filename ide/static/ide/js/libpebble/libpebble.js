@@ -455,6 +455,10 @@ Pebble = function(proxy, token) {
         mButtonStateTimer = setTimeout(handle_queue, 100);
     };
 
+    this.emu_tap = function(axis, direction) {
+        send_qemu_command(QEmu.Tap, [axis, direction]);
+    };
+
     var handle_screenshot = function(data) {
         console.log("Received screenshot fragment.");
         if(mIncomingImage === null) {
@@ -575,6 +579,7 @@ Pebble = function(proxy, token) {
     };
 
     var send_qemu_command = function(protocol, message) {
+        console.log(message);
         mSocket.send(new Uint8Array([0xb, protocol].concat(message)))
     };
 

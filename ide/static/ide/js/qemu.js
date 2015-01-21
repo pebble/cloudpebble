@@ -184,20 +184,27 @@
             $(document).off('keydown', handleKeydown);
         }
 
-        var keymap = {
+        var buttonMap = {
             37: Pebble.Button.Back,    // left arrow
             38: Pebble.Button.Up,      // up arrow
-            39: Pebble.Button.Select,  //
-            40: Pebble.Button.Down,
-            81: Pebble.Button.Back,
-            87: Pebble.Button.Up,
-            83: Pebble.Button.Select,
-            88: Pebble.Button.Down
+            39: Pebble.Button.Select,  // right arrow
+            40: Pebble.Button.Down,    // down arrow
+            87: Pebble.Button.Back,    // W
+            69: Pebble.Button.Up,      // E
+            68: Pebble.Button.Select,  // D
+            67: Pebble.Button.Down     // C
+        };
+
+        var tapMap = {
+            88: 0, // X
+            89: 1, // Y
+            90: 2  // X
         };
 
         function handleKeydown(e) {
-            var button = keymap[e.keyCode];
-            if(button=== undefined) {
+            var button = buttonMap[e.keyCode];
+            if(button === undefined) {
+                handleKeypress(e);
                 return;
             }
             e.preventDefault();
@@ -207,13 +214,25 @@
         }
 
         function handleKeyup(e) {
-            var button = keymap[e.keyCode];
+            var button = buttonMap[e.keyCode];
             if(button === undefined) {
                 return;
             }
             e.preventDefault();
             SharedPebble.getPebble().done(function(pebble) {
                 pebble.emu_press_button(button, false)
+            });
+        }
+
+        function handleKeypress(e) {
+            var axis = tapMap[e.keyCode];
+            if(axis === undefined) {
+                return;
+            }
+            e.preventDefault();
+            var direction = e.shiftKey ? -1 : 1;
+            SharedPebble.getPebble().done(function(pebble) {
+                pebble.emu_tap(axis, direction);
             });
         }
 
