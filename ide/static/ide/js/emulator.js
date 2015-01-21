@@ -5,9 +5,7 @@
 CloudPebble.Emulator = new (function() {
     var self = this;
     this.element = null;
-    this._batteryLevel = 80;
-    this._charging = false;
-    this._bluetooth = true;
+    setDefaults();
 
     function handleShown(e) {
         var popup = $('.emulator-config');
@@ -16,6 +14,17 @@ CloudPebble.Emulator = new (function() {
         popup.find('.battery-level').on('input', setBatteryState).val(self._batteryLevel);
         popup.find('#is-charging').change(setBatteryState).prop('checked', self._charging);
         popup.find('#bluetooth-enabled').change(setBluetoothState).prop('checked', self._bluetooth);
+    }
+
+    function setDefaults() {
+        self._batteryLevel = 80;
+        self._charging = false;
+        self._bluetooth = true;
+    }
+
+    function handleClosed() {
+        setDefaults();
+        self.element.popover('hide');
     }
 
     function getHTML() {
@@ -50,6 +59,7 @@ CloudPebble.Emulator = new (function() {
         e.preventDefault();
         SharedPebble.disconnect(true);
         self.element.popover('hide');
+        handleClosed();
     }
 
     function setBatteryState(e) {
@@ -71,5 +81,6 @@ CloudPebble.Emulator = new (function() {
             html: true,
             animation: false
         }).on('shown', handleShown);
+        SharedPebble.on('close', handleClosed);
     };
 })();
