@@ -459,6 +459,10 @@ Pebble = function(proxy, token) {
         send_qemu_command(QEmu.Tap, [axis, direction]);
     };
 
+    this.emu_bluetooth = function(connected) {
+        send_qemu_command(QEmu.BluetoothConnection, [connected]);
+    };
+
     var handle_screenshot = function(data) {
         console.log("Received screenshot fragment.");
         if(mIncomingImage === null) {

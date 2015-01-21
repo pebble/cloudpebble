@@ -288,18 +288,6 @@ CloudPebble.Compile = (function() {
     var mLogHolder = null;
     var mCrashAnalyser = null;
 
-    $('#emulator-container .power').click(function() {
-        SharedPebble.disconnect(true);
-    });
-
-    $('#emulator-container .configure').click(function() {
-        if(SharedPebble.isVirtual()) {
-            SharedPebble.getPebble(true).done(function(pebble) {
-                pebble.request_config_page();
-            });
-        }
-    });
-
     var handle_app_log = function(pebble, priority, filename, line_number, message) {
         var log = {
             priority: priority,

@@ -47,8 +47,7 @@
                     <div class="down qemu-button"></div>
                     <div class="back qemu-button"></div>
                     <div class="select qemu-button"></div>
-                    <img src="{% static 'ide/img/power.png' %}" class="power" title="Shut down emulator">
-                    <img src="{% static 'ide/img/configure.png' %}" class="configure" title="Configure app">
+                    <img src="{% static 'ide/img/configure.png' %}" class="configure">
                 </div>
                 <ul class="nav-list" id="sidebar">
                     <li class="nav-header project-name">{{ project.name }}</li>
@@ -489,6 +488,7 @@ var LIBPEBBLE_PROXY = {{ libpebble_proxy | safe }};
 <script src="{% static 'ide/js/ib/codegen.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/ib/codeparser.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/ib/layer_list.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/emulator.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/external/jshint.min.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/external/html.sortable.min.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/external/textdecoder.js' %}" type="text/javascript"></script>
