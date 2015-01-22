@@ -64,7 +64,7 @@ var SharedPebble = new (function() {
 
     function handleEmulatorDisconnected() {
         if(mPebble && mVirtual) {
-            mPebble.disconnect();
+            mPebble.close();
             mEmulator = null;
         }
     }
