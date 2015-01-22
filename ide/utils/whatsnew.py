@@ -28,6 +28,9 @@ NEW_THINGS = [
      "Check out <a href='https://developer.getpebble.com/blog/2014/10/09/CloudPebble-code-completion/' target='_blank'>the blog post</a> for details and examples!"],
     ["CloudPebble is now available in English, German, French and Spanish, with the ironic exception of this message."],
     ["App installation is now simpler and works without your computer and phone on the same network. Make sure you have the latest software, enable the development server, and use the new buttons."],
+    ["<strong>CloudPebble now has an emulator!</strong> By default, we will install into the emulator. You can toggle between the emulator and a physical pebble in the compilation pane",
+     "Emulator tip: you can click in the screen to use the arrow keys as buttons, or X/Y/Z as taps. Use shift-X/Y/Z for taps in the negative direction.",
+     "Emulator tip: you must update your configuration pages for the emulator. We will pass a return_to query parameter; when specified, use it instead of 'pebblejs://close#'"],
 ]
 
 
