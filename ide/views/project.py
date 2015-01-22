@@ -82,3 +82,7 @@ def import_gist(request, gist_id):
         'gist_id': gist_id,
         'blurb': request.GET.get('blurb', None)
     })
+
+
+def qemu_config(request):
+    return render(request, 'ide/qemu-config.html')

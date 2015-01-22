@@ -170,6 +170,13 @@ CloudPebble.Editor = (function() {
                     is_autocompleting = true;
                 });
 
+                // The browser should probably do this without our help. Sometimes Safari doesn't.
+                $(document).click(function(e) {
+                    if(!pane.find(e.target).length) {
+                        $(code_mirror.display.input).blur();
+                    }
+                });
+
                 $(code_mirror.getWrapperElement()).mouseup(function(event) {
                     if(!event.altKey) return;
                     var x = event.pageX;
@@ -283,7 +290,12 @@ CloudPebble.Editor = (function() {
                                             return;
                                         }
                                         var line = error.location.line_num - 1;
-                                        var markers = code_mirror.lineInfo(line).gutterMarkers;
+                                        var line_info = code_mirror.lineInfo(line);
+                                        if(!line_info) {
+                                            console.log('line_info is null.', line, data);
+                                            return;
+                                        }
+                                        var markers = line_info.gutterMarkers;
                                         if(markers && markers['gutter-errors']) {
                                             var marker = $(markers['gutter-errors']);
                                             marker.attr('title', marker.attr('title') + "\n" + error.text);
@@ -353,7 +365,7 @@ CloudPebble.Editor = (function() {
 
                 CloudPebble.Sidebar.SetActivePane(pane, 'source-' + file.id, function() {
                     code_mirror.refresh();
-                    code_mirror.focus();
+                    _.defer(function() { code_mirror.focus(); });
                     check_safe();
                     refresh_ib();
                 }, function() {

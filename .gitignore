@@ -9,3 +9,5 @@ src/
 .vagrant
 
 .cache/
+.env/
+.idea/

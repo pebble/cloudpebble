@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <script>
+        var data = location.search.substr(1);
+        console.log(data);
+        window.addEventListener('message', function(e) {
+            e.source.postMessage(data, '*');
+        }, false);
+    </script>
+</head>
+<body>
+almost done...
+</body>
+</html>

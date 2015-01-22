@@ -1,5 +1,6 @@
-Pebble = function(token) {
+Pebble = function(proxy, token) {
     var self = this;
+    var mProxy = proxy;
     var mToken = token;
     var mSocket;
     var mAppLogEnabled = false;
@@ -9,7 +10,7 @@ Pebble = function(token) {
     _.extend(this, Backbone.Events);
 
     var init = function() {
-        mSocket = new PebbleProxySocket(mToken);
+        mSocket = new PebbleProxySocket(mProxy, mToken);
         mSocket.on('error', handle_socket_error);
         mSocket.on('close', handle_socket_close);
         mSocket.on('open', handle_socket_open);
@@ -29,6 +30,7 @@ Pebble = function(token) {
         var request = new XMLHttpRequest();
         request.open('get', url, true);
         request.responseType = "arraybuffer";
+        putbytes_sent = 0;
         request.onload = function(event) {
             var buffer = request.response;
             if(buffer) {
@@ -52,7 +54,13 @@ Pebble = function(token) {
         disable_app_logs();
     };
 
+    this.set_time = function(time) {
+        time = (time / 1000) | 0;
+        send_message("TIME", pack("bI", [0x02, time]));
+    };
+
     this.close = function() {
+        console.error('closing');
         try {
             disable_app_logs();
         } catch(e) {
@@ -114,15 +122,12 @@ Pebble = function(token) {
     };
 
     var handle_socket_message = function(data) {
-        console.log(hexify(data));
         var origin = data[0];
-        console.log(origin);
         if(origin == 5) {
             var result = unpack("I", data.subarray(1, 5));
             console.log("Received status update: ", result);
             mIsInstalling = false;
             self.trigger("status", result[0]);
-            return;
         } else if(origin == 2) {
             var decoder = new TextDecoder('utf-8');
             var phone_log = decoder.decode(data.subarray(1));
@@ -131,6 +136,8 @@ Pebble = function(token) {
             handle_message_to_watch(data.subarray(1));
         } else if(origin === 0) {
             handle_message_from_watch(data.subarray(1));
+        } else if(origin == 0x0a) {
+            handle_config_message(data.subarray(1));
         }
     };
 
@@ -173,6 +180,66 @@ Pebble = function(token) {
     var handle_proxysocket_event = function(event) {
         if(event.substr(0, 6) == "proxy:") {
             self.trigger(event);
+        }
+    };
+
+    var handle_config_message = function(data) {
+        var command = data[0];
+        if(command == 0x01) {
+            console.log(data);
+            var length = unpack("I", data.subarray(1))[0];
+            console.log(length);
+            var url = unpack("S" + length, data.subarray(5))[0];
+            console.log("opening url: " + url);
+            var hash_parts = url.split('#');
+            var query_parts = url.split('?');
+            console.log(hash_parts, query_parts);
+            if(query_parts.length == 1) {
+                query_parts.push('');
+            }
+            if(query_parts[1] != '') {
+                query_parts[1] += '&';
+            }
+            query_parts[1] += 'return_to=' + escape(location.protocol + '//' + location.host + '/ide/emulator/config?');
+            var new_url = query_parts.join('?');
+            if(hash_parts.length > 1) {
+                new_url += '#' + hash_parts[1];
+            }
+            console.log("new url: " + new_url);
+
+            var configWindow = window.open(new_url, "emu_config", "width=375,height=567");
+            function poll() {
+                var spamInterval = setInterval(function () {
+                    if (configWindow.location && configWindow.location.host) {
+                        $(configWindow).off();
+                        clearInterval(spamInterval);
+                        console.log("there!");
+                        configWindow.postMessage('hi', '*');
+                        $(window).one('message', function (event) {
+                            var config = event.originalEvent.data;
+                            console.log('got config data: ', config);
+                            var data = new Uint8Array(pack("BBIS", [0x0a, 0x02, config.length, config]));
+                            console.log(data);
+                            mSocket.send(data);
+                            configWindow.close();
+                        });
+                    } else if (configWindow.closed) {
+                        console.log('it closed.');
+                        clearInterval(spamInterval);
+                        $(window).off('message');
+                        var data = new Uint8Array(pack("BB", [0x0a, 0x03]));
+                        mSocket.send(data);
+                    }
+                }, 1000);
+            }
+            if(!configWindow) {
+                CloudPebble.Prompts.Confirm("Config page", "It looks like you have a popup blocker enabled. Click continue to open the config page.", function() {
+                    configWindow = window.open(new_url, "emu_config", "width=375,height=567");
+                    poll();
+                });
+            } else {
+                poll();
+            }
         }
     };
 
@@ -253,7 +320,7 @@ Pebble = function(token) {
 
     var handle_version = function(message) {
         console.log("Received watch version.");
-        result = unpack("BIS32S8BBBIS32S8BBBIS9S12BBBBBBIIS16", message);
+        var result = unpack("BIS32S8BBBIS32S8BBBIS9S12BBBBBBIIS16", message);
         if(result[0] != 1) return;
         self.trigger('version', {
             running: {
@@ -337,7 +404,7 @@ Pebble = function(token) {
             var value = data.subarray(2, 2 + strlen);
             self.trigger('factory_setting:result', value);
         }
-    }
+    };
 
     this.request_screenshot = function() {
         console.log("Requesting screenshot.");
@@ -346,6 +413,54 @@ Pebble = function(token) {
             return;
         }
         send_message("SCREENSHOT", "\x00");
+    };
+
+    this.request_config_page = function() {
+        if(!mSocket.isOpen()) {
+            throw new Error("Cannot send on non-open socket.");
+        }
+        var data = new Uint8Array([0x0a, 0x01]);
+        mSocket.send(data);
+    };
+
+    this.emu_set_battery_state = function(percent, charging) {
+        send_qemu_command(QEmu.Battery, pack("bb", [percent, charging|0]));
+    };
+
+    var mButtonState = 0;
+    var mButtonStateQueue = [];
+    var mButtonStateTimer = null;
+
+    this.emu_press_button = function(button, down) {
+        var bit = 1 << button;
+        if(down) {
+            mButtonState |= bit;
+        } else {
+            mButtonState &= ~bit;
+        }
+        mButtonStateQueue.push(mButtonState);
+        if(mButtonStateTimer === null) {
+            handle_queue();
+        }
+    };
+
+    var handle_queue = function() {
+        mButtonStateTimer = null;
+        if(mButtonStateQueue.length === 0) {
+            return;
+        }
+        var state = mButtonStateQueue.shift();
+        console.log(state);
+        send_qemu_command(QEmu.Button, [state]);
+        mButtonStateTimer = setTimeout(handle_queue, 100);
+    };
+
+    this.emu_tap = function(axis, direction) {
+        send_qemu_command(QEmu.Tap, [axis, direction]);
+    };
+
+    this.emu_bluetooth = function(connected) {
+        send_qemu_command(QEmu.BluetoothConnection, [connected]);
     };
 
     var handle_screenshot = function(data) {
@@ -364,7 +479,7 @@ Pebble = function(token) {
             self.trigger('screenshot:complete', decode_image(mIncomingImage));
             mIncomingImage = null;
         }
-    }
+    };
 
     var decode_image = function(incoming_image) {
         var canvas = document.createElement('canvas');
@@ -392,7 +507,7 @@ Pebble = function(token) {
         var image = document.createElement('img');
         image.src = canvas.toDataURL();
         return image;
-    }
+    };
 
     var read_screenshot_header = function(data) {
         var header_data = unpack("BIII", data.subarray(0, 13));
@@ -418,7 +533,7 @@ Pebble = function(token) {
             received: 0
         };
         return data;
-    }
+    };
 
     var ENDPOINTS = {
         "TIME": 11,
@@ -443,6 +558,17 @@ Pebble = function(token) {
         "PUTBYTES": 48879
     };
 
+    var QEmu = {
+        SPP: 1,
+        Tap: 2,
+        BluetoothConnection: 3,
+        Compass: 4,
+        Battery: 5,
+        Accel: 6,
+        VibrationNotification: 7,
+        Button: 8
+    };
+
     var send_message = function(endpoint, message) {
         console.log("Sending message to " + endpoint + "(" + ENDPOINTS[endpoint] + ")");
         var data = new Uint8Array([1].concat(build_message(ENDPOINTS[endpoint], message)));
@@ -456,10 +582,16 @@ Pebble = function(token) {
         return pack('HH', [data.length, endpoint]).concat(data);
     };
 
+    var send_qemu_command = function(protocol, message) {
+        console.log(message);
+        mSocket.send(new Uint8Array([0xb, protocol].concat(message)))
+    };
+
     // Handy utility function to pack data.
     var pack = function(format, data) {
         var pointer = 0;
         var bytes = [];
+        var encoder = new TextEncoder('utf-8');
         for(var i = 0; i < format.length; ++i) {
             if(pointer >= data.length) {
                 throw new Error("Expected more data.");
@@ -478,10 +610,16 @@ Pebble = function(token) {
                 break;
             case "l":
             case "L":
+            case "i":
+            case "I":
                 bytes.push((data[pointer] >> 24) & 0xFF);
                 bytes.push((data[pointer] >> 16) & 0xFF);
                 bytes.push((data[pointer] >> 8) & 0xFF);
                 bytes.push(data[pointer] & 0xFF);
+                ++pointer;
+                break;
+            case "S":
+                bytes = bytes.concat(Array.prototype.slice.call(encoder.encode(data[pointer])));
                 ++pointer;
                 break;
             }
@@ -539,4 +677,11 @@ Pebble = function(token) {
     };
 
     init();
+};
+
+Pebble.Button = {
+    Back: 0,
+    Up: 1,
+    Select: 2,
+    Down: 3
 };
