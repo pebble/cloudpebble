@@ -5,11 +5,11 @@
         <div class="hide well" id="run-on-phone">
             <form class="form-horizontal">
                 <ul class="nav nav-tabs" id="run-target-tabs">
-                    <li class="active"><a href="#run-device" data-toggle="tab" data-run-target="device">{% trans "Phone" %}</a></li>
-                    <li><a href="#run-qemu" data-toggle="tab" data-run-target="qemu">{% trans "Emulator" %}</a></li>
+                    <li><a href="#run-device" data-toggle="tab" data-run-target="device">{% trans "Phone" %}</a></li>
+                    <li class="active"><a href="#run-qemu" data-toggle="tab" data-run-target="qemu">{% trans "Emulator" %}</a></li>
                 </ul>
                 <div class="tab-content" id="run-target-content">
-                    <div id="run-device" class="tab-pane active">
+                    <div id="run-device" class="tab-pane">
                         <div class="control-group text-center">
                             <p>
                                 {% blocktrans %}Make sure that the Developer Connection is enabled on your phone, and you are
@@ -24,7 +24,7 @@
                             <button class="btn" id="screenshot-btn">{% trans 'Screenshot' %}</button>
                         </div>
                     </div>
-                    <div id="run-qemu" class="tab-pane">
+                    <div id="run-qemu" class="tab-pane active">
                         <hr>
                         <button class="btn btn-primary" id="install-in-qemu-btn">{% trans 'Install and Run' %}</button>
                         <button class="btn" id="show-qemu-logs-btn">{% trans 'View app logs' %}</button>

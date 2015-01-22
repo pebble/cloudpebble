@@ -611,7 +611,7 @@ CloudPebble.Compile = (function() {
             run_build(callback);
         },
         DoInstall: function() {
-            install_on_watch(localStorage['activeTarget'] == 'qemu');
+            install_on_watch(localStorage['activeTarget'] != 'device');
         }
     };
 })();
