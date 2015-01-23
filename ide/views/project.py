@@ -86,3 +86,9 @@ def import_gist(request, gist_id):
 
 def qemu_config(request):
     return render(request, 'ide/qemu-config.html')
+
+
+def qemu_sensors(request, emulator_id):
+    return render(request, 'ide/qemu-sensors.html', {
+        'emulator_id': emulator_id,
+    })

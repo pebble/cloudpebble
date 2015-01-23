@@ -12,7 +12,7 @@ from ide.api.user import transition_accept, transition_export, transition_delete
 from ide.api.ycm import init_autocomplete
 from ide.api.qemu import launch_emulator
 from ide.views.index import index
-from ide.views.project import view_project, github_hook, build_status, import_gist, qemu_config
+from ide.views.project import view_project, github_hook, build_status, import_gist, qemu_config, qemu_sensors
 from ide.views.settings import settings_page, start_github_auth, remove_github_auth, complete_github_auth
 
 urlpatterns = patterns(
@@ -48,6 +48,7 @@ urlpatterns = patterns(
     url(r'^project/(?P<project_id>\d+)/autocomplete/init', init_autocomplete, name='init_autocomplete'),
     url(r'emulator/launch', launch_emulator, name='launch_emulator'),
     url(r'emulator/config', qemu_config, name='qemu_config'),
+    url(r'emulator/(?P<emulator_id>[0-9a-f-]{32,36})/sensors', qemu_sensors,  name='qemu_sensors'),
     url(r'^task/(?P<task_id>[0-9a-f-]{32,36})', check_task, name='check_task'),
     url(r'^shortlink$', get_shortlink, name='get_shortlink'),
     url(r'^settings$', settings_page, name='settings'),
