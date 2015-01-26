@@ -1,0 +1,41 @@
+{% extends 'common/base.html' %}
+{% load staticfiles %}
+{% load i18n %}
+{% block head %}
+<meta name="viewport" content="width=device-width, user-scalable=no" />
+<link rel="stylesheet" type="text/css" href="{% static 'ide/css/mobile.css' %}">
+<script type="text/javascript">
+window.addEventListener('load', function() {
+    console.log('hi');
+    function doTheThing() {
+        var input = $('#code-input');
+        console.log(input);
+        if (input.val().length == 6) {
+            $('#go-btn').removeAttr('disabled');
+        } else {
+            $('#go-btn').attr('disabled', 'disabled');
+        }
+    }
+    $('#code-input').on('input', doTheThing);
+    $('form').submit(function(e) {
+        e.preventDefault();
+        location.href = '/ide/emulator/token/' + $('#code-input').val();
+    });
+    doTheThing();
+    $('#code-input').focus();
+});
+</script>
+{% endblock %}
+{% block content %}
+    <h1 class="cloudpebble-logo">
+        <span class="cloudpebble-logo-cloud">Cloud</span><span class="cloudpebble-logo-pebble">Pebble</span>
+    </h1>
+    <div class="content">
+        <!-- I still don't know how to vertically centre things with CSS. -->
+        <h2>Enter code</h2>
+        <form>
+            <input id="code-input" type="text" pattern="\d*" maxlength="6">
+            <p><button class="btn btn-primary" id="go-btn" disabled>Go</button></p>
+        </form>
+    </div>
+{% endblock %}

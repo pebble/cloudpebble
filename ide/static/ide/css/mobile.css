@@ -1,0 +1,37 @@
+h1.cloudpebble-logo {
+    padding: 0;
+    height: initial;
+    line-height: initial;
+    font-size: 40px;
+}
+
+h2 {
+    font-size: 30px;
+}
+
+.content {
+    clear: both;
+    padding-top: 80px;
+    text-align: center;
+}
+
+.content form {
+    padding-top: 10px;
+    position: relative;
+}
+
+#code-input {
+    width: calc(100% - 170px);
+    font-size: xx-large;
+    letter-spacing: 2px;
+    height: 40px;
+    position: absolute;
+    left: 20px;
+}
+
+.content .btn {
+    position: absolute;
+    right: 20px;
+    height: 45px;
+    width: 90px;
+}

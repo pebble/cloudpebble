@@ -463,6 +463,18 @@ Pebble = function(proxy, token) {
         send_qemu_command(QEmu.BluetoothConnection, [connected]);
     };
 
+    this.emu_set_accel = function(samples) {
+        var message = [samples.length];
+        _.each(samples, function(sample) {
+            message = message.concat(pack("hhh", _.map(sample, function(x) { return (x / 0.00981)|0 })));
+        });
+        send_qemu_command(QEmu.Accel, message);
+    };
+
+    this.emu_set_compass = function(heading, calibration) {
+        send_qemu_command(QEmu.Compass, pack("Ib", [(heading * 182.044)|0, calibration]));
+    };
+
     var handle_screenshot = function(data) {
         console.log("Received screenshot fragment.");
         if(mIncomingImage === null) {

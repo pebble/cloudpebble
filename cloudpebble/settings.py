@@ -291,6 +291,8 @@ COMPLETION_CERTS = _environ.get('COMPLETION_CERTS', os.getcwd() + '/completion-c
 QEMU_URLS = _environ.get('QEMU_URLS', 'http://192.168.42.42:8003/').split(',')
 QEMU_LAUNCH_AUTH_HEADER = _environ.get('QEMU_LAUNCH_AUTH_HEADER', 'secret')
 
+PHONE_SHORTURL = _environ.get('PHONE_SHORTURL', 'cpbl.io')
+
 import djcelery
 djcelery.setup_loader()
 

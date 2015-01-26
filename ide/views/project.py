@@ -43,7 +43,8 @@ def view_project(request, project_id):
         'app_keys': app_keys,
         'font_css': settings.TYPOGRAPHY_CSS,
         'libpebble_proxy': json.dumps(settings.LIBPEBBLE_PROXY),
-        'token': token
+        'token': token,
+        'phone_shorturl': settings.PHONE_SHORTURL,
     })
 
 
@@ -88,7 +89,5 @@ def qemu_config(request):
     return render(request, 'ide/qemu-config.html')
 
 
-def qemu_sensors(request, emulator_id):
-    return render(request, 'ide/qemu-sensors.html', {
-        'emulator_id': emulator_id,
-    })
+def enter_phone_token(request):
+    return render(request, 'ide/qemu-enter-token.html')

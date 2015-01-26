@@ -226,6 +226,24 @@ ul.nav-pills {
     right: 53px;
 }
 
+/* Emulator sensor prompt */
+
+#qemu-sensor-prompt .modal-body {
+    text-align: center;
+    padding-bottom: 0;
+}
+
+.cpbl-url, .cpbl-token {
+    font-size: xx-large;
+    color: white;
+    display: inline-block;
+    margin: 10px;
+}
+
+.cpbl-token {
+    letter-spacing: 2px;
+}
+
 /* Editor */
 
 .CodeMirror {

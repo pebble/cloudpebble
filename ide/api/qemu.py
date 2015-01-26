@@ -3,14 +3,14 @@ __author__ = 'katharine'
 import json
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404
+from django.http import HttpResponseNotFound
+from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_exempt
 from ide.api import json_response, json_failure
-from ide.models.project import Project
 import requests
 import random
 import urlparse
+import urllib
 import string
 from utils.redis_helper import redis_client
 
@@ -65,6 +65,29 @@ def launch_emulator(request):
             print e
             pass
     return json_failure("No capacity available.")
+
+
+@login_required
+@require_POST
+def generate_phone_token(request, emulator_id):
+    phone_token = random.randint(100000, 999999)
+    token = request.POST['token']
+    url = request.POST['url']
+    redis_key = 'qemu-phone-token-%s' % phone_token
+    redis_client.set(redis_key, json.dumps({'uuid': emulator_id, 'token': token, 'url': url}), ex=300)
+    return json_response({'token': phone_token})
+
+
+def handle_phone_token(request, token):
+    redis_key = 'qemu-phone-token-%s' % token
+    qemu = json.loads(redis_client.get(redis_key))
+    if qemu is not None:
+        return render(request, "ide/qemu-sensors.html", {
+            'url': qemu['url'],
+            'token': qemu['token'],
+        })
+    else:
+        return HttpResponseNotFound("No such token?")
 
 
 def _generate_token():

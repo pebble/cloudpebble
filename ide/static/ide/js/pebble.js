@@ -28,6 +28,11 @@ var SharedPebble = new (function() {
     ];
 
     this.getEmulator = function() {
+        var deferred = $.Deferred();
+        if(mEmulator != null) {
+            deferred.resolve(mEmulator);
+            return deferred.promise();
+        }
         var statementInterval = null;
         var randomStatements = LOADING_STATEMENTS.slice(0);
 
@@ -49,7 +54,6 @@ var SharedPebble = new (function() {
         });
         $('#sidebar').addClass('with-emulator');
 
-        var deferred = $.Deferred();
         mEmulator.connect().done(function() {
             deferred.resolve();
         }).fail(function(reason) {

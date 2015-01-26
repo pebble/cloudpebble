@@ -10,9 +10,9 @@ from ide.api.source import create_source_file, load_source_file, source_file_is_
     delete_source_file
 from ide.api.user import transition_accept, transition_export, transition_delete, whats_new
 from ide.api.ycm import init_autocomplete
-from ide.api.qemu import launch_emulator
+from ide.api.qemu import launch_emulator, generate_phone_token, handle_phone_token
 from ide.views.index import index
-from ide.views.project import view_project, github_hook, build_status, import_gist, qemu_config, qemu_sensors
+from ide.views.project import view_project, github_hook, build_status, import_gist, qemu_config, enter_phone_token
 from ide.views.settings import settings_page, start_github_auth, remove_github_auth, complete_github_auth
 
 urlpatterns = patterns(
@@ -48,7 +48,9 @@ urlpatterns = patterns(
     url(r'^project/(?P<project_id>\d+)/autocomplete/init', init_autocomplete, name='init_autocomplete'),
     url(r'emulator/launch', launch_emulator, name='launch_emulator'),
     url(r'emulator/config', qemu_config, name='qemu_config'),
-    url(r'emulator/(?P<emulator_id>[0-9a-f-]{32,36})/sensors', qemu_sensors,  name='qemu_sensors'),
+    url(r'emulator/(?P<emulator_id>[0-9a-f-]{32,36})/mobile_token', generate_phone_token,  name='qemu_mobile_token'),
+    url(r'emulator/token/(?P<token>\d{6})', handle_phone_token,  name='qemu_mobile_token'),
+    url(r'emulator/token/?', enter_phone_token,  name='qemu_mobile_token'),
     url(r'^task/(?P<task_id>[0-9a-f-]{32,36})', check_task, name='check_task'),
     url(r'^shortlink$', get_shortlink, name='get_shortlink'),
     url(r'^settings$', settings_page, name='settings'),

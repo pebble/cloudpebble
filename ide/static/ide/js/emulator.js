@@ -11,6 +11,7 @@ CloudPebble.Emulator = new (function() {
         var popup = $('.emulator-config');
         popup.find('.emu-app-config').click(doAppConfig);
         popup.find('.emu-shut-down').click(doShutdown);
+        popup.find('.emu-sensors').click(doSensors);
         popup.find('.battery-level').on('input', setBatteryState).val(self._batteryLevel);
         popup.find('#is-charging').change(setBatteryState).prop('checked', self._charging);
         popup.find('#bluetooth-enabled').change(setBluetoothState).prop('checked', self._bluetooth);
@@ -28,7 +29,7 @@ CloudPebble.Emulator = new (function() {
     }
 
     function getHTML() {
-        return '<form class="emulator-config form-horizontal form-popover" style="width: 260px;">' +
+        return '<form class="emulator-config form-horizontal form-popover" style="width: 308px;">' +
             '<div class="control-group">' +
                 '<label class="control-label">Battery:</label>' +
                 '<div class="controls"><input class="battery-level" type="range" min="0" max="100" step="10" value="80"></div>' +
@@ -41,7 +42,9 @@ CloudPebble.Emulator = new (function() {
                 '<label class="control-label" for="bluetooth-enabled">Bluetooth:</label>' +
                 '<div class="controls"><input type="checkbox" id="bluetooth-enabled" checked></div>' +
             '</div>' +
-            '<button class="btn emu-app-config">App Config</button> <button class="btn btn-danger emu-shut-down">Shut down</button>' +
+            '<button class="btn emu-app-config">App Config</button> ' +
+            '<button class="btn emu-sensors">Sensors</button> ' +
+            '<button class="btn btn-danger emu-shut-down">Shut down</button>' +
             '</form>';
     }
 
@@ -71,6 +74,19 @@ CloudPebble.Emulator = new (function() {
     function setBluetoothState(e) {
         self._bluetooth = $('.emulator-config #bluetooth-enabled').prop('checked');
         SharedPebble.getPebbleNow().emu_bluetooth(self._bluetooth);
+    }
+
+    function doSensors(e) {
+        e.preventDefault();
+        var prompt = $('#qemu-sensor-prompt').modal('show');
+        var token_holder = prompt.find('.cpbl-token').text('…');
+        SharedPebble.getEmulator().done(function(emulator) {
+            $.post('/ide/emulator/' + emulator.getUUID() + '/mobile_token', {token: emulator.getToken(), url: emulator.getWebsocketURL()})
+                .done(function(result) {
+                    token_holder.text(result.token);
+                })
+        });
+        self.element.popover('hide');
     }
 
     this.init = function() {
