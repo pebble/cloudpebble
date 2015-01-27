@@ -37,5 +37,10 @@ window.addEventListener('load', function() {
             <input id="code-input" type="text" pattern="\d*" maxlength="6">
             <p><button class="btn btn-primary" id="go-btn" disabled>Go</button></p>
         </form>
+        {% if failed %}
+        <div class="well alert alert-error">
+            <p>That token wasn't valid. Please try again.</p>
+        </div>
+        {% endif %}
     </div>
 {% endblock %}

@@ -80,14 +80,17 @@ def generate_phone_token(request, emulator_id):
 
 def handle_phone_token(request, token):
     redis_key = 'qemu-phone-token-%s' % token
-    qemu = json.loads(redis_client.get(redis_key))
+    qemu = redis_client.get(redis_key)
     if qemu is not None:
+        qemu = json.loads(qemu)
         return render(request, "ide/qemu-sensors.html", {
             'url': qemu['url'],
             'token': qemu['token'],
         })
     else:
-        return HttpResponseNotFound("No such token?")
+        return render(request, "ide/qemu-enter-token.html", {
+            'failed': True
+        })
 
 
 def _generate_token():

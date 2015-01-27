@@ -595,7 +595,6 @@ Pebble = function(proxy, token) {
     };
 
     var send_qemu_command = function(protocol, message) {
-        console.log(message);
         mSocket.send(new Uint8Array([0xb, protocol].concat(message)))
     };
 
