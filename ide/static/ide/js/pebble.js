@@ -75,7 +75,7 @@ var SharedPebble = new (function() {
 
     this.getPebble = function(virtual) {
         var deferred = $.Deferred();
-        if(mPebble) {
+        if(mPebble && mPebble.is_connected()) {
             if(mVirtual === virtual || virtual === undefined) {
                 deferred.resolve(mPebble);
             } else {

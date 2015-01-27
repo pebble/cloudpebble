@@ -416,7 +416,7 @@ Pebble = function(proxy, token) {
     };
 
     this.request_config_page = function() {
-        if(!mSocket.isOpen()) {
+        if(!self.is_connected()) {
             throw new Error("Cannot send on non-open socket.");
         }
         var data = new Uint8Array([0x0a, 0x01]);
@@ -584,7 +584,7 @@ Pebble = function(proxy, token) {
     var send_message = function(endpoint, message) {
         console.log("Sending message to " + endpoint + "(" + ENDPOINTS[endpoint] + ")");
         var data = new Uint8Array([1].concat(build_message(ENDPOINTS[endpoint], message)));
-        if(!mSocket.isOpen()) {
+        if(!self.is_connected()) {
             throw new Error("Cannot send on non-open socket.");
         }
         mSocket.send(data);
