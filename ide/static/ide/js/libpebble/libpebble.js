@@ -472,7 +472,7 @@ Pebble = function(proxy, token) {
     };
 
     this.emu_set_compass = function(heading, calibration) {
-        send_qemu_command(QEmu.Compass, pack("Ib", [(heading * 182.044)|0, calibration]));
+        send_qemu_command(QEmu.Compass, pack("Ib", [(65536 - heading * 182.044)|0, calibration]));
     };
 
     var handle_screenshot = function(data) {
