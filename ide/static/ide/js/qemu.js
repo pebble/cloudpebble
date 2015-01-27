@@ -282,6 +282,10 @@
             return mToken;
         };
 
+        this.getUUID = function() {
+            return mInstanceID;
+        };
+
         this.handleButton = function(button, down) {
             if(!mRFB) return;
             var buttonMap = {

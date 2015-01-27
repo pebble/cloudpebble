@@ -411,6 +411,22 @@
         <a href="https://www.dropbox.com/s/hjz0eoremh9m2gu/pebble-release-2.1.0-beta9-515.apk?dl=0" target="_blank" class="btn btn-primary">{% trans 'Download' %}</a>
     </div>
 </div>
+<!-- QEMU sensor prompt -->
+<div id="qemu-sensor-prompt" class="modal hide fade" tabindex="-1" role="dialog">
+    <div class="modal-header">
+        <h3>{% trans 'Compass and Accelerometer' %}</h3>
+    </div>
+    <div class="modal-body">
+        <div>
+            {% blocktrans with url=phone_shorturl %}<p>You can use your mobile phone to send sensor data to the emulator.<br>
+            In your mobile browser, go to<br><span class="cpbl-url">{{ url }}</span><br>and enter this code:</p>{% endblocktrans %}
+            <p class="cpbl-token">…</p>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">{% trans 'Okay' %}</button>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}

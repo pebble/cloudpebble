@@ -43,7 +43,8 @@ def view_project(request, project_id):
         'app_keys': app_keys,
         'font_css': settings.TYPOGRAPHY_CSS,
         'libpebble_proxy': json.dumps(settings.LIBPEBBLE_PROXY),
-        'token': token
+        'token': token,
+        'phone_shorturl': settings.PHONE_SHORTURL,
     })
 
 
@@ -86,3 +87,7 @@ def import_gist(request, gist_id):
 
 def qemu_config(request):
     return render(request, 'ide/qemu-config.html')
+
+
+def enter_phone_token(request):
+    return render(request, 'ide/qemu-enter-token.html')
