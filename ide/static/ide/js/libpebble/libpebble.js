@@ -9,6 +9,39 @@ Pebble = function(proxy, token) {
 
     _.extend(this, Backbone.Events);
 
+    PebbleProtocolParser = function() {
+        var mReassemblyBuffer = new Uint8Array(0);
+
+        this.addBytes = function(bytes) {
+            // Buffers cannot grow, so we have to do this:
+            var newBuffer = new Uint8Array(mReassemblyBuffer.length + bytes.length);
+            newBuffer.set(mReassemblyBuffer, 0);
+            newBuffer.set(bytes, mReassemblyBuffer.length);
+            mReassemblyBuffer = newBuffer;
+        };
+
+        this.readMessage = function() {
+            if(mReassemblyBuffer.length < 4) {
+                return null;
+            }
+            var parts = unpack("HH", mReassemblyBuffer.subarray(0, 4));
+            var size = parts[0];
+            var command = parts[1];
+            // If we don't have enough data, try again the next time we get some.
+            if(size > mReassemblyBuffer.length) {
+                return null;
+            }
+            var message = mReassemblyBuffer.subarray(4, 4 + size);
+            // Leave the remainder of the message in place for our next call.
+            mReassemblyBuffer = mReassemblyBuffer.subarray(4 + size);
+            return {
+                command: command,
+                size: size,
+                message: message
+            }
+        }
+    };
+
     var init = function() {
         mSocket = new PebbleProxySocket(mProxy, mToken);
         mSocket.on('error', handle_socket_error);
@@ -141,39 +174,40 @@ Pebble = function(proxy, token) {
         }
     };
 
-    var decode_pebble_protocol = function(data) {
-        var parts = unpack("HH", data.subarray(0, 4));
-        var command = parts[1];
-        var size = parts[0];
-        var message = data.subarray(4);
-        return {
-            command: command,
-            size: size,
-            message: message
-        }
-    };
+    var mInboundParser = new PebbleProtocolParser();
+    var mOutboundParser = new PebbleProtocolParser();
 
-    var handle_message_from_watch = function(data) {
-        data = decode_pebble_protocol(data);
-        var command = data.command;
-        var message = data.message;
-        if(command == ENDPOINTS.APP_LOGS) {
-            handle_app_log(message);
-        } else if(command == ENDPOINTS.SCREENSHOT) {
-            handle_screenshot(message);
-        } else if(command == ENDPOINTS.VERSION) {
-            handle_version(message);
-        } else if(command == ENDPOINTS.FACTORY_SETTINGS) {
-            handle_factory_setting(message);
-        } else if(command == ENDPOINTS.PUTBYTES) {
-            handle_receive_putbytes(message);
+    var handle_message_from_watch = function(pdata) {
+        mInboundParser.addBytes(pdata);
+        while((data = mInboundParser.readMessage())) {
+            var command = data.command;
+            var message = data.message;
+            try {
+                if (command == ENDPOINTS.APP_LOGS) {
+                    handle_app_log(message);
+                } else if (command == ENDPOINTS.SCREENSHOT) {
+                    handle_screenshot(message);
+                } else if (command == ENDPOINTS.VERSION) {
+                    handle_version(message);
+                } else if (command == ENDPOINTS.FACTORY_SETTINGS) {
+                    handle_factory_setting(message);
+                } else if (command == ENDPOINTS.PUTBYTES) {
+                    handle_receive_putbytes(message);
+                }
+            }
+            catch (e) {
+                console.error("Exception handling message!", data.command);
+                console.error(e);
+            }
         }
     };
 
     var handle_message_to_watch = function(data) {
-        data = decode_pebble_protocol(data);
-        if(data.command == ENDPOINTS.PUTBYTES) {
-            handle_send_putbytes(data.message);
+        mOutboundParser.addBytes(data);
+        while((data = mOutboundParser.readMessage())) {
+            if (data.command == ENDPOINTS.PUTBYTES) {
+                handle_send_putbytes(data.message);
+            }
         }
     };
 
@@ -644,6 +678,7 @@ Pebble = function(proxy, token) {
         var decoder = new TextDecoder('utf-8');
         for(var i = 0; i < format.length; ++i) {
             if(pointer >= bytes.length) {
+                console.error("ran out of bytes.", format, bytes);
                 throw new Error("Expected more bytes");
             }
             var chr = format.charAt(i);
