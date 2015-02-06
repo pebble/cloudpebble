@@ -5,14 +5,17 @@ set -e
 
 # Make sure we have the SDK in place.
 
-echo "Downloading the SDK"
-curl -o /tmp/pebblesdk.tar.gz http://assets.getpebble.com.s3-website-us-east-1.amazonaws.com/sdk2/PebbleSDK-2.8.1.tar.gz
+echo "Downloading SDK 2"
+curl -o /tmp/pebblesdk2.tar.gz http://assets.getpebble.com.s3-website-us-east-1.amazonaws.com/sdk2/PebbleSDK-2.8.1.tar.gz
+
+echo "Downloading SDK 3"
+curl -o /tmp/pebblesdk3.tar.gz https://snowy-sdk.s3.amazonaws.com/PebbleSDK-3.0-alpha2-hacknight.tar.gz
 
 echo "Downloading the toolchain"
 curl -o /tmp/arm-cs-tools.tar https://cloudpebble-vagrant.s3.amazonaws.com/arm-cs-tools-stripped.tar
 
-echo "Extracting the SDK"
-tar -xf /tmp/pebblesdk.tar.gz
+echo "Extracting SDK 2"
+tar -xf /tmp/pebblesdk2.tar.gz
 mv PebbleSDK-2.8.1 sdk2
 pushd sdk2
     echo "Extracting the toolchain"
@@ -25,6 +28,17 @@ pushd sdk2
 #        pip install -r requirements.txt
 #    deactivate
 popd
+
+echo "Extracting SDK 3"
+tar -xf /tmp/pebblesdk3.tar.gz
+mv PebbleSDK-3.0-alpha2-hacknight sdk3
+pushd sdk3
+    echo "Extracting the toolchain"
+    tar -xf /tmp/arm-cs-tools.tar
+    echo "Preparing virtualenv"
+    virtualenv .env
+popd
+
 echo "Cleaning up."
 rm /tmp/*.tar.*
 

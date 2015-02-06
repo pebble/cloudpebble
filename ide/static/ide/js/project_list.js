@@ -24,7 +24,8 @@ $(function() {
         $.post('/ide/project/create', {
                 name: value,
                 template: $('#project-template').val(),
-                type: $('#project-type').val()
+                type: $('#project-type').val(),
+                sdk: $('#project-sdk-version').val()
             }, function(data) {
                 if(!data.success) {
                     $('#project-prompt-errors').removeClass('hide').text(data.error);

@@ -140,11 +140,20 @@ def run_compile(build_result):
         build_start_time = now()
         try:
             os.chdir(base_dir)
-            output = subprocess.check_output([settings.PEBBLE_TOOL, "build"], stderr=subprocess.STDOUT, preexec_fn=_set_resource_limits)
+            if project.sdk_version == '2':
+                tool = settings.SDK2_PEBBLE_TOOL
+            elif project.sdk_version == '3':
+                tool = settings.SDK3_PEBBLE_TOOL
+            else:
+                raise Exception("invalid sdk version.")
+            output = subprocess.check_output([tool, "build"], stderr=subprocess.STDOUT, preexec_fn=_set_resource_limits)
         except subprocess.CalledProcessError as e:
             output = e.output
             print output
             success = False
+        except Exception as e:
+            success = False
+            output = str(e)
         else:
             success = True
             temp_file = os.path.join(base_dir, 'build', '%s.pbw' % os.path.basename(base_dir))

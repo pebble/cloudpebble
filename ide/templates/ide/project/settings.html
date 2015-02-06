@@ -10,6 +10,15 @@
                     <input type="text" id="settings-name">
                 </div>
             </div>
+            <div class="sdk-version control-group">
+                <label class="control-label" for="settings-sdk-version">{% trans "SDK Version" %}</label>
+                <div class="controls">
+                    <select id="settings-sdk-version">
+                        <option value="2" {% if project.sdk_version == '2' %}selected{% endif %}>{% trans 'SDK 2 (Pebble, Pebble Steel)' %}</option>
+                        <option value="3" {% if project.sdk_version == '3' %}selected{% endif %}>{% trans 'SDK 3 (Pebble Time)' %}</option>
+                    </select>
+                </div>
+            </div>
         </div>
         <div>
             <div class="well">

@@ -45,10 +45,20 @@ wget --progress=bar:force -O arm-cs-tools.tar.bz2 http://assets.getpebble.com.s3
 sudo -u vagrant tar -xzf arm-cs-tools.tar.bz2
 rm arm-cs-tools.tar.bz2
 
-# Obtain the SDK.
+# Obtain SDK2.
 sudo -u vagrant mkdir sdk2
 pushd sdk2
     wget --progress=bar:force -O sdk.tar.gz https://s3.amazonaws.com/assets.getpebble.com/sdk2/PebbleSDK-2.8.1.tar.gz
+    sudo -u vagrant tar --strip 1 -xzf sdk.tar.gz
+    rm sdk.tar.gz
+    sudo -u vagrant ln -s ~/arm-cs-tools arm-cs-tools
+    pip install -r requirements.txt
+popd
+
+# Obtain SDK3.
+sudo -u vagrant mkdir sdk3
+pushd sdk3
+    wget --progress=bar:force -O sdk.tar.gz https://snowy-sdk.s3.amazonaws.com/PebbleSDK-3.0-alpha2-hacknight.tar.gz
     sudo -u vagrant tar --strip 1 -xzf sdk.tar.gz
     rm sdk.tar.gz
     sudo -u vagrant ln -s ~/arm-cs-tools arm-cs-tools

@@ -31,6 +31,7 @@ CloudPebble.Settings = (function() {
         pane.find('form').submit(function(e) {e.preventDefault();});
         pane.find('#project-save').click(function() {
             var name = pane.find('#settings-name').val();
+            var sdk_version = pane.find('#settings-sdk-version').val();
             var short_name = pane.find('#settings-short-name').val();
             var long_name = pane.find('#settings-long-name').val();
             var company_name = pane.find('#settings-company-name').val();
@@ -103,6 +104,7 @@ CloudPebble.Settings = (function() {
                 app_keys[name] = parseInt(id);
             });
 
+            saved_settings['sdk_version'] = sdk_version;
             saved_settings['app_short_name'] = short_name;
             saved_settings['app_long_name'] = long_name;
             saved_settings['app_company_name'] = company_name;

@@ -24,6 +24,12 @@ class Project(IdeModel):
     )
     project_type = models.CharField(max_length=10, choices=PROJECT_TYPES, default='native')
 
+    SDK_VERSIONS = (
+        ('2', _('SDK 2 (Pebble, Pebble Steel)')),
+        ('3', _('SDK 3 (Pebble Time)')),
+    )
+    sdk_version = models.CharField(max_length=6, choices=SDK_VERSIONS, default='2')
+
     # New settings for 2.0
     app_uuid = models.CharField(max_length=36, blank=True, null=True, default=generate_half_uuid)
     app_company_name = models.CharField(max_length=100, blank=True, null=True)

@@ -41,6 +41,7 @@ def project_info(request, project_id):
         'app_is_watchface': project.app_is_watchface,
         'app_capabilities': project.app_capabilities,
         'app_jshint': project.app_jshint,
+        'sdk_version': project.sdk_version,
         'menu_icon': project.menu_icon.id if project.menu_icon else None,
         'source_files': [{'name': f.file_name, 'id': f.id, 'target': f.target} for f in source_files],
         'resources': [{
@@ -160,6 +161,7 @@ def create_project(request):
         template_id = int(template_id)
     project_type = request.POST.get('type', 'native')
     template_name = None
+    sdk_version = request.POST.get('sdk', 2)
     try:
         with transaction.commit_on_success():
             project = Project.objects.create(
@@ -172,7 +174,8 @@ def create_project(request):
                 app_version_label='1.0',
                 app_is_watchface=False,
                 app_capabilities='',
-                project_type=project_type
+                project_type=project_type,
+                sdk_version=sdk_version,
             )
             if template_id is not None and template_id != 0:
                 template = TemplateProject.objects.get(pk=template_id)
@@ -216,6 +219,7 @@ def save_project_settings(request, project_id):
             project.app_capabilities = request.POST['app_capabilities']
             project.app_keys = request.POST['app_keys']
             project.app_jshint = bool(int(request.POST['app_jshint']))
+            project.sdk_version = request.POST['sdk_version']
 
             menu_icon = request.POST['menu_icon']
             old_icon = project.menu_icon

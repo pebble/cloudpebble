@@ -84,6 +84,15 @@
                     </select>
                 </div>
             </div>
+            <div class="sdk-version control-group">
+                <label class="control-label" for="project-sdk-version">{% trans "SDK Version" %}</label>
+                <div class="controls">
+                    <select id="project-sdk-version">
+                        <option value="2" selected>{% trans 'SDK 2 (Pebble, Pebble Steel)' %}</option>
+                        <option value="3">{% trans 'SDK 3 (Pebble Time)' %}</option>
+                    </select>
+                </div>
+            </div>
             <div class="control-group" id="template-holder">
                 <label class="control-label" for="project-template">{% trans "Template" %}</label>
                 <div class="controls">
