@@ -1,24 +1,16 @@
 CloudPebble.CrashChecker = function(app_uuid) {
     var self = this;
-    var mAppDebugCache = null;
-    var mWorkerDebugCache = null;
-    var mAppDebugInfoURL = null;
-    var mWorkerDebugInfoURL = null;
+    var mSymbolCache = {};
+    var mBuildDir = null;
     var mAppUUID = app_uuid;
 
-    this.set_debug_info_url = function(app_url, worker_url) {
-        if(app_url !== mAppDebugInfoURL) {
-            mAppDebugCache = null;
-            mAppDebugInfoURL = app_url;
-        }
-        if(worker_url !== mWorkerDebugInfoURL) {
-            mWorkerDebugCache = null;
-            mWorkerDebugInfoURL = worker_url;
-        }
+    this.set_debug_info_url = function(build_dir) {
+        mBuildDir = build_dir;
+        mSymbolCache = {};
     };
 
-    var find_pointer_sync = function(process, pointer) {
-        var cache = (process == 'app' ? mAppDebugCache : mWorkerDebugCache);
+    var find_pointer_sync = function(platform, process, pointer) {
+        var cache = cache_lookup(process, platform);
         var files = cache.files;
         var lines = cache.lines;
         var functions = cache.functions;
@@ -51,17 +43,53 @@ CloudPebble.CrashChecker = function(app_uuid) {
         };
     };
 
-    this.find_source_lines = function(process, version, pointers, callback) {
-        if((process == 'app' && mAppDebugCache === null) || (process == 'worker' && mWorkerDebugCache === null)) {
+    function cache_lookup(process, platform) {
+        return mSymbolCache[platform + '/' + process];
+    }
+
+    var platform_mappings = {
+        app: {
+            unknown: ['debug_info.json'],
+            aplite: ['debug_info.json'],
+            basalt: ['basalt_debug_info.json', 'debug_info.json']
+        },
+        worker: {
+            unknown: ['worker_debug_info.json'],
+            aplite: ['worker_debug_info.json'],
+            basalt: ['basalt_worker_debug_info.json', 'worker_debug_info.json']
+        }
+    };
+
+    function get_debug_json(platform, process) {
+        function go(urls) {
+            var deferred = $.Deferred();
+            if (urls.length == 0) {
+                deferred.reject();
+                return deferred.promise();
+            }
+            var url = urls[0];
             $.ajax({
-                url: (process == 'app' ? mAppDebugInfoURL : mWorkerDebugInfoURL),
-                dataType: "json"
+                url: url,
+                dataType: 'json'
             }).done(function(data) {
-                if(process == 'app') {
-                    mAppDebugCache = data;
-                } else {
-                    mWorkerDebugCache = data;
-                }
+                deferred.resolve(data);
+            }).fail(function() {
+                go(urls.slice(1)).done(function(data) {
+                    deferred.resolve(data);
+                }).fail(function() {
+                    deferred.fail();
+                });
+            });
+            return deferred.promise();
+        }
+        return go(platform_mappings[platform][process]);
+    }
+
+    this.find_source_lines = function(process, version, pointers, callback) {
+        var platform = Pebble.version_to_platform(version);
+        if(!cache_lookup(process, platform)) {
+            get_debug_json(platform, process).done(function(data) {
+                mSymbolCache[platform + '/' + process] = data;
                 self.find_source_lines(process, version, pointers, callback);
             });
             return;
@@ -69,7 +97,7 @@ CloudPebble.CrashChecker = function(app_uuid) {
 
         var results = [];
         _.each(pointers, function(pointer) {
-            results.push(find_pointer_sync(process, pointer));
+            results.push(find_pointer_sync(platform, process, pointer));
         });
         callback(results);
     };

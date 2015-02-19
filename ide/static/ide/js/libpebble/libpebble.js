@@ -731,3 +731,22 @@ Pebble.Button = {
     Select: 2,
     Down: 3
 };
+
+Pebble.version_to_platform = function(version) {
+    var mapping = {
+        0: 'aplite',
+        1: 'aplite',
+        2: 'aplite',
+        3: 'aplite',
+        4: 'aplite',
+        5: 'aplite',
+        6: 'aplite',
+        7: 'basalt',
+        8: 'basalt',
+        0xFF: 'aplite',
+        0xFE: 'aplite',
+        0xFD: 'basalt',
+        0xFC: 'basalt'
+    };
+    return version.running.platform_version;
+};

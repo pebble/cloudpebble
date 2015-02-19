@@ -43,9 +43,8 @@
             <p><label>{% trans 'Started:' context 'date/time' %}</label> <span id="last-compilation-started">April 17, 2013, 11:50 a.m.</span></p>
             <p id="last-compilation-time"><label>{% trans 'Build time:' context 'duration' %}</label> <span>0.98 seconds</span></p>
             <p><label>{% trans 'Status:' %}</label> <span id="last-compilation-status" class="label label-success">Successful</span></p>
-            <p id="last-compilation-size" class="hide"><label>{% trans 'Size:' %}</label> <span class="text"></span></p>
-            <p id="last-compilation-app-memory" class="hide"><label>{% trans 'Available App RAM:' %}</label> <span class="text"></span></p>
-            <p id="last-compilation-worker-memory" class="hide"><label>{% trans 'Available Worker RAM:' %}</label> <span class="text"></span></p>
+            <p id="last-compilation-size-aplite" class="hide"><label>{% trans 'Aplite Size:' %}</label> <span class="text"></span></p>
+            <p id="last-compilation-size-basalt" class="hide"><label>{% trans 'Basalt Size:' %}</label> <span class="text"></span></p>
         </div>
         <hr>
         <div class="build-buttons">
@@ -61,7 +60,6 @@
                     <th>{% trans '#' context 'number symbol' %}</th>
                     <th>{% trans 'Date' %}</th>
                     <th>{% trans 'Status' %}</th>
-                    <th>{% trans 'Size' %}</th>
                     <th colspan="2"></th>
                 </tr>
             </thead>

@@ -90,14 +90,8 @@ def last_build(request, project_id):
             'id': build.id,
             'pbw': build.pbw_url,
             'log': build.build_log_url,
-            'debug': build.debug_info_url,
-            'worker_debug': build.worker_debug_info_url,
-            'size': {
-                'total': build.total_size,
-                'binary': build.binary_size,
-                'worker': build.worker_size,
-                'resources': build.resource_size
-            }
+            'build_dir': build.get_url(),
+            'sizes': build.get_sizes(),
         }
         return json_response({"build": b})
 
@@ -121,14 +115,8 @@ def build_history(request, project_id):
                 'id': build.id,
                 'pbw': build.pbw_url,
                 'log': build.build_log_url,
-                'debug': build.debug_info_url,
-                'worker_debug': build.worker_debug_info_url,
-                'size': {
-                    'total': build.total_size,
-                    'binary': build.binary_size,
-                    'worker': build.worker_size,
-                    'resources': build.resource_size
-                }
+                'build_dir': build.get_url(),
+                'sizes': build.get_sizes()
             })
         return json_response({"builds": out})
 

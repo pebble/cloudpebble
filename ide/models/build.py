@@ -25,16 +25,18 @@ class BuildResult(IdeModel):
         (STATE_SUCCEEDED, _('Succeeded'))
     )
 
+    DEBUG_INFO_MAP = {
+        'aplite': ('debug_info.json', 'worker_debug_info.json'),
+        'basalt': ('basalt_debug_info.json', 'basalt_worker_debug_info.json'),
+    }
+    DEBUG_APP = 0
+    DEBUG_WORKER = 1
+
     project = models.ForeignKey(Project, related_name='builds')
     uuid = models.CharField(max_length=36, default=lambda:str(uuid.uuid4()))
     state = models.IntegerField(choices=STATE_CHOICES, default=STATE_WAITING)
     started = models.DateTimeField(auto_now_add=True, db_index=True)
     finished = models.DateTimeField(blank=True, null=True)
-
-    total_size = models.IntegerField(blank=True, null=True)
-    binary_size = models.IntegerField(blank=True, null=True)
-    resource_size = models.IntegerField(blank=True, null=True)
-    worker_size = models.IntegerField(blank=True, null=True)
 
     def _get_dir(self):
         if settings.AWS_ENABLED:
@@ -63,17 +65,11 @@ class BuildResult(IdeModel):
     def get_build_log_url(self):
         return '%sbuild_log.txt' % self.get_url()
 
-    def get_debug_info_filename(self):
-        return '%sdebug_info.json' % self._get_dir()
+    def get_debug_info_filename(self, platform, kind):
+        return self._get_dir() + self.DEBUG_INFO_MAP[platform][kind]
 
-    def get_debug_info_url(self):
-        return '%sdebug_info.json' % self.get_url()
-
-    def get_worker_debug_info_filename(self):
-        return '%sworker_debug_info.json' % self._get_dir()
-
-    def get_worker_debug_info_url(self):
-        return '%sworker_debug_info.json' % self.get_url()
+    def get_debug_info_url(self, platform, kind):
+        return self.get_url() + self.DEBUG_INFO_MAP[platform][kind]
 
     def get_simplyjs(self):
         return '%ssimply.js' % self._get_dir()
@@ -95,21 +91,13 @@ class BuildResult(IdeModel):
         else:
             return s3.read_file('builds', self.build_log)
 
-    def save_debug_info(self, json_info):
+    def save_debug_info(self, json_info, platform, kind):
         text = json.dumps(json_info)
         if not settings.AWS_ENABLED:
-            with open(self.debug_info, 'w') as f:
+            with open(self.get_debug_info_filename(platform, kind), 'w') as f:
                 f.write(text)
         else:
             s3.save_file('builds', self.debug_info, text, public=True, content_type='application/json')
-
-    def save_worker_debug_info(self, json_info):
-        text = json.dumps(json_info)
-        if not settings.AWS_ENABLED:
-            with open(self.worker_debug_info, 'w') as f:
-                f.write(text)
-        else:
-            s3.save_file('builds', self.worker_debug_info, text, public=True, content_type='application/json')
 
     def save_pbw(self, pbw_path):
         if not settings.AWS_ENABLED:
@@ -130,11 +118,27 @@ class BuildResult(IdeModel):
     pbw_url = property(get_pbw_url)
     build_log_url = property(get_build_log_url)
 
-    debug_info = property(get_debug_info_filename)
-    debug_info_url = property(get_debug_info_url)
-
-    worker_debug_info = property(get_worker_debug_info_filename)
-    worker_debug_info_url = property(get_worker_debug_info_url)
-
     simplyjs = property(get_simplyjs)
     simplyjs_url = property(get_simplyjs_url)
+
+    def get_sizes(self):
+        sizes = {}
+        for size in self.sizes.all():
+            sizes[size.platform] = {
+                'total': size.total_size,
+                'app': size.binary_size,
+                'resources': size.resource_size,
+                'worker': size.worker_size,
+            }
+        return sizes
+
+
+class BuildSize(IdeModel):
+    build = models.ForeignKey(BuildResult, related_name='sizes')
+
+    platform = models.CharField(max_length=20)
+
+    total_size = models.IntegerField(blank=True, null=True)
+    binary_size = models.IntegerField(blank=True, null=True)
+    resource_size = models.IntegerField(blank=True, null=True)
+    worker_size = models.IntegerField(blank=True, null=True)

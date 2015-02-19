@@ -17,7 +17,6 @@ CloudPebble.Compile = (function() {
         tr.append($('<td class="build-id">' + (build.id === null ? '?' : build.id) + '</td>'));
         tr.append($('<td class="build-date">' + CloudPebble.Utils.FormatDatetime(build.started) + '</td>'));
         tr.append($('<td class="build-state">' + COMPILE_SUCCESS_STATES[build.state].english + '</td>'));
-        tr.append($('<td class="build-size">' + (build.size.total !== null ? Math.round(build.size.total / 1024) + ' KiB' : '') + '</td>'));
         tr.append($('<td class="build-pbw">' + (build.state == 3 ? ('<a href="'+build.pbw+'" class="btn btn-small">' + gettext("pbw") + '</a>') : ' ') + '</td>'));
         // Build log thingy.
         var td = $('<td class="build-log">');
@@ -203,6 +202,24 @@ CloudPebble.Compile = (function() {
         ga('send','event', 'build', 'run', {eventValue: ++m_build_count});
     };
 
+    var format_build_size = function(size, max_code, max_worker, max_resources) {
+        var sfmt;
+        if(!size.worker) {
+            sfmt = gettext("%(total)s KiB (%(resources)s\u2008/\u2008%(resource_limit)s KiB resources, %(appbin)s\u2008/\u2008%(appbin_limit)s KiB binary)");
+        } else {
+            sfmt = gettext("%(total)s KiB (%(resources)s\u2008/\u2008%(resource_limit)s KiB resources, %(appbin)s\u2008/\u2008%(appbin_limit)s KiB binary, %(workerbin)s\u2008/\u2008%(workerbin_limit)s KiB worker)");
+        }
+        return interpolate(sfmt, {
+            total: Math.round((size.resources + size.app + size.worker) / 1024),
+            resources: Math.round(size.resources / 1024),
+            appbin: Math.round(size.app / 1024),
+            workerbin: Math.round(size.worker / 1024),
+            resource_limit: Math.round(max_resources / 1024),
+            workerbin_limit: Math.round(max_worker / 1024),
+            appbin_limit: Math.round(max_code / 1024)
+        }, true);
+    };
+
     var update_last_build = function(pane, build) {
         mLastBuild = build;
         if(build === null) {
@@ -226,40 +243,18 @@ CloudPebble.Compile = (function() {
                 if(build.state == 3) {
                     pane.find('#last-compilation-pbw').removeClass('hide').attr('href', build.pbw);
                     pane.find("#run-on-phone").removeClass('hide');
-                    if(build.size.total !== null) {
-                        var s = pane.find('#last-compilation-size').removeClass('hide');
-                        var sfmt;
-                        if(!build.size.worker) {
-                            sfmt = gettext("%(total)s KiB (%(resources)s KiB resources, %(appbin)s KiB binary)");
+                    if(build.sizes) {
+                        if(build.sizes.aplite) {
+                            var aplite_size_text = format_build_size(build.sizes.aplite, 24576, 10240, 98304);
+                            pane.find('#last-compilation-size-aplite').removeClass('hide').find('.text').text(aplite_size_text);
                         } else {
-                            sfmt = gettext("%(total)s KiB (%(resources)s KiB resources, %(appbin)s KiB binary, %(workerbin)s KiB worker)");
+                            pane.find('#last-compilation-size-aplite').addClass('hide');
                         }
-                        var stext = interpolate(sfmt, {
-                            total: Math.round(build.size.total / 1024),
-                            resources: Math.round(build.size.resources / 1024),
-                            appbin: Math.round(build.size.binary / 1024),
-                            workerbin: Math.round(build.size.worker / 1024)
-                        }, true);
-                        s.find('.text').text(stext);
-
-                        var memfmt = gettext("%(free)s / %(max)s bytes (%(percent)s%)");
-
-                        var m = pane.find('#last-compilation-app-memory').removeClass('hide');
-                        m.find('.text').text(interpolate(memfmt, {
-                            free: 24576 - build.size.binary,
-                            max: 24576,
-                            percent: Math.round((24576 - build.size.binary) / 245.76)
-                        }, true));
-
-                        if(build.size.worker) {
-                            m = pane.find('#last-compilation-worker-memory').removeClass('hide');
-                            m.find('.text').text(interpolate(memfmt, {
-                                free: 12800 - build.size.worker,
-                                max: 12800,
-                                percent: Math.round((12800 - build.size.worker) / 128.00)
-                            }, true));
+                        if(build.sizes.basalt) {
+                            var basalt_size_text = format_build_size(build.sizes.basalt, 65536, 10240, 262144);
+                            pane.find('#last-compilation-size-basalt').removeClass('hide').find('.text').text(basalt_size_text);
                         } else {
-                            pane.find('#last-compilation-worker-memory').addClass('hide')
+                            pane.find('#last-compilation-size-basalt').addClass('hide');
                         }
                     }
                 }
@@ -280,7 +275,7 @@ CloudPebble.Compile = (function() {
                 .removeClass('label-success label-error label-info')
                 .addClass('label-' + COMPILE_SUCCESS_STATES[build.state].label)
                 .text(COMPILE_SUCCESS_STATES[build.state].english);
-            mCrashAnalyser.set_debug_info_url(build.debug, build.worker_debug);
+            mCrashAnalyser.set_debug_info_url(build.build_dir);
         }
     };
 
