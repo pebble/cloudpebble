@@ -231,7 +231,7 @@ def generate_v2_manifest_dict(project, resources):
 def generate_v3_manifest_dict(project, resources):
     # Just extend the v2 one.
     manifest = generate_v2_manifest_dict(project, resources)
-    manifest['targetPlatform'] = project.app_platform_list
+    manifest['targetPlatforms'] = project.app_platform_list
     return manifest
 
 
