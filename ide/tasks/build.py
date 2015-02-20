@@ -13,7 +13,7 @@ from django.conf import settings
 from django.utils.timezone import now
 
 import apptools.addr2lines
-from ide.utils.sdk import generate_wscript_file, generate_jshint_file, generate_v2_manifest_dict, \
+from ide.utils.sdk import generate_wscript_file, generate_jshint_file, generate_manifest_dict, \
     generate_simplyjs_manifest_dict, generate_pebblejs_manifest_dict
 from utils.keen_helper import send_keen_event
 
@@ -119,7 +119,7 @@ def run_compile(build_result):
             # Source code
             create_source_files(project, base_dir)
 
-            manifest_dict = generate_v2_manifest_dict(project, resources)
+            manifest_dict = generate_manifest_dict(project, resources)
             open(os.path.join(base_dir, 'appinfo.json'), 'w').write(json.dumps(manifest_dict))
 
             for f in resources:

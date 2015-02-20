@@ -26,7 +26,7 @@ class Project(IdeModel):
 
     SDK_VERSIONS = (
         ('2', _('SDK 2 (Pebble, Pebble Steel)')),
-        ('3', _('SDK 3 (Pebble Time)')),
+        ('3', _('SDK 3 beta (Pebble Time)')),
     )
     sdk_version = models.CharField(max_length=6, choices=SDK_VERSIONS, default='2')
 
@@ -41,8 +41,10 @@ class Project(IdeModel):
     app_capabilities = models.CharField(max_length=255, blank=True, null=True)
     app_keys = models.TextField(default="{}")
     app_jshint = models.BooleanField(default=True)
+    app_platforms = models.TextField(max_length=255, blank=True, null=True)
 
     app_capability_list = property(lambda self: self.app_capabilities.split(','))
+    app_platform_list = property(lambda self: self.app_platforms.split(','))
 
     OPTIMISATION_CHOICES = (
         ('0', 'None'),
@@ -72,6 +74,9 @@ class Project(IdeModel):
             return self.resources.filter(is_menu_icon=True)[0]
         except IndexError:
             return None
+
+    def has_platform(self, platform):
+        return self.app_platforms is None or platform in self.app_platform_list
 
     last_build = property(get_last_build)
     menu_icon = property(get_menu_icon)

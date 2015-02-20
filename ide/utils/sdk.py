@@ -228,10 +228,19 @@ def generate_v2_manifest_dict(project, resources):
     }
     return manifest
 
+def generate_v3_manifest_dict(project, resources):
+    # Just extend the v2 one.
+    manifest = generate_v2_manifest_dict(project, resources)
+    manifest['targetPlatform'] = project.app_platform_list
+    return manifest
+
 
 def generate_manifest_dict(project, resources):
     if project.project_type == 'native':
-        return generate_v2_manifest_dict(project, resources)
+        if project.sdk_version == '2':
+            return generate_v2_manifest_dict(project, resources)
+        else:
+            return generate_v3_manifest_dict(project, resources)
     elif project.project_type == 'simplyjs':
         return generate_simplyjs_manifest_dict(project)
     elif project.project_type == 'pebblejs':

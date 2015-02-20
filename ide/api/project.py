@@ -208,6 +208,7 @@ def save_project_settings(request, project_id):
             project.app_keys = request.POST['app_keys']
             project.app_jshint = bool(int(request.POST['app_jshint']))
             project.sdk_version = request.POST['sdk_version']
+            project.app_platforms = request.POST['app_platforms']
 
             menu_icon = request.POST['menu_icon']
             old_icon = project.menu_icon

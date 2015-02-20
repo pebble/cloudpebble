@@ -10,13 +10,36 @@
                     <input type="text" id="settings-name">
                 </div>
             </div>
-            <div class="sdk-version control-group">
+            <div class="sdk-version native-only control-group">
                 <label class="control-label" for="settings-sdk-version">{% trans "SDK Version" %}</label>
                 <div class="controls">
                     <select id="settings-sdk-version">
                         <option value="2" {% if project.sdk_version == '2' %}selected{% endif %}>{% trans 'SDK 2 (Pebble, Pebble Steel)' %}</option>
                         <option value="3" {% if project.sdk_version == '3' %}selected{% endif %}>{% trans 'SDK 3 (Pebble Time)' %}</option>
                     </select>
+                </div>
+            </div>
+        </div>
+        <div class="well native-only sdk3-only" {% if project.sdk_version == '2' %}style="display: none;"{% endif %}>
+            <div class="control-group">
+                {# Translators: "Aplite" is a platform name and should be left untranslated. #}
+                <label class="control-label" for="settings-build-aplite">{% trans 'Build Aplite' %}</label>
+                <div class="controls">
+                    <input type="checkbox" id="settings-build-aplite" {% if not project.app_platforms or 'aplite' in project.app_platform_list %}checked{% endif %}>
+                    <span class="help-block">
+                        {% trans "If enabled, your app will be built to run on Pebble and Pebble Steel watches." %}
+                    </span>
+                </div>
+            </div>
+            <div class="control-group">
+                {# Translators: "Basalt" is a platform name and should be left untranslated. #}
+                <label class="control-label" for="settings-build-basalt">{% trans 'Build Basalt' %}</label>
+                <div class="controls">
+                    <input type="checkbox" id="settings-build-basalt" {% if not project.app_platforms or 'basalt' in project.app_platform_list %}checked{% endif %}>
+                    <span class="help-block">
+                        {# Translators: "aplite" is a platform name and should be left untranslated. #}
+                        {% trans "If enabled, your app will be built to run on Pebble Time watches. If not, the aplite version will be used instead." %}
+                    </span>
                 </div>
             </div>
         </div>

@@ -42,6 +42,8 @@ CloudPebble.Settings = (function() {
             var app_keys = {};
             var app_jshint = pane.find('#settings-app-jshint').prop("checked") ? 1 : 0;
             var menu_icon = pane.find('#settings-menu-image').val();
+            var build_aplite = pane.find('#settings-build-aplite').prop('checked');
+            var build_basalt = pane.find('#settings-build-basalt').prop('checked');
 
             var app_capabilities = [];
             if(pane.find('#settings-capabilities-location').is(':checked')) {
@@ -92,6 +94,23 @@ CloudPebble.Settings = (function() {
                 return;
             }
 
+
+            if(sdk_version == '3') {
+                if (!build_aplite && !build_basalt) {
+                    display_error(gettext("You must build your app for at least one platform."));
+                    return;
+                }
+            }
+
+            var target_platforms = [];
+            if(build_aplite) {
+                target_platforms.push('aplite');
+            }
+            if(build_basalt) {
+                target_platforms.push('basalt');
+            }
+            var app_platforms = target_platforms.join(',');
+
             pane.find(".appkey").each(function() {
                 var name = $(this).find('.appkey-name').val();
                 var id = $(this).find('.appkey-id').val();
@@ -116,6 +135,7 @@ CloudPebble.Settings = (function() {
             saved_settings['app_keys'] = JSON.stringify(app_keys);
             saved_settings['app_jshint'] = app_jshint;
             saved_settings['menu_icon'] = menu_icon;
+            saved_settings['app_platforms'] = app_platforms;
 
             $.post('/ide/project/' + PROJECT_ID + '/save_settings', saved_settings, function(data) {
                 pane.find('input, button, select').removeAttr('disabled');
@@ -131,10 +151,10 @@ CloudPebble.Settings = (function() {
                     CloudPebble.ProjectInfo.app_is_watchface = app_is_watchface;
                     CloudPebble.ProjectInfo.app_capabilities = app_capabilities;
                     CloudPebble.ProjectInfo.app_jshint = app_jshint;
+                    CloudPebble.ProjectInfo.app_platforms = app_platforms;
                     $('.project-name').text(name);
                     window.document.title = "CloudPebble – " + name;
                     display_success(gettext("Settings saved."));
-                    CloudPebble.Editor.Autocomplete.Init();
                 } else {
                     display_error(interpolate(gettext("Error: %s"), [data.error]));
                 }
@@ -215,6 +235,15 @@ CloudPebble.Settings = (function() {
 
         pane.find('.remove-appkey').not('.disabled').click(function() {
             $(this).closest('.appkey').remove();
+        });
+
+        pane.find('#settings-sdk-version').change(function() {
+            var sdk = $(this).val();
+            if(sdk == '3') {
+                pane.find('.sdk3-only').show();
+            } else {
+                pane.find('.sdk3-only').hide();
+            }
         });
 
         CloudPebble.Sidebar.SetActivePane(pane, 'settings');
