@@ -748,5 +748,5 @@ Pebble.version_to_platform = function(version) {
         0xFD: 'basalt',
         0xFC: 'basalt'
     };
-    return version.running.platform_version;
+    return mapping[version.running.platform_version];
 };

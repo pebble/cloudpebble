@@ -262,7 +262,8 @@ CloudPebble.Compile = (function() {
                 pane.find('#last-compilation-time').addClass('hide');
                 pane.find('#last-compilation-log').addClass('hide');
                 pane.find('#compilation-run-build-button').attr('disabled', 'disabled');
-                pane.find('#last-compilation-size').addClass('hide');
+                pane.find('#last-compilation-size-aplite').addClass('hide');
+                pane.find('#last-compilation-size-basalt').addClass('hide');
                 pane.find('#last-compilation-app-memory').addClass('hide');
                 pane.find('#last-compilation-worker-memory').addClass('hide');
             }
