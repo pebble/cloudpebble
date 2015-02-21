@@ -517,7 +517,10 @@ var URL_VNC_INCLUDES = ["{% static 'ide/external/vnc/base64.js' %}",
                         "{% static 'ide/external/vnc/input.js' %}", "{% static 'ide/external/vnc/display.js' %}",
                         "{% static 'ide/external/vnc/jsunzip.js' %}", "{% static 'ide/external/vnc/rfb.js' %}",
                         "{% static 'ide/external/vnc/keysym.js' %}"];
-var URL_TINTIN_BOOT_PNG = "{% static 'ide/img/tintin-boot.png' %}";
+var URL_BOOT_IMG = {
+    aplite: "{% static 'ide/img/boot-aplite.png' %}",
+    basalt: "{% static 'ide/img/boot-basalt.png' %}"
+};
 CloudPebble.Init();
 </script>
 {% endblock %}

@@ -109,29 +109,20 @@ CloudPebble.Compile = (function() {
         });
     };
 
-    function ensureVirtual(bool) {
-        if(SharedPebble.isVirtual() != bool) {
-            SharedPebble.disconnect(true);
-        }
-    }
-
     var pane = null;
     var init = function() {
         pane = $('#compilation-pane-template').clone();
         pane.find('#install-on-phone-btn').click(function(e) {
             e.preventDefault();
-            ensureVirtual(false);
-            install_on_watch();
+            install_on_watch(ConnectionType.Phone);
         });
         pane.find('#show-app-logs-btn').click(function(e) {
             e.preventDefault();
-            ensureVirtual(false);
-            show_app_logs();
+            show_app_logs(ConnectionType.Phone);
         });
         pane.find('#screenshot-btn').click(function(e) {
             e.preventDefault();
-            ensureVirtual(false);
-            take_screenshot();
+            take_screenshot(ConnectionType.Phone);
         });
         pane.find('#android-beta-link').click(function(e) {
             e.preventDefault();
@@ -139,20 +130,22 @@ CloudPebble.Compile = (function() {
             CloudPebble.Analytics.addEvent('cloudpebble_android_beta_modal', null, null, ['cloudpebble']);
         });
 
-        pane.find('#install-in-qemu-btn').click(function(e) {
+        pane.find('#install-in-qemu-aplite-btn').click(function(e) {
             e.preventDefault();
-            ensureVirtual(true);
-            install_on_watch(true);
+            install_on_watch(ConnectionType.QemuAplite);
+        });
+
+        pane.find('#install-in-qemu-basalt-btn').click(function(e) {
+            e.preventDefault();
+            install_on_watch(ConnectionType.QemuBasalt);
         });
         pane.find('#show-qemu-logs-btn').click(function(e) {
             e.preventDefault();
-            ensureVirtual(true);
-            show_app_logs(true);
+            show_app_logs(ConnectionType.Qemu);
         });
         pane.find('#screenshot-qemu-btn').click(function(e) {
             e.preventDefault();
-            ensureVirtual(true);
-            take_screenshot(true);
+            take_screenshot(ConnectionType.Qemu);
         });
         var targetTabs = pane.find('#run-target-tabs');
         targetTabs.on('shown', function(e) {
@@ -417,7 +410,7 @@ CloudPebble.Compile = (function() {
         return gettext('[VERBOSE]');
     };
 
-    var install_on_watch = function(virtual) {
+    var install_on_watch = function(kind) {
         var modal = $('#phone-install-progress');
 
         var report_error = function(message) {
@@ -426,7 +419,7 @@ CloudPebble.Compile = (function() {
             modal.find('.progress').addClass('progress-danger').removeClass('progress-striped');
         };
 
-        SharedPebble.getPebble(virtual).done(function(pebble) {
+        SharedPebble.getPebble(kind).done(function(pebble) {
             pebble.on('status', function(code) {
                 pebble.off('install:progress');
                 if(code === 0) {
@@ -492,8 +485,8 @@ CloudPebble.Compile = (function() {
         });
     };
 
-    var show_app_logs = function(virtual) {
-        SharedPebble.getPebble(virtual).done(function(pebble) {
+    var show_app_logs = function(kind) {
+        SharedPebble.getPebble(kind).done(function(pebble) {
             pebble.on('close', function() {
                 if(mLogHolder)
                     mLogHolder.append($('<span>').addClass('log-error').text(gettext("Disconnected from phone.") + "\n"));
@@ -511,11 +504,11 @@ CloudPebble.Compile = (function() {
         });
     };
 
-    var take_screenshot = function(virtual) {
+    var take_screenshot = function(kind) {
         var modal = $('#phone-screenshot-display').clone();
         var finished = false;
 
-        SharedPebble.getPebble(virtual).done(function(pebble) {
+        SharedPebble.getPebble(kind).done(function(pebble) {
             var report_error = function(message) {
                 modal.find('.modal-body > p').text(message);
                 modal.find('.dismiss-btn').removeClass('hide');

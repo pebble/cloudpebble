@@ -19,7 +19,13 @@ from utils.redis_helper import redis_client
 @require_POST
 def launch_emulator(request):
     user_id = request.user.id
-    redis_key = 'qemu-user-%s' % user_id
+    platform = request.POST['platform']
+    versions = {
+        'aplite': '2.9',
+        'basalt': '3.0',
+    }
+    version = versions[platform]
+    redis_key = 'qemu-user-%s-%s' % (user_id, platform)
     qemu_instance = redis_client.get(redis_key)
     if qemu_instance is not None:
         qemu_instance = json.loads(qemu_instance)
@@ -44,7 +50,7 @@ def launch_emulator(request):
         servers.remove(server)
         try:
             result = requests.post(server + 'qemu/launch',
-                                   data={'token': token},
+                                   data={'token': token, 'platform': platform, 'version': version},
                                    headers={'Authorization': settings.QEMU_LAUNCH_AUTH_HEADER},
                                    timeout=15,
                                    verify=settings.COMPLETION_CERTS)

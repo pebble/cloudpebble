@@ -2,10 +2,24 @@
  * Created by katharine on 1/15/15.
  */
 
+var ConnectionType = {
+    None: 0,
+    Phone: 1,
+    Qemu: 2,
+    QemuAplite: 6,
+    QemuBasalt: 10
+};
+
+var ConnectionPlatformNames = {
+    2: 'aplite',
+    6: 'aplite',
+    10: 'basalt'
+};
+
 var SharedPebble = new (function() {
     var self = this;
     var mPebble = null;
-    var mVirtual = null;
+    var mConnectionType = ConnectionType.None;
     var mEmulator = null;
 
     _.extend(this, Backbone.Events);
@@ -27,12 +41,7 @@ var SharedPebble = new (function() {
         gettext("Never letting you down…")
     ];
 
-    this.getEmulator = function() {
-        var deferred = $.Deferred();
-        if(mEmulator != null) {
-            deferred.resolve(mEmulator);
-            return deferred.promise();
-        }
+    function _getEmulator(kind, deferred) {
         var statementInterval = null;
         var randomStatements = LOADING_STATEMENTS.slice(0);
 
@@ -42,12 +51,13 @@ var SharedPebble = new (function() {
             CloudPebble.Prompts.Progress.Update(pickElement(randomStatements));
         }, 2500);
 
-        mEmulator = new QEmu($('#emulator-container canvas'), {
+        mEmulator = new QEmu(ConnectionPlatformNames[kind], $('#emulator-container canvas'), {
             up: $('#emulator-container .up'),
             select: $('#emulator-container .select'),
             down: $('#emulator-container .down'),
             back: $('#emulator-container .back'),
         });
+        window.emu = mEmulator;
         mEmulator.on('disconnected', function() {
             $('#sidebar').removeClass('with-emulator');
             mEmulator = null;
@@ -62,41 +72,53 @@ var SharedPebble = new (function() {
             clearInterval(statementInterval);
         });
         mEmulator.on('disconnected', handleEmulatorDisconnected);
+    }
 
+    this.getEmulator = function(kind) {
+        var deferred = $.Deferred();
+        if(mEmulator != null) {
+            if(kind == mConnectionType) {
+                deferred.resolve(mEmulator);
+                return deferred.promise();
+            } else {
+                mEmulator.once('disconnected', function() { _getEmulator(kind, deferred); })
+                mEmulator.disconnect(true);
+                mEmulator = null;
+                return deferred.promise();
+            }
+        }
+        _getEmulator(kind, deferred);
         return deferred.promise();
     };
 
     function handleEmulatorDisconnected() {
-        if(mPebble && mVirtual) {
+        if(mPebble && (mConnectionType & ConnectionType.Qemu)) {
             mPebble.close();
             mEmulator = null;
         }
     }
 
-    this.getPebble = function(virtual) {
+    this.getPebble = function(kind) {
         var deferred = $.Deferred();
         if(mPebble && mPebble.is_connected()) {
-            if(mVirtual === virtual || virtual === undefined) {
+            if(kind === undefined || mConnectionType == kind || (kind == ConnectionType.Qemu && self.isVirtual())) {
                 deferred.resolve(mPebble);
-            } else {
-                deferred.reject();
+                return deferred.promise();
             }
-            return deferred.promise();
         }
-        virtual = !!virtual;
-        mVirtual = virtual;
 
         var watchPromise;
         var statementInterval = null;
 
-        if(virtual) {
-            watchPromise = self.getEmulator();
+        if(kind & ConnectionType.Qemu) {
+            watchPromise = self.getEmulator(kind);
         } else {
             watchPromise = $.Deferred().resolve();
         }
         watchPromise
             .done(function() {
                 var did_connect = false;
+                mConnectionType = kind;
                 CloudPebble.Prompts.Progress.Show(gettext("Connecting..."), gettext("Establishing connection..."), function() {
                     if(!did_connect && mPebble) {
                         mPebble.off();
@@ -122,7 +144,7 @@ var SharedPebble = new (function() {
                 };
                 mPebble.on('close error', connectionError);
                 mPebble.on('open', function() {
-                    if(virtual) {
+                    if(self.isVirtual()) {
                         // Set the clock to localtime.
                         var date = new Date();
                         mPebble.set_time(date.getTime() - date.getTimezoneOffset() * 60000);
@@ -156,7 +178,7 @@ var SharedPebble = new (function() {
             mPebble.off();
             mPebble.close();
             mPebble = null;
-            mVirtual = false;
+            mConnectionType = ConnectionType.None;
         }
         if(shutdown === true && mEmulator) {
             mEmulator.disconnect();
@@ -165,15 +187,15 @@ var SharedPebble = new (function() {
     };
 
     this.isVirtual = function() {
-        return mPebble && mVirtual;
+        return mPebble && !!(mConnectionType & ConnectionType.Qemu);
     };
 
     function getWebsocketURL() {
-        return mVirtual ? mEmulator.getWebsocketURL() : LIBPEBBLE_PROXY;
+        return (mConnectionType & ConnectionType.Qemu)? mEmulator.getWebsocketURL() : LIBPEBBLE_PROXY;
     }
 
     function getToken() {
-        return mVirtual ? mEmulator.getToken() : USER_SETTINGS.token;
+        return (mConnectionType & ConnectionType.Qemu) ? mEmulator.getToken() : USER_SETTINGS.token;
     }
 
     function pickElement(elements) {

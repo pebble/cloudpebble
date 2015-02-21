@@ -176,8 +176,8 @@ ul.nav-pills {
     top: 28px;
     left: 53px;
     background-color: #aaa;
-    height: 168px;
-    width: 144px;
+    /*height: 168px;*/
+    /*width: 144px;*/
 }
 
 .qemu-button {

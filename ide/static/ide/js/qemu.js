@@ -5,7 +5,7 @@
 (function() {
     var sLoadedScripts = false;
     window.INCLUDE_URI = "";
-    window.QEmu = function (canvas, button_map) {
+    window.QEmu = function (platform, canvas, button_map) {
         var self = this;
         var mCanvas = $(canvas);
         var mToken = null;
@@ -22,12 +22,14 @@
         var mPingTimer = null;
         var mAPIPort = null;
         var mButtonMap = button_map;
+        var mPlatform = platform;
 
         _.extend(this, Backbone.Events);
 
         function spawn() {
             var deferred = $.Deferred();
-            $.post('/ide/emulator/launch')
+            console.log(mPlatform);
+            $.post('/ide/emulator/launch', {platform: mPlatform})
                 .done(function (data) {
                     console.log(data);
                     if (data.success) {
@@ -96,13 +98,19 @@
             }
             if(state == 'normal') {
                 mConnected = true;
+                if(mPlatform == 'aplite') {
+                    mRFB.get_display().resize(144, 168);
+                } else {
+                    mRFB.get_display().resize(148, 172);
+                }
             }
-            if(mConnected && state != 'normal') {
+            if(mConnected && state == 'disconnected') {
                 mConnected = false;
                 killEmulator();
                 clearInterval(mKickInterval);
                 clearInterval(mPingTimer);
                 self.trigger('disconnected');
+
             }
         }
 
@@ -140,10 +148,11 @@
                     view_only: false,
                     onUpdateState: handleStateUpdate
                 });
+                window.rfb = mRFB;
                 mRFB.get_display()._logo = {
                     width: 144,
                     height: 168,
-                    data: mSplashURL
+                    data: URL_BOOT_IMG[mPlatform]
                 };
                 mRFB.get_display().clear();
                 mRFB.connect(mHost, mAPIPort, mToken.substr(0, 8), 'qemu/' + mInstanceID + '/ws/vnc');
@@ -165,8 +174,10 @@
 
         function showLaunchSplash() {
             var img = new Image(144, 168);
-            img.src = URL_TINTIN_BOOT_PNG;
+            img.src = URL_BOOT_IMG[mPlatform];
+            console.log('show launch splash', img.src);
             img.onload = function() {
+                console.log("drawing", img.src);
                 mCanvas[0].getContext('2d').drawImage(img, 0, 0);
                 mSplashURL = mCanvas[0].toDataURL();
             };
@@ -208,7 +219,7 @@
                 return;
             }
             e.preventDefault();
-            SharedPebble.getPebble(true).done(function(pebble) {
+            SharedPebble.getPebble().done(function(pebble) {
                 pebble.emu_press_button(button, true);
             });
         }
@@ -298,7 +309,7 @@
                 console.error("unknown button " + button);
                 return;
             }
-            SharedPebble.getPebble(true).done(function(pebble){
+            SharedPebble.getPebble().done(function(pebble){
                 pebble.emu_press_button(buttonMap[button], down);
             })
         };
