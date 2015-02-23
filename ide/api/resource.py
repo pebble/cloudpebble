@@ -122,7 +122,7 @@ def update_resource(request, project_id, resource_id):
     resource = get_object_or_404(ResourceFile, pk=resource_id, project=project)
     resource_ids = json.loads(request.POST['resource_ids'])
     try:
-        with transaction.commit_on_success():
+        with transaction.atomic():
             # Lazy approach: delete all the resource_ids and recreate them.
             # We could do better.
             resources = []
@@ -134,10 +134,10 @@ def update_resource(request, project_id, resource_id):
                 resources.append(ResourceIdentifier.objects.create(resource_file=resource, resource_id=r['id'], character_regex=regex, tracking=tracking, compatibility=compat))
 
             if 'file' in request.FILES:
-                default_variant = resource.variants.get_or_create(variant=ResourceVariant.VARIANT_DEFAULT)
+                default_variant = resource.variants.get_or_create(variant=ResourceVariant.VARIANT_DEFAULT)[0]
                 default_variant.save_file(request.FILES['file'], request.FILES['file'].size)
-            if 'file_colour' in request.FILE:
-                colour_variant = resource.variants.get_or_create(variant=ResourceVariant.VARIANT_COLOUR)
+            if 'file_colour' in request.FILES:
+                colour_variant = resource.variants.get_or_create(variant=ResourceVariant.VARIANT_COLOUR)[0]
                 colour_variant.save_file(request.FILES['file_colour'], request.FILES['file_colour'].size)
     except Exception as e:
         return json_failure(str(e))

@@ -274,7 +274,7 @@ def generate_v2_resource_dict(resources):
         for resource_id in resource.get_identifiers():
             d = {
                 'type': resource.kind,
-                'file': resource.path,
+                'file': resource.root_path,
                 'name': resource_id.resource_id,
             }
             if resource_id.character_regex:

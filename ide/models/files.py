@@ -57,7 +57,7 @@ class ResourceFile(IdeModel):
     def copy_all_variants_to_dir(self, path):
         filename_parts = os.path.splitext(self.file_name)
         for variant in self.variants.all():
-            abs_target = "%s/%s%s.%s" % (path, filename_parts[0], ResourceVariant.VARIANT_SUFFIXES[variant.variant], filename_parts[1])
+            abs_target = "%s/%s%s%s" % (path, filename_parts[0], ResourceVariant.VARIANT_SUFFIXES[variant.variant], filename_parts[1])
             if not abs_target.startswith(path):
                 raise Exception("Suspicious filename: %s" % self.file_name)
             variant.copy_to_path(abs_target)
@@ -76,6 +76,10 @@ class ResourceFile(IdeModel):
 
     def get_path(self, variant):
         return self.get_best_variant(variant).get_path()
+
+    @property
+    def root_path(self):
+        return self.get_best_variant(ResourceVariant.VARIANT_DEFAULT).get_path()
 
     class Meta(IdeModel.Meta):
         unique_together = (('project', 'file_name'),)
@@ -168,7 +172,7 @@ class ResourceVariant(IdeModel):
 
     def get_path(self):
         name_parts = os.path.splitext(self.resource_file.file_name)
-        return '%s/%s%s.%s' % (ResourceFile.DIR_MAP[self.kind], name_parts[0], self.VARIANT_SUFFIXES[self.variant], name_parts[1])
+        return '%s/%s%s%s' % (ResourceFile.DIR_MAP[self.resource_file.kind], name_parts[0], self.VARIANT_SUFFIXES[self.variant], name_parts[1])
 
     path = property(get_path)
 

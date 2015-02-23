@@ -26,6 +26,21 @@ CloudPebble.Resources = (function() {
 
     var PEBBLE_PPI = 175.2;
 
+    function process_file(kind, input) {
+        var files = $(input)[0].files;
+        var file = (files.length > 0) ? files[0] : null;
+        if(files.length != 1) {
+            return null;
+        }
+        if(!!project_resources[file.name]) {
+            throw interpolate(gettext("A resource called '%(name)s' already exists in the project."), file, true);
+        }
+        if((kind == 'png' || kind == 'png-trans') && file.type != "image/png") {
+            throw (gettext("You must upload a PNG image."));
+        }
+        return file;
+    }
+
     var process_resource_form = function(form, is_new, url, callback) {
         var report_error = function(message) {
             form.find('.alert:first').removeClass("hide").text(message);
@@ -45,29 +60,25 @@ CloudPebble.Resources = (function() {
         };
 
         remove_error();
-        var files = form.find('#edit-resource-file').get(0).files;
-        var file = (files.length > 0) ? files[0] : null;
-        if(is_new) {
-            if(files.length != 1) {
-                report_error(gettext("You must upload a file."));
-                return;
-            }
-            if(!!project_resources[file.name]) {
-                report_error(interpolate(gettext("A resource called '%(name)s' already exists in the project."), file, true));
-                return;
-            }
-        }
         var kind = form.find('#edit-resource-type').val();
-        if(files.length == 1) {
-            if((kind == 'png' || kind == 'png-trans') && file.type != "image/png") {
-                report_error(gettext("You must upload a PNG image."));
-                return;
-            }
-            if(kind == 'font' && !/\.ttf$/i.test(file.name)) {
-                report_error(gettext("You must upload a TrueType Font (.ttf)"));
-                return;
+
+        var file, colour_file;
+        try {
+            file = process_file(kind, '#edit-resource-file');
+            colour_file = process_file(kind, '#edit-resource-file-colour');
+        } catch(e) {
+            report_error(e);
+            return;
+        }
+        if(is_new) {
+            if (!file) {
+                if (!colour_file || kind != 'png') {
+                    report_error("You must upload a resource.");
+                    return;
+                }
             }
         }
+
         var resources = [];
         if(kind != 'font') {
             if(CloudPebble.ProjectInfo.type != 'pebblejs') {
@@ -119,7 +130,12 @@ CloudPebble.Resources = (function() {
         }
         var form_data = new FormData();
         form_data.append("kind", kind);
-        form_data.append("file", file);
+        if(file) {
+            form_data.append("file", file);
+        }
+        if(colour_file) {
+            form_data.append("file_colour", colour_file);
+        }
         form_data.append("resource_ids", JSON.stringify(resources));
         disable_controls();
         $.ajax({
@@ -153,27 +169,33 @@ CloudPebble.Resources = (function() {
             var resource = data.resource;
             var pane = prepare_resource_pane();
             var list_entry = $('#sidebar-pane-resource-' + resource.id);
-            var preview_img = null;
             if(list_entry) {
                 list_entry.addClass('active');
             }
 
             CloudPebble.Sidebar.SetActivePane(pane, 'resource-' + resource.id);
             pane.find('#edit-resource-type').val(resource.kind).attr('disabled', 'disabled');
-            pane.find('#edit-resource-file').after($("<span class='help-block'>" + gettext("If specified, this file will replace the current file for this resource, regardless of its filename.") + "</span>"));
+
+            pane.find('#edit-resource-type').change();
+            //pane.find('#edit-resource-file').after($("<span class='help-block'>" + gettext("If specified, this file will replace the current file for this resource, regardless of its filename.") + "</span>"));
 
             // Generate a preview.
-            var preview_url = '/ide/project/' + PROJECT_ID + '/resource/' + resource.id +'/0/get';
-            if(resource.kind == 'png' || resource.kind == 'png-trans') {
-                preview_img = pane.find('.image-resource-preview img');
-                preview_img.attr('src', preview_url);
-                var dimensions = pane.find('.image-resource-preview p');
-                preview_img.load(function() {
-                    dimensions.text(this.naturalWidth + ' x ' + this.naturalHeight);
-                    pane.find('.image-resource-preview').show();
+            console.log(resource.variants);
+            if (resource.kind == 'png' || resource.kind == 'png-trans') {
+                _.each(resource.variants, function (variant) {
+                    var preview_url = '/ide/project/' + PROJECT_ID + '/resource/' + resource.id + '/' + variant + '/get';
+                    var preview_img = pane.find('.image-resource-preview.variant-' + variant + ' img');
+                    preview_img.attr('src', preview_url);
+                    var dimensions = pane.find('.image-resource-preview.variant-' + variant + ' p');
+                    preview_img.load(function () {
+                        dimensions.text(this.naturalWidth + ' x ' + this.naturalHeight);
+                        pane.find('.image-resource-preview.variant-' + variant).show();
+                    });
                 });
+            } else {
+                var preview_url = '/ide/project/' + PROJECT_ID + '/resource/' + resource.id + '/0/get';
+                pane.find('.resource-download-link').removeClass('hide').find('a').attr('href', preview_url);
             }
-            pane.find('.resource-download-link').removeClass('hide').find('a').attr('href', preview_url);
 
             var update_font_preview = function(group) {
                 group.find('.font-preview').remove();
@@ -272,9 +294,9 @@ CloudPebble.Resources = (function() {
                 e.preventDefault();
                 process_resource_form(form, false, "/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/update", function(data) {
                     // Update any previews we have.
-                    if(preview_img) {
-                        preview_img.attr('src', preview_img.attr('src').replace(/#e.*$/,'') + '#e' + (++preview_count));
-                    }
+                    $('.image-resource-preview img').each(function() {
+                        $(this).attr('src', $(this).attr('src').replace(/#e.*$/,'') + '#e' + (++preview_count));
+                    });
                     if(resource.kind == 'font') {
                         resource.family = null;
                         $.each(pane.find('.font-resource-group-single'), function(index, group) {
@@ -285,7 +307,6 @@ CloudPebble.Resources = (function() {
                     update_resource(data);
                 });
             });
-
         });
     };
 
@@ -302,6 +323,11 @@ CloudPebble.Resources = (function() {
                 template.find('#font-resource-group').removeClass('hide');
                 template.find('#add-font-resource').removeClass('hide');
             } else {
+                if($(this).val() == 'png') {
+                    template.find('.colour-resource').removeClass('hide');
+                } else {
+                    template.find('.colour-resource').addClass('hide');
+                }
                 template.find('#font-resource-group').addClass('hide');
                 template.find('#non-font-resource-group').removeClass('hide');
                 template.find('#add-font-resource').addClass('hide');
