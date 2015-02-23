@@ -38,6 +38,11 @@ def read_file_to_filesystem(bucket_name, path, destination):
     key = bucket.get_key(path)
     key.get_contents_to_filename(destination)
 
+@_requires_aws
+def delete_file(bucket_name, path):
+    bucket = _buckets[bucket_name]
+    key = bucket.get_key(path)
+    key.delete()
 
 @_requires_aws
 def save_file(bucket_name, path, value, public=False, content_type='application/octet-stream'):

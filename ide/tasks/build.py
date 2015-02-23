@@ -125,9 +125,7 @@ def run_compile(build_result):
             for f in resources:
                 target_dir = os.path.abspath(os.path.join(base_dir, resource_root, ResourceFile.DIR_MAP[f.kind]))
                 abs_target = os.path.abspath(os.path.join(target_dir, f.file_name))
-                if not abs_target.startswith(target_dir):
-                    raise Exception("Suspicious filename: %s" % f.file_name)
-                f.copy_to_path(abs_target)
+                f.copy_all_variants_to_dir(target_dir)
 
             # Reconstitute the SDK
             open(os.path.join(base_dir, 'wscript'), 'w').write(generate_wscript_file(project))

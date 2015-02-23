@@ -14,7 +14,7 @@ from ide.utils.project import find_project_root
 from ide.utils.sdk import generate_manifest, generate_wscript_file, generate_jshint_file, dict_to_pretty_json
 from utils.keen_helper import send_keen_event
 
-from ide.models.files import SourceFile, ResourceFile, ResourceIdentifier
+from ide.models.files import SourceFile, ResourceFile, ResourceIdentifier, ResourceVariant
 from ide.models.project import Project
 import utils.s3 as s3
 
@@ -32,7 +32,8 @@ def add_project_to_archive(z, project, prefix=''):
 
     for resource in resources:
         res_path = 'resources'
-        z.writestr('%s/%s/%s' % (prefix, res_path, resource.path), resource.get_contents())
+        for variant in resource.variants.all():
+            z.writestr('%s/%s/%s' % (prefix, res_path, variant.path), variant.get_contents())
 
     manifest = generate_manifest(project, resources)
     z.writestr('%s/appinfo.json' % prefix, manifest)
@@ -154,6 +155,9 @@ def do_import_archive(project_id, archive, delete_project=False):
                             media_map = m['resources']['media']
 
                             resources = {}
+                            resource_files = {}
+                            resource_suffix_map = {v: k for k, v in ResourceVariant.VARIANT_SUFFIXES.iteritems()}
+                            del resource_suffix_map['']  # This mapping is confusing to keep around; everything is suffixed with nothing.
                             for resource in media_map:
                                 kind = resource['type']
                                 def_name = resource['name']
@@ -166,10 +170,21 @@ def do_import_archive(project_id, archive, delete_project=False):
                                 tracking = resource.get('trackingAdjust', None)
                                 is_menu_icon = resource.get('menuIcon', False)
                                 compatibility = resource.get('compatibility', None)
-                                if file_name not in resources:
-                                    resources[file_name] = ResourceFile.objects.create(project=project, file_name=os.path.basename(file_name), kind=kind, is_menu_icon=is_menu_icon)
+                                if file_name not in resource_files:
+                                    file_name_parts = os.path.splitext(file_name)
+                                    for suffix in resource_suffix_map.iterkeys():
+                                        if file_name_parts[0].endswith(suffix):
+                                            root_file_name = file_name_parts[0][:len(file_name_parts[0]) - len(suffix)] + "." + file_name_parts[1]
+                                            variant = resource_suffix_map[suffix]
+                                            break
+                                    else:
+                                        root_file_name = file_name
+                                        variant = ResourceVariant.VARIANT_DEFAULT
+                                    if root_file_name not in resources:
+                                        resources[root_file_name] = ResourceFile.objects.create(project=project, file_name=os.path.basename(root_file_name), kind=kind, is_menu_icon=is_menu_icon)
                                     res_path = 'resources'
-                                    resources[file_name].save_file(z.open('%s%s/%s' % (base_dir, res_path, file_name)))
+                                    resource_files[file_name] = ResourceVariant.objects.create(resource_file=resources[root_file_name], variant=variant)
+                                    resource_files[file_name].save_file(z.open('%s%s/%s' % (base_dir, res_path, file_name)))
                                 ResourceIdentifier.objects.create(
                                     resource_file=resources[file_name],
                                     resource_id=def_name,

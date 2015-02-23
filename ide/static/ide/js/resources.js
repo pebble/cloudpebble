@@ -163,7 +163,7 @@ CloudPebble.Resources = (function() {
             pane.find('#edit-resource-file').after($("<span class='help-block'>" + gettext("If specified, this file will replace the current file for this resource, regardless of its filename.") + "</span>"));
 
             // Generate a preview.
-            var preview_url = '/ide/project/' + PROJECT_ID + '/resource/' + resource.id +'/get';
+            var preview_url = '/ide/project/' + PROJECT_ID + '/resource/' + resource.id +'/0/get';
             if(resource.kind == 'png' || resource.kind == 'png-trans') {
                 preview_img = pane.find('.image-resource-preview img');
                 preview_img.attr('src', preview_url);

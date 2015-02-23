@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import ugettext as _
 
-from ide.models.files import ResourceFile, ResourceIdentifier, SourceFile
+from ide.models.files import ResourceFile, ResourceIdentifier, SourceFile, ResourceVariant
 from ide.utils import generate_half_uuid
 
 from ide.models.meta import IdeModel
@@ -102,7 +102,9 @@ class TemplateProject(Project):
         uuid_string = ", ".join(["0x%02X" % ord(b) for b in uuid.uuid4().bytes])
         for resource in self.resources.all():
             new_resource = ResourceFile.objects.create(project=project, file_name=resource.file_name, kind=resource.kind)
-            new_resource.save_string(resource.get_contents())
+            for variant in resource.variants.all():
+                new_variant = ResourceVariant.objects.create(resource_file=new_resource, variant=variant.variant)
+                new_variant.save_string(variant.get_contents())
             for i in resource.identifiers.all():
                 ResourceIdentifier.objects.create(resource_file=new_resource, resource_id=i.resource_id, character_regex=i.character_regex)
 
