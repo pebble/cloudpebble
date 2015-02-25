@@ -152,6 +152,7 @@ CloudPebble.Settings = (function() {
                     CloudPebble.ProjectInfo.app_capabilities = app_capabilities;
                     CloudPebble.ProjectInfo.app_jshint = app_jshint;
                     CloudPebble.ProjectInfo.app_platforms = app_platforms;
+                    CloudPebble.ProjectInfo.sdk_version = sdk_version;
                     $('.project-name').text(name);
                     window.document.title = "CloudPebble – " + name;
                     display_success(gettext("Settings saved."));

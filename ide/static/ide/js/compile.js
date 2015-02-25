@@ -179,6 +179,11 @@ CloudPebble.Compile = (function() {
             var target = localStorage['activeTarget'];
             targetTabs.find('a[data-run-target=' + target + ']').tab('show');
         }
+        if(CloudPebble.ProjectInfo.sdk_version != '3') {
+            pane.find('#install-in-qemu-basalt-btn').hide();
+        } else {
+            pane.find('#install-in-qemu-basalt-btn').show();
+        }
     };
 
     var run_build = function(callback) {

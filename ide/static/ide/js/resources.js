@@ -307,6 +307,11 @@ CloudPebble.Resources = (function() {
                     update_resource(data);
                 });
             });
+            if(CloudPebble.ProjectInfo.sdk_version == '2') {
+                $('.colour-resource').hide();
+            } else {
+                $('.colour-resource').show();
+            }
         });
     };
 
@@ -333,6 +338,11 @@ CloudPebble.Resources = (function() {
                 template.find('#add-font-resource').addClass('hide');
             }
         });
+        if(CloudPebble.ProjectInfo.sdk_version == '2') {
+            template.find('.colour-resource').hide();
+        } else {
+            template.find('.colour-resource').show();
+        }
         return template;
     };
 
