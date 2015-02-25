@@ -54,6 +54,11 @@ CloudPebble.YCM = new (function() {
         if(mInitialised || mIsInitialising || mFailed) {
             return;
         }
+        if(CloudPebble.ProjectInfo.sdk_version == '3') {
+            $('.prepare-autocomplete').text(gettext("Code completion unavailable for SDK 3."));
+            mFailed = true;
+            return;
+        }
         mIsInitialising = true;
         $.post('/ide/project/' + PROJECT_ID + '/autocomplete/init')
             .done(function(data) {
