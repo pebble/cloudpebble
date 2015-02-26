@@ -97,7 +97,7 @@ class BuildResult(IdeModel):
             with open(self.get_debug_info_filename(platform, kind), 'w') as f:
                 f.write(text)
         else:
-            s3.save_file('builds', self.debug_info, text, public=True, content_type='application/json')
+            s3.save_file('builds', self.get_debug_info_filename(platform, kind), text, public=True, content_type='application/json')
 
     def save_pbw(self, pbw_path):
         if not settings.AWS_ENABLED:
