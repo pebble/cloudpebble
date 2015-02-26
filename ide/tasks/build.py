@@ -210,10 +210,10 @@ def run_compile(build_result):
                     save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, 'aplite', os.path.join(base_dir, 'build', 'pebble-app.elf'))
                     save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, 'aplite', os.path.join(base_dir, 'build', 'pebble-worker.elf'))
                 else:
-                    save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, 'aplite', os.path.join(base_dir, 'build', 'aplite-pebble-app.elf'))
-                    save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, 'aplite', os.path.join(base_dir, 'build', 'aplite-pebble-worker.elf'))
-                    save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, 'basalt', os.path.join(base_dir, 'build', 'basalt-pebble-app.elf'))
-                    save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, 'basalt', os.path.join(base_dir, 'build', 'basalt-pebble-worker.elf'))
+                    save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, 'aplite', os.path.join(base_dir, 'build', 'aplite/pebble-app.elf'))
+                    save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, 'aplite', os.path.join(base_dir, 'build', 'aplite/pebble-worker.elf'))
+                    save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, 'basalt', os.path.join(base_dir, 'build', 'basalt/pebble-app.elf'))
+                    save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, 'basalt', os.path.join(base_dir, 'build', 'basalt/pebble-worker.elf'))
 
 
                 build_result.save_pbw(temp_file)
