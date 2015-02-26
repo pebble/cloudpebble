@@ -347,8 +347,8 @@ def generate_pebblejs_resource_dict(resources):
 
         d = {
             'type': resource.kind,
-            'file': resource.path,
-            'name': re.sub(r'[^A-Z0-9_]', '_', resource.path.upper()),
+            'file': resource.root_path,
+            'name': re.sub(r'[^A-Z0-9_]', '_', resource.root_path.upper()),
         }
         if resource.is_menu_icon:
             d['menuIcon'] = True
