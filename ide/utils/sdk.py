@@ -197,7 +197,7 @@ def generate_jshint_file(project):
 
 def generate_manifest(project, resources):
     if project.project_type == 'native':
-        return generate_v2_manifest(project, resources)
+        return generate_manifest(project, resources)
     elif project.project_type == 'pebblejs':
         return generate_pebblejs_manifest(project, resources)
     elif project.project_type == 'simplyjs':
@@ -232,7 +232,8 @@ def generate_v2_manifest_dict(project, resources):
 def generate_v3_manifest_dict(project, resources):
     # Just extend the v2 one.
     manifest = generate_v2_manifest_dict(project, resources)
-    manifest['targetPlatforms'] = project.app_platform_list
+    if len(project.app_platform_list) > 0:
+        manifest['targetPlatforms'] = project.app_platform_list
     manifest['sdkVersion'] = "3"
     return manifest
 
