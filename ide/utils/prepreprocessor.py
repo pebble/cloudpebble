@@ -21,19 +21,18 @@ def extract_includes(source):
     return re.findall(r'^#\s*include\s*[<"](.+)[">]\s*$', source, flags=re.MULTILINE)
 
 
-def check_include_legal(include):
-    prefix = '/%s/' % uuid.uuid4()
-    path = os.path.normpath(os.path.join(prefix, include))
-    if not path.startswith(prefix):
+def check_include_legal(abs_dir, abs_target, include):
+    path = os.path.normpath(os.path.join(abs_dir, abs_target, include))
+    if not path.startswith(abs_dir):
         raise Exception(_("Illegal include '%(include)s' -> '%(path)s'") % {'include': include, 'path': path})
     return True
 
 
-def process_file(source):
+def process_file(abs_dir, abs_target, source):
     processed_text = remove_comments(merge_newlines(fix_newlines(source)))
     includes = extract_includes(processed_text)
 
     for include in includes:
-        check_include_legal(include)
+        check_include_legal(abs_dir, abs_target, include)
 
 

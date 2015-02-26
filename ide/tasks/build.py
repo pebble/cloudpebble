@@ -64,7 +64,7 @@ def create_source_files(project, base_dir):
         f.copy_to_path(abs_target)
         # Make sure we don't duplicate downloading effort; just open the one we created.
         with open(abs_target) as fh:
-            check_preprocessor_directives(fh.read())
+            check_preprocessor_directives(abs_target_dir, abs_target, fh.read())
 
 
 def save_debug_info(base_dir, build_result, kind, platform, elf_file):
