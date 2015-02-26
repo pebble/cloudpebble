@@ -11,7 +11,7 @@ class Migration(DataMigration):
         # Note: Don't use "from appname.models import ModelName". 
         # Use orm.ModelName to refer to models in this application,
         # and orm['appname.ModelName'] for models in other applications.
-        for build in orm.BuildResult.objects.all():
+        for build in orm.BuildResult.objects.iterator():
             if build.total_size is not None:
                 result_size = orm.BuildSize.objects.create(build=build,
                                                            platform='aplite',
