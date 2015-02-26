@@ -18,7 +18,7 @@ from ide.utils.sdk import generate_wscript_file, generate_jshint_file, generate_
 from utils.keen_helper import send_keen_event
 
 from ide.models.build import BuildResult, BuildSize
-from ide.models.files import SourceFile, ResourceFile
+from ide.models.files import SourceFile, ResourceFile, ResourceVariant
 from ide.utils.prepreprocessor import process_file as check_preprocessor_directives
 
 __author__ = 'katharine'
@@ -158,7 +158,7 @@ def run_compile(build_result):
                 abs_target = os.path.abspath(os.path.join(target_dir, f.file_name))
                 if not abs_target.startswith(target_dir):
                     raise Exception("Suspicious filename: %s" % f.file_name)
-                f.copy_to_path(abs_target)
+                f.copy_to_path(ResourceVariant.VARIANT_DEFAULT, abs_target)
 
             open(os.path.join(base_dir, 'appinfo.json'), 'w').write(json.dumps(manifest_dict))
 
