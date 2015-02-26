@@ -38,7 +38,9 @@ var SharedPebble = new (function() {
         gettext("Petting unicorns…"),
         gettext("Firing missiles…"),
         gettext("Never giving you up…"),
-        gettext("Never letting you down…")
+        gettext("Never letting you down…"),
+        // Translators: do whatever you like with this one.
+        gettext("Harmonising Elements…") // yes.
     ];
 
     function _getEmulator(kind, deferred) {
