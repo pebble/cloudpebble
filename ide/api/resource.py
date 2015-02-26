@@ -36,7 +36,7 @@ def create_resource(request, project_id):
                 default_variant = ResourceVariant.objects.create(resource_file=rf, variant=ResourceVariant.VARIANT_DEFAULT)
                 default_variant.save_file(default_file, default_file.size)
             if colour_file is not None:
-                colour_variant = ResourceVariant.objects.create(resource_file=rf, variabt=ResourceVariant.VARIANT_COLOUR)
+                colour_variant = ResourceVariant.objects.create(resource_file=rf, variant=ResourceVariant.VARIANT_COLOUR)
                 colour_variant.save_file(colour_file, colour_file.size)
 
 
