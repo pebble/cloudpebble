@@ -9,7 +9,7 @@ echo "Downloading SDK 2"
 curl -o /tmp/pebblesdk2.tar.gz http://assets.getpebble.com.s3-website-us-east-1.amazonaws.com/sdk2/PebbleSDK-2.8.1.tar.gz
 
 echo "Downloading SDK 3"
-curl -o /tmp/pebblesdk3.tar.gz https://snowy-sdk.s3.amazonaws.com/PebbleSDK-3.0-alpha2-hacknight.tar.gz
+curl -o /tmp/pebblesdk3.tar.gz http://snowy-sdk.s3.amazonaws.com/sdk2/PebbleSDK-3.0-beta-rc2.tar.gz
 
 echo "Downloading the toolchain"
 curl -o /tmp/arm-cs-tools.tar https://cloudpebble-vagrant.s3.amazonaws.com/arm-cs-tools-stripped.tar
@@ -31,7 +31,7 @@ popd
 
 echo "Extracting SDK 3"
 tar -xf /tmp/pebblesdk3.tar.gz
-mv PebbleSDK-3.0-alpha2-hacknight sdk3
+mv PebbleSDK-3.0-beta-rc2 sdk3
 pushd sdk3
     echo "Extracting the toolchain"
     tar -xf /tmp/arm-cs-tools.tar

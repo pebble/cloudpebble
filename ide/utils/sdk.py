@@ -224,7 +224,8 @@ def generate_v2_manifest_dict(project, resources):
         'appKeys': json.loads(project.app_keys),
         'resources': generate_resource_dict(project, resources),
         'capabilities': project.app_capabilities.split(','),
-        'projectType': 'native'
+        'projectType': 'native',
+        'sdkVersion': "2",
     }
     return manifest
 
@@ -232,6 +233,7 @@ def generate_v3_manifest_dict(project, resources):
     # Just extend the v2 one.
     manifest = generate_v2_manifest_dict(project, resources)
     manifest['targetPlatforms'] = project.app_platform_list
+    manifest['sdkVersion'] = "3"
     return manifest
 
 

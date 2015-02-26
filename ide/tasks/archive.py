@@ -146,8 +146,11 @@ def do_import_archive(project_id, archive, delete_project=False):
                             project.app_company_name = m['companyName']
                             project.app_version_code = m['versionCode']
                             project.app_version_label = m['versionLabel']
+                            project.sdk_version = m.get('sdkVersion', '2')
                             project.app_is_watchface = m.get('watchapp', {}).get('watchface', False)
                             project.app_capabilities = ','.join(m.get('capabilities', []))
+                            if 'targetPlatforms' in m:
+                                project.app_platforms = ','.join(m['targetPlatforms'])
                             project.app_keys = dict_to_pretty_json(m.get('appKeys', {}))
                             project.project_type = m.get('projectType', 'native')
                             if project.project_type not in [x[0] for x in Project.PROJECT_TYPES]:
@@ -174,7 +177,7 @@ def do_import_archive(project_id, archive, delete_project=False):
                                     file_name_parts = os.path.splitext(file_name)
                                     for suffix in resource_suffix_map.iterkeys():
                                         if file_name_parts[0].endswith(suffix):
-                                            root_file_name = file_name_parts[0][:len(file_name_parts[0]) - len(suffix)] + file_name_parts[1]
+                                            root_file_name = file_name_parts[0][:len(file_name_parts[0]) - len(suffix)] + "." + file_name_parts[1]
                                             variant = resource_suffix_map[suffix]
                                             break
                                     else:
