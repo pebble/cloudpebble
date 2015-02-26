@@ -16,7 +16,7 @@ curl -o /tmp/arm-cs-tools.tar https://cloudpebble-vagrant.s3.amazonaws.com/arm-c
 
 echo "Extracting SDK 2"
 tar -xf /tmp/pebblesdk2.tar.gz
-mv PebbleSDK-2.8.1 sdk2mi
+mv PebbleSDK-2.8.1 sdk2
 pushd sdk2
     echo "Extracting the toolchain"
     tar -xf /tmp/arm-cs-tools.tar
