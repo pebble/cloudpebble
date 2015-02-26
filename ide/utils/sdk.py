@@ -197,7 +197,10 @@ def generate_jshint_file(project):
 
 def generate_manifest(project, resources):
     if project.project_type == 'native':
-        return generate_manifest(project, resources)
+        if project.sdk_version == '2':
+            return generate_v2_manifest(project, resources)
+        else:
+            return generate_v3_manifest(project, resources)
     elif project.project_type == 'pebblejs':
         return generate_pebblejs_manifest(project, resources)
     elif project.project_type == 'simplyjs':
@@ -208,6 +211,10 @@ def generate_manifest(project, resources):
 
 def generate_v2_manifest(project, resources):
     return dict_to_pretty_json(generate_v2_manifest_dict(project, resources))
+
+
+def generate_v3_manifest(project, resources):
+    return dict_to_pretty_json(generate_v3_manifest_dict(project, resources))
 
 
 def generate_v2_manifest_dict(project, resources):
