@@ -44,7 +44,7 @@ class Project(IdeModel):
     app_platforms = models.TextField(max_length=255, blank=True, null=True)
 
     app_capability_list = property(lambda self: self.app_capabilities.split(','))
-    app_platform_list = property(lambda self: (self.app_platforms or '').split(','))
+    app_platform_list = property(lambda self: self.app_platforms.split(',') if self.app_platforms else [])
 
     OPTIMISATION_CHOICES = (
         ('0', 'None'),

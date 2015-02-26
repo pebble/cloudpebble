@@ -239,7 +239,7 @@ def generate_v2_manifest_dict(project, resources):
 def generate_v3_manifest_dict(project, resources):
     # Just extend the v2 one.
     manifest = generate_v2_manifest_dict(project, resources)
-    if len(project.app_platform_list) > 0:
+    if project.app_platforms:
         manifest['targetPlatforms'] = project.app_platform_list
     manifest['sdkVersion'] = "3"
     return manifest
