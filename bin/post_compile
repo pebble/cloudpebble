@@ -45,7 +45,7 @@ rm /tmp/*.tar.*
 # Make sure the database is up to date.
 echo "Performing database migration."
 python manage.py syncdb --noinput
-python manage.py migrate
+#python manage.py migrate
 
 echo "Compiling gettext files"
 export PATH="/app/gettext/bin:$PATH"
