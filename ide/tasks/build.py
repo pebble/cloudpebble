@@ -67,7 +67,7 @@ def create_source_files(project, base_dir):
             check_preprocessor_directives(fh.read())
 
 
-def save_debug_info(base_dir, build_result, platform, kind, elf_file):
+def save_debug_info(base_dir, build_result, kind, platform, elf_file):
     path = os.path.join(base_dir, 'build', elf_file)
     if os.path.exists(path):
         try:
