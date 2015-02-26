@@ -6,7 +6,7 @@ import github
 from django.db import transaction
 from ide.models.user import User
 from ide.models.project import Project
-from ide.models.files import SourceFile, ResourceFile, ResourceIdentifier
+from ide.models.files import SourceFile, ResourceFile, ResourceIdentifier, ResourceVariant
 from ide.utils.sdk import dict_to_pretty_json
 from ide.utils import generate_half_uuid
 from utils.keen_helper import send_keen_event
@@ -93,7 +93,8 @@ def import_gist(user_id, gist_id):
                                                                       is_menu_icon=is_menu_icon)
                     # We already have this as a unicode string in .content, but it shouldn't have become unicode
                     # in the first place.
-                    resources[filename].save_file(urllib2.urlopen(gist.files[filename].raw_url))
+                    default_variant = ResourceVariant.objects.create(resource_file=resources[filename], variant=ResourceVariant.VARIANT_DEFAULT)
+                    default_variant.save_file(urllib2.urlopen(gist.files[filename].raw_url))
                 ResourceIdentifier.objects.create(
                     resource_file=resources[filename],
                     resource_id=def_name,
