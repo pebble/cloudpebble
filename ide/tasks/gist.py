@@ -57,7 +57,8 @@ def import_gist(user_id, gist_id):
         'app_is_watchface': settings.get('watchapp', {}).get('watchface', False),
         'app_capabilities': ','.join(settings.get('capabilities', [])),
         'app_keys': dict_to_pretty_json(settings.get('appKeys', {})),
-        'project_type': project_type
+        'project_type': project_type,
+        'sdk_version': settings.get('sdkVersion', '2'),
     }
 
     with transaction.commit_on_success():
