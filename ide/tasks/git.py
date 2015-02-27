@@ -119,7 +119,7 @@ def github_push(user, commit_message, repo_name, project):
     resource_root = root + 'resources/'
 
     for res in resources:
-        for variant in res.variants:
+        for variant in res.variants.all():
             repo_path = resource_root + variant.path
             if repo_path in next_tree:
                 content = variant.get_contents()
