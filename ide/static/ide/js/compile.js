@@ -605,7 +605,19 @@ CloudPebble.Compile = (function() {
             run_build(callback);
         },
         DoInstall: function() {
-            install_on_watch(localStorage['activeTarget'] != 'device');
+            if(localStorage['activeTarget'] == 'device') {
+                install_on_watch(ConnectionType.Phone);
+            } else {
+                if(SharedPebble.isVirtual()) {
+                    install_on_watch(ConnectionType.Qemu);
+                } else {
+                    if(CloudPebble.ProjectInfo.sdk_version == '3') {
+                        install_on_watch(ConnectionType.QemuBasalt);
+                    } else {
+                        install_on_watch(ConnectionType.QemuAplite);
+                    }
+                }
+            }
         }
     };
 })();
