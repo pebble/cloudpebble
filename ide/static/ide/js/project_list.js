@@ -8,10 +8,22 @@ $(function() {
         if(val != 'native') {
             $('#project-template').val(0);
             $('#template-holder').hide();
+            $('#project-sdk-version').val('2');
+            $('.sdk-version').hide();
         } else {
             $('#template-holder').show();
+            $('.sdk-version').show();
         }
-    })
+    });
+    $('#project-sdk-version').change(function() {
+        var val = $(this).val();
+        if(val == '3') {
+            $('#project-type').val('native');
+            $('.project-type-holder').hide();
+        } else {
+            $('.project-type-holder').show();
+        }
+    });
 
     $('#project-confirm-button').click(function() {
         var value = $('#project-prompt-value').val();
