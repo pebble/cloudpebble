@@ -80,7 +80,7 @@ CloudPebble.Emulator = new (function() {
         e.preventDefault();
         var prompt = $('#qemu-sensor-prompt').modal('show');
         var token_holder = prompt.find('.cpbl-token').text('…');
-        SharedPebble.getEmulator().done(function(emulator) {
+        SharedPebble.getEmulator(ConnectionType.Qemu).done(function(emulator) {
             $.post('/ide/emulator/' + emulator.getUUID() + '/mobile_token', {token: emulator.getToken(), url: emulator.getWebsocketURL()})
                 .done(function(result) {
                     token_holder.text(result.token);

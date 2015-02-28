@@ -79,7 +79,7 @@ var SharedPebble = new (function() {
     this.getEmulator = function(kind) {
         var deferred = $.Deferred();
         if(mEmulator != null) {
-            if(kind == mConnectionType) {
+            if((kind & mConnectionType) == kind) {
                 deferred.resolve(mEmulator);
                 return deferred.promise();
             } else {
