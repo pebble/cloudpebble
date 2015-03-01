@@ -131,7 +131,7 @@ def github_push(user, commit_message, repo_name, project):
                     next_tree[repo_path]._InputGitTreeElement__sha = blob.sha
             else:
                 print "New resource: %s" % repo_path
-                blob = repo.create_git_blob(base64.b64encode(res.get_contents()), 'base64')
+                blob = repo.create_git_blob(base64.b64encode(variant.get_contents()), 'base64')
                 print "Created blob %s" % blob.sha
                 next_tree[repo_path] = InputGitTreeElement(path=repo_path, mode='100644', type='blob', sha=blob.sha)
 
