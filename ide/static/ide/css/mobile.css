@@ -31,14 +31,6 @@ h2 {
     height: 40px;
     position: absolute;
     left: 20px;
-    font-family: PFD-Light,'Helvetica Neue',Helvetica,Arial,sans-serif;
-    border: none;
-    border-radius: 10px;
-    padding-top: 5px;
-    padding-left: 15px;
-    margin: 0;
-    padding-right: 0;
-    padding-bottom: 0
 }
 
 .content .btn {
