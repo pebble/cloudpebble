@@ -51,7 +51,7 @@ CloudPebble.Emulator = new (function() {
     function doAppConfig(e) {
         e.preventDefault();
         if(SharedPebble.isVirtual()) {
-            SharedPebble.getPebble(true).done(function(pebble) {
+            SharedPebble.getPebble(ConnectionType.Qemu).done(function(pebble) {
                 pebble.request_config_page();
             });
         }
