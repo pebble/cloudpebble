@@ -155,7 +155,7 @@ CloudPebble.Editor.Autocomplete = new (function() {
 
         CloudPebble.YCM.request('completions', editor)
             .done(function(data) {
-                var completions = _.map(data.completions.completions, function(item) {
+                var completions = _.map(data.completions, function(item) {
                     if(item.kind == 'FUNCTION' || (item.kind == 'MACRO' && item.detailed_info.indexOf('(') > 0)) {
                         var params = item.detailed_info.substr(item.detailed_info.indexOf('(') + 1);
                         if (params[0] == ')') {
@@ -177,7 +177,7 @@ CloudPebble.Editor.Autocomplete = new (function() {
                 });
                 var result = {
                     list: completions,
-                    from: Pos(cursor.line, data.completions.completion_start_column - 1),
+                    from: Pos(cursor.line, data.start_column - 1),
                     to: Pos(cursor.line, cursor.ch)
                 };
                 CodeMirror.on(result, 'shown', showSummary);

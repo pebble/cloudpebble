@@ -42,6 +42,7 @@ def project_info(request, project_id):
         'app_capabilities': project.app_capabilities,
         'app_jshint': project.app_jshint,
         'sdk_version': project.sdk_version,
+        'app_platforms': project.app_platforms,
         'menu_icon': project.menu_icon.id if project.menu_icon else None,
         'source_files': [{'name': f.file_name, 'id': f.id, 'target': f.target} for f in source_files],
         'resources': [{

@@ -36,7 +36,7 @@ def init_autocomplete(request, project_id):
                 count += 1
     file_contents['build/src/resource_ids.auto.h'] = '\n'.join(resource_ids) + "\n"
 
-    request = {'files': file_contents}
+    request = {'files': file_contents, 'platforms': request.POST.get('platforms', 'aplite').split(',')}
     # Let's go!
     return _spin_up_server(request)
 
@@ -47,6 +47,7 @@ def _choose_ycm_server():
 
 def _spin_up_server(request):
     servers = set(settings.YCM_URLS)
+    print request
     while len(servers) > 0:
         server = random.choice(list(servers))
         servers.remove(server)
@@ -57,7 +58,8 @@ def _spin_up_server(request):
                 if response['success']:
                     return json_response({'uuid': response['uuid'], 'server': server})
         except (requests.RequestException, ValueError):
-            pass
+            import traceback
+            traceback.print_exc()
         print "Server %s failed; trying another." % server
     # If we get out of here, something went wrong.
     return json_failure({'success': False, 'error': 'No servers'})

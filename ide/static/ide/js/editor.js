@@ -289,6 +289,7 @@ CloudPebble.Editor = (function() {
                                         if(error.kind != "ERROR" && error.kind != "WARNING") {
                                             return;
                                         }
+                                        error.text = error.platforms.join(', ') + ': ' + error.text;
                                         var line = error.location.line_num - 1;
                                         var line_info = code_mirror.lineInfo(line);
                                         if(!line_info) {

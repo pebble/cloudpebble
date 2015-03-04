@@ -54,13 +54,12 @@ CloudPebble.YCM = new (function() {
         if(mInitialised || mIsInitialising || mFailed) {
             return;
         }
-        if(CloudPebble.ProjectInfo.sdk_version == '3') {
-            $('.prepare-autocomplete').text(gettext("Code completion unavailable for SDK 3."));
-            mFailed = true;
-            return;
-        }
         mIsInitialising = true;
-        $.post('/ide/project/' + PROJECT_ID + '/autocomplete/init')
+        var platforms = (CloudPebble.ProjectInfo.app_platforms || 'aplite,basalt');
+        if(CloudPebble.ProjectInfo.sdk_version == '2') {
+            platforms = 'basalt';
+        }
+        $.post('/ide/project/' + PROJECT_ID + '/autocomplete/init', {platforms: platforms})
             .done(function(data) {
                 if(data.success) {
                     mUUID = data.uuid;
