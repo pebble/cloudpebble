@@ -59,7 +59,8 @@ CloudPebble.YCM = new (function() {
         if(CloudPebble.ProjectInfo.sdk_version == '2') {
             platforms = 'aplite';
         }
-        $.post('/ide/project/' + PROJECT_ID + '/autocomplete/init', {platforms: platforms})
+        var sdk_version = CloudPebble.ProjectInfo.sdk_version;
+        $.post('/ide/project/' + PROJECT_ID + '/autocomplete/init', {platforms: platforms, sdk: sdk_version})
             .done(function(data) {
                 if(data.success) {
                     mUUID = data.uuid;
