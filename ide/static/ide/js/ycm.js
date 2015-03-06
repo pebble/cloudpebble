@@ -57,7 +57,7 @@ CloudPebble.YCM = new (function() {
         mIsInitialising = true;
         var platforms = (CloudPebble.ProjectInfo.app_platforms || 'aplite,basalt');
         if(CloudPebble.ProjectInfo.sdk_version == '2') {
-            platforms = 'basalt';
+            platforms = 'aplite';
         }
         $.post('/ide/project/' + PROJECT_ID + '/autocomplete/init', {platforms: platforms})
             .done(function(data) {
