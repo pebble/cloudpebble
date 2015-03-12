@@ -3,7 +3,7 @@ $(function() {
 
     $.getJSON('/ide/whats_new', function(data) {
         if(data.free_snowy) {
-            $('#free-pebble-time').modal().find('a').href(data.free_snowy);
+            $('#free-pebble-time').modal().find('a').attr('href', data.free_snowy);
             return;
         }
         var new_things = data.new;
