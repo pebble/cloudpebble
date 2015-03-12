@@ -48,6 +48,21 @@
                 <button data-dismiss="modal" class="btn">{% trans "Okay" %}</button>
             </div>
         </div>
+        <div id="free-pebble-time" class="modal hide fade" tabindex="-1" role="dialog">
+            <div class="modal-header">
+                <h3>Free Pebble Time</h3>
+            </div>
+            <div class="modal-body">
+                <p>Thank you for being one of our most active developers! To express our gratitude, we'd like to
+                offer you a free, brand new <a style="text-decoration: underline; color: lightblue;"  target="_blank" href="https://www.kickstarter.com/projects/597507018/pebble-time-awesome-smartwatch-no-compromises">Pebble Time</a>.</p>
+                <p><a href="about:blank" class="btn btn-primary" style="width: 180px;">Claim Pebble Time</a></p>
+                <p>Once you've filled out the form, click "Done"; you won't see this again.</p>
+            </div>
+            <div class="modal-footer">
+                <button data-dismiss="modal" class="btn">Not now</button>
+                <button data-dismiss="modal" class="btn btn-danger" id="free-pebble-time-hide">Done</button>
+            </div>
+        </div>
         {% block modals %}{% endblock %}
         {% block scripts %}{% endblock %}
     </body>

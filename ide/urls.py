@@ -8,7 +8,7 @@ from ide.api.project import project_info, compile_project, last_build, build_his
 from ide.api.resource import create_resource, resource_info, delete_resource, update_resource, show_resource
 from ide.api.source import create_source_file, load_source_file, source_file_is_safe, save_source_file, \
     delete_source_file
-from ide.api.user import transition_accept, transition_export, transition_delete, whats_new
+from ide.api.user import transition_accept, transition_export, transition_delete, whats_new, hide_snowy_offer
 from ide.api.ycm import init_autocomplete
 from ide.api.qemu import launch_emulator, generate_phone_token, handle_phone_token
 from ide.views.index import index
@@ -68,6 +68,7 @@ urlpatterns = patterns(
     url(r'^update_phone$', update_phone),
     url(r'^list_phones$', list_phones),
     url(r'^whats_new', whats_new, name='whats_new'),
+    url(r'^hide_snowy_offer', hide_snowy_offer, name='hide_snowy_offer'),
     url(r'^gist/(?P<gist_id>[0-9a-f]+)$', import_gist),
     url(r'^heartbeat$', heartbeat),
     url(r'^jsi18n/$', 'django.views.i18n.javascript_catalog', name='jsi18n'),

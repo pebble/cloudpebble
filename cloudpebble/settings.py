@@ -294,6 +294,9 @@ QEMU_LAUNCH_AUTH_HEADER = _environ.get('QEMU_LAUNCH_AUTH_HEADER', 'secret')
 
 PHONE_SHORTURL = _environ.get('PHONE_SHORTURL', 'cpbl.io')
 
+FREE_WATCH_USERS = _environ.get('FREE_WATCH_USERS', '').split(',')
+FREE_WATCH_URL = _environ.get('FREE_WATCH_URL', 'about:blank')
+
 import djcelery
 djcelery.setup_loader()
 
