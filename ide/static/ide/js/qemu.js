@@ -29,7 +29,7 @@
         function spawn() {
             var deferred = $.Deferred();
             console.log(mPlatform);
-            var tz_offset = (new Date()).getTimezoneOffset();
+            var tz_offset = -(new Date()).getTimezoneOffset(); // Negative because JS does timezones backwards.
             $.post('/ide/emulator/launch', {platform: mPlatform, token: USER_SETTINGS.token, tz_offset: tz_offset})
                 .done(function (data) {
                     console.log(data);
