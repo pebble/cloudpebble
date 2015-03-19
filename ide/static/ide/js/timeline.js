@@ -4,6 +4,7 @@
 
 CloudPebble.Timeline = new (function() {
     var mEditor = null;
+    var mCurrentAction = null;
     function setStatus(okay, text) {
         $('#timeline-status').text(text);
         if(okay) {
@@ -14,6 +15,14 @@ CloudPebble.Timeline = new (function() {
     }
 
     function handleTimelineResult(success) {
+        var analytics = {
+            'insert': 'sdk_pin_inserted',
+            'delete': 'sdk_pin_deleted'
+        };
+        if(mCurrentAction) {
+            CloudPebble.Analytics.addEvent(analytics[mCurrentAction], {success: success});
+            mCurrentAction = null;
+        }
         if(success) {
             setStatus(true, "Sent pin.");
         } else {
@@ -22,6 +31,7 @@ CloudPebble.Timeline = new (function() {
     }
 
     function insertPin() {
+        mCurrentAction = 'insert';
         var content = mEditor.getValue();
         var json;
         try {
@@ -51,6 +61,7 @@ CloudPebble.Timeline = new (function() {
     }
 
     function deletePin() {
+        mCurrentAction = 'delete';
         var content = mEditor.getValue();
         var id = JSON.parse(content)['id'];
         SharedPebble.getPebble(ConnectionType.QemuBasalt)
@@ -62,6 +73,7 @@ CloudPebble.Timeline = new (function() {
 
     this.show = function() {
         CloudPebble.Sidebar.SuspendActive();
+        CloudPebble.Analytics.addEvent("cloudpebble_timeline_displayed", {}, null, ["cloudpebble"]);
         if(CloudPebble.Sidebar.Restore("timeline")) {
             return;
         }
