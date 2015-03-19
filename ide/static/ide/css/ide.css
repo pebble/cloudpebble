@@ -670,6 +670,21 @@ table.build-results tr.pending .build-state {
     right: 10px;
 }
 
+#timeline-status {
+    float: left;
+    margin-right: 20px;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+#timeline-status.bad {
+    color: red;
+}
+
+#timeline-status.good {
+    color: green;
+}
+
 /* Old stuff. */
 
 .CodeMirror-hints {

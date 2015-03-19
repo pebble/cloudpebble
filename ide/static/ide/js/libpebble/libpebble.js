@@ -178,8 +178,14 @@ Pebble = function(proxy, token) {
             handle_message_from_watch(data.subarray(1));
         } else if(origin == 0x0a) {
             handle_config_message(data.subarray(1));
+        } else if(origin == 0x0c) {
+            handle_timeline_message(data.subarray(1));
         }
     };
+
+    function handle_timeline_message(message) {
+        self.trigger('timeline:result', !message[0]);
+    }
 
     var mInboundParser = new PebbleProtocolParser();
     var mOutboundParser = new PebbleProtocolParser();

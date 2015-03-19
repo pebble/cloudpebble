@@ -4,10 +4,48 @@
 
 CloudPebble.Timeline = new (function() {
     var mEditor = null;
+    function setStatus(okay, text) {
+        $('#timeline-status').text(text);
+        if(okay) {
+            $('#timeline-status').addClass('good').removeClass('bad');
+        } else {
+            $('#timeline-status').addClass('bad').removeClass('good');
+        }
+    }
+
+    function handleTimelineResult(success) {
+        if(success) {
+            setStatus(true, "Sent pin.");
+        } else {
+            setStatus(false, "Pin could not be sent.");
+        }
+    }
+
     function insertPin() {
         var content = mEditor.getValue();
+        var json;
+        try {
+            json = JSON.parse(content);
+        } catch(e) {
+            setStatus(false, e);
+            return;
+        }
+        if(!_.has(json, 'id')) {
+            setStatus(false, "You must provide an 'id'.");
+            return;
+        }
+        if(!_.has(json, 'time')) {
+            setStatus(false, "You must specify a 'time' for the pin.");
+            return;
+        }
+        if(!_.has(json, 'layout')) {
+            setStatus(false, "You must provide a 'layout' for the pin");
+            return;
+        }
+        setStatus(true, '');
         SharedPebble.getPebble(ConnectionType.QemuBasalt)
             .done(function(pebble) {
+                pebble.once('timeline:result', handleTimelineResult);
                 pebble.emu_send_pin(content);
             });
     }
@@ -17,6 +55,7 @@ CloudPebble.Timeline = new (function() {
         var id = JSON.parse(content)['id'];
         SharedPebble.getPebble(ConnectionType.QemuBasalt)
             .done(function(pebble) {
+                pebble.once('timeline:result', handleTimelineResult);
                 pebble.emu_delete_pin(id);
             });
     }
