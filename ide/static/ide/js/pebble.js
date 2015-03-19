@@ -147,10 +147,19 @@ var SharedPebble = new (function() {
                 mPebble.on('close error', connectionError);
                 mPebble.on('open', function() {
                     if(self.isVirtual()) {
-                        // Set the clock to localtime.
-                        var date = new Date();
-                        mPebble.set_time(date.getTime() - date.getTimezoneOffset() * 60000);
-                        console.log("setting pebble clock to localtime.");
+                        if((mConnectionType & ConnectionType.QemuBasalt) == ConnectionType.QemuBasalt) {
+                            // Set pebble timzeone
+                            var date = new Date();
+                            // WTF: Yes, this sets the time twice. For some reason it only works the second time.
+                            mPebble.set_time_utc(date.getTime());
+                            mPebble.set_time_utc(date.getTime());
+                            console.log("setting pebble clock to utc.");
+                        } else {
+                            // Set the clock to localtime.
+                            var date = new Date();
+                            mPebble.set_time(date.getTime() - date.getTimezoneOffset() * 60000);
+                            console.log("setting pebble clock to localtime.");
+                        }
                     }
                     mPebble.enable_app_logs();
                     did_connect = true;

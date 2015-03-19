@@ -92,6 +92,13 @@ Pebble = function(proxy, token) {
         send_message("TIME", pack("bI", [0x02, time]));
     };
 
+    this.set_time_utc = function(time) {
+        time = (time / 1000) | 0;
+        var offset = -(new Date()).getTimezoneOffset();
+        var tz_name = "offset" + offset;
+        send_message("TIME", pack("bIhbS", [0x03, time, offset, tz_name.length, tz_name]));
+    };
+
     this.close = function() {
         console.error('closing');
         try {
