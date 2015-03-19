@@ -29,7 +29,8 @@
         function spawn() {
             var deferred = $.Deferred();
             console.log(mPlatform);
-            $.post('/ide/emulator/launch', {platform: mPlatform})
+            var tz_offset = (new Date()).getTimezoneOffset();
+            $.post('/ide/emulator/launch', {platform: mPlatform, token: USER_SETTINGS.token, tz_offset: tz_offset})
                 .done(function (data) {
                     console.log(data);
                     if (data.success) {

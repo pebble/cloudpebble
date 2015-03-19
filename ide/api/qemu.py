@@ -20,6 +20,8 @@ from utils.redis_helper import redis_client
 def launch_emulator(request):
     user_id = request.user.id
     platform = request.POST['platform']
+    oauth = request.POST['token']
+    tz_offset = request.POST['tz_offset']
     versions = {
         'aplite': '2.9',
         'basalt': '3.0',
@@ -50,7 +52,11 @@ def launch_emulator(request):
         servers.remove(server)
         try:
             result = requests.post(server + 'qemu/launch',
-                                   data={'token': token, 'platform': platform, 'version': version},
+                                   data={'token': token,
+                                         'platform': platform,
+                                         'version': version,
+                                         'oauth': oauth,
+                                         'tz_offset': tz_offset},
                                    headers={'Authorization': settings.QEMU_LAUNCH_AUTH_HEADER},
                                    timeout=15,
                                    verify=settings.COMPLETION_CERTS)
