@@ -658,6 +658,18 @@ table.build-results tr.pending .build-state {
     padding-top: 20px;
 }
 
+/* Timeline */
+
+.timeline-input .CodeMirror {
+    height: calc(100% - 40px) !important;
+}
+
+.timeline-buttons {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+}
+
 /* Old stuff. */
 
 .CodeMirror-hints {

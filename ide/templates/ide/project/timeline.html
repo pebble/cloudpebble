@@ -1,0 +1,34 @@
+{% load i18n %}
+<div id="timeline-pane" class="ui-pane hide">
+    <div class="timeline-input">
+        <textarea id="timeline-input">{
+  "id": "cloudpebble-test-pin-1",
+  "time": "2015-03-20T20:00:00Z",
+  "layout": {
+    "type": "genericPin",
+    "title": "Timeline!"
+  },
+  "createMessage": {
+    "layout": {
+      "type": "genericNotification",
+      "title": "Created!",
+      "body": "This is a pin notification."
+    }
+  },
+  "updateMessage": {
+    "layout": {
+      "type": "genericNotification",
+      "title": "Updated!",
+      "body": "This is a pin notification."
+    },
+    "time": "2015-03-20T20:10:00Z"
+  }
+}</textarea>
+    </div>
+    <div class="timeline-buttons">
+        <button class="btn btn-primary" id="timeline-insert-btn">Insert pin</button>
+        <button class="btn btn-primary" id="timeline-delete-btn">Delete pin</button>
+    </div>
+    <div class="ui-controls"></div>
+    <div style="clear: both;"></div>
+</div>

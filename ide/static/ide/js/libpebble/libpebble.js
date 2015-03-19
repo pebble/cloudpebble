@@ -516,6 +516,27 @@ Pebble = function(proxy, token) {
         send_qemu_command(QEmu.Compass, pack("Ib", [(65536 - heading * 182.044)|0, calibration]));
     };
 
+    function id_to_uuid(id) {
+        return _.UUID.v5(id + ".pins.developer.getpebble.com", "6ba7b810-9dad-11d1-80b4-00c04fd430c8");
+    }
+
+    this.emu_send_pin = function(pin_json) {
+        var json = JSON.parse(pin_json);
+        var now = new Date();
+        json['createTime'] = now.toISOString();
+        json['updateTime'] = now.toISOString();
+        json['guid'] = id_to_uuid(json['id']);
+        json['dataSource'] = 'sandbox-uuid:' + CloudPebble.ProjectInfo.app_uuid;
+        json['source'] = 'sdk';
+        json['topicKeys'] = [];
+        delete pin_json['id'];
+        mSocket.send(new Uint8Array(pack("BBS", [0xc, 0x01, JSON.stringify(json)])));
+    };
+
+    this.emu_delete_pin = function(pin_id) {
+        mSocket.send(new Uint8Array(pack("BBS", [0xc, 0x02, id_to_uuid(pin_id)])))
+    };
+
     var handle_screenshot = function(data) {
         console.log("Received screenshot fragment.");
         if(mIncomingImage === null) {

@@ -54,6 +54,10 @@ CloudPebble.Init = function() {
         CloudPebble.YCM.initialise();
         CloudPebble.Sidebar.SetProjectType(data.type);
         CloudPebble.Ready = true;
+
+        if(CloudPebble.ProjectInfo.sdk_version != '3') {
+            $('.sdk3-only').hide();
+        }
     });
 
     window.addEventListener('beforeunload', function(e) {
