@@ -31,7 +31,7 @@ popd
 
 echo "Extracting SDK 3"
 tar -xf /tmp/pebblesdk3.tar.gz
-mv PebbleSDK-3.0-dp2 sdk3
+mv PebbleSDK-3.0-dp4 sdk3
 pushd sdk3
     echo "Extracting the toolchain"
     tar -xf /tmp/arm-cs-tools.tar
