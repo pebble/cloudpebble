@@ -9,7 +9,7 @@ echo "Downloading SDK 2"
 curl -o /tmp/pebblesdk2.tar.gz http://assets.getpebble.com.s3-website-us-east-1.amazonaws.com/sdk2/PebbleSDK-2.8.1.tar.gz
 
 echo "Downloading SDK 3"
-curl -o /tmp/pebblesdk3.tar.gz http://assets.getpebble.com.s3-website-us-east-1.amazonaws.com/sdk2/PebbleSDK-3.0-dp2.tar.gz
+curl -o /tmp/pebblesdk3.tar.gz http://assets.getpebble.com.s3-website-us-east-1.amazonaws.com/sdk2/PebbleSDK-3.0-dp4.tar.gz
 
 echo "Downloading the toolchain"
 curl -o /tmp/arm-cs-tools.tar https://cloudpebble-vagrant.s3.amazonaws.com/arm-cs-tools-stripped.tar
