@@ -230,6 +230,24 @@ Pebble = function(proxy, token) {
         }
     };
 
+    var manipulate_url = function(url) {
+        var hash_parts = url.split('#');
+        var query_parts = hash_parts[0].split('?');
+        console.log(hash_parts, query_parts);
+        if(query_parts.length == 1) {
+            query_parts.push('');
+        }
+        if(query_parts[1] != '') {
+            query_parts[1] += '&';
+        }
+        query_parts[1] += 'return_to=' + escape(location.protocol + '//' + location.host + '/ide/emulator/config?');
+        var new_url = query_parts.join('?');
+        if(hash_parts.length > 1) {
+            new_url += '#' + hash_parts[1];
+        }
+        return new_url;
+    };
+
     var handle_config_message = function(data) {
         var command = data[0];
         if(command == 0x01) {
@@ -238,20 +256,7 @@ Pebble = function(proxy, token) {
             console.log(length);
             var url = unpack("S" + length, data.subarray(5))[0];
             console.log("opening url: " + url);
-            var hash_parts = url.split('#');
-            var query_parts = url.split('?');
-            console.log(hash_parts, query_parts);
-            if(query_parts.length == 1) {
-                query_parts.push('');
-            }
-            if(query_parts[1] != '') {
-                query_parts[1] += '&';
-            }
-            query_parts[1] += 'return_to=' + escape(location.protocol + '//' + location.host + '/ide/emulator/config?');
-            var new_url = query_parts.join('?');
-            if(hash_parts.length > 1) {
-                new_url += '#' + hash_parts[1];
-            }
+            var new_url = manipulate_url(url);
             console.log("new url: " + new_url);
 
             var configWindow = window.open(new_url, "emu_config", "width=375,height=567");
