@@ -31,7 +31,6 @@ def index(request):
         return render(request, 'ide/index.html', {
             'my_projects': my_projects,
             'sdk_templates': TemplateProject.objects.filter(template_kind=TemplateProject.KIND_TEMPLATE),
-            'example_templates': TemplateProject.objects.filter(template_kind=TemplateProject.KIND_EXAMPLE),
             'demo_templates': TemplateProject.objects.filter(template_kind=TemplateProject.KIND_SDK_DEMO),
             'default_template_id': settings.DEFAULT_TEMPLATE,
             'user': user,
