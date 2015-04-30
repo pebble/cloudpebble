@@ -1,46 +1,120 @@
+# WARNING: This file is extremely specific to how Katharine happens to have her 
+# local machines set up.
+# In particular, to run without modification, you will need:
+# - An EC2 keypair in ~/Downloads/katharine-keypair.pem
+# - A keypair for the ycmd servers in ~/.ssh/id_rsa
+# - The tintin source tree in ~/projects/tintin
+#   - With an appropriate pypy virtualenv in .env/
+# - A clone of qemu-tintin-images in ~/projects/qemu-tintin-images
+# - Access to the cloudpebble heroku app
+
 from fabric.api import *
-from fabric.contrib.console import confirm
+from fabric.tasks import execute
 
-env.hosts = ['app.cloudpebble.net']
-env.project_root = '/home/cloudpebble/web/cloudpebble'
-env.virtualenv = '/home/cloudpebble/virtualenv'
-env.app_user = 'cloudpebble'
+env.roledefs = {
+    'qemu': ['ec2-user@qemu-us1.pebble-sockets.com', 'ec2-user@qemu-us2.pebble-sockets.com'],
+    'ycmd': ['root@cloudpebble-ycm3.pebble-sockets.com', 'root@cloudpebble-ycm4.pebble-sockets.com'],
+}
+env.key_filename = ['~/.ssh/id_rsa', '~/Downloads/katharine-keypair.pem']
+
+@task
+@roles('qemu')
+def update_qemu_service():
+    with cd("cloudpebble-qemu-controller"):
+        run("git pull")
+        run("git submodule update --init --recursive")
+        with prefix(". .env/bin/activate"):
+            run("pip install -r requirements.txt")
+    sudo("restart cloudpebble-qemu")
 
 
-def check_updated():
-    local("git status")
-    if not confirm("Are you ready to deploy?"):
-        abort("Not ready.")
+@task
+@roles('qemu')
+def update_qemu_sdk():
+    with cd('qemu'):
+        run("git pull")
+        run("make -j8")
+
+    with cd("qemu-tintin-images"):
+        run("git pull")
+
+    with cd("pypkjs"):
+        run("git pull")
+        run("git submodule update --init --recursive")
+        with prefix(". .env/bin/activate"):
+            run("pip install -r requirements.txt")
 
 
-def update_remote():
-    with cd(env.project_root), settings(sudo_user=env.app_user):
+@task
+@roles('ycmd')
+def update_ycmd_sdk(sdk_version):
+    with cd("/home/ycm"), settings(sudo_user="ycm", shell="/bin/bash -c"):
+        sudo("wget -nv -O sdk.tar.gz http://assets.getpebble.com.s3-website-us-east-1.amazonaws.com/sdk2/PebbleSDK-%s.tar.gz" % sdk_version)
+        sudo("tar -xf sdk.tar.gz")
+        sudo("rm -rf sdk3")
+        sudo("mv PebbleSDK-%s sdk3" % sdk_version)
+
+
+@task
+@roles('ycmd')
+def update_ycmd_service():
+    with cd("/home/ycm/proxy"), settings(sudo_user="ycm", shell="/bin/bash -c"):
         sudo("git pull")
-        sudo("git submodule update --init --recursive")
+        run("restart ycmd-proxy")
+
+@task
+def deploy_heroku():
+    local("git push heroku master")
 
 
-def update_django():
-    with cd(env.project_root), settings(sudo_user=env.app_user):
-        with prefix(". %s/bin/activate" % env.virtualenv):
-            sudo("python manage.py syncdb")
-            sudo("python manage.py migrate")
-            sudo("python manage.py collectstatic --noinput")
+@task
+def update_all_services():
+    execute(update_qemu_servers)
+    execute(update_ycmd_service)
+    execute(deploy_heroku)
 
 
-def update_modules():
-    with cd(env.project_root), settings(sudo_user=env.app_user):
-        with prefix(". %s/bin/activate" % env.virtualenv):
-            sudo("pip install -q --exists-action i -r requirements.txt")
+@task
+@runs_once
+def update_qemu_images(sdk_version):
+    # Merge conflicts are no fun.
+    with lcd("~/projects/qemu-tintin-images"):
+        local("git pull")
+
+    with lcd("~/projects/tintin"):
+        local("git checkout v%s" % sdk_version)
+        with prefix(". .env/bin/activate"):
+            local("pypy ./waf configure --board=snowy_bb --qemu --release --sdkshell build qemu_image_spi qemu_image_micro")
+        local("cp build/qemu_* ~/projects/qemu-tintin-images/basalt/3.0/")
+
+    with lcd("~/projects/qemu-tintin-images"):
+        local("git commit -a -m 'Update to v%s'" % sdk_version)
+        local("git push")
 
 
-def restart_servers():
-    sudo("supervisorctl restart cloudpebble cloudpebble_celery")
+@task
+@runs_once
+def update_cloudpebble_sdk(sdk_version):
+    local("sed -i.bak 's/PebbleSDK-3.[a-z0-9-]*.tar.gz/PebbleSDK-%s.tar.gz/' bin/post_compile bootstrap.sh" % sdk_version)
+    local("git add bin/post_compile bootstrap.sh")
+    local("git commit -m 'Update to v%s'" % sdk_version)
+    local("git push")
+    execute(deploy_heroku)
 
 
-def deploy():
-    check_updated()
-    update_remote()
-    update_modules()
-    update_django()
+@task
+def update_sdk(sdk_version):
+    execute(update_qemu_images, sdk_version)
+    execute(update_qemu_sdk)
+    execute(update_ycmd_sdk, sdk_version)
+    execute(update_cloudpebble_sdk, sdk_version)
 
-    restart_servers()
+
+@task
+def update_all(sdk_version):
+    execute(update_qemu_images, sdk_version)
+    execute(update_qemu_sdk)
+    execute(update_qemu_service)
+    execute(update_ycmd_sdk, sdk_version)
+    execute(update_ycmd_service)
+    execute(update_cloudpebble_sdk, sdk_version)
