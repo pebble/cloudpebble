@@ -32,7 +32,7 @@ popd
 mkdir sdk3
 pushd sdk3
     echo "Extracting SDK 3"
-    tar -xf --strip 1 /tmp/pebblesdk3.tar.gz
+    tar --strip 1 -xf /tmp/pebblesdk3.tar.gz
     echo "Extracting the toolchain"
     tar -xf /tmp/arm-cs-tools.tar
     echo "Preparing virtualenv"
