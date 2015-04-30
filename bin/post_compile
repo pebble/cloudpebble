@@ -48,7 +48,6 @@ python manage.py syncdb --noinput
 #python manage.py migrate
 
 echo "Compiling gettext files"
-export PATH="/app/gettext/bin:$PATH"
 python manage.py compilemessages
 
 echo "Post-compile complete."
