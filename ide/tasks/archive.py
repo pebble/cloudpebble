@@ -144,7 +144,6 @@ def do_import_archive(project_id, archive, delete_project=False):
                             project.app_short_name = m['shortName']
                             project.app_long_name = m['longName']
                             project.app_company_name = m['companyName']
-                            project.app_version_code = m['versionCode']
                             project.app_version_label = m['versionLabel']
                             project.sdk_version = m.get('sdkVersion', '2')
                             project.app_is_watchface = m.get('watchapp', {}).get('watchface', False)
