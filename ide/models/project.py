@@ -89,11 +89,9 @@ class Project(IdeModel):
 class TemplateProject(Project):
     KIND_TEMPLATE = 1
     KIND_SDK_DEMO = 2
-    KIND_EXAMPLE = 3
     KIND_CHOICES = (
         (KIND_TEMPLATE, _('Template')),
         (KIND_SDK_DEMO, _('SDK Demo')),
-        (KIND_EXAMPLE, _('Example')),
     )
 
     template_kind = models.IntegerField(choices=KIND_CHOICES, db_index=True)
