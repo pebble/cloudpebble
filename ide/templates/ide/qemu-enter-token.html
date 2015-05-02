@@ -34,7 +34,7 @@ window.addEventListener('load', function() {
         <!-- I still don't know how to vertically centre things with CSS. -->
         <h2>Enter code</h2>
         <form>
-            <input id="code-input" type="text" pattern="\d*" maxlength="6">
+            <input id="code-input" type="tel" pattern="\d*" maxlength="6">
             <p><button class="btn btn-primary" id="go-btn" disabled>Go</button></p>
         </form>
         {% if failed %}

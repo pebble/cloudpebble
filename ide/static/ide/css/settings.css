@@ -3,6 +3,10 @@
     width: 535px;
 }
 
+.editor-settings .well {
+    margin-bottom: 30px;
+}
+
 .github-settings {
     float: right;
     width: 375px;

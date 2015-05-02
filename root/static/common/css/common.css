@@ -331,7 +331,7 @@ select {
     background-image: url('../../common/img/dropdown.png');
 }
 
-input[type=text], input[type=number], input[type=password] {
+input[type=text], input[type=number], input[type=password], input[type=tel] {
     height: 35px;
     font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: larger;
