@@ -36,7 +36,11 @@ def init_autocomplete(request, project_id):
                 count += 1
     file_contents['build/src/resource_ids.auto.h'] = '\n'.join(resource_ids) + "\n"
 
-    request = {'files': file_contents, 'platforms': request.POST.get('platforms', 'aplite').split(',')}
+    request = {
+        'files': file_contents,
+        'platforms': request.POST.get('platforms', 'aplite').split(','),
+        'sdk': request.POST.get('sdk', '2'),
+    }
     # Let's go!
     return _spin_up_server(request)
 
