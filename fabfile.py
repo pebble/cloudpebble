@@ -69,7 +69,7 @@ def deploy_heroku():
 
 @task
 def update_all_services():
-    execute(update_qemu_servers)
+    execute(update_qemu_service)
     execute(update_ycmd_service)
     execute(deploy_heroku)
 
