@@ -243,6 +243,7 @@ def generate_v3_manifest_dict(project, resources):
     if project.app_platforms:
         manifest['targetPlatforms'] = project.app_platform_list
     manifest['sdkVersion'] = "3"
+    del manifest['versionCode']
     return manifest
 
 
@@ -374,6 +375,7 @@ def generate_simplyjs_manifest_dict(project):
         "longName": project.app_long_name,
         "companyName": project.app_company_name,
         "versionLabel": project.app_version_label,
+        "versionCode": 1,
         "capabilities": project.app_capabilities.split(','),
         "watchapp": {
             "watchface": project.app_is_watchface
@@ -397,6 +399,7 @@ def generate_pebblejs_manifest_dict(project, resources):
         "companyName": project.app_company_name,
         "versionLabel": project.app_version_label,
         "capabilities": project.app_capabilities.split(','),
+        "versionCode": 1,
         "watchapp": {
             "watchface": project.app_is_watchface
         },
