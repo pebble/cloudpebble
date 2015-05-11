@@ -36,6 +36,7 @@ def project_info(request, project_id):
         'app_company_name': project.app_company_name,
         'app_short_name': project.app_short_name,
         'app_long_name': project.app_long_name,
+        'app_version_code': project.app_version_code,
         'app_version_label': project.app_version_label,
         'app_is_watchface': project.app_is_watchface,
         'app_capabilities': project.app_capabilities,
@@ -159,6 +160,7 @@ def create_project(request):
                 app_company_name=request.user.username,
                 app_short_name=name,
                 app_long_name=name,
+                app_version_code=1,
                 app_version_label='1.0',
                 app_is_watchface=False,
                 app_capabilities='',
@@ -201,6 +203,7 @@ def save_project_settings(request, project_id):
             project.app_company_name = request.POST['app_company_name']
             project.app_short_name = request.POST['app_short_name']
             project.app_long_name = request.POST['app_long_name']
+            project.app_version_code = int(request.POST['app_version_code'])
             project.app_version_label = request.POST['app_version_label']
             project.app_is_watchface = bool(int(request.POST['app_is_watchface']))
             project.app_capabilities = request.POST['app_capabilities']

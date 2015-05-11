@@ -52,6 +52,7 @@ def import_gist(user_id, gist_id):
         'app_short_name': settings.get('shortName', default_name),
         'app_long_name': settings.get('longName', default_name),
         'app_company_name': settings.get('companyName', user.username),
+        'app_version_code': 1,
         'app_version_label': settings.get('versionLabel', '1.0'),
         'app_is_watchface': settings.get('watchapp', {}).get('watchface', False),
         'app_capabilities': ','.join(settings.get('capabilities', [])),
