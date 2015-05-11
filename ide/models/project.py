@@ -35,7 +35,6 @@ class Project(IdeModel):
     app_company_name = models.CharField(max_length=100, blank=True, null=True)
     app_short_name = models.CharField(max_length=100, blank=True, null=True)
     app_long_name = models.CharField(max_length=100, blank=True, null=True)
-    app_version_code = models.IntegerField(blank=True, null=True, default=1)
     app_version_label = models.CharField(max_length=40, blank=True, null=True, default='1.0')
     app_is_watchface = models.BooleanField(default=False)
     app_capabilities = models.CharField(max_length=255, blank=True, null=True)
