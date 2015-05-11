@@ -93,6 +93,16 @@
                         </span>
                     </div>
                 </div>
+                <div class="control-group hide">
+                    <label class="control-label" for="settings-version-code">Version code</label>
+                    <div class="controls">
+                        <input type="number" id="settings-version-code" placeholder="1" value="{{project.app_version_code}}">
+                        <span class="help-block">
+                            A version number for this app. Each time you make a change to your app, you should increment the version code.
+                            CloudPebble will automatically increment it each time you compile, providing a build number.
+                        </span>
+                    </div>
+                </div>
                 <div class="control-group">
                     <label class="control-label" for="settings-version-label">{% trans "Version label" %}</label>
                     <div class="controls">

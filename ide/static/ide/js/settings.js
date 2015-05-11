@@ -35,6 +35,7 @@ CloudPebble.Settings = (function() {
             var short_name = pane.find('#settings-short-name').val();
             var long_name = pane.find('#settings-long-name').val();
             var company_name = pane.find('#settings-company-name').val();
+            var version_code = pane.find('#settings-version-code').val();
             var version_label = pane.find('#settings-version-label').val();
             var app_uuid = pane.find('#settings-uuid').val();
             var app_is_watchface = pane.find('#settings-app-is-watchface').val();
@@ -75,6 +76,10 @@ CloudPebble.Settings = (function() {
             }
             if(company_name.replace(/\s/g, '') == '') {
                 display_error(gettext("You must specify a company name."));
+                return;
+            }
+            if(version_code.replace(/\s/g, '') == '' || version_code.replace(/\d/g,'') != '') {
+                display_error(gettext("You must specify a positive integer version code."));
                 return;
             }
             // This is not an appropriate use of a regex, but we have to have it for the HTML5 pattern attribute anyway,
@@ -122,6 +127,7 @@ CloudPebble.Settings = (function() {
             saved_settings['app_short_name'] = short_name;
             saved_settings['app_long_name'] = long_name;
             saved_settings['app_company_name'] = company_name;
+            saved_settings['app_version_code'] = version_code;
             saved_settings['app_version_label'] = version_label;
             saved_settings['app_uuid'] = app_uuid;
             saved_settings['app_capabilities'] = app_capabilities;
@@ -140,6 +146,7 @@ CloudPebble.Settings = (function() {
                     CloudPebble.ProjectInfo.app_company_name = company_name;
                     CloudPebble.ProjectInfo.app_short_name = short_name;
                     CloudPebble.ProjectInfo.app_long_name = long_name;
+                    CloudPebble.ProjectInfo.app_version_code = version_code;
                     CloudPebble.ProjectInfo.app_version_label = version_label;
                     CloudPebble.ProjectInfo.app_is_watchface = app_is_watchface;
                     CloudPebble.ProjectInfo.app_capabilities = app_capabilities;

@@ -28,6 +28,8 @@ def view_project(request, project_id):
         project.app_short_name = project.name
     if project.app_long_name is None:
         project.app_long_name = project.app_short_name
+    if project.app_version_code is None:
+        project.app_version_code = 1
     if project.app_version_label is None:
         project.app_version_label = '1.0'
     send_keen_event('cloudpebble', 'cloudpebble_open_project', request=request, project=project)

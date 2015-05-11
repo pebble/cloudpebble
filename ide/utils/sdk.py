@@ -224,6 +224,7 @@ def generate_v2_manifest_dict(project, resources):
         'shortName': project.app_short_name,
         'longName': project.app_long_name,
         'companyName': project.app_company_name,
+        'versionCode': project.app_version_code,
         'versionLabel': project.app_version_label,
         'watchapp': {
             'watchface': project.app_is_watchface
@@ -372,6 +373,7 @@ def generate_simplyjs_manifest_dict(project):
         "shortName": project.app_short_name,
         "longName": project.app_long_name,
         "companyName": project.app_company_name,
+        "versionCode": project.app_version_code,
         "versionLabel": project.app_version_label,
         "capabilities": project.app_capabilities.split(','),
         "watchapp": {
@@ -394,6 +396,7 @@ def generate_pebblejs_manifest_dict(project, resources):
         "shortName": project.app_short_name,
         "longName": project.app_long_name,
         "companyName": project.app_company_name,
+        "versionCode": project.app_version_code,
         "versionLabel": project.app_version_label,
         "capabilities": project.app_capabilities.split(','),
         "watchapp": {
