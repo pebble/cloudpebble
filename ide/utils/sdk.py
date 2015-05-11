@@ -225,6 +225,7 @@ def generate_v2_manifest_dict(project, resources):
         'longName': project.app_long_name,
         'companyName': project.app_company_name,
         'versionLabel': project.app_version_label,
+        'versionCode': 1,
         'watchapp': {
             'watchface': project.app_is_watchface
         },
