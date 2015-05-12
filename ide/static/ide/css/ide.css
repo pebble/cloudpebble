@@ -930,6 +930,25 @@ span.cm-autofilled-end {
     background-image: url('../img/pebbles/tintin-green.png');
 }
 
+.screenshot-holder-snowy-black {
+    background-image: url('../img/pebbles/snowy-black.png');
+}
+
+.screenshot-holder-snowy-white {
+    background-image: url('../img/pebbles/snowy-white.png');
+}
+
+.screenshot-holder-snowy-red {
+    background-image: url('../img/pebbles/snowy-red.png');
+}
+
+.screenshot-holder.screenshot-holder-snowy-black,
+.screenshot-holder.screenshot-holder-snowy-red,
+.screenshot-holder.screenshot-holder-snowy-white {
+    padding-top: 91px;
+    padding-left: 4px;
+}
+
 .field-help {
     vertical-align: middle;
     margin-bottom: 5px;

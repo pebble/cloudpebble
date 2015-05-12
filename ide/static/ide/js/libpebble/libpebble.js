@@ -422,7 +422,10 @@ Pebble = function(proxy, token) {
             7: 'bianca-black',
             8: 'tintin-blue',
             9: 'tintin-green',
-            10: 'tintin-pink'
+            10: 'tintin-pink',
+            11: 'snowy-white',
+            12: 'snowy-black',
+            13: 'snowy-red'
         };
 
         var handle_colour = function(data) {
@@ -566,6 +569,35 @@ Pebble = function(proxy, token) {
         }
     };
 
+    var decode_image_1bit = function(incoming_image) {
+        var expanded_data = new Uint8Array(incoming_image.width * incoming_image.height * 4);
+        for (var i = 0; i < incoming_image.data.length; ++i) {
+            for (var j = 0; j < 8; ++j) {
+                var pixel = (incoming_image.data[i] >> j) & 1;
+                var colour = pixel * 255;
+                var pos = ((i * 8) + j) * 4;
+                expanded_data[pos + 0] = colour;
+                expanded_data[pos + 1] = colour;
+                expanded_data[pos + 2] = colour;
+                expanded_data[pos + 3] = 255; // always fully opaque.
+            }
+        }
+        return expanded_data;
+    };
+
+    var decode_image_8bit = function(incoming_image) {
+        var expanded_data = new Uint8Array(incoming_image.width * incoming_image.height * 4);
+        for (var i = 0; i < incoming_image.data.length; ++i) {
+            var pixel = incoming_image.data[i];
+            var pos = i * 4;
+            expanded_data[pos + 0] = ((pixel & 0x30) >> 4) * 85;
+            expanded_data[pos + 1] = ((pixel & 0x0c) >> 2) * 85;
+            expanded_data[pos + 2] = ((pixel & 0x03) >> 0) * 85;
+            expanded_data[pos + 3] = 255; // always fully opaque.
+        }
+        return expanded_data;
+    };
+
     var decode_image = function(incoming_image) {
         var canvas = document.createElement('canvas');
         canvas.setAttribute('width', String(incoming_image.width));
@@ -574,17 +606,11 @@ Pebble = function(proxy, token) {
 
         var image_data = context.createImageData(incoming_image.width, incoming_image.height);
 
-        var expanded_data = new Uint8Array(incoming_image.width * incoming_image.height * 4);
-        for(var i = 0; i < incoming_image.data.length; ++i) {
-            for(var j = 0; j < 8; ++j) {
-                var pixel = (incoming_image.data[i] >> j) & 1;
-                var colour = pixel * 255;
-                var pos = ((i*8)+j)*4;
-                expanded_data[pos+0] = colour;
-                expanded_data[pos+1] = colour;
-                expanded_data[pos+2] = colour;
-                expanded_data[pos+3] = 255; // always fully opaque.
-            }
+        var expanded_data;
+        if (incoming_image.version == 1) {
+            expanded_data = decode_image_1bit(incoming_image);
+        } else if (incoming_image.version == 2) {
+            expanded_data = decode_image_8bit(incoming_image);
         }
 
         image_data.data.set(expanded_data);
@@ -605,16 +631,22 @@ Pebble = function(proxy, token) {
             self.trigger('screenshot:failed', "Internal watch error.");
             data = null;
         }
-        if(version !== 1) {
+        if(version < 1 || version > 2) {
             self.trigger('screenshot:failed', "Unrecognised image format.");
             data = null;
         }
+        var array;
+        if(version == 1) {
+            array = new Uint8Array(width*height / 8);
+        } else if(version == 2) {
+            array = new Uint8Array(width * height);
+        }
         mIncomingImage = {
-            data: new Uint8Array(width*height / 8),
+            data: array,
             version: version,
             width: width,
             height: height,
-            length: width * height / 8,
+            length: array.length,
             received: 0
         };
         return data;
