@@ -264,9 +264,9 @@
                     CloudPebble.Analytics.addEvent('qemu_launched', {success: true});
                     startVNC();
                 })
-                .fail(function() {
-                    CloudPebble.Analytics.addEvent('qemu_launched', {success: false});
-                    mPendingDeferred.reject();
+                .fail(function(reason) {
+                    CloudPebble.Analytics.addEvent('qemu_launched', {success: false, reason: reason});
+                    mPendingDeferred.reject(reason);
                 });
 
             return mPendingDeferred.promise();

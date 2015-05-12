@@ -172,7 +172,7 @@ var SharedPebble = new (function() {
             .fail(function(reason) {
                 mEmulator = null;
                 CloudPebble.Prompts.Progress.Fail();
-                CloudPebble.Prompts.Progress.Update(interpolate(gettext("Emulator boot failed: %s"), ["out of capacity."]));
+                CloudPebble.Prompts.Progress.Update(interpolate(gettext("Emulator boot failed: %s"), [reason]));
                 $('#sidebar').removeClass('with-emulator');
                 deferred.reject(reason);
             });
