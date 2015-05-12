@@ -598,6 +598,86 @@ Pebble = function(proxy, token) {
         return expanded_data;
     };
 
+    var decode_image_8bit_corrected = function(incoming_image) {
+        var expanded_data = new Uint8Array(incoming_image.width * incoming_image.height * 4);
+        var colour_map = {
+            0:  0x000000,
+            1:  0x001e41,
+            2:  0x004387,
+            3:  0x0068ca,
+            4:  0x2b4a2c,
+            5:  0x27514f,
+            6:  0x16638d,
+            7:  0x007dce,
+            8:  0x5e9860,
+            9:  0x5c9b72,
+            10: 0x57a5a2,
+            11: 0x4cb4db,
+            12: 0x8ee391,
+            13: 0x8ee69e,
+            14: 0x8aebc0,
+            15: 0x84f5f1,
+            16: 0x4a161b,
+            17: 0x482748,
+            18: 0x40488a,
+            19: 0x2f6bcc,
+            20: 0x564e36,
+            21: 0x545454,
+            22: 0x4f6790,
+            23: 0x4180d0,
+            24: 0x759a64,
+            25: 0x759d76,
+            26: 0x71a6a4,
+            27: 0x69b5dd,
+            28: 0x9ee594,
+            29: 0x9de7a0,
+            30: 0x9becc2,
+            31: 0x95f6f2,
+            32: 0x99353f,
+            33: 0x983e5a,
+            34: 0x955694,
+            35: 0x8f74d2,
+            36: 0x9d5b4d,
+            37: 0x9d6064,
+            38: 0x9a7099,
+            39: 0x9587d5,
+            40: 0xafa072,
+            41: 0xaea382,
+            42: 0xababab,
+            43: 0xffffff,
+            44: 0xa7bae2,
+            45: 0xc9e89d,
+            46: 0xc9eaa7,
+            47: 0xc7f0c8,
+            48: 0xc3f9f7,
+            49: 0xe35462,
+            50: 0xe25874,
+            51: 0xe16aa3,
+            52: 0xde83dc,
+            53: 0xe66e6b,
+            54: 0xe6727c,
+            55: 0xe37fa7,
+            56: 0xe194df,
+            57: 0xf1aa86,
+            58: 0xf1ad93,
+            59: 0xefb5b8,
+            60: 0xecc3eb,
+            61: 0xffeeab,
+            62: 0xfff1b5,
+            63: 0xfff6d3
+        };
+        for (var i = 0; i < incoming_image.data.length; ++i) {
+            var pixel = incoming_image.data[i];
+            var pos = i * 4;
+            var corrected = colour_map[pixel & 63];
+            expanded_data[pos + 0] = (corrected >> 16) & 0xff;
+            expanded_data[pos + 1] = (corrected >> 8)  & 0xff;
+            expanded_data[pos + 2] = (corrected >> 0)  & 0xff;
+            expanded_data[pos + 3] = 255; // always fully opaque.
+        }
+        return expanded_data;
+    };
+
     var decode_image = function(incoming_image) {
         var canvas = document.createElement('canvas');
         canvas.setAttribute('width', String(incoming_image.width));
@@ -610,7 +690,7 @@ Pebble = function(proxy, token) {
         if (incoming_image.version == 1) {
             expanded_data = decode_image_1bit(incoming_image);
         } else if (incoming_image.version == 2) {
-            expanded_data = decode_image_8bit(incoming_image);
+            expanded_data = decode_image_8bit_corrected(incoming_image);
         }
 
         image_data.data.set(expanded_data);
