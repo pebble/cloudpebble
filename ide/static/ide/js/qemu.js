@@ -34,13 +34,13 @@
                 deferred.reject("You need a browser that supports binary websockets.");
                 return deferred.promise();
             }
+            var test_ws;
             try {
-                var test_ws = new WebSocket("wss://./");
-                if (!test_ws.binaryType) {
-                    deferred.reject("You need a browser that supports binary websockets.");
-                    return deferred.promise()
-                }
+                test_ws = new WebSocket("wss://./");
             } catch(e) {
+                // pass.
+            }
+            if (!test_ws || !test_ws.binaryType) {
                 deferred.reject("You need a browser that supports binary websockets.");
                 return deferred.promise()
             }
