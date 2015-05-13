@@ -29,6 +29,21 @@
         function spawn() {
             var deferred = $.Deferred();
             console.log(mPlatform);
+            // First verify that this is actually plausible.
+            if (!window.WebSocket || !('binaryType' in WebSocket.prototype)) {
+                deferred.reject("You need a browser that supports binary websockets.");
+                return deferred.promise();
+            }
+            try {
+                var test_ws = new WebSocket("wss://./");
+                if (!test_ws.binaryType) {
+                    deferred.reject("You need a browser that supports binary websockets.");
+                    return deferred.promise()
+                }
+            } catch(e) {
+                deferred.reject("You need a browser that supports binary websockets.");
+                return deferred.promise()
+            }
             var tz_offset = -(new Date()).getTimezoneOffset(); // Negative because JS does timezones backwards.
             $.post('/ide/emulator/launch', {platform: mPlatform, token: USER_SETTINGS.token, tz_offset: tz_offset})
                 .done(function (data) {

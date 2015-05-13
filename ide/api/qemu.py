@@ -76,7 +76,7 @@ def launch_emulator(request):
         except (requests.RequestException, ValueError) as e:
             print e
             pass
-    return json_failure("No capacity available.")
+    return json_failure("Unable to create emulator instance.")
 
 
 @login_required
