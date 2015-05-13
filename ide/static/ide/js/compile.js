@@ -442,7 +442,11 @@ CloudPebble.Compile = (function() {
                     ga('send', 'event', 'install', 'direct', 'success');
                     CloudPebble.Analytics.addEvent('app_install_succeeded', {virtual: SharedPebble.isVirtual()});
                 } else {
-                    report_error(gettext("Installation failed. Check your phone for details."));
+                    if (SharedPebble.isVirtual()) {
+                        report_error(gettext("Installation rejected. Try rebooting the emulator and trying again."));
+                    } else {
+                        report_error(gettext("Installation rejected. Check your phone for details."));
+                    }
                     ga('send', 'event', 'install', 'direct', 'phone-error');
                     CloudPebble.Analytics.addEvent('app_install_failed', {cause: 'rejected', virtual: SharedPebble.isVirtual()});
                 }
@@ -470,9 +474,21 @@ CloudPebble.Compile = (function() {
                         basalt: mLastBuild.sizes.basalt
                     };
                     var size = sizes[platform];
+                    var install_timer = setTimeout(function() {
+                        if (SharedPebble.isVirtual()) {
+                            report_error(gettext("Installation failed (timeout). Try rebooting the emulator and trying again."));
+                        } else {
+                            report_error(gettext("Installation failed; no response from phone."));
+                        }
+                        CloudPebble.Analytics.addEvent('app_install_failed', {
+                            cause: 'target_not_responding',
+                            virtual: SharedPebble.isVirtual()
+                        });
+                    }, 30000);
                     pebble.install_app(mLastBuild.pbw);
                     var expectedBytes = (size.binary + size.worker + size.resources);
                     pebble.on('install:progress', function(bytes) {
+                        clearTimeout(install_timer);
                         modal.find('.modal-body > p').text(gettext("Installing app on watch…"));
                         if(modal.find('.progress').hasClass('progress-striped')) {
                             modal.find('.progress').addClass('no-animation');
