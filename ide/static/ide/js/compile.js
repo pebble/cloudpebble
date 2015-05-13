@@ -464,8 +464,14 @@ CloudPebble.Compile = (function() {
                 // Make sure that we have the required version - but also assume that anyone who has the string 'test'
                 // in their firmware version number (e.g. me) knows what they're doing.
                 if(/test/.test(version_string) || compare_version_strings(version_string, MINIMUM_INSTALL_VERSION) >= 0) {
+                    var platform = Pebble.version_to_platform(version_info);
+                    var sizes = {
+                        aplite: mLastBuild.sizes.aplite,
+                        basalt: mLastBuild.sizes.basalt
+                    };
+                    var size = sizes[platform];
                     pebble.install_app(mLastBuild.pbw);
-                    var expectedBytes = (mLastBuild.size.binary + mLastBuild.size.worker + mLastBuild.size.resources);
+                    var expectedBytes = (size.binary + size.worker + size.resources);
                     pebble.on('install:progress', function(bytes) {
                         modal.find('.modal-body > p').text(gettext("Installing app on watch…"));
                         if(modal.find('.progress').hasClass('progress-striped')) {
