@@ -405,7 +405,8 @@ def generate_pebblejs_manifest_dict(project, resources):
         },
         "appKeys": {},
         "resources": generate_pebblejs_resource_dict(resources),
-        "projectType": "pebblejs"
+        "projectType": "pebblejs",
+        "sdkVersion": str(project.sdk_version),
     }
 
     return manifest

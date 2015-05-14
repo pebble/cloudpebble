@@ -247,4 +247,5 @@ def run_compile(build_result):
             pass
         build_result.save()
     finally:
-        shutil.rmtree(base_dir)
+        # shutil.rmtree(base_dir)
+        print base_dir
