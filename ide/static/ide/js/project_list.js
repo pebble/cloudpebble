@@ -177,6 +177,14 @@ $(function() {
         $('#project-confirm-button').click();
     });
 
+    if (location.pathname.indexOf('/ide/import/github/') === 0) {
+        var parts = location.pathname.substr(1).split('/');
+        $('#import-prompt').modal();
+        $('#import-github-name').val(parts[3]);
+        $('#import-github-url').val('github.com/' + parts[3] + '/' + parts[4]);
+        $('a[href=#import-github]').tab('show');
+    }
+
     jquery_csrf_setup();
     $('table').tablesorter();
 });
