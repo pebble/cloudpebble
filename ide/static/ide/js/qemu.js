@@ -30,8 +30,8 @@
             var deferred = $.Deferred();
             console.log(mPlatform);
             // First verify that this is actually plausible.
-            if (!window.WebSocket || !('binaryType' in WebSocket.prototype)) {
-                deferred.reject("You need a browser that supports binary websockets.");
+            if (!window.WebSocket) {
+                deferred.reject("You need a browser that supports websockets.");
                 return deferred.promise();
             }
             var test_ws;
@@ -40,7 +40,7 @@
             } catch(e) {
                 // pass.
             }
-            if (!test_ws || !test_ws.binaryType) {
+            if (!test_ws || (!test_ws.binaryType && !('binaryType' in WebSocket.prototype))) {
                 deferred.reject("You need a browser that supports binary websockets.");
                 return deferred.promise()
             }
