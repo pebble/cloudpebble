@@ -79,7 +79,7 @@
                 <div class="controls">
                     <select id="project-type">
                         <option value="native" selected="selected">{% trans "Pebble C SDK" %}</option>
-                        <option value="simplyjs">{% trans "Simply.js" %}</option>
+                        <option value="simplyjs" disabled>{% trans "Simply.js" %}</option>
                         <option value="pebblejs">{% trans "Pebble.js (beta)" %}</option>
                     </select>
                 </div>
@@ -88,8 +88,8 @@
                 <label class="control-label" for="project-sdk-version">{% trans "SDK Version" %}</label>
                 <div class="controls">
                     <select id="project-sdk-version">
-                        <option value="2" selected>{% trans 'SDK 2 (Pebble, Pebble Steel)' %}</option>
-                        <option value="3">{% trans 'SDK 3 (Pebble Time)' %}</option>
+                        <option value="2">{% trans 'SDK 2' %}</option>
+                        <option value="3" selected>{% trans 'SDK 3' %}</option>
                     </select>
                 </div>
             </div>

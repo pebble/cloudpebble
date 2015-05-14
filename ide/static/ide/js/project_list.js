@@ -8,12 +8,12 @@ $(function() {
         if(val != 'native') {
             $('#project-template').val(0);
             $('#template-holder').hide();
-            if (val == 'simplyjs') {
-                $('#project-sdk-version').val('2');
-                $('.sdk-version').hide();
+            if (val == 'pebblejs') {
+                $('#project-sdk-version').val('3');
             } else {
-                $('.sdk-version').show();
+                $('#project-sdk-version').val('2');
             }
+            $('.sdk-version').hide();
         } else {
             $('#template-holder').show();
             $('.sdk-version').show();
@@ -23,8 +23,10 @@ $(function() {
         var val = $(this).val();
         if(val == '3') {
             $('#project-type').find('[value=simplyjs]').attr('disabled', 'disabled');
+            $('#project-type').find('[value=pebblejs]').removeAttr('disabled');
         } else {
             $('#project-type').find('[value=simplyjs]').removeAttr('disabled');
+            $('#project-type').find('[value=pebblejs]').attr('disabled', 'disabled');
         }
     });
 
