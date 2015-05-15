@@ -12,7 +12,7 @@ __author__ = 'katharine'
 @require_safe
 @login_required
 @ensure_csrf_cookie
-def index(request):
+def index(request, github_account=None, github_project=None):
     user = request.user
     my_projects = Project.objects.filter(owner=user).order_by('-last_modified')
     if not user.settings.accepted_terms:

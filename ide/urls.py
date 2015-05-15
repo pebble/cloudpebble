@@ -18,6 +18,7 @@ from ide.views.settings import settings_page, start_github_auth, remove_github_a
 urlpatterns = patterns(
     '',
     url(r'^$', index, name='index'),
+    url(r'^import/github/(?P<github_account>.+?)/(?P<github_project>.+?)$', index, name='index'),
     url(r'^project/create', create_project, name='create_project'),
     url(r'^project/(?P<project_id>\d+)$', view_project, name='project'),
     url(r'^project/(?P<project_id>\d+)/info', project_info, name='project_info'),

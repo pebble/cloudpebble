@@ -8,7 +8,11 @@ $(function() {
         if(val != 'native') {
             $('#project-template').val(0);
             $('#template-holder').hide();
-            $('#project-sdk-version').val('2');
+            if (val == 'pebblejs') {
+                $('#project-sdk-version').val('3');
+            } else {
+                $('#project-sdk-version').val('2');
+            }
             $('.sdk-version').hide();
         } else {
             $('#template-holder').show();
@@ -18,10 +22,11 @@ $(function() {
     $('#project-sdk-version').change(function() {
         var val = $(this).val();
         if(val == '3') {
-            $('#project-type').val('native');
-            $('.project-type-holder').hide();
+            $('#project-type').find('[value=simplyjs]').attr('disabled', 'disabled');
+            $('#project-type').find('[value=pebblejs]').removeAttr('disabled');
         } else {
-            $('.project-type-holder').show();
+            $('#project-type').find('[value=simplyjs]').removeAttr('disabled');
+            $('#project-type').find('[value=pebblejs]').attr('disabled', 'disabled');
         }
     });
 
@@ -171,6 +176,14 @@ $(function() {
         e.preventDefault();
         $('#project-confirm-button').click();
     });
+
+    if (location.pathname.indexOf('/ide/import/github/') === 0) {
+        var parts = location.pathname.substr(1).split('/');
+        $('#import-prompt').modal();
+        $('#import-github-name').val(parts[3]);
+        $('#import-github-url').val('github.com/' + parts[3] + '/' + parts[4]);
+        $('a[href=#import-github]').tab('show');
+    }
 
     jquery_csrf_setup();
     $('table').tablesorter();
