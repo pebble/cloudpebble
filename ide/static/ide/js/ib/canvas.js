@@ -29,7 +29,7 @@
         // Window properties
         var mProperties = {
             bg: new IB.Properties.Colour(pgettext("background colour", "Background"), IB.ColourWhite),
-            fullscreen: new IB.Properties.Bool(gettext("Fullscreen"), CloudPebble.ProjectInfo.app_is_watchface)
+            fullscreen: new IB.Properties.Bool(gettext("Fullscreen"), CloudPebble.ProjectInfo.app_is_watchface || CloudPebble.ProjectInfo.sdk_version == '3')
         };
         mProperties.bg.on('change', handleBackgroundChange, this);
         mProperties.fullscreen.on('change', handleFullscreenChange, this);
@@ -349,7 +349,9 @@
             if(mProperties.bg.getValue() != IB.ColourWhite) {
                 initialiser.push("window_set_background_color(s_window, " + mProperties.bg.getValue() + ");");
             }
-            initialiser.push("window_set_fullscreen(s_window, " + mProperties.fullscreen.getValue() + ");");
+            initialiser.push("#ifndef PBL_SDK_3");
+            initialiser.push("  window_set_fullscreen(s_window, " + mProperties.fullscreen.getValue() + ");");
+            initialiser.push("#endif");
             return initialiser;
         };
 
