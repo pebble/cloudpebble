@@ -851,7 +851,7 @@ CloudPebble.Editor = (function() {
                         });
                         create_remote_file({
                             name: name + ".c",
-                            content: "#include \"" + name + ".h\"\n#include <pebble.h>\n\n" +
+                            content: "#include <pebble.h>\n#include \"" + name + ".h\"\n\n" +
                                 "// BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY\n" +
                                 "static void destroy_ui(void) {}\n" +
                                 "static void initialise_ui(void) {}\n" +
