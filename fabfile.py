@@ -49,7 +49,7 @@ def update_qemu_sdk():
 @roles('ycmd')
 def update_ycmd_sdk(sdk_version):
     with cd("/home/ycm"), settings(sudo_user="ycm", shell="/bin/bash -c"):
-        sudo("wget -nv -O sdk.tar.gz http://assets.getpebble.com.s3-website-us-east-1.amazonaws.com/sdk2/PebbleSDK-%s.tar.gz" % sdk_version)
+        sudo("wget -nv -O sdk.tar.gz https://sdk.getpebble.com/download/%s?source=cloudpebble" % sdk_version)
         sudo("tar -xf sdk.tar.gz")
         sudo("rm -rf sdk3")
         sudo("mv PebbleSDK-%s sdk3" % sdk_version)
