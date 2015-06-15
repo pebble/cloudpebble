@@ -48,7 +48,7 @@ rm arm-cs-tools.tar.bz2
 # Obtain SDK2.
 sudo -u vagrant mkdir sdk2
 pushd sdk2
-    wget --progress=bar:force -O sdk.tar.gz https://s3.amazonaws.com/assets.getpebble.com/sdk2/PebbleSDK-2.8.1.tar.gz
+    wget --progress=bar:force -O sdk.tar.gz https://sdk.getpebble.com/download/2.8.1?source=cloudpebble
     sudo -u vagrant tar --strip 1 -xzf sdk.tar.gz
     rm sdk.tar.gz
     sudo -u vagrant ln -s ~/arm-cs-tools arm-cs-tools
@@ -58,7 +58,7 @@ popd
 # Obtain SDK3.
 sudo -u vagrant mkdir sdk3
 pushd sdk3
-    wget --progress=bar:force -O sdk.tar.gz http://assets.getpebble.com.s3-website-us-east-1.amazonaws.com/sdk2/PebbleSDK-3.0.tar.gz
+    wget --progress=bar:force -O sdk.tar.gz https://sdk.getpebble.com/download/3.0?source=cloudpebble
     sudo -u vagrant tar --strip 1 -xzf sdk.tar.gz
     rm sdk.tar.gz
     sudo -u vagrant ln -s ~/arm-cs-tools arm-cs-tools
