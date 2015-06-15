@@ -95,7 +95,7 @@ def update_qemu_images(sdk_version):
 @task
 @runs_once
 def update_cloudpebble_sdk(sdk_version):
-    local("sed -i.bak 's/PebbleSDK-3.[a-z0-9-]*.tar.gz/PebbleSDK-%s.tar.gz/' bin/post_compile bootstrap.sh" % sdk_version)
+    local("sed -i.bak 's/download\/3.[a-z0-9-]*/download\/%s/' bin/post_compile bootstrap.sh" % sdk_version)
     local("git add bin/post_compile bootstrap.sh")
     local("git commit -m 'Update to v%s'" % sdk_version)
     local("git push")
