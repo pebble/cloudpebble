@@ -414,6 +414,10 @@ ul.nav-pills {
     width: 450px;
 }
 
+.settings-uuid-control input[type=text] {
+    width: 340px;
+}
+
 #settings-app-keys input[type=text] {
     width: 200px;
     font-family: Menlo, 'Deja Vu Sans Mono', monospace;

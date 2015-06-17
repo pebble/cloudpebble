@@ -84,7 +84,7 @@ CloudPebble.Settings = (function() {
                 display_error(gettext("You must specify a valid version number."));
                 return;
             }
-            if(!app_uuid.match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/)) {
+            if(!app_uuid.match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}/)) {
                 display_error(gettext("You must specify a valid UUID (of the form 00000000-0000-0000-0000-000000000000)"));
                 return;
             }
@@ -238,6 +238,11 @@ CloudPebble.Settings = (function() {
             } else {
                 pane.find('.sdk3-only').hide();
             }
+        });
+
+        pane.find('#uuid-generate').click(function() {
+            var uuid_field = settings_template.find('#settings-uuid');
+            uuid_field.val(_.UUID.v4)
         });
 
         CloudPebble.Sidebar.SetActivePane(pane, 'settings');
