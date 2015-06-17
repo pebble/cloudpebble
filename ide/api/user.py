@@ -4,8 +4,6 @@ from ide.api import json_response
 from ide.tasks.archive import export_user_projects
 from utils.keen_helper import send_keen_event
 from ide.utils.whatsnew import get_new_things
-from utils.redis_helper import redis_client
-from django.conf import settings
 
 __author__ = 'katharine'
 
@@ -39,19 +37,4 @@ def whats_new(request):
     if not request.user.is_authenticated():
         return json_response({'new': []})
 
-    try:
-        user_id = request.user.social_auth.get(provider='pebble').uid
-        if user_id in settings.FREE_WATCH_USERS:
-            if not redis_client.exists("no-free-snowy-%s" % user_id):
-                return json_response({'free_snowy': settings.FREE_WATCH_URL, 'new': []})
-    except:
-        pass
-
     return json_response({'new': get_new_things(request.user)})
-
-@login_required
-@require_POST
-def hide_snowy_offer(request):
-    user_id = request.user.social_auth.get(provider='pebble').uid
-    redis_client.set("no-free-snowy-%s" % user_id, "1")
-    return json_response({})

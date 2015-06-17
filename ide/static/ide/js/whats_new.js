@@ -2,10 +2,6 @@ $(function() {
     var mWhatsNewElement = $('#whats-new');
 
     $.getJSON('/ide/whats_new', function(data) {
-        if(data.free_snowy) {
-            $('#free-pebble-time').modal().find('a').attr('href', data.free_snowy);
-            return;
-        }
         var new_things = data.new;
         if(new_things.length > 0) {
             var holder = $('<div>');
@@ -21,7 +17,4 @@ $(function() {
         }
     });
 
-    $('#free-pebble-time-hide').click(function() {
-        $.post('/ide/hide_snowy_offer');
-    });
 });
