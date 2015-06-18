@@ -242,7 +242,8 @@ CloudPebble.Settings = (function() {
 
         pane.find('#uuid-generate').click(function() {
             var uuid_field = settings_template.find('#settings-uuid');
-            uuid_field.val(_.UUID.v4)
+            new_uuid = _.UUID.v4();
+            uuid_field.val(new_uuid);
         });
 
         CloudPebble.Sidebar.SetActivePane(pane, 'settings');
