@@ -12,8 +12,8 @@ from fabric.api import *
 from fabric.tasks import execute
 
 env.roledefs = {
-    'qemu': ['ec2-user@qemu-us1.pebble-sockets.com', 'ec2-user@qemu-us2.pebble-sockets.com'],
-    'ycmd': ['root@cloudpebble-ycm3.pebble-sockets.com', 'root@cloudpebble-ycm4.pebble-sockets.com'],
+    'qemu': ['ec2-user@qemu-us1.cloudpebble.net', 'ec2-user@qemu-us2.cloudpebble.net'],
+    'ycmd': ['root@ycm3.cloudpebble.net', 'root@ycm4.cloudpebble.net'],
 }
 env.key_filename = ['~/.ssh/id_rsa', '~/Downloads/katharine-keypair.pem']
 
