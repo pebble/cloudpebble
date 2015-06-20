@@ -7,6 +7,8 @@ Vagrant.configure("2") do |config|
   config.vm.network :forwarded_port, host: 8002, guest: 8002
   config.vm.network "private_network", ip: "192.168.42.42"
 
+  config.vm.synced_folder "../ycmd-proxy", "/home/vagrant/ycmd-proxy"
+
   config.vm.provider "virtualbox" do |v|
     v.memory = 3192
     v.cpus = 4

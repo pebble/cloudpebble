@@ -8,6 +8,7 @@ from ide.api import json_response, json_failure
 from ide.models.project import Project
 import requests
 import random
+import urlparse
 
 __author__ = 'katharine'
 
