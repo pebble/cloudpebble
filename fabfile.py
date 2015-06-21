@@ -46,6 +46,12 @@ def update_qemu_sdk():
 
 
 @task
+@roles('qemu')
+def restart_qemu_service():
+    sudo("restart cloudpebble-qemu")
+
+
+@task
 @roles('ycmd')
 def update_ycmd_sdk(sdk_version):
     with cd("/home/ycm"), settings(sudo_user="ycm", shell="/bin/bash -c"):
@@ -63,8 +69,19 @@ def update_ycmd_service():
         run("restart ycmd-proxy")
 
 @task
+@roles('ycmd')
+def restart_ycmd_service():
+    run("restart ycmd-proxy")
+
+
+@task
 def deploy_heroku():
     local("git push heroku master")
+
+
+@task
+def restart_heroku():
+    local("heroku restart -a cloudpebble")
 
 
 @task
@@ -72,6 +89,13 @@ def update_all_services():
     execute(update_qemu_service)
     execute(update_ycmd_service)
     execute(deploy_heroku)
+
+
+@task
+def restart_everything():
+    execute(restart_qemu_service)
+    execute(restart_ycmd_service)
+    execute(restart_heroku)
 
 
 @task
