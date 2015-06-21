@@ -55,13 +55,14 @@ var EventedWebSocket = function(host) {
     };
 
     this.sendTimeout = function(data, timeout) {
+        // TODO: test this function
         var d = $.Deferred();
         var id = register_promise(d);
         data._ws_message_id = id;
         var text = JSON.stringify(data);
         mSocket.send(text);
         setTimeout(function() {
-            d.reject({'error': 'timed out'});
+            d.reject({'error': 'timeout'});
             delete ids[id];
         }, timeout);
         return d.promise();
@@ -72,7 +73,6 @@ var EventedWebSocket = function(host) {
     };
 
     var handle_socket_error = function(e) {
-        // TODO: actually handle errors somewhere
         self.trigger('error', e);
     };
 
@@ -82,10 +82,9 @@ var EventedWebSocket = function(host) {
 
     var handle_socket_close = function(e) {
         self.trigger('close', e);
-        // TODO: actually handle socket closures (e.g. attempt a restart)
         mSocket = null;
         _.each(ids, function(promise, key) {
-            promise.reject({'error': 'socket closed'})
+            promise.reject({'error': 'closed'})
         });
         ids = {};
     };
@@ -170,7 +169,7 @@ CloudPebble.YCM = new (function() {
                 if(data.success) {
                     mUUID = data.uuid;
                     mURL = data.server + 'ycm/' + data.uuid;
-                    // TODO: deal with wss. Also, parse URLs properly.
+                    // TODO: deal with wss://. Also, parse URLs properly?
                     mSocketHost = "ws://"+mURL.split("://")[1]+"/ws";
                     mSocket = new EventedWebSocket(mSocketHost);
                     mSocket.on('open', function() {
@@ -183,7 +182,14 @@ CloudPebble.YCM = new (function() {
                             $('.footer-credits').show();
                         }
                     });
-                    // TODO: deal with closed/errored websocket
+                    // TODO: test socket close/error restart
+                    mSocket.on('close', function() {
+                        self.restart();
+                    });
+                    mSocket.on('error', function() {
+                        self.restart();
+                    });
+
                     mSocket.connect();
                 } else {
                     mFailed = true;
@@ -296,11 +302,7 @@ CloudPebble.YCM = new (function() {
         }).fail(function(error) {
             editor.patch_list = these_patches.concat(editor.patch_list);
             promise.reject();
-            // TODO: rework this logic for websockets
-            //// If we get a 404 status our session is definitively lost and we should create another.
-            //if(xhr.status == 404) {
-            //    self.restart();
-            //}
+            // TODO: we moved the restart logic out of here. When that gets tested, remove this TODO.
         });
         return promise.promise();
     };
