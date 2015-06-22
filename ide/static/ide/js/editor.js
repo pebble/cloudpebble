@@ -50,7 +50,8 @@ CloudPebble.Editor = (function() {
                     mode: (is_js ? 'javascript' : CloudPebble.Editor.PebbleMode),
                     styleActiveLine: true,
                     value: source,
-                    theme: USER_SETTINGS.theme
+                    theme: USER_SETTINGS.theme,
+                    foldGutter: true
                 };
                 if(USER_SETTINGS.keybinds !== '') {
                     settings.keyMap = USER_SETTINGS.keybinds;
@@ -149,9 +150,9 @@ CloudPebble.Editor = (function() {
                     };
                 }
                 if(is_js) {
-                    settings.gutters = ['gutter-hint-warnings', 'CodeMirror-linenumbers'];
+                    settings.gutters = ['gutter-hint-warnings', 'CodeMirror-linenumbers', 'CodeMirror-foldgutter'];
                 } else {
-                    settings.gutters = ['gutter-errors', 'CodeMirror-linenumbers'];
+                    settings.gutters = ['gutter-errors', 'CodeMirror-linenumbers', 'CodeMirror-foldgutter'];
                 }
                 var code_mirror = CodeMirror(pane[0], settings);
                 code_mirror.file_path = (file.target  == 'worker' ? 'worker_src/' : 'src/') + file.name;
