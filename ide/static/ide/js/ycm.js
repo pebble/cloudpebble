@@ -46,27 +46,23 @@ var EventedWebSocket = function(host) {
         }
     };
 
-    this.send = function(data) {
-        var d = $.Deferred();
-        data._ws_message_id = register_promise(d);
-        var text = JSON.stringify(data);
-        mSocket.send(text);
-        return d.promise();
-    };
 
-    this.sendTimeout = function(data, timeout) {
-        // TODO: test this function
+    this.send = function(data, timeout) {
         var d = $.Deferred();
         var id = register_promise(d);
         data._ws_message_id = id;
         var text = JSON.stringify(data);
         mSocket.send(text);
-        setTimeout(function() {
-            d.reject({'error': 'timeout'});
-            delete ids[id];
-        }, timeout);
+
+        if (typeof timeout !== "undefined") {
+            setTimeout(function() {
+                d.reject({'error': 'timeout'});
+                delete ids[id];
+            }, timeout);
+        }
+
         return d.promise();
-    }
+    };
 
     this.isOpen = function() {
         return (mSocket.readyState == WebSocket.OPEN);
@@ -118,16 +114,13 @@ CloudPebble.YCM = new (function() {
         });
     }
 
-    function ws_send(command, data) {
-        data['command'] = command;
-        return mSocket.send(data);
+    function ws_send(command, data, timeout) {
+        var packet = {
+            'command': command,
+            'data': data
+        };
+        return mSocket.send(packet, timeout);
     }
-
-    function ws_send_timeout(command, timeout, data) {
-        data['command'] = command;
-        return mSocket.sendTimeout(data, timeout);
-    }
-
     function sendBuffers() {
         var editors = CloudPebble.Editor.GetAllEditors();
         var pending = 0;
@@ -150,6 +143,7 @@ CloudPebble.YCM = new (function() {
                 mFailed = true;
                 console.log('restart failed.');
                 $('.prepare-autocomplete').text(gettext("Code completion resync failed."));
+                throw "Restart failed";
             });
         });
     }
@@ -292,12 +286,12 @@ CloudPebble.YCM = new (function() {
         cursor = cursor || editor.getCursor();
         var these_patches = editor.patch_list;
         editor.patch_list = [];
-        ws_send_timeout(endpoint, 2000, {
+        ws_send(endpoint, {
             file: editor.file_path,
             line: cursor.line,
             ch: cursor.ch,
             patches: these_patches
-        }).done(function(data) {
+        }, 2000).done(function(data) {
             promise.resolve(data);
         }).fail(function(error) {
             editor.patch_list = these_patches.concat(editor.patch_list);
