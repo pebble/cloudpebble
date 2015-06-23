@@ -138,10 +138,10 @@ CloudPebble.YCM = new (function() {
                     $('.prepare-autocomplete').hide();
                     $('.footer-credits').show();
                     mInitialised = true;
+                    mRestarting = false;
                 }
             }).fail(function() {
                 mFailed = true;
-                console.log('restart failed.');
                 $('.prepare-autocomplete').text(gettext("Code completion resync failed."));
                 throw "Restart failed";
             });
@@ -176,12 +176,9 @@ CloudPebble.YCM = new (function() {
                             $('.footer-credits').show();
                         }
                     });
-                    // TODO: test socket close/error restart
-                    mSocket.on('close', function() {
-                        self.restart();
-                    });
-                    mSocket.on('error', function() {
-                        self.restart();
+
+                    mSocket.on('close error', function() {
+                        setTimeout(function() {self.restart();}, 1000);
                     });
 
                     mSocket.connect();
