@@ -20,15 +20,19 @@
         return folded_line_numbers;
     });
     CodeMirror.defineExtension("force_fold_lines", function (lines) {
+
         var editor = this;
+        var linecount = this.lineCount();
         _.each(lines, function (line) {
-            editor.foldCode(line, null, "fold");
+            if (line < linecount) {
+                editor.foldCode(line, null, "fold");
+            }
         });
     });
 })();
 
-// CodeMirror addon for saving code folds in local storage
-(function() {
+
+CloudPebble.CodeFolds = (function () {
     var try_get_localstorage = function (ls_key) {
         var test = '__ls_test__';
         try {
@@ -45,19 +49,48 @@
         }
     };
 
-    CodeMirror.defineExtension("localStorage_save_folds", function(file_key, ls_key) {
-        ls_key = (_.isString(ls_key) ? ls_key : "code_folds");
-        if ((all_folds = try_get_localstorage(ls_key)) == null) return;
-        all_folds[file_key] = this.get_folded_lines();;
-        localStorage.setItem(ls_key, JSON.stringify(all_folds));
-    });
-
-    CodeMirror.defineExtension("localStorage_load_folds", function(file_key, ls_key) {
-        ls_key = (_.isString(ls_key) ? ls_key : "code_folds");
-        if ((all_folds = try_get_localstorage(ls_key)) == null) return;
-        lines = all_folds[file_key];
-        if (_.isArray(lines)) {
-            this.force_fold_lines(lines);
+    var access_localstorage = function (callback) {
+        var key = "code_folds";
+        var all_folds = try_get_localstorage(key);
+        if (all_folds == null) return;
+        var modified = callback(_.clone(all_folds));
+        if (modified !== null) {
+            localStorage.setItem(key, JSON.stringify(modified));
         }
-    });
+    };
+
+
+    return {
+        save_folds: function (code_mirror, fileid) {
+            access_localstorage(function (folds) {
+                folds[PROJECT_ID + "/" + fileid] = code_mirror.get_folded_lines();
+                return folds;
+            });
+        },
+        load_folds: function (code_mirror, fileid) {
+            access_localstorage(function (folds) {
+                lines = folds[PROJECT_ID + "/" + fileid];
+                if (_.isArray(lines)) {
+                    code_mirror.force_fold_lines(lines);
+                }
+                return null;
+            });
+        },
+        delete_file_folds: function (code_mirror, fileid) {
+            access_localstorage(function (folds) {
+                delete folds[PROJECT_ID + "/" + fileid];
+                return folds;
+            });
+        },
+        delete_project_folds: function () {
+            access_localstorage(function (folds) {
+                _.each(folds, function(v, k) {
+                    if (k.startsWith(PROJECT_ID)) {
+                        delete folds[k];
+                    }
+                });
+                return folds;
+            });
+        }
+    }
 })();
