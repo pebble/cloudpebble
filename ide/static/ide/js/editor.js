@@ -12,6 +12,17 @@ CloudPebble.Editor = (function() {
         project_source_files[file.name] = file;
     };
 
+    var save_folds = function(code_mirror, fileid) {
+        // TODO: make this cloud-based
+        code_mirror.localStorage_save_folds(PROJECT_ID + "/" + fileid);
+    };
+
+    var load_folds = function(code_mirror, fileid) {
+        // TODO: make this cloud-based
+        code_mirror.localStorage_load_folds(PROJECT_ID + "/" + fileid);
+    };
+
+
     var edit_source_file = function(file, show_ui_editor, callback) {
         // See if we already had it open.
         CloudPebble.Sidebar.SuspendActive();
@@ -340,6 +351,8 @@ CloudPebble.Editor = (function() {
                                 });
                         }
                     });
+
+                    load_folds(code_mirror, file.id);
                 }
 
                 function update_patch_list(instance, changes) {
@@ -422,6 +435,7 @@ CloudPebble.Editor = (function() {
                             lastModified = data.modified;
                             mark_clean();
                             ga('send', 'event' ,'file', 'save');
+                            save_folds(code_mirror, file.id);
                         } else {
                             alert(data.error);
                         }
