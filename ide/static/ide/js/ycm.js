@@ -143,7 +143,6 @@ CloudPebble.YCM = new (function() {
             }).fail(function() {
                 mFailed = true;
                 $('.prepare-autocomplete').text(gettext("Code completion resync failed."));
-                throw "Restart failed";
             });
         });
     }
@@ -288,10 +287,11 @@ CloudPebble.YCM = new (function() {
             line: cursor.line,
             ch: cursor.ch,
             patches: these_patches
-        }, 2000).done(function(data) {
+        }).done(function(data) {
             promise.resolve(data);
         }).fail(function(error) {
-            editor.patch_list = these_patches.concat(editor.patch_list);
+            console.log("Patches rejected");
+            // editor.patch_list = these_patches.concat(editor.patch_list);
             promise.reject();
             // TODO: we moved the restart logic out of here. When that gets tested, remove this TODO.
         });
