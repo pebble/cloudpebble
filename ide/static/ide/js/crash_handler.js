@@ -69,7 +69,7 @@ CloudPebble.CrashChecker = function(app_uuid) {
             }
             var url = urls[0];
             $.ajax({
-                url: url,
+                url: mBuildDir + url,
                 dataType: 'json'
             }).done(function(data) {
                 deferred.resolve(data);
@@ -82,7 +82,7 @@ CloudPebble.CrashChecker = function(app_uuid) {
             });
             return deferred.promise();
         }
-        return go(platform_mappings[platform][process]);
+        return go(platform_mappings[process][platform]);
     }
 
     this.find_source_lines = function(process, version, pointers, callback) {
