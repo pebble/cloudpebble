@@ -16,10 +16,10 @@ var EventedWebSocket = function(host) {
 
     this.connect = function() {
         mSocket = new WebSocket(host);
-        mSocket.onerror = handle_socket_error;
+        mSocket.onerror = function(e) { self.trigger('error', e); };
         mSocket.onclose = handle_socket_close;
         mSocket.onmessage = handle_socket_message;
-        mSocket.onopen = handle_socket_open;
+        mSocket.onopen = function() { self.trigger('open'); };
     };
 
     this.close = function() {
@@ -27,39 +27,17 @@ var EventedWebSocket = function(host) {
         mSocket = null;
     };
 
-    var register_promise = function(promise) {
+    this.send = function(data) {
+        var d = $.Deferred();
+        // Find the first free ID
         var id;
         for (id = 0; id in ids; id++);
-        ids[id] = promise;
-        return id;
-    };
-
-    var trigger_promise = function(id, data) {
-        var promise = ids[id];
-        delete ids[id];
-        // TODO: think about other failure conditions
-        if ('success' in data && data['success'] == false) {
-            promise.reject(data);
-        }
-        else {
-            promise.resolve(data);
-        }
-    };
-
-
-    this.send = function(data, timeout) {
-        var d = $.Deferred();
-        var id = register_promise(d);
+        // Register the promise
+        ids[id] = d;
         data._ws_message_id = id;
+        // Send the data
         var text = JSON.stringify(data);
         mSocket.send(text);
-
-        if (typeof timeout !== "undefined") {
-            setTimeout(function() {
-                d.reject({'error': 'timeout'});
-                delete ids[id];
-            }, timeout);
-        }
 
         return d.promise();
     };
@@ -68,13 +46,6 @@ var EventedWebSocket = function(host) {
         return (mSocket.readyState == WebSocket.OPEN);
     };
 
-    var handle_socket_error = function(e) {
-        self.trigger('error', e);
-    };
-
-    var handle_socket_open = function() {
-        self.trigger('open');
-    };
 
     var handle_socket_close = function(e) {
         self.trigger('close', e);
@@ -89,9 +60,16 @@ var EventedWebSocket = function(host) {
         var data = JSON.parse(e.data);
         var id = data._ws_message_id;
         if (id in ids) {
-            trigger_promise(id, data);
+            // Trigger the promise
+            var promise = ids[id];
+            delete ids[id];
+            if ('success' in data && data['success'] == false) {
+                promise.reject(data);
+            }
+            else {
+                promise.resolve(data);
+            }
         }
-        // if id is not in ids, the message probably timed out.
     };
 };
 
@@ -290,10 +268,7 @@ CloudPebble.YCM = new (function() {
         }).done(function(data) {
             promise.resolve(data);
         }).fail(function(error) {
-            console.log("Patches rejected");
-            // editor.patch_list = these_patches.concat(editor.patch_list);
             promise.reject();
-            // TODO: we moved the restart logic out of here. When that gets tested, remove this TODO.
         });
         return promise.promise();
     };
