@@ -2,7 +2,7 @@ from social.backends.oauth import BaseOAuth2
 from django.conf import settings
 from ide.models.user import UserGithub
 from ide.models.project import Project
-
+from ide.utils.mailinglist import MailingList
 
 class PebbleOAuth2(BaseOAuth2):
     name = 'pebble'
@@ -51,6 +51,7 @@ def merge_user(strategy, uid, user=None, *args, **kwargs):
 
         elif not user:
             user = social.user
+            MailingList.add_user(user)
     return {'social': social,
             'user': user,
             'is_new': user is None,
