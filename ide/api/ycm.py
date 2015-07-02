@@ -61,7 +61,7 @@ def _spin_up_server(request):
             if result.ok:
                 response = result.json()
                 if response['success']:
-                    return json_response({'uuid': response['uuid'], 'server': server})
+                    return json_response({'uuid': response['uuid'], 'server': server, 'secure': response['secure']})
         except (requests.RequestException, ValueError):
             import traceback
             traceback.print_exc()

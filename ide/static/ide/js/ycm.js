@@ -140,8 +140,8 @@ CloudPebble.YCM = new (function() {
                 if(data.success) {
                     mUUID = data.uuid;
                     mURL = data.server + 'ycm/' + data.uuid;
-                    // TODO: deal with wss://. Also, parse URLs properly?
-                    mSocketHost = "ws://"+mURL.split("://")[1]+"/ws";
+                    mSocketHost = data.secure ? 'wss' : 'ws';
+                    mSocketHost += "://"+mURL.split("://")[1]+"/ws";
                     mSocket = new EventedWebSocket(mSocketHost);
                     mSocket.on('open', function() {
                         if(mRestarting) {
