@@ -30,11 +30,12 @@ var EventedWebSocket = function(host) {
     this.send = function(data) {
         var d = $.Deferred();
         // Find the first free ID
-        var id;
-        for (id = 0; id in ids; id++);
+        var id = 0;
+        while(id in ids) id++;
+
         // Register the promise
         ids[id] = d;
-        data._ws_message_id = id;
+        data._id = id;
         // Send the data
         var text = JSON.stringify(data);
         mSocket.send(text);
@@ -58,12 +59,12 @@ var EventedWebSocket = function(host) {
 
     var handle_socket_message = function(e) {
         var data = JSON.parse(e.data);
-        var id = data._ws_message_id;
+        var id = data._id;
         if (id in ids) {
             // Trigger the promise
             var promise = ids[id];
             delete ids[id];
-            if ('success' in data && data['success'] == false) {
+            if (!data['success']) {
                 promise.reject(data);
             }
             else {
@@ -139,10 +140,8 @@ CloudPebble.YCM = new (function() {
             .done(function(data) {
                 if(data.success) {
                     mUUID = data.uuid;
-                    mURL = data.server + 'ycm/' + data.uuid;
-                    mSocketHost = data.secure ? 'wss' : 'ws';
-                    mSocketHost += "://"+mURL.split("://")[1]+"/ws";
-                    mSocket = new EventedWebSocket(mSocketHost);
+                    mURL = data.server + 'ycm/' + data.uuid + '/ws';
+                    mSocket = new EventedWebSocket(mURL);
                     mSocket.on('open', function() {
                         if(mRestarting) {
                             sendBuffers();
@@ -266,7 +265,7 @@ CloudPebble.YCM = new (function() {
             ch: cursor.ch,
             patches: these_patches
         }).done(function(data) {
-            promise.resolve(data);
+            promise.resolve(data['data']);
         }).fail(function(error) {
             promise.reject();
         });
