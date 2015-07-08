@@ -339,7 +339,7 @@ CloudPebble.Compile = (function() {
             append_log_html("<span class='log-warning'>" + gettext("Different app crashed. Only the active app has debugging information available.") + "</span>");
             return;
         }
-        var pebble = pebble.getPebbleNow();
+        var pebble = SharedPebble.getPebbleNow();
         if(!pebble) {
             return;
         }
@@ -383,14 +383,12 @@ CloudPebble.Compile = (function() {
                     append_log_html("<span class='log-error'>" + gettext("Crashed inside firmware call.") + "</span>");
                 } else {
                     var fmt = gettext("Crashed at %(file)s:%(line)s, in %(fn_name)s (starts at %(file)s:%(fn_line)s).");
-                    append_log_html($("<span class='log-error'>"))
-                        .text(interpolate(fmt, pc_result, true));
+                    append_log_html($("<span class='log-error'>").text(interpolate(fmt, pc_result, true)));
                 }
                 if(lr_result !== null) {
                     if(pc_result === null || (lr_result.fn_name !== pc_result.fn_name)) {
                         fmt = gettext("Which was called from %(file)s:%(line)s, in %(fn_name)s (starts at %(file)s:%(fn_line)s).");
-                        append_log_html($("<span class='log-error'>"))
-                            .text(interpolate(fmt, lr_result, true));
+                        append_log_html($("<span class='log-error'>").text(interpolate(fmt, lr_result, true)));
                     }
                 }
             });
