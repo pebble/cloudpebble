@@ -414,6 +414,10 @@ ul.nav-pills {
     width: 450px;
 }
 
+.settings-uuid-control input[type=text] {
+    width: 360px;
+}
+
 #settings-app-keys input[type=text] {
     width: 200px;
     font-family: Menlo, 'Deja Vu Sans Mono', monospace;
@@ -969,3 +973,4 @@ span.cm-autofilled-end {
 .CodeMirror-foldgutter-folded {
   color: #d0d0d0;
 }
+
