@@ -1,5 +1,6 @@
-// CodeMirror addon for getting/setting a list of folded lines
+// A CodeMirror add-on for getting/setting a list of folded lines
 (function () {
+    // Return a list of all line numbers which are currently folded
     CodeMirror.defineExtension("get_folded_lines", function () {
         var i = 0;
         var folded_line_numbers = [];
@@ -16,6 +17,8 @@
         });
         return folded_line_numbers;
     });
+
+    // Provided with a list of line numbers, force all of those lines to be folded
     CodeMirror.defineExtension("force_fold_lines", function (lines) {
         var editor = this;
         var linecount = this.lineCount();
