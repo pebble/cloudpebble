@@ -340,8 +340,7 @@ CloudPebble.Editor = (function() {
                                 });
                         }
                     });
-
-                    CloudPebble.CodeFolds.load_folds(code_mirror, file.id);
+                    code_mirror.force_fold_lines(data.folded_lines.split(",").map(function(x) {return parseInt(x, 10);}));
                 }
 
                 function update_patch_list(instance, changes) {
@@ -414,9 +413,11 @@ CloudPebble.Editor = (function() {
                     }
                     save_btn.attr('disabled','disabled');
                     delete_btn.attr('disabled','disabled');
+
                     $.post("/ide/project/" + PROJECT_ID + "/source/" + file.id + "/save", {
                         content: code_mirror.getValue(),
-                        modified: lastModified
+                        modified: lastModified,
+                        folded_lines: code_mirror.get_folded_lines().join(",")
                     }, function(data) {
                         save_btn.removeAttr('disabled');
                         delete_btn.removeAttr('disabled');
@@ -424,7 +425,6 @@ CloudPebble.Editor = (function() {
                             lastModified = data.modified;
                             mark_clean();
                             ga('send', 'event' ,'file', 'save');
-                            CloudPebble.CodeFolds.save_folds(code_mirror, file.id);
                         } else {
                             alert(data.error);
                         }
@@ -512,7 +512,6 @@ CloudPebble.Editor = (function() {
                                 delete project_source_files[file.name];
                                 CloudPebble.Sidebar.Remove('source-' + file.id);
                                 CloudPebble.YCM.deleteFile(file);
-                                CloudPebble.CodeFolds.delete_file_folds(code_mirror, file.id);
                             } else {
                                 alert(data.error);
                             }

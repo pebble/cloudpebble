@@ -161,7 +161,6 @@ CloudPebble.Settings = (function() {
             CloudPebble.Prompts.Confirm(gettext("Delete Project"), gettext("Are you sure you want to delete this project? THIS CANNOT BE UNDONE."), function() {
                 $.post('/ide/project/' + PROJECT_ID + '/delete', {confirm: true}, function(data) {
                     if(data.success) {
-                        CloudPebble.CodeFolds.delete_project_folds();
                         window.location.href = "/ide/";
                     } else {
                         display_error(interpolate(gettext("Error: %s"), [data.error]));

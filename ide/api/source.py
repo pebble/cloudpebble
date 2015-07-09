@@ -45,7 +45,7 @@ def load_source_file(request, project_id, file_id):
     source_file = get_object_or_404(SourceFile, pk=file_id, project=project)
     try:
         content = source_file.get_contents()
-
+        folded_lines = source_file.folded_lines
         send_keen_event('cloudpebble', 'cloudpebble_open_file', data={
             'data': {
                 'filename': source_file.file_name,
@@ -59,7 +59,8 @@ def load_source_file(request, project_id, file_id):
         return json_response({
             "success": True,
             "source": content,
-            "modified": time.mktime(source_file.last_modified.utctimetuple())
+            "modified": time.mktime(source_file.last_modified.utctimetuple()),
+            "folded_lines": folded_lines
         })
 
 
@@ -90,7 +91,7 @@ def save_source_file(request, project_id, file_id):
                 }
             }, project=project, request=request)
             raise Exception(_("Could not save: file has been modified since last save."))
-        source_file.save_file(request.POST['content'])
+        source_file.save_file(request.POST['content'], folded_lines = request.POST['folded_lines'])
 
 
     except Exception as e:
