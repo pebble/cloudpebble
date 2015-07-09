@@ -71,6 +71,7 @@ def update_ycmd_sdk(sdk_version):
 def update_ycmd_service():
     with cd("/home/ycm/proxy"), settings(sudo_user="ycm", shell="/bin/bash -c"):
         sudo("git pull")
+        run("pip install --upgrade -r requirements.txt")
         run("restart ycmd-proxy")
 
 @task
