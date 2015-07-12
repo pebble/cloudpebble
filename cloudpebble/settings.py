@@ -272,6 +272,9 @@ KEEN_PROJECT_ID = _environ.get('KEEN_PROJECT_ID', None)
 KEEN_WRITE_KEY = _environ.get('KEEN_WRITE_KEY', None)
 KEEN_ENABLED = 'ENABLE_KEEN' in _environ
 
+MAILCHIMP_API_KEY = _environ.get('MAILCHIMP_API_KEY', None)
+MAILCHIMP_LIST_ID = _environ.get('MAILCHIMP_LIST_ID', None)
+
 AWS_ENABLED = 'AWS_ENABLED' in _environ
 AWS_ACCESS_KEY_ID = _environ.get('AWS_ACCESS_KEY_ID', None)
 AWS_SECRET_ACCESS_KEY = _environ.get('AWS_SECRET_ACCESS_KEY', None)

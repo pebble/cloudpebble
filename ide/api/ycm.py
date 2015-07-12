@@ -4,12 +4,16 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
+from urlparse import urlparse
+
 from ide.api import json_response, json_failure
 from ide.models.project import Project
 import requests
 import random
 
+
 __author__ = 'katharine'
+
 
 @login_required
 @require_POST
@@ -60,7 +64,11 @@ def _spin_up_server(request):
             if result.ok:
                 response = result.json()
                 if response['success']:
-                    return json_response({'uuid': response['uuid'], 'server': server})
+                    secure = response['secure']
+                    scheme = "wss" if secure else "ws"
+                    ws_server = urlparse(server)._replace(scheme=scheme).geturl()
+                    return json_response({'uuid': response['uuid'], 'server': ws_server, 'secure': secure})
+
         except (requests.RequestException, ValueError):
             import traceback
             traceback.print_exc()

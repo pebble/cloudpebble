@@ -764,10 +764,8 @@ CloudPebble.Editor = (function() {
         }
         $.post("/ide/project/" + PROJECT_ID + "/create_source_file", params, function(data) {
             if(data.success) {
-                CloudPebble.YCM.createFile(data.file, params.content)
-                    .always(function() {
-                        add_source_file(data.file);
-                    });
+                CloudPebble.YCM.createFile(data.file, params.content);
+                add_source_file(data.file);
             }
             if(callback) {
                 callback(data);
