@@ -10,7 +10,7 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding field 'SourceFile.folded_lines'
         db.add_column(u'ide_sourcefile', 'folded_lines',
-                      self.gf('django.db.models.fields.CommaSeparatedIntegerField')(default='', max_length=100),
+                      self.gf('django.db.models.fields.TextField')(default='[]'),
                       keep_default=False)
 
 
@@ -63,7 +63,7 @@ class Migration(SchemaMigration):
             'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'builds'", 'to': "orm['ide.Project']"}),
             'started': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'db_index': 'True', 'blank': 'True'}),
             'state': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
-            'uuid': ('django.db.models.fields.CharField', [], {'default': "'d7640693-8e03-4888-a6a3-932683ce66f3'", 'max_length': '36'})
+            'uuid': ('django.db.models.fields.CharField', [], {'default': "'94a49101-eb30-46ac-9f2b-65d8eec3f047'", 'max_length': '36'})
         },
         'ide.buildsize': {
             'Meta': {'object_name': 'BuildSize'},
@@ -85,7 +85,7 @@ class Migration(SchemaMigration):
             'app_long_name': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'app_platforms': ('django.db.models.fields.TextField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'app_short_name': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'app_uuid': ('django.db.models.fields.CharField', [], {'default': "'6054305e-4931-47d4-a689-96bcc6a46c62'", 'max_length': '36', 'null': 'True', 'blank': 'True'}),
+            'app_uuid': ('django.db.models.fields.CharField', [], {'default': "'179a72ea-6df6-4910-a0e7-701f0640a292'", 'max_length': '36', 'null': 'True', 'blank': 'True'}),
             'app_version_label': ('django.db.models.fields.CharField', [], {'default': "'1.0'", 'max_length': '40', 'null': 'True', 'blank': 'True'}),
             'github_branch': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'github_hook_build': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
@@ -128,7 +128,7 @@ class Migration(SchemaMigration):
         'ide.sourcefile': {
             'Meta': {'unique_together': "(('project', 'file_name'),)", 'object_name': 'SourceFile'},
             'file_name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'folded_lines': ('django.db.models.fields.CommaSeparatedIntegerField', [], {'default': "''", 'max_length': '100'}),
+            'folded_lines': ('django.db.models.fields.TextField', [], {'default': "'[]'"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'last_modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'null': 'True', 'blank': 'True'}),
             'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'source_files'", 'to': "orm['ide.Project']"}),

@@ -1,5 +1,6 @@
 import datetime
 import time
+import json
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
@@ -45,7 +46,12 @@ def load_source_file(request, project_id, file_id):
     source_file = get_object_or_404(SourceFile, pk=file_id, project=project)
     try:
         content = source_file.get_contents()
-        folded_lines = source_file.folded_lines
+
+        try:
+            folded_lines = json.loads(source_file.folded_lines)
+        except ValueError:
+            folded_lines = []
+
         send_keen_event('cloudpebble', 'cloudpebble_open_file', data={
             'data': {
                 'filename': source_file.file_name,

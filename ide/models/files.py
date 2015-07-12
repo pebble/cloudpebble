@@ -200,7 +200,7 @@ class SourceFile(IdeModel):
     project = models.ForeignKey('Project', related_name='source_files')
     file_name = models.CharField(max_length=100)
     last_modified = models.DateTimeField(blank=True, null=True, auto_now=True)
-    folded_lines = models.CommaSeparatedIntegerField(max_length=200, default="")
+    folded_lines = models.TextField(default="[]")
 
     TARGETS = (
         ('app', _('App')),

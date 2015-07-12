@@ -340,7 +340,7 @@ CloudPebble.Editor = (function() {
                                 });
                         }
                     });
-                    code_mirror.force_fold_lines(data.folded_lines.split(",").map(function(x) {return parseInt(x, 10);}));
+                    code_mirror.force_fold_lines(data.folded_lines);
                 }
 
                 function update_patch_list(instance, changes) {
@@ -417,7 +417,7 @@ CloudPebble.Editor = (function() {
                     $.post("/ide/project/" + PROJECT_ID + "/source/" + file.id + "/save", {
                         content: code_mirror.getValue(),
                         modified: lastModified,
-                        folded_lines: code_mirror.get_folded_lines().join(",")
+                        folded_lines: JSON.stringify(code_mirror.get_folded_lines())
                     }, function(data) {
                         save_btn.removeAttr('disabled');
                         delete_btn.removeAttr('disabled');
