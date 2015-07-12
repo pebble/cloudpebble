@@ -1,4 +1,79 @@
 CloudPebble = CloudPebble || {};
+
+// This is a drop-in replacement for $.ajax
+// TODO: is this overkill? It seems to work, and means that very few changes to other code are required.
+// TODO: If we do keep this, (a) stick it in another file, (b) make sure it's robust
+var EventedWebSocket = function(host) {
+    var self = this;
+    var mSocket = null;
+    var ids = {};
+
+    _.extend(this, Backbone.Events);
+
+    this.getSocket = function() {
+        return mSocket;
+    };
+
+    this.connect = function() {
+        mSocket = new WebSocket(host);
+        mSocket.onerror = function(e) { self.trigger('error', e); };
+        mSocket.onclose = handle_socket_close;
+        mSocket.onmessage = handle_socket_message;
+        mSocket.onopen = function() { self.trigger('open'); };
+    };
+
+    this.close = function() {
+        mSocket.close();
+        mSocket = null;
+    };
+
+    this.send = function(data) {
+        var d = $.Deferred();
+        // Find the first free ID
+        var id = 0;
+        while(id in ids) id++;
+
+        // Register the promise
+        ids[id] = d;
+        data._id = id;
+        // Send the data
+        var text = JSON.stringify(data);
+        mSocket.send(text);
+
+        return d.promise();
+    };
+
+    this.isOpen = function() {
+        return (mSocket.readyState == WebSocket.OPEN);
+    };
+
+
+    var handle_socket_close = function(e) {
+        self.trigger('close', e);
+        mSocket = null;
+        _.each(ids, function(promise, key) {
+            promise.reject({'error': 'closed'})
+        });
+        ids = {};
+    };
+
+    var handle_socket_message = function(e) {
+        var data = JSON.parse(e.data);
+        var id = data._id;
+        if (id in ids) {
+            // Trigger the promise
+            var promise = ids[id];
+            delete ids[id];
+            if (!data['success']) {
+                promise.reject(data);
+            }
+            else {
+                promise.resolve(data);
+            }
+        }
+    };
+};
+
 CloudPebble.YCM = new (function() {
     var self = this;
     var PING_INTERVAL = 90000;
@@ -8,18 +83,23 @@ CloudPebble.YCM = new (function() {
     var mFailed = false;
     var mRestarting = false;
     var mURL = null;
+    var mSocket = null;
     var mUUID = null;
     var mPingTimer = null;
 
     function pingServer() {
-        $.ajax(mURL + '/ping', {
-            contentType: 'application/json',
-            method: 'POST'
-        }).always(function() {
+        ws_send('ping',{}).always(function() {
             mPingTimer = _.delay(pingServer, PING_INTERVAL);
         });
     }
 
+    function ws_send(command, data, timeout) {
+        var packet = {
+            'command': command,
+            'data': data
+        };
+        return mSocket.send(packet, timeout);
+    }
     function sendBuffers() {
         var editors = CloudPebble.Editor.GetAllEditors();
         var pending = 0;
@@ -28,23 +108,19 @@ CloudPebble.YCM = new (function() {
             editor.patch_sequence = 0;
             ++pending;
 
-            $.ajax(mURL + '/create', {
-                data: JSON.stringify({
+            ws_send('create', {
                     filename: editor.file_path,
                     content: editor.getValue()
-                }),
-                contentType: 'application/json',
-                method: 'POST'
             }).done(function() {
                 if(--pending == 0) {
                     console.log('restart done.');
                     $('.prepare-autocomplete').hide();
                     $('.footer-credits').show();
                     mInitialised = true;
+                    mRestarting = false;
                 }
             }).fail(function() {
                 mFailed = true;
-                console.log('restart failed.');
                 $('.prepare-autocomplete').text(gettext("Code completion resync failed."));
             });
         });
@@ -64,15 +140,24 @@ CloudPebble.YCM = new (function() {
             .done(function(data) {
                 if(data.success) {
                     mUUID = data.uuid;
-                    mURL = data.server + 'ycm/' + data.uuid;
-                    if(mRestarting) {
-                        sendBuffers();
-                    } else {
-                        mInitialised = true;
-                        mPingTimer = _.delay(pingServer, PING_INTERVAL);
-                        $('.prepare-autocomplete').hide();
-                        $('.footer-credits').show();
-                    }
+                    mURL = data.server + 'ycm/' + data.uuid + '/ws';
+                    mSocket = new EventedWebSocket(mURL);
+                    mSocket.on('open', function() {
+                        if(mRestarting) {
+                            sendBuffers();
+                        } else {
+                            mInitialised = true;
+                            mPingTimer = _.delay(pingServer, PING_INTERVAL);
+                            $('.prepare-autocomplete').hide();
+                            $('.footer-credits').show();
+                        }
+                    });
+
+                    mSocket.on('close error', function() {
+                        setTimeout(function() {self.restart();}, 1000);
+                    });
+
+                    mSocket.connect();
                 } else {
                     mFailed = true;
                     $('.prepare-autocomplete').text(gettext("Code completion unavailable."));
@@ -95,6 +180,7 @@ CloudPebble.YCM = new (function() {
         mFailed = false;
         mRestarting = true;
         mURL = false;
+        mSocket = null;
         mUUID = null;
         $('.prepare-autocomplete').text(gettext("Code completion lost; retrying...")).show();
         $('.footer-credits').hide();
@@ -111,12 +197,8 @@ CloudPebble.YCM = new (function() {
             promise.reject();
             return promise.promise();
         }
-        $.ajax(mURL + '/delete', {
-            data: JSON.stringify({
+        ws_send('delete', {
                 filename: ((file.target == 'worker') ? 'worker_src/' : 'src/') + file.name
-            }),
-            contentType: 'application/json',
-            method: 'POST'
         }).done(function() {
             promise.resolve();
         }).fail(function() {
@@ -131,13 +213,9 @@ CloudPebble.YCM = new (function() {
             promise.reject();
             return promise.promise();
         }
-        $.ajax(mURL + '/create', {
-            data: JSON.stringify({
+        ws_send('create', {
                 filename: ((file.target == 'worker') ? 'worker_src/' : 'src/') + file.name,
                 content: content || ''
-            }),
-            contentType: 'application/json',
-            method: 'POST'
         }).done(function() {
             promise.resolve();
         }).fail(function() {
@@ -165,13 +243,9 @@ CloudPebble.YCM = new (function() {
             }
         });
         defines.push("");
-        $.ajax(mURL + '/create', {
-            data: JSON.stringify({
+        ws_send('create',{
                 filename: 'build/src/resource_ids.auto.h',
                 content: defines.join("\n")
-            }),
-            contentType: 'application/json',
-            method: 'POST'
         });
     };
 
@@ -185,25 +259,15 @@ CloudPebble.YCM = new (function() {
         cursor = cursor || editor.getCursor();
         var these_patches = editor.patch_list;
         editor.patch_list = [];
-        $.ajax(mURL + '/' + endpoint, {
-            data: JSON.stringify({
-                file: editor.file_path,
-                line: cursor.line,
-                ch: cursor.ch,
-                patches: these_patches
-            }),
-            contentType: 'application/json',
-            method: 'POST',
-            timeout: 2000
+        ws_send(endpoint, {
+            file: editor.file_path,
+            line: cursor.line,
+            ch: cursor.ch,
+            patches: these_patches
         }).done(function(data) {
-            promise.resolve(data);
-        }).fail(function(xhr) {
-            editor.patch_list = these_patches.concat(editor.patch_list);
+            promise.resolve(data['data']);
+        }).fail(function(error) {
             promise.reject();
-            // If we get a 404 status our session is definitively lost and we should create another.
-            if(xhr.status == 404) {
-                self.restart();
-            }
         });
         return promise.promise();
     };

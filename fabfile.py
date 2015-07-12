@@ -13,12 +13,13 @@ from fabric.tasks import execute
 
 env.roledefs = {
     'qemu': ['ec2-user@qemu-us1.cloudpebble.net', 'ec2-user@qemu-us2.cloudpebble.net'],
-    'ycmd': ['root@ycm3.cloudpebble.net', 'root@ycm4.cloudpebble.net'],
+    'ycmd': ['root@ycm2.cloudpebble.net', 'root@ycm3.cloudpebble.net', 'root@ycm4.cloudpebble.net'],
 }
 env.key_filename = ['~/.ssh/id_rsa', '~/Downloads/katharine-keypair.pem']
 
 @task
 @roles('qemu')
+@parallel
 def update_qemu_service():
     with cd("cloudpebble-qemu-controller"):
         run("git pull")
@@ -30,6 +31,7 @@ def update_qemu_service():
 
 @task
 @roles('qemu')
+@parallel
 def update_qemu_sdk():
     with cd('qemu'):
         run("git pull")
@@ -47,12 +49,14 @@ def update_qemu_sdk():
 
 @task
 @roles('qemu')
+@parallel
 def restart_qemu_service():
     sudo("restart cloudpebble-qemu")
 
 
 @task
 @roles('ycmd')
+@parallel
 def update_ycmd_sdk(sdk_version):
     with cd("/home/ycm"), settings(sudo_user="ycm", shell="/bin/bash -c"):
         sudo("wget -nv -O sdk.tar.gz https://sdk.getpebble.com/download/%s?source=cloudpebble" % sdk_version)
@@ -63,13 +67,16 @@ def update_ycmd_sdk(sdk_version):
 
 @task
 @roles('ycmd')
+@parallel
 def update_ycmd_service():
     with cd("/home/ycm/proxy"), settings(sudo_user="ycm", shell="/bin/bash -c"):
         sudo("git pull")
+        run("pip install --upgrade -r requirements.txt")
         run("restart ycmd-proxy")
 
 @task
 @roles('ycmd')
+@parallel
 def restart_ycmd_service():
     run("restart ycmd-proxy")
 
