@@ -200,6 +200,7 @@ class SourceFile(IdeModel):
     project = models.ForeignKey('Project', related_name='source_files')
     file_name = models.CharField(max_length=100)
     last_modified = models.DateTimeField(blank=True, null=True, auto_now=True)
+    folded_lines = models.TextField(default="[]")
 
     TARGETS = (
         ('app', _('App')),
@@ -223,14 +224,15 @@ class SourceFile(IdeModel):
         else:
             return s3.read_file('source', self.s3_path)
 
-    def save_file(self, content):
+    def save_file(self, content, folded_lines=None):
         if not settings.AWS_ENABLED:
             if not os.path.exists(os.path.dirname(self.local_filename)):
                 os.makedirs(os.path.dirname(self.local_filename))
             open(self.local_filename, 'w').write(content.encode('utf-8'))
         else:
             s3.save_file('source', self.s3_path, content.encode('utf-8'))
-
+        if folded_lines:
+            self.folded_lines = folded_lines
         self.save()
 
     def copy_to_path(self, path):
