@@ -97,7 +97,7 @@ def save_source_file(request, project_id, file_id):
                 }
             }, project=project, request=request)
             raise Exception(_("Could not save: file has been modified since last save."))
-        source_file.save_file(request.POST['content'], folded_lines = request.POST['folded_lines'])
+        source_file.save_file(request.POST['content'], folded_lines=request.POST['folded_lines'])
 
 
     except Exception as e:
