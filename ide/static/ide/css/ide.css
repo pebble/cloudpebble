@@ -967,3 +967,10 @@ span.cm-autofilled-end {
 #help-prompt-holder > .popover {
     width: 300px;
 }
+
+/* Make the code-fold arrow light-gray */
+.CodeMirror-foldgutter-open,
+.CodeMirror-foldgutter-folded {
+  color: #d0d0d0;
+}
+

@@ -50,7 +50,8 @@ CloudPebble.Editor = (function() {
                     mode: (is_js ? 'javascript' : CloudPebble.Editor.PebbleMode),
                     styleActiveLine: true,
                     value: source,
-                    theme: USER_SETTINGS.theme
+                    theme: USER_SETTINGS.theme,
+                    foldGutter: true
                 };
                 if(USER_SETTINGS.keybinds !== '') {
                     settings.keyMap = USER_SETTINGS.keybinds;
@@ -149,9 +150,9 @@ CloudPebble.Editor = (function() {
                     CodeMirror.commands.toggleComment(cm);
                 };
                 if(is_js) {
-                    settings.gutters = ['gutter-hint-warnings', 'CodeMirror-linenumbers'];
+                    settings.gutters = ['gutter-hint-warnings', 'CodeMirror-linenumbers', 'CodeMirror-foldgutter'];
                 } else {
-                    settings.gutters = ['gutter-errors', 'CodeMirror-linenumbers'];
+                    settings.gutters = ['gutter-errors', 'CodeMirror-linenumbers', 'CodeMirror-foldgutter'];
                 }
                 var code_mirror = CodeMirror(pane[0], settings);
                 code_mirror.file_path = (file.target  == 'worker' ? 'worker_src/' : 'src/') + file.name;
@@ -339,6 +340,7 @@ CloudPebble.Editor = (function() {
                                 });
                         }
                     });
+                    code_mirror.force_fold_lines(data.folded_lines);
                 }
 
                 function update_patch_list(instance, changes) {
@@ -411,9 +413,11 @@ CloudPebble.Editor = (function() {
                     }
                     save_btn.attr('disabled','disabled');
                     delete_btn.attr('disabled','disabled');
+
                     $.post("/ide/project/" + PROJECT_ID + "/source/" + file.id + "/save", {
                         content: code_mirror.getValue(),
-                        modified: lastModified
+                        modified: lastModified,
+                        folded_lines: JSON.stringify(code_mirror.get_folded_lines())
                     }, function(data) {
                         save_btn.removeAttr('disabled');
                         delete_btn.removeAttr('disabled');
