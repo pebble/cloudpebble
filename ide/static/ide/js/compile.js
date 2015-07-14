@@ -159,10 +159,10 @@ CloudPebble.Compile = (function() {
         pane.find('#compilation-run-build-button').click(function() { run_build(); });
 
         var commands = {};
-        commands[("Show Phone Logs")] = function() { show_app_logs(ConnectionType.Phone); };
-        commands[("Show Emulator Logs")] = function() { show_app_logs(ConnectionType.Qemu); };
-        commands[("Show Last Build Log")] = function() {show_build_log(mLastBuild.id)};
-        commands[("Compilation")] = function() { show_compile_pane(); ;};
+        commands[gettext("Show Phone Logs")] = function() { show_app_logs(ConnectionType.Phone); };
+        commands[gettext("Show Emulator Logs")] = function() { show_app_logs(ConnectionType.Qemu); };
+        commands[gettext("Show Last Build Log")] = function() {show_build_log(mLastBuild.id)};
+        commands[gettext("Compilation")] = function() { show_compile_pane(); ;};
         CloudPebble.FuzzyPrompt.AddCommands(commands);
 
         SharedPebble.on('app_log', handle_app_log);

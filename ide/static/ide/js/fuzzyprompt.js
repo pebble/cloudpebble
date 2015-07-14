@@ -35,7 +35,7 @@ CloudPebble.FuzzyPrompt = (function() {
 
             // Register ctrl-p and ctrl-shift-p
             $(document).keydown(function(e) {
-               if (e.ctrlKey && e.keyCode == 80) {
+               if ((e.ctrlKey || e.metaKey) && e.keyCode == 80) {
                    if (COMMANDS_ENABLED && e.shiftKey) {
                        input.attr('placeholder', gettext("Enter Command"));
                        show_prompt('commands');
@@ -50,7 +50,7 @@ CloudPebble.FuzzyPrompt = (function() {
 
             prompt.keydown(function (e) {
                 // Ctrl-P to hide
-                if (e.ctrlKey && e.keyCode == 80) {
+                if ((e.ctrlKey || e.metaKey) && e.keyCode == 80) {
                     hide_prompt();
                 }
                 // Enter to select
