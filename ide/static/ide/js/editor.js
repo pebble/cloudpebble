@@ -344,6 +344,8 @@ CloudPebble.Editor = (function() {
                         }
                     });
                     code_mirror.force_fold_lines(data.folded_lines);
+                    // This is needed to force focus on the editor
+                    setTimeout(function() { code_mirror.focus();}, 1);
                 }
 
                 function update_patch_list(instance, changes) {
