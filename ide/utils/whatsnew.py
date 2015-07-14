@@ -31,7 +31,7 @@ NEW_THINGS = [
     ["<strong>CloudPebble now has an emulator!</strong> By default, we will install into the emulator. You can toggle between the emulator and a physical pebble in the compilation pane",
      "Emulator tip: you can click in the screen to use the arrow keys as buttons, or X/Y/Z as taps. Use shift-X/Y/Z for taps in the negative direction.",
      "Emulator tip: you must update your configuration pages for the emulator. We will pass a return_to query parameter; when specified, use it instead of 'pebblejs://close#'"],
-    ["CloudPebble now has fuzzy file search! Use cmd-P or ctrl-P in the editor to bring up an input prompt, then begin to type the name of a file you would like to open.",
+    ["CloudPebble now has fuzzy file search! Use cmd-P (Mac) or ctrl-P (Windows) in the editor to bring up an input prompt, then begin to type the name of a file you would like to open.",
      "You can scroll up and down the suggestions with the arrow keys, and press enter to select a file."]
 ]
 
