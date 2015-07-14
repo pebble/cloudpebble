@@ -7,6 +7,12 @@ CloudPebble.FuzzyPrompt = (function() {
     var initialised = false;
     var selected_id = null;
     var default_item;
+    var cancel_function;
+    var show_previews;
+    var selection_was_made;
+    var opened = false;
+    var COMMANDS_ENABLED = false;
+
     // While manual is false, always highlight the first item
     var manual = false;
 
@@ -32,8 +38,14 @@ CloudPebble.FuzzyPrompt = (function() {
             // Register ctrl-p and ctrl-shift-p
             $(document).keydown(function(e) {
                if (e.ctrlKey && e.keyCode == 80) {
-                   var kind = (e.shiftKey ? 'commands' : 'files');
-                   show_prompt(kind);
+                   if (COMMANDS_ENABLED && e.shiftKey) {
+                       input.attr('placeholder', gettext("Enter Command"));
+                       show_prompt('commands');
+                   }
+                   if (!e.shiftKey) {
+                       input.attr('placeholder', gettext("Search Files"));
+                       show_prompt('files');
+                   }
                    e.preventDefault();
                }
             });
@@ -91,6 +103,10 @@ CloudPebble.FuzzyPrompt = (function() {
                 input.focus();
                 input.val("");
             });
+
+            prompt.on('hidden.bs.modal', function() {
+                opened = false;
+            });
         }
     };
 
@@ -118,6 +134,8 @@ CloudPebble.FuzzyPrompt = (function() {
     };
 
     var select_match = function(match) {
+        selection_was_made = true;
+        opened = false;
         match.callback(match.object, input.val());
         hide_prompt();
     };
@@ -128,6 +146,8 @@ CloudPebble.FuzzyPrompt = (function() {
         item_list = [];
         results.empty();
         manual = false;
+        selection_was_made = false;
+        opened = true;
         // Build up the list of files to search through
         var id = 0;
         _.each(sources, function(source) {
@@ -155,7 +175,7 @@ CloudPebble.FuzzyPrompt = (function() {
             }
         });
         fuse.set(item_list);
-        highlight_item_by_id(0);
+        highlight_item(_.findWhere(item_list, {name: default_item}) || item_list[0]);
     };
 
     var highlight_item = function(item) {
@@ -184,13 +204,18 @@ CloudPebble.FuzzyPrompt = (function() {
 
     return {
         SetCurrentItemName: function(item_name) {
-            default_item = item_name;
+            if (!opened) {
+                default_item = item_name;
+            }
         },
         Show: function() {
             show_prompt();
         },
         AddDataSource: function(kind, item_getter, select_callback) {
             sources.push({list_func: item_getter, callback: select_callback, kind: kind});
+        },
+        AddCommands: function(commands) {
+            sources.push({list_func: function() {return commands;}, callback: function(func) {func();}, kind: 'commands' });
         },
         Init: function() {
             init();

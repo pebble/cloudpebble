@@ -12,6 +12,21 @@ CloudPebble.Editor = (function() {
         project_source_files[file.name] = file;
     };
 
+    var run = function() {
+        CloudPebble.Prompts.Progress.Show(gettext("Saving..."));
+        CloudPebble.Editor.SaveAll(function() {
+            CloudPebble.Prompts.Progress.Show(gettext("Compiling..."));
+            CloudPebble.Compile.RunBuild(function (success) {
+                CloudPebble.Prompts.Progress.Hide();
+                if(success) {
+                    CloudPebble.Compile.DoInstall();
+                } else {
+                    CloudPebble.Compile.Show();
+                }
+            });
+        });
+    };
+
     var edit_source_file = function(file, show_ui_editor, callback) {
         CloudPebble.FuzzyPrompt.SetCurrentItemName(file.name);
         // See if we already had it open.
@@ -150,9 +165,7 @@ CloudPebble.Editor = (function() {
                 settings.extraKeys['Ctrl-/']  = function(cm) {
                     CodeMirror.commands.toggleComment(cm);
                 };
-                settings.extraKeys['Ctrl-P'] = function(cm) {
-                    CloudPebble.FuzzyPrompt.Show(file.name);
-                };
+
                 if(is_js) {
                     settings.gutters = ['gutter-hint-warnings', 'CodeMirror-linenumbers', 'CodeMirror-foldgutter'];
                 } else {
@@ -538,21 +551,7 @@ CloudPebble.Editor = (function() {
                     );
                 });
 
-                run_btn.click(function() {
-                    var button = $(this);
-                    CloudPebble.Prompts.Progress.Show(gettext("Saving..."));
-                    CloudPebble.Editor.SaveAll(function() {
-                        CloudPebble.Prompts.Progress.Show(gettext("Compiling..."));
-                        CloudPebble.Compile.RunBuild(function (success) {
-                            CloudPebble.Prompts.Progress.Hide();
-                            if(success) {
-                                CloudPebble.Compile.DoInstall();
-                            } else {
-                                CloudPebble.Compile.Show();
-                            }
-                        });
-                    });
-                });
+                run_btn.click(run);
 
                 ib_btn.click(toggle_ib);
 
@@ -645,6 +644,9 @@ CloudPebble.Editor = (function() {
                 edit_source_file(file);
             }
         });
+        var commands = {};
+        commands[gettext('Run')] = run;
+        CloudPebble.FuzzyPrompt.AddCommands(commands);
 
     }
 

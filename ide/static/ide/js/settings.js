@@ -272,6 +272,9 @@ CloudPebble.Settings = (function() {
             show_settings_pane();
         },
         Init: function() {
+            var commands = {};
+            commands[gettext('Settings')] = show_settings_pane;
+            CloudPebble.FuzzyPrompt.AddCommands(commands);
             settings_template = $('#settings-pane-template').remove().removeClass('hide');
         },
         AddResource: function(resource) {
