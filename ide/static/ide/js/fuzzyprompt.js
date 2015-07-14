@@ -7,7 +7,7 @@ CloudPebble.FuzzyPrompt = (function() {
     var initialised = false;
     var selected_id = null;
     var default_item;
-    // While manual == false, always highlight the first item
+    // While manual is false, always highlight the first item
     var manual = false;
 
     var init = function() {
@@ -28,6 +28,13 @@ CloudPebble.FuzzyPrompt = (function() {
             input = $('#fuzzy-prompt-input-value');
             prompt = $('#fuzzy-prompt');
             results = $('#fuzzy-results');
+
+            $(document).keydown(function(e) {
+               if (e.ctrlKey && e.keyCode == 80) {
+                   show_prompt();
+                   e.preventDefault();
+               }
+            });
 
             prompt.keydown(function (e) {
                 // Ctrl-P to hide
@@ -113,13 +120,12 @@ CloudPebble.FuzzyPrompt = (function() {
         hide_prompt();
     };
 
-    var show_prompt = function(default_item_name) {
+    var show_prompt = function() {
         previously_active = document.activeElement;
         prompt.modal('show');
         item_list = [];
         results.empty();
         manual = false;
-        default_item = default_item_name;
         // Build up the list of files to search through
         var id = 0;
         _.each(sources, function(source) {
@@ -173,8 +179,11 @@ CloudPebble.FuzzyPrompt = (function() {
     };
 
     return {
-        Show: function(default_item_name) {
-            show_prompt(default_item_name);
+        SetCurrentItemName: function(item_name) {
+            default_item = item_name;
+        },
+        Show: function() {
+            show_prompt();
         },
         AddDataSource: function(item_getter, select_callback) {
             sources.push({list_func: item_getter, callback: select_callback});

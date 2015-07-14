@@ -324,18 +324,13 @@
 </div>
 <!-- Command-P-->
 <div id="fuzzy-prompt" class="modal hide fade" tabindex="-1" role="dialog">
-    <div class="modal-body">
-        <form class="form-horizontal" autocomplete="off">
-            <div class="control-group">
-                <label id="fuzzy-prompt-input-prompt" for="fuzzy-prompt-input-value">{% trans 'Search' %}</label>
-                <div class="controls">
-                    <input type="text" id="fuzzy-prompt-input-value">
-                </div>
-            </div>
-        </form>
+    <div class="modal-header padded-modal-header">
+        <input type="text" id="fuzzy-prompt-input-value" autocomplete="off" placeholder="{% trans 'Search' %}">
     </div>
-    <div id="fuzzy-results" class="modal-footer">
+    <div class="modal-footer">
+        <div id="fuzzy-results">
 
+        </div>
     </div>
 </div>
 <!-- Modal text prompt -->

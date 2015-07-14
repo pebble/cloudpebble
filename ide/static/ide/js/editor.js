@@ -13,6 +13,7 @@ CloudPebble.Editor = (function() {
     };
 
     var edit_source_file = function(file, show_ui_editor, callback) {
+        CloudPebble.FuzzyPrompt.SetCurrentItemName(file.name);
         // See if we already had it open.
         CloudPebble.Sidebar.SuspendActive();
         if(CloudPebble.Sidebar.Restore('source-'+file.id)) {
@@ -631,12 +632,12 @@ CloudPebble.Editor = (function() {
         CodeMirror.commands.saveAll = function(cm) {
             save_all();
         };
-        CloudPebble.FuzzyPrompt.Init();
+
         CloudPebble.FuzzyPrompt.AddDataSource(CloudPebble.Editor.GetProjectSourceFiles, function(file, querystring) {
             var parts = querystring.split(":", 2);
             var line = parseInt(parts[1], 10);
             if (_.isFinite(line)) {
-                go_to(file.name, line, 0);
+                go_to(file.name, line - 1, 0);
             }
             else {
                 edit_source_file(file);

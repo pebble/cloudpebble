@@ -974,8 +974,9 @@ span.cm-autofilled-end {
   color: #d0d0d0;
 }
 
-#fuzzy-results {
-    padding: 20px 0 0 0;
+#fuzzy-prompt .modal-footer {
+    padding: 0 0 10px 0;
+    text-align: left;
 }
 
 #fuzzy-results > div {
@@ -983,13 +984,23 @@ span.cm-autofilled-end {
     line-height: 30px;
     cursor: pointer;
     cursor: hand;
-}
-
-#fuzzy-prompt .controls {
-    margin-bottom: 0;
+    padding-left: 25px;
 }
 
 #fuzzy-results > div.selected {
     color: white;
     background-color: #333;
+}
+
+#fuzzy-prompt-input-value {
+    width: 100%;
+    /*height: auto;*/
+}
+
+#fuzzy-prompt-input-value:focus{
+    outline: 0;
+}
+
+.padded-modal-header {
+    padding: 10px 25px 10px 10px;
 }
