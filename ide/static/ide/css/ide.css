@@ -980,8 +980,8 @@ span.cm-autofilled-end {
 }
 
 #fuzzy-results > div {
-    font-size: large;
-    line-height: 30px;
+
+    line-height: 28px;
     cursor: pointer;
     cursor: hand;
     padding-left: 25px;

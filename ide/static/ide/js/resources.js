@@ -384,7 +384,7 @@ CloudPebble.Resources = (function() {
         // Set up the resource editing template.
         resource_template = $('#resource-pane-template');
         resource_template.remove();
-        CloudPebble.FuzzyPrompt.AddDataSource(function() {
+        CloudPebble.FuzzyPrompt.AddDataSource('files', function() {
             return project_resources;
         }, function (resource, querystring) {
             edit_resource(resource);

@@ -633,7 +633,9 @@ CloudPebble.Editor = (function() {
             save_all();
         };
 
-        CloudPebble.FuzzyPrompt.AddDataSource(CloudPebble.Editor.GetProjectSourceFiles, function(file, querystring) {
+        CloudPebble.FuzzyPrompt.AddDataSource('files', function() {
+            return project_source_files;
+        }, function(file, querystring) {
             var parts = querystring.split(":", 2);
             var line = parseInt(parts[1], 10);
             if (_.isFinite(line)) {
@@ -951,9 +953,6 @@ CloudPebble.Editor = (function() {
         },
         GetUnsavedFiles: function() {
             return unsaved_files;
-        },
-        GetProjectSourceFiles: function() {
-            return project_source_files;
         },
         Open: function(file) {
             edit_source_file(file);
