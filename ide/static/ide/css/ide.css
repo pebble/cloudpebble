@@ -981,6 +981,8 @@ span.cm-autofilled-end {
 #fuzzy-results > div {
     font-size: large;
     line-height: 30px;
+    cursor: pointer;
+    cursor: hand;
 }
 
 #fuzzy-prompt .controls {

@@ -150,7 +150,7 @@ CloudPebble.Editor = (function() {
                     CodeMirror.commands.toggleComment(cm);
                 };
                 settings.extraKeys['Ctrl-P'] = function(cm) {
-                    CloudPebble.FuzzyPrompt.Toggle();
+                    CloudPebble.FuzzyPrompt.Show(file.name);
                 };
                 if(is_js) {
                     settings.gutters = ['gutter-hint-warnings', 'CodeMirror-linenumbers', 'CodeMirror-foldgutter'];
@@ -630,9 +630,17 @@ CloudPebble.Editor = (function() {
             save_all();
         };
         CloudPebble.FuzzyPrompt.Init();
-        CloudPebble.FuzzyPrompt.AddDataSource(CloudPebble.Editor.GetProjectSourceFiles, function(file) {
-            edit_source_file(file);
-        })
+        CloudPebble.FuzzyPrompt.AddDataSource(CloudPebble.Editor.GetProjectSourceFiles, function(file, querystring) {
+            var parts = querystring.split(":", 2);
+            var line = parseInt(parts[1], 10);
+            if (_.isFinite(line)) {
+                go_to(file.name, line, 0);
+            }
+            else {
+                edit_source_file(file);
+            }
+        });
+
     }
 
     function fullscreen(code_mirror, toggle) {
