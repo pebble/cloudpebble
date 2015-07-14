@@ -994,7 +994,6 @@ span.cm-autofilled-end {
 
 #fuzzy-prompt-input-value {
     width: 100%;
-    /*height: auto;*/
 }
 
 #fuzzy-prompt-input-value:focus{

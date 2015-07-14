@@ -165,7 +165,6 @@ CloudPebble.Editor = (function() {
                 settings.extraKeys['Ctrl-/']  = function(cm) {
                     CodeMirror.commands.toggleComment(cm);
                 };
-
                 if(is_js) {
                     settings.gutters = ['gutter-hint-warnings', 'CodeMirror-linenumbers', 'CodeMirror-foldgutter'];
                 } else {
@@ -635,6 +634,8 @@ CloudPebble.Editor = (function() {
         CloudPebble.FuzzyPrompt.AddDataSource('files', function() {
             return project_source_files;
         }, function(file, querystring) {
+            // When a file is selected in fuzzy search, 'edit' or 'go_to'
+            // depending on whether the user included :<line-number>
             var parts = querystring.split(":", 2);
             var line = parseInt(parts[1], 10);
             if (_.isFinite(line)) {

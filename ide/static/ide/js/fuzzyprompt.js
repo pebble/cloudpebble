@@ -7,8 +7,6 @@ CloudPebble.FuzzyPrompt = (function() {
     var initialised = false;
     var selected_id = null;
     var default_item;
-    var cancel_function;
-    var show_previews;
     var selection_was_made;
     var opened = false;
     var COMMANDS_ENABLED = false;
@@ -57,7 +55,7 @@ CloudPebble.FuzzyPrompt = (function() {
                 }
                 // Enter to select
                 else if (e.keyCode == 13) {
-                    select_match(item_list[selected_id]);
+                    select_item(item_list[selected_id]);
                 }
                 // Up and down to switch between items
                 // Use e.preventDefault so arrow keys don't navigate the text
@@ -81,10 +79,11 @@ CloudPebble.FuzzyPrompt = (function() {
                     item.rank = null;
                 });
 
-                // Build the new results list
+                // Then build the new results list
                 if (matches.length > 0) {
                     _.each(matches, function(match, rank) {
                         match.menu_item.appendTo(results);
+                        // The item's rank is its current position in the suggestion list.
                         match.rank = rank;
                     });
                     // Highlight the first item if the previously highlighted item disappears
@@ -94,6 +93,7 @@ CloudPebble.FuzzyPrompt = (function() {
                     }
                 }
                 else {
+                    // If there are no results, go back to highlighting the top item
                     manual = false;
                     selected_id = null;
                 }
@@ -110,6 +110,7 @@ CloudPebble.FuzzyPrompt = (function() {
         }
     };
 
+    // Move the highlight cursor up or down by 'jump' places.
     var move = function(jump) {
         var selected = item_list[selected_id];
         var children = results.children();
@@ -119,6 +120,8 @@ CloudPebble.FuzzyPrompt = (function() {
         highlight_item(new_selection);
     };
 
+    // Get all items which fuzzily match the input string
+    // or if the input string is empty, return all the items
     var current_matches = function() {
         var parts = input.val().split(":", 2);
         if (parts[0].length == 0) {
@@ -133,7 +136,8 @@ CloudPebble.FuzzyPrompt = (function() {
         }
     };
 
-    var select_match = function(match) {
+    // Select an item, run its callback then hide the prompt
+    var select_item = function(match) {
         selection_was_made = true;
         opened = false;
         match.callback(match.object, input.val());
@@ -155,10 +159,11 @@ CloudPebble.FuzzyPrompt = (function() {
                 _.each(source.list_func(), function (object, name) {
                     var menu_item = $("<div></div>");
                     menu_item.text(name).appendTo(results);
+                    // Set up the menu item handler
                     (function () {
                         var this_id = id;
                         menu_item.on('click', function () {
-                            select_match(item_list[this_id]);
+                            select_item(item_list[this_id]);
                         });
                     })();
 
@@ -175,13 +180,16 @@ CloudPebble.FuzzyPrompt = (function() {
             }
         });
         fuse.set(item_list);
+
+        // Select the current item by default, or the first item.
         highlight_item(_.findWhere(item_list, {name: default_item}) || item_list[0]);
     };
 
+    // Highlight an item in the suggestions list.
+    // if enter is hit, the highlighted item gets selected.
     var highlight_item = function(item) {
         highlight_item_by_id(item.id);
     };
-
     var highlight_item_by_id = function(id) {
         _.each(item_list, function(item) {
             if (item.id == id) {
@@ -194,6 +202,7 @@ CloudPebble.FuzzyPrompt = (function() {
         selected_id = id;
     };
 
+    // Hide the prompt and refocus on the last thing.
     var hide_prompt = function() {
         prompt.modal('hide');
         setTimeout(function() {
@@ -203,6 +212,8 @@ CloudPebble.FuzzyPrompt = (function() {
     };
 
     return {
+        // Let fuzzy-prompt know the name of the currently opened file
+        // to use as a default when nothing has been typed.
         SetCurrentItemName: function(item_name) {
             if (!opened) {
                 default_item = item_name;
@@ -211,9 +222,17 @@ CloudPebble.FuzzyPrompt = (function() {
         Show: function() {
             show_prompt();
         },
+        /* Add a data source.
+            kind: 'files' or 'commands
+            item_getter: a function which should return a dict of items with string name keys
+            select_callback: a function to call when one of these items is selected
+         */
         AddDataSource: function(kind, item_getter, select_callback) {
             sources.push({list_func: item_getter, callback: select_callback, kind: kind});
         },
+        /* Add a set of commands
+            commands: a dict of names->functions
+         */
         AddCommands: function(commands) {
             sources.push({list_func: function() {return commands;}, callback: function(func) {func();}, kind: 'commands' });
         },
