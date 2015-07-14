@@ -974,3 +974,20 @@ span.cm-autofilled-end {
   color: #d0d0d0;
 }
 
+#fuzzy-results {
+    padding: 20px 0 0 0;
+}
+
+#fuzzy-results > div {
+    font-size: large;
+    line-height: 30px;
+}
+
+#fuzzy-prompt .controls {
+    margin-bottom: 0;
+}
+
+#fuzzy-results > div.selected {
+    color: white;
+    background-color: #333;
+}
