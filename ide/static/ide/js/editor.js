@@ -12,7 +12,23 @@ CloudPebble.Editor = (function() {
         project_source_files[file.name] = file;
     };
 
+    var run = function() {
+        CloudPebble.Prompts.Progress.Show(gettext("Saving..."));
+        CloudPebble.Editor.SaveAll(function() {
+            CloudPebble.Prompts.Progress.Show(gettext("Compiling..."));
+            CloudPebble.Compile.RunBuild(function (success) {
+                CloudPebble.Prompts.Progress.Hide();
+                if(success) {
+                    CloudPebble.Compile.DoInstall();
+                } else {
+                    CloudPebble.Compile.Show();
+                }
+            });
+        });
+    };
+
     var edit_source_file = function(file, show_ui_editor, callback) {
+        CloudPebble.FuzzyPrompt.SetCurrentItemName(file.name);
         // See if we already had it open.
         CloudPebble.Sidebar.SuspendActive();
         if(CloudPebble.Sidebar.Restore('source-'+file.id)) {
@@ -534,21 +550,7 @@ CloudPebble.Editor = (function() {
                     );
                 });
 
-                run_btn.click(function() {
-                    var button = $(this);
-                    CloudPebble.Prompts.Progress.Show(gettext("Saving..."));
-                    CloudPebble.Editor.SaveAll(function() {
-                        CloudPebble.Prompts.Progress.Show(gettext("Compiling..."));
-                        CloudPebble.Compile.RunBuild(function (success) {
-                            CloudPebble.Prompts.Progress.Hide();
-                            if(success) {
-                                CloudPebble.Compile.DoInstall();
-                            } else {
-                                CloudPebble.Compile.Show();
-                            }
-                        });
-                    });
-                });
+                run_btn.click(run);
 
                 ib_btn.click(toggle_ib);
 
@@ -628,6 +630,25 @@ CloudPebble.Editor = (function() {
         CodeMirror.commands.saveAll = function(cm) {
             save_all();
         };
+
+        CloudPebble.FuzzyPrompt.AddDataSource('files', function() {
+            return project_source_files;
+        }, function(file, querystring) {
+            // When a file is selected in fuzzy search, 'edit' or 'go_to'
+            // depending on whether the user included :<line-number>
+            var parts = querystring.split(":", 2);
+            var line = parseInt(parts[1], 10);
+            if (_.isFinite(line)) {
+                go_to(file.name, line - 1, 0);
+            }
+            else {
+                edit_source_file(file);
+            }
+        });
+        var commands = {};
+        commands[gettext('Run')] = run;
+        CloudPebble.FuzzyPrompt.AddCommands(commands);
+
     }
 
     function fullscreen(code_mirror, toggle) {

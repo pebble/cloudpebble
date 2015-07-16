@@ -158,6 +158,7 @@ CloudPebble.Resources = (function() {
     };
 
     var edit_resource = function(resource) {
+        CloudPebble.FuzzyPrompt.SetCurrentItemName(resource.file_name);
         CloudPebble.Sidebar.SuspendActive();
         if(CloudPebble.Sidebar.Restore('resource-' + resource.id)) return;
         ga('send', 'event', 'resource', 'open');
@@ -383,6 +384,11 @@ CloudPebble.Resources = (function() {
         // Set up the resource editing template.
         resource_template = $('#resource-pane-template');
         resource_template.remove();
+        CloudPebble.FuzzyPrompt.AddDataSource('files', function() {
+            return project_resources;
+        }, function (resource, querystring) {
+            edit_resource(resource);
+        });
     };
 
     return {
