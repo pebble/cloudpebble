@@ -69,8 +69,6 @@ def create_archive(project_id):
             return '%s%s' % (settings.EXPORT_ROOT, outfile)
 
 
-
-
 @task(acks_late=True)
 def export_user_projects(user_id):
     user = User.objects.get(pk=user_id)
@@ -90,6 +88,24 @@ def export_user_projects(user_id):
 
         send_keen_event('cloudpebble', 'cloudpebble_export_all_projects', user=user)
         return '%s%s/%s.zip' % (settings.EXPORT_ROOT, u, 'cloudpebble-export')
+
+
+def get_filename_variant(file_name, resource_suffix_map):
+    file_name_parts = os.path.splitext(file_name)
+    for suffix in resource_suffix_map.iterkeys():
+        if file_name_parts[0].endswith(suffix):
+            root_file_name = file_name_parts[0][:len(file_name_parts[0]) - len(suffix)] + file_name_parts[1]
+            variant = resource_suffix_map[suffix]
+            break
+    else:
+        root_file_name = file_name
+        variant = ResourceVariant.VARIANT_DEFAULT
+    return variant, root_file_name
+
+
+def make_filename_variant(file_name, variant):
+    file_name_parts = os.path.splitext(file_name)
+    return file_name_parts[0] + variant + file_name_parts[1]
 
 
 @task(acks_late=True)
@@ -160,40 +176,71 @@ def do_import_archive(project_id, archive, delete_project=False):
                             resource_files = {}
                             resource_suffix_map = {v: k for k, v in ResourceVariant.VARIANT_SUFFIXES.iteritems()}
                             del resource_suffix_map['']  # This mapping is confusing to keep around; everything is suffixed with nothing.
+
+                            # Build a list of all the files we actually want to try opening.
+                            # If any file names without variants are specified, we add all possible variants to the list.
+                            full_media_map = {}
+                            file_exists_for_root = {}
+
                             for resource in media_map:
-                                kind = resource['type']
-                                def_name = resource['name']
                                 file_name = resource['file']
+                                def_name = resource['name']
                                 # Pebble.js and simply.js both have some internal resources that we don't import.
                                 if project.project_type in {'pebblejs', 'simplyjs'}:
                                     if def_name in {'MONO_FONT_14', 'IMAGE_MENU_ICON', 'IMAGE_LOGO_SPLASH', 'IMAGE_TILE_SPLASH'}:
                                         continue
+                                variant, root_file_name = get_filename_variant(file_name, resource_suffix_map)
+                                file_exists_for_root[root_file_name] = False
+                                if variant == ResourceVariant.VARIANT_DEFAULT:
+                                    for variant_string in resource_suffix_map.keys():
+                                        new_file_name = make_filename_variant(file_name, variant_string)
+                                        if new_file_name not in full_media_map:
+                                            resource_copy = dict(resource)
+                                            resource_copy['file'] = new_file_name
+                                            full_media_map[new_file_name] = resource_copy
+                                full_media_map[file_name] = dict(resource)
+
+                            for resource in full_media_map.values():
+                                kind = resource['type']
+                                def_name = resource['name']
+                                file_name = resource['file']
                                 regex = resource.get('characterRegex', None)
                                 tracking = resource.get('trackingAdjust', None)
                                 is_menu_icon = resource.get('menuIcon', False)
                                 compatibility = resource.get('compatibility', None)
+
                                 if file_name not in resource_files:
-                                    file_name_parts = os.path.splitext(file_name)
-                                    for suffix in resource_suffix_map.iterkeys():
-                                        if file_name_parts[0].endswith(suffix):
-                                            root_file_name = file_name_parts[0][:len(file_name_parts[0]) - len(suffix)] + "." + file_name_parts[1]
-                                            variant = resource_suffix_map[suffix]
-                                            break
-                                    else:
-                                        root_file_name = file_name
-                                        variant = ResourceVariant.VARIANT_DEFAULT
-                                    if root_file_name not in resources:
-                                        resources[root_file_name] = ResourceFile.objects.create(project=project, file_name=os.path.basename(root_file_name), kind=kind, is_menu_icon=is_menu_icon)
                                     res_path = 'resources'
+                                    try:
+                                        extracted = z.open('%s%s/%s' % (base_dir, res_path, file_name))
+                                    except KeyError:
+                                        continue  # File not found, but variants might exist.
+
+                                    variant, root_file_name = get_filename_variant(file_name, resource_suffix_map)
+
+                                    if root_file_name not in resources:
+                                        resources[root_file_name] = ResourceFile.objects.create(
+                                            project=project,
+                                            file_name=os.path.basename(root_file_name),
+                                            kind=kind,
+                                            is_menu_icon=is_menu_icon)
+
+                                        ResourceIdentifier.objects.create(
+                                            resource_file=resources[root_file_name],
+                                            resource_id=def_name,
+                                            character_regex=regex,
+                                            tracking=tracking,
+                                            compatibility=compatibility
+                                        )
+
                                     resource_files[file_name] = ResourceVariant.objects.create(resource_file=resources[root_file_name], variant=variant)
-                                    resource_files[file_name].save_file(z.open('%s%s/%s' % (base_dir, res_path, file_name)))
-                                ResourceIdentifier.objects.create(
-                                    resource_file=resources[file_name],
-                                    resource_id=def_name,
-                                    character_regex=regex,
-                                    tracking=tracking,
-                                    compatibility=compatibility
-                                )
+                                    resource_files[file_name].save_file(extracted)
+                                    file_exists_for_root[root_file_name] = True
+
+                            # Check that at least one variant of each specified resource exists.
+                            for root_file_name, loaded in file_exists_for_root.iteritems():
+                                if not loaded:
+                                    raise KeyError("No file was found to satisfy the manifest filename: {}".format(root_file_name))
 
                         elif filename.startswith(SRC_DIR):
                             if (not filename.startswith('.')) and (filename.endswith('.c') or filename.endswith('.h') or filename.endswith('.js')):
