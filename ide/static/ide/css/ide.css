@@ -974,3 +974,32 @@ span.cm-autofilled-end {
   color: #d0d0d0;
 }
 
+#fuzzy-prompt .modal-footer {
+    padding: 0 0 10px 0;
+    text-align: left;
+}
+
+#fuzzy-results > div {
+
+    line-height: 28px;
+    cursor: pointer;
+    cursor: hand;
+    padding-left: 25px;
+}
+
+#fuzzy-results > div.selected {
+    color: white;
+    background-color: #333;
+}
+
+#fuzzy-prompt-input-value {
+    width: 100%;
+}
+
+#fuzzy-prompt-input-value:focus{
+    outline: 0;
+}
+
+.padded-modal-header {
+    padding: 10px 25px 10px 10px;
+}

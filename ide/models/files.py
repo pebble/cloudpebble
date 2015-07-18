@@ -79,7 +79,19 @@ class ResourceFile(IdeModel):
 
     @property
     def root_path(self):
-        return self.get_best_variant(ResourceVariant.VARIANT_DEFAULT).get_path()
+        # Either return the path of the default variant if it exists
+        # or strip out the suffix from another variant
+        for variant, suffix in ResourceVariant.RESOURCE_VARIANTS:
+            try:
+                file_name = self.get_best_variant(variant).get_path()
+                if variant == ResourceVariant.VARIANT_DEFAULT:
+                    return file_name
+                else:
+                    file_name_parts = os.path.splitext(file_name)
+                    return file_name_parts[0][:len(file_name_parts[0]) - len(suffix) - 1] + file_name_parts[1]
+            except ResourceVariant.DoesNotExist:
+                continue
+        raise Exception("No root path found for resource %s" % self.file_name)
 
     class Meta(IdeModel.Meta):
         unique_together = (('project', 'file_name'),)
@@ -162,7 +174,6 @@ class ResourceVariant(IdeModel):
     def save(self, *args, **kwargs):
         self.resource_file.save()
         super(ResourceVariant, self).save(*args, **kwargs)
-
 
     VARIANT_SUFFIXES = {
         0: '',
