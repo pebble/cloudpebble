@@ -424,7 +424,7 @@ CloudPebble.Resources = (function() {
         },
         GetFontFamily: function(font) {
             if(!font.family) {
-                var preview_url = '/ide/project/' + PROJECT_ID + '/resource/' + font.id +'/get';
+                var preview_url = '/ide/project/' + PROJECT_ID + '/resource/' + font.id +'/0/get';
                 var style = document.createElement('style');
                 font.family = 'font-preview-' + font.id + '-' + (++preview_count);
                 var rule = '@font-face { font-family: "' + font.family + '"; src: url(' + preview_url + '#e' + (preview_count) + '); }';
