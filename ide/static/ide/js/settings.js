@@ -132,8 +132,6 @@ CloudPebble.Settings = (function() {
                     CloudPebble.ProjectInfo.sdk_version = sdk_version;
                     $('.project-name').text(name);
                     window.document.title = "CloudPebble – " + name;
-                    pane.find('.setting-changed:visible').siblings('.setting-saved').show().delay(1000).hide('fast');
-                    pane.find('.setting-changed').hide();
                     defer.resolve();
                 } else {
                     defer.reject(interpolate(gettext("Error: %s"), [error]));
@@ -146,25 +144,10 @@ CloudPebble.Settings = (function() {
             return defer.promise();
         };
 
-        $("<span class='settings-status-icons'>" +
-            "<span class='icon-ok setting-saved'></span>" +
-            "<span class='icon-edit setting-changed'></span>" +
-            "</span>")
-            .insertAfter(pane.find('.control-label'))
-            .children().hide();
-
-        pane.find('input, select').change(function() {
-            var self = this;
-            save().then(function() {
-                $(self).parents('.control-group').find('.setting-saved').show().delay(1000).hide('fast');
-            }, function(error) {
-                display_error(error);
-                $(self).parents('.control-group').find('.setting-changed').show('fast');
-            });
-        });
-
-        pane.find('input').on('input', function(ininin) {
-            $(this).parents('.control-group').find('.setting-changed').show('fast');
+        make_live_settings_form({
+            save_function: save,
+            error_function: display_error,
+            form: pane.find('form')
         });
 
         pane.find('#project-delete').click(function() {
