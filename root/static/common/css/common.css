@@ -406,6 +406,10 @@ input[type=checkbox]:checked {
     width: 435px;
 }
 
+.editor-settings .help-block {
+    width: inherit;
+}
+
 .nav-tabs {
     list-style: none;
     padding: 0;
