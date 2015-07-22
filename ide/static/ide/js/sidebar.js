@@ -110,6 +110,9 @@ CloudPebble.Sidebar = (function() {
             end.before(li);
             return li;
         },
+        SetItemName: function(id, new_name) {
+            $('#sidebar-link-'+id).text(new_name + ' ');
+        },
         AddSourceFile: function(file, on_click) {
             var end = $('#end-source-files');
             if(file.target == 'worker') {
@@ -117,7 +120,7 @@ CloudPebble.Sidebar = (function() {
                 $('#worker-files').show();
                 $('#source-files').find('span:first').text(gettext("App source"));
             }
-            var link = $('<a href="#"></a>');
+            var link = $('<a href="#" id="sidebar-link-'+file.id+'"></a>');
             link.text(file.name + ' ');
             link.click(on_click);
             var li = $('<li id="sidebar-pane-source-'+file.id+'">');

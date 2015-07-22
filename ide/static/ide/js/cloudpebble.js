@@ -79,13 +79,16 @@ CloudPebble.Init = function() {
 };
 
 CloudPebble.Prompts = {
-    Prompt: function(title, prompt, placeholder, default_value, callback) {
+    Prompt: function(title, prompt, placeholder, default_value, callback, pattern) {
         $('#modal-text-input-title').text(title);
         $('#modal-text-input-prompt').text(prompt);
-        $('#modal-text-input-value').val(default_value).attr('placeholder', placeholder);
+        $('#modal-text-input-value')
+            .val(default_value)
+            .attr('placeholder', placeholder)
+            .attr('pattern', pattern || '')
+            .removeAttr('disabled');
         $('#modal-text-input-errors').html('');
         $('#modal-text-input').modal();
-        $('#modal-text-input-value').removeAttr('disabled');
         $('#modal-text-confirm-button').unbind('click').click(function() {
             callback($('#modal-text-input-value').val(), {
                 error: function(message) {

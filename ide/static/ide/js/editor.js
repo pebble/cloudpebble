@@ -452,6 +452,71 @@ CloudPebble.Editor = (function() {
                     });
                 };
 
+                var rename_file = function(new_name) {
+                    var defer = $.Deferred();
+                    // Check no-change or duplicate filenames
+                    if (new_name == file.name) {
+                        return defer.resolve();
+                    }
+                    if (project_source_files[new_name]) {
+                        return defer.reject(interpolate(gettext("A file called '%s' already exists."), [new_name]));
+                    }
+
+                    $.post("/ide/project/" + PROJECT_ID + "/source/" + file.id + "/rename", {
+                        old_name: file.name,
+                        new_name: new_name,
+                        modified: lastModified
+                    }).done(function(response) {
+                        if (!response.success) {
+                            defer.reject(response.error);
+                        }
+                        else {
+                            delete project_source_files[file.name];
+                            file.name = new_name;
+                            CloudPebble.Sidebar.SetItemName(file.id, new_name);
+                            project_source_files[file.name] = file;
+                            defer.resolve();
+                        }
+                    }).fail(function(error) {
+                        console.log(error);
+                        defer.reject(gettext("Error renaming file"));
+                    });
+
+                    return defer.promise();
+                };
+
+                var show_rename_prompt = function() {
+                    var old_type = file.name.split('.').pop();
+                    var c_pattern = "[a-zA-Z0-9_-]+\.(c|h)$";
+                    var js_pattern = "[a-zA-Z0-9_-]+\.js$";
+                    var pattern = "";
+                    if (old_type == "c" || old_type == "h") {
+                        pattern = c_pattern;
+                    }
+                    if (old_type == "js") {
+                        pattern = js_pattern;
+                    }
+                    CloudPebble.Prompts.Prompt(
+                        gettext("Rename File"),
+                        gettext("Filename"),
+                        "",
+                        function() {
+                            return file.name;
+                        },
+                        function(value, prompt) {
+                            var regexp = new RegExp(pattern);
+                            if (value.match(regexp) === null) {
+                                prompt.error(gettext("Invalid filename"));
+                            }
+                            rename_file(value).done(function() {
+                                prompt.dismiss();
+                            }).fail(function(error) {
+                                prompt.error(error);
+                            });
+                        },
+                        pattern)
+                };
+
                 var ib_pane = $('#ui-editor-pane-template').clone().removeClass('hide').appendTo(pane).hide();
                 var ib_editor = new IB(ib_pane.find('.ui-canvas'), ib_pane.find('#ui-properties'), ib_pane.find('#ui-toolkit'), ib_pane.find('#ui-layer-list > div'));
                 var ib_showing = false;
@@ -514,6 +579,7 @@ CloudPebble.Editor = (function() {
                 var discard_btn = $('<button class="btn reload-btn" title="' + gettext('Reload') + '"></button>');
                 var delete_btn = $('<button class="btn delete-btn" title="' + gettext('Delete') + '"></button>');
                 var ib_btn = $('<button class="btn ib-btn" title="' + gettext('UI Editor') + '"></button>');
+                var rename_btn = $('<button class="btn rename-btn" title="' + gettext('Rename File') + '"></button>');
                 var error_area = $('<div>');
 
                 save_btn.click(function() { save(); });
@@ -550,6 +616,8 @@ CloudPebble.Editor = (function() {
                     );
                 });
 
+                rename_btn.click(show_rename_prompt);
+
                 run_btn.click(run);
 
                 ib_btn.click(toggle_ib);
@@ -558,6 +626,8 @@ CloudPebble.Editor = (function() {
                 button_holder.append(run_btn);
                 button_holder.append(save_btn);
                 button_holder.append(discard_btn);
+                button_holder.append(rename_btn);
+
                 if(source.indexOf('// BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY') != -1) {
                     button_holder.append(ib_btn);
                 }

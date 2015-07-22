@@ -1,6 +1,7 @@
 import os
 import shutil
 import traceback
+import datetime
 from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_delete
@@ -234,6 +235,17 @@ class SourceFile(IdeModel):
                 return ''
         else:
             return s3.read_file('source', self.s3_path)
+
+    def rename(self, new_name):
+        self.file_name = new_name
+        self.save()
+
+    def was_modified_since(self, expected_modification_time):
+        if isinstance(expected_modification_time, int):
+            expected_modification_time = datetime.datetime.fromtimestamp(expected_modification_time)
+        else:
+            assert isinstance(expected_modification_time, datetime.datetime)
+        return self.last_modified.replace(tzinfo=None, microsecond=0) > expected_modification_time
 
     def save_file(self, content, folded_lines=None):
         if not settings.AWS_ENABLED:
