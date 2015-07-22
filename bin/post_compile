@@ -39,6 +39,8 @@ pushd sdk3
     virtualenv .env
 popd
 
+touch NO_TRACKING
+
 echo "Cleaning up."
 rm /tmp/*.tar.*
 
