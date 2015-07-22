@@ -55,6 +55,19 @@
                         </select>
                     </div>
                 </div>
+                <div class="control-group not-simplyjs">
+                    <label class="control-label" for="settings-app-visibility">{% trans 'App Visibility' %}</label>
+                    <div class="controls">
+                        <select id="settings-app-visibility">
+                            <option value="visible"{% if not project.app_is_hidden and not project.app_is_shown_on_communication %}selected{% endif%}>{% trans 'Always Visible' %}</option>
+                            <option value="hidden"{% if project.app_is_hidden %}selected{% endif%}>{% trans 'Always Hidden' %}</option>
+                            <option value="show_on_comms" {% if not project.project_type == 'native' %}style="display:none"{% endif %} {% if project.app_is_shown_on_communication %}selected{% endif%}>{% trans 'Only Visible When Companion App Running' %}</option>
+                        </select>
+                        <span class="help-block">
+                            {% trans "The visibility of your app in the app launcher menu." %}
+                        </span>
+                    </div>
+                </div>
                 <div class="control-group">
                     <label class="control-label" for="settings-short-name">{% trans 'Short App Name' %}</label>
                     <div class="controls">

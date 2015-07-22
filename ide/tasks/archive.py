@@ -163,6 +163,8 @@ def do_import_archive(project_id, archive, delete_project=False):
                             project.app_version_label = m['versionLabel']
                             project.sdk_version = m.get('sdkVersion', '2')
                             project.app_is_watchface = m.get('watchapp', {}).get('watchface', False)
+                            project.app_is_hidden = m.get('watchapp', {}).get('hiddenApp', False)
+                            project.app_is_shown_on_communication = m.get('watchapp', {}).get('onlyShownOnCommunication', False)
                             project.app_capabilities = ','.join(m.get('capabilities', []))
                             if 'targetPlatforms' in m:
                                 project.app_platforms = ','.join(m['targetPlatforms'])

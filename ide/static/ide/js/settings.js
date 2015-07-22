@@ -44,6 +44,16 @@ CloudPebble.Settings = (function() {
             var build_aplite = pane.find('#settings-build-aplite').prop('checked');
             var build_basalt = pane.find('#settings-build-basalt').prop('checked');
 
+            var app_is_hidden = 0;
+            var app_is_shown_on_communication = 0;
+            if(pane.find('#settings-app-visibility').val() == 'hidden') {
+                var app_is_hidden = 1;
+            }
+            if(pane.find('#settings-app-visibility').val() == 'show_on_comms') {
+                var app_is_shown_on_communication = 1;
+            }
+
+
             var app_capabilities = [];
             if(pane.find('#settings-capabilities-location').is(':checked')) {
                 app_capabilities.push('location');
@@ -126,6 +136,8 @@ CloudPebble.Settings = (function() {
             saved_settings['app_uuid'] = app_uuid;
             saved_settings['app_capabilities'] = app_capabilities;
             saved_settings['app_is_watchface'] = app_is_watchface;
+            saved_settings['app_is_hidden'] = app_is_hidden;
+            saved_settings['app_is_shown_on_communication'] = app_is_shown_on_communication;
             saved_settings['app_keys'] = JSON.stringify(app_keys);
             saved_settings['app_jshint'] = app_jshint;
             saved_settings['menu_icon'] = menu_icon;
@@ -142,6 +154,8 @@ CloudPebble.Settings = (function() {
                     CloudPebble.ProjectInfo.app_long_name = long_name;
                     CloudPebble.ProjectInfo.app_version_label = version_label;
                     CloudPebble.ProjectInfo.app_is_watchface = app_is_watchface;
+                    CloudPebble.ProjectInfo.app_is_hidden = app_is_hidden;
+                    CloudPebble.ProjectInfo.app_is_shown_on_communication = app_is_shown_on_communication;
                     CloudPebble.ProjectInfo.app_capabilities = app_capabilities;
                     CloudPebble.ProjectInfo.app_jshint = app_jshint;
                     CloudPebble.ProjectInfo.app_platforms = app_platforms;

@@ -54,6 +54,8 @@ def import_gist(user_id, gist_id):
         'app_company_name': settings.get('companyName', user.username),
         'app_version_label': settings.get('versionLabel', '1.0'),
         'app_is_watchface': settings.get('watchapp', {}).get('watchface', False),
+        'app_is_hidden': settings.get('watchapp', {}).get('hiddenApp', False),
+        'app_is_shown_on_communication': settings.get('watchapp', {}).get('onlyShownOnCommunication', False),
         'app_capabilities': ','.join(settings.get('capabilities', [])),
         'app_keys': dict_to_pretty_json(settings.get('appKeys', {})),
         'project_type': project_type,
