@@ -60,6 +60,8 @@ CloudPebble.FuzzyPrompt = (function() {
                 // Enter to select
                 else if (e.keyCode == 13) {
                     select_item(item_list[selected_id]);
+                    e.preventDefault();
+                    e.stopPropagation();
                 }
                 // Up and down to switch between items
                 // Use e.preventDefault so arrow keys don't navigate the text
@@ -142,10 +144,12 @@ CloudPebble.FuzzyPrompt = (function() {
 
     // Select an item, run its callback then hide the prompt
     var select_item = function(match) {
-        selection_was_made = true;
+        selection_was_made = (match != null);
         opened = false;
-        hide_prompt(false);
-        match.callback(match.object, input.val());
+        hide_prompt(!selection_was_made);
+        if (match) {
+            match.callback(match.object, input.val());
+        }
     };
 
     var show_prompt = function(kind) {
