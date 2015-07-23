@@ -11,6 +11,7 @@ CloudPebble.Settings = (function() {
         var pane = settings_template;
         shared_pane = pane;
 
+
         if(CloudPebble.ProjectInfo.type != 'native') {
             pane.find('.native-only').hide();
         }
@@ -144,7 +145,7 @@ CloudPebble.Settings = (function() {
             return defer.promise();
         };
 
-        make_live_settings_form({
+        var live_form = make_live_settings_form({
             save_function: save,
             error_function: display_error,
             form: pane.find('form')
@@ -205,6 +206,7 @@ CloudPebble.Settings = (function() {
             var entry = $(this).closest('.appkey');
             entry.find('.remove-appkey').removeClass('disabled').click(function() {
                 entry.remove();
+                live_form.save($('#settings-app-keys'));
             });
 
             var new_appkey = $('<tr class="appkey">' +
@@ -216,12 +218,15 @@ CloudPebble.Settings = (function() {
             new_appkey.find('.appkey-name').on('change', add_appkey_field);
 
             pane.find('#appkeys').append(new_appkey);
+
+            live_form.addElement(new_appkey);
         };
 
         pane.find('.appkey:last').on('change', add_appkey_field);
 
         pane.find('.remove-appkey').not('.disabled').click(function() {
             $(this).closest('.appkey').remove();
+            live_form.save($('#settings-app-keys'));
         });
 
         pane.find('#settings-sdk-version').change(function() {
@@ -238,6 +243,8 @@ CloudPebble.Settings = (function() {
             uuid_field.val(_.UUID.v4());
             uuid_field.trigger("change");
         });
+
+        live_form.init();
 
         CloudPebble.Sidebar.SetActivePane(pane, 'settings');
     };
