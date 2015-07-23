@@ -99,7 +99,7 @@
         make_live_settings_form({
             save_function: save,
             form: $("#user-settings-form")
-        });
+        }).init();
 
         $("#user-settings-form").submit(function(e) {
             e.preventDefault();
