@@ -37,23 +37,23 @@ CloudPebble.FuzzyPrompt = (function() {
 
             // Register ctrl-p and ctrl-shift-p
             $(document).keydown(function(e) {
-               if ((e[modifier]) && e.keyCode == 80) {
-                   if (COMMANDS_ENABLED && e.shiftKey) {
-                       input.attr('placeholder', gettext("Enter Command"));
-                       show_prompt('commands');
-                   }
-                   if (!e.shiftKey) {
-                       input.attr('placeholder', gettext("Search Files"));
-                       show_prompt('files');
-                   }
-                   e.preventDefault();
-               }
+                if ((e[modifier]) && e.keyCode == 80) {
+                    if (COMMANDS_ENABLED && e.shiftKey) {
+                        input.attr('placeholder', gettext("Enter Command"));
+                        show_prompt('commands');
+                    }
+                    if (!e.shiftKey) {
+                        input.attr('placeholder', gettext("Search Files"));
+                        show_prompt('files');
+                    }
+                    e.preventDefault();
+                }
             });
 
             prompt.keydown(function (e) {
                 // Ctrl-P to hide
-                if (e[modifier] && e.keyCode == 80) {
-                    hide_prompt();
+                if (opened && e[modifier] && e.keyCode == 80) {
+                    hide_prompt(true);
                     e.preventDefault();
                     e.stopPropagation();
                 }
@@ -144,8 +144,8 @@ CloudPebble.FuzzyPrompt = (function() {
     var select_item = function(match) {
         selection_was_made = true;
         opened = false;
+        hide_prompt(false);
         match.callback(match.object, input.val());
-        hide_prompt();
     };
 
     var show_prompt = function(kind) {
@@ -207,11 +207,16 @@ CloudPebble.FuzzyPrompt = (function() {
     };
 
     // Hide the prompt and refocus on the last thing.
-    var hide_prompt = function() {
+    var hide_prompt = function(refocus) {
         prompt.modal('hide');
-        setTimeout(function() {
-            $(previously_active).focus();
-        }, 1);
+        if (refocus) {
+            setTimeout(function () {
+                $(previously_active).focus();
+            }, 1);
+        }
+        else {
+            prompt.blur();
+        }
 
     };
 
