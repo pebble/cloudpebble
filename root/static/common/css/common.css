@@ -470,7 +470,7 @@ input[type=checkbox]:checked {
     position: fixed;
     top: 10%;
     left: 50%;
-    z-index: 1050;
+    z-index: 10001;
     margin-left: -300px;
     width: 600px;
     background-color: #333;
