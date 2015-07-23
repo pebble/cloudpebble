@@ -16,20 +16,15 @@ CloudPebble.Settings = (function() {
         }
 
         var display_error = function(message) {
-            $('#main-pane')[0].scrollTop = 0;
             pane.find('.alert').addClass('alert-error').removeClass('hide').text(message);
-            pane.find('input, button, select').removeAttr('disabled');
-        };
-
-        var display_success = function(message) {
-            $('#main-pane')[0].scrollTop = 0;
-            pane.find('.alert').addClass('alert-success').removeClass('hide').text(message);
             pane.find('input, button, select').removeAttr('disabled');
         };
 
         pane.find('#settings-name').val(CloudPebble.ProjectInfo.name);
         pane.find('form').submit(function(e) {e.preventDefault();});
-        pane.find('#project-save').click(function() {
+
+        var save = function() {
+            var defer = $.Deferred();
             var name = pane.find('#settings-name').val();
             var sdk_version = pane.find('#settings-sdk-version').val();
             var short_name = pane.find('#settings-short-name').val();
@@ -54,46 +49,36 @@ CloudPebble.Settings = (function() {
             app_capabilities = app_capabilities.join(',');
 
             if(name.replace(/\s/g, '') === '') {
-                display_error(gettext("You must specify a project name"));
-                return;
+                return defer.reject(gettext("You must specify a project name"));
             }
-
-
-            pane.find('input, button, select').attr('disabled', 'disabled');
 
             var saved_settings = {
                 'name': name
             };
 
             if(short_name.replace(/\s/g, '') == '') {
-                display_error(gettext("You must specify a short name."));
-                return;
+                return defer.reject(gettext("You must specify a short name."));
             }
             if(long_name.replace(/\s/g, '') == '') {
-                display_error(gettext("You must specify a long name."));
-                return;
+                return defer.reject(gettext("You must specify a long name."));
             }
             if(company_name.replace(/\s/g, '') == '') {
-                display_error(gettext("You must specify a company name."));
-                return;
+                return defer.reject(gettext("You must specify a company name."));
             }
             // This is not an appropriate use of a regex, but we have to have it for the HTML5 pattern attribute anyway,
             // so we may as well reuse the effort here.
             // It validates that the format matches x[.y] with x, y in [0, 255].
             if(!version_label.match(/^(\d{1,2}|1\d{2}|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d{2}|2[0-4]\d|25[0-5]))?$/)) {
-                display_error(gettext("You must specify a valid version number."));
-                return;
+                return defer.reject(gettext("You must specify a valid version number."));
             }
             if(!app_uuid.match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}/)) {
-                display_error(gettext("You must specify a valid UUID (of the form 00000000-0000-0000-0000-000000000000)"));
-                return;
+                return defer.reject(gettext("You must specify a valid UUID (of the form 00000000-0000-0000-0000-000000000000)"));
             }
 
 
             if(sdk_version == '3') {
                 if (!build_aplite && !build_basalt) {
-                    display_error(gettext("You must build your app for at least one platform."));
-                    return;
+                    return defer.reject(gettext("You must build your app for at least one platform."));
                 }
             }
 
@@ -132,7 +117,6 @@ CloudPebble.Settings = (function() {
             saved_settings['app_platforms'] = app_platforms;
 
             $.post('/ide/project/' + PROJECT_ID + '/save_settings', saved_settings, function(data) {
-                pane.find('input, button, select').removeAttr('disabled');
                 pane.find('.alert').removeClass("alert-success alert-error").addClass("hide");
                 if(data.success) {
                     CloudPebble.ProjectInfo.name = name;
@@ -148,13 +132,22 @@ CloudPebble.Settings = (function() {
                     CloudPebble.ProjectInfo.sdk_version = sdk_version;
                     $('.project-name').text(name);
                     window.document.title = "CloudPebble – " + name;
-                    display_success(gettext("Settings saved."));
+                    defer.resolve();
                 } else {
-                    display_error(interpolate(gettext("Error: %s"), [data.error]));
+                    defer.reject(interpolate(gettext("Error: %s"), [error]));
                 }
+            }).fail(function(e) {
+                defer.reject(interpolate("Failed to save project settings. (%s) %s", [e.status, e.statusText]));
             });
 
             ga('send', 'event', 'project', 'save settings');
+            return defer.promise();
+        };
+
+        make_live_settings_form({
+            save_function: save,
+            error_function: display_error,
+            form: pane.find('form')
         });
 
         pane.find('#project-delete').click(function() {
@@ -243,6 +236,7 @@ CloudPebble.Settings = (function() {
         pane.find('#uuid-generate').click(function() {
             var uuid_field = settings_template.find('#settings-uuid');
             uuid_field.val(_.UUID.v4());
+            uuid_field.trigger("change");
         });
 
         CloudPebble.Sidebar.SetActivePane(pane, 'settings');

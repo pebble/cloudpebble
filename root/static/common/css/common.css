@@ -650,3 +650,24 @@ select:invalid {
     height: 30px;
     padding-top: 2px;
 }
+
+.settings-status-icons {
+    position: relative;
+    top: 10px;
+    float: right;
+}
+
+.editor-settings .settings-status-icons {
+    left: 10px;
+}
+
+.settings-status-icons span {
+    background-image: url("../../common/img/glyphicons-halflings-white.png");
+}
+
+.fixed-well {
+  position: fixed;
+  width: 300px !important;
+  margin-left: 200px !important;
+  margin-top: -30px !important;
+}

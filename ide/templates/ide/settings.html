@@ -37,7 +37,6 @@
                 </div>
                 {% endfor %}
                 <div class="form-actions">
-                    <input type="submit" class="btn btn-primary" value="{% trans 'Submit' %}">
                     <input type="reset" class="btn" value="{% trans 'Reset' %}">
                 </div>
             </form>
@@ -80,5 +79,34 @@
         e.preventDefault();
         $('#unlink-form').submit();
     });
+
+    $(function() {
+        var save = function() {
+            var defer = $.Deferred();
+            $.ajax({
+                type: "POST",
+                url: "settings",
+                data: $("#user-settings-form").serialize(), // serializes the form's elements.
+                success: function(data) {
+                    defer.resolve();
+                },
+                error: function(e) {
+                    defer.reject(interpolate(gettext("Error: %s"), [error]));
+                }
+            });
+            return defer.promise();
+        };
+        make_live_settings_form({
+            save_function: save,
+            form: $("#user-settings-form")
+        });
+
+        $("#user-settings-form").submit(function(e) {
+            e.preventDefault();
+            return false;
+        });
+    });
+
 </script>
+<script src="{% static 'ide/js/live_settings_form.js' %}" type="text/javascript"></script>
 {% endblock %}
