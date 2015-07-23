@@ -54,6 +54,8 @@ CloudPebble.FuzzyPrompt = (function() {
                 // Ctrl-P to hide
                 if (e[modifier] && e.keyCode == 80) {
                     hide_prompt();
+                    e.preventDefault();
+                    e.stopPropagation();
                 }
                 // Enter to select
                 else if (e.keyCode == 13) {
