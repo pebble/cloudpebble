@@ -3,6 +3,7 @@ CloudPebble.Editor = (function() {
     var open_codemirrors = {};
     var unsaved_files = 0;
     var is_fullscreen = false;
+    var resume_fullscreen = false;
 
     var add_source_file = function(file) {
         CloudPebble.Sidebar.AddSourceFile(file, function() {
@@ -34,6 +35,9 @@ CloudPebble.Editor = (function() {
         if(CloudPebble.Sidebar.Restore('source-'+file.id)) {
             if(callback) {
                 callback(open_codemirrors[file.id]);
+            }
+            if (resume_fullscreen) {
+                fullscreen(open_codemirrors[file.id], true);
             }
             return;
         }
@@ -579,6 +583,12 @@ CloudPebble.Editor = (function() {
                 },function() {
                     $('.fullscreen-icon-tooltip').fadeOut(300);
                 });
+                $('#main-pane').data('pane-suspend-function', function() {
+                    if (is_fullscreen) {
+                        fullscreen(code_mirror, false);
+                        resume_fullscreen = true;
+                    }
+                });
 
                 $(document).keyup(function(e) {
                   if (e.keyCode == 27) { fullscreen(code_mirror, false); }   // Esc exits fullscreen mode
@@ -588,6 +598,9 @@ CloudPebble.Editor = (function() {
                     toggle_ib();
                 }
 
+                if (resume_fullscreen) {
+                    fullscreen(code_mirror, true);
+                }
                 if(callback) {
                     callback(code_mirror);
                 }
@@ -664,6 +677,7 @@ CloudPebble.Editor = (function() {
                 .removeClass('FullScreen')
                 .css({'height' : newHeight})
                 .prependTo(code_mirror.parent_pane);
+            resume_fullscreen = false;
         }
         code_mirror.refresh();
         code_mirror.focus();
