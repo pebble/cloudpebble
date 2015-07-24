@@ -22,7 +22,7 @@ def create_resource(request, project_id):
     resource_ids = json.loads(request.POST['resource_ids'])
     default_file = request.FILES.get('file', None)
     colour_file = request.FILES.get('file_colour', None)
-    file_name = default_file.name if default_file is not None else colour_file.name
+    file_name = request.POST['file_name']
     resources = []
     try:
         with transaction.commit_on_success():
@@ -121,6 +121,7 @@ def update_resource(request, project_id, resource_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     resource = get_object_or_404(ResourceFile, pk=resource_id, project=project)
     resource_ids = json.loads(request.POST['resource_ids'])
+    file_name = request.POST.get('file_name', None)
     try:
         with transaction.atomic():
             # Lazy approach: delete all the resource_ids and recreate them.
@@ -139,6 +140,9 @@ def update_resource(request, project_id, resource_id):
             if 'file_colour' in request.FILES:
                 colour_variant = resource.variants.get_or_create(variant=ResourceVariant.VARIANT_COLOUR)[0]
                 colour_variant.save_file(request.FILES['file_colour'], request.FILES['file_colour'].size)
+
+            if file_name and resource.file_name != file_name:
+                resource.rename(file_name)
     except Exception as e:
         return json_failure(str(e))
     else:

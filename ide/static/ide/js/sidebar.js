@@ -110,8 +110,8 @@ CloudPebble.Sidebar = (function() {
             end.before(li);
             return li;
         },
-        SetItemName: function(id, new_name) {
-            $('#sidebar-link-'+id).text(new_name + ' ');
+        SetItemName: function(kind, id, new_name) {
+            $('#sidebar-pane-'+kind+'-'+id+' a').text(new_name + ' ');
         },
         AddSourceFile: function(file, on_click) {
             var end = $('#end-source-files');

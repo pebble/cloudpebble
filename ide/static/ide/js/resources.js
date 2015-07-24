@@ -32,16 +32,13 @@ CloudPebble.Resources = (function() {
         if(files.length != 1) {
             return null;
         }
-        if(!!project_resources[file.name]) {
-            throw interpolate(gettext("A resource called '%(name)s' already exists in the project."), file, true);
-        }
         if((kind == 'png' || kind == 'png-trans') && file.type != "image/png") {
             throw (gettext("You must upload a PNG image."));
         }
         return file;
     }
 
-    var process_resource_form = function(form, is_new, url, callback) {
+    var process_resource_form = function(form, is_new, current_filename, url, callback) {
         var report_error = function(message) {
             form.find('.alert:first').removeClass("hide").text(message);
         };
@@ -61,7 +58,7 @@ CloudPebble.Resources = (function() {
 
         remove_error();
         var kind = form.find('#edit-resource-type').val();
-
+        var name = form.find("#edit-resource-file-name").val();
         var file, colour_file;
         try {
             file = process_file(kind, '#edit-resource-file');
@@ -79,6 +76,15 @@ CloudPebble.Resources = (function() {
             }
         }
 
+        if (_.has(project_resources, name) && name !== current_filename) {
+            report_error(interpolate(gettext("A resource called '%s' already exists in the project."), [name]));
+            return;
+        }
+
+        if (!/^[\.a-zA-Z0-9-_ ]/.test(name)) {
+            report_error(gettext("You must provide a valid filename. Only upper and lowercase letters, underscores, spaces and .'s are allowed."));
+            return;
+        }
         var resources = [];
         if(kind != 'font') {
             if(CloudPebble.ProjectInfo.type != 'pebblejs') {
@@ -137,6 +143,8 @@ CloudPebble.Resources = (function() {
             form_data.append("file_colour", colour_file);
         }
         form_data.append("resource_ids", JSON.stringify(resources));
+        form_data.append("file_name", name);
+
         disable_controls();
         $.ajax({
             url: url,
@@ -272,6 +280,8 @@ CloudPebble.Resources = (function() {
                 });
             }
 
+            pane.find("#edit-resource-file-name").val(resource.file_name);
+
             pane.find('#edit-resource-delete').removeClass('hide').click(function() {
                 CloudPebble.Prompts.Confirm(interpolate(gettext("Do you want to delete %s?"), [resource.file_name]), gettext("This cannot be undone."), function() {
                     pane.find('input, button, select').attr('disabled', 'disabled');
@@ -293,11 +303,26 @@ CloudPebble.Resources = (function() {
             var form = pane.find('form');
             form.submit(function(e) {
                 e.preventDefault();
-                process_resource_form(form, false, "/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/update", function(data) {
+                process_resource_form(form, false, resource.file_name, "/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/update", function(data) {
                     // Update any previews we have.
-                    $('.image-resource-preview img').each(function() {
-                        $(this).attr('src', $(this).attr('src').replace(/#e.*$/,'') + '#e' + (++preview_count));
+                    _.each(data.variants, function(variant) {
+                        var variant_div = $('.variant-'+variant);
+                        variant_div.find('img').attr('src', function(ind, old_src) {
+                            if (!old_src || /^(\s*(\?t=.*)|\s+)$/.test(old_src)) {
+                                // If we're uploading a new variant, we need to set its preview url from scratch
+                                return '/ide/project/' + PROJECT_ID + '/resource/' + resource.id + '/' + variant + '/get';
+                            }
+                            else {
+                                // If not, we have to refresh and bypass the cache the image using a query string
+                                return old_src.replace(/\?t=.*$/,'') + '?t=' + (++preview_count);
+                            }
+                        });
+                        variant_div.show();
                     });
+
+                    // Set the resource's sidebar name
+                    CloudPebble.Sidebar.SetItemName('resource', data.id, data.file_name);
+
                     if(resource.kind == 'font') {
                         resource.family = null;
                         $.each(pane.find('.font-resource-group-single'), function(index, group) {
@@ -305,6 +330,7 @@ CloudPebble.Resources = (function() {
                         });
                     }
                     // Update our information about the resource.
+                    delete project_resources[resource.file_name];
                     update_resource(data);
                 });
             });
@@ -339,11 +365,22 @@ CloudPebble.Resources = (function() {
                 template.find('#add-font-resource').addClass('hide');
             }
         });
+
         if(CloudPebble.ProjectInfo.sdk_version == '2') {
             template.find('.colour-resource').hide();
         } else {
             template.find('.colour-resource').show();
         }
+
+        template.find("input[type=file]").change(function() {
+            var input = $(this);
+            $('#edit-resource-file-name').val(function(index, old_val) {
+                //console.log("")
+                return (old_val || input.val().split(/(\\|\/)/g).pop());
+            });
+        });
+
+
         return template;
     };
 
@@ -362,7 +399,7 @@ CloudPebble.Resources = (function() {
 
         form.submit(function(e) {
             e.preventDefault();
-            process_resource_form(form, true, "/ide/project/" + PROJECT_ID + "/create_resource", function(data) {
+            process_resource_form(form, true, null, "/ide/project/" + PROJECT_ID + "/create_resource", function(data) {
                 CloudPebble.Sidebar.DestroyActive();
                 resource_created(data);
             });

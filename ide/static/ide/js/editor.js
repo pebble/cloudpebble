@@ -473,7 +473,7 @@ CloudPebble.Editor = (function() {
                         else {
                             delete project_source_files[file.name];
                             file.name = new_name;
-                            CloudPebble.Sidebar.SetItemName(file.id, new_name);
+                            CloudPebble.Sidebar.SetItemName('source', file.id, new_name);
                             project_source_files[file.name] = file;
                             defer.resolve();
                         }

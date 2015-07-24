@@ -30,6 +30,12 @@
                     <span class="help-block hide">{% trans 'If provided, the colour file will be used instead of the default  on colour watches.' %}</span>
                 </div>
             </div>
+            <div class="control-group">
+                <label class="control-label" for="edit-resource-file-name">{% trans 'File name' %}</label>
+                <div class="controls">
+                    <input type="text" id="edit-resource-file-name">
+                </div>
+            </div>
         </div>
         <div class="well">
             <div class="control-group image-resource-preview variant-0 hide">
@@ -59,7 +65,7 @@
             </div>
         </div>
         <div class="control-group well native-only" id="non-font-resource-group">
-            <label class="control-label" for="edit-resource-id">{% trans 'Identifier' %}</label>
+            <label class="control-label" id="edit-resource-id">{% trans 'Identifier' %}</label>
             <div class="controls">
                 <input type="text" class="edit-resource-id" placeholder="IMAGE_EXAMPLE_IDENTIFIER" pattern="[A-Za-z0-9_]+">
                 <span class="help-block">{% trans 'This is used in your code and must be a valid C identifier.' %}</span>

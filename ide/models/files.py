@@ -2,11 +2,13 @@ import os
 import shutil
 import traceback
 import datetime
+import re
 from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.utils.timezone import now
+from django.core.validators import RegexValidator
 from django.utils.translation import ugettext as _
 import utils.s3 as s3
 
@@ -24,7 +26,7 @@ class ResourceFile(IdeModel):
         ('font', _('True-Type Font'))
     )
 
-    file_name = models.CharField(max_length=100)
+    file_name = models.CharField(max_length=100, validators=[RegexValidator(regex=r"^[\.a-zA-Z0-9-_ ]+$")])
     kind = models.CharField(max_length=9, choices=RESOURCE_KINDS)
     is_menu_icon = models.BooleanField(default=False)
 
@@ -33,6 +35,15 @@ class ResourceFile(IdeModel):
             return self.variants.get(variant=variant)
         except ResourceVariant.DoesNotExist:
             return self.variants.get(variant=0)
+
+    def rename(self, new_name):
+        #if not re.match(r"^[\.a-zA-Z0-9-_ ]+\.[a-zA-Z0-9]+$", new_name):
+        #    raise Exception("Invalid resource name")
+        if os.path.splitext(self.file_name)[1] != os.path.splitext(new_name)[1]:
+            raise Exception("Cannot change file type when renaming resource")
+
+        self.file_name = new_name
+        self.save()
 
     def get_local_filename(self, variant, create=False):
         return self.get_best_variant(variant).get_local_filename(create=create)
@@ -64,6 +75,7 @@ class ResourceFile(IdeModel):
             variant.copy_to_path(abs_target)
 
     def save(self, *args, **kwargs):
+        self.clean_fields()
         self.project.last_modified = now()
         self.project.save()
         super(ResourceFile, self).save(*args, **kwargs)
@@ -210,7 +222,7 @@ class ResourceIdentifier(IdeModel):
 
 class SourceFile(IdeModel):
     project = models.ForeignKey('Project', related_name='source_files')
-    file_name = models.CharField(max_length=100)
+    file_name = models.CharField(max_length=100, validators=[RegexValidator(regex=r"^[\.a-zA-Z0-9-_ ]+\.[a-zA-Z0-9]+$")])
     last_modified = models.DateTimeField(blank=True, null=True, auto_now=True)
     folded_lines = models.TextField(default="[]")
 
@@ -271,6 +283,7 @@ class SourceFile(IdeModel):
             s3.read_file_to_filesystem('source', self.s3_path, path)
 
     def save(self, *args, **kwargs):
+        self.clean_fields()
         self.project.last_modified = now()
         self.project.save()
         super(SourceFile, self).save(*args, **kwargs)
