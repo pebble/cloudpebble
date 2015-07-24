@@ -478,6 +478,7 @@ CloudPebble.Editor = (function() {
                             delete project_source_files[file.name];
                             file.name = new_name;
                             CloudPebble.Sidebar.SetItemName('source', file.id, new_name);
+                            CloudPebble.FuzzyPrompt.SetCurrentItemName(new_name);
                             project_source_files[file.name] = file;
                             defer.resolve();
                         }
@@ -514,6 +515,7 @@ CloudPebble.Editor = (function() {
                             }
                             rename_file(value).done(function() {
                                 prompt.dismiss();
+                                code_mirror.focus();
                             }).fail(function(error) {
                                 prompt.error(error);
                             });

@@ -12,6 +12,7 @@ CloudPebble.Resources = (function() {
 
     var update_resource = function(resource) {
         project_resources[resource.file_name] = resource;
+        CloudPebble.FuzzyPrompt.SetCurrentItemName(resource.file_name);
         if(resource.kind == 'png-trans' && resource.identifiers.length == 1) {
             var identifier = resource.identifiers[0];
             resource.identifiers = [identifier + '_WHITE', identifier + '_BLACK'];
@@ -317,7 +318,9 @@ CloudPebble.Resources = (function() {
                                 return old_src.replace(/\?t=.*$/,'') + '?t=' + (++preview_count);
                             }
                         });
-                        variant_div.show();
+                        if (resource.kind == 'png' || resource.kind == 'png-trans') {
+                            variant_div.show();
+                        }
                     });
 
                     // Set the resource's sidebar name
