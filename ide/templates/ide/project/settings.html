@@ -1,8 +1,8 @@
 {% load i18n %}
 <!-- Settings template -->
 <div id="settings-pane-template" class="hide settings-pane">
+    <div class="well alert alert-error hide fixed-well"></div>
     <form class="form-horizontal">
-        <div class="well alert alert-error hide"></div>
         <div class="well">
             <div class="control-group">
                 <label class="control-label" for="settings-name">{% trans 'Project name' %}</label>
@@ -169,7 +169,6 @@
             </div>
         </div>
         <div class="well form-actions">
-            <button id="project-save" class="btn btn-affirmative">{% trans "Save changes" %}</button>
             <button id="project-export-zip" class="btn">{% trans "Download as zip" %}</button>
             <button id="project-delete" class="btn btn-danger">{% trans "Delete Project" %}</button>
         </div>

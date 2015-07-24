@@ -23,7 +23,8 @@ class ResourceFile(IdeModel):
         ('raw', _('Binary blob')),
         ('png', _('1-bit PNG')),
         ('png-trans', _('1-bit PNG with transparency')),
-        ('font', _('True-Type Font'))
+        ('font', _('True-Type Font')),
+        ('pbi', _('1-bit Pebble image')),
     )
 
     file_name = models.CharField(max_length=100, validators=[RegexValidator(regex=r"^[\.a-zA-Z0-9-_ ]+$")])
@@ -81,6 +82,7 @@ class ResourceFile(IdeModel):
         super(ResourceFile, self).save(*args, **kwargs)
 
     DIR_MAP = {
+        'pbi': 'images',
         'png': 'images',
         'png-trans': 'images',
         'font': 'fonts',

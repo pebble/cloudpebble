@@ -13,7 +13,8 @@ from fabric.tasks import execute
 
 env.roledefs = {
     'qemu': ['ec2-user@qemu-us1.cloudpebble.net', 'ec2-user@qemu-us2.cloudpebble.net'],
-    'ycmd': ['root@ycm2.cloudpebble.net', 'root@ycm3.cloudpebble.net', 'root@ycm4.cloudpebble.net'],
+    'ycmd': ['root@ycm1.cloudpebble.net', 'root@ycm2.cloudpebble.net',
+             'root@ycm3.cloudpebble.net', 'root@ycm4.cloudpebble.net',],
 }
 env.key_filename = ['~/.ssh/id_rsa', '~/Downloads/katharine-keypair.pem']
 

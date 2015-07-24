@@ -406,6 +406,10 @@ input[type=checkbox]:checked {
     width: 435px;
 }
 
+.editor-settings .help-block {
+    width: inherit;
+}
+
 .nav-tabs {
     list-style: none;
     padding: 0;
@@ -466,7 +470,7 @@ input[type=checkbox]:checked {
     position: fixed;
     top: 10%;
     left: 50%;
-    z-index: 1050;
+    z-index: 10001;
     margin-left: -300px;
     width: 600px;
     background-color: #333;
@@ -649,4 +653,25 @@ select:invalid {
 .project-page.lang-select select {
     height: 30px;
     padding-top: 2px;
+}
+
+.settings-status-icons {
+    position: relative;
+    top: 10px;
+    float: right;
+}
+
+.editor-settings .settings-status-icons {
+    left: 10px;
+}
+
+.settings-status-icons span {
+    background-image: url("../../common/img/glyphicons-halflings-white.png");
+}
+
+.fixed-well {
+  position: fixed;
+  width: 300px !important;
+  margin-left: 200px !important;
+  margin-top: -30px !important;
 }
