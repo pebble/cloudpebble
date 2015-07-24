@@ -38,6 +38,7 @@ CloudPebble.FuzzyPrompt = (function() {
             // Register ctrl-p and ctrl-shift-p
             $(document).keydown(function(e) {
                 if ((e[modifier]) && e.keyCode == 80) {
+                    e.preventDefault();
                     if (COMMANDS_ENABLED && e.shiftKey) {
                         input.attr('placeholder', gettext("Enter Command"));
                         show_prompt('commands');
@@ -46,7 +47,6 @@ CloudPebble.FuzzyPrompt = (function() {
                         input.attr('placeholder', gettext("Search Files"));
                         show_prompt('files');
                     }
-                    e.preventDefault();
                 }
             });
 
@@ -196,7 +196,9 @@ CloudPebble.FuzzyPrompt = (function() {
     // Highlight an item in the suggestions list.
     // if enter is hit, the highlighted item gets selected.
     var highlight_item = function(item) {
-        highlight_item_by_id(item.id);
+        if (_.isObject(item)) {
+            highlight_item_by_id(item.id);
+        }
     };
     var highlight_item_by_id = function(id) {
         _.each(item_list, function(item) {
