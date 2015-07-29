@@ -10,7 +10,7 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding field 'ResourceFile.target_platforms'
         db.add_column(u'ide_resourcefile', 'target_platforms',
-                      self.gf('django.db.models.fields.CharField')(default='null', max_length=30),
+                      self.gf('django.db.models.fields.CharField')(default=None, max_length=30, null=True),
                       keep_default=False)
 
 
@@ -63,7 +63,7 @@ class Migration(SchemaMigration):
             'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'builds'", 'to': "orm['ide.Project']"}),
             'started': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'db_index': 'True', 'blank': 'True'}),
             'state': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
-            'uuid': ('django.db.models.fields.CharField', [], {'default': "'0fb1a42b-8730-4f31-ae3f-f7fb37e71ef6'", 'max_length': '36'})
+            'uuid': ('django.db.models.fields.CharField', [], {'default': "'82c659e5-34fb-4f98-bcb7-037b602bb0df'", 'max_length': '36'})
         },
         'ide.buildsize': {
             'Meta': {'object_name': 'BuildSize'},
@@ -85,7 +85,7 @@ class Migration(SchemaMigration):
             'app_long_name': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'app_platforms': ('django.db.models.fields.TextField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'app_short_name': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'app_uuid': ('django.db.models.fields.CharField', [], {'default': "'07882890-a757-4e7d-a61c-46a46d81ee95'", 'max_length': '36', 'null': 'True', 'blank': 'True'}),
+            'app_uuid': ('django.db.models.fields.CharField', [], {'default': "'7af783e2-682a-4f2f-a981-071379ff670d'", 'max_length': '36', 'null': 'True', 'blank': 'True'}),
             'app_version_label': ('django.db.models.fields.CharField', [], {'default': "'1.0'", 'max_length': '40', 'null': 'True', 'blank': 'True'}),
             'github_branch': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'github_hook_build': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
@@ -108,7 +108,7 @@ class Migration(SchemaMigration):
             'is_menu_icon': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'kind': ('django.db.models.fields.CharField', [], {'max_length': '9'}),
             'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'resources'", 'to': "orm['ide.Project']"}),
-            'target_platforms': ('django.db.models.fields.CharField', [], {'default': "'null'", 'max_length': '30'})
+            'target_platforms': ('django.db.models.fields.CharField', [], {'default': 'None', 'max_length': '30', 'null': 'True'})
         },
         'ide.resourceidentifier': {
             'Meta': {'unique_together': "(('resource_file', 'resource_id'),)", 'object_name': 'ResourceIdentifier'},

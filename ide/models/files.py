@@ -27,7 +27,7 @@ class ResourceFile(IdeModel):
     file_name = models.CharField(max_length=100)
     kind = models.CharField(max_length=9, choices=RESOURCE_KINDS)
     is_menu_icon = models.BooleanField(default=False)
-    target_platforms = models.CharField(max_length=30, default="null")
+    target_platforms = models.CharField(max_length=30, null=True, default=None)
 
     def get_best_variant(self, variant):
         try:
