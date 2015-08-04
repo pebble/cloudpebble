@@ -89,6 +89,7 @@ CloudPebble.Editor = (function() {
                         var distance = 99999999999; // eh
                         for (var i = marks.length - 1; i >= 0; i--) {
                             var mark = marks[i];
+                            if (mark.className !== "cm-autofilled") continue;
                             var pos = mark.find();
                             if(pos === undefined) continue;
                             if(cursor.line >= pos.from.line - 5) {
