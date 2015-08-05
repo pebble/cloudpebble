@@ -246,6 +246,8 @@ def generate_v2_manifest_dict(project, resources):
         'projectType': 'native',
         'sdkVersion': "2",
     }
+    if project.app_is_shown_on_communication:
+        manifest['watchapp']['onlyShownOnCommunication'] = project.app_is_shown_on_communication
     return manifest
 
 
@@ -254,6 +256,8 @@ def generate_v3_manifest_dict(project, resources):
     manifest = generate_v2_manifest_dict(project, resources)
     if project.app_platforms:
         manifest['targetPlatforms'] = project.app_platform_list
+    if project.app_is_hidden:
+        manifest['watchapp']['hiddenApp'] = project.app_is_hidden
     manifest['sdkVersion'] = "3"
     del manifest['versionCode']
     return manifest
@@ -417,7 +421,8 @@ def generate_pebblejs_manifest_dict(project, resources):
         "capabilities": project.app_capabilities.split(','),
         "versionCode": 1,
         "watchapp": {
-            "watchface": project.app_is_watchface
+            "watchface": project.app_is_watchface,
+            'hiddenApp': project.app_is_hidden
         },
         "appKeys": {},
         "resources": generate_pebblejs_resource_dict(resources),
