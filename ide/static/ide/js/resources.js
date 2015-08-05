@@ -139,9 +139,9 @@ CloudPebble.Resources = (function() {
         }
         form_data.append("resource_ids", JSON.stringify(resources));
 
-        var do_target_platforms = $('#edit-resource-target-platforms-enabled').is(":checked");
+        var do_target_platforms = form.find('#edit-resource-target-platforms-enabled').is(":checked");
         var target_platforms = (!do_target_platforms ? null : _.filter(POSSIBLE_PLATFORMS, function(platform) {
-            return $('#edit-resource-target-'+platform).is(":checked");
+            return form.find('#edit-resource-target-'+platform).is(":checked");
         }));
         form_data.append("target_platforms", JSON.stringify(target_platforms));
 
@@ -183,7 +183,7 @@ CloudPebble.Resources = (function() {
                 list_entry.addClass('active');
             }
 
-            CloudPebble.Sidebar.SetActivePane(pane, 'resource-' + resource.id);
+            CloudPebble.Sidebar.SetActivePane(pane, 'resource-' + resource.id, _.partial(restore_pane, pane));
             pane.find('#edit-resource-type').val(resource.kind).attr('disabled', 'disabled');
 
             pane.find('#edit-resource-type').change();
@@ -252,10 +252,8 @@ CloudPebble.Resources = (function() {
             };
             var has_target_platforms = _.isArray(resource["target_platforms"]);
             if (has_target_platforms) {
-                console.log("checking", target_platforms_checkbox, true);
                 target_platforms_checkbox.prop('checked', true);
                 _.each(POSSIBLE_PLATFORMS, function(platform) {
-                    console.log("Checking", platform, _.contains(resource["target_platforms"], platform));
                     $("#edit-resource-target-"+platform).prop('checked', _.contains(resource["target_platforms"], platform));
                 });
             }
@@ -331,12 +329,17 @@ CloudPebble.Resources = (function() {
                     update_resource(data);
                 });
             });
-            if(CloudPebble.ProjectInfo.sdk_version == '2') {
-                $('.colour-resource').hide();
-            } else {
-                $('.colour-resource').show();
-            }
+            restore_pane(pane);
         });
+    };
+
+
+    var restore_pane = function(parent) {
+        if (CloudPebble.ProjectInfo.sdk_version == '2') {
+            parent.find('.colour-resource, #resource-targets-section').hide();
+        } else {
+            parent.find('.colour-resource, #resource-targets-section').show();
+        }
     };
 
     var prepare_resource_pane = function() {
@@ -362,11 +365,8 @@ CloudPebble.Resources = (function() {
                 template.find('#add-font-resource').addClass('hide');
             }
         });
-        if(CloudPebble.ProjectInfo.sdk_version == '2') {
-            template.find('.colour-resource').hide();
-        } else {
-            template.find('.colour-resource').show();
-        }
+
+        restore_pane(template);
         return template;
     };
 
@@ -391,7 +391,7 @@ CloudPebble.Resources = (function() {
             });
         });
 
-        CloudPebble.Sidebar.SetActivePane(pane, 'new-resource');
+        CloudPebble.Sidebar.SetActivePane(pane, 'new-resource', _.partial(restore_pane, pane));
     };
 
     var resource_created = function(resource) {
