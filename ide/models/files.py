@@ -25,7 +25,7 @@ class ResourceFile(IdeModel):
         ('pbi', _('1-bit Pebble image')),
     )
 
-    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[a-zA-Z0-9_().-]+$")])
+    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[a-zA-Z0-9_(). -]+$")])
     kind = models.CharField(max_length=9, choices=RESOURCE_KINDS)
     is_menu_icon = models.BooleanField(default=False)
 
