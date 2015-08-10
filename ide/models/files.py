@@ -25,7 +25,7 @@ class ResourceFile(IdeModel):
         ('pbi', _('1-bit Pebble image')),
     )
 
-    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[a-zA-Z0-9_(). -]+$")])
+    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_(). -]+$")])
     kind = models.CharField(max_length=9, choices=RESOURCE_KINDS)
     is_menu_icon = models.BooleanField(default=False)
 
@@ -213,7 +213,7 @@ class ResourceIdentifier(IdeModel):
 
 class SourceFile(IdeModel):
     project = models.ForeignKey('Project', related_name='source_files')
-    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[a-zA-Z0-9_-]+\.(c|h|js)$")])
+    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_-]+\.(c|h|js)$")])
     last_modified = models.DateTimeField(blank=True, null=True, auto_now=True)
     folded_lines = models.TextField(default="[]")
 
