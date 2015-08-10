@@ -2,6 +2,7 @@ import os
 import shutil
 import traceback
 from django.conf import settings
+from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
@@ -24,7 +25,7 @@ class ResourceFile(IdeModel):
         ('pbi', _('1-bit Pebble image')),
     )
 
-    file_name = models.CharField(max_length=100)
+    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[a-zA-Z0-9_().-]+$")])
     kind = models.CharField(max_length=9, choices=RESOURCE_KINDS)
     is_menu_icon = models.BooleanField(default=False)
 
@@ -174,6 +175,7 @@ class ResourceVariant(IdeModel):
             return s3.read_file('source', self.s3_path)
 
     def save(self, *args, **kwargs):
+        self.full_clean()
         self.resource_file.save()
         super(ResourceVariant, self).save(*args, **kwargs)
 
@@ -211,7 +213,7 @@ class ResourceIdentifier(IdeModel):
 
 class SourceFile(IdeModel):
     project = models.ForeignKey('Project', related_name='source_files')
-    file_name = models.CharField(max_length=100)
+    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[a-zA-Z0-9_-]+\.(c|h|js)$")])
     last_modified = models.DateTimeField(blank=True, null=True, auto_now=True)
     folded_lines = models.TextField(default="[]")
 
@@ -261,6 +263,7 @@ class SourceFile(IdeModel):
             s3.read_file_to_filesystem('source', self.s3_path, path)
 
     def save(self, *args, **kwargs):
+        self.full_clean()
         self.project.last_modified = now()
         self.project.save()
         super(SourceFile, self).save(*args, **kwargs)
