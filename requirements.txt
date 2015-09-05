@@ -46,3 +46,4 @@ rsa==3.1.4
 six==1.9.0
 wheel==0.24.0
 colorama==0.3.3
+pyqrcode==1.1
