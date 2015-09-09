@@ -285,7 +285,7 @@ AWS_S3_EXPORT_BUCKET = _environ.get('AWS_S3_EXPORT_BUCKET', None)
 
 TYPOGRAPHY_CSS = _environ.get('TYPOGRAPHY_CSS', None)
 
-REDIS_URL = _environ.get('REDISCLOUD_URL', 'redis://localhost:6379/')
+REDIS_URL = _environ.get('REDIS_URL', None) or _environ.get('REDISCLOUD_URL', 'redis://localhost:6379/')
 
 LIBPEBBLE_PROXY = _environ.get('LIBPEBBLE_PROXY', None)
 
