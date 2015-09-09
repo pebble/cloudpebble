@@ -1,0 +1,57 @@
+{
+  "name": "cloudpebble-staging-public",
+  "description": "CloudPebble Staging Configuration",
+  "scripts": {},
+  "env": {
+    "ARM_CS_TOOLS": "/app/sdk2/arm-cs-tools/bin/",
+    "AWS_ACCESS_KEY_ID": {
+      "required": true
+    },
+    "AWS_ENABLED": "yes",
+    "AWS_S3_BUILDS_BUCKET": "builds-staging.cloudpebble.net",
+    "AWS_S3_EXPORT_BUCKET": "export-staging.cloudpebble.net",
+    "AWS_S3_SOURCE_BUCKET": "source-staging.cloudpebble.net",
+    "AWS_SECRET_ACCESS_KEY": {
+      "required": true
+    },
+    "BROKER_POOL_LIMIT": "1",
+    "BUILDPACK_URL": "https://github.com/pebble/cloudpebble-buildpack",
+    "COMPLETION_CERTS": "/app/completion-certs.crt",
+    "ENABLE_KEEN": "yes",
+    "FROM_EMAIL": "noreply@cloudpebble.net",
+    "KEEN_PROJECT_ID": "52e205f405cd6662b9000000",
+    "KEEN_WRITE_KEY": {
+      "required": true
+    },
+    "LIBPEBBLE_PROXY": "wss://cloudpebble-ws-proxy-prod.herokuapp.com/tool",
+    "MAINTENANCE_PAGE_URL": "//static.cloudpebble.net/maintenance/back-soon.html",
+    "PEBBLE_AUTH_ADMIN_TOKEN": {
+      "required": true
+    },
+    "PEBBLE_AUTH_KEY": {
+      "required": true
+    },
+    "PEBBLE_AUTH_SECRET": {
+      "required": true
+    },
+    "PEBBLE_AUTH_URL": "https://auth.getpebble.com/",
+    "PEBBLE_TOOL": "/app/sdk2/bin/pebble",
+    "PUBLIC_URL": "/",
+    "PYTHONPATH": "nah",
+    "QEMU_LAUNCH_AUTH_HEADER": {
+      "required": true
+    },
+    "QEMU_URLS": "https://qemu-us1.cloudpebble.net/",
+    "SDK2_PEBBLE_TOOL": "/app/sdk2/bin/pebble",
+    "SDK3_PEBBLE_TOOL": "/app/sdk3/bin/pebble",
+    "TYPOGRAPHY_CSS": "//cloud.typography.com/7515512/745724/css/fonts.css",
+    "WEB_CONCURRENCY": "2",
+    "YCM_URLS": "https://ycm1.cloudpebble.net/"
+  },
+  "addons": [
+    "cloudamqp:lemur",
+    "papertrail:choklad",
+    "heroku-postgresql:hobby-dev",
+    "heroku-redis:hobby-dev"
+  ]
+}
