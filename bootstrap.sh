@@ -58,7 +58,7 @@ popd
 # Obtain SDK3.
 sudo -u vagrant mkdir sdk3
 pushd sdk3
-    wget --progress=bar:force -O sdk.tar.gz https://sdk.getpebble.com/download/3.3?source=cloudpebble
+    wget --progress=bar:force -O sdk.tar.gz https://sdk.getpebble.com/download/3.4?source=cloudpebble
     sudo -u vagrant tar --strip 1 -xzf sdk.tar.gz
     rm sdk.tar.gz
     sudo -u vagrant ln -s ~/arm-cs-tools arm-cs-tools
