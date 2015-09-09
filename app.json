@@ -1,5 +1,5 @@
 {
-  "name": "cloudpebble-staging-public",
+  "name": "cloudpebble-pr",
   "description": "CloudPebble Staging Configuration",
   "scripts": {},
   "env": {
