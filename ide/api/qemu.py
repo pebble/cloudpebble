@@ -58,7 +58,7 @@ def launch_emulator(request):
                                          'oauth': oauth,
                                          'tz_offset': tz_offset},
                                    headers={'Authorization': settings.QEMU_LAUNCH_AUTH_HEADER},
-                                   timeout=15,
+                                   timeout=30,
                                    verify=settings.COMPLETION_CERTS)
             result.raise_for_status()
             response = result.json()
