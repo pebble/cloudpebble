@@ -111,7 +111,11 @@ CloudPebble.Sidebar = (function() {
             return li;
         },
         SetItemName: function(kind, id, new_name) {
-            $('#sidebar-pane-'+kind+'-'+id+' a').text(new_name + ' ');
+            // We need to keep any icons
+            var link = $('#sidebar-pane-'+kind+'-'+id+' a');
+            var icons = link.children();
+            icons.detach();
+            link.text(new_name + ' ').append(icons);
         },
         AddSourceFile: function(file, on_click) {
             var end = $('#end-source-files');

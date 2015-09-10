@@ -215,7 +215,7 @@ CloudPebble.Editor = (function() {
                     var token = code_mirror.getTokenAt(cm.getCursor());
 
                     create_popover(cm, token.string, pos.left, pos.top);
-                }
+                };
 
                 if(!is_js && USER_SETTINGS.autocomplete === 1) {
                     code_mirror.on('changes', function(instance, changes) {
@@ -676,6 +676,13 @@ CloudPebble.Editor = (function() {
                 if(callback) {
                     callback(code_mirror);
                 }
+
+                var commands = {};
+                commands[gettext('Rename File')] = function() {
+                    // We need to use a timeout because the rename prompt will conflict with the old prompt
+                    setTimeout(show_rename_prompt, 0);
+                };
+                CloudPebble.FuzzyPrompt.ReplaceCommands(commands);
 
                 // Tell Google
                 ga('send', 'event', 'file', 'open');
