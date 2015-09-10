@@ -135,11 +135,13 @@ def build(ctx):
     """
     return wscript.replace('{{jshint}}', 'True' if jshint and not for_export else 'False')
 
+
 def generate_wscript_file(project, for_export=False):
     if project.sdk_version == '2':
         return generate_wscript_file_sdk2(project, for_export)
     elif project.sdk_version == '3':
         return generate_wscript_file_sdk3(project, for_export)
+
 
 def generate_jshint_file(project):
     return """
@@ -248,6 +250,7 @@ def generate_v2_manifest_dict(project, resources):
         manifest['watchapp']['onlyShownOnCommunication'] = project.app_is_shown_on_communication
     return manifest
 
+
 def generate_v3_manifest_dict(project, resources):
     # Just extend the v2 one.
     manifest = generate_v2_manifest_dict(project, resources)
@@ -273,6 +276,7 @@ def generate_manifest_dict(project, resources):
     else:
         raise Exception(_("Unknown project type %s") % project.project_type)
 
+
 def generate_resource_map(project, resources):
     return dict_to_pretty_json(generate_resource_dict(project, resources))
 
@@ -283,7 +287,7 @@ def dict_to_pretty_json(d):
 
 def generate_resource_dict(project, resources):
     if project.project_type == 'native':
-        return generate_v2_resource_dict(resources)
+        return generate_native_resource_dict(project, resources)
     elif project.project_type == 'simplyjs':
         return generate_simplyjs_resource_dict()
     elif project.project_type == 'pebblejs':
@@ -292,7 +296,7 @@ def generate_resource_dict(project, resources):
         raise Exception(_("Unknown project type %s") % project.project_type)
 
 
-def generate_v2_resource_dict(resources):
+def generate_native_resource_dict(project, resources):
     resource_map = {'media': []}
 
     for resource in resources:
@@ -310,6 +314,9 @@ def generate_v2_resource_dict(resources):
                 d['menuIcon'] = True
             if resource_id.compatibility is not None:
                 d['compatibility'] = resource_id.compatibility
+            if project.sdk_version == '3' and resource.target_platforms:
+                d['targetPlatforms'] = json.loads(resource.target_platforms)
+
             resource_map['media'].append(d)
     return resource_map
 

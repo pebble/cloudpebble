@@ -39,6 +39,9 @@ def create_resource(request, project_id):
                 colour_variant = ResourceVariant.objects.create(resource_file=rf, variant=ResourceVariant.VARIANT_COLOUR)
                 colour_variant.save_file(colour_file, colour_file.size)
 
+            target_platforms = json.loads(request.POST.get('target_platforms', None))
+            rf.target_platforms = None if target_platforms is None else json.dumps(target_platforms)
+            rf.save()
 
     except Exception as e:
         return json_failure(str(e))
@@ -55,6 +58,7 @@ def create_resource(request, project_id):
             "id": rf.id,
             "kind": rf.kind,
             "file_name": rf.file_name,
+            "target_platforms": json.loads(rf.target_platforms) if rf.target_platforms else None,
             "resource_ids": [{'id': x.resource_id, 'regex': x.character_regex} for x in resources],
             "identifiers": [x.resource_id for x in resources],
             "variants": [x.variant for x in rf.variants.all()],
@@ -79,6 +83,7 @@ def resource_info(request, project_id, resource_id):
 
     return json_response({
         'resource': {
+            "target_platforms": json.loads(resource.target_platforms) if resource.target_platforms else None,
             'resource_ids': [{
                                  'id': x.resource_id,
                                  'regex': x.character_regex,
@@ -121,6 +126,7 @@ def update_resource(request, project_id, resource_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     resource = get_object_or_404(ResourceFile, pk=resource_id, project=project)
     resource_ids = json.loads(request.POST['resource_ids'])
+    target_platforms = json.loads(request.POST.get('target_platforms', None))
     try:
         with transaction.atomic():
             # Lazy approach: delete all the resource_ids and recreate them.
@@ -139,6 +145,9 @@ def update_resource(request, project_id, resource_id):
             if 'file_colour' in request.FILES:
                 colour_variant = resource.variants.get_or_create(variant=ResourceVariant.VARIANT_COLOUR)[0]
                 colour_variant.save_file(request.FILES['file_colour'], request.FILES['file_colour'].size)
+
+            resource.target_platforms = None if target_platforms is None else json.dumps(target_platforms)
+            resource.save()
     except Exception as e:
         return json_failure(str(e))
     else:
@@ -148,12 +157,12 @@ def update_resource(request, project_id, resource_id):
                 'kind': 'source'
             }
         }, project=project, request=request)
-
         return json_response({"file": {
             "id": resource.id,
             "kind": resource.kind,
             "file_name": resource.file_name,
             "resource_ids": [{'id': x.resource_id, 'regex': x.character_regex, 'compatibility': x.compatibility} for x in resources],
+            "target_platforms": json.loads(resource.target_platforms) if resource.target_platforms else None,
             "identifiers": [x.resource_id for x in resources],
             "variants": [x.variant for x in resource.variants.all()],
             "extra": {y.resource_id: {'regex': y.character_regex, 'tracking': y.tracking, 'compatibility': y.compatibility} for y in resource.identifiers.all()}

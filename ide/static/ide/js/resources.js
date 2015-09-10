@@ -1,4 +1,5 @@
 CloudPebble.Resources = (function() {
+    var POSSIBLE_PLATFORMS = ["aplite", "basalt"];
     var project_resources = {};
     var preview_count = 0;
 
@@ -137,6 +138,13 @@ CloudPebble.Resources = (function() {
             form_data.append("file_colour", colour_file);
         }
         form_data.append("resource_ids", JSON.stringify(resources));
+
+        var do_target_platforms = form.find('#edit-resource-target-platforms-enabled').is(":checked");
+        var target_platforms = (!do_target_platforms ? null : _.filter(POSSIBLE_PLATFORMS, function(platform) {
+            return form.find('#edit-resource-target-'+platform).is(":checked");
+        }));
+        form_data.append("target_platforms", JSON.stringify(target_platforms));
+
         disable_controls();
         $.ajax({
             url: url,
@@ -170,15 +178,21 @@ CloudPebble.Resources = (function() {
             var resource = data.resource;
             var pane = prepare_resource_pane();
             var list_entry = $('#sidebar-pane-resource-' + resource.id);
+            var target_platforms_checkbox = pane.find("#edit-resource-target-platforms-enabled");
             if(list_entry) {
                 list_entry.addClass('active');
             }
 
-            CloudPebble.Sidebar.SetActivePane(pane, 'resource-' + resource.id);
+            CloudPebble.Sidebar.SetActivePane(pane, 'resource-' + resource.id, _.partial(restore_pane, pane));
             pane.find('#edit-resource-type').val(resource.kind).attr('disabled', 'disabled');
 
             pane.find('#edit-resource-type').change();
             //pane.find('#edit-resource-file').after($("<span class='help-block'>" + gettext("If specified, this file will replace the current file for this resource, regardless of its filename.") + "</span>"));
+            
+            var show_resource_targets = function() {
+                $('#edit-resource-targets').toggle(target_platforms_checkbox.is(":checked"));
+            };
+            target_platforms_checkbox.change(show_resource_targets);
 
             // Generate a preview.
             console.log(resource.variants);
@@ -236,7 +250,14 @@ CloudPebble.Resources = (function() {
                 row.append(preview_holder);
                 group.append(row);
             };
-
+            var has_target_platforms = _.isArray(resource["target_platforms"]);
+            if (has_target_platforms) {
+                target_platforms_checkbox.prop('checked', true);
+                _.each(POSSIBLE_PLATFORMS, function(platform) {
+                    $("#edit-resource-target-"+platform).prop('checked', _.contains(resource["target_platforms"], platform));
+                });
+            }
+            show_resource_targets();
 
             if(resource.kind != 'font') {
                 if(resource.resource_ids.length > 0) {
@@ -308,12 +329,17 @@ CloudPebble.Resources = (function() {
                     update_resource(data);
                 });
             });
-            if(CloudPebble.ProjectInfo.sdk_version == '2') {
-                $('.colour-resource').hide();
-            } else {
-                $('.colour-resource').show();
-            }
+            restore_pane(pane);
         });
+    };
+
+
+    var restore_pane = function(parent) {
+        if (CloudPebble.ProjectInfo.sdk_version == '2') {
+            parent.find('.colour-resource, #resource-targets-section').hide();
+        } else {
+            parent.find('.colour-resource, #resource-targets-section').show();
+        }
     };
 
     var prepare_resource_pane = function() {
@@ -339,11 +365,8 @@ CloudPebble.Resources = (function() {
                 template.find('#add-font-resource').addClass('hide');
             }
         });
-        if(CloudPebble.ProjectInfo.sdk_version == '2') {
-            template.find('.colour-resource').hide();
-        } else {
-            template.find('.colour-resource').show();
-        }
+
+        restore_pane(template);
         return template;
     };
 
@@ -368,7 +391,7 @@ CloudPebble.Resources = (function() {
             });
         });
 
-        CloudPebble.Sidebar.SetActivePane(pane, 'new-resource');
+        CloudPebble.Sidebar.SetActivePane(pane, 'new-resource', _.partial(restore_pane, pane));
     };
 
     var resource_created = function(resource) {
