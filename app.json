@@ -24,17 +24,7 @@
       "required": true
     },
     "LIBPEBBLE_PROXY": "wss://cloudpebble-ws-proxy-prod.herokuapp.com/tool",
-    "MAINTENANCE_PAGE_URL": "//static.cloudpebble.net/maintenance/back-soon.html",
-    "PEBBLE_AUTH_ADMIN_TOKEN": {
-      "required": true
-    },
-    "PEBBLE_AUTH_KEY": {
-      "required": true
-    },
-    "PEBBLE_AUTH_SECRET": {
-      "required": true
-    },
-    "PEBBLE_AUTH_URL": "https://auth.getpebble.com/",
+    "MAINTENANCE_PAGE_URL": "//static.cloudpebble.net/maintenance/back-soon.html",  
     "PEBBLE_TOOL": "/app/sdk2/bin/pebble",
     "PUBLIC_URL": "/",
     "PYTHONPATH": "nah",
