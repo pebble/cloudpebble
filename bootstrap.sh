@@ -70,7 +70,7 @@ popd
 
 
 # Enable SDK3 analytics non-interactively
-touch /home/vagrant/ENABLE_ANALYTICS
+touch /home/vagrant/NO_TRACKING
 
 # Fetch autocompletion tools.
 mkdir /ycmd
@@ -144,6 +144,7 @@ console log
 script
     export PATH="$PATH:/home/vagrant/arm-cs-tools/bin:/home/vagrant/sdk2/bin"
     export DEBUG=yes
+    export QEMU_LAUNCH_TIMEOUT=30
     exec /usr/bin/python manage.py runserver 0.0.0.0:8000
 end script
 
