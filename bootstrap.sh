@@ -34,6 +34,9 @@ easy_install pip
 # CloudPebble python requirements.
 pip install -r /vagrant/requirements.txt
 
+# Force installation of requests 2.7.0
+easy_install requests==2.7.0
+
 # Make sure we have a useful database
 pushd /vagrant
     sudo -u vagrant python manage.py syncdb --noinput
@@ -65,6 +68,10 @@ pushd sdk3
     pip install -r requirements.txt
 popd
 
+
+# Enable SDK3 analytics non-interactively
+touch /home/vagrant/NO_TRACKING
+
 # Fetch autocompletion tools.
 mkdir /ycmd
 pushd /ycmd
@@ -89,7 +96,7 @@ pushd /qemu
 popd
 mkdir /pypkjs
 pushd /pypkjs
-    git clone git@github.com:pebble/pypkjs.git .
+    git clone --recursive https://github.com/pebble/pypkjs.git .
     virtualenv .env
     source .env/bin/activate
     pip install -r requirements.txt
@@ -98,9 +105,17 @@ popd
 
 sudo -u vagrant mkdir qemu-controller
 pushd qemu-controller
-    git clone git@github.com:pebble/cloudpebble-qemu-controller.git .
+    git clone https://github.com/pebble/cloudpebble-qemu-controller.git .
     pip install -r requirements.txt
 popd
+
+sudo -u vagrant mkdir qemu-tintin-images
+pushd qemu-tintin-images
+    git clone https://github.com/pebble/qemu-tintin-images.git .
+popd
+
+# Make sure vagrant user can access the images
+chown vagrant -R /home/vagrant/qemu-tintin-images
 
 # Set up CORS on the lighttpd server.
 cat << 'EOF' > /etc/lighttpd/conf-available/20-cors.conf
@@ -129,6 +144,7 @@ console log
 script
     export PATH="$PATH:/home/vagrant/arm-cs-tools/bin:/home/vagrant/sdk2/bin"
     export DEBUG=yes
+    export QEMU_LAUNCH_TIMEOUT=30
     exec /usr/bin/python manage.py runserver 0.0.0.0:8000
 end script
 
@@ -202,6 +218,7 @@ script
     export QEMU_BIN=/qemu/arm-softmmu/qemu-system-arm
     export PKJS_BIN=/pypkjs/phonesim.py
     export PKJS_VIRTUALENV=/pypkjs/.env
+    export QEMU_IMAGE_ROOT=/home/vagrant/qemu-tintin-images
     export DEBUG=yes
     export QCON_PORT=8003
     exec /usr/bin/python controller.py
