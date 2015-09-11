@@ -12,6 +12,7 @@ from ide.models.meta import IdeModel
 
 __author__ = 'katharine'
 
+
 class Project(IdeModel):
     owner = models.ForeignKey(User)
     name = models.CharField(max_length=50)
@@ -37,6 +38,8 @@ class Project(IdeModel):
     app_long_name = models.CharField(max_length=100, blank=True, null=True)
     app_version_label = models.CharField(max_length=40, blank=True, null=True, default='1.0')
     app_is_watchface = models.BooleanField(default=False)
+    app_is_hidden = models.BooleanField(default=False)
+    app_is_shown_on_communication = models.BooleanField(default=False)
     app_capabilities = models.CharField(max_length=255, blank=True, null=True)
     app_keys = models.TextField(default="{}")
     app_jshint = models.BooleanField(default=True)
@@ -84,7 +87,6 @@ class Project(IdeModel):
         return u"%s" % self.name
 
 
-
 class TemplateProject(Project):
     KIND_TEMPLATE = 1
     KIND_SDK_DEMO = 2
@@ -114,6 +116,8 @@ class TemplateProject(Project):
         # todo: can we do better than that? Maybe we could reuse the zip import mechanism or something...
         project.app_capabilities = self.app_capabilities
         project.app_is_watchface = self.app_is_watchface
+        project.app_is_hidden = self.app_is_hidden
+        project.app_is_shown_on_communication = self.app_is_shown_on_communication
         project.app_keys = self.app_keys
         project.app_jshint = self.app_jshint
         project.save()

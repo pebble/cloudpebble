@@ -38,6 +38,8 @@ def project_info(request, project_id):
         'app_long_name': project.app_long_name,
         'app_version_label': project.app_version_label,
         'app_is_watchface': project.app_is_watchface,
+        'app_is_hidden': project.app_is_hidden,
+        'app_is_shown_on_communication': project.app_is_shown_on_communication,
         'app_capabilities': project.app_capabilities,
         'app_jshint': project.app_jshint,
         'sdk_version': project.sdk_version,
@@ -203,6 +205,8 @@ def save_project_settings(request, project_id):
             project.app_long_name = request.POST['app_long_name']
             project.app_version_label = request.POST['app_version_label']
             project.app_is_watchface = bool(int(request.POST['app_is_watchface']))
+            project.app_is_hidden = bool(int(request.POST['app_is_hidden']))
+            project.app_is_shown_on_communication = bool(int(request.POST['app_is_shown_on_communication']))
             project.app_capabilities = request.POST['app_capabilities']
             project.app_keys = request.POST['app_keys']
             project.app_jshint = bool(int(request.POST['app_jshint']))

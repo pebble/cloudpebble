@@ -163,6 +163,8 @@ def do_import_archive(project_id, archive, delete_project=False):
                             project.app_version_label = m['versionLabel']
                             project.sdk_version = m.get('sdkVersion', '2')
                             project.app_is_watchface = m.get('watchapp', {}).get('watchface', False)
+                            project.app_is_hidden = m.get('watchapp', {}).get('hiddenApp', False)
+                            project.app_is_shown_on_communication = m.get('watchapp', {}).get('onlyShownOnCommunication', False)
                             project.app_capabilities = ','.join(m.get('capabilities', []))
                             if 'targetPlatforms' in m:
                                 project.app_platforms = ','.join(m['targetPlatforms'])
@@ -208,6 +210,8 @@ def do_import_archive(project_id, archive, delete_project=False):
                                 tracking = resource.get('trackingAdjust', None)
                                 is_menu_icon = resource.get('menuIcon', False)
                                 compatibility = resource.get('compatibility', None)
+                                target_platforms = resource.get('targetPlatforms', None)
+                                target_platforms = json.dumps(target_platforms) if target_platforms else None
 
                                 if file_name not in resource_files:
                                     res_path = 'resources'
@@ -223,7 +227,8 @@ def do_import_archive(project_id, archive, delete_project=False):
                                             project=project,
                                             file_name=os.path.basename(root_file_name),
                                             kind=kind,
-                                            is_menu_icon=is_menu_icon)
+                                            is_menu_icon=is_menu_icon,
+                                            target_platforms=target_platforms)
 
                                         ResourceIdentifier.objects.create(
                                             resource_file=resources[root_file_name],

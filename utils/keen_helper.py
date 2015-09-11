@@ -49,6 +49,8 @@ def send_keen_event(collections, event, data=None, request=None, project=None, u
             'uuid': project.app_uuid,
             'app_name': project.app_long_name,
             'is_watchface': project.app_is_watchface,
+            'is_hidden': project.app_is_hidden,
+            'is_shown_on_communication': project.app_is_shown_on_communication,
             'jshint': project.app_jshint,
             'type': project.project_type,
             'sdk': project.sdk_version,

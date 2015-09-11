@@ -89,6 +89,7 @@ CloudPebble.Editor = (function() {
                         var distance = 99999999999; // eh
                         for (var i = marks.length - 1; i >= 0; i--) {
                             var mark = marks[i];
+                            if (mark.className !== "cm-autofilled") continue;
                             var pos = mark.find();
                             if(pos === undefined) continue;
                             if(cursor.line >= pos.from.line - 5) {
@@ -360,10 +361,11 @@ CloudPebble.Editor = (function() {
                                 });
                         }
                     });
-                    code_mirror.force_fold_lines(data.folded_lines);
-                    // This is needed to force focus on the editor
-                    setTimeout(function() { code_mirror.focus();}, 1);
                 }
+                
+                code_mirror.force_fold_lines(data.folded_lines);
+                // This is needed to force focus on the editor
+                setTimeout(function() { code_mirror.focus();}, 1);
 
                 function update_patch_list(instance, changes) {
                     _.each(changes, function(change) {

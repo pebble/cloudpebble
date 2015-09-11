@@ -38,6 +38,7 @@ CloudPebble.FuzzyPrompt = (function() {
             // Register ctrl-p and ctrl-shift-p
             $(document).keydown(function(e) {
                 if ((e[modifier]) && e.keyCode == 80) {
+                    e.preventDefault();
                     if (COMMANDS_ENABLED && e.shiftKey) {
                         input.attr('placeholder', gettext("Enter Command"));
                         show_prompt('commands');
@@ -46,7 +47,6 @@ CloudPebble.FuzzyPrompt = (function() {
                         input.attr('placeholder', gettext("Search Files"));
                         show_prompt('files');
                     }
-                    e.preventDefault();
                 }
             });
 
@@ -60,6 +60,8 @@ CloudPebble.FuzzyPrompt = (function() {
                 // Enter to select
                 else if (e.keyCode == 13) {
                     select_item(item_list[selected_id]);
+                    e.preventDefault();
+                    e.stopPropagation();
                 }
                 // Up and down to switch between items
                 // Use e.preventDefault so arrow keys don't navigate the text
@@ -142,10 +144,12 @@ CloudPebble.FuzzyPrompt = (function() {
 
     // Select an item, run its callback then hide the prompt
     var select_item = function(match) {
-        selection_was_made = true;
+        selection_was_made = (match != null);
         opened = false;
-        hide_prompt(false);
-        match.callback(match.object, input.val());
+        hide_prompt(!selection_was_made);
+        if (match) {
+            match.callback(match.object, input.val());
+        }
     };
 
     var show_prompt = function(kind) {
@@ -192,7 +196,9 @@ CloudPebble.FuzzyPrompt = (function() {
     // Highlight an item in the suggestions list.
     // if enter is hit, the highlighted item gets selected.
     var highlight_item = function(item) {
-        highlight_item_by_id(item.id);
+        if (_.isObject(item)) {
+            highlight_item_by_id(item.id);
+        }
     };
     var highlight_item_by_id = function(id) {
         _.each(item_list, function(item) {
