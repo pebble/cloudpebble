@@ -327,18 +327,18 @@ CloudPebble.Resources = (function() {
                 process_resource_form(form, false, resource.file_name, "/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/update", function(data) {
                     // Update any previews we have.
                     _.each(data.variants, function(variant) {
-                        var variant_div = $('.variant-'+variant);
-                        variant_div.find('img').attr('src', function(ind, old_src) {
-                            if (!old_src || /^(\s*(\?t=.*)|\s+)$/.test(old_src)) {
-                                // If we're uploading a new variant, we need to set its preview url from scratch
-                                return '/ide/project/' + PROJECT_ID + '/resource/' + resource.id + '/' + variant + '/get';
-                            }
-                            else {
-                                // If not, we have to refresh and bypass the cache the image using a query string
-                                return old_src.replace(/\?t=.*$/,'') + '?t=' + (++preview_count);
-                            }
-                        });
                         if (resource.kind == 'png' || resource.kind == 'png-trans') {
+                            var variant_div = pane.find('.variant-'+variant);
+                            variant_div.find('img').attr('src', function(ind, old_src) {
+                                if (!old_src || /^(\s*(\?t=.*)|\s+)$/.test(old_src)) {
+                                    // If we're uploading a new variant, we need to set its preview url from scratch
+                                    return '/ide/project/' + PROJECT_ID + '/resource/' + resource.id + '/' + variant + '/get';
+                                }
+                                else {
+                                    // If not, we have to refresh and bypass the cache the image using a query string
+                                    return old_src.replace(/\?t=.*$/,'') + '?t=' + (++preview_count);
+                                }
+                            });
                             variant_div.show();
                         }
                     });

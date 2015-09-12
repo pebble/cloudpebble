@@ -105,7 +105,9 @@ def rename_source_file(request, project_id, file_id):
                 }
             }, project=project, request=request)
             raise Exception(_("Could not rename, file has been modified since last save."))
-        source_file.rename(request.POST['new_name'])
+        source_file.file_name = request.POST['new_name']
+        source_file.save()
+
     except Exception as e:
         return json_failure(str(e))
     else:

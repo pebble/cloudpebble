@@ -147,11 +147,10 @@ def update_resource(request, project_id, resource_id):
             if 'file_colour' in request.FILES:
                 colour_variant = resource.variants.get_or_create(variant=ResourceVariant.VARIANT_COLOUR)[0]
                 colour_variant.save_file(request.FILES['file_colour'], request.FILES['file_colour'].size)
-
-            if file_name and resource.file_name != file_name:
-                resource.rename(file_name)
-
             resource.target_platforms = None if target_platforms is None else json.dumps(target_platforms)
+            if file_name and resource.file_name != file_name:
+                resource.file_name = file_name
+
             resource.save()
 
     except Exception as e:
