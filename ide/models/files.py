@@ -85,14 +85,14 @@ class ResourceFile(IdeModel):
     def root_path(self):
         # Either return the path of the default variant if it exists
         # or strip out the suffix from another variant
-        for variant, suffix in ResourceVariant.RESOURCE_VARIANTS:
+        for variant, suffix in ResourceVariant.VARIANT_SUFFIXES.iteritems():
             try:
                 file_name = self.get_best_variant(variant).get_path()
                 if variant == ResourceVariant.VARIANT_DEFAULT:
                     return file_name
                 else:
                     file_name_parts = os.path.splitext(file_name)
-                    return file_name_parts[0][:len(file_name_parts[0]) - len(suffix) - 1] + file_name_parts[1]
+                    return file_name_parts[0][:len(file_name_parts[0]) - len(suffix)] + file_name_parts[1]
             except ResourceVariant.DoesNotExist:
                 continue
         raise Exception("No root path found for resource %s" % self.file_name)
