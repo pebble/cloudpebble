@@ -1,12 +1,15 @@
 import os
 import shutil
 import traceback
+import datetime
+import re
 from django.conf import settings
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.utils.timezone import now
+from django.core.validators import RegexValidator
 from django.utils.translation import ugettext as _
 import utils.s3 as s3
 
@@ -28,13 +31,18 @@ class ResourceFile(IdeModel):
     file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_(). -]+$")])
     kind = models.CharField(max_length=9, choices=RESOURCE_KINDS)
     is_menu_icon = models.BooleanField(default=False)
-    target_platforms = models.CharField(max_length=30, null=True, default=None)
+    target_platforms = models.CharField(max_length=30, null=True, blank=True, default=None)
 
     def get_best_variant(self, variant):
         try:
             return self.variants.get(variant=variant)
         except ResourceVariant.DoesNotExist:
             return self.variants.get(variant=0)
+
+    def rename(self, new_name):
+        if os.path.splitext(self.file_name)[1] != os.path.splitext(new_name)[1]:
+            raise Exception("Cannot change file type when renaming resource")
+        self.file_name = new_name
 
     def get_local_filename(self, variant, create=False):
         return self.get_best_variant(variant).get_local_filename(create=create)
@@ -66,6 +74,7 @@ class ResourceFile(IdeModel):
             variant.copy_to_path(abs_target)
 
     def save(self, *args, **kwargs):
+        self.clean_fields()
         self.project.last_modified = now()
         self.project.save()
         super(ResourceFile, self).save(*args, **kwargs)
@@ -239,6 +248,12 @@ class SourceFile(IdeModel):
                 return ''
         else:
             return s3.read_file('source', self.s3_path)
+
+    def was_modified_since(self, expected_modification_time):
+        if isinstance(expected_modification_time, int):
+            expected_modification_time = datetime.datetime.fromtimestamp(expected_modification_time)
+        assert isinstance(expected_modification_time, datetime.datetime)
+        return self.last_modified.replace(tzinfo=None, microsecond=0) > expected_modification_time
 
     def save_file(self, content, folded_lines=None):
         if not settings.AWS_ENABLED:

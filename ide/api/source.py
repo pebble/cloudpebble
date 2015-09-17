@@ -84,12 +84,50 @@ def source_file_is_safe(request, project_id, file_id):
 
 @require_POST
 @login_required
+def rename_source_file(request, project_id, file_id):
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    source_file = get_object_or_404(SourceFile, pk=file_id, project=project)
+    old_filename = source_file.file_name
+    try:
+        if source_file.file_name != request.POST['old_name']:
+            send_keen_event('cloudpebble', 'cloudpebble_rename_abort_unsafe', data={
+                'data': {
+                    'filename': source_file.file_name,
+                    'kind': 'source'
+                }
+            }, project=project, request=request)
+            raise Exception(_("Could not rename, file has been renamed already."))
+        if source_file.was_modified_since(int(request.POST['modified'])):
+            send_keen_event('cloudpebble', 'cloudpebble_rename_abort_unsafe', data={
+                'data': {
+                    'filename': source_file.file_name,
+                    'kind': 'source'
+                }
+            }, project=project, request=request)
+            raise Exception(_("Could not rename, file has been modified since last save."))
+        source_file.file_name = request.POST['new_name']
+        source_file.save()
+
+    except Exception as e:
+        return json_failure(str(e))
+    else:
+        send_keen_event('cloudpebble', 'cloudpebble_rename_file', data={
+            'data': {
+                'old_filename': old_filename,
+                'new_filename': source_file.file_name,
+                'kind': 'source'
+            }
+        }, project=project, request=request)
+        return json_response({"modified": time.mktime(source_file.last_modified.utctimetuple())})
+
+
+@require_POST
+@login_required
 def save_source_file(request, project_id, file_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     source_file = get_object_or_404(SourceFile, pk=file_id, project=project)
     try:
-        expected_modification_time = datetime.datetime.fromtimestamp(int(request.POST['modified']))
-        if source_file.last_modified.replace(tzinfo=None, microsecond=0) > expected_modification_time:
+        if source_file.was_modified_since(int(request.POST['modified'])):
             send_keen_event('cloudpebble', 'cloudpebble_save_abort_unsafe', data={
                 'data': {
                     'filename': source_file.file_name,
@@ -98,7 +136,6 @@ def save_source_file(request, project_id, file_id):
             }, project=project, request=request)
             raise Exception(_("Could not save: file has been modified since last save."))
         source_file.save_file(request.POST['content'], folded_lines=request.POST['folded_lines'])
-
 
     except Exception as e:
         return json_failure(str(e))

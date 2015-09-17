@@ -110,6 +110,13 @@ CloudPebble.Sidebar = (function() {
             end.before(li);
             return li;
         },
+        SetItemName: function(kind, id, new_name) {
+            // We need to keep any icons
+            var link = $('#sidebar-pane-'+kind+'-'+id+' a');
+            var icons = link.children();
+            icons.detach();
+            link.text(new_name + ' ').append(icons);
+        },
         AddSourceFile: function(file, on_click) {
             var end = $('#end-source-files');
             if(file.target == 'worker') {
@@ -117,7 +124,7 @@ CloudPebble.Sidebar = (function() {
                 $('#worker-files').show();
                 $('#source-files').find('span:first').text(gettext("App source"));
             }
-            var link = $('<a href="#"></a>');
+            var link = $('<a href="#" id="sidebar-link-'+file.id+'"></a>');
             link.text(file.name + ' ');
             link.click(on_click);
             var li = $('<li id="sidebar-pane-source-'+file.id+'">');

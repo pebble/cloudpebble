@@ -226,6 +226,14 @@ CloudPebble.FuzzyPrompt = (function() {
 
     };
 
+    var add_commands = function(commands) {
+        sources.push({
+            list_func: function() {return commands;},
+            callback: function(func) {func();},
+            kind: 'commands'
+        });
+    };
+
     return {
         // Let fuzzy-prompt know the name of the currently opened file
         // to use as a default when nothing has been typed.
@@ -238,7 +246,7 @@ CloudPebble.FuzzyPrompt = (function() {
             show_prompt();
         },
         /* Add a data source.
-            kind: 'files' or 'commands
+            kind: 'files' or 'commands'
             item_getter: a function which should return a dict of items with string name keys
             select_callback: a function to call when one of these items is selected
          */
@@ -249,7 +257,39 @@ CloudPebble.FuzzyPrompt = (function() {
             commands: a dict of names->functions
          */
         AddCommands: function(commands) {
-            sources.push({list_func: function() {return commands;}, callback: function(func) {func();}, kind: 'commands' });
+            add_commands(commands);
+        },
+        /* Add a new set of commands, replacing any identically named commands */
+        ReplaceCommands: function(commands) {
+            // For each new command, look through the data source for
+            // commands with the same name. If we find any, replace their functions
+            // with the new one.
+            var all_replaced = [];
+
+            _.each(commands, function(newfunc, compare_key) {
+                _.each(sources, function (source) {
+                    if (source.kind == 'commands') {
+                        var source_commands = source.list_func();
+                        _.each(source_commands, function (func, key) {
+                            if (compare_key == key) {
+                                source_commands[key] = newfunc;
+                                // Keep track of the fact that this command was replaced
+                                all_replaced.push(key);
+                            }
+                        });
+                        source.list_func = function() {return source_commands};
+                    }
+                });
+            });
+            // At the end, we add any commands in the set which were new and note replacements.
+            var filtered = _.omit(commands, all_replaced);
+            add_commands(filtered);
+        },
+        DeleteCommands: function(names) {
+            _.each(sources, function(source) {
+                var new_list = _.omit(source.list_func(), names);
+                source.list_func = function() {return new_list; };
+            });
         },
         Init: function() {
             init();

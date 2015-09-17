@@ -284,6 +284,10 @@ ul.nav-pills {
     background: white url('../img/save.png') no-repeat center;
 }
 
+.rename-btn {
+    background: white url('../img/rename.png') no-repeat center;
+}
+
 .reload-btn {
     background: white url('../img/reload.png') no-repeat center;
 }
