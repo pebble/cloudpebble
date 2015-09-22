@@ -96,10 +96,9 @@ class ResourceVariant(IdeModel):
     VARIANT_COLOUR = 2
     VARIANT_RECT = 3
     VARIANT_ROUND = 4
-
-    VARIANT_APLITE = 20
-    VARIANT_BASALT = 21
-    VARIANT_CHALK = 22
+    VARIANT_APLITE = 5
+    VARIANT_BASALT = 6
+    VARIANT_CHALK = 7
 
     VARIANT_STRINGS = {
         VARIANT_MONOCHROME: '~bw',
@@ -203,7 +202,7 @@ class ResourceVariant(IdeModel):
             raise Exception("No root path found for resource variant %s" % self.path)
         root_path = name_parts[0][:len(name_parts[0])-len(suffix)] + name_parts[1]
         if "~" in root_path:
-            raise ValueError("Root paths are not allowed to contain the tilde (~) character")
+            raise ValueError("Filenames are not allowed to contain the tilde (~) character, except for specifying tags")
         return root_path
 
     path = property(get_path)

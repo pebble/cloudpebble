@@ -25,7 +25,7 @@ def create_resource(request, project_id):
     new_tags = json.loads(request.POST['new_tags'])
     resources = []
     try:
-        with transaction.commit_on_success():
+        with transaction.atomic():
             rf = ResourceFile.objects.create(project=project, file_name=file_name, kind=kind)
             for r in resource_ids:
                 regex = r['regex'] if 'regex' in r else None

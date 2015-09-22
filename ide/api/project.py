@@ -154,7 +154,7 @@ def create_project(request):
     template_name = None
     sdk_version = request.POST.get('sdk', 2)
     try:
-        with transaction.commit_on_success():
+        with transaction.atomic():
             project = Project.objects.create(
                 name=name,
                 owner=request.user,
@@ -197,7 +197,7 @@ def create_project(request):
 def save_project_settings(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     try:
-        with transaction.commit_on_success():
+        with transaction.atomic():
             project.name = request.POST['name']
             project.app_uuid = request.POST['app_uuid']
             project.app_company_name = request.POST['app_company_name']

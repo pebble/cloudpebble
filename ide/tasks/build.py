@@ -78,19 +78,19 @@ def save_debug_info(base_dir, build_result, kind, platform, elf_file):
             build_result.save_debug_info(debug_info, platform, kind)
 
 
-def store_size_info(build_result, platform, zip):
+def store_size_info(build_result, platform, zip_file):
     platform_dir = platform + '/'
     if platform == 'aplite':
         platform_dir = ''
     try:
         build_size = BuildSize.objects.create(
             build=build_result,
-            binary_size=zip.getinfo(platform_dir + 'pebble-app.bin').file_size,
-            resource_size=zip.getinfo(platform_dir + 'app_resources.pbpack').file_size,
+            binary_size=zip_file.getinfo(platform_dir + 'pebble-app.bin').file_size,
+            resource_size=zip_file.getinfo(platform_dir + 'app_resources.pbpack').file_size,
             platform=platform,
         )
         try:
-            build_size.worker_size = zip.getinfo(platform_dir + 'pebble-worker.bin').file_size
+            build_size.worker_size = zip_file.getinfo(platform_dir + 'pebble-worker.bin').file_size
         except KeyError:
             pass
         build_size.save()

@@ -7,9 +7,9 @@ CloudPebble.Resources = (function() {
     var TAG_COLOUR = 2;
     var TAG_RECT = 3;
     var TAG_ROUND = 4;
-    var TAG_APLITE = 20;
-    var TAG_BASALT = 21;
-    var TAG_CHALK = 22;
+    var TAG_APLITE = 5;
+    var TAG_BASALT = 6;
+    var TAG_CHALK = 7;
 
     var TAGS = {
         color: {name: gettext("Colour"), id: TAG_COLOUR, excludes: [TAG_MONOCHROME, TAG_APLITE]},
@@ -36,10 +36,10 @@ CloudPebble.Resources = (function() {
     }
 
     function get_target_platforms(pane) {
-        pane = pane || document;
-        var do_target_platforms = $(pane).find('#edit-resource-target-platforms-enabled').is(":checked");
+        pane = $(pane);
+        var do_target_platforms = pane.find('#edit-resource-target-platforms-enabled').is(":checked");
         return (!do_target_platforms ? null : _.filter(POSSIBLE_PLATFORMS, function(platform) {
-            return $(pane).find('#edit-resource-target-'+platform).is(":checked");
+            return pane.find('#edit-resource-target-'+platform).is(":checked");
         }));
     }
 
@@ -66,17 +66,17 @@ CloudPebble.Resources = (function() {
 
 
     var update_platform_labels = _.throttle(function(pane) {
-        pane = pane || document;
-        var include_uploader = $(pane).find('#edit-resource-new-file textarea').is(':enabled');
+        pane = $(pane);
+        var include_uploader = pane.find('#edit-resource-new-file textarea').is(':enabled');
         var new_tag_values = get_new_tag_values(document, include_uploader, false);
-        $(pane).find('.label-list').empty();
+        pane.find('.label-list').empty();
         var target_platforms = get_target_platforms(pane);
         var targeted_platform_tags = (target_platforms!== null ? _.pick(PLATFORM_TAGS, target_platforms) : PLATFORM_TAGS);
-        $(pane).find(".image-platform-preview img").hide();
-        $(pane).find(".image-platform-preview span").text('Not targeted').removeClass('conflict');
+        pane.find(".image-platform-preview img").hide();
+        pane.find(".image-platform-preview span").text('Not targeted').removeClass('conflict');
 
         _.each(targeted_platform_tags, function(platform_tags, platform_name) {
-            var per_platform_preview_pane = $(pane).find("#resource-image-preview-for-"+platform_name);
+            var per_platform_preview_pane = pane.find("#resource-image-preview-for-"+platform_name);
             try {
                 // Update the label tag
                 var tags_for_this_platform = get_resource_for_platform(new_tag_values, platform_tags, platform_name);
@@ -318,20 +318,17 @@ CloudPebble.Resources = (function() {
 
 
         // Validate the tags: detect ambiguities and check that each targeted platform has a matching variant
-        if (!_.every(targeted_platform_tags, function(platform_tags, platform_name) {
-                try {
-                    if (get_resource_for_platform(new_tag_values, platform_tags, platform_name) == null) {
-                        report_error(interpolate(gettext("There is no variant matching the target platform '%s'."), [platform_name]));
-                        return false;
-                    }
-                    return true;
-                }
-                catch (err) {
-                    report_error(err.description || err);
+        for (var platform_name in targeted_platform_tags) {
+            try {
+                if (get_resource_for_platform(new_tag_values, targeted_platform_tags[platform_name], platform_name) == null) {
+                    report_error(interpolate(gettext("There is no variant matching the target platform '%s'."), [platform_name]));
                     return false;
                 }
-            })) {
-            return false;
+            }
+            catch (err) {
+                report_error(err.description || err);
+                return false;
+            }
         }
 
         var variant_tags = extract_tags(form.find('#edit-resource-previews .text-wrap input'));
@@ -438,13 +435,13 @@ CloudPebble.Resources = (function() {
                         preview_img.load(function () {
                             dimensions.text(this.naturalWidth + ' x ' + this.naturalHeight);
                             preview_pane.show();
-                            build_tags_editor(preview_pane.find('.resource-tags'), tags) ;
+                            build_tags_editor(pane, preview_pane.find('.resource-tags'), tags) ;
                         });
                     }
                     if (template_name == 'raw') {
                         preview_pane.find('.resource-download-link').removeClass('hide').find('a').attr('href', preview_url);
                         preview_pane.show();
-                        build_tags_editor(preview_pane.find('.resource-tags'), tags) ;
+                        build_tags_editor(pane, preview_pane.find('.resource-tags'), tags) ;
                     }
 
                     preview_pane.find('.btn-delvariant').click(function() {
@@ -647,7 +644,7 @@ CloudPebble.Resources = (function() {
         }
     };
 
-    var build_tags_editor = function(textarea, tags) {
+    var build_tags_editor = function(pane, textarea, tags) {
         // Create the tags editor.
 
         // The textext library does strange things with with sizing. This seems to fix it.
@@ -694,7 +691,7 @@ CloudPebble.Resources = (function() {
                                 this.wrapElement().addClass('disabled');
                                 this.wrapElement().find('textarea').attr('disabled', true);
                             }
-                            update_platform_labels();
+                            update_platform_labels(pane);
                             return this;
                         }
 
@@ -767,9 +764,9 @@ CloudPebble.Resources = (function() {
                 result: filtered
             });
         }).bind('change', function() {
-            update_platform_labels();
+            update_platform_labels(pane);
         });
-        update_platform_labels();
+        update_platform_labels(pane);
         return textext.textext()[0];
     };
 
@@ -798,11 +795,11 @@ CloudPebble.Resources = (function() {
         });
 
         template.find("#edit-resource-target-platforms-enabled").change(_.partial(show_resource_targets, template));
-        template.find("#resource-targets-section input").change(function() {update_platform_labels();});
+        template.find("#resource-targets-section input").change(function() {update_platform_labels(template);});
 
         // setTimeout is used because the textarea has to actually be visible when the textext tag editor is initialised
         setTimeout(function() {
-            var textext = build_tags_editor(template.find("#new-resource-tags"), []);
+            var textext = build_tags_editor(template, template.find("#new-resource-tags"), []);
             // Disable the new file tag-picker unless a file has been chosen.
             textext.enabled(false);
             template.find("input[type='file']").change(function(e) {
@@ -815,10 +812,8 @@ CloudPebble.Resources = (function() {
     };
 
     var validate_resource_id = function(id) {
-        if(/[^a-zA-Z0-9_]/.test(id)) {
-            return false;
-        }
-        return true;
+        return !/[^a-zA-Z0-9_]/.test(id);
+
     };
 
     var create_new_resource = function() {
@@ -872,7 +867,7 @@ CloudPebble.Resources = (function() {
             create_new_resource();
         },
         GetResourceIDs: function() {
-            names = [];
+            var names = [];
             $.each(project_resources, function(index, value) {
                 $.each(value.identifiers, function(index, id) {
                     names.push("RESOURCE_ID_" + id);

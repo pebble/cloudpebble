@@ -75,7 +75,7 @@ CloudPebble.Sidebar = (function() {
     };
 
     var init = function() {
-    }
+    };
 
     return {
         SuspendActive: function() {

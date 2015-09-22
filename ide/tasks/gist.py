@@ -12,6 +12,7 @@ from ide.utils import generate_half_uuid
 from utils.keen_helper import send_keen_event
 import urllib2
 
+
 @task(acks_late=True)
 def import_gist(user_id, gist_id):
     user = User.objects.get(pk=user_id)
@@ -62,7 +63,7 @@ def import_gist(user_id, gist_id):
         'sdk_version': settings.get('sdkVersion', '2'),
     }
 
-    with transaction.commit_on_success():
+    with transaction.atomic():
         project = Project.objects.create(**project_settings)
 
         if project_type != 'simplyjs':

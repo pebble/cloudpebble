@@ -89,7 +89,7 @@ CloudPebble.Prompts = {
             .removeAttr('disabled');
         $('#modal-text-input-errors').html('');
         $('#modal-text-input').modal();
-        $('#modal-text-input-value').focus()
+        $('#modal-text-input-value').focus();
         var submit = function() {
             callback($('#modal-text-input-value').val(), {
                 error: function(message) {

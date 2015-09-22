@@ -864,7 +864,7 @@ CloudPebble.Editor = (function() {
                 popover.remove();
                 popover = null;
                 cm.focus();
-            }
+            };
             var handler = function(e) {
                 if(e.keyCode == 27) { // esc
                     remove();

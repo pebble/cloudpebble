@@ -49,7 +49,7 @@ CloudPebble.Editor.Autocomplete = new (function() {
         // Easy part.
         cm.replaceRange(completion.text, data.from, data.to);
         // Now we get to figure out where precisely the params should have ended up and fix that.
-        start = data.from.ch + completion.name.length + 1; // +1 for open paren
+        var start = data.from.ch + completion.name.length + 1; // +1 for open paren
         var orig_start = start;
         var first_pos = null;
         var first_mark = null;

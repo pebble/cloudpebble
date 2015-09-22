@@ -143,24 +143,24 @@ def do_import_archive(project_id, archive, delete_project=False):
                 base_dir = find_project_root(file_list)
                 dir_end = len(base_dir)
 
-                def make_valid_filename(entry):
-                    filename = entry.filename
-                    if filename[:dir_end] != base_dir:
+                def make_valid_filename(zip_entry):
+                    entry_filename = zip_entry.filename
+                    if entry_filename[:dir_end] != base_dir:
                         return False
-                    filename = filename[dir_end:]
-                    if filename == '':
+                    entry_filename = entry_filename[dir_end:]
+                    if entry_filename == '':
                         return False
-                    if not os.path.normpath('/SENTINEL_DO_NOT_ACTUALLY_USE_THIS_NAME/%s' % filename).startswith('/SENTINEL_DO_NOT_ACTUALLY_USE_THIS_NAME/'):
+                    if not os.path.normpath('/SENTINEL_DO_NOT_ACTUALLY_USE_THIS_NAME/%s' % entry_filename).startswith('/SENTINEL_DO_NOT_ACTUALLY_USE_THIS_NAME/'):
                         raise SuspiciousOperation("Invalid zip file contents.")
-                    if entry.file_size > 5242880:  # 5 MB
+                    if zip_entry.file_size > 5242880:  # 5 MB
                         raise Exception("Excessively large compressed file.")
-                    return filename
+                    return entry_filename
 
                 # Now iterate over the things we found
                 with transaction.atomic():
                     for entry in contents:
                         filename = make_valid_filename(entry)
-                        if filename == False:
+                        if not filename:
                             continue
 
                         if filename == MANIFEST:

@@ -53,7 +53,7 @@ def set_project_repo(request, project_id):
 
     # TODO: Validate the branch...give user option to create one?
 
-    with transaction.commit_on_success():
+    with transaction.atomic():
         if repo != project.github_repo:
             if project.github_hook_uuid:
                 try:
