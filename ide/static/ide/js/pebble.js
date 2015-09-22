@@ -97,7 +97,7 @@ var SharedPebble = new (function() {
                 deferred.resolve(mEmulator);
                 return deferred.promise();
             } else {
-                mEmulator.once('disconnected', function() { _getEmulator(kind, deferred); })
+                mEmulator.once('disconnected', function() { _getEmulator(kind, deferred); });
                 mEmulator.disconnect(true);
                 mEmulator = null;
                 return deferred.promise();

@@ -113,12 +113,7 @@
                         break;
                     case 'chalk':
                         mRFB.get_display().resize(180, 180);
-                        break
-                }
-                if(mPlatform == 'aplite') {
-
-                } else {
-
+                        break;
                 }
             }
             if(mConnected && state == 'disconnected') {

@@ -20,7 +20,7 @@ def create_resource(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     kind = request.POST['kind']
     resource_ids = json.loads(request.POST['resource_ids'])
-    file = request.FILES.get('file', None)
+    posted_file = request.FILES.get('file', None)
     file_name = request.POST['file_name']
     new_tags = json.loads(request.POST['new_tags'])
     resources = []
@@ -32,9 +32,9 @@ def create_resource(request, project_id):
                 tracking = int(r['tracking']) if 'tracking' in r else None
                 resources.append(ResourceIdentifier.objects.create(resource_file=rf, resource_id=r['id'],
                                                                    character_regex=regex, tracking=tracking))
-            if file is not None:
+            if posted_file is not None:
                 variant = ResourceVariant.objects.create(resource_file=rf, tags=",".join(str(int(t)) for t in new_tags))
-                variant.save_file(file, file.size)
+                variant.save_file(posted_file, posted_file.size)
 
             target_platforms = json.loads(request.POST.get('target_platforms', None))
             rf.target_platforms = None if target_platforms is None else json.dumps(target_platforms)
@@ -171,18 +171,18 @@ def update_resource(request, project_id, resource_id):
                 resources.append(ResourceIdentifier.objects.create(resource_file=resource, resource_id=r['id'], character_regex=regex, tracking=tracking, compatibility=compat))
 
             # We get sent a list of (tags_before, tags_after) pairs.
-            with transaction.atomic():
-                updated_variants = []
-                for tag_update in variant_tags:
-                    variant = resource.variants.get(tags=tag_update[0])
-                    variant.set_tags(tag_update[1])
-                    updated_variants.append(variant)
+            updated_variants = []
+            for tag_update in variant_tags:
+                tags_before, tags_after = tag_update
+                variant = resource.variants.get(tags=tags_before)
+                variant.set_tags(tags_after)
+                updated_variants.append(variant)
 
-                for variant in updated_variants:
-                    variant.save()
-                if 'file' in request.FILES:
-                    variant = resource.variants.create(tags=",".join(str(int(t)) for t in new_tags))
-                    variant.save_file(request.FILES['file'], request.FILES['file'].size)
+            for variant in updated_variants:
+                variant.save()
+            if 'file' in request.FILES:
+                variant = resource.variants.create(tags=",".join(str(int(t)) for t in new_tags))
+                variant.save_file(request.FILES['file'], request.FILES['file'].size)
 
             resource.target_platforms = None if target_platforms is None else json.dumps(target_platforms)
             if file_name and resource.file_name != file_name:

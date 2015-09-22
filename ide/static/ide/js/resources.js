@@ -12,7 +12,7 @@ CloudPebble.Resources = (function() {
     var TAG_CHALK = 22;
 
     var TAGS = {
-        color: {name: gettext("Color"), id: TAG_COLOUR, excludes: [TAG_MONOCHROME, TAG_APLITE]},
+        color: {name: gettext("Colour"), id: TAG_COLOUR, excludes: [TAG_MONOCHROME, TAG_APLITE]},
         bw: {name: gettext("Monochrome"), id:TAG_MONOCHROME,  excludes: [TAG_COLOUR, TAG_BASALT, TAG_CHALK, TAG_ROUND]},
         aplite: {name: "Aplite", id: TAG_APLITE, excludes: [TAG_BASALT, TAG_CHALK, TAG_ROUND, TAG_COLOUR]},
         basalt: {name: "Basalt", id: TAG_BASALT, excludes: [TAG_APLITE, TAG_CHALK, TAG_ROUND, TAG_MONOCHROME]},
@@ -624,13 +624,6 @@ CloudPebble.Resources = (function() {
                 });
             });
 
-            if(CloudPebble.ProjectInfo.sdk_version != '3') {
-                pane.find('.sdk3-only').hide();
-                pane.find('#edit-resource-new-file').hide();
-            }
-
-
-
             restore_pane(pane);
         });
     };
@@ -642,6 +635,15 @@ CloudPebble.Resources = (function() {
         } else {
             parent.find('.colour-resource, #resource-targets-section').show();
             show_resource_targets(parent)
+        }
+        if(CloudPebble.ProjectInfo.sdk_version != '3') {
+            parent.find('.sdk3-only').hide();
+            parent.find('#edit-resource-new-file').hide();
+        }
+        if(CloudPebble.ProjectInfo.type != 'native') {
+            console.log("hiding native only");
+            parent.find('.native-only').hide();
+            parent.find('#edit-resource-new-file').hide();
         }
     };
 
@@ -726,14 +728,17 @@ CloudPebble.Resources = (function() {
                         // We extend the addTags/removeTag methods to trigger 'change'
                         // so that the live settings form can autosave.
                         $.fn.textext.TextExtTags.prototype.addTags.apply(this, arguments);
-                        if (initialised)
+                        if (initialised) {
                             this.trigger('change');
+                            this.trigger('input');
+                        }
                     },
                     removeTag: function(tag) {
                         $.fn.textext.TextExtTags.prototype.removeTag.apply(this, arguments);
 
                         if (initialised) {
                             this.trigger('change');
+                            this.trigger('input');
                         }
                     },
                     empty: function() {
@@ -771,9 +776,7 @@ CloudPebble.Resources = (function() {
     var prepare_resource_pane = function() {
         var template = resource_template.clone();
         template.removeClass('hide');
-        if(CloudPebble.ProjectInfo.type != 'native') {
-            template.find('.native-only').addClass('hide');
-        }
+
         template.find('.image-platform-preview').hide();
         template.find('#edit-resource-type').change(function() {
             if($(this).val() == 'font') {
@@ -781,22 +784,11 @@ CloudPebble.Resources = (function() {
                 template.find('#font-resource-group').removeClass('hide');
                 template.find('#add-font-resource').removeClass('hide');
             } else {
-                if($(this).val() == 'png') {
-                    template.find('.colour-resource').removeClass('hide');
-                } else {
-                    template.find('.colour-resource').addClass('hide');
-                }
                 template.find('#font-resource-group').addClass('hide');
                 template.find('#non-font-resource-group').removeClass('hide');
                 template.find('#add-font-resource').addClass('hide');
             }
         });
-
-        if(CloudPebble.ProjectInfo.sdk_version == '2') {
-            template.find('.colour-resource').hide();
-        } else {
-            template.find('.colour-resource').show();
-        }
 
         template.find("input[type=file]").change(function() {
             var input = $(this);
@@ -817,10 +809,6 @@ CloudPebble.Resources = (function() {
                 textext.enabled(e.target.value.length > 0);
             });
         }, 1);
-
-        if(CloudPebble.ProjectInfo.sdk_version != '3') {
-            template.find('.sdk3-only').hide();
-        }
 
         restore_pane(template);
         return template;

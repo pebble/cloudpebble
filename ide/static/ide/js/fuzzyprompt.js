@@ -156,7 +156,7 @@ CloudPebble.FuzzyPrompt = (function() {
     };
 
     var show_prompt = function(kind) {
-        var prompt_already_open;
+        var prompt_already_open = false;
         $('.modal').each(function() {
             if ($(this).hasClass('in')) {
                 prompt_already_open = true;

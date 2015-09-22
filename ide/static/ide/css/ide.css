@@ -195,25 +195,28 @@ ul.nav-pills {
 }
 .emulator-round .down.qemu-button {
     transform: rotate(30deg);
-    left: 205px;
-    top: 134px;
+    left: 207px;
+    top: 132px;
 }
 .emulator-round .up.qemu-button {
-    left: 205px;
-    top: 20px;
+    left: 209px;
+    top: 24px;
     transform: rotate(330deg);
 }
 .emulator-round .back.qemu-button {
     top: 79px;
     left: 0px;
 }
+
 .qemu-button {
     position: absolute;
     cursor: pointer;
     background-color: rgba(255, 0, 0, 0.2);
     border-radius: 8px;
 }
-
+.emulator-round .qemu-button {
+    border-radius: 20px;
+}
 .qemu-button.up, .qemu-button.down, .qemu-button.back {
     width: 35px;
     height: 73px;

@@ -35,7 +35,7 @@
                 </div>
             </div>
 
-            <div id="resource-targets-section">
+            <div id="resource-targets-section" class="sdk3-only native-only">
                 <div class="control-group">
                     <label style="width: 250px" class="control-label" for="edit-resource-target-platforms-enabled">{% trans 'Target specific platforms' %}</label>
                     <input type="checkbox" id="edit-resource-target-platforms-enabled">
@@ -49,18 +49,13 @@
                         </div>
                     {% endfor %}
                     </div>
-                    <div class="control-group">
-                        <label>&nbsp;</label>
-                        <div class="controls">
-                            <p>The 'targetPlatforms' option restricts all variants of a resource to a specific set of platforms, regardless of their tags.</p>
-                        </div>
-                    </div>
+                    <p class="help-block">The 'targetPlatforms' option restricts all variants of a resource to a specific set of platforms, regardless of their tags.</p>
                 </div>
             </div>
 
         </div>
 
-        <div class="well image-platform-preview hide sdk3-only">
+        <div class="well image-platform-preview hide sdk3-only native-only">
             <h4>Preview per platform</h4>
             <div class="pane-boxes pane-3-boxes ">
                 {% for platform in supported_platforms %}
@@ -71,7 +66,7 @@
                 </div>
                 {% endfor %}
             </div>
-            <p class="help-block">Given the tags for each variant, this shows the final version selected for each platforn</p>
+            <p class="help-block">Given the tags for each variant, this shows the final version selected for each platform.</p>
         </div>
 
         <div id="edit-resource-previews">
@@ -89,14 +84,14 @@
                         <img src=""><p class="image-resource-preview-dimensions">52x52</p>
                     </div>
                 </div>
-                <div class="tag-edit control-group sdk3-only">
+                <div class="tag-edit control-group sdk3-only native-only">
                 {# TODO: support for/id #}
                     <label class="control-label">Tags</label>
                     <div class="controls">
                         <textarea class="resource-tags" rows="1" cols="60"></textarea>
                     </div>
                 </div>
-                <div class="control-group sdk3-only">
+                <div class="control-group sdk3-only native-only">
                     <label class="control-label">Final platforms</label>
                     <div class="controls label-list"></div>
                 </div>
@@ -116,14 +111,14 @@
                     </div>
                 </div>
 
-                <div class="tag-edit control-group sdk3-only">
+                <div class="tag-edit control-group sdk3-only native-only">
                 {# TODO: support for/id #}
                     <label class="control-label">Tags</label>
                     <div class="controls">
                         <textarea class="resource-tags" rows="1" cols="60"></textarea>
                     </div>
                 </div>
-                <div class="control-group sdk3-only">
+                <div class="control-group sdk3-only native-only">
                     <label class="control-label">Final platforms</label>
                     <div class="controls label-list"></div>
                 </div>
@@ -177,13 +172,13 @@
                     <input type="file" id="edit-resource-file">
                 </div>
             </div>
-            <div class="tag-edit control-group sdk3-only">
+            <div class="tag-edit control-group sdk3-only native-only">
                 <label class="control-label">Tags</label>
                 <div class="controls">
                     <textarea id="new-resource-tags" class="resource-tags" rows="1" cols="60"></textarea>
                 </div>
             </div>
-            <div class="control-group sdk3-only">
+            <div class="control-group sdk3-only native-only">
                 <label class="control-label">Final platforms</label>
                 <div class="controls label-list"></div>
             </div>

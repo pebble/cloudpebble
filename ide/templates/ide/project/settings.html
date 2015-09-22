@@ -39,7 +39,7 @@
                     <input type="checkbox" id="settings-build-basalt" {% if not project.app_platforms or 'basalt' in project.app_platform_list %}checked{% endif %}>
                     <span class="help-block">
                         {# Translators: "aplite" is a platform name and should be left untranslated. #}
-                        {% trans "If enabled, your app will be built to run on Pebble Time watches." %}{% if projects.sdk_version == '2'%}{% trans "If not, the aplite version will be used instead." %}{% endif %}
+                        {% trans "If enabled, your app will be built to run on Pebble Time watches." %}
                     </span>
                 </div>
             </div>
