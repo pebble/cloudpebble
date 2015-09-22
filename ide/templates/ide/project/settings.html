@@ -39,7 +39,17 @@
                     <input type="checkbox" id="settings-build-basalt" {% if not project.app_platforms or 'basalt' in project.app_platform_list %}checked{% endif %}>
                     <span class="help-block">
                         {# Translators: "aplite" is a platform name and should be left untranslated. #}
-                        {% trans "If enabled, your app will be built to run on Pebble Time watches. If not, the aplite version will be used instead." %}
+                        {% trans "If enabled, your app will be built to run on Pebble Time watches." %}{% if projects.sdk_version == '2'%}{% trans "If not, the aplite version will be used instead." %}{% endif %}
+                    </span>
+                </div>
+            </div>
+            <div class="control-group sdk3-only" {% if project.sdk_version == '2' %}style="display: none;"{% endif %}>
+                {# Translators: "Chalk" is a platform name and should be left untranslated. #}
+                <label class="control-label" for="settings-build-chalk">{% trans 'Build Chalk' %}</label>
+                <div class="controls">
+                    <input type="checkbox" id="settings-build-chalk" {% if not project.app_platforms or 'chalk' in project.app_platform_list %}checked{% endif %}>
+                    <span class="help-block">
+                        {% trans "If enabled, your app will be built to run on Pebble Round watches." %}
                     </span>
                 </div>
             </div>

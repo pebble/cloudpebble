@@ -39,6 +39,7 @@ CloudPebble.Settings = (function() {
             var menu_icon = pane.find('#settings-menu-image').val();
             var build_aplite = pane.find('#settings-build-aplite').prop('checked');
             var build_basalt = pane.find('#settings-build-basalt').prop('checked');
+            var build_chalk = pane.find('#settings-build-chalk').prop('checked');
 
             var app_is_hidden = 0;
             var app_is_shown_on_communication = 0;
@@ -88,7 +89,7 @@ CloudPebble.Settings = (function() {
 
 
             if(sdk_version == '3') {
-                if (!build_aplite && !build_basalt) {
+                if (!build_aplite && !build_basalt && !build_chalk) {
                     return defer.reject(gettext("You must build your app for at least one platform."));
                 }
             }
@@ -99,6 +100,9 @@ CloudPebble.Settings = (function() {
             }
             if(build_basalt) {
                 target_platforms.push('basalt');
+            }
+            if(build_chalk) {
+                target_platforms.push('chalk');
             }
             var app_platforms = target_platforms.join(',');
 

@@ -104,7 +104,7 @@ CloudPebble.Sidebar = (function() {
                 end = $('<li id="end-resources-' + resource.kind + '" class="divider">');
                 res_end.before(end);
             }
-            var link = $('<a href="#"></a>').text(resource.file_name).click(on_click);
+            var link = $('<a href="#"></a>').text(resource.file_name+" ").click(on_click);
             var li = $('<li id="sidebar-pane-resource-' + resource.id + '">');
             li.append(link);
             end.before(li);

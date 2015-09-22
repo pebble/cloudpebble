@@ -7,13 +7,15 @@ var ConnectionType = {
     Phone: 1,
     Qemu: 2,
     QemuAplite: 6,
-    QemuBasalt: 10
+    QemuBasalt: 10,
+    QemuChalk: 18
 };
 
 var ConnectionPlatformNames = {
     2: 'aplite',
     6: 'aplite',
-    10: 'basalt'
+    10: 'basalt',
+    18: 'chalk'
 };
 
 var SharedPebble = new (function() {
@@ -43,6 +45,10 @@ var SharedPebble = new (function() {
         gettext("Harmonising Elements…") // yes.
     ];
 
+    function isRound(kind) {
+        return ((kind & ConnectionType.QemuChalk) == ConnectionType.QemuChalk);
+    }
+
     function _getEmulator(kind, deferred) {
         var statementInterval = null;
         var randomStatements = LOADING_STATEMENTS.slice(0);
@@ -52,12 +58,12 @@ var SharedPebble = new (function() {
             if(statementInterval === null) return;
             CloudPebble.Prompts.Progress.Update(pickElement(randomStatements));
         }, 2500);
-
-        mEmulator = new QEmu(ConnectionPlatformNames[kind], $('#emulator-container canvas'), {
-            up: $('#emulator-container .up'),
-            select: $('#emulator-container .select'),
-            down: $('#emulator-container .down'),
-            back: $('#emulator-container .back'),
+        var emulator_container = $('#emulator-container');
+        mEmulator = new QEmu(ConnectionPlatformNames[kind], emulator_container.find('canvas'), {
+            up: emulator_container.find('.up'),
+            select: emulator_container.find('.select'),
+            down: emulator_container.find('.down'),
+            back: emulator_container.find('.back'),
         });
         window.emu = mEmulator;
         mEmulator.on('disconnected', function() {
@@ -65,6 +71,14 @@ var SharedPebble = new (function() {
             mEmulator = null;
         });
         $('#sidebar').addClass('with-emulator');
+        var canvas_size = URL_BOOT_IMG[ConnectionPlatformNames[kind]].size;
+        if (isRound(kind)) {
+            emulator_container.addClass('emulator-round');
+            emulator_container.find('canvas').attr('width', canvas_size[0]).attr('height', canvas_size[1]);
+        }
+        else {
+            emulator_container.removeClass('emulator-round');
+        }
 
         mEmulator.connect().done(function() {
             deferred.resolve();

@@ -4,28 +4,32 @@ function make_live_settings_form(options) {
         save_function: null,
         form: null,
         error_function: console.log,
-        control_selector: 'input, select',
-        changeable_control_selector: "input[type!='number']",
+        on_change_function: null,
+        control_selector: 'input, select, textarea',
+        changeable_control_selector: "input[type!='number'], textarea",
         label_selector: '.control-group label',
         group_selector: '.control-group'
     });
     if (!_.isFunction(opts.save_function)
         || (!_.isObject(opts.form))
-        || (!_.isFunction(opts.error_function))) {
+        || (!_.isFunction(opts.error_function))
+        || (!!opts.on_change_function && !_.isFunction(opts.on_change_function))) {
         throw "Invalid arguments to make_live_settings_form";
     }
 
-    var save = function(element) {
+    var save = function(element, event) {
         // After the form is saved, flash the 'tick' icon on success or keep a 'changed' icon on error.
-        opts.save_function()
-            .done(function() {
+        var promise = opts.save_function(event);
+
+        if (promise) {
+            promise.done(function () {
                 clear_changed_icons();
                 if (element) flash_tick_icon(element);
-            })
-            .fail(function(error) {
+            }).fail(function (error) {
                 opts.error_function(error);
                 if (element) show_changed_icon(element);
             });
+        }
     };
 
     var clear_changed_icons = function() {
@@ -42,18 +46,23 @@ function make_live_settings_form(options) {
     var show_changed_icon = function(element) {
         // Show the 'changed' icon for an element
         element.parents(opts.group_selector).find('.setting-changed').show('fast');
+        if (_.isFunction(opts.on_change_function)) {
+            opts.on_change_function(element);
+        }
     };
 
     var hookup_elements = function(elements) {
-
         // Set up a hook for any changed form elements
-        elements.find(opts.control_selector).change(function() {
-            save($(this));
+        elements.on("change", opts.control_selector, function(e) {
+            if (_.isFunction(opts.on_change_function)) {
+                opts.on_change_function(this);
+            }
+            save($(this), e);
         });
 
         // While typing in text forms, show the changed icon
-        elements.find(opts.changeable_control_selector).on('input', function() {
-            show_changed_icon($(this));
+        elements.on('input', opts.changeable_control_selector, function(e) {
+            show_changed_icon($(this), e);
         });
     };
 
@@ -101,15 +110,22 @@ function make_live_settings_form(options) {
         hookup_elements(opts.form);
     };
 
-    return {
+    var self = {
+        clearIcons: function() {
+            console.log("Clearing icons!");
+            clear_changed_icons();
+        },
         addElement: function(elements) {
             hookup_elements(elements);
         },
         init: function() {
             init();
+            return self;
         },
         save: function(element) {
             save(element);
         }
-    }
+    };
+
+    return self;
 }

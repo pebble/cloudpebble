@@ -39,7 +39,7 @@ body {
     margin-right: auto;
 }
 
-h1, h2, h3 {
+h1, h2, h3, h4 {
     color: #fff;
     padding: 0;
     margin: 0;
@@ -50,6 +50,10 @@ h1, h2, h3 {
 h3 {
     font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 24px;
+}
+
+h4 {
+    font-size: 18px;
 }
 
 p {
@@ -359,6 +363,11 @@ input[type=checkbox] {
 
 input[type=checkbox]:checked {
     background-image: url('../../common/img/checkbox.png');
+}
+
+input[type=checkbox]:disabled {
+    background-image: url('../../common/img/checkbox-disabled.png');
+    cursor: default;
 }
 
 /* Form popover thing */
