@@ -167,7 +167,6 @@ CloudPebble.Compile = (function() {
         commands[gettext("Show Phone Logs")] = function() { show_app_logs(ConnectionType.Phone); };
         commands[gettext("Show Emulator Logs")] = function() { show_app_logs(ConnectionType.Qemu); };
         commands[gettext("Show Last Build Log")] = function() {show_build_log(mLastBuild.id)};
-        commands[gettext("Compilation")] = function() { show_compile_pane(); ;};
         CloudPebble.FuzzyPrompt.AddCommands(commands);
 
         SharedPebble.on('app_log', handle_app_log);

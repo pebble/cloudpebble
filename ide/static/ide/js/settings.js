@@ -292,7 +292,12 @@ CloudPebble.Settings = (function() {
         },
         Init: function() {
             var commands = {};
-            commands[gettext('Settings')] = show_settings_pane;
+            commands[gettext("Add New Resource")] = CloudPebble.Resources.Create;
+            commands[gettext("Compilation")] = CloudPebble.Compile.Show;
+            commands[gettext("Settings")] = CloudPebble.Settings.Show;
+            commands["GitHub"] = CloudPebble.GitHub.Show;
+            commands[gettext("Timeline")] = CloudPebble.Timeline.show;
+            commands[gettext("Add New Source File")] = CloudPebble.Editor.Create;
             CloudPebble.FuzzyPrompt.AddCommands(commands);
             settings_template = $('#settings-pane-template').remove().removeClass('hide');
         },

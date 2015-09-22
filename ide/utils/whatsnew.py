@@ -32,7 +32,8 @@ NEW_THINGS = [
      "Emulator tip: you can click in the screen to use the arrow keys as buttons, or X/Y/Z as taps. Use shift-X/Y/Z for taps in the negative direction.",
      "Emulator tip: you must update your configuration pages for the emulator. We will pass a return_to query parameter; when specified, use it instead of 'pebblejs://close#'"],
     ["CloudPebble now has fuzzy file search! Use cmd-P (Mac) or ctrl-P (Windows) in the editor to bring up an input prompt, then begin to type the name of a file you would like to open.",
-     "You can scroll up and down the suggestions with the arrow keys, and press enter to select a file."]
+     "You can scroll up and down the suggestions with the arrow keys, and press enter to select a file."],
+    ["Fuzzy search has been expanded to help you do more on CloudPebble with your keyboard! Press cmd-shift-P (Mac) or ctrl-shift-P (Windows) in a project to try the new functions."]
 ]
 
 
