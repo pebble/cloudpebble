@@ -52,7 +52,7 @@ def project_info(request, project_id):
             'kind': x.kind,
             'identifiers': [y.resource_id for y in x.identifiers.all()],
             'extra': {y.resource_id: {'regex': y.character_regex, 'tracking': y.tracking, 'compatibility': y.compatibility} for y in x.identifiers.all()},
-            'variants': [y.variant for y in x.variants.all()],
+            'variants': [y.get_tags() for y in x.variants.all()],
         } for x in resources],
         'github': {
             'repo': "github.com/%s" % project.github_repo if project.github_repo is not None else None,

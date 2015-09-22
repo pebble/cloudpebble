@@ -94,7 +94,7 @@ def import_gist(user_id, gist_id):
                                                                       is_menu_icon=is_menu_icon)
                     # We already have this as a unicode string in .content, but it shouldn't have become unicode
                     # in the first place.
-                    default_variant = ResourceVariant.objects.create(resource_file=resources[filename], variant=ResourceVariant.VARIANT_DEFAULT)
+                    default_variant = ResourceVariant.objects.create(resource_file=resources[filename], tags=ResourceVariant.TAGS_DEFAULT)
                     default_variant.save_file(urllib2.urlopen(gist.files[filename].raw_url))
                 ResourceIdentifier.objects.create(
                     resource_file=resources[filename],

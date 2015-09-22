@@ -20,11 +20,13 @@ from utils.redis_helper import redis_client
 def launch_emulator(request):
     user_id = request.user.id
     platform = request.POST['platform']
+
     oauth = request.POST['token']
     tz_offset = request.POST['tz_offset']
     versions = {
         'aplite': '2.9',
         'basalt': '3.0',
+        'chalk': '3.0'
     }
     version = versions[platform]
     redis_key = 'qemu-user-%s-%s' % (user_id, platform)

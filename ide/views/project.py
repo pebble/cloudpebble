@@ -43,6 +43,7 @@ def view_project(request, project_id):
         'libpebble_proxy': json.dumps(settings.LIBPEBBLE_PROXY),
         'token': token,
         'phone_shorturl': settings.PHONE_SHORTURL,
+        'supported_platforms': ["aplite", "basalt", "chalk"]
     })
 
 
