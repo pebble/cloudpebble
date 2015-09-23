@@ -207,7 +207,6 @@ def do_import_archive(project_id, archive, delete_project=False):
                                     raise ValueError("Generic resource filenames cannot contain a tilde (~)")
                                 if file_name not in desired_resources:
                                     desired_resources[root_file_name] = []
-                                print "Desired resource: %s"%root_file_name
                                 desired_resources[root_file_name].append(resource)
                                 file_exists_for_root[root_file_name] = False
 
@@ -223,8 +222,6 @@ def do_import_archive(project_id, archive, delete_project=False):
                                 except KeyError:
                                     print "Failed to open %s" % filename
                                     continue
-
-                                print "File %s is good" % zipitem.filename
 
                                 # Now we know the file exists and is in the resource directory - is it one we want?
                                 tags, root_file_name = get_filename_variant(filename, tag_map)

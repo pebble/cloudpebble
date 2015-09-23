@@ -564,7 +564,6 @@ CloudPebble.Resources = (function() {
                 });
             }
 
-            console.log(resource.kind);
             pane.find('.image-platform-preview').toggle((resource.kind == 'png' || resource.kind == 'png-trans'));
 
             pane.find("#edit-resource-file-name").val(resource.file_name);
@@ -642,7 +641,6 @@ CloudPebble.Resources = (function() {
             parent.find('#edit-resource-new-file').hide();
         }
         if(CloudPebble.ProjectInfo.type != 'native') {
-            console.log("hiding native only");
             parent.find('.native-only').hide();
             parent.find('#edit-resource-new-file').hide();
         }
