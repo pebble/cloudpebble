@@ -432,10 +432,13 @@ CloudPebble.Resources = (function() {
                         var preview_img = preview_pane.find('.image-resource-preview img');
                         preview_img.attr('src', preview_url);
                         var dimensions = preview_pane.find('.image-resource-preview-dimensions');
+                        preview_pane.show();
+                        build_tags_editor(pane, preview_pane.find('.resource-tags'), tags) ;
+
                         preview_img.load(function () {
                             dimensions.text(this.naturalWidth + ' x ' + this.naturalHeight);
-                            preview_pane.show();
-                            build_tags_editor(pane, preview_pane.find('.resource-tags'), tags) ;
+                        }).error(function() {
+                            dimensions.text("Image failed to load");
                         });
                     }
                     if (template_name == 'raw') {
@@ -616,6 +619,7 @@ CloudPebble.Resources = (function() {
                     // Clear and disable the upload-file form
                     pane.find('#edit-resource-new-file input').val('');
                     pane.find('#edit-resource-new-file textarea').textext()[0].tags().empty().core().enabled(false);
+                    pane.find('#edit-resource-new-file').toggleClass('file-present', false);
                     CloudPebble.Sidebar.ClearIcon('resource-'+resource.id);
                     live_form.clearIcons();
                 });
@@ -803,7 +807,9 @@ CloudPebble.Resources = (function() {
             // Disable the new file tag-picker unless a file has been chosen.
             textext.enabled(false);
             template.find("input[type='file']").change(function(e) {
-                textext.enabled(e.target.value.length > 0);
+                var file_exists = e.target.value.length > 0;
+                textext.enabled(file_exists);
+                template.find('#edit-resource-new-file').toggleClass('file-present', file_exists);
             });
         }, 1);
 
