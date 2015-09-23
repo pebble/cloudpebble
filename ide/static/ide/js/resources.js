@@ -726,8 +726,8 @@ CloudPebble.Resources = (function() {
         $(textarea).attr('name', 'variant-'+(tags.join(',') || ''));
         // Set up the resource tag UI
         var textext = textarea.textext_tagger({
+            tagsItems : tags,
             ext: {
-                tagsItems : tags,
                 itemManager: {
                     // These functions convert between ~tags and Tag Names
                     stringToItem: function(str) {
