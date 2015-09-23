@@ -207,9 +207,9 @@ def do_import_archive(project_id, archive, delete_project=False):
                                     raise ValueError("Generic resource filenames cannot contain a tilde (~)")
                                 if file_name not in desired_resources:
                                     desired_resources[root_file_name] = []
+                                print "Desired resource: %s" % root_file_name
                                 desired_resources[root_file_name].append(resource)
                                 file_exists_for_root[root_file_name] = False
-
 
                             for zipitem in contents:
                                 # Let's just try opening the file
@@ -227,6 +227,8 @@ def do_import_archive(project_id, archive, delete_project=False):
                                 tags, root_file_name = get_filename_variant(filename, tag_map)
                                 tags_string = ",".join(str(int(t)) for t in tags)
 
+                                print "Importing file %s with root %s " % (zipitem.filename, root_file_name)
+
                                 if root_file_name in desired_resources:
                                     ''' FIXME: targetPlatforms is currently stored in resourceFile, but it *should* be in
                                      ResourceIdentifier. Until that is fixed, we cannot support multiple identifiers
@@ -235,7 +237,7 @@ def do_import_archive(project_id, archive, delete_project=False):
                                      of desired_resources.'''
                                     medias = desired_resources[root_file_name]
                                     is_font = False
-
+                                    print "Looking for variants of %s" % root_file_name
                                     # An exception to the above warning is made for fonts, where multiple identifiers is
                                     # already implemented in the UI.
                                     if len(medias) > 1:
@@ -258,24 +260,28 @@ def do_import_archive(project_id, archive, delete_project=False):
                                                 kind=kind,
                                                 is_menu_icon=is_menu_icon,
                                                 target_platforms=target_platforms)
-                                        # Add all the identifiers
-                                        tracking = resource.get('trackingAdjust', None)
-                                        regex = resource.get('characterRegex', None)
+
                                         identifier = resource['name']
-                                        compatibility = resource.get('compatibility', None)
-                                        ResourceIdentifier.objects.create(
-                                            resource_file=resources_files[root_file_name],
-                                            resource_id=identifier,
-                                            character_regex=regex,
-                                            tracking=tracking,
-                                            compatibility=compatibility
-                                        )
+                                        # Add all the identifiers which don't clash with existing identifiers
+                                        if not identifier in resource_identifiers:
+                                            tracking = resource.get('trackingAdjust', None)
+                                            regex = resource.get('characterRegex', None)
+                                            compatibility = resource.get('compatibility', None)
+
+                                            ResourceIdentifier.objects.create(
+                                                resource_file=resources_files[root_file_name],
+                                                resource_id=identifier,
+                                                character_regex=regex,
+                                                tracking=tracking,
+                                                compatibility=compatibility
+                                            )
+                                            resource_identifiers[identifier] = resources_files[root_file_name]
 
                                         # At the moment, only add > 1 identifier for fonts.
                                         if not is_font:
                                             break
 
-                                    print "Adding variant %s with tags %s" % (file_name, tags_string)
+                                    print "Adding variant %s with tags [%s]" % (root_file_name, tags_string)
                                     actual_file_name = resource['file']
                                     resource_variants[actual_file_name] = ResourceVariant.objects.create(resource_file=resources_files[root_file_name], tags=tags_string)
                                     resource_variants[actual_file_name].save_file(extracted)
