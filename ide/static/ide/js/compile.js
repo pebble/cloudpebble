@@ -9,7 +9,6 @@ CloudPebble.Compile = (function() {
 
     var mPendingCallbacks = [];
     var mRunningBuild = false;
-
     var mLastBuild = null;
 
     var build_history_row = function(build) {
@@ -160,8 +159,8 @@ CloudPebble.Compile = (function() {
         var commands = {};
         commands[gettext("Show Phone Logs")] = function() { show_app_logs(ConnectionType.Phone); };
         commands[gettext("Show Emulator Logs")] = function() { show_app_logs(ConnectionType.Qemu); };
-        commands[gettext("Show Last Build Log")] = function() {show_build_log(mLastBuild.id)};
-        commands[gettext("Compilation")] = function() { show_compile_pane(); ;};
+        commands[gettext("Show Last Build Log")] = function() { show_build_log(mLastBuild.id); };
+        commands[gettext("Compilation")] = function() { show_compile_pane(); };
         commands[gettext("Clear App Logs")] = function() { show_clear_logs_prompt(); };
         CloudPebble.FuzzyPrompt.AddCommands(commands);
 
@@ -285,6 +284,7 @@ CloudPebble.Compile = (function() {
     };
 
     var mPreviousDisplayLogs = [];
+    var mArchivePoints = [];
     var mLogHolder = null;
     var mCrashAnalyser = null;
 
@@ -525,6 +525,30 @@ CloudPebble.Compile = (function() {
         });
     };
 
+    var archive_logs = function() {
+        var logs = $(mLogHolder).children('.log, hr');
+        if (logs.length > 0) {
+            mArchivePoints.push(logs.length);
+            var log_num = mArchivePoints.length;
+            logs.detach();
+            var toggle = function () {
+                var state = "open";
+                if (archive.children("div").toggle().is(":hidden")) {
+                    state = "folded";
+                }
+                icon.removeClass().addClass("CodeMirror-foldgutter-" + state);
+            };
+            var archive = $("<span>").addClass("log-archive");
+
+            $("<span>").addClass("archive-name").text(interpolate(gettext("Archive %s"), [log_num])).appendTo(archive).click(toggle);
+            var icon = $('<span>').addClass("archive-icon CodeMirror-foldgutter-folded").prependTo(archive).click(toggle);
+
+            $("<div></div>").append(logs).hide().appendTo(archive);
+            append_log_html(archive);
+            ga('send', 'event', 'logs', 'archive');
+        }
+    };
+
     var show_app_logs = function(kind) {
         SharedPebble.getPebble(kind).done(function(pebble) {
             pebble.on('close', function() {
@@ -541,10 +565,25 @@ CloudPebble.Compile = (function() {
                     .addClass('btn delete-btn')
                     .attr('title', "Clear Logs")
                     .appendTo(buttonHolder).click(show_clear_logs_prompt);
+                $("<button>")
+                    .addClass('btn archive-btn')
+                    .attr('title', "Archive Logs")
+                    .appendTo(buttonHolder).click(archive_logs);
             } else {
                 mLogHolder.empty();
             }
-            _.each(mPreviousDisplayLogs, _.partial(show_log_line, _, true));
+            var archives = mArchivePoints;
+            mArchivePoints= [];
+            var count = 0;
+            _.each(mPreviousDisplayLogs, function(log) {
+                show_log_line(log, true);
+                count++;
+                if (count === archives[0]) {
+                    count = 0;
+                    archives.shift();
+                    archive_logs();
+                }
+            });
             CloudPebble.Sidebar.SetActivePane(parentPane, undefined, undefined, stop_logs);
             CloudPebble.Analytics.addEvent('app_log_view', {virtual: SharedPebble.isVirtual()});
         });

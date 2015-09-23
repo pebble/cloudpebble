@@ -287,6 +287,9 @@ ul.nav-pills {
 .rename-btn {
     background: white url('../img/rename.png') no-repeat center;
 }
+.archive-btn {
+    background: white url('../img/archive.png') no-repeat center;
+}
 
 .reload-btn {
     background: white url('../img/reload.png') no-repeat center;
@@ -1021,3 +1024,17 @@ span.cm-autofilled-end {
     margin: 0;
 }
 
+.log-archive .log {
+    border-left: thin #999 solid;
+    margin-left: 0.3em;
+    padding-left: 0.7em;
+}
+
+.archive-name {
+    cursor: pointer;
+    padding-left: 0.5em;
+}
+
+.archive-name:hover {
+    text-decoration: underline;
+}
