@@ -49,14 +49,14 @@
                         </div>
                     {% endfor %}
                     </div>
-                    <p class="help-block">The 'targetPlatforms' option restricts all variants of a resource to a specific set of platforms, regardless of their tags.</p>
+                    <p class="help-block">{% trans "The 'targetPlatforms' option restricts all variants of a resource to a specific set of platforms." %}</p>
                 </div>
             </div>
 
         </div>
 
         <div class="well image-platform-preview hide sdk3-only native-only">
-            <h4>Preview per platform</h4>
+            <h4>{% trans 'Preview per platform' %}</h4>
             <div class="pane-boxes pane-3-boxes ">
                 {% for platform in supported_platforms %}
                 <div id="resource-image-preview-for-{{ platform }}">
@@ -66,7 +66,7 @@
                 </div>
                 {% endfor %}
             </div>
-            <p class="help-block">Given the tags for each variant, this shows the final version selected for each platform.</p>
+            <p class="help-block">{% trans "Given the tags for each variant, this shows the final version selected for each platform." %}</p>
         </div>
 
         <div id="edit-resource-previews">
@@ -119,7 +119,7 @@
                     </div>
                 </div>
                 <div class="variant-platform-preview control-group sdk3-only native-only">
-                    <label class="control-label">Final platforms</label>
+                    <label class="control-label">{% trans 'Final platforms' %}</label>
                     <div class="controls label-list"></div>
                 </div>
 

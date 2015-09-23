@@ -1,5 +1,4 @@
 CloudPebble.Resources = (function() {
-    var POSSIBLE_PLATFORMS = ["aplite", "basalt", "chalk"];
     var project_resources = {};
     var preview_count = 0;
 
@@ -21,28 +20,47 @@ CloudPebble.Resources = (function() {
         rect: {name: gettext("Rectangular"), id: TAG_RECT, excludes: [TAG_ROUND, TAG_CHALK]}
     };
 
-    var PLATFORM_TAGS = {
+    var PLATFORMS = {
         aplite: [TAG_APLITE, TAG_MONOCHROME, TAG_RECT],
         basalt: [TAG_BASALT, TAG_COLOUR, TAG_RECT],
         chalk: [TAG_CHALK, TAG_COLOUR, TAG_ROUND]
     };
 
+    /**
+     * Get the tag data (from TAGS) for the tag with a specific human-readable name
+     * @param {string} name
+     */
     function get_tag_data_for_tag_name(name) {
         return _.findWhere(TAGS, {name: name});
     }
 
+    /**
+     * Geet the tag data (from TAGS) for the tag with a specific numeric ID.
+     * @param {Number} id
+     */
     function get_tag_data_for_id(id) {
         return _.findWhere(TAGS, {id: id});
     }
 
+    /**
+     * Get the the list of target platforms currently checked in the targetPlatforms interface,
+     * or null if target platforms is disabled.
+     * @param {jQuery|HTMLElement} pane element containing the form
+     * @returns {Array|null}
+     */
     function get_target_platforms(pane) {
         pane = $(pane);
         var do_target_platforms = pane.find('#edit-resource-target-platforms-enabled').is(":checked");
-        return (!do_target_platforms ? null : _.filter(POSSIBLE_PLATFORMS, function(platform) {
+        return (!do_target_platforms ? null : _.filter(_.keys(PLATFORMS), function(platform) {
             return pane.find('#edit-resource-target-'+platform).is(":checked");
         }));
     }
 
+    /**
+     * Get the image preview box whose tag editor has a specific set of tags typed in
+     * @param tags Array of tags to search for
+     * @returns {jQuery}
+     */
     function get_image_preview_for_tag_input(tags) {
         // Given a set of tags currently typed in one of the boxes,
         // which image preview element does it belong to?
@@ -51,6 +69,13 @@ CloudPebble.Resources = (function() {
         }).parents('.well');
     }
 
+    /**
+     * Extract out the currently-entered tag values
+     * @param {jQuery|HTMLElement} parent element containing
+     * @param {bool} should_include_new_file_tags Set true to include the tags in the New File box
+     * @param {bool} do_sort Set true to sort each set of tags
+     * @returns {Array}
+     */
     function get_new_tag_values(parent, should_include_new_file_tags, do_sort) {
         return $.makeArray($(parent).find('.text-wrap input').filter(function() {
             // Only check the uploading-file tags if we're uploading a file
@@ -64,26 +89,40 @@ CloudPebble.Resources = (function() {
         }));
     }
 
-
+    /**
+     * Refresh the image-per-platform previews and platform-for-resource labels.
+     * Throttled to 100ms so that repeated calls don't cause flashes.
+     * @paramn {jQuery|HTMLElement} pane element containing resource interface
+     */
     var update_platform_labels = _.throttle(function(pane) {
         pane = $(pane);
+
+        // We only include the tags for a file being uploaded if there actually is a file being uploaded
         var include_uploader = pane.find('#edit-resource-new-file textarea').is(':enabled');
-        var new_tag_values = get_new_tag_values(document, include_uploader, false);
+
+        // Get the tags currently typed in each tag editor
+        var new_tag_values = get_new_tag_values(pane, include_uploader, false);
+
+        // We empty all tags and recreate them from scratch
         pane.find('.label-list').empty();
-        var target_platforms = get_target_platforms(pane);
-        var targeted_platform_tags = (target_platforms!== null ? _.pick(PLATFORM_TAGS, target_platforms) : PLATFORM_TAGS);
+
+        // If we're not targeting specific platforms, all platforms are target platforms
+        var target_platforms = get_target_platforms(pane) || _.keys(PLATFORMS);
+
+        // Start by assuming that no platforms are being targeted.
         pane.find(".image-platform-preview img").hide();
         pane.find(".image-platform-preview span").text('Not targeted').removeClass('conflict');
 
-        _.each(targeted_platform_tags, function(platform_tags, platform_name) {
+        // Go through each targeted platforms and set up its previews
+        _.each(target_platforms, function(platform_name) {
             var per_platform_preview_pane = pane.find("#resource-image-preview-for-"+platform_name);
             try {
-                // Update the label tag
-                var tags_for_this_platform = get_resource_for_platform(new_tag_values, platform_tags, platform_name);
+                // First add in the platform labels
+                var tags_for_this_platform = get_resource_for_platform(new_tag_values, platform_name);
                 var preview_pane = get_image_preview_for_tag_input(tags_for_this_platform);
                 var list = preview_pane.find('.label-list');
                 $("<span>").text(platform_name).addClass('label').attr('title', null).addClass('label-'+platform_name).appendTo(list);
-                // Then the preview images
+                // Then update the per-platform preview images
                 var img = preview_pane.find('img').first();
                 var file = preview_pane.find('input[type="file"]').first();
                 if (tags_for_this_platform == null) {
@@ -100,6 +139,7 @@ CloudPebble.Resources = (function() {
                 }
             }
             catch (err) {
+                // If there are any conflicts, show them
                 if (err.conflicts) {
                     per_platform_preview_pane.find('img').hide();
                     per_platform_preview_pane.find('span').text("Conflict!").addClass('conflict');
@@ -152,10 +192,17 @@ CloudPebble.Resources = (function() {
         return file;
     }
 
-    // For a given platform, find out which platform
-    function get_resource_for_platform(tag_values, platform_tags, platform_name) {
+    /**
+     * Given the tags for each variant and a desired platform, figure out which variant will run.
+     * Returns null if there is no match. Throws an exception if there is a specicifity conflict for the platform.
+     * @param tag_values Array of arrays of tag IDs.
+     * @param platform_name Name of platform to check
+     * @returns {Array|null}
+     */
+    function get_resource_for_platform(tag_values, platform_name) {
         // TODO: This will eventually need to be updated to support setting targetPlatforms for each resource ID.
         // Find all variants with tags which fully apply to this platform.
+        var platform_tags = PLATFORMS[platform_name];
         var filtered_tags = _.filter(tag_values, function(var_tags) {
             return _.difference(var_tags, platform_tags).length == 0;
         });
@@ -287,7 +334,7 @@ CloudPebble.Resources = (function() {
 
         // Extract target platforms and verify that they're valid
         var target_platforms = get_target_platforms(form);
-        var targeted_platform_tags = (target_platforms!== null ? _.pick(PLATFORM_TAGS, target_platforms) : PLATFORM_TAGS);
+        var targeted_platform_tags = (target_platforms!== null ? _.pick(PLATFORMS, target_platforms) : PLATFORMS);
         if (_.isEqual(target_platforms, [])) {
             report_error(gettext("You cannot specifically target no platforms."));
             return;
@@ -312,7 +359,7 @@ CloudPebble.Resources = (function() {
 
         // Validate the tags: ensure that all variants are unique
         if (_.uniq(_.map(new_tag_values, JSON.stringify)).length != new_tag_values.length) {
-            report_error("Each variant must have a different set of tags");
+            report_error(gettext("Each variant must have a different set of tags"));
             return;
         }
 
@@ -320,7 +367,7 @@ CloudPebble.Resources = (function() {
         // Validate the tags: detect ambiguities and check that each targeted platform has a matching variant
         for (var platform_name in targeted_platform_tags) {
             try {
-                if (get_resource_for_platform(new_tag_values, targeted_platform_tags[platform_name], platform_name) == null) {
+                if (get_resource_for_platform(new_tag_values, platform_name) == null) {
                     report_error(interpolate(gettext("There is no variant matching the target platform '%s'."), [platform_name]));
                     return false;
                 }
@@ -525,7 +572,7 @@ CloudPebble.Resources = (function() {
             var has_target_platforms = _.isArray(resource["target_platforms"]);
             if (has_target_platforms) {
                 target_platforms_checkbox.prop('checked', true);
-                _.each(POSSIBLE_PLATFORMS, function(platform) {
+                _.each(_.keys(PLATFORMS), function(platform) {
                     $("#edit-resource-target-"+platform).prop('checked', _.contains(resource["target_platforms"], platform));
                 });
             }
@@ -646,15 +693,13 @@ CloudPebble.Resources = (function() {
         }
     };
 
+    /**
+     * Create a tag editor from a textarea
+     * @param {jQuery|HTMLElement} pane The pane containing all tag editors
+     * @param {jQuery|HTMLElement} textarea The <textarea> element to turn in to a tags editor
+     * @param {Array} tags The default set of tags
+     */
     var build_tags_editor = function(pane, textarea, tags) {
-        // Create the tags editor.
-
-        // The textext library does strange things with with sizing. This seems to fix it.
-        $(textarea).height($(textarea).height()).attr('name', 'variant-'+(tags.join(',') || ''));
-        var fuse = new Fuse([], {
-            threshold: 0.6,
-            maxPatternLength: 32
-        });
 
         var isTagAllowed = function(elm, tag_id) {
             // Check that a new tag doesn't conflict with a tag currently in the specified textex box
@@ -665,40 +710,24 @@ CloudPebble.Resources = (function() {
 
             return (!(invalidName || isExcluded || existsAlready));
         };
+
         var allowedTags = function(elm) {
             return _.chain(TAGS)
                 .pluck('id')
                 .filter(_.partial(isTagAllowed, elm))
                 .value();
         };
-        var initialised = false;
 
+        var fuse = new Fuse([], {
+            threshold: 0.6,
+            maxPatternLength: 32
+        });
+
+        $(textarea).attr('name', 'variant-'+(tags.join(',') || ''));
         // Set up the resource tag UI
-        var textext = textarea.textext({
-            plugins : 'tags prompt focus autocomplete arrow',
-            tagsItems : tags,//_(tags || []).map(get_tag_for_id),
-            prompt : 'Resource tags',
+        var textext = textarea.textext_tagger({
             ext: {
-                core: {
-                    enabled: function(isEnabled) {
-                        if (_.isUndefined(isEnabled)) {
-                            return (!$(this).core().wrapElement().hasClass('disabled'));
-                        }
-                        else {
-                            if (!!isEnabled) {
-                                this.wrapElement().removeClass('disabled');
-                                this.wrapElement().find('textarea').attr('disabled', false);
-                            }
-                            else {
-                                this.wrapElement().addClass('disabled');
-                                this.wrapElement().find('textarea').attr('disabled', true);
-                            }
-                            update_platform_labels(pane);
-                            return this;
-                        }
-
-                    }
-                },
+                tagsItems : tags,
                 itemManager: {
                     // These functions convert between ~tags and Tag Names
                     stringToItem: function(str) {
@@ -708,48 +737,7 @@ CloudPebble.Resources = (function() {
                     itemToString: function(id) {
                         return get_tag_data_for_id(id).name;
                     }
-                },
-                arrow: {
-                    onArrowClick: function(e) {
-                        // This makes the arrow button show suggestions even when no query is entered
-                        this.trigger('getSuggestions');
-                        this.core().focusInput();
-                    }
-                },
-                tags: {
-                    onPostInit: function(e) {
-                        // Ensure that we don't re-save the initial tags
-                        $.fn.textext.TextExtTags.prototype.onPostInit.apply(this, arguments);
-                        initialised = true;
-
-                    },
-                    addTags: function(tags)  {
-                        // We extend the addTags/removeTag methods to trigger 'change'
-                        // so that the live settings form can autosave.
-                        $.fn.textext.TextExtTags.prototype.addTags.apply(this, arguments);
-                        if (initialised) {
-                            this.trigger('change');
-                            this.trigger('input');
-                        }
-                    },
-                    removeTag: function(tag) {
-                        $.fn.textext.TextExtTags.prototype.removeTag.apply(this, arguments);
-
-                        if (initialised) {
-                            this.trigger('change');
-                            this.trigger('input');
-                        }
-                    },
-                    empty: function() {
-                        var core = this.core();
-                        this.containerElement().empty();
-                        this.updateFormCache();
-                        core.getFormData();
-                        core.invalidateBounds();
-                        return this;
-                    }
                 }
-
             }
         }).bind('isTagAllowed', function(e, data) {
             // Prevent conflicting tags from being added
@@ -766,6 +754,8 @@ CloudPebble.Resources = (function() {
                 result: filtered
             });
         }).bind('change', function() {
+            update_platform_labels(pane);
+        }).bind('toggled', function() {
             update_platform_labels(pane);
         });
         update_platform_labels(pane);
