@@ -366,7 +366,6 @@ input[type=checkbox]:checked {
 }
 
 input[type=checkbox]:disabled {
-    background-image: url('../../common/img/checkbox-disabled.png');
     cursor: default;
 }
 
