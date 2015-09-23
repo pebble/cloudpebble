@@ -16,18 +16,8 @@ class Migration(SchemaMigration):
                       self.gf('django.db.models.fields.CommaSeparatedIntegerField')(max_length=50, null=True),
                       keep_default=False)
 
-
         # Changing field 'ResourceVariant.variant'
         db.alter_column(u'ide_resourcevariant', 'variant', self.gf('django.db.models.fields.IntegerField')(null=True))
-        # Adding field 'Project.app_is_hidden'
-        db.add_column(u'ide_project', 'app_is_hidden',
-                      self.gf('django.db.models.fields.BooleanField')(default=False),
-                      keep_default=False)
-
-        # Adding field 'Project.app_is_shown_on_communication'
-        db.add_column(u'ide_project', 'app_is_shown_on_communication',
-                      self.gf('django.db.models.fields.BooleanField')(default=False),
-                      keep_default=False)
 
 
     def backwards(self, orm):
@@ -39,13 +29,6 @@ class Migration(SchemaMigration):
         db.alter_column(u'ide_resourcevariant', 'variant', self.gf('django.db.models.fields.IntegerField')(default=0))
         # Adding unique constraint on 'ResourceVariant', fields ['resource_file', 'variant']
         db.create_unique(u'ide_resourcevariant', ['resource_file_id', 'variant'])
-
-        # Deleting field 'Project.app_is_hidden'
-        db.delete_column(u'ide_project', 'app_is_hidden')
-
-        # Deleting field 'Project.app_is_shown_on_communication'
-        db.delete_column(u'ide_project', 'app_is_shown_on_communication')
-
 
     models = {
         u'auth.group': {
