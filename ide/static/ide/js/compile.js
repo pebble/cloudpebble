@@ -60,9 +60,8 @@ CloudPebble.Compile = (function() {
             log = log.replace(/^(JavaScript linting failed.*)$/gm, '<span class="log-note">$1</span>');
             // Link the thingies.
             log = log.replace(/([\/a-zA-Z0-9_]+\.[ch]):([0-9+]+)/g, '<span class="filename-link" data-filename="$1" data-line="$2">$1:$2</span>');
-            log = '<pre class="build-log" style="height: 100%;">' + log + '</pre>';
-            var browserHeight = document.documentElement.clientHeight;
-            log = $(log).css({'height': (browserHeight - 130) + 'px', 'overflow': 'auto'});
+            log = '<pre class="build-log">' + log + '</pre>';
+            log = $(log).css({'height': '100%', 'overflow': 'auto'});
             // Make the links do something.
             log.find('.filename-link').click(function() {
                 var thing = $(this);
@@ -163,6 +162,7 @@ CloudPebble.Compile = (function() {
         commands[gettext("Show Emulator Logs")] = function() { show_app_logs(ConnectionType.Qemu); };
         commands[gettext("Show Last Build Log")] = function() {show_build_log(mLastBuild.id)};
         commands[gettext("Compilation")] = function() { show_compile_pane(); ;};
+        commands[gettext("Clear App Logs")] = function() { show_clear_logs_prompt(); };
         CloudPebble.FuzzyPrompt.AddCommands(commands);
 
         SharedPebble.on('app_log', handle_app_log);
@@ -317,7 +317,7 @@ CloudPebble.Compile = (function() {
             } else {
                 var display = _.escape(get_log_label(log.priority) + ' ' + log.filename + ':' + log.line_number + ': ' + log.message);
                 display = display.replace(/([\/a-zA-Z0-9_]+\.[ch]):([0-9+]+)/, '<span class="filename-link" data-filename="$1" data-line="$2">$1:$2</span>');
-                var span = $('<span>').addClass(get_log_class(log.priority)).html(display);
+                var span = $('<span>').addClass(get_log_class(log.priority)).addClass('log').html(display);
                 span.find('.filename-link').click(function() {
                     var thing = $(this);
                     var filename = thing.data('filename');
@@ -336,7 +336,7 @@ CloudPebble.Compile = (function() {
     };
 
     var append_log_html = function(html) {
-        mLogHolder.append(html).append("\n");
+        mLogHolder.append(html.append("\n"));
         mLogHolder[0].scrollTop = mLogHolder[0].scrollHeight;
     };
 
@@ -516,6 +516,15 @@ CloudPebble.Compile = (function() {
         });
     };
 
+    var show_clear_logs_prompt = function() {
+        CloudPebble.Prompts.Confirm(gettext("Clear all app logs?"), gettext("This cannot be undone."), function() {
+            mLogHolder.empty();
+            mPreviousDisplayLogs = [];
+            mArchivePoints = [];
+            ga('send', 'event', 'logs', 'delete');
+        });
+    };
+
     var show_app_logs = function(kind) {
         SharedPebble.getPebble(kind).done(function(pebble) {
             pebble.on('close', function() {
@@ -524,13 +533,19 @@ CloudPebble.Compile = (function() {
             });
             CloudPebble.Sidebar.SuspendActive();
             if(!mLogHolder) {
-                var browserHeight = document.documentElement.clientHeight;
-                mLogHolder = $('<pre class="build-log">').css({'height': (browserHeight - 130) + 'px', 'overflow': 'auto'});
+                var parentPane = $('<div></div>');
+                var logPane = $('<div></div>').addClass("app-log").appendTo(parentPane);
+                mLogHolder = $('<pre class="build-log">').appendTo(logPane);
+                var buttonHolder = $("<div>").addClass("editor-button-wrapper").appendTo(parentPane);
+                $("<button>")
+                    .addClass('btn delete-btn')
+                    .attr('title', "Clear Logs")
+                    .appendTo(buttonHolder).click(show_clear_logs_prompt);
             } else {
                 mLogHolder.empty();
             }
             _.each(mPreviousDisplayLogs, _.partial(show_log_line, _, true));
-            CloudPebble.Sidebar.SetActivePane(mLogHolder, undefined, undefined, stop_logs);
+            CloudPebble.Sidebar.SetActivePane(parentPane, undefined, undefined, stop_logs);
             CloudPebble.Analytics.addEvent('app_log_view', {virtual: SharedPebble.isVirtual()});
         });
     };
