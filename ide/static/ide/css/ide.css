@@ -258,7 +258,7 @@ ul.nav-pills {
     height: 100% !important;
 }
 
-#editor-button-wrapper {
+.editor-button-wrapper {
     position: absolute;
     width: 40px;
     margin-left: 5px;
@@ -268,7 +268,7 @@ ul.nav-pills {
     bottom: 0;
 }
 
-#editor-button-wrapper .btn {
+.editor-button-wrapper .btn {
     margin-top: 10px;
 }
 
@@ -308,7 +308,7 @@ ul.nav-pills {
     background-color: #e5171f;
 }
 
-#editor-button-wrapper .btn:hover {
+.editor-button-wrapper .btn:hover {
     opacity: 0.8;
 }
 
@@ -1006,5 +1006,18 @@ span.cm-autofilled-end {
 
 .padded-modal-header {
     padding: 10px 25px 10px 10px;
+}
+
+.app-log {
+    position: absolute;
+    left: 0;
+    right: 50px;
+    top: 0;
+    bottom: 0;
+}
+.app-log > .build-log {
+    height: 100%;
+    overflow: auto;
+    margin: 0;
 }
 
