@@ -538,8 +538,17 @@ CloudPebble.Compile = (function() {
                 var buttonHolder = $("<div>").addClass("editor-button-wrapper").appendTo(parentPane);
                 $("<button>")
                     .addClass('btn delete-btn')
-                    .attr('title', "Clear Logs")
+                    .attr('title', gettext("Clear Logs"))
                     .appendTo(buttonHolder).click(show_clear_logs_prompt);
+                $("<a>")
+                    .addClass('btn save-btn')
+                    .attr('title', gettext("Download Logs"))
+                    .attr('download', "CloudPebble.log")
+                    .attr('target', '_blank')
+                    .appendTo(buttonHolder)
+                    .click(function() {
+                        this.href = "data:text/plain;base64,"+window.btoa(mLogHolder.text());
+                    });
             } else {
                 mLogHolder.empty();
             }
