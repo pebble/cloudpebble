@@ -550,9 +550,10 @@ CloudPebble.Compile = (function() {
 
     var show_clear_logs_prompt = function() {
         CloudPebble.Prompts.Confirm(gettext("Clear all app logs?"), gettext("This cannot be undone."), function() {
+            ga('send', 'event', 'logs', 'delete');
+            CloudPebble.Analytics.addEvent('app_log_clear', {log_length: mPreviousDisplayLogs.length, virtual: SharedPebble.isVirtual()});
             mLogHolder.empty();
             mPreviousDisplayLogs = [];
-            ga('send', 'event', 'logs', 'delete');
         });
     };
 
@@ -580,6 +581,7 @@ CloudPebble.Compile = (function() {
                     .appendTo(buttonHolder)
                     .click(function() {
                         this.href = "data:text/plain;base64,"+window.btoa(mLogHolder.text());
+                        CloudPebble.Analytics.addEvent('app_log_download', {log_length: mPreviousDisplayLogs.length, virtual: SharedPebble.isVirtual()});
                     });
             } else {
                 mLogHolder.empty();
