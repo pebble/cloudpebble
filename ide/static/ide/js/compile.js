@@ -444,6 +444,13 @@ CloudPebble.Compile = (function() {
         return gettext('[VERBOSE]');
     };
 
+    function add_log_divider() {
+        // Only add a log divider if the previous log entry wasn't also a divider.
+        if (mPreviousDisplayLogs.length > 0 && mPreviousDisplayLogs[mPreviousDisplayLogs.length-1] !== null) {
+            mPreviousDisplayLogs.push(null);
+        }
+    }
+
     var install_on_watch = function(kind) {
         var modal = $('#phone-install-progress');
 
@@ -457,7 +464,7 @@ CloudPebble.Compile = (function() {
             pebble.on('status', function(code) {
                 pebble.off('install:progress');
                 if(code === 0) {
-                    mPreviousDisplayLogs.push(null);
+                    add_log_divider();
                     pebble.enable_app_logs();
                     modal.find('.modal-body > p').text(gettext("Installed successfully!"));
                     modal.find('.btn').removeClass('hide');
@@ -643,7 +650,7 @@ CloudPebble.Compile = (function() {
         if(!SharedPebble.isVirtual()) {
             SharedPebble.disconnect();
         }
-        mPreviousDisplayLogs.push(null);
+        add_log_divider();
         mLastScrollTop = (mLogHolder ? (logs_scrolled_to_bottom() ? 'bottom' : mLogHolder[0].scrollTop) : mLastScrollTop);
         mLogHolder = null;
     };
