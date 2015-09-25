@@ -9,7 +9,7 @@ CloudPebble.Compile = (function() {
 
     var mPendingCallbacks = [];
     var mRunningBuild = false;
-
+    var mLastScrollTop = 'bottom';
     var mLastBuild = null;
 
     var build_history_row = function(build) {
@@ -335,9 +335,34 @@ CloudPebble.Compile = (function() {
         }
     };
 
+    function logs_scrolled_to_bottom() {
+        if (mLogHolder == null) {
+            return false;
+        }
+        return (mLogHolder[0].scrollHeight - mLogHolder.scrollTop() == mLogHolder.outerHeight());
+    }
+
+    function scroll_logs_to_bottom() {
+        mLogHolder[0].scrollTop = mLogHolder[0].scrollHeight - mLogHolder.outerHeight();
+    }
+
+    function restore_scroll_position() {
+        if (mLastScrollTop == 'bottom') {
+            scroll_logs_to_bottom();
+        }
+        else if (_.isNumber(mLastScrollTop)) {
+            mLogHolder[0].scrollTop = mLastScrollTop;
+        }
+    }
+
     var append_log_html = function(html) {
+        // Append the HTML line to the log
+        var at_bottom = logs_scrolled_to_bottom();
         mLogHolder.append(html.append("\n"));
-        mLogHolder[0].scrollTop = mLogHolder[0].scrollHeight;
+        // Then, scroll to the bottom if we were already scrolled to the bottom before.
+        if (at_bottom) {
+            mLogHolder[0].scrollTop = mLogHolder[0].scrollHeight - mLogHolder.outerHeight();
+        }
     };
 
     var handle_crash = function(process, is_our_crash, pc, lr) {
@@ -555,6 +580,7 @@ CloudPebble.Compile = (function() {
             _.each(mPreviousDisplayLogs, _.partial(show_log_line, _, true));
             CloudPebble.Sidebar.SetActivePane(parentPane, undefined, undefined, stop_logs);
             CloudPebble.Analytics.addEvent('app_log_view', {virtual: SharedPebble.isVirtual()});
+            restore_scroll_position();
         });
     };
 
@@ -618,6 +644,7 @@ CloudPebble.Compile = (function() {
             SharedPebble.disconnect();
         }
         mPreviousDisplayLogs.push(null);
+        mLastScrollTop = (mLogHolder ? (logs_scrolled_to_bottom() ? 'bottom' : mLogHolder[0].scrollTop) : mLastScrollTop);
         mLogHolder = null;
     };
 
