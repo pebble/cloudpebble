@@ -161,11 +161,9 @@ var SharedPebble = new (function() {
                 mPebble.on('close error', connectionError);
                 mPebble.on('open', function() {
                     if(self.isVirtual()) {
-                        if((mConnectionType & ConnectionType.QemuBasalt) == ConnectionType.QemuBasalt) {
+                        if((mConnectionType & ConnectionType.QemuAplite) != ConnectionType.QemuAplite) {
                             // Set pebble timzeone
                             var date = new Date();
-                            // WTF: Yes, this sets the time twice. For some reason it only works the second time.
-                            mPebble.set_time_utc(date.getTime());
                             mPebble.set_time_utc(date.getTime());
                             console.log("setting pebble clock to utc.");
                         } else {
