@@ -54,7 +54,7 @@ def start_github_auth(request):
 
 
 @login_required
-@require_POST
+@require_safe
 def remove_github_auth(request):
     try:
         user_github = request.user.github
