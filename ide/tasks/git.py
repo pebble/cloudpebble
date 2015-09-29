@@ -3,6 +3,7 @@ import shutil
 import tempfile
 import urllib2
 import json
+import os
 from celery import task
 from django.conf import settings
 from django.utils.timezone import now
@@ -205,6 +206,9 @@ def github_push(user, commit_message, repo_name, project):
 
     return False
 
+def get_root_path(path):
+    split_path = os.path.splitext(path)
+    return split_path[0].split('~', 1)[0] + split_path[1]
 
 @git_auth_check
 def github_pull(user, project):
@@ -228,7 +232,7 @@ def github_pull(user, project):
     tree = repo.get_git_tree(commit.tree.sha, recursive=True)
 
     paths = {x.path: x for x in tree.tree}
-
+    paths_notags = {get_root_path(x) for x in paths}
     root = find_project_root(paths)
 
     # First try finding the resource map so we don't fail out part-done later.
@@ -250,7 +254,7 @@ def github_pull(user, project):
         if project_type == 'pebblejs' and resource['name'] in {
             'MONO_FONT_14', 'IMAGE_MENU_ICON', 'IMAGE_LOGO_SPLASH', 'IMAGE_TILE_SPLASH'}:
             continue
-        if path not in paths:
+        if path not in paths_notags:
             raise Exception("Resource %s not found in repo." % path)
 
     # Now we grab the zip.
