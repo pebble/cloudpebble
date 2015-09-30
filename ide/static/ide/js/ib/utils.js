@@ -31,11 +31,21 @@
         };
     };
 
-    IB.ColourWhite = new IB.Colour('GColorWhite', 'white', gettext('White'));
-    IB.ColourBlack = new IB.Colour('GColorBlack', 'black', gettext('Black'));
-    IB.ColourClear = new IB.Colour('GColorClear', 'rgba(0, 0, 0, 0)', gettext('Transparent'));
+    IB.ColourMode = 0;
 
     IB.ColourMap = {
+        GColorClear: new IB.Colour('GColorClear', 'rgba(0, 0, 0, 0)', gettext('Transparent'))
+    };
+    _.each(IB.FullColourDescriptionMap, function(colour) {
+        var GColor = _.findWhere(colour.literals, {'id': 'define'}).value;
+        IB.ColourMap[GColor] = new IB.Colour(GColor, colour.html, colour.name);
+    });
+
+    IB.ColourClear = IB.ColourMap['GColorClear'];
+    IB.ColourWhite = IB.ColourMap['GColorWhite'];
+    IB.ColourBlack = IB.ColourMap['GColorBlack'];
+
+    IB.MonochromeMap = {
         GColorWhite: IB.ColourWhite,
         GColorBlack: IB.ColourBlack,
         GColorClear: IB.ColourClear

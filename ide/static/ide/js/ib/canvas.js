@@ -235,7 +235,7 @@
 
         function handleBackgroundChange(colour) {
             mNode.css({
-                'background-color': colour.css
+                'background-color': colour[IB.ColourMode].css
             });
             self.trigger('changeBackground', colour);
         }
@@ -346,8 +346,9 @@
 
         this.generateInitialiser = function() {
             var initialiser = ["s_window = window_create();"];
-            if(mProperties.bg.getValue() != IB.ColourWhite) {
-                initialiser.push("window_set_background_color(s_window, " + mProperties.bg.getValue() + ");");
+
+            if(!mProperties.bg.fullyEquals(IB.ColourWhite)) {
+                initialiser.push("window_set_background_color(s_window, " + mProperties.bg.generateCode() + ");");
             }
             initialiser.push("#ifndef PBL_SDK_3");
             initialiser.push("  window_set_fullscreen(s_window, " + mProperties.fullscreen.getValue() + ");");
@@ -363,7 +364,7 @@
             _.each(properties, function(values, property) {
                 switch(property) {
                     case "window_set_background_color":
-                        mProperties.bg.setValue(IB.ColourMap[values[0][1]]);
+                        mProperties.bg.setValue(values[0][1]);
                         break;
                     case "window_set_fullscreen":
                         mProperties.fullscreen.setValue(JSON.parse(values[0][1]));

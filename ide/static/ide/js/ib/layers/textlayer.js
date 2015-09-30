@@ -73,11 +73,11 @@
         },
         generateInitialiser: function() {
             var init = [this._ID + " = text_layer_create(" + this.generateRect() + ");"];
-            if(this._backgroundColour.getValue() != IB.ColourWhite) {
-                init.push("text_layer_set_background_color(" + this._ID + ", " + this._backgroundColour.getValue().name + ");");
+            if(!this._backgroundColour.fullyEquals(IB.ColourWhite)) {
+                init.push("text_layer_set_background_color(" + this._ID + ", " + this._backgroundColour.generateCode() + ");");
             }
-            if(this._textColour.getValue() != IB.ColourBlack) {
-                init.push("text_layer_set_text_color(" + this._ID + ", " + this._textColour.getValue().name + ");");
+            if(!this._textColour.fullyEquals(IB.ColourBlack)) {
+                init.push("text_layer_set_text_color(" + this._ID + ", " + this._textColour.generateCode() + ");");
             }
             if(this._text.getValue() != "") {
                 init.push("text_layer_set_text(" + this._ID + ", \"" + IB.escapeCString(this.getText()) + "\");");
@@ -98,10 +98,10 @@
             _.each(properties, function(values, property) {
                 switch(property) {
                     case "text_layer_set_background_color":
-                        this.setBackgroundColour(IB.ColourMap[values[0][1]]);
+                        this.setBackgroundColour(values[0][1]);
                         break;
                     case "text_layer_set_text_color":
-                        this.setTextColour(IB.ColourMap[values[0][1]]);
+                        this.setTextColour(values[0][1]);
                         break;
                     case "text_layer_set_text":
                         this.setText(JSON.parse(values[0][0]));

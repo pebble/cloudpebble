@@ -15,6 +15,12 @@
     -webkit-filter: invert(100%); /* For Chrome/Safari/Opera - we actually prefer vendor-specific here. */
 }
 
+/* Colour Pickers */
+
+.ib-colours select {
+    width: 170px;
+}
+
 /* Resizer */
 
 .ib-resizer {

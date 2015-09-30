@@ -64,8 +64,8 @@
             if(this._resource.getValue()) {
                 init.push("bitmap_layer_set_bitmap(" + this._ID + ", " + this._canvas.getResources().getResource(this._resource.getValue()) + ");");
             }
-            if(this._bg_colour.getValue() != IB.ColourClear) {
-                init.push("bitmap_layer_set_background_color(" + this._ID + ", " + this._bg_colour.getValue().name + ");");
+            if(!this._bg_colour.fullyEquals(IB.ColourClear)) {
+                init.push("bitmap_layer_set_background_color(" + this._ID + ", " + this._bg_colour.generateCode() + ");");
             }
             return init;
         },
@@ -73,11 +73,12 @@
             return ["bitmap_layer_destroy(" + this._ID + ");"];
         },
         readProperties: function(properties, mappings) {
+            console.log("Setting properties", properties, mappings);
             IB.Layer.prototype.readProperties.call(this, properties);
             _.each(properties, function(values, property) {
                 switch(property) {
                     case "bitmap_layer_set_background_color":
-                        this.setBackgroundColour(IB.ColourMap[values[0][1]]);
+                        this.setBackgroundColour(values[0][1]);
                         break;
                     case "bitmap_layer_set_bitmap":
                         if(mappings[values[0][1]]) {

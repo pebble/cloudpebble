@@ -48,7 +48,8 @@
             this._node.css({
                 'background-color': this._backgroundColour.getValue().css
             });
-            var invertIcons = (this._backgroundColour.getValue() != IB.ColourWhite);
+            // TODO: Figure out which colours to invert the layer for.
+            var invertIcons = (!this._backgroundColour.fullyEquals(IB.ColourWhite));
             _.each(this._icon_nodes, function(node, it) {
                 if(invertIcons) {
                     node.addClass('ib-invert');
@@ -71,9 +72,10 @@
                 this._ID + " = action_bar_layer_create();",
                 "action_bar_layer_add_to_window(" + this._ID + ", s_window);"
             ];
-            if(this._backgroundColour != IB.ColourBlack) {
+
+            if(!this._backgroundColour.fullyEquals(IB.ColourBlack)) {
                 init.push("action_bar_layer_set_background_color("
-                    + this._ID + ", " + this._backgroundColour.getValue().name + ");");
+                    + this._ID + ", " + this._backgroundColour.generateCode() + ");");
             }
             _.each(BUTTONS, function(it) {
                 var icon = this._icons[it].getValue();
@@ -93,7 +95,7 @@
             _.each(properties, function(values, property) {
                 switch(property) {
                     case "action_bar_layer_set_background_color":
-                        this._backgroundColour.setValue(IB.ColourMap[values[0][1]]);
+                        this._backgroundColour.setValue(values[0][1]);
                         break;
                     case "action_bar_layer_set_icon":
                         _.each(values, function(group) {

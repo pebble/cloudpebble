@@ -22,11 +22,13 @@
             var list = this._listNode;
             list.empty();
             _.each(IB.layerRegistry.knownClasses, function(layer, name) {
-                var li = $('<tr>')
-                    .append($('<td class="name">').text(name))
-                    .append($('<td class="desc">').text(layer.description))
-                    .click(_.bind(this._createLayer, this, layer))
-                    .appendTo(list);
+                if (!layer.allowedSDKs || _(layer.allowedSDKs).contains(CloudPebble.ProjectInfo.sdk_version)) {
+                    var li = $('<tr>')
+                        .append($('<td class="name">').text(name))
+                        .append($('<td class="desc">').text(layer.description))
+                        .click(_.bind(this._createLayer, this, layer))
+                        .appendTo(list);
+                    }
             }, this);
         },
         /**
