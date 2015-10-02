@@ -46,11 +46,16 @@
             mNode.on('mousedown', handleMouseDown);
             mNode.appendTo(parent);
 
+            render();
+
+            handleFullscreenChange(mProperties.fullscreen.getValue());
+        }
+
+        function render() {
             mScaleX = parent.width() / 144;
             mScaleY = parent.height() / 168;
 
             var cssTransform = 'scale(' + mScaleX + ',' + mScaleY + ')';
-
             mNode.css({
                 width: 144,
                 height: 168,
@@ -66,8 +71,6 @@
                 overflow: 'hidden',
                 'background-color': mProperties.bg.getValue().css
             });
-
-            handleFullscreenChange(mProperties.fullscreen.getValue());
         }
 
         /**
@@ -271,7 +274,7 @@
             self.trigger('removelayer', layer);
             self.trigger('changed');
             layer = null;
-        }
+        };
 
         function handleChangeID(oldID, newID) {
             if(mChildren[oldID]) {
@@ -340,6 +343,15 @@
             mNode.empty();
         };
 
+
+        /**
+         * Re-render the canvas and all its children
+         */
+        this.refresh = function() {
+            render();
+            _.invoke(mChildOrder, 'render', mNode);
+        };
+
         this.generateDeclaration = function() {
             return ["static Window *s_window;"];
         };
@@ -383,7 +395,7 @@
 
         this.getBackgroundColour = function() {
             return mProperties.bg.getValue();
-        }
+        };
 
         this.getResources = function() {
             return mResources;

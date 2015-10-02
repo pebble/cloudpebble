@@ -73,7 +73,6 @@
             return ["bitmap_layer_destroy(" + this._ID + ");"];
         },
         readProperties: function(properties, mappings) {
-            console.log("Setting properties", properties, mappings);
             IB.Layer.prototype.readProperties.call(this, properties);
             _.each(properties, function(values, property) {
                 switch(property) {

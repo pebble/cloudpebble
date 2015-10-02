@@ -252,3 +252,9 @@
     color: #333333;
     background-color: #969696;
 }
+
+/* Global canvas settings form */
+
+.ib-settings select, .ib-settings input {
+    width: 140px;
+}

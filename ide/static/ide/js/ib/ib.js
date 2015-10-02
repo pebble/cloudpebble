@@ -9,11 +9,12 @@
      * @constructor
      * @extends {Backbone.Events}
      */
-    function IB(canvasPane, propertyPane, toolkitPane, layerPane, source) {
+    function IB(canvasPane, propertyPane, toolkitPane, layerPane, settingsPane, source) {
         var mCanvas;
         var mPropertyView;
         var mToolkit;
         var mLayerListView;
+        var mSettingsForm;
         var mSource = '';
         var self = this;
 
@@ -24,11 +25,14 @@
             mCanvas.on('selection', handleSelection);
             mToolkit = new IB.Toolkit(toolkitPane, mCanvas);
             mToolkit.renderList();
+            mSettingsForm = new IB.SettingsForm(settingsPane, this);
+            mSettingsForm.render();
+            mSettingsForm.on('refresh', _.bind(mCanvas.rerender, mCanvas));
             mLayerListView = new IB.LayerListView(layerPane, mCanvas);
             mCanvas.on('changed', handleChange);
             handleSelection(null);
             CloudPebble.Analytics.addEvent("cloudpebble_ib_displayed", null, null, ['cloudpebble']);
-        }
+        };
 
         /**
          * Handles changing the selection. If a layer is passed, selects that. If null, selects the window.
@@ -85,6 +89,7 @@
             propertyPane.empty();
             toolkitPane.empty();
             layerPane.empty();
+            mSettingsForm.empty();
             init();
         };
 

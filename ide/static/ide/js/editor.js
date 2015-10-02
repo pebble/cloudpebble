@@ -582,7 +582,7 @@ CloudPebble.Editor = (function() {
             };
 
             var ib_pane = $('#ui-editor-pane-template').clone().removeClass('hide').appendTo(pane).hide();
-            var ib_editor = new IB(ib_pane.find('.ui-canvas'), ib_pane.find('#ui-properties'), ib_pane.find('#ui-toolkit'), ib_pane.find('#ui-layer-list > div'));
+            var ib_editor = new IB(ib_pane.find('.ui-canvas'), ib_pane.find('#ui-properties'), ib_pane.find('#ui-toolkit'), ib_pane.find('#ui-layer-list > div'), ib_pane.find('#ui-settings'));
             var ib_showing = false;
 
             CloudPebble.GlobalShortcuts.SetShortcutHandlers({

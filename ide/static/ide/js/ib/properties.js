@@ -230,9 +230,18 @@
             var value = _super.getValue.call(this);
             return (_.isArray(value) ? (_.isFinite(index) ? value[index] : value[IB.ColourMode]) : value);
         },
+        /**
+         * Returns checks whether all variants of the colour are equal to a given one
+         * @param colour the colour co compare to
+         * @returns {boolean}
+         */
         fullyEquals: function(colour) {
             return (this._value[0] == colour && this._value[1] == colour);
         },
+        /**
+         * Generate the C expression representing this property.
+         * @returns {string}
+         */
         generateCode: function() {
             if (this._value[0] !== this._value[1]) {
                 return interpolate("COLOR_FALLBACK(%s, %s)", [this._value[0].name, this._value[1].name]);
@@ -241,6 +250,10 @@
                 return this._value[0].name;
             }
         },
+        /**
+         * Refresh the colour picker box for this property
+         * @private
+         */
         _setColourCSS: function() {
             if (this._value[0]) {
                 var stripes = 'repeating-linear-gradient(45deg, #aaa, #aaa 4px, #fff 5px, #fff 10px)';
