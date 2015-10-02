@@ -322,7 +322,7 @@ CloudPebble.Resources = (function() {
             });
 
             var form = pane.find('form');
-            form.submit(function(e) {
+            var save = function(e) {
                 e.preventDefault();
                 process_resource_form(form, false, resource.file_name, "/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/update", function(data) {
                     // Update any previews we have.
@@ -356,6 +356,10 @@ CloudPebble.Resources = (function() {
                     delete project_resources[resource.file_name];
                     update_resource(data);
                 });
+            };
+            form.submit(save);
+            CloudPebble.GlobalShortcuts.SetShortcutHandlers({
+                save: save
             });
             restore_pane(pane);
         });
