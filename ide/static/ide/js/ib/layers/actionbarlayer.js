@@ -48,8 +48,8 @@
             this._node.css({
                 'background-color': this._backgroundColour.getValue().css
             });
-            // TODO: Figure out which colours to invert the layer for.
-            var invertIcons = (!this._backgroundColour.fullyEquals(IB.ColourWhite));
+            var monoBgColour = this._backgroundColour.getValue(IB.ColourModes.Monochrome);
+            var invertIcons = (monoBgColour !== IB.ColourWhite && IB.colourMode == IB.ColourModes.Monochrome);
             _.each(this._icon_nodes, function(node, it) {
                 if(invertIcons) {
                     node.addClass('ib-invert');

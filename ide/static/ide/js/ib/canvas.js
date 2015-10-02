@@ -3,7 +3,7 @@
     /**
      * Represents an IB canvas, which can contain layers.
      * @param {jQuery|HTMLElement} parent Node to which to attach the canvas.
-     * @}tructor
+     * @constructor
      */
     IB.Canvas = function(parent) {
         var self = this;
@@ -238,7 +238,7 @@
 
         function handleBackgroundChange(colour) {
             mNode.css({
-                'background-color': colour[IB.ColourMode].css
+                'background-color': colour[IB.colourMode].css
             });
             self.trigger('changeBackground', colour);
         }

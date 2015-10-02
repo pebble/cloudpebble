@@ -1,8 +1,7 @@
-'use strict';
-
 /* Modified Slate colour picker, from https://github.com/pebble/slate/blob/master/lib/js/main.js */
 
 (function ($) {
+    'use strict';
 
     var ENUMS = {
         COLOR: {

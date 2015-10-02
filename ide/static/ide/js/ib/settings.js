@@ -5,7 +5,7 @@
         name: gettext("Preview Mode"),
         id: 'ib-setting-colourmode',
         renderNode: function (parent) {
-            var isColour = IB.ColourMode == 0;
+            var isColour = IB.colourMode == IB.ColourModes.Colour;
             var node = $('<select>' +
                 interpolate('<option value="0" %s>%s</option>', [(isColour ? 'selected' : ''), gettext("Colour")]) +
                 interpolate('<option value="1" %s>%s</option>', [(isColour ? '' : 'selected'), gettext("Monochrome")]) +
@@ -14,7 +14,7 @@
             return node;
         },
         handleChange: function (evt) {
-            IB.ColourMode = parseInt(evt.target.value, 10);
+            IB.colourMode = parseInt(evt.target.value, 10);
             this.trigger('refresh');
         }
     };

@@ -34,7 +34,7 @@
             // Matches functions where 'id' is the first argument, and extracts the function name and its other arguments
             var regex = new RegExp('^\\s*([a-zA-Z_]+)\\s*\\(' + id + ',\\s*(.+)\\);$', 'gm');
             // Splits the remaining arguments by any commas, which aren't followed by closing brackets
-            var split_regex = /,(?![^,]*\))/g;
+            var splitRegex = /,(?![^,]*\))/g;
             var groups;
             var props = Object.create(null);
             // Look through the document for any functions whose first arguments are the desired layer ID.
@@ -42,22 +42,22 @@
                 if(!props[groups[1]]) {
                     props[groups[1]] = [];
                 }
-                var full_string = groups[2].trim();
+                var fullString = groups[2].trim();
                 // Extract all function arguments. If any arguments are functions containing more arguments,
                 // extract the arguments of those functions.
-                var inner_arguments_regex = /([A-Za-z_]+)\s*\((.*?)\)/g;
-                var args = _.chain(groups[2].split(split_regex))
+                var innerArgumentsRegex = /([A-Za-z_]+)\s*\((.*?)\)/g;
+                var args = _.chain(groups[2].split(splitRegex))
                     .invoke('trim')
                     .map(function(argument) {
-                        var inner_group;
-                        if ((inner_group = inner_arguments_regex.exec(argument)) != null) {
-                            return _([inner_group[1]].concat(inner_group[2].split(split_regex))).invoke('trim');
+                        var innerGroup;
+                        if ((innerGroup = innerArgumentsRegex.exec(argument)) != null) {
+                            return _([innerGroup[1]].concat(innerGroup[2].split(splitRegex))).invoke('trim');
                         }
                         else {
                             return argument;
                         }
                     }).value();
-                var prop = [full_string].concat(args);
+                var prop = [fullString].concat(args);
                 props[groups[1]].push(prop);
             }
             return props;

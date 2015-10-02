@@ -220,34 +220,34 @@
             return value;
         },
         setValue: function(value) {
-            value = this._makeColours(value);
-            _super.setValue.call(this, value);
-            this._bw_node.val(this._value[1].name);
-            this._color_node.val(this._value[0].name);
+            var new_value = this._makeColours(value);
+            _super.setValue.call(this, new_value);
+            this._bwNode.val(this._value[IB.ColourModes.Monochrome].name);
+            this._colourNode.val(this._value[IB.ColourModes.Colour].name);
             this._setColourCSS();
         },
         getValue: function(index) {
             var value = _super.getValue.call(this);
-            return (_.isArray(value) ? (_.isFinite(index) ? value[index] : value[IB.ColourMode]) : value);
+            return (_.isArray(value) ? (_.isFinite(index) ? value[index] : value[IB.colourMode]) : value);
         },
         /**
-         * Returns checks whether all variants of the colour are equal to a given one
+         * Returns true if all variants of the colour are equal to a given one
          * @param colour the colour co compare to
          * @returns {boolean}
          */
         fullyEquals: function(colour) {
-            return (this._value[0] == colour && this._value[1] == colour);
+            var uniq = _.uniq(this._value);
+            return (uniq.length == 1 && uniq[0] == colour);
         },
         /**
          * Generate the C expression representing this property.
          * @returns {string}
          */
         generateCode: function() {
-            if (this._value[0] !== this._value[1]) {
-                return interpolate("COLOR_FALLBACK(%s, %s)", [this._value[0].name, this._value[1].name]);
-            }
-            else {
+            if (_.uniq(this._value).length == 1) {
                 return this._value[0].name;
+            } else {
+                return interpolate("COLOR_FALLBACK(%s, %s)", [this._value[0].name, this._value[1].name]);
             }
         },
         /**
@@ -257,12 +257,12 @@
         _setColourCSS: function() {
             if (this._value[0]) {
                 var stripes = 'repeating-linear-gradient(45deg, #aaa, #aaa 4px, #fff 5px, #fff 10px)';
-                var css = (this._value[0] == IB.ColourClear ? stripes : this._value[0].css);
-                this._color_node.siblings().find(".value").css('background', css);
+                var is_clear = this._value[IB.ColourModes.Colour] == IB.ColourClear;
+                var css = (is_clear ? stripes : this._value[IB.ColourModes.Colour].css);
+                this._colourNode.siblings().find(".value").css('background', css);
             }
         },
         _generateNode: function() {
-            var colour_options = _.map(IB.ColourMap, this._createColour);
             var mono_options = _.map(IB.MonochromeMap, this._createColour);
             var table = $(interpolate('<table class="ib-colours">' +
                 '<thead><tr><th>%s</th><th>%s</th></tr></thead>' +
@@ -271,18 +271,19 @@
             var tr = table.find('tbody tr');
             var td = $("<td></td>").appendTo(tr);
             var div = $('<div></div>').appendTo(td);
-            this._color_node =  $('<input type="text" class="item-color item-color-normal" name="color-1">')
+            this._colourNode =  $('<input type="text" class="item-color item-color-normal" name="color-1">')
                 .change(_.bind(this._handleChange, this))
+                .val(this._value[IB.ColourModes.Colour].name)
                 .appendTo(div);
 
-            this._bw_node = $('<select class="ib-property ib-colour">')
+            this._bwNode = $('<select class="ib-property ib-colour">')
                 .append(mono_options)
-                .val(this._value[1].name)
+                .val(this._value[IB.ColourModes.Monochrome].name)
                 .change(_.bind(this._handleChange, this));
-            this._bw_node.appendTo("<td>").parent().appendTo(tr);
+            this._bwNode.appendTo("<td>").parent().appendTo(tr);
             var self = this;
             setTimeout(function() {
-                self._color_node.pebbleColourPicker({
+                self._colourNode.pebbleColourPicker({
                     value_mapping: function(value) {
                         if (value == "transparent") {
                             return "GColorClear";
@@ -302,11 +303,11 @@
                 .text(colour.display);
         },
         _handleChange: function() {
-            var col_find = this._color_node.val();
-            var bw_find = this._bw_node.val();
+            var col_find = this._colourNode.val();
+            var bw_find = this._bwNode.val();
             var col_val = _.findWhere(IB.ColourMap, {name: col_find});
             var bw_val = _.findWhere(IB.ColourMap, {name: bw_find});
-            if(col_val != this._value[0] || bw_val != this._value[1]) {
+            if(col_val != this._value[IB.ColourModes.Colour] || bw_val != this._value[IB.ColourModes.Monochrome]) {
                 this.setValue([col_val, bw_val]);
             }
         }

@@ -27,7 +27,7 @@
             mToolkit.renderList();
             mSettingsForm = new IB.SettingsForm(settingsPane, this);
             mSettingsForm.render();
-            mSettingsForm.on('refresh', _.bind(mCanvas.rerender, mCanvas));
+            mSettingsForm.on('refresh', _.bind(mCanvas.refresh, mCanvas));
             mLayerListView = new IB.LayerListView(layerPane, mCanvas);
             mCanvas.on('changed', handleChange);
             handleSelection(null);
@@ -92,7 +92,9 @@
             mSettingsForm.empty();
             init();
         };
-
+        if (!IB.colourMode) {
+            IB.colourMode = (CloudPebble.ProjectInfo.sdk_version == "3" ? IB.ColourModes.Colour : IB.ColourModes.Monochrome);
+        }
         init();
     }
     window.IB = IB;
