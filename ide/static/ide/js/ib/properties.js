@@ -17,6 +17,7 @@
         this._value = value;
         this._node = this._generateNode();
         this._locked = false;
+        this._labelClass = null;
         _.extend(this, Backbone.Events);
     };
     IB.Properties.Property.prototype = {
@@ -25,6 +26,12 @@
          */
         getName: function() {
             return this._name;
+        },
+        /**
+         * @returns {*} The the class name to add to the property's label.
+         */
+        getLabelClass: function() {
+            return this._labelClass;
         },
         /**
          * @returns {*} The value of the property.
@@ -189,28 +196,35 @@
      * @extends {IB.Properties.Property}
      */
     IB.Properties.Colour = function(name, value) {
-        Property.call(this, name, value);
+        Property.call(this, name, this._makeColours(value));
+        this._labelClass = 'ib-colour-label';
     };
     IB.Properties.Colour.prototype = Object.create(_super);
     IB.Properties.Colour.prototype.constructor = IB.Properties.Colour;
     _.extend(IB.Properties.Colour.prototype, {
-        setValue: function(value) {
+        _makeColours: function(value) {
             if (_.isString(value)) {
                 value = IB.ColourMap[value];
             }
-            else if (_.isArray(value)) {
+            if (_.isArray(value)) {
                 if (value[0] == "COLOR_FALLBACK") {
                     value = _.map(value.slice(1), function(c) {
                         return IB.ColourMap[c];
                     });
                 }
             }
-            else { // Assume value is a Colour object
+            else {
+                // Assume value is a Colour object
                 value = [value, value];
             }
+            return value;
+        },
+        setValue: function(value) {
+            value = this._makeColours(value);
             _super.setValue.call(this, value);
-            this._color_node.val(this._value[0].name);
             this._bw_node.val(this._value[1].name);
+            this._color_node.val(this._value[0].name);
+            this._setColourCSS();
         },
         getValue: function(index) {
             var value = _super.getValue.call(this);
@@ -227,6 +241,13 @@
                 return this._value[0].name;
             }
         },
+        _setColourCSS: function() {
+            if (this._value[0]) {
+                var stripes = 'repeating-linear-gradient(45deg, #aaa, #aaa 4px, #fff 5px, #fff 10px)';
+                var css = (this._value[0] == IB.ColourClear ? stripes : this._value[0].css);
+                this._color_node.siblings().find(".value").css('background', css);
+            }
+        },
         _generateNode: function() {
             var colour_options = _.map(IB.ColourMap, this._createColour);
             var mono_options = _.map(IB.MonochromeMap, this._createColour);
@@ -235,16 +256,31 @@
                 '<tbody><tr></tr></tbody>' +
                 '</table>', [gettext("Colour Watches"), gettext("B/W Watches")]));
             var tr = table.find('tbody tr');
-            this._color_node = $('<select class="ib-property ib-colour">')
-                .append(colour_options)
-                .val(this._value.name)
-                .change(_.bind(this._handleChange, this));
-            this._color_node.appendTo("<td>").parent().appendTo(tr);
+            var td = $("<td></td>").appendTo(tr);
+            var div = $('<div></div>').appendTo(td);
+            this._color_node =  $('<input type="text" class="item-color item-color-normal" name="color-1">')
+                .change(_.bind(this._handleChange, this))
+                .appendTo(div);
+
             this._bw_node = $('<select class="ib-property ib-colour">')
                 .append(mono_options)
-                .val(this._value.name)
+                .val(this._value[1].name)
                 .change(_.bind(this._handleChange, this));
             this._bw_node.appendTo("<td>").parent().appendTo(tr);
+            var self = this;
+            setTimeout(function() {
+                self._color_node.pebbleColourPicker({
+                    value_mapping: function(value) {
+                        if (value == "transparent") {
+                            return "GColorClear";
+                        }
+                        else {
+                            return _.findWhere(IB.ColourMap, {css: value});
+                        }
+                    }
+                });
+                self._setColourCSS();
+            }, 1);
             return table;
         },
         _createColour: function(colour) {

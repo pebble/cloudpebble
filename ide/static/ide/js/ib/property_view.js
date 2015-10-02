@@ -54,7 +54,8 @@
             return $('<div class="control-group">')
                 .append(
                     $('<label class="control-label">')
-                        .text(property.getName()))
+                        .text(property.getName())
+                        .addClass(property.getLabelClass()))
                 .append(
                     $('<div class="controls">')
                         .append(property.getNode()));

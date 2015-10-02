@@ -3,7 +3,7 @@
     /**
      * Represents an IB canvas, which can contain layers.
      * @param {jQuery|HTMLElement} parent Node to which to attach the canvas.
-     * @constructor
+     * @}tructor
      */
     IB.Canvas = function(parent) {
         var self = this;

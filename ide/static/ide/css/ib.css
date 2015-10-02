@@ -15,10 +15,76 @@
     -webkit-filter: invert(100%); /* For Chrome/Safari/Opera - we actually prefer vendor-specific here. */
 }
 
+/* Colour picker from Slate */
+.item-color {
+    display: none;
+}
+
+.item-styled-color {
+    position: relative;
+}
+
+.item-styled-color .value {
+    border-radius: 5px;
+    border-color: #A8A8A8;
+    border-width: 1px;
+    border-style: solid;
+    display: block;
+    height: 40px;
+}
+
+.item-styled-color .color-box-wrap {
+    display: none;
+    box-sizing: border-box;
+    position: absolute;
+    padding: 0 0 100% 0;
+    margin: 0.6em 0 0em;
+}
+
+.item-styled-color .color-box-wrap.show {
+    display: block;
+}
+
+.item-styled-color .color-box-wrap .color-box-container {
+    position: absolute;
+    background: repeating-linear-gradient(45deg, #aaa, #aaa 4px, #fff 5px, #fff 10px);
+    height: 99.97%;
+    width: 300px;
+    height: 300px;
+    left: 0;
+    top: 0;
+    z-index: 10;
+}
+
+.item-styled-color .color-box-wrap .color-box-container .color-box {
+    float: left;
+    cursor: pointer;
+}
+
+.item-styled-color .color-box-wrap .color-box-container .color-box.rounded-tl {
+    border-top-left-radius: 5px;
+}
+
+.item-styled-color .color-box-wrap .color-box-container .color-box.rounded-tr {
+    border-top-right-radius: 5px;
+}
+
+.item-styled-color .color-box-wrap .color-box-container .color-box.rounded-bl {
+    border-bottom-left-radius: 5px;
+}
+
+.item-styled-color .color-box-wrap .color-box-container .color-box.rounded-br {
+    border-bottom-right-radius: 5px;
+}
+
 /* Colour Pickers */
 
 .ib-colours select {
     width: 170px;
+}
+
+.ib-colour-label {
+    margin-top: 29px;
 }
 
 /* Resizer */
