@@ -728,12 +728,14 @@ CloudPebble.Editor = (function() {
             button_holder.append(error_area);
             button_holder.append(run_btn);
             button_holder.append(save_btn);
-            button_holder.append(discard_btn);
-            button_holder.append(rename_btn);
 
             if(source.indexOf('// BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY') != -1) {
                 button_holder.append(ib_btn);
             }
+
+            button_holder.append(rename_btn);
+            button_holder.append(discard_btn);
+
             // You must have an app.js in pebblejs projects.
             if(CloudPebble.ProjectInfo.type != 'pebblejs' || file.name != 'app.js') {
                 button_holder.append(delete_btn);
