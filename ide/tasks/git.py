@@ -207,8 +207,8 @@ def github_push(user, commit_message, repo_name, project):
     return False
 
 def get_root_path(path):
-    split_path = os.path.splitext(path)
-    return split_path[0].split('~', 1)[0] + split_path[1]
+    path, extension = os.path.splitext(path)
+    return path.split('~', 1)[0] + extension
 
 @git_auth_check
 def github_pull(user, project):
