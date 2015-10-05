@@ -1,5 +1,5 @@
 CloudPebble.Editor.PebbleMode = {
-    name: 'clike',
+    name: 'text/x-c',
     useCPP: true,
     keywords: {
         // C

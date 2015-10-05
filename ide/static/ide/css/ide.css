@@ -1004,7 +1004,7 @@ span.cm-autofilled-end {
 }
 
 #help-prompt-holder {
-    z-index: 2000;
+    z-index: 10001;
     position: relative;
 }
 
