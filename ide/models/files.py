@@ -31,7 +31,6 @@ class ResourceFile(IdeModel):
     file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_(). -]+$")])
     kind = models.CharField(max_length=9, choices=RESOURCE_KINDS)
     is_menu_icon = models.BooleanField(default=False)
-    target_platforms = models.CharField(max_length=30, null=True, blank=True, default=None)
 
     def get_best_variant(self, tags_string):
         try:
@@ -225,9 +224,6 @@ class ResourceIdentifier(IdeModel):
         self.resource_file.project.last_modified = now()
         self.resource_file.project.save()
         super(ResourceIdentifier, self).save(*args, **kwargs)
-
-    class Meta(IdeModel.Meta):
-        unique_together = (('resource_file', 'resource_id'),)
 
 
 class SourceFile(IdeModel):
