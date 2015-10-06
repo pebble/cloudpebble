@@ -1082,6 +1082,10 @@ button#add-filter {
     display: table;
 }
 
+.edit-resource-target-platforms-enabled:not(:checked) ~ .edit-resource-targets {
+    display: none;
+}
+
 .pane-boxes {
     width: 100%;
 }
@@ -1122,11 +1126,11 @@ button#add-filter {
     line-height: 40px;
     color: white;
 }
-.btn-delvariant {
+.btn-delete-well {
     float: right;
     width: initial;
     margin-bottom: 20px;
-    bottom: 30px;
+    bottom: 20px;
 }
 .image-platform-preview span {
     text-align: center;

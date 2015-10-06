@@ -21,35 +21,10 @@
                 </div>
             </div>
 
-            <div class="control-group native-only" id="non-font-resource-group">
-                <label class="control-label">{% trans 'Identifier' %}</label>
-                <div class="controls">
-                    <input type="text" class="edit-resource-id" placeholder="IMAGE_EXAMPLE_IDENTIFIER" pattern="[A-Za-z0-9_]+">
-                    <span class="help-block">{% trans 'This is used in your code and must be a valid C identifier.' %}</span>
-                </div>
-            </div>
             <div class="control-group" id="edit-resource-file-name_section">
                 <label class="control-label" for="edit-resource-file-name">{% trans 'File name' %}</label>
                 <div class="controls">
                     <input type="text" id="edit-resource-file-name" name="file_name">
-                </div>
-            </div>
-
-            <div id="resource-targets-section" class="sdk3-only native-only">
-                <div class="control-group">
-                    <label style="width: 250px" class="control-label" for="edit-resource-target-platforms-enabled">{% trans 'Target specific platforms' %}</label>
-                    <input type="checkbox" id="edit-resource-target-platforms-enabled">
-                </div>
-                <div id="edit-resource-targets">
-                    <div class="edit-resource-target-options">
-                    {% for platform in  supported_platforms %}
-                        <div class="control-group">
-                            <label class="control-label" for="edit-resource-target-{{ platform }}">{{ platform | capfirst }}</label>
-                            <input type="checkbox" id="edit-resource-target-{{ platform }}">
-                        </div>
-                    {% endfor %}
-                    </div>
-                    <p class="help-block">{% trans "The 'targetPlatforms' option restricts all variants of a resource to a specific set of platforms." %}</p>
                 </div>
             </div>
 
@@ -96,7 +71,7 @@
                     <div class="controls label-list"></div>
                 </div>
 
-                <button type="button" class="btn btn-small btn-danger btn-delvariant">{% trans 'Delete Variant' %}</button>
+                <button type="button" class="btn btn-small btn-danger btn-delete-well btn-delvariant">{% trans 'Delete Variant' %}</button>
             </div>
         </div>
 
@@ -123,28 +98,31 @@
                     <div class="controls label-list"></div>
                 </div>
 
-                <button type="button" class="btn btn-small btn-danger btn-delvariant">{% trans 'Delete Variant' %}</button>
+                <button type="button" class="btn btn-small btn-danger btn-delete-well btn-delvariant">{% trans 'Delete Variant' %}</button>
             </div>
         </div>
 
-        <div id="font-resource-group" class="hide">
-            <div class="well font-resource-group-single">
+        <div id="resource-id-group">
+            <div class="well resource-id-group-single">
                 <div class="control-group">
                     <label class="control-label">{% trans 'Identifier' %}</label>
                     <div class="controls">
-                        <input type="text" class="span6 edit-resource-id" placeholder="FONT_EXAMPLE_BOLD_SUBSET_24" pattern="[A-Za-z0-9_]*[0-9]+">
+                        {# TODO: placeholder/pattern thingybobs #}
+                        <input type="text" class="span6 edit-resource-id font-only" placeholder="FONT_EXAMPLE_BOLD_SUBSET_24" pattern="[A-Za-z0-9_]*[0-9]+">
+                        <input type="text" class="span6 edit-resource-id non-font-only" placeholder="IMAGE_EXAMPLE_IDENTIFIER" pattern="[A-Za-z0-9_]+">
                         <span class="help-block">{% trans 'This is used in your code and must be a valid C identifier.' %}<br>
-                            {% trans 'It must end with the desired font size.' %}</span>
+                            <span class="font-only">{% trans 'It must end with the desired font size.' %}</span>
+                        </span>
                     </div>
                 </div>
-                <div class="control-group font-resource-regex-group">
+                <div class="control-group font-resource-regex-group font-only">
                     <label class="control-label">{% trans 'Characters' context "like letters and numbers" %}</label>
                     <div class="controls">
                         <input type="text" class="span4 edit-resource-regex" placeholder="[0-9:. ]">
                         <span class="help-block">{% trans 'A PCRE regular expression that restricts characters.' %}</span>
                     </div>
                 </div>
-                <div class="control-group font-resource-tracking-group">
+                <div class="control-group font-resource-tracking-group font-only">
                     {# Translators: This refers to the number of additional pixels by which to shift each character #}
                     <label class="control-label">{% trans 'Tracking adjust' %}</label>
                     <div class="controls">
@@ -152,7 +130,7 @@
                         <span class="help-block">{% trans 'Number of additional pixels by which to shift each character.' %}</span>
                     </div>
                 </div>
-                <div class="control-group font-resource-compatibility-group">
+                <div class="control-group font-resource-compatibility-group font-only">
                     <label class="control-label">{% trans 'Compatibility' %}</label>
                     <div class="controls">
                         <select class="font-compat-option">
@@ -162,6 +140,25 @@
                         <span class="help-block">{% trans 'Determines the font rendering algorithm to use. The latest looks better, but can produce slightly larger characters.' %}</span>
                     </div>
                 </div>
+                <div class="resource-targets-section" class="sdk3-only native-only">
+                    <div class="control-group">
+                        <label style="width: 250px" class="control-label">{% trans 'Target specific platforms' %}</label>
+                        <input type="checkbox" class="edit-resource-target-platforms-enabled"> <p></p>
+
+                        <div class="edit-resource-targets">
+                            <div class="edit-resource-target-options">
+                            {% for platform in  supported_platforms %}
+                                <div class="control-group">
+                                    <label class="control-label" for="edit-resource-target-{{ platform }}">{{ platform | capfirst }}</label>
+                                    <input type="checkbox" class="edit-resource-target-{{ platform }}">
+                                </div>
+                            {% endfor %}
+                            </div>
+                            <p class="help-block">{% trans "The 'targetPlatforms' option restricts all variants of a resource to a specific set of platforms. It is an advanced option, which you should only use if you require multiple Resource IDs for different platforms." %}</p>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-small btn-danger btn-delete-well btn-delidentifier">{% trans 'Delete Identifier' %}</button>
             </div>
         </div>
 
@@ -184,11 +181,13 @@
             </div>
         </div>
 
-
         <div id="edit-resource-buttons" class="well resource-actions">
             <button type="submit" class="btn btn-affirmative">{% trans 'Save' %}</button>
             <button type="button" class="btn btn-danger hide" id="edit-resource-delete">{% trans 'Delete' %}</button>
-            <button type="button" class="btn hide" id="add-font-resource">{% trans 'Another font' %}</button>
+            <button type="button" class="btn hide" id="add-resource-id">
+                <span class="font-only">{% trans 'Another font' %}</span>
+                <span class="non-font-only">{% trans 'Another Identifer' %}</span>
+            </button>
         </div>
     </form>
 

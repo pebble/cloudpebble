@@ -314,8 +314,8 @@ def generate_native_resource_dict(project, resources):
                 d['menuIcon'] = True
             if resource_id.compatibility is not None:
                 d['compatibility'] = resource_id.compatibility
-            if project.sdk_version == '3' and resource.target_platforms:
-                d['targetPlatforms'] = json.loads(resource.target_platforms)
+            if project.sdk_version == '3' and resource_id.target_platforms:
+                d['targetPlatforms'] = json.loads(resource_id.target_platforms)
 
             resource_map['media'].append(d)
     return resource_map

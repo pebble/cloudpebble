@@ -30,14 +30,14 @@ def create_resource(request, project_id):
             for r in resource_ids:
                 regex = r['regex'] if 'regex' in r else None
                 tracking = int(r['tracking']) if 'tracking' in r else None
+                target_platforms = json.dumps(r['target_platforms']) if 'target_platforms' in r else None
                 resources.append(ResourceIdentifier.objects.create(resource_file=rf, resource_id=r['id'],
-                                                                   character_regex=regex, tracking=tracking))
+                                                                   character_regex=regex, tracking=tracking,
+                                                                   target_platforms=target_platforms))
             if posted_file is not None:
                 variant = ResourceVariant.objects.create(resource_file=rf, tags=",".join(str(int(t)) for t in new_tags))
                 variant.save_file(posted_file, posted_file.size)
 
-            target_platforms = json.loads(request.POST.get('target_platforms', None))
-            rf.target_platforms = None if target_platforms is None else json.dumps(target_platforms)
             rf.save()
 
     except Exception as e:
@@ -55,8 +55,11 @@ def create_resource(request, project_id):
             "id": rf.id,
             "kind": rf.kind,
             "file_name": rf.file_name,
-            "target_platforms": json.loads(rf.target_platforms) if rf.target_platforms else None,
-            "resource_ids": [{'id': x.resource_id, 'regex': x.character_regex} for x in resources],
+            "resource_ids": [{
+                    'id': x.resource_id,
+                    'regex': x.character_regex,
+                    'target_platforms': json.loads(x.target_platforms) if x.target_platforms else None
+                } for x in resources],
             "identifiers": [x.resource_id for x in resources],
             "variants": [x.get_tags() for x in rf.variants.all()],
             "extra": {y.resource_id: {'regex': y.character_regex, 'tracking': y.tracking} for y in rf.identifiers.all()}
@@ -80,12 +83,12 @@ def resource_info(request, project_id, resource_id):
 
     return json_response({
         'resource': {
-            "target_platforms": json.loads(resource.target_platforms) if resource.target_platforms else None,
             'resource_ids': [{
                                  'id': x.resource_id,
                                  'regex': x.character_regex,
                                  'tracking': x.tracking,
-                                 'compatibility': x.compatibility
+                                 'compatibility': x.compatibility,
+                                 'target_platforms': json.loads(x.target_platforms) if x.target_platforms else None
                              } for x in resources],
             'id': resource.id,
             'file_name': resource.file_name,
@@ -154,7 +157,6 @@ def update_resource(request, project_id, resource_id):
     resource = get_object_or_404(ResourceFile, pk=resource_id, project=project)
     resource_ids = json.loads(request.POST['resource_ids'])
     file_name = request.POST.get('file_name', None)
-    target_platforms = json.loads(request.POST.get('target_platforms', None))
     variant_tags = json.loads(request.POST.get('variants', "[]"))
     new_tags = json.loads(request.POST.get('new_tags', "[]"))
 
@@ -168,7 +170,8 @@ def update_resource(request, project_id, resource_id):
                 regex = r['regex'] if 'regex' in r else None
                 tracking = int(r['tracking']) if 'tracking' in r else None
                 compat = r['compatibility'] if 'compatibility' in r else None
-                resources.append(ResourceIdentifier.objects.create(resource_file=resource, resource_id=r['id'], character_regex=regex, tracking=tracking, compatibility=compat))
+                target_platforms = json.dumps(r['target_platforms']) if 'target_platforms' in r else None
+                resources.append(ResourceIdentifier.objects.create(resource_file=resource, resource_id=r['id'], character_regex=regex, tracking=tracking, compatibility=compat, target_platforms=target_platforms))
 
             # We get sent a list of (tags_before, tags_after) pairs.
             updated_variants = []
@@ -184,7 +187,6 @@ def update_resource(request, project_id, resource_id):
                 variant = resource.variants.create(tags=",".join(str(int(t)) for t in new_tags))
                 variant.save_file(request.FILES['file'], request.FILES['file'].size)
 
-            resource.target_platforms = None if target_platforms is None else json.dumps(target_platforms)
             if file_name and resource.file_name != file_name:
                 resource.file_name = file_name
 
@@ -204,8 +206,12 @@ def update_resource(request, project_id, resource_id):
             "id": resource.id,
             "kind": resource.kind,
             "file_name": resource.file_name,
-            "resource_ids": [{'id': x.resource_id, 'regex': x.character_regex, 'compatibility': x.compatibility} for x in resources],
-            "target_platforms": json.loads(resource.target_platforms) if resource.target_platforms else None,
+            "resource_ids": [{
+                                 'id': x.resource_id,
+                                 'regex': x.character_regex,
+                                 'compatibility': x.compatibility,
+                                 'target_platforms': json.loads(x.target_platforms) if x.target_platforms else None
+                             } for x in resources],
             "identifiers": [x.resource_id for x in resources],
             "variants": [x.get_tags() for x in resource.variants.all()],
             "extra": {y.resource_id: {'regex': y.character_regex, 'tracking': y.tracking, 'compatibility': y.compatibility} for y in resource.identifiers.all()}

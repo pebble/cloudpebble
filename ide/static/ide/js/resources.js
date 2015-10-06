@@ -43,17 +43,23 @@ CloudPebble.Resources = (function() {
     }
 
     /**
-     * Get the the list of target platforms currently checked in the targetPlatforms interface,
-     * or null if target platforms is disabled.
+     * Get the the list of target platforms currently checked in all targetPlatforms interfaces in the pane,
+     * or null if all target platform checkboxes are disabled.
      * @param {jQuery|HTMLElement} pane element containing the form
      * @returns {Array|null}
      */
     function get_target_platforms(pane) {
         pane = $(pane);
-        var do_target_platforms = pane.find('#edit-resource-target-platforms-enabled').is(":checked");
-        return (!do_target_platforms ? null : _.filter(_.keys(PLATFORMS), function(platform) {
-            return pane.find('#edit-resource-target-'+platform).is(":checked");
-        }));
+        // Return null any IDs in the pane have no targetPlatforms enabled
+        if (pane.find('.edit-resource-target-platforms-enabled').is(":not(:checked)")) {
+            return null;
+        }
+        // Otherwise, return the union of all targetPlatforms set in the pane.
+        else {
+            return _.filter(_.keys(PLATFORMS), function(platform) {
+                return pane.find('.edit-resource-target-'+platform).is(":checked");
+            });
+        }
     }
 
     /**
@@ -276,67 +282,8 @@ CloudPebble.Resources = (function() {
         }
 
         // Validate the file name
-
         if (!/^[a-zA-Z0-9_(). -]+$/.test(name)) {
             report_error(gettext("You must provide a valid filename. Only alphanumerics and characters in the set \"_(). -\" are allowed."));
-            return;
-        }
-        var resources = [];
-        if(kind != 'font') {
-            // Check that the Resource ID is valid
-            if(CloudPebble.ProjectInfo.type != 'pebblejs') {
-                var resource_id = form.find('#non-font-resource-group .edit-resource-id').val();
-                if(resource_id === '' || !validate_resource_id(resource_id)) {
-                    report_error(gettext("You must provide a valid resource identifier. Use only letters, numbers and underscores."));
-                    return;
-                }
-                resources = [{'id': resource_id}];
-            }
-        } else {
-            var resource_ids = {};
-            var okay = true;
-            $.each(form.find('.font-resource-group-single'), function(index, value) {
-                value = $(value);
-                var resource_id = value.find('.edit-resource-id').val();
-                var regex = value.find('.edit-resource-regex').val();
-                var tracking = parseInt(value.find('.edit-resource-tracking').val() || '0', 10);
-                var compat = value.find('.font-compat-option').val() || null;
-                if(resource_id === '') return true; // continue
-                if(!validate_resource_id(resource_id)) {
-                    report_error(gettext("Invalid resource identifier. Use only letters, numbers and underscores."));
-                    okay = false;
-                    return false;
-                }
-                if(!/[0-9]+$/.test(resource_id)) {
-                    report_error(interpolate(gettext("Font resource identifiers must end with the desired font size, e.g. %s_24"), [resource_id]));
-                    okay = false;
-                    return false;
-                }
-                if(!!resource_ids[resource_id]) {
-                    report_error(gettext("You can't have multiple identical identifiers. Please remove or change one."));
-                    okay = false;
-                    return false;
-                }
-                if(tracking != tracking) {
-                    report_error(gettext("Tracking must be an integer."));
-                    okay = false;
-                    return false;
-                }
-                resource_ids[resource_id] = true;
-                resources.push({'id': resource_id, 'regex': regex, 'tracking': tracking, 'compatibility': compat});
-            });
-            if(!okay) return;
-            if(resources.length === 0) {
-                report_error(gettext("You must specify at least one resource."));
-                return;
-            }
-        }
-
-        // Extract target platforms and verify that they're valid
-        var target_platforms = get_target_platforms(form);
-        var targeted_platform_tags = (target_platforms!== null ? _.pick(PLATFORMS, target_platforms) : PLATFORMS);
-        if (_.isEqual(target_platforms, [])) {
-            report_error(gettext("You cannot specifically target no platforms."));
             return;
         }
 
@@ -357,29 +304,84 @@ CloudPebble.Resources = (function() {
         // Validate the tags!
         var new_tag_values = get_new_tag_values(form, !!file, true);
 
-        // Validate the tags: ensure that all variants are unique
+        // Ensure that all variant's tags are unique
         if (_.uniq(_.map(new_tag_values, JSON.stringify)).length != new_tag_values.length) {
             report_error(gettext("Each variant must have a different set of tags"));
             return;
         }
 
 
-        // Validate the tags: detect ambiguities and check that each targeted platform has a matching variant
-        for (var platform_name in targeted_platform_tags) {
-            try {
-                if (get_resource_for_platform(new_tag_values, platform_name) == null) {
-                    report_error(interpolate(gettext("There is no variant matching the target platform '%s'."), [platform_name]));
+        var variant_tags = extract_tags(form.find('#edit-resource-previews .text-wrap input'));
+        var new_tags = extract_tags(form.find('#edit-resource-new-file .text-wrap input'));
+
+        var resources = [];
+
+        var resource_ids = {};
+        var okay = true;
+        $.each(form.find('.resource-id-group-single'), function(index, value) {
+            value = $(value);
+            var resource_id = value.find('.edit-resource-id').val();
+            if(resource_id === '') return true; // continue
+            var resource = {'id': resource_id};
+
+            // Check the resource ID
+            if(!validate_resource_id(resource_id)) {
+                report_error(gettext("Invalid resource identifier. Use only letters, numbers and underscores."));
+                okay = false;
+                return false;
+            }
+
+            // Extract target platforms and verify that they're valid
+            var target_platforms = get_target_platforms(value);
+            var targeted_platform_tags = (target_platforms!== null ? _.pick(PLATFORMS, target_platforms) : PLATFORMS);
+            if (_.isEqual(target_platforms, [])) {
+                report_error(gettext("You cannot specifically target no platforms."));
+                okay = false;
+                return;
+            }
+
+            // Validate the tags: detect ambiguities and check that each targeted platform has a matching variant
+            for (var platform_name in targeted_platform_tags) {
+                try {
+                    if (get_resource_for_platform(new_tag_values, platform_name) == null) {
+                        report_error(interpolate(gettext("There is no variant matching the target platform '%s'."), [platform_name]));
+                        okay = false;
+                        return false;
+                    }
+                }
+                catch (err) {
+                    report_error(err.description || err);
+                    okay = false;
                     return false;
                 }
             }
-            catch (err) {
-                report_error(err.description || err);
-                return false;
-            }
-        }
+            resource.target_platforms = target_platforms;
 
-        var variant_tags = extract_tags(form.find('#edit-resource-previews .text-wrap input'));
-        var new_tags = extract_tags(form.find('#edit-resource-new-file .text-wrap input'));
+            // Add in font-specific per-ID settings, if applicable
+            if (kind == 'font') {
+                var regex = value.find('.edit-resource-regex').val();
+                var tracking = parseInt(value.find('.edit-resource-tracking').val() || '0', 10);
+                var compat = value.find('.font-compat-option').val() || null;
+                if(!/[0-9]+$/.test(resource_id)) {
+                    report_error(interpolate(gettext("Font resource identifiers must end with the desired font size, e.g. %s_24"), [resource_id]));
+                    okay = false;
+                    return false;
+                }
+                if(tracking != tracking) {
+                    report_error(gettext("Tracking must be an integer."));
+                    okay = false;
+                    return false;
+                }
+                _(resource).extend({'regex': regex, 'tracking': tracking, 'compatibility': compat})
+            }
+            resource_ids[resource_id] = true;
+            resources.push(resource);
+        });
+        if(!okay) return;
+        if(resources.length === 0) {
+            report_error(gettext("You must specify at least one resource."));
+            return;
+        }
 
         var form_data = new FormData();
         form_data.append("kind", kind);
@@ -395,7 +397,6 @@ CloudPebble.Resources = (function() {
         form_data.append("file_name", name);
 
 
-        form_data.append("target_platforms", JSON.stringify(target_platforms));
 
         disable_controls();
         $.ajax({
@@ -417,11 +418,6 @@ CloudPebble.Resources = (function() {
         ga('send', 'event', 'resource', 'save');
     };
 
-    var show_resource_targets = function(parent) {
-        var target_platforms_checkbox = parent.find("#edit-resource-target-platforms-enabled");
-        parent.find('#edit-resource-targets').toggle(target_platforms_checkbox.is(":checked"));
-    };
-
     var edit_resource = function(resource) {
         CloudPebble.FuzzyPrompt.SetCurrentItemName(resource.file_name);
         CloudPebble.Sidebar.SuspendActive();
@@ -436,7 +432,6 @@ CloudPebble.Resources = (function() {
             var pane = prepare_resource_pane();
 
             var list_entry = $('#sidebar-pane-resource-' + resource.id);
-            var target_platforms_checkbox = pane.find("#edit-resource-target-platforms-enabled");
             if(list_entry) {
                 list_entry.addClass('active');
             }
@@ -444,6 +439,37 @@ CloudPebble.Resources = (function() {
             CloudPebble.Sidebar.SetActivePane(pane, 'resource-' + resource.id, _.partial(restore_pane, pane));
             pane.find('#edit-resource-type').val(resource.kind).attr('disabled', 'disabled');
             pane.find('#edit-resource-type').change();
+
+            var save = function(e) {
+                if (e) e.preventDefault();
+                process_resource_form(form, false, resource.file_name, "/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/update", function(data) {
+                    delete project_resources[resource.file_name];
+                    // Update our information about the resource.
+                    update_resource(data);
+                    resource = project_resources[data.file_name];
+
+                    // Set the resource's sidebar name
+                    generate_resource_previews(resource.kind);
+                    CloudPebble.Sidebar.SetItemName('resource', data.id, data.file_name);
+
+                    if(resource.kind == 'font') {
+                        resource.family = null;
+                        $.each(pane.find('.resource-id-group-single'), function(index, group) {
+                            update_font_preview($(group));
+                        });
+                    }
+
+                    // Clear and disable the upload-file form
+                    pane.find('#edit-resource-new-file input').val('');
+                    pane.find('#edit-resource-new-file textarea').textext()[0].tags().empty().core().enabled(false);
+                    pane.find('#edit-resource-new-file').toggleClass('file-present', false);
+                    CloudPebble.Sidebar.ClearIcon('resource-'+resource.id);
+                    live_form.clearIcons();
+
+                    // Only show the delete-identifiers button if there is more than one ID.
+                    pane.find('.btn-delidentifier').toggle(resource.resource_ids.length > 1);
+                });
+            };
 
             // Generate a preview.
 
@@ -527,68 +553,58 @@ CloudPebble.Resources = (function() {
             }
 
             var update_font_preview = function(group) {
-                group.find('.font-preview').remove();
-                var regex_str = group.find('.edit-resource-regex').val();
-                var id_str = group.find('.edit-resource-id').val();
-                var preview_regex = new RegExp('');
-                try {
-                    preview_regex = new RegExp(regex_str ? regex_str : '.', 'g');
-                    group.find('.font-resource-regex-group').removeClass('error').find('.help-block').text(gettext("A PCRE regular expression that restricts characters."));
-                } catch(e) {
-                    group.find('.font-resource-regex-group').addClass('error').find('.help-block').text(e);
-                }
-                var tracking = parseInt(group.find('.edit-resource-tracking').val(), 10) || 0;
+                if (resource.kind == 'font') {
+                    group.find('.font-preview').remove();
+                    var regex_str = group.find('.edit-resource-regex').val();
+                    var id_str = group.find('.edit-resource-id').val();
+                    var preview_regex = new RegExp('');
+                    try {
+                        preview_regex = new RegExp(regex_str ? regex_str : '.', 'g');
+                        group.find('.font-resource-regex-group').removeClass('error').find('.help-block').text(gettext("A PCRE regular expression that restricts characters."));
+                    } catch (e) {
+                        group.find('.font-resource-regex-group').addClass('error').find('.help-block').text(e);
+                    }
+                    var tracking = parseInt(group.find('.edit-resource-tracking').val(), 10) || 0;
 
-                _.each(resource.variants, function(tags) {
-                    var row = $('<div class="control-group font-preview"><label class="control-label">' + gettext('Preview') + '</label>');
-                    var preview_holder = $('<div class="controls">');
-                    $('<div class="font-tag-preview">').appendTo(preview_holder).text(_.chain(tags).map(get_tag_data_for_id).pluck('name').value().join(', ') || gettext("No tags"));
-                    var preview = $('<div>').appendTo(preview_holder);
-                    var line = ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789~!@#$%^& *()_+[]{}\\|;:\'"<>?`'.match(preview_regex)||[]).join('');
-                    var font_size = id_str.match(/[0-9]+$/)[0];
+                    _.each(resource.variants, function (tags) {
+                        var row = $('<div class="control-group font-preview"><label class="control-label">' + gettext('Preview') + '</label>');
+                        var preview_holder = $('<div class="controls">');
+                        $('<div class="font-tag-preview">').appendTo(preview_holder).text(_.chain(tags).map(get_tag_data_for_id).pluck('name').value().join(', ') || gettext("No tags"));
+                        var preview = $('<div>').appendTo(preview_holder);
+                        var line = ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789~!@#$%^& *()_+[]{}\\|;:\'"<>?`'.match(preview_regex) || []).join('');
+                        var font_size = id_str.match(/[0-9]+$/)[0];
 
-                    preview.text(line);
-                    // Officially, a CSS pixel is defined as one pixel at 96 dpi.
-                    // 96 / PEBBLE_PPI should thus be correct.
-                    // We use 'transform' to work around https://bugs.webkit.org/show_bug.cgi?id=20606
-                    preview.css({
-                        'font-family': CloudPebble.Resources.GetFontFamily(resource, tags),
-                        'font-size': font_size + 'px',
-                        'line-height': font_size + 'px',
-                        'letter-spacing': tracking + 'px',
-                        'transform': 'scale(' + (96 / PEBBLE_PPI) + ')',
-                        'transform-origin': '0 0',
-                        'display': 'inline-block',
-                        'border': (2 * (PEBBLE_PPI / 96)) + 'px solid #767676',
-                        'padding': '5px',
-                        'border-radius': '5px',
-                        'background-color': 'white',
-                        'color': 'black'
+                        preview.text(line);
+                        // Officially, a CSS pixel is defined as one pixel at 96 dpi.
+                        // 96 / PEBBLE_PPI should thus be correct.
+                        // We use 'transform' to work around https://bugs.webkit.org/show_bug.cgi?id=20606
+                        preview.css({
+                            'font-family': CloudPebble.Resources.GetFontFamily(resource, tags),
+                            'font-size': font_size + 'px',
+                            'line-height': font_size + 'px',
+                            'letter-spacing': tracking + 'px',
+                            'transform': 'scale(' + (96 / PEBBLE_PPI) + ')',
+                            'transform-origin': '0 0',
+                            'display': 'inline-block',
+                            'border': (2 * (PEBBLE_PPI / 96)) + 'px solid #767676',
+                            'padding': '5px',
+                            'border-radius': '5px',
+                            'background-color': 'white',
+                            'color': 'black'
+                        });
+                        row.append(preview_holder);
+                        group.append(row);
                     });
-                    row.append(preview_holder);
-                    group.append(row);
-                });
-            };
-            var has_target_platforms = _.isArray(resource["target_platforms"]);
-            if (has_target_platforms) {
-                target_platforms_checkbox.prop('checked', true);
-                _.each(_.keys(PLATFORMS), function(platform) {
-                    $("#edit-resource-target-"+platform).prop('checked', _.contains(resource["target_platforms"], platform));
-                });
-            }
-            show_resource_targets(pane);
-            if(resource.kind != 'font') {
-                if(resource.resource_ids.length > 0) {
-                    pane.find('#non-font-resource-group .edit-resource-id').val(resource.resource_ids[0].id);
                 }
-            } else {
-                pane.find('#non-font-resource-group').addClass('hide');
-                var template = pane.find('.font-resource-group-single').detach();
-                var parent = $('#font-resource-group').removeClass('hide');
-                $.each(resource.resource_ids, function(index, value) {
-                    var group = template.clone();
-                    group.removeClass('hide').attr('id','');
-                    group.find('.edit-resource-id').val(value.id);
+            };
+
+            var template = pane.find('.resource-id-group-single').detach();
+            var parent = $('#resource-id-group').removeClass('hide');
+            $.each(resource.resource_ids, function(index, value) {
+                var group = template.clone();
+                group.removeClass('hide').attr('id','');
+                group.find('.edit-resource-id').val(value.id);
+                if (resource.kind == 'font') {
                     group.find('.edit-resource-regex').val(value.regex);
                     group.find('.edit-resource-tracking').val(value.tracking || '0');
                     group.find('.font-compat-option').val(value.compatibility || "");
@@ -596,20 +612,46 @@ CloudPebble.Resources = (function() {
                     group.find('input[type=text], input[type=number]').on('input', function() {
                         update_font_preview(group);
                     });
-                    parent.append(group);
-                });
-                pane.find('#add-font-resource').removeClass('hide').click(function() {
-                    var clone = parent.find('.font-resource-group-single:last').clone(false);
-                    if(!clone.length) {
-                        clone = template.clone().removeClass('hide').attr('id','');
-                    }
-                    parent.append(clone);
+                    group.find('.non-font-only').remove();
+                } else {
+                    group.find('.font-only').remove();
+                }
 
-                    clone.find('input[type=text], input[type=number]').on('input', function() {
-                        update_font_preview(clone);
+                var has_target_platforms = _.isArray(value["target_platforms"]);
+                if (has_target_platforms) {
+                    var target_platforms_checkbox = group.find(".edit-resource-target-platforms-enabled");
+                    target_platforms_checkbox.prop('checked', true);
+                    _.each(_.keys(PLATFORMS), function(platform) {
+                        group.find(".edit-resource-target-"+platform).prop('checked', _.contains(value["target_platforms"], platform));
+                    });
+                }
+                group.find(".resource-targets-section input").change(function() {
+                    update_platform_labels(pane);
+                });
+
+                group.find('.btn-delidentifier').click(function() {
+                    CloudPebble.Prompts.Confirm(gettext("Do you want to this resource identifier?"), gettext("This cannot be undone."), function () {
+                        group.remove();
+                        CloudPebble.Sidebar.SetIcon('resource-'+resource.id, 'edit');
+                        save();
                     });
                 });
-            }
+
+                parent.append(group);
+            });
+            pane.find('.btn-delidentifier').toggle(resource.resource_ids.length > 1);
+            pane.find('#add-resource-id').removeClass('hide').click(function() {
+                var clone = parent.find('.resource-id-group-single:last').clone(false);
+
+                if(!clone.length) {
+                    clone = template.clone().removeClass('hide').attr('id','');
+                }
+                parent.append(clone);
+                clone.find('input[type=text], input[type=number]').on('input', function() {
+                    update_font_preview(clone);
+                });
+                CloudPebble.Sidebar.SetIcon('resource-'+resource.id, 'edit');
+            });
 
             pane.find('.image-platform-preview').toggle((resource.kind == 'png' || resource.kind == 'png-trans'));
 
@@ -643,33 +685,7 @@ CloudPebble.Resources = (function() {
                     CloudPebble.Sidebar.SetIcon('resource-'+resource.id, 'edit');
                 }
             }).init();
-            form.submit(function(e) {
-                e.preventDefault();
-                process_resource_form(form, false, resource.file_name, "/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/update", function(data) {
-                    delete project_resources[resource.file_name];
-                    // Update our information about the resource.
-                    update_resource(data);
-                    resource = project_resources[data.file_name];
-
-                    // Set the resource's sidebar name
-                    generate_resource_previews(resource.kind);
-                    CloudPebble.Sidebar.SetItemName('resource', data.id, data.file_name);
-
-                    if(resource.kind == 'font') {
-                        resource.family = null;
-                        $.each(pane.find('.font-resource-group-single'), function(index, group) {
-                            update_font_preview($(group));
-                        });
-                    }
-
-                    // Clear and disable the upload-file form
-                    pane.find('#edit-resource-new-file input').val('');
-                    pane.find('#edit-resource-new-file textarea').textext()[0].tags().empty().core().enabled(false);
-                    pane.find('#edit-resource-new-file').toggleClass('file-present', false);
-                    CloudPebble.Sidebar.ClearIcon('resource-'+resource.id);
-                    live_form.clearIcons();
-                });
-            });
+            form.submit(save);
 
             restore_pane(pane);
         });
@@ -681,7 +697,6 @@ CloudPebble.Resources = (function() {
             parent.find('.colour-resource, #resource-targets-section').hide();
         } else {
             parent.find('.colour-resource, #resource-targets-section').show();
-            show_resource_targets(parent)
         }
         if(CloudPebble.ProjectInfo.sdk_version != '3') {
             parent.find('.sdk3-only').hide();
@@ -765,17 +780,16 @@ CloudPebble.Resources = (function() {
     var prepare_resource_pane = function() {
         var template = resource_template.clone();
         template.removeClass('hide');
-
+        template.find('.font-only').addClass('hide');
+        template.find('.nont-font-only').removeClass('hide');
         template.find('.image-platform-preview').hide();
         template.find('#edit-resource-type').change(function() {
             if($(this).val() == 'font') {
-                template.find('#non-font-resource-group').addClass('hide');
-                template.find('#font-resource-group').removeClass('hide');
-                template.find('#add-font-resource').removeClass('hide');
+                template.find('.font-only').removeClass('hide');
+                template.find('.non-font-only').addClass('hide');
             } else {
-                template.find('#font-resource-group').addClass('hide');
-                template.find('#non-font-resource-group').removeClass('hide');
-                template.find('#add-font-resource').addClass('hide');
+                template.find('.font-only').addClass('hide');
+                template.find('.non-font-only').removeClass('hide');
             }
         });
 
@@ -785,9 +799,6 @@ CloudPebble.Resources = (function() {
                 return (old_val || input.val().split(/(\\|\/)/g).pop());
             });
         });
-
-        template.find("#edit-resource-target-platforms-enabled").change(_.partial(show_resource_targets, template));
-        template.find("#resource-targets-section input").change(function() {update_platform_labels(template);});
 
         // setTimeout is used because the textarea has to actually be visible when the textext tag editor is initialised
         setTimeout(function() {

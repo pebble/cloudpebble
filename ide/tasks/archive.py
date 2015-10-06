@@ -190,7 +190,6 @@ def do_import_archive(project_id, archive, delete_project=False):
 
                             desired_resources = {}
                             resources_files = {}
-                            resource_identifiers = {}
                             resource_variants = {}
                             file_exists_for_root = {}
 
@@ -230,62 +229,47 @@ def do_import_archive(project_id, archive, delete_project=False):
                                 print "Importing file %s with root %s " % (zipitem.filename, root_file_name)
 
                                 if root_file_name in desired_resources:
-                                    ''' FIXME: targetPlatforms is currently stored in resourceFile, but it *should* be in
-                                     ResourceIdentifier. Until that is fixed, we cannot support multiple identifiers
-                                     linked to a single file compiling for different platforms. When the bug is fixed,
-                                     this will need to be changed. Until then, we just pick the first file on the list
-                                     of desired_resources.'''
                                     medias = desired_resources[root_file_name]
-                                    is_font = False
                                     print "Looking for variants of %s" % root_file_name
-                                    # An exception to the above warning is made for fonts, where multiple identifiers is
-                                    # already implemented in the UI.
-                                    if len(medias) > 1:
-                                        if set(r['type'] for r in medias) != {'font'}:
-                                            raise NotImplementedError("You cannot currently import a project with multiple identifiers for a single non-font file")
-                                        else:
-                                            is_font = True
-                                    resource = medias[-1]
 
-                                    for resource in medias:
-                                        # Make only one resource file per base resource.
-                                        if root_file_name not in resources_files:
-                                            kind = resource['type']
-                                            is_menu_icon = resource.get('menuIcon', False)
-                                            target_platforms = resource.get('targetPlatforms', None)
-                                            target_platforms = json.dumps(target_platforms) if target_platforms else None
-                                            resources_files[root_file_name] = ResourceFile.objects.create(
-                                                project=project,
-                                                file_name=os.path.basename(root_file_name),
-                                                kind=kind,
-                                                is_menu_icon=is_menu_icon,
-                                                target_platforms=target_platforms)
+                                    # Because 'kind' and 'is_menu_icons' are properties of ResourceFile in the database,
+                                    # we just use the first one.
+                                    resource = medias[0]
+                                    # Make only one resource file per base resource.
+                                    if root_file_name not in resources_files:
+                                        kind = resource['type']
+                                        is_menu_icon = resource.get('menuIcon', False)
+                                        resources_files[root_file_name] = ResourceFile.objects.create(
+                                            project=project,
+                                            file_name=os.path.basename(root_file_name),
+                                            kind=kind,
+                                            is_menu_icon=is_menu_icon)
 
-                                        identifier = resource['name']
-                                        # Add all the identifiers which don't clash with existing identifiers
-                                        if not identifier in resource_identifiers:
-                                            tracking = resource.get('trackingAdjust', None)
-                                            regex = resource.get('characterRegex', None)
-                                            compatibility = resource.get('compatibility', None)
-
-                                            ResourceIdentifier.objects.create(
-                                                resource_file=resources_files[root_file_name],
-                                                resource_id=identifier,
-                                                character_regex=regex,
-                                                tracking=tracking,
-                                                compatibility=compatibility
-                                            )
-                                            resource_identifiers[identifier] = resources_files[root_file_name]
-
-                                        # At the moment, only add > 1 identifier for fonts.
-                                        if not is_font:
-                                            break
-
+                                    # But add a resource variant for every file
                                     print "Adding variant %s with tags [%s]" % (root_file_name, tags_string)
                                     actual_file_name = resource['file']
                                     resource_variants[actual_file_name] = ResourceVariant.objects.create(resource_file=resources_files[root_file_name], tags=tags_string)
                                     resource_variants[actual_file_name].save_file(extracted)
                                     file_exists_for_root[root_file_name] = True
+
+                            # Now add all the resource identifiers
+                            for root_file_name in desired_resources:
+                                for resource in desired_resources[root_file_name]:
+                                    print resource
+                                    identifier = resource['name']
+                                    tracking = resource.get('trackingAdjust', None)
+                                    regex = resource.get('characterRegex', None)
+                                    compatibility = resource.get('compatibility', None)
+                                    target_platforms = resource.get('targetPlatforms', None)
+                                    target_platforms = json.dumps(target_platforms) if target_platforms is not None else None
+                                    ResourceIdentifier.objects.create(
+                                        resource_file=resources_files[root_file_name],
+                                        resource_id=identifier,
+                                        character_regex=regex,
+                                        tracking=tracking,
+                                        compatibility=compatibility,
+                                        target_platforms=target_platforms
+                                    )
 
                             # Check that at least one variant of each specified resource exists.
                             for root_file_name, loaded in file_exists_for_root.iteritems():
