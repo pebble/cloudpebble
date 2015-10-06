@@ -30,77 +30,6 @@
 
         </div>
 
-        <div class="well image-platform-preview hide sdk3-only native-only">
-            <h4>{% trans 'Preview per platform' %}</h4>
-            <div class="pane-boxes pane-3-boxes ">
-                {% for platform in supported_platforms %}
-                <div id="resource-image-preview-for-{{ platform }}">
-                    <h4>{{ platform | capfirst }}</h4>
-                    <span></span>
-                    <img src="">
-                </div>
-                {% endfor %}
-            </div>
-            <p class="help-block">{% trans "Given the tags for each variant, this shows the final version selected for each platform." %}</p>
-        </div>
-
-        <div id="edit-resource-previews">
-
-        </div>
-
-
-        <div id="edit-image-resource-preview-template" class="hide">
-            <div class="image-resource-preview-pane well">
-                <div class="control-group image-resource-preview">
-                    <label class="control-label">
-                        {%  trans 'Image preview' %}
-                    </label>
-                    <div class="controls">
-                        <img src=""><p class="image-resource-preview-dimensions">52x52</p>
-                    </div>
-                </div>
-                <div class="tag-edit control-group sdk3-only native-only">
-                {# TODO: support for/id #}
-                    <label class="control-label">Tags</label>
-                    <div class="controls">
-                        <textarea class="resource-tags" rows="1" cols="60"></textarea>
-                    </div>
-                </div>
-                <div class="variant-platform-preview control-group sdk3-only native-only">
-                    <label class="control-label">Final platforms</label>
-                    <div class="controls label-list"></div>
-                </div>
-
-                <button type="button" class="btn btn-small btn-danger btn-delete-well btn-delvariant">{% trans 'Delete Variant' %}</button>
-            </div>
-        </div>
-
-        <div id="edit-raw-resource-preview-template" class="hide">
-            <div class="raw-resource-preview-pane well">
-                <div class="control-group ">
-                    <label class="control-label">
-                        Resource
-                    </label>
-                    <div class="controls resource-download-link">
-                        <a href="#" class="btn">{% trans 'Download uploaded resource' %}</a>
-                    </div>
-                </div>
-
-                <div class="tag-edit control-group sdk3-only native-only">
-                {# TODO: support for/id #}
-                    <label class="control-label">Tags</label>
-                    <div class="controls">
-                        <textarea class="resource-tags" rows="1" cols="60"></textarea>
-                    </div>
-                </div>
-                <div class="variant-platform-preview control-group sdk3-only native-only">
-                    <label class="control-label">{% trans 'Final platforms' %}</label>
-                    <div class="controls label-list"></div>
-                </div>
-
-                <button type="button" class="btn btn-small btn-danger btn-delete-well btn-delvariant">{% trans 'Delete Variant' %}</button>
-            </div>
-        </div>
 
         <div id="resource-id-group">
             <div class="well resource-id-group-single">
@@ -159,6 +88,77 @@
                     </div>
                 </div>
                 <button type="button" class="btn btn-small btn-danger btn-delete-well btn-delidentifier">{% trans 'Delete Identifier' %}</button>
+            </div>
+        </div>
+
+        <div class="well image-platform-preview hide sdk3-only native-only">
+            <h4>{% trans 'Preview per platform' %}</h4>
+            <div class="pane-boxes pane-3-boxes ">
+                {% for platform in supported_platforms %}
+                <div id="resource-image-preview-for-{{ platform }}">
+                    <h4>{{ platform | capfirst }}</h4>
+                    <span></span>
+                    <img src="">
+                </div>
+                {% endfor %}
+            </div>
+            <p class="help-block">{% trans "Given the tags for each variant, this shows the final version selected for each platform." %}</p>
+        </div>
+
+        <div id="edit-resource-previews">
+
+        </div>
+
+
+        <div id="edit-image-resource-preview-template" class="hide">
+            <div class="image-resource-preview-pane well">
+                <div class="control-group image-resource-preview">
+                    <label class="control-label">
+                        {%  trans 'Image preview' %}
+                    </label>
+                    <div class="controls">
+                        <img src=""><p class="image-resource-preview-dimensions">52x52</p>
+                    </div>
+                </div>
+                <div class="tag-edit control-group sdk3-only native-only">
+                {# TODO: support for/id #}
+                    <label class="control-label">Tags</label>
+                    <div class="controls">
+                        <textarea class="resource-tags" rows="1" cols="60"></textarea>
+                    </div>
+                </div>
+                <div class="variant-platform-preview control-group sdk3-only native-only">
+                    <label class="control-label">Final platforms</label>
+                    <div class="controls label-list"></div>
+                </div>
+
+                <button type="button" class="btn btn-small btn-danger btn-delete-well btn-delvariant">{% trans 'Delete Variant' %}</button>
+            </div>
+        </div>
+
+        <div id="edit-raw-resource-preview-template" class="hide">
+            <div class="raw-resource-preview-pane well">
+                <div class="control-group ">
+                    <label class="control-label">
+                        Resource
+                    </label>
+                    <div class="controls resource-download-link">
+                        <a href="#" class="btn">{% trans 'Download uploaded resource' %}</a>
+                    </div>
+                </div>
+
+                <div class="tag-edit control-group sdk3-only native-only">
+                    <label class="control-label">Tags</label>
+                    <div class="controls">
+                        <textarea class="resource-tags" rows="1" cols="60"></textarea>
+                    </div>
+                </div>
+                <div class="variant-platform-preview control-group sdk3-only native-only">
+                    <label class="control-label">{% trans 'Final platforms' %}</label>
+                    <div class="controls label-list"></div>
+                </div>
+
+                <button type="button" class="btn btn-small btn-danger btn-delete-well btn-delvariant">{% trans 'Delete Variant' %}</button>
             </div>
         </div>
 
