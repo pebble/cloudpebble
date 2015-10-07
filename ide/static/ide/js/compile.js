@@ -336,10 +336,11 @@ CloudPebble.Compile = (function() {
     };
 
     function logs_scrolled_to_bottom() {
-        if (mLogHolder == null) {
+        // Return true if the log window is scrolled to within 20 pixels of the bottom.
+        if (!mLogHolder) {
             return false;
         }
-        return (mLogHolder[0].scrollHeight - mLogHolder.scrollTop() == mLogHolder.outerHeight());
+        return (mLogHolder[0].scrollHeight - mLogHolder.scrollTop() <= mLogHolder.outerHeight() + 20);
     }
 
     function scroll_logs_to_bottom() {
@@ -446,7 +447,7 @@ CloudPebble.Compile = (function() {
 
     function add_log_divider() {
         // Only add a log divider if the previous log entry wasn't also a divider.
-        if (mPreviousDisplayLogs.length > 0 && mPreviousDisplayLogs[mPreviousDisplayLogs.length-1] !== null) {
+        if (_.last(mPreviousDisplayLogs)) {
             mPreviousDisplayLogs.push(null);
         }
     }
@@ -580,7 +581,7 @@ CloudPebble.Compile = (function() {
                     .attr('target', '_blank')
                     .appendTo(buttonHolder)
                     .click(function() {
-                        this.href = "data:text/plain;base64,"+window.btoa(mLogHolder.text());
+                        this.href = "data:text/plain;base64,"+btoa(mLogHolder.text());
                         CloudPebble.Analytics.addEvent('app_log_download', {log_length: mPreviousDisplayLogs.length, virtual: SharedPebble.isVirtual()});
                     });
             } else {
