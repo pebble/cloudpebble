@@ -631,11 +631,11 @@ CloudPebble.Editor = (function() {
                 run_btn.popover({
                     trigger: 'hover',
                     content: function() {
-                        var capstart = function(str) {return str.charAt(0).toUpperCase() + str.slice(1);};
+                        var capitalise_first_letter = function(str) {return str.charAt(0).toUpperCase() + str.slice(1);};
                         var build_platforms = CloudPebble.ProjectInfo.app_platforms;
                         var run_platform = CloudPebble.Compile.GetPlatformForInstall();
-                        var run_platform_name = capstart(run_platform == 1 ? gettext("Phone") : ConnectionPlatformNames[run_platform] + gettext(" Emulator"));
-                        var build_platform_names = _.map(build_platforms.split(','), capstart).join(', ');
+                        var run_platform_name = capitalise_first_letter(run_platform == 1 ? gettext("Phone") : ConnectionPlatformNames[run_platform] + gettext(" Emulator"));
+                        var build_platform_names = _.map(build_platforms.split(','), capitalise_first_letter).join(', ');
 
                         return interpolate("<div><strong>%s: </strong>%s<br><strong>%s: </strong>%s</div>", [
                             gettext("Build for"),
