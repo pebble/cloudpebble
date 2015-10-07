@@ -627,6 +627,29 @@ CloudPebble.Editor = (function() {
                 rename_btn.click(show_rename_prompt);
 
                 run_btn.click(run);
+                // Show the current build/run targets in a popover on the run button.
+                run_btn.popover({
+                    trigger: 'hover',
+                    content: function() {
+                        var capitalise_first_letter = function(str) {return str.charAt(0).toUpperCase() + str.slice(1);};
+                        var build_platforms = CloudPebble.ProjectInfo.app_platforms;
+                        var run_platform = CloudPebble.Compile.GetPlatformForInstall();
+                        var run_platform_name = capitalise_first_letter(run_platform == 1 ? gettext("Phone") : ConnectionPlatformNames[run_platform] + gettext(" Emulator"));
+                        var build_platform_names = _.map(build_platforms.split(','), capitalise_first_letter).join(', ');
+
+                        return interpolate("<div><strong>%s: </strong>%s<br><strong>%s: </strong>%s</div>", [
+                            gettext("Build for"),
+                            build_platform_names,
+                            gettext("Run on"),
+                            run_platform_name
+                        ]);
+                    },
+                    html: true,
+                    placement: 'left',
+                    animation: false,
+                    delay: {show: 250},
+                    container: 'body'
+                }).click(function() { $(this).popover('hide'); });
 
                 ib_btn.click(toggle_ib);
 

@@ -630,20 +630,27 @@ CloudPebble.Compile = (function() {
         RunBuild: function(callback) {
             run_build(callback);
         },
-        DoInstall: function() {
+        /**
+         * Get the platform to install and run the the app on, given details of the project and last build.
+         * @returns {number}
+         */
+        GetPlatformForInstall: function() {
             if(localStorage['activeTarget'] == 'device') {
-                install_on_watch(ConnectionType.Phone);
+                return ConnectionType.Phone;
             } else {
                 if(SharedPebble.isVirtual()) {
-                    install_on_watch(ConnectionType.Qemu);
+                    return ConnectionType.Qemu;
                 } else {
                     if(CloudPebble.ProjectInfo.sdk_version == '3') {
-                        install_on_watch(ConnectionType.QemuBasalt);
+                        return ConnectionType.QemuBasalt;
                     } else {
-                        install_on_watch(ConnectionType.QemuAplite);
+                        return ConnectionType.QemuAplite;
                     }
                 }
             }
+        },
+        DoInstall: function() {
+            install_on_watch(CloudPebble.Compile.GetPlatformForInstall());
         }
     };
 })();
