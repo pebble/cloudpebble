@@ -634,7 +634,7 @@ CloudPebble.Editor = (function() {
                         var capstart = function(str) {return str.charAt(0).toUpperCase() + str.slice(1);};
                         var build_platforms = CloudPebble.ProjectInfo.app_platforms;
                         var run_platform = CloudPebble.Compile.GetPlatformForInstall();
-                        var run_platform_name = capstart(run_platform == 1 ? 'Phone' : ConnectionPlatformNames[run_platform]);
+                        var run_platform_name = capstart(run_platform == 1 ? gettext("Phone") : ConnectionPlatformNames[run_platform] + gettext(" Emulator"));
                         var build_platform_names = _.map(build_platforms.split(','), capstart).join(', ');
 
                         return interpolate("<div><strong>%s: </strong>%s<br><strong>%s: </strong>%s</div>", [
