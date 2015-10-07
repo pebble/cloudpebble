@@ -585,7 +585,7 @@ CloudPebble.Editor = (function() {
                 });
 
                 // Add some buttons
-                var button_holder = $('<p id="editor-button-wrapper">');
+                var button_holder = $('<p class="editor-button-wrapper">');
                 var run_btn = $('<button class="btn run-btn" title="' + gettext("Save, build, install and run") + '"></button>');
                 var save_btn = $('<button class="btn save-btn" title="' + gettext('Save') + '"></button>');
                 var discard_btn = $('<button class="btn reload-btn" title="' + gettext('Reload') + '"></button>');
