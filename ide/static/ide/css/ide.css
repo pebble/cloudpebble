@@ -990,11 +990,56 @@ span.cm-autofilled-end {
     background-image: url('../img/pebbles/snowy-red.png');
 }
 
+.screenshot-holder-bobby-black {
+    background-image: url('../img/pebbles/bobby-black.png');
+}
+
+.screenshot-holder-bobby-silver {
+    background-image: url('../img/pebbles/bobby-silver.png');
+}
+
+.screenshot-holder-bobby-gold {
+    background-image: url('../img/pebbles/bobby-gold.png');
+}
+
+.screenshot-holder-spalding-20mm-black {
+    background-image: url('../img/pebbles/spalding-20mm-black.png');
+}
+
+.screenshot-holder-spalding-20mm-silver {
+    background-image: url('../img/pebbles/spalding-20mm-silver.png');
+}
+
+.screenshot-holder-spalding-14mm-black {
+    background-image: url('../img/pebbles/spalding-14mm-black.png');
+}
+
+.screenshot-holder-spalding-14mm-silver {
+    background-image: url('../img/pebbles/spalding-14mm-silver.png');
+}
+
+.screenshot-holder-spalding-14mm-rose-gold {
+    background-image: url('../img/pebbles/spalding-14mm-rose-gold.png');
+}
+
 .screenshot-holder.screenshot-holder-snowy-black,
 .screenshot-holder.screenshot-holder-snowy-red,
-.screenshot-holder.screenshot-holder-snowy-white {
+.screenshot-holder.screenshot-holder-snowy-white,
+.screenshot-holder.screenshot-holder-bobby-black,
+.screenshot-holder.screenshot-holder-bobby-silver,
+.screenshot-holder.screenshot-holder-bobby-gold {
     padding-top: 91px;
     padding-left: 4px;
+}
+
+.screenshot-holder.screenshot-holder-spalding-14mm-silver,
+.screenshot-holder.screenshot-holder-spalding-14mm-black,
+.screenshot-holder.screenshot-holder-spalding-20mm-silver,
+.screenshot-holder.screenshot-holder-spalding-20mm-black,
+.screenshot-holder.screenshot-holder-spalding-14mm-rose-gold {
+    padding-top: 86px;
+    height: 247px;
+    width: 251px;
 }
 
 .field-help {
