@@ -67,7 +67,7 @@ CloudPebble.Editor = (function() {
                     //highlightSelectionMatches: true,
                     smartIndent: true,
                     indentWithTabs: !USER_SETTINGS.use_spaces,
-                    mode: (is_js ? 'javascript' : CloudPebble.Editor.PebbleMode),
+                    mode: (is_js ? 'javascript' : 'MonkeyScript'),
                     styleActiveLine: true,
                     value: source,
                     theme: USER_SETTINGS.theme,
@@ -345,8 +345,8 @@ CloudPebble.Editor = (function() {
                                 sChecking = false;
                             });
                     }, 2000);
-                    code_mirror.on('change', throttled_check);
-                    throttled_check();
+                    //code_mirror.on('change', throttled_check);
+                    //throttled_check();
 
                     code_mirror.on('mousedown', function(cm, e) {
                         if(e.ctrlKey || e.metaKey) {

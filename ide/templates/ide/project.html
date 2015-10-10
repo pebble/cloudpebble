@@ -64,11 +64,16 @@
                     <li class="hide nav-section" id="end-worker-files"></li>
                     <li class="nav-header nav-section not-simplyjs">{% trans 'Resources' %} <button class="btn btn-small" id="sidebar-pane-new-resource">{% trans 'Add new' %}</button></li>
                     <li class="hide not-simplyjs" id="end-resources"></li>
+                    <li class="nav-header" id="nav-tests">Tests
+                        <button class="btn btn-small" id="new-test">{% trans 'Add new' %}</button></li></li>
                 </ul>
             </div>
         </div>
         <div id="pane-parent">
             <div id="main-pane" style="display: none;">
+            </div>
+            <div id="right-pane">
+                {% include "ide/project/monkeyscript.html" %}
             </div>
             <div id="progress-pane">
                 <div class="row-fluid">
@@ -483,6 +488,7 @@ var LIBPEBBLE_PROXY = {{ libpebble_proxy | safe }};
 <script src="{% static 'ide/external/fuse.js' %}"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.2.0/mode/clike/clike.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.2.0/mode/javascript/javascript.js"></script>
+<script src="{% static 'ide/js/monkeyscript.js' %}"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.2.0/keymap/emacs.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.2.0/keymap/vim.js"></script>
 <script src="{% static 'ide/external/uuid.js' %}"></script>

@@ -1025,3 +1025,38 @@ span.cm-autofilled-end {
     margin: 0;
 }
 
+/* Monkey editor */
+
+#main-pane {
+    right: 700px;
+}
+
+.monkey-pane {
+    padding: 10px;
+    overflow: scroll;
+    height: 100%;
+}
+
+#right-pane {
+    left: calc(100% - 700px);
+    right: 0;
+    top: 0;
+    bottom: 0;
+    position: absolute;
+    border-left: #444 3px solid;
+}
+
+.monkey-pane h2 {
+    padding: 10px;
+}
+
+.monkey-screenshots .image-resource-preview {
+    padding-top: 30px;
+    width: 200px;
+    display: inline-block;
+    /* line-height: 280px; */
+}
+
+.monkey-screenshots .image-resource-preview img {
+    width: 180px;
+}
