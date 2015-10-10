@@ -1028,17 +1028,11 @@ span.cm-autofilled-end {
 /* Monkey editor */
 
 #main-pane {
-    right: 700px;
-}
-
-.monkey-pane {
-    padding: 10px;
-    overflow: scroll;
-    height: 100%;
+    right: 640px;
 }
 
 #right-pane {
-    left: calc(100% - 700px);
+    left: calc(100% - 640px);
     right: 0;
     top: 0;
     bottom: 0;
@@ -1046,17 +1040,89 @@ span.cm-autofilled-end {
     border-left: #444 3px solid;
 }
 
+.monkey-pane {
+    padding: 10px;
+    overflow: scroll;
+    height: 100%;
+    background-color: #333;
+}
+
+
 .monkey-pane h2 {
     padding: 10px;
 }
 
-.monkey-screenshots .image-resource-preview {
-    padding-top: 30px;
+.monkey-screenshot-set {
+    margin-bottom: 30px;
+}
+
+.monkey-pane .image-resource-preview {
     width: 200px;
     display: inline-block;
     /* line-height: 280px; */
 }
 
-.monkey-screenshots .image-resource-preview img {
+.monkey-pane .image-resource-preview img {
     width: 180px;
+}
+
+.monkey-platforms div {
+    width: 200px;
+    color: white;
+    font-size: 30px;
+    display: inline-block;
+    text-align: center;
+}
+
+.monkey-screenshot-name {
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.aplite-only .platform-chalk, .aplite-only .platform-basalt, .basalt-only .platform-aplite, .basalt-only .platform-chalk, .chalk-only .platform-aplite, .chalk-only .platform-basalt {
+    display: none;
+}
+
+.aplite-only .monkey-platforms, .chalk-only .monkey-platforms, .basalt-only .monkey-platforms {
+    display: none;
+}
+
+.monkey-inline .monkey-screenshot-set, #monkey-upload-previews .image-resource-preview {
+    display: inline-block;
+}
+
+.monkey-pane h2 > span {
+    display: none;
+}
+
+.monkey-inline h2 > span {
+    display: inline;
+}
+
+.monkey-inline .monkey-screenshot-set {
+    width: 200px;
+    height: 270px;
+    vertical-align: top;
+}
+
+.monkey-screenshot-set input {
+    width: calc(100% - 50px);
+}
+
+.monkey-screenshots .image-resource-preview img {
+    cursor: pointer;
+    background-color: rgba(100, 100, 100, 0.5);
+}
+
+.monkey-screenshots .monkey-modified {
+    border: 2px white dashed;
+}
+
+.monkey-screenshots .monkey-hover {
+    border: 2px #5bc0de dashed;
+}
+
+.monkey-screenshots .settings-status-icons {
+    padding-right: 10px;
 }

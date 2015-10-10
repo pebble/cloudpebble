@@ -1,20 +1,40 @@
 {% load i18n %}
 
+{#<div class="monkey-pane aplite-only monkey-inline">#}
 <div id="monkey-editor-template" class="monkey-pane">
-  <h2>Test Screenshots</h2>
+    <h2>Test Screenshots
+            {% for platform in current_platforms %}
+            <span class="platform-{{ platform }}">- {{ platform }}</span>
+            {%  endfor %}
+    </h2>
+    <div class="monkey-platforms">
+    {% for platform in current_platforms %}
+        <div>{{ platform }}</div>
+    {%  endfor %}
+</div>
 
-    <div class="monkey-image-controls">
-  <input type="file">
-        <button class="btn btn-large">Upload</button>
-    </div><div class="monkey-screenshots" style="
-">
-<div class="image-resource-preview">
-  <img src="/static/common/img/screenshot.png"><span><input type="text" placeholder="Name"></span></div>
+    <form class="monkey-form">
+        <div class="monkey-screenshots">
+            <div class="monkey-screenshot-set hide">
+                {% for platform in current_platforms %}
+                <div class="image-resource-preview platform-{{ platform }}" data-platform="{{ platform }}" >
+                    <img src="/static/common/img/screenshot-empty.png">
+                    <input type="file" class="hide" multiple >
+                </div>
+                {%  endfor %}
+                <div class="monkey-screenshot-title hide">
+                    <input class="monkey-editing " type="text" placeholder="{% trans "screenshot name" %}">
+                    <span class="settings-status-icons">
+                        <span class="monkey-changed icon-edit hide"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </form>
 
 
-<div class="image-resource-preview">
-  <img src="/static/common/img/screenshot.png"><input type="text" placeholder="Name"></div><div class="image-resource-preview">
-  <img src="/static/common/img/screenshot.png"><input type="text" placeholder="Name"></div><div class="image-resource-preview">
-  <img src="/static/common/img/screenshot.png"><input type="text" placeholder="Name"></div></div>
-
+    <div class="monkey-form-buttons">
+        <button class="btn btn-affirmative">Save</button>
+        <button class="btn btn-cancel">Reset</button>
+    </div>
 </div>
