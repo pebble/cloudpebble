@@ -636,17 +636,18 @@ CloudPebble.Editor = (function() {
                     trigger: 'hover',
                     content: function() {
                         var capitalise_first_letter = function(str) {return str.charAt(0).toUpperCase() + str.slice(1);};
+
+                        var tooltip = $('<div>');
                         var build_platforms = CloudPebble.ProjectInfo.app_platforms;
+                        if (build_platforms) {
+                            var build_platform_names = _.map(build_platforms.split(','), capitalise_first_letter).join(', ');
+                            tooltip.append($(interpolate("<div><strong>%s: </strong>%s</div>", [gettext("Build for"), build_platform_names])));
+                        }
                         var run_platform = CloudPebble.Compile.GetPlatformForInstall();
                         var run_platform_name = capitalise_first_letter(run_platform == 1 ? gettext("Phone") : ConnectionPlatformNames[run_platform] + gettext(" Emulator"));
-                        var build_platform_names = _.map(build_platforms.split(','), capitalise_first_letter).join(', ');
+                        tooltip.append(interpolate("<div><strong>%s: </strong>%s</div>", [gettext("Run on"), run_platform_name]));
 
-                        return interpolate("<div><strong>%s: </strong>%s<br><strong>%s: </strong>%s</div>", [
-                            gettext("Build for"),
-                            build_platform_names,
-                            gettext("Run on"),
-                            run_platform_name
-                        ]);
+                        return tooltip;
                     },
                     html: true,
                     placement: 'left',
