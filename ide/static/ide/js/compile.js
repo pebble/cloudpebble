@@ -9,7 +9,7 @@ CloudPebble.Compile = (function() {
 
     var mPendingCallbacks = [];
     var mRunningBuild = false;
-
+    var mLastScrollTop = 'bottom';
     var mLastBuild = null;
 
     var build_history_row = function(build) {
@@ -60,9 +60,8 @@ CloudPebble.Compile = (function() {
             log = log.replace(/^(JavaScript linting failed.*)$/gm, '<span class="log-note">$1</span>');
             // Link the thingies.
             log = log.replace(/([\/a-zA-Z0-9_]+\.[ch]):([0-9+]+)/g, '<span class="filename-link" data-filename="$1" data-line="$2">$1:$2</span>');
-            log = '<pre class="build-log" style="height: 100%;">' + log + '</pre>';
-            var browserHeight = document.documentElement.clientHeight;
-            log = $(log).css({'height': (browserHeight - 130) + 'px', 'overflow': 'auto'});
+            log = '<pre class="build-log">' + log + '</pre>';
+            log = $(log).css({'height': '100%', 'overflow': 'auto'});
             // Make the links do something.
             log.find('.filename-link').click(function() {
                 var thing = $(this);
@@ -167,6 +166,8 @@ CloudPebble.Compile = (function() {
         commands[gettext("Show Phone Logs")] = function() { show_app_logs(ConnectionType.Phone); };
         commands[gettext("Show Emulator Logs")] = function() { show_app_logs(ConnectionType.Qemu); };
         commands[gettext("Show Last Build Log")] = function() {show_build_log(mLastBuild.id)};
+        commands[gettext("Compilation")] = function() { show_compile_pane(); ;};
+        commands[gettext("Clear App Logs")] = function() { show_clear_logs_prompt(); };
         CloudPebble.FuzzyPrompt.AddCommands(commands);
 
         SharedPebble.on('app_log', handle_app_log);
@@ -333,7 +334,7 @@ CloudPebble.Compile = (function() {
             } else {
                 var display = _.escape(get_log_label(log.priority) + ' ' + log.filename + ':' + log.line_number + ': ' + log.message);
                 display = display.replace(/([\/a-zA-Z0-9_]+\.[ch]):([0-9+]+)/, '<span class="filename-link" data-filename="$1" data-line="$2">$1:$2</span>');
-                var span = $('<span>').addClass(get_log_class(log.priority)).html(display);
+                var span = $('<span>').addClass(get_log_class(log.priority)).addClass('log').html(display);
                 span.find('.filename-link').click(function() {
                     var thing = $(this);
                     var filename = thing.data('filename');
@@ -351,9 +352,35 @@ CloudPebble.Compile = (function() {
         }
     };
 
+    function logs_scrolled_to_bottom() {
+        // Return true if the log window is scrolled to within 20 pixels of the bottom.
+        if (!mLogHolder) {
+            return false;
+        }
+        return (mLogHolder[0].scrollHeight - mLogHolder.scrollTop() <= mLogHolder.outerHeight() + 20);
+    }
+
+    function scroll_logs_to_bottom() {
+        mLogHolder[0].scrollTop = mLogHolder[0].scrollHeight - mLogHolder.outerHeight();
+    }
+
+    function restore_scroll_position() {
+        if (mLastScrollTop == 'bottom') {
+            scroll_logs_to_bottom();
+        }
+        else if (_.isNumber(mLastScrollTop)) {
+            mLogHolder[0].scrollTop = mLastScrollTop;
+        }
+    }
+
     var append_log_html = function(html) {
-        mLogHolder.append(html).append("\n");
-        mLogHolder[0].scrollTop = mLogHolder[0].scrollHeight;
+        // Append the HTML line to the log
+        var at_bottom = logs_scrolled_to_bottom();
+        mLogHolder.append(html.append("\n"));
+        // Then, scroll to the bottom if we were already scrolled to the bottom before.
+        if (at_bottom) {
+            mLogHolder[0].scrollTop = mLogHolder[0].scrollHeight - mLogHolder.outerHeight();
+        }
     };
 
     var handle_crash = function(process, is_our_crash, pc, lr) {
@@ -435,6 +462,13 @@ CloudPebble.Compile = (function() {
         return gettext('[VERBOSE]');
     };
 
+    function add_log_divider() {
+        // Only add a log divider if the previous log entry wasn't also a divider.
+        if (_.last(mPreviousDisplayLogs)) {
+            mPreviousDisplayLogs.push(null);
+        }
+    }
+
     var install_on_watch = function(kind) {
         var modal = $('#phone-install-progress');
 
@@ -448,7 +482,7 @@ CloudPebble.Compile = (function() {
             pebble.on('status', function(code) {
                 pebble.off('install:progress');
                 if(code === 0) {
-                    mPreviousDisplayLogs.push(null);
+                    add_log_divider();
                     pebble.enable_app_logs();
                     modal.find('.modal-body > p').text(gettext("Installed successfully!"));
                     modal.find('.btn').removeClass('hide');
@@ -533,6 +567,15 @@ CloudPebble.Compile = (function() {
         });
     };
 
+    var show_clear_logs_prompt = function() {
+        CloudPebble.Prompts.Confirm(gettext("Clear all app logs?"), gettext("This cannot be undone."), function() {
+            ga('send', 'event', 'logs', 'delete');
+            CloudPebble.Analytics.addEvent('app_log_clear', {log_length: mPreviousDisplayLogs.length, virtual: SharedPebble.isVirtual()});
+            mLogHolder.empty();
+            mPreviousDisplayLogs = [];
+        });
+    };
+
     var show_app_logs = function(kind) {
         SharedPebble.getPebble(kind).done(function(pebble) {
             pebble.on('close', function() {
@@ -541,14 +584,31 @@ CloudPebble.Compile = (function() {
             });
             CloudPebble.Sidebar.SuspendActive();
             if(!mLogHolder) {
-                var browserHeight = document.documentElement.clientHeight;
-                mLogHolder = $('<pre class="build-log">').css({'height': (browserHeight - 130) + 'px', 'overflow': 'auto'});
+                var parentPane = $('<div></div>');
+                var logPane = $('<div></div>').addClass("app-log").appendTo(parentPane);
+                mLogHolder = $('<pre class="build-log">').appendTo(logPane);
+                var buttonHolder = $("<div>").addClass("editor-button-wrapper").appendTo(parentPane);
+                $("<button>")
+                    .addClass('btn delete-btn')
+                    .attr('title', gettext("Clear Logs"))
+                    .appendTo(buttonHolder).click(show_clear_logs_prompt);
+                $("<a>")
+                    .addClass('btn save-btn')
+                    .attr('title', gettext("Download Logs"))
+                    .attr('download', "CloudPebble.log")
+                    .attr('target', '_blank')
+                    .appendTo(buttonHolder)
+                    .click(function() {
+                        this.href = "data:text/plain;base64,"+btoa(mLogHolder.text());
+                        CloudPebble.Analytics.addEvent('app_log_download', {log_length: mPreviousDisplayLogs.length, virtual: SharedPebble.isVirtual()});
+                    });
             } else {
                 mLogHolder.empty();
             }
             _.each(mPreviousDisplayLogs, _.partial(show_log_line, _, true));
-            CloudPebble.Sidebar.SetActivePane(mLogHolder, undefined, undefined, stop_logs);
+            CloudPebble.Sidebar.SetActivePane(parentPane, undefined, undefined, stop_logs);
             CloudPebble.Analytics.addEvent('app_log_view', {virtual: SharedPebble.isVirtual()});
+            restore_scroll_position();
         });
     };
 
@@ -611,7 +671,8 @@ CloudPebble.Compile = (function() {
         if(!SharedPebble.isVirtual()) {
             SharedPebble.disconnect();
         }
-        mPreviousDisplayLogs.push(null);
+        add_log_divider();
+        mLastScrollTop = (mLogHolder ? (logs_scrolled_to_bottom() ? 'bottom' : mLogHolder[0].scrollTop) : mLastScrollTop);
         mLogHolder = null;
     };
 
@@ -647,28 +708,35 @@ CloudPebble.Compile = (function() {
         RunBuild: function(callback) {
             run_build(callback);
         },
-        DoInstall: function() {
+        /**
+         * Get the platform to install and run the the app on, given details of the project and last build.
+         * @returns {number}
+         */
+        GetPlatformForInstall: function() {
             if(localStorage['activeTarget'] == 'device') {
-                install_on_watch(ConnectionType.Phone);
+                return ConnectionType.Phone;
             } else {
                 if(SharedPebble.isVirtual()) {
-                    install_on_watch(ConnectionType.Qemu);
+                    return ConnectionType.Qemu;
                 } else {
                     if(CloudPebble.ProjectInfo.sdk_version == '3') {
-                        if (CloudPebble.ProjectInfo.app_platforms.indexOf('basalt') > -1) {
-                            install_on_watch(ConnectionType.QemuBasalt);
+                        if (CloudPebble.ProjectInfo.app_platforms.indexOf('chalk') > -1) {
+                            return ConnectionType.QemuChalk;
                         }
-                        else if (CloudPebble.ProjectInfo.app_platforms.indexOf('chalk') > -1) {
-                            install_on_watch(ConnectionType.QemuChalk);
+                        else if (CloudPebble.ProjectInfo.app_platforms.indexOf('basalt') > -1) {
+                            return ConnectionType.QemuBasalt;
                         }
                         else if (CloudPebble.ProjectInfo.app_platforms.indexOf('aplite') > -1) {
-                            install_on_watch(ConnectionType.QemuAplite);
+                            return ConnectionType.QemuAplite;
                         }
                     } else {
-                        install_on_watch(ConnectionType.QemuAplite);
+                        return ConnectionType.QemuAplite;
                     }
                 }
             }
+        },
+        DoInstall: function() {
+            install_on_watch(CloudPebble.Compile.GetPlatformForInstall());
         }
     };
 })();

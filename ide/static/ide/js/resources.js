@@ -634,6 +634,7 @@ CloudPebble.Resources = (function() {
             });
 
             var form = pane.find('form');
+
             var live_form = make_live_settings_form({
                 form: form,
                 save_function: function() {
@@ -643,7 +644,8 @@ CloudPebble.Resources = (function() {
                     CloudPebble.Sidebar.SetIcon('resource-'+resource.id, 'edit');
                 }
             }).init();
-            form.submit(function(e) {
+
+            var save = function(e) {
                 e.preventDefault();
                 process_resource_form(form, false, resource.file_name, "/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/update", function(data) {
                     delete project_resources[resource.file_name];
@@ -669,6 +671,10 @@ CloudPebble.Resources = (function() {
                     CloudPebble.Sidebar.ClearIcon('resource-'+resource.id);
                     live_form.clearIcons();
                 });
+            };
+            form.submit(save);
+            CloudPebble.GlobalShortcuts.SetShortcutHandlers({
+                save: save
             });
 
             restore_pane(pane);

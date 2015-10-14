@@ -452,8 +452,8 @@ CloudPebble.Editor = (function() {
                         } else {
                             alert(data.error);
                         }
-                        if(callback) {
-                            callback()
+                        if(_.isFunction(callback)) {
+                            callback();
                         }
                     });
                 };
@@ -529,6 +529,10 @@ CloudPebble.Editor = (function() {
                 var ib_editor = new IB(ib_pane.find('.ui-canvas'), ib_pane.find('#ui-properties'), ib_pane.find('#ui-toolkit'), ib_pane.find('#ui-layer-list > div'));
                 var ib_showing = false;
 
+                CloudPebble.GlobalShortcuts.SetShortcutHandlers({
+                    save: save
+                });
+
                 function toggle_ib() {
                     if(!ib_showing) {
                         $(code_mirror.getWrapperElement()).hide();
@@ -581,7 +585,7 @@ CloudPebble.Editor = (function() {
                 });
 
                 // Add some buttons
-                var button_holder = $('<p id="editor-button-wrapper">');
+                var button_holder = $('<p class="editor-button-wrapper">');
                 var run_btn = $('<button class="btn run-btn" title="' + gettext("Save, build, install and run") + '"></button>');
                 var save_btn = $('<button class="btn save-btn" title="' + gettext('Save') + '"></button>');
                 var discard_btn = $('<button class="btn reload-btn" title="' + gettext('Reload') + '"></button>');
@@ -627,6 +631,29 @@ CloudPebble.Editor = (function() {
                 rename_btn.click(show_rename_prompt);
 
                 run_btn.click(run);
+                // Show the current build/run targets in a popover on the run button.
+                run_btn.popover({
+                    trigger: 'hover',
+                    content: function() {
+                        var capitalise_first_letter = function(str) {return str.charAt(0).toUpperCase() + str.slice(1);};
+                        var build_platforms = CloudPebble.ProjectInfo.app_platforms;
+                        var run_platform = CloudPebble.Compile.GetPlatformForInstall();
+                        var run_platform_name = capitalise_first_letter(run_platform == 1 ? gettext("Phone") : ConnectionPlatformNames[run_platform] + gettext(" Emulator"));
+                        var build_platform_names = _.map(build_platforms.split(','), capitalise_first_letter).join(', ');
+
+                        return interpolate("<div><strong>%s: </strong>%s<br><strong>%s: </strong>%s</div>", [
+                            gettext("Build for"),
+                            build_platform_names,
+                            gettext("Run on"),
+                            run_platform_name
+                        ]);
+                    },
+                    html: true,
+                    placement: 'left',
+                    animation: false,
+                    delay: {show: 250},
+                    container: 'body'
+                }).click(function() { $(this).popover('hide'); });
 
                 ib_btn.click(toggle_ib);
 
