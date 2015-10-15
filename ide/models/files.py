@@ -33,42 +33,27 @@ class ResourceFile(IdeModel):
     is_menu_icon = models.BooleanField(default=False)
     target_platforms = models.CharField(max_length=30, null=True, blank=True, default=None)
 
-    def get_best_variant(self, variant):
+    def get_best_variant(self, tags_string):
         try:
-            return self.variants.get(variant=variant)
+            return self.variants.get(tags=tags_string)
         except ResourceVariant.DoesNotExist:
-            return self.variants.get(variant=0)
+            return self.get_default_variant()
 
     def rename(self, new_name):
         if os.path.splitext(self.file_name)[1] != os.path.splitext(new_name)[1]:
             raise Exception("Cannot change file type when renaming resource")
         self.file_name = new_name
 
-    def get_local_filename(self, variant, create=False):
-        return self.get_best_variant(variant).get_local_filename(create=create)
-
-    def get_s3_path(self, variant):
-        return self.get_best_variant(variant).get_s3_path()
-
-    def save_file(self, variant, stream, file_size=0):
-        return self.get_best_variant(variant).save_file(stream, file_size=file_size)
-
-    def save_string(self, variant, string):
-        return self.get_best_variant(variant).save_string(string)
-
-    def get_contents(self, variant):
-        return self.get_best_variant(variant).get_contents()
+    def get_default_variant(self):
+        return self.variants.get(tags="")
 
     def get_identifiers(self):
         return ResourceIdentifier.objects.filter(resource_file=self)
 
-    def copy_to_path(self, variant, path):
-        return self.get_best_variant(variant).copy_to_path(path)
-
     def copy_all_variants_to_dir(self, path):
         filename_parts = os.path.splitext(self.file_name)
         for variant in self.variants.all():
-            abs_target = "%s/%s%s%s" % (path, filename_parts[0], ResourceVariant.VARIANT_SUFFIXES[variant.variant], filename_parts[1])
+            abs_target = "%s/%s%s%s" % (path, filename_parts[0], variant.get_tags_string(), filename_parts[1])
             if not abs_target.startswith(path):
                 raise Exception("Suspicious filename: %s" % self.file_name)
             variant.copy_to_path(abs_target)
@@ -92,19 +77,12 @@ class ResourceFile(IdeModel):
 
     @property
     def root_path(self):
-        # Either return the path of the default variant if it exists
-        # or strip out the suffix from another variant
-        for variant, suffix in ResourceVariant.VARIANT_SUFFIXES.iteritems():
-            try:
-                file_name = self.get_best_variant(variant).get_path()
-                if variant == ResourceVariant.VARIANT_DEFAULT:
-                    return file_name
-                else:
-                    file_name_parts = os.path.splitext(file_name)
-                    return file_name_parts[0][:len(file_name_parts[0]) - len(suffix)] + file_name_parts[1]
-            except ResourceVariant.DoesNotExist:
-                continue
-        raise Exception("No root path found for resource %s" % self.file_name)
+        # Try to get the default variant and return its path
+        try:
+            return self.get_default_variant().root_path
+        except ResourceVariant.DoesNotExist:
+            # Failing that, strip the suffixes off an existing one
+            return self.variants.all()[0].root_path
 
     class Meta(IdeModel.Meta):
         unique_together = (('project', 'file_name'),)
@@ -116,14 +94,38 @@ class ResourceVariant(IdeModel):
     VARIANT_DEFAULT = 0
     VARIANT_MONOCHROME = 1
     VARIANT_COLOUR = 2
+    VARIANT_RECT = 3
+    VARIANT_ROUND = 4
+    VARIANT_APLITE = 5
+    VARIANT_BASALT = 6
+    VARIANT_CHALK = 7
 
-    RESOURCE_VARIANTS = (
-        (VARIANT_DEFAULT, 'fallback'),
-        (VARIANT_MONOCHROME, 'bw'),
-        (VARIANT_COLOUR, 'colour')
-    )
-    variant = models.IntegerField(choices=RESOURCE_VARIANTS)
+    VARIANT_STRINGS = {
+        VARIANT_MONOCHROME: '~bw',
+        VARIANT_COLOUR: '~color',
+        VARIANT_RECT: '~rect',
+        VARIANT_ROUND: '~round',
+        VARIANT_APLITE: '~aplite',
+        VARIANT_BASALT: '~basalt',
+        VARIANT_CHALK: '~chalk'
+    }
+
+    TAGS_DEFAULT = ""
+
+    tags = models.CommaSeparatedIntegerField(max_length=50, blank=True)
     is_legacy = models.BooleanField(default=False)  # True for anything migrated out of ResourceFile
+
+    def get_tags(self):
+        return [int(tag) for tag in self.tags.split(",") if tag]
+
+    def set_tags(self, tag_ids):
+        self.tags = ",".join([str(int(t)) for t in tag_ids])
+
+    def get_tag_names(self):
+        return [ResourceVariant.VARIANT_STRINGS[t] for t in self.get_tags()]
+
+    def get_tags_string(self):
+        return "".join(self.get_tag_names())
 
     def get_local_filename(self, create=False):
         if self.is_legacy:
@@ -189,20 +191,26 @@ class ResourceVariant(IdeModel):
         self.resource_file.save()
         super(ResourceVariant, self).save(*args, **kwargs)
 
-    VARIANT_SUFFIXES = {
-        0: '',
-        1: '~bw',
-        2: '~color'
-    }
-
     def get_path(self):
         name_parts = os.path.splitext(self.resource_file.file_name)
-        return '%s/%s%s%s' % (ResourceFile.DIR_MAP[self.resource_file.kind], name_parts[0], self.VARIANT_SUFFIXES[self.variant], name_parts[1])
+        return '%s/%s%s%s' % (ResourceFile.DIR_MAP[self.resource_file.kind], name_parts[0], self.get_tags_string(), name_parts[1])
+
+    def get_root_path(self):
+        name_parts = os.path.splitext(self.path)
+        suffix = self.get_tags_string()
+        if not name_parts[0].endswith(suffix):
+            raise Exception("No root path found for resource variant %s" % self.path)
+        root_path = name_parts[0][:len(name_parts[0])-len(suffix)] + name_parts[1]
+        if "~" in root_path:
+            raise ValueError("Filenames are not allowed to contain the tilde (~) character, except for specifying tags")
+        return root_path
 
     path = property(get_path)
+    root_path = property(get_root_path)
+
 
     class Meta(IdeModel.Meta):
-        unique_together = (('resource_file', 'variant'),)
+        unique_together = (('resource_file', 'tags'),)
 
 
 class ResourceIdentifier(IdeModel):

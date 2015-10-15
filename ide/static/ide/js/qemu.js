@@ -104,10 +104,16 @@
             }
             if(state == 'normal') {
                 mConnected = true;
-                if(mPlatform == 'aplite') {
-                    mRFB.get_display().resize(144, 168);
-                } else {
-                    mRFB.get_display().resize(148, 172);
+                switch(mPlatform) {
+                    case 'aplite':
+                        mRFB.get_display().resize(144, 168);
+                        break;
+                    case 'basalt':
+                        mRFB.get_display().resize(148, 172);
+                        break;
+                    case 'chalk':
+                        mRFB.get_display().resize(180, 180);
+                        break;
                 }
             }
             if(mConnected && state == 'disconnected') {
@@ -156,9 +162,9 @@
                 });
                 window.rfb = mRFB;
                 mRFB.get_display()._logo = {
-                    width: 144,
-                    height: 168,
-                    data: URL_BOOT_IMG[mPlatform]
+                    width: URL_BOOT_IMG[mPlatform].size[0],
+                    height: URL_BOOT_IMG[mPlatform].size[1],
+                    data: URL_BOOT_IMG[mPlatform].url
                 };
                 mRFB.get_display().clear();
                 mRFB.connect(mHost, mAPIPort, mToken.substr(0, 8), 'qemu/' + mInstanceID + '/ws/vnc');
@@ -179,8 +185,8 @@
         }
 
         function showLaunchSplash() {
-            var img = new Image(144, 168);
-            img.src = URL_BOOT_IMG[mPlatform];
+            var img = new Image(URL_BOOT_IMG[mPlatform].size[0], URL_BOOT_IMG[mPlatform].size[1]);
+            img.src = URL_BOOT_IMG[mPlatform].url;
             console.log('show launch splash', img.src);
             img.onload = function() {
                 console.log("drawing", img.src);

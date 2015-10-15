@@ -3,12 +3,12 @@
 {#<div class="monkey-pane aplite-only monkey-inline">#}
 <div id="monkey-editor-template" class="monkey-pane">
     <h2>Test Screenshots
-            {% for platform in current_platforms %}
+            {% for platform in supported_platforms %}
             <span class="platform-{{ platform }}">- {{ platform }}</span>
             {%  endfor %}
     </h2>
     <div class="monkey-platforms">
-    {% for platform in current_platforms %}
+    {% for platform in supported_platforms %}
         <div>{{ platform }}</div>
     {%  endfor %}
 </div>
@@ -16,7 +16,7 @@
     <form class="monkey-form">
         <div class="monkey-screenshots">
             <div class="monkey-screenshot-set hide">
-                {% for platform in current_platforms %}
+                {% for platform in supported_platforms %}
                 <div class="image-resource-preview platform-{{ platform }}" data-platform="{{ platform }}" >
                     <img src="/static/common/img/screenshot-empty.png">
                     <input type="file" class="hide" multiple >

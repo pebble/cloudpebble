@@ -91,16 +91,19 @@ def export_user_projects(user_id):
 
 
 def get_filename_variant(file_name, resource_suffix_map):
+    # Given a filename
+    # Get a list of variant IDs, and the root file name
     file_name_parts = os.path.splitext(file_name)
-    for suffix in resource_suffix_map.iterkeys():
-        if file_name_parts[0].endswith(suffix):
-            root_file_name = file_name_parts[0][:len(file_name_parts[0]) - len(suffix)] + file_name_parts[1]
-            variant = resource_suffix_map[suffix]
-            break
-    else:
-        root_file_name = file_name
-        variant = ResourceVariant.VARIANT_DEFAULT
-    return variant, root_file_name
+    if file_name_parts[0] == '~':
+        raise Exception('Cannot start a file name with a ~ character')
+    split = file_name_parts[0].split("~")
+    tags = split[1:]
+    try:
+        ids = [resource_suffix_map['~'+tag] for tag in tags]
+    except KeyError as key:
+        raise ValueError('Unrecognised tag %s' % key)
+    root_file_name = split[0] + file_name_parts[1]
+    return ids, root_file_name
 
 
 def make_filename_variant(file_name, variant):
@@ -130,26 +133,35 @@ def do_import_archive(project_id, archive, delete_project=False):
                 # - Parse resource_map.json and import files it references
                 MANIFEST = 'appinfo.json'
                 SRC_DIR = 'src/'
+                RES_PATH = 'resources'
+
                 if len(contents) > 400:
                     raise Exception("Too many files in zip file.")
                 file_list = [x.filename for x in contents]
 
+
                 base_dir = find_project_root(file_list)
                 dir_end = len(base_dir)
 
+                def make_valid_filename(zip_entry):
+                    entry_filename = zip_entry.filename
+                    if entry_filename[:dir_end] != base_dir:
+                        return False
+                    entry_filename = entry_filename[dir_end:]
+                    if entry_filename == '':
+                        return False
+                    if not os.path.normpath('/SENTINEL_DO_NOT_ACTUALLY_USE_THIS_NAME/%s' % entry_filename).startswith('/SENTINEL_DO_NOT_ACTUALLY_USE_THIS_NAME/'):
+                        raise SuspiciousOperation("Invalid zip file contents.")
+                    if zip_entry.file_size > 5242880:  # 5 MB
+                        raise Exception("Excessively large compressed file.")
+                    return entry_filename
+
                 # Now iterate over the things we found
-                with transaction.commit_on_success():
+                with transaction.atomic():
                     for entry in contents:
-                        filename = entry.filename
-                        if filename[:dir_end] != base_dir:
+                        filename = make_valid_filename(entry)
+                        if not filename:
                             continue
-                        filename = filename[dir_end:]
-                        if filename == '':
-                            continue
-                        if not os.path.normpath('/SENTINEL_DO_NOT_ACTUALLY_USE_THIS_NAME/%s' % filename).startswith('/SENTINEL_DO_NOT_ACTUALLY_USE_THIS_NAME/'):
-                            raise SuspiciousOperation("Invalid zip file contents.")
-                        if entry.file_size > 5242880:  # 5 MB
-                            raise Exception("Excessively large compressed file.")
 
                         if filename == MANIFEST:
                             # We have a resource map! We can now try importing things from it.
@@ -174,72 +186,105 @@ def do_import_archive(project_id, archive, delete_project=False):
                                 raise Exception("Illegal project type %s" % project.project_type)
                             media_map = m['resources']['media']
 
-                            resources = {}
-                            resource_files = {}
-                            resource_suffix_map = {v: k for k, v in ResourceVariant.VARIANT_SUFFIXES.iteritems()}
-                            del resource_suffix_map['']  # This mapping is confusing to keep around; everything is suffixed with nothing.
+                            tag_map = {v: k for k, v in ResourceVariant.VARIANT_STRINGS.iteritems() if v}
 
-                            # Build a list of all the files we actually want to try opening.
-                            # If any file names without variants are specified, we add all possible variants to the list.
-                            full_media_map = {}
+                            desired_resources = {}
+                            resources_files = {}
+                            resource_identifiers = {}
+                            resource_variants = {}
                             file_exists_for_root = {}
 
+                            # Go through the media map and look for resources
                             for resource in media_map:
                                 file_name = resource['file']
-                                def_name = resource['name']
+                                identifier = resource['name']
                                 # Pebble.js and simply.js both have some internal resources that we don't import.
                                 if project.project_type in {'pebblejs', 'simplyjs'}:
-                                    if def_name in {'MONO_FONT_14', 'IMAGE_MENU_ICON', 'IMAGE_LOGO_SPLASH', 'IMAGE_TILE_SPLASH'}:
+                                    if identifier in {'MONO_FONT_14', 'IMAGE_MENU_ICON', 'IMAGE_LOGO_SPLASH', 'IMAGE_TITLE_SPLASH'}:
                                         continue
-                                variant, root_file_name = get_filename_variant(file_name, resource_suffix_map)
+                                tags, root_file_name = get_filename_variant(file_name, tag_map)
+                                if (len(tags) != 0):
+                                    raise ValueError("Generic resource filenames cannot contain a tilde (~)")
+                                if file_name not in desired_resources:
+                                    desired_resources[root_file_name] = []
+                                print "Desired resource: %s" % root_file_name
+                                desired_resources[root_file_name].append(resource)
                                 file_exists_for_root[root_file_name] = False
-                                if variant == ResourceVariant.VARIANT_DEFAULT:
-                                    for variant_string in resource_suffix_map.keys():
-                                        new_file_name = make_filename_variant(file_name, variant_string)
-                                        if new_file_name not in full_media_map:
-                                            resource_copy = dict(resource)
-                                            resource_copy['file'] = new_file_name
-                                            full_media_map[new_file_name] = resource_copy
-                                full_media_map[file_name] = dict(resource)
 
-                            for resource in full_media_map.values():
-                                kind = resource['type']
-                                def_name = resource['name']
-                                file_name = resource['file']
-                                regex = resource.get('characterRegex', None)
-                                tracking = resource.get('trackingAdjust', None)
-                                is_menu_icon = resource.get('menuIcon', False)
-                                compatibility = resource.get('compatibility', None)
-                                target_platforms = resource.get('targetPlatforms', None)
-                                target_platforms = json.dumps(target_platforms) if target_platforms else None
+                            for zipitem in contents:
+                                # Let's just try opening the file
+                                filename = make_valid_filename(zipitem)
+                                if filename is False or not filename.startswith(RES_PATH):
+                                    continue
+                                filename = filename[len(RES_PATH)+1:]
+                                try:
+                                    extracted = z.open("%s%s/%s"%(base_dir, RES_PATH, filename))
+                                except KeyError:
+                                    print "Failed to open %s" % filename
+                                    continue
 
-                                if file_name not in resource_files:
-                                    res_path = 'resources'
-                                    try:
-                                        extracted = z.open('%s%s/%s' % (base_dir, res_path, file_name))
-                                    except KeyError:
-                                        continue  # File not found, but variants might exist.
+                                # Now we know the file exists and is in the resource directory - is it one we want?
+                                tags, root_file_name = get_filename_variant(filename, tag_map)
+                                tags_string = ",".join(str(int(t)) for t in tags)
 
-                                    variant, root_file_name = get_filename_variant(file_name, resource_suffix_map)
+                                print "Importing file %s with root %s " % (zipitem.filename, root_file_name)
 
-                                    if root_file_name not in resources:
-                                        resources[root_file_name] = ResourceFile.objects.create(
-                                            project=project,
-                                            file_name=os.path.basename(root_file_name),
-                                            kind=kind,
-                                            is_menu_icon=is_menu_icon,
-                                            target_platforms=target_platforms)
+                                if root_file_name in desired_resources:
+                                    ''' FIXME: targetPlatforms is currently stored in resourceFile, but it *should* be in
+                                     ResourceIdentifier. Until that is fixed, we cannot support multiple identifiers
+                                     linked to a single file compiling for different platforms. When the bug is fixed,
+                                     this will need to be changed. Until then, we just pick the first file on the list
+                                     of desired_resources.'''
+                                    medias = desired_resources[root_file_name]
+                                    is_font = False
+                                    print "Looking for variants of %s" % root_file_name
+                                    # An exception to the above warning is made for fonts, where multiple identifiers is
+                                    # already implemented in the UI.
+                                    if len(medias) > 1:
+                                        if set(r['type'] for r in medias) != {'font'}:
+                                            raise NotImplementedError("You cannot currently import a project with multiple identifiers for a single non-font file")
+                                        else:
+                                            is_font = True
+                                    resource = medias[-1]
 
-                                        ResourceIdentifier.objects.create(
-                                            resource_file=resources[root_file_name],
-                                            resource_id=def_name,
-                                            character_regex=regex,
-                                            tracking=tracking,
-                                            compatibility=compatibility
-                                        )
+                                    for resource in medias:
+                                        # Make only one resource file per base resource.
+                                        if root_file_name not in resources_files:
+                                            kind = resource['type']
+                                            is_menu_icon = resource.get('menuIcon', False)
+                                            target_platforms = resource.get('targetPlatforms', None)
+                                            target_platforms = json.dumps(target_platforms) if target_platforms else None
+                                            resources_files[root_file_name] = ResourceFile.objects.create(
+                                                project=project,
+                                                file_name=os.path.basename(root_file_name),
+                                                kind=kind,
+                                                is_menu_icon=is_menu_icon,
+                                                target_platforms=target_platforms)
 
-                                    resource_files[file_name] = ResourceVariant.objects.create(resource_file=resources[root_file_name], variant=variant)
-                                    resource_files[file_name].save_file(extracted)
+                                        identifier = resource['name']
+                                        # Add all the identifiers which don't clash with existing identifiers
+                                        if not identifier in resource_identifiers:
+                                            tracking = resource.get('trackingAdjust', None)
+                                            regex = resource.get('characterRegex', None)
+                                            compatibility = resource.get('compatibility', None)
+
+                                            ResourceIdentifier.objects.create(
+                                                resource_file=resources_files[root_file_name],
+                                                resource_id=identifier,
+                                                character_regex=regex,
+                                                tracking=tracking,
+                                                compatibility=compatibility
+                                            )
+                                            resource_identifiers[identifier] = resources_files[root_file_name]
+
+                                        # At the moment, only add > 1 identifier for fonts.
+                                        if not is_font:
+                                            break
+
+                                    print "Adding variant %s with tags [%s]" % (root_file_name, tags_string)
+                                    actual_file_name = resource['file']
+                                    resource_variants[actual_file_name] = ResourceVariant.objects.create(resource_file=resources_files[root_file_name], tags=tags_string)
+                                    resource_variants[actual_file_name].save_file(extracted)
                                     file_exists_for_root[root_file_name] = True
 
                             # Check that at least one variant of each specified resource exists.

@@ -20,76 +20,113 @@
                     </select>
                 </div>
             </div>
-            <div class="control-group">
-                <label class="control-label" for="edit-resource-file">{% trans 'File' %}</label>
+
+            <div class="control-group native-only" id="non-font-resource-group">
+                <label class="control-label">{% trans 'Identifier' %}</label>
                 <div class="controls">
-                    <input type="file" id="edit-resource-file">
+                    <input type="text" class="edit-resource-id" placeholder="IMAGE_EXAMPLE_IDENTIFIER" pattern="[A-Za-z0-9_]+">
+                    <span class="help-block">{% trans 'This is used in your code and must be a valid C identifier.' %}</span>
                 </div>
             </div>
-            <div class="control-group colour-resource">
-                <label class="control-label" for="edit-resource-file-colour">{% trans 'Colour file' %}</label>
-                <div class="controls">
-                    <input type="file" id="edit-resource-file-colour">
-                    <span class="help-block hide">{% trans 'If provided, the colour file will be used instead of the default  on colour watches.' %}</span>
-                </div>
-            </div>
-            <div class="control-group">
+            <div class="control-group" id="edit-resource-file-name_section">
                 <label class="control-label" for="edit-resource-file-name">{% trans 'File name' %}</label>
                 <div class="controls">
-                    <input type="text" id="edit-resource-file-name">
+                    <input type="text" id="edit-resource-file-name" name="file_name">
                 </div>
             </div>
-        </div>
-        <div class="well" id="resource-targets-section">
-            <div class="control-group">
-                <label style="width: 250px" class="control-label" for="edit-resource-target-platforms-enabled">{% trans 'Target specific platforms' %}</label>
-                <input type="checkbox" id="edit-resource-target-platforms-enabled">
-            </div>
-            <div id="edit-resource-targets">
+
+            <div id="resource-targets-section" class="sdk3-only native-only">
                 <div class="control-group">
-                    <label class="control-label" for="edit-resource-target-basalt">Basalt</label>
-                    <input type="checkbox" id="edit-resource-target-basalt">
+                    <label style="width: 250px" class="control-label" for="edit-resource-target-platforms-enabled">{% trans 'Target specific platforms' %}</label>
+                    <input type="checkbox" id="edit-resource-target-platforms-enabled">
                 </div>
-                <div class="control-group">
-                    <label class="control-label" for="edit-resource-target-aplite">Aplite</label>
-                    <input type="checkbox" id="edit-resource-target-aplite">
+                <div id="edit-resource-targets">
+                    <div class="edit-resource-target-options">
+                    {% for platform in  supported_platforms %}
+                        <div class="control-group">
+                            <label class="control-label" for="edit-resource-target-{{ platform }}">{{ platform | capfirst }}</label>
+                            <input type="checkbox" id="edit-resource-target-{{ platform }}">
+                        </div>
+                    {% endfor %}
+                    </div>
+                    <p class="help-block">{% trans "The 'targetPlatforms' option restricts all variants of a resource to a specific set of platforms." %}</p>
                 </div>
+            </div>
+
+        </div>
+
+        <div class="well image-platform-preview hide sdk3-only native-only">
+            <h4>{% trans 'Preview per platform' %}</h4>
+            <div class="pane-boxes pane-3-boxes ">
+                {% for platform in supported_platforms %}
+                <div id="resource-image-preview-for-{{ platform }}">
+                    <h4>{{ platform | capfirst }}</h4>
+                    <span></span>
+                    <img src="">
+                </div>
+                {% endfor %}
+            </div>
+            <p class="help-block">{% trans "Given the tags for each variant, this shows the final version selected for each platform." %}</p>
+        </div>
+
+        <div id="edit-resource-previews">
+
+        </div>
+
+
+        <div id="edit-image-resource-preview-template" class="hide">
+            <div class="image-resource-preview-pane well">
+                <div class="control-group image-resource-preview">
+                    <label class="control-label">
+                        {%  trans 'Image preview' %}
+                    </label>
+                    <div class="controls">
+                        <img src=""><p class="image-resource-preview-dimensions">52x52</p>
+                    </div>
+                </div>
+                <div class="tag-edit control-group sdk3-only native-only">
+                {# TODO: support for/id #}
+                    <label class="control-label">Tags</label>
+                    <div class="controls">
+                        <textarea class="resource-tags" rows="1" cols="60"></textarea>
+                    </div>
+                </div>
+                <div class="variant-platform-preview control-group sdk3-only native-only">
+                    <label class="control-label">Final platforms</label>
+                    <div class="controls label-list"></div>
+                </div>
+
+                <button type="button" class="btn btn-small btn-danger btn-delvariant">{% trans 'Delete Variant' %}</button>
             </div>
         </div>
-        <div class="well">
-            <div class="control-group image-resource-preview variant-0 hide">
-                <label class="control-label">{% trans 'Generic' %}</label>
-                <div class="controls">
-                    <img src="">
-                    <p>52x52</p>
+
+        <div id="edit-raw-resource-preview-template" class="hide">
+            <div class="raw-resource-preview-pane well">
+                <div class="control-group ">
+                    <label class="control-label">
+                        Resource
+                    </label>
+                    <div class="controls resource-download-link">
+                        <a href="#" class="btn">{% trans 'Download uploaded resource' %}</a>
+                    </div>
                 </div>
-            </div>
-            <div class="control-group image-resource-preview variant-1 hide">
-                <label class="control-label">{% trans 'Black & White' %}</label>
-                <div class="controls">
-                    <img src="">
-                    <p>52x52</p>
+
+                <div class="tag-edit control-group sdk3-only native-only">
+                {# TODO: support for/id #}
+                    <label class="control-label">Tags</label>
+                    <div class="controls">
+                        <textarea class="resource-tags" rows="1" cols="60"></textarea>
+                    </div>
                 </div>
-            </div>
-            <div class="control-group image-resource-preview variant-2 hide">
-                <label class="control-label">{% trans 'Colour' %}</label>
-                <div class="controls">
-                    <img src="">
-                    <p>52x52</p>
+                <div class="variant-platform-preview control-group sdk3-only native-only">
+                    <label class="control-label">{% trans 'Final platforms' %}</label>
+                    <div class="controls label-list"></div>
                 </div>
-            </div>
-            <div class="resource-download-link hide">
-                <hr>
-                <a href="#" class="btn">{% trans 'Download uploaded resource' %}</a>
+
+                <button type="button" class="btn btn-small btn-danger btn-delvariant">{% trans 'Delete Variant' %}</button>
             </div>
         </div>
-        <div class="control-group well native-only" id="non-font-resource-group">
-            <label class="control-label">{% trans 'Identifier' %}</label>
-            <div class="controls">
-                <input type="text" class="edit-resource-id" placeholder="IMAGE_EXAMPLE_IDENTIFIER" pattern="[A-Za-z0-9_]+">
-                <span class="help-block">{% trans 'This is used in your code and must be a valid C identifier.' %}</span>
-            </div>
-        </div>
+
         <div id="font-resource-group" class="hide">
             <div class="well font-resource-group-single">
                 <div class="control-group">
@@ -127,10 +164,32 @@
                 </div>
             </div>
         </div>
+
+        <div class="well" id="edit-resource-new-file">
+            <div class="control-group">
+                <label class="control-label" for="edit-resource-file">{% trans 'Upload new file' %}</label>
+                <div class="controls">
+                    <input type="file" id="edit-resource-file">
+                </div>
+            </div>
+            <div class="tag-edit control-group sdk3-only native-only">
+                <label class="control-label">Tags</label>
+                <div class="controls">
+                    <textarea id="new-resource-tags" class="resource-tags" rows="1" cols="60"></textarea>
+                </div>
+            </div>
+            <div class="variant-platform-preview control-group sdk3-only native-only">
+                <label class="control-label">Final platforms</label>
+                <div class="controls label-list"></div>
+            </div>
+        </div>
+
+
         <div id="edit-resource-buttons" class="well resource-actions">
             <button type="submit" class="btn btn-affirmative">{% trans 'Save' %}</button>
             <button type="button" class="btn btn-danger hide" id="edit-resource-delete">{% trans 'Delete' %}</button>
             <button type="button" class="btn hide" id="add-font-resource">{% trans 'Another font' %}</button>
         </div>
     </form>
+
 </div>

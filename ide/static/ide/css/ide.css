@@ -180,15 +180,51 @@ ul.nav-pills {
     top: 28px;
     left: 53px;
     background-color: #aaa;
-    /*height: 168px;*/
-    /*width: 144px;*/
+}
+
+#emulator-container.emulator-round canvas {
+    left: 35px;
+    border-radius: 100px;
+}
+#emulator-container.emulator-round {
+    background-image: url('../img/pebbles/black-20mm-hole.png');
+    background-position: center -59px;
+}
+#emulator-container.emulator-round .configure {
+    right: 10px;
+}
+.emulator-round .select.qemu-button {
+    left: 221px;
+    top: 100px;
+}
+.emulator-round .down.qemu-button {
+	-webkit-transform: rotate(30deg);
+	    -ms-transform: rotate(30deg);
+	        transform: rotate(30deg);
+    left: 207px;
+    top: 134px;
+}
+.emulator-round .up.qemu-button {
+    left: 207px;
+    top: 29px;
+	-webkit-transform: rotate(330deg);
+	    -ms-transform: rotate(330deg);
+	        transform: rotate(330deg);
+}
+.emulator-round .back.qemu-button {
+    top: 79px;
+    left: 0;
 }
 
 .qemu-button {
     position: absolute;
     cursor: pointer;
+    background-color: rgba(255, 0, 0, 0.2);
+    border-radius: 8px;
 }
-
+.emulator-round .qemu-button {
+    border-radius: 20px;
+}
 .qemu-button.up, .qemu-button.down, .qemu-button.back {
     width: 35px;
     height: 73px;
@@ -503,6 +539,10 @@ ul.nav-pills {
     margin-right: 0;
 }
 
+.compilation-pane #run-qemu .btn-primary {
+    width: 121px;
+}
+
 .compilation-pane h3 {
     margin-top: 20px;
     margin-bottom: 20px;
@@ -611,14 +651,14 @@ table.build-results tr.pending .build-state {
 }
 
 .resource-download-link .btn {
-    margin-left: 170px;
     width: 300px;
 }
 
-.image-resource-preview img {
+.image-resource-preview img, .image-platform-preview img {
     border: 2px solid #767676;
     padding: 5px;
     border-radius: 5px;
+    max-width: 400px;
 }
 
 .image-resource-preview p {
@@ -632,9 +672,9 @@ table.build-results tr.pending .build-state {
     display: table-row;
 }
 
-.image-resource-preview > div > * {
-    display: table-cell;
-}
+/*.image-resource-preview > div > * {*/
+    /*display: table-cell;*/
+/*}*/
 
 .resource-actions .btn {
     margin-right: 20px;
@@ -954,11 +994,56 @@ span.cm-autofilled-end {
     background-image: url('../img/pebbles/snowy-red.png');
 }
 
+.screenshot-holder-bobby-black {
+    background-image: url('../img/pebbles/bobby-black.png');
+}
+
+.screenshot-holder-bobby-silver {
+    background-image: url('../img/pebbles/bobby-silver.png');
+}
+
+.screenshot-holder-bobby-gold {
+    background-image: url('../img/pebbles/bobby-gold.png');
+}
+
+.screenshot-holder-spalding-20mm-black {
+    background-image: url('../img/pebbles/spalding-20mm-black.png');
+}
+
+.screenshot-holder-spalding-20mm-silver {
+    background-image: url('../img/pebbles/spalding-20mm-silver.png');
+}
+
+.screenshot-holder-spalding-14mm-black {
+    background-image: url('../img/pebbles/spalding-14mm-black.png');
+}
+
+.screenshot-holder-spalding-14mm-silver {
+    background-image: url('../img/pebbles/spalding-14mm-silver.png');
+}
+
+.screenshot-holder-spalding-14mm-rose-gold {
+    background-image: url('../img/pebbles/spalding-14mm-rose-gold.png');
+}
+
 .screenshot-holder.screenshot-holder-snowy-black,
 .screenshot-holder.screenshot-holder-snowy-red,
-.screenshot-holder.screenshot-holder-snowy-white {
+.screenshot-holder.screenshot-holder-snowy-white,
+.screenshot-holder.screenshot-holder-bobby-black,
+.screenshot-holder.screenshot-holder-bobby-silver,
+.screenshot-holder.screenshot-holder-bobby-gold {
     padding-top: 91px;
     padding-left: 4px;
+}
+
+.screenshot-holder.screenshot-holder-spalding-14mm-silver,
+.screenshot-holder.screenshot-holder-spalding-14mm-black,
+.screenshot-holder.screenshot-holder-spalding-20mm-silver,
+.screenshot-holder.screenshot-holder-spalding-20mm-black,
+.screenshot-holder.screenshot-holder-spalding-14mm-rose-gold {
+    padding-top: 86px;
+    height: 247px;
+    width: 251px;
 }
 
 .field-help {
@@ -1010,6 +1095,110 @@ span.cm-autofilled-end {
 
 .padded-modal-header {
     padding: 10px 25px 10px 10px;
+}
+
+.filter {
+    display: inline-block;
+    padding: 6px;
+    background-color: white;
+    border-radius: 5px;
+    margin-right: 5px;
+}
+
+button#add-filter {
+    width: 2em;
+    margin-right: 15px;
+}
+
+.text-wrap {
+    margin-left: 170px;
+}
+.text-wrap.disabled {
+    background-color: #dfdfdf;
+}
+
+.tag-edit textarea {
+    width: 450px;
+    height: 37px;
+}
+
+.edit-resource-target-options > div {
+    float: left;
+}
+.edit-resource-target-options:after {
+    clear: both;
+    content: "";
+    display: table;
+}
+
+.pane-boxes {
+    width: 100%;
+}
+.pane-boxes> div {
+    float: left;
+}
+.pane-3-boxes > div {
+    width: 33%;
+}
+.image-platform-preview h4 {
+    text-align: center;
+    margin-bottom: 1em;
+}
+
+.pane-boxes img {
+    display: block;
+    margin: auto;
+    max-width: 97%;
+    box-sizing: border-box;
+}
+
+.label-list {
+    line-height: 30px;
+    min-height: 36px;
+}
+
+/*TODO: decide on some colours*/
+.label-aplite {
+    background-color: #00B293;
+}
+.label-basalt {
+    background-color: #E517E5;
+}
+.label-chalk {
+    background-color: #3a87ad;
+}
+.font-preview .font-tag-preview {
+    line-height: 40px;
+    color: white;
+}
+.btn-delvariant {
+    float: right;
+    width: initial;
+    margin-bottom: 20px;
+    bottom: 30px;
+}
+.image-platform-preview span {
+    text-align: center;
+    display: block;
+    color: white;
+    border-radius: 10px;
+    font-size: 20px;
+    line-height: 45px;
+    max-width: 98%;
+    background-color: rgba(100, 100, 100, 0.4);
+}
+.image-platform-preview span.conflict {
+    text-align: center;
+    font-size: 25px;
+    background-color: rgba(255, 0, 0, 0.4);
+    line-height: 50px;
+}
+
+#edit-resource-new-file .tag-edit, #edit-resource-new-file .variant-platform-preview {
+    display: none;
+}
+#edit-resource-new-file.file-present .tag-edit, #edit-resource-new-file.file-present .variant-platform-preview {
+    display: block;
 }
 
 .app-log {

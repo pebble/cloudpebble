@@ -102,7 +102,7 @@ class TemplateProject(Project):
         for resource in self.resources.all():
             new_resource = ResourceFile.objects.create(project=project, file_name=resource.file_name, kind=resource.kind)
             for variant in resource.variants.all():
-                new_variant = ResourceVariant.objects.create(resource_file=new_resource, variant=variant.variant)
+                new_variant = ResourceVariant.objects.create(resource_file=new_resource, tags=variant.tags)
                 new_variant.save_string(variant.get_contents())
             for i in resource.identifiers.all():
                 ResourceIdentifier.objects.create(resource_file=new_resource, resource_id=i.resource_id, character_regex=i.character_regex)

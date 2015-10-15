@@ -12,6 +12,7 @@ from ide.utils import generate_half_uuid
 from utils.keen_helper import send_keen_event
 import urllib2
 
+
 @task(acks_late=True)
 def import_gist(user_id, gist_id):
     user = User.objects.get(pk=user_id)
@@ -62,7 +63,7 @@ def import_gist(user_id, gist_id):
         'sdk_version': settings.get('sdkVersion', '2'),
     }
 
-    with transaction.commit_on_success():
+    with transaction.atomic():
         project = Project.objects.create(**project_settings)
 
         if project_type != 'simplyjs':
@@ -94,7 +95,7 @@ def import_gist(user_id, gist_id):
                                                                       is_menu_icon=is_menu_icon)
                     # We already have this as a unicode string in .content, but it shouldn't have become unicode
                     # in the first place.
-                    default_variant = ResourceVariant.objects.create(resource_file=resources[filename], variant=ResourceVariant.VARIANT_DEFAULT)
+                    default_variant = ResourceVariant.objects.create(resource_file=resources[filename], tags=ResourceVariant.TAGS_DEFAULT)
                     default_variant.save_file(urllib2.urlopen(gist.files[filename].raw_url))
                 ResourceIdentifier.objects.create(
                     resource_file=resources[filename],

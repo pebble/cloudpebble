@@ -424,6 +424,7 @@ def generate_pebblejs_manifest_dict(project, resources):
             "watchface": project.app_is_watchface,
             'hiddenApp': project.app_is_hidden
         },
+        "targetPlatforms": ["aplite", "basalt"],
         "appKeys": {},
         "resources": generate_pebblejs_resource_dict(resources),
         "projectType": "pebblejs",

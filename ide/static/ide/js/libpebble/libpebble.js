@@ -425,7 +425,15 @@ Pebble = function(proxy, token) {
             10: 'tintin-pink',
             11: 'snowy-white',
             12: 'snowy-black',
-            13: 'snowy-red'
+            13: 'snowy-red',
+            14: 'bobby-silver',
+            15: 'bobby-black',
+            16: 'bobby-gold',
+            17: 'spalding-14mm-silver',
+            18: 'spalding-14mm-black',
+            19: 'spalding-20mm-silver',
+            20: 'spalding-20mm-black',
+            21: 'spalding-14mm-rose-gold'
         };
 
         var handle_colour = function(data) {
@@ -692,6 +700,9 @@ Pebble = function(proxy, token) {
         } else if (incoming_image.version == 2) {
             expanded_data = decode_image_8bit_corrected(incoming_image);
         }
+        if (incoming_image.width == 180) {
+            expanded_data = roundify(expanded_data);
+        }
 
         image_data.data.set(expanded_data);
         context.putImageData(image_data, 0, 0);
@@ -699,6 +710,24 @@ Pebble = function(proxy, token) {
         image.src = canvas.toDataURL();
         return image;
     };
+
+    // This mutates the array because I'm lazy.
+    var roundify = function(bitmap) {
+        var roundness = [76, 71, 66, 63, 60, 57, 55, 52, 50, 48, 46, 45, 43, 41, 40, 38, 37,
+             36, 34, 33, 32, 31, 29, 28, 27, 26, 25, 24, 23, 22, 22, 21, 20, 19,
+             18, 18, 17, 16, 15, 15, 14, 13, 13, 12, 12, 11, 10, 10, 9, 9, 8, 8, 7,
+             7, 7, 6, 6, 5, 5, 5, 4, 4, 4, 3, 3, 3, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1,
+             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        roundness = roundness.concat(_.clone(roundness).reverse());
+        _.each(roundness, function(skip, y) {
+            for (var x = 0; x < 180; ++x) {
+                if (x < skip || x >= (180 - skip)) {
+                    bitmap[y*180*4+x*4+3] = 0;
+                }
+            }
+        });
+        return bitmap;
+    }
 
     var read_screenshot_header = function(data) {
         var header_data = unpack("BIII", data.subarray(0, 13));
@@ -894,10 +923,14 @@ Pebble.version_to_platform = function(version) {
         6: 'aplite',
         7: 'basalt',
         8: 'basalt',
+        9: 'chalk',
+        10: 'basalt',
+        11: 'chalk',
         0xFF: 'aplite',
         0xFE: 'aplite',
         0xFD: 'basalt',
-        0xFC: 'basalt'
+        0xFC: 'basalt',
+        0xFB: 'chalk'
     };
     return mapping[version.running.platform_version];
 };

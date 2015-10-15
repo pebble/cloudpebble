@@ -5,7 +5,8 @@ from ide.api.git import github_push, github_pull, set_project_repo, create_proje
 from ide.api.phone import ping_phone, check_phone, list_phones, update_phone
 from ide.api.project import project_info, compile_project, last_build, build_history, build_log, create_project, \
     save_project_settings, delete_project, begin_export, import_zip, import_github, do_import_gist
-from ide.api.resource import create_resource, resource_info, delete_resource, update_resource, show_resource
+from ide.api.resource import create_resource, resource_info, delete_resource, update_resource, show_resource, \
+    delete_variant
 from ide.api.source import create_source_file, load_source_file, source_file_is_safe, save_source_file, \
     delete_source_file, rename_source_file
 from ide.api.user import transition_accept, transition_export, transition_delete, whats_new
@@ -34,7 +35,8 @@ urlpatterns = patterns(
     url(r'^project/(?P<project_id>\d+)/resource/(?P<resource_id>\d+)/info', resource_info, name='resource_info'),
     url(r'^project/(?P<project_id>\d+)/resource/(?P<resource_id>\d+)/delete', delete_resource, name='delete_resource'),
     url(r'^project/(?P<project_id>\d+)/resource/(?P<resource_id>\d+)/update', update_resource, name='update_resource'),
-    url(r'^project/(?P<project_id>\d+)/resource/(?P<resource_id>\d+)/(?P<variant>\d+)/get', show_resource, name='show_resource'),
+    url(r'^project/(?P<project_id>\d+)/resource/(?P<resource_id>\d+)/(?P<variant>\d+(?:,\d+)*)/get', show_resource, name='show_resource'),
+    url(r'^project/(?P<project_id>\d+)/resource/(?P<resource_id>\d+)/(?P<variant>\d+(?:,\d+)*)/delete', delete_variant, name='delete_variant'),
     url(r'^project/(?P<project_id>\d+)/build/run', compile_project, name='compile_project'),
     url(r'^project/(?P<project_id>\d+)/build/last', last_build, name='get_last_build'),
     url(r'^project/(?P<project_id>\d+)/build/history', build_history, name='get_build_history'),

@@ -9,7 +9,7 @@ CloudPebble.FuzzyPrompt = (function() {
     var default_item;
     var selection_was_made;
     var opened = false;
-    var COMMANDS_ENABLED = false;
+    var COMMANDS_ENABLED = true;
 
     // While manual is false, always highlight the first item
     var manual = false;
@@ -73,7 +73,10 @@ CloudPebble.FuzzyPrompt = (function() {
                     move(-1);
                     e.preventDefault();
                 }
+            });
 
+            input.on('blur', function() {
+                hide_prompt(true);
             });
 
             prompt.on('input', function() {
@@ -153,6 +156,14 @@ CloudPebble.FuzzyPrompt = (function() {
     };
 
     var show_prompt = function(kind) {
+        var prompt_already_open = false;
+        $('.modal').each(function() {
+            if ($(this).hasClass('in')) {
+                prompt_already_open = true;
+                return false;
+            }
+        });
+        if (prompt_already_open) return;
         previously_active = document.activeElement;
         prompt.modal('show');
         item_list = [];

@@ -36,7 +36,7 @@ sh==1.08
 websocket-client==0.32.0
 pyserial>=2.7
 pypng==0.0.17
-libpebble2>=0.0.8
+libpebble2>=0.0.10
 enum34==1.0.4
 httplib2==0.9.1
 progressbar2==2.7.3

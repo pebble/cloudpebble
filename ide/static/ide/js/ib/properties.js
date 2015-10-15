@@ -605,7 +605,7 @@
                 var font_size = parseInt(resource_id.match(/[0-9]+$/)[0], 10);
                 return [resource_id, {
                     css: {
-                        'font-family': CloudPebble.Resources.GetFontFamily(font),
+                        'font-family': CloudPebble.Resources.GetDefaultFontFamily(font),
                         'font-size': font_size,
                         'letter-spacing': info.tracking || 0,
                         'font-kerning': 'none'

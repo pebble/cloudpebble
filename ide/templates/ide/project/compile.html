@@ -26,8 +26,9 @@
                     </div>
                     <div id="run-qemu" class="tab-pane active">
                         <hr>
-                        <button class="btn btn-primary" id="install-in-qemu-aplite-btn">{% trans 'Install on Aplite' %}</button>
-                        <button class="btn btn-primary" id="install-in-qemu-basalt-btn">{% trans 'Install on Basalt' %}</button>
+                        <button class="btn btn-primary" id="install-in-qemu-aplite-btn" data-platform="aplite">Aplite</button>
+                        <button class="btn btn-primary" id="install-in-qemu-basalt-btn" data-platform="basalt">Basalt</button>
+                        <button class="btn btn-primary" id="install-in-qemu-chalk-btn" data-platform="chalk">Chalk</button>
                         <button class="btn" id="show-qemu-logs-btn">{% trans 'View app logs' %}</button>
 {#                        <button class="btn" id="screenshot-qemu-btn">{% trans 'Screenshot' %}</button>#}
                     </div>
@@ -46,6 +47,7 @@
             <p><label>{% trans 'Status:' %}</label> <span id="last-compilation-status" class="label label-success">Successful</span></p>
             <p id="last-compilation-size-aplite" class="hide"><label>{% trans 'Aplite Size:' %}</label> <span class="text"></span></p>
             <p id="last-compilation-size-basalt" class="hide"><label>{% trans 'Basalt Size:' %}</label> <span class="text"></span></p>
+            <p id="last-compilation-size-chalk" class="hide"><label>{% trans 'Chalk Size:' %}</label> <span class="text"></span></p>
         </div>
         <hr>
         <div class="build-buttons">

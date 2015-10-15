@@ -43,10 +43,9 @@ function make_live_settings_form(options) {
         element.parents(opts.group_selector).find('.setting-saved').show().delay(1000).hide('fast');
     };
 
-    var show_changed_icon = function(element, speed) {
+    var show_changed_icon = function(element) {
         // Show the 'changed' icon for an element
-        speed = (speed === undefined ? 'fast' : speed);
-        element.parents(opts.group_selector).find('.setting-changed').show(speed);
+        element.parents(opts.group_selector).find('.setting-changed').show('fast');
         if (_.isFunction(opts.on_change_function)) {
             opts.on_change_function(element);
         }
@@ -55,7 +54,6 @@ function make_live_settings_form(options) {
     var hookup_elements = function(elements) {
         // Set up a hook for any changed form elements
         elements.on("change", opts.control_selector, function(e) {
-            console.log("GHCAFAS");
             if (_.isFunction(opts.on_change_function)) {
                 opts.on_change_function(this);
             }
@@ -64,26 +62,20 @@ function make_live_settings_form(options) {
 
         // While typing in text forms, show the changed icon
         elements.on('input', opts.changeable_control_selector, function(e) {
-            console.log("OMG");
             show_changed_icon($(this), e);
         });
     };
 
-    var add_status_icon = function(element, changed) {
+    var init = function() {
+        // Add status icons to every form element
         $("<span class='settings-status-icons'>" +
             "<span class='icon-ok setting-saved'></span>" +
             "<span class='icon-edit setting-changed'></span>" +
             "</span>")
-            .insertAfter(element)
+            .insertAfter(opts.form.find(opts.label_selector))
             .children().hide();
-        if (changed === true) {
-            show_changed_icon(element, null);
-        }
-    };
 
-    var init = function() {
-        // Add status icons to every form element
-        add_status_icon(opts.form.find(opts.label_selector));
+
         // When a form-reset button is clicked, submit the form instantly
         $(opts.form).bind("reset", function() {
             var values = {};
@@ -132,9 +124,6 @@ function make_live_settings_form(options) {
         },
         save: function(element) {
             save(element);
-        },
-        addStatusIcon: function(element, changed) {
-            add_status_icon(element, changed);
         }
     };
 
