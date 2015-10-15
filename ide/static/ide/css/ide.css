@@ -1216,12 +1216,9 @@ button#add-filter {
 
 /* Monkey editor */
 
-#main-pane {
-    right: 640px;
-}
-
 #right-pane {
-    left: calc(100% - 640px);
+    box-sizing: border-box;
+    width: 0;
     right: 0;
     top: 0;
     bottom: 0;
@@ -1248,7 +1245,6 @@ button#add-filter {
 .monkey-pane .image-resource-preview {
     width: 200px;
     display: inline-block;
-    /* line-height: 280px; */
 }
 
 .monkey-pane .image-resource-preview img {

@@ -1,16 +1,14 @@
-(function() {
+CloudPebble.MonkeyScreenshots = (function() {
     var current_platforms = ['aplite', 'basalt', 'chalk'];
-
+    var screenshot_editor_template;
 
     function ScreenshotFile(options) {
         var options = _.defaults(options || {}, {
             is_new: false,
-            id: null,
             file: null,
             src: ""
         });
         this.is_new = options.is_new;
-        this.id = options.id;
         this.file = options.file;
         this.src = options.src;
     }
@@ -24,17 +22,17 @@
             name: "Screenshot set 1",
             id: 0,
             images: {
-                aplite: new ScreenshotFile({src: "/static/common/img/screenshot-aplite.png", id: 0}),
-                basalt: new ScreenshotFile({src: "/static/common/img/screenshot-basalt.png", id: 1}),
-                chalk:  new ScreenshotFile({src: "/static/common/img/screenshot-chalk.png",  id: 2})
+                aplite: new ScreenshotFile({src: "/static/common/img/screenshot-aplite.png"}),
+                basalt: new ScreenshotFile({src: "/static/common/img/screenshot-basalt.png"}),
+                chalk:  new ScreenshotFile({src: "/static/common/img/screenshot-chalk.png"})
             }
         }, {
             name: "Screenshot set 2",
             id: 1,
             images: {
-                aplite: new ScreenshotFile({src: "/static/common/img/screenshot-aplite.png", id: 3}),
-                basalt: new ScreenshotFile({src: "/static/common/img/screenshot-basalt.png", id: 4}),
-                chalk:  new ScreenshotFile({src: "/static/common/img/screenshot-chalk.png",  id: 5})
+                aplite: new ScreenshotFile({src: "/static/common/img/screenshot-aplite.png"}),
+                basalt: new ScreenshotFile({src: "/static/common/img/screenshot-basalt.png"}),
+                chalk:  new ScreenshotFile({src: "/static/common/img/screenshot-chalk.png"})
             }
         }];
 
@@ -49,7 +47,7 @@
             _.each(screenshots, function(screenshot) {
                 var shot_data = {name: screenshot.name, id: screenshot.id};
                 _.each(screenshot.images, function(image, platform) {
-                    shot_data[platform] = {id: image.id};
+                    shot_data[platform] = {};
                     if (image.file !== null) {
                         shot_data[platform].uploadId = files.length;
                         files.push(image.file);
@@ -146,7 +144,7 @@
                     var upload = screenshots[index + i];
                     if (upload) {
                         // Update existing screenshots at the current index
-                        upload.images[platform] = new ScreenshotFile({file:file, id: upload.images[platform].id, is_new: true});
+                        upload.images[platform] = new ScreenshotFile({file:file, is_new: true});
                     }
                     else {
                         // If there was no screenshot to update, add the remaining files as new screenshots.
@@ -341,56 +339,74 @@
         });
     }
 
-    /**
-     * Set up the screenshot manager in a pane, and connect models to views.
-     * @param test_name name of test associated with screenshots
-     * @param pane HTML element containing monkey screenshot uploader
-     */
-    function init(test_name, pane) {
-        var screenshots = new ScreenshotsModel(test_name);
-        var screenshots_view = new ScreenshotsView(pane.find('.monkey-screenshots'));
-        var buttons_view = new FormButtonsView(pane.find('.monkey-form-buttons'));
+    function ScreenshotPane(test_name) {
+            var pane = screenshot_editor_template.clone();
+            var screenshots;
+            var screenshots_view;
+            var buttons_view;
+            /**
+             * Set up the screenshot manager in a pane, and connect models to views.
+             * @param test_name name of test associated with screenshots
+             * @param pane HTML element containing monkey screenshot uploader
+             */
+            function setup_pane(test_name, pane) {
+                screenshots = new ScreenshotsModel(test_name);
+                screenshots_view = new ScreenshotsView(pane.find('.monkey-screenshots'));
+                buttons_view = new FormButtonsView(pane.find('.monkey-form-buttons'));
+                // Render screenshots whenever we fetch them
+                screenshots.on('changeScreenshots', function(screenshots) {
+                    screenshots_view.renderScreenshots(screenshots);
+                }).on('error', function(error) {
+                    screenshots_view.renderError(error);
+                }).on('changeName', function(index, name, changed) {
+                    screenshots_view.showAsChanged(index, changed);
+                }).on('saved', function() {
+                    console.log("loading");
+                    screenshots.loadScreenshots();
+                });
 
-        // Render screenshots whenever we fetch them
-        screenshots.on('changeScreenshots', function(screenshots) {
-            screenshots_view.renderScreenshots(screenshots);
-        }).on('error', function(error) {
-            screenshots_view.renderError(error);
-        }).on('changeName', function(index, name, changed) {
-            screenshots_view.showAsChanged(index, changed);
-        }).on('saved', function() {
-            console.log("loading");
-            screenshots.loadScreenshots();
-        });
+                // Update list of uploads when user selects files
+                screenshots_view.on('filesSelected', function(fileList, index, platform) {
+                    screenshots.setNames(screenshots_view.getNames());
+                    var files = [];
+                    _.each(fileList, function(file, i) {
+                        files[i] = file;
+                    });
+                    screenshots.addUploadedFiles(files, index, platform);
+                });
+                screenshots_view.on('inputName', function(index, value) {
+                    screenshots.setName(index, value);
+                });
 
-        // Update list of uploads when user selects files
-        screenshots_view.on('filesSelected', function(fileList, index, platform) {
-            screenshots.setNames(screenshots_view.getNames());
-            var files = [];
-            _.each(fileList, function(file, i) {
-                files[i] = file;
-            });
-            screenshots.addUploadedFiles(files, index, platform);
-        });
-        screenshots_view.on('inputName', function(index, value) {
-            screenshots.setName(index, value);
-        });
+                // Perform actions when form buttons are clicked
+                buttons_view.on('reset', function() {
+                    screenshots.loadScreenshots();
+                });
+                buttons_view.on('save', function() {
+                    screenshots.setNames(screenshots_view.getNames());
+                    screenshots.save();
+                });
 
-        // Perform actions when form buttons are clicked
-        buttons_view.on('reset', function() {
-            screenshots.loadScreenshots();
-        });
-        buttons_view.on('save', function() {
-            screenshots.setNames(screenshots_view.getNames());
-            screenshots.save();
-        });
+                screenshots_view.renderScreenshots([]);
+                screenshots.loadScreenshots();
+            }
 
-        screenshots_view.renderScreenshots([]);
-        screenshots.loadScreenshots();
-
-
+            setup_pane(test_name, pane);
+            this.getPane = function() {
+                return pane;
+            };
+            this.destroy = function() {
+                // TODO: what else should we destroy?
+                pane.trigger('destroy');
+            }
     }
 
-    init("TEST", $('.monkey-pane'));
+    //setup_pane("TEST", $('.monkey-pane'));
 
+    return {
+        Init: function() {
+            screenshot_editor_template = $('#monkey-screenshot-manager-template').detach().removeClass('hide');
+        },
+        ScreenshotPane: ScreenshotPane
+    }
 })();

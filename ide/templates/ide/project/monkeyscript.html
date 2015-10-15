@@ -1,7 +1,7 @@
 {% load i18n %}
 
 {#<div class="monkey-pane aplite-only monkey-inline">#}
-<div id="monkey-editor-template" class="monkey-pane">
+<div id="monkey-screenshot-manager-template" class="monkey-pane hide">
     <h2>Test Screenshots
             {% for platform in supported_platforms %}
             <span class="platform-{{ platform }}">- {{ platform }}</span>
@@ -11,7 +11,7 @@
     {% for platform in supported_platforms %}
         <div>{{ platform }}</div>
     {%  endfor %}
-</div>
+    </div>
 
     <form class="monkey-form">
         <div class="monkey-screenshots">

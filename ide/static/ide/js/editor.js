@@ -33,6 +33,12 @@ CloudPebble.Editor = (function() {
         // See if we already had it open.
         CloudPebble.Sidebar.SuspendActive();
         if(CloudPebble.Sidebar.Restore('source-'+file.id)) {
+            if (CloudPebble.SidePane.RightPane.restorePane('monkey-screenshots', file.id)) {
+                CloudPebble.SidePane.RightPane.setSize('640px');
+            }
+            else {
+                CloudPebble.SidePane.RightPane.setSize('0');
+            }
             if(callback) {
                 callback(open_codemirrors[file.id]);
             }
@@ -51,7 +57,9 @@ CloudPebble.Editor = (function() {
                 error.text(interpolate(gettext("Something went wrong: %s"), [data.error]));
                 CloudPebble.Sidebar.SetActivePane(error, '');
             } else {
+                var screenshot_pane;
                 var is_js = file.name.substr(-3) == '.js';
+                var is_monkey = !is_js;
                 var source = data.source;
                 var lastModified = data.modified;
                 var pane = $('<div>');
@@ -67,12 +75,13 @@ CloudPebble.Editor = (function() {
                     //highlightSelectionMatches: true,
                     smartIndent: true,
                     indentWithTabs: !USER_SETTINGS.use_spaces,
-                    mode: (is_js ? 'javascript' : 'MonkeyScript'),
+                    mode: (is_js ? 'javascript' : (is_monkey ? 'MonkeyScript' : CloudPebble.Editor.PebbleMode)),
                     styleActiveLine: true,
                     value: source,
                     theme: USER_SETTINGS.theme,
                     foldGutter: true
                 };
+
                 if(USER_SETTINGS.keybinds !== '') {
                     settings.keyMap = USER_SETTINGS.keybinds;
                 }
@@ -408,8 +417,18 @@ CloudPebble.Editor = (function() {
                     if(!was_clean) {
                         --unsaved_files;
                     }
+                    screenshot_pane.destroy();
+                    //CloudPebble.SidePane.RightPane.destroyPane('monkey-screenshots', file.id);
                     delete open_codemirrors[file.id];
                 });
+
+                if (is_monkey) {
+                    // TODO: test name
+                    screenshot_pane = new CloudPebble.MonkeyScreenshots.ScreenshotPane(file.name);
+                    CloudPebble.SidePane.RightPane.addPane(screenshot_pane.getPane(), 'monkey-screenshots', file.id);
+                    CloudPebble.SidePane.RightPane.setSize('640px');
+                }
+
 
                 var was_clean = true;
                 code_mirror.on('change', function() {
