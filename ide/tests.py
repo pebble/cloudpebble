@@ -11,7 +11,7 @@ class UrlToReposTest(TestCase):
         """
         Tests that a simple repo url is correctly recognized.
         """
-        username, reponame  = git.url_to_repo("https://github.com/pebble/cloudpebble")
+        username, reponame = git.url_to_repo("https://github.com/pebble/cloudpebble")
         self.assertEqual("pebble", username)
         self.assertEqual("cloudpebble", reponame)
 
@@ -22,7 +22,6 @@ class UrlToReposTest(TestCase):
         username, reponame  = git.url_to_repo("git://github.com:foo/bar.git")
         self.assertEqual("foo", username)
         self.assertEqual("bar", reponame)
-
 
     def test_bad_url_to_repo(self):
         """

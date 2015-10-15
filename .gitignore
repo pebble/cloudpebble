@@ -8,7 +8,6 @@ pebble-sdk/
 cloudpebble/settings_local.py
 src/
 .vagrant
-
 .cache/
 .env/
 .idea/

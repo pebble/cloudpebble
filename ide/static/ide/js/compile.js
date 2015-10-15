@@ -138,6 +138,11 @@ CloudPebble.Compile = (function() {
             e.preventDefault();
             install_on_watch(ConnectionType.QemuBasalt);
         });
+        pane.find('#install-in-qemu-chalk-btn').click(function(e) {
+            e.preventDefault();
+            install_on_watch(ConnectionType.QemuChalk);
+        });
+
         pane.find('#show-qemu-logs-btn').click(function(e) {
             e.preventDefault();
             show_app_logs(ConnectionType.Qemu);
@@ -186,9 +191,9 @@ CloudPebble.Compile = (function() {
             targetTabs.find('a[data-run-target=' + target + ']').tab('show');
         }
         if(CloudPebble.ProjectInfo.sdk_version != '3') {
-            pane.find('#install-in-qemu-basalt-btn').hide();
+            pane.find('#install-in-qemu-basalt-btn #install-in-qemu-chalk-btn').hide();
         } else {
-            pane.find('#install-in-qemu-basalt-btn').show();
+            pane.find('#install-in-qemu-basalt-btn #install-in-qemu-chalk-btn').show();
         }
     };
 
@@ -260,7 +265,17 @@ CloudPebble.Compile = (function() {
                         } else {
                             pane.find('#last-compilation-size-basalt').addClass('hide');
                         }
+                        if(build.sizes.chalk) {
+                            var chalk_size_text = format_build_size(build.sizes.chalk, 65536, 10240, 262144);
+                            pane.find('#last-compilation-size-chalk').removeClass('hide').find('.text').text(chalk_size_text);
+                        } else {
+                            pane.find('#last-compilation-size-chalk').addClass('hide');
+                        }
                     }
+                    // Only enable emulator buttons for built platforms.
+                    pane.find('#run-qemu .btn-primary').attr('disabled', function() {
+                        return !_.isObject(build.sizes[$(this).data('platform')]);
+                    })
                 }
             } else {
                 pane.find('#last-compilation-time').addClass('hide');
@@ -268,6 +283,7 @@ CloudPebble.Compile = (function() {
                 pane.find('#compilation-run-build-button').attr('disabled', 'disabled');
                 pane.find('#last-compilation-size-aplite').addClass('hide');
                 pane.find('#last-compilation-size-basalt').addClass('hide');
+                pane.find('#last-compilation-size-chalk').addClass('hide');
                 pane.find('#last-compilation-app-memory').addClass('hide');
                 pane.find('#last-compilation-worker-memory').addClass('hide');
             }
@@ -282,6 +298,7 @@ CloudPebble.Compile = (function() {
                 .text(COMPILE_SUCCESS_STATES[build.state].english);
             mCrashAnalyser.set_debug_info_url(build.build_dir);
         }
+
     };
 
     var mPreviousDisplayLogs = [];
@@ -508,7 +525,8 @@ CloudPebble.Compile = (function() {
                     var platform = Pebble.version_to_platform(version_info);
                     var sizes = {
                         aplite: mLastBuild.sizes.aplite,
-                        basalt: mLastBuild.sizes.basalt
+                        basalt: mLastBuild.sizes.basalt,
+                        chalk: mLastBuild.sizes.chalk
                     };
                     var size = sizes[platform];
                     var install_timer = setTimeout(function() {
@@ -702,7 +720,18 @@ CloudPebble.Compile = (function() {
                     return ConnectionType.Qemu;
                 } else {
                     if(CloudPebble.ProjectInfo.sdk_version == '3') {
-                        return ConnectionType.QemuBasalt;
+                        if (!CloudPebble.ProjectInfo.app_platforms) {
+                            return ConnectionType.QemuChalk;
+                        }
+                        if (CloudPebble.ProjectInfo.app_platforms.indexOf('chalk') > -1) {
+                            return ConnectionType.QemuChalk;
+                        }
+                        else if (CloudPebble.ProjectInfo.app_platforms.indexOf('basalt') > -1) {
+                            return ConnectionType.QemuBasalt;
+                        }
+                        else if (CloudPebble.ProjectInfo.app_platforms.indexOf('aplite') > -1) {
+                            return ConnectionType.QemuAplite;
+                        }
                     } else {
                         return ConnectionType.QemuAplite;
                     }

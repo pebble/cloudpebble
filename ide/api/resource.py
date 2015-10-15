@@ -20,24 +20,21 @@ def create_resource(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     kind = request.POST['kind']
     resource_ids = json.loads(request.POST['resource_ids'])
-    default_file = request.FILES.get('file', None)
-    colour_file = request.FILES.get('file_colour', None)
+    posted_file = request.FILES.get('file', None)
     file_name = request.POST['file_name']
+    new_tags = json.loads(request.POST['new_tags'])
     resources = []
     try:
-        with transaction.commit_on_success():
+        with transaction.atomic():
             rf = ResourceFile.objects.create(project=project, file_name=file_name, kind=kind)
             for r in resource_ids:
                 regex = r['regex'] if 'regex' in r else None
                 tracking = int(r['tracking']) if 'tracking' in r else None
                 resources.append(ResourceIdentifier.objects.create(resource_file=rf, resource_id=r['id'],
                                                                    character_regex=regex, tracking=tracking))
-            if default_file is not None:
-                default_variant = ResourceVariant.objects.create(resource_file=rf, variant=ResourceVariant.VARIANT_DEFAULT)
-                default_variant.save_file(default_file, default_file.size)
-            if colour_file is not None:
-                colour_variant = ResourceVariant.objects.create(resource_file=rf, variant=ResourceVariant.VARIANT_COLOUR)
-                colour_variant.save_file(colour_file, colour_file.size)
+            if posted_file is not None:
+                variant = ResourceVariant.objects.create(resource_file=rf, tags=",".join(str(int(t)) for t in new_tags))
+                variant.save_file(posted_file, posted_file.size)
 
             target_platforms = json.loads(request.POST.get('target_platforms', None))
             rf.target_platforms = None if target_platforms is None else json.dumps(target_platforms)
@@ -61,7 +58,7 @@ def create_resource(request, project_id):
             "target_platforms": json.loads(rf.target_platforms) if rf.target_platforms else None,
             "resource_ids": [{'id': x.resource_id, 'regex': x.character_regex} for x in resources],
             "identifiers": [x.resource_id for x in resources],
-            "variants": [x.variant for x in rf.variants.all()],
+            "variants": [x.get_tags() for x in rf.variants.all()],
             "extra": {y.resource_id: {'regex': y.character_regex, 'tracking': y.tracking} for y in rf.identifiers.all()}
         }})
 
@@ -93,7 +90,7 @@ def resource_info(request, project_id, resource_id):
             'id': resource.id,
             'file_name': resource.file_name,
             'kind': resource.kind,
-            "variants": [x.variant for x in resource.variants.all()],
+            "variants": [x.get_tags() for x in resource.variants.all()],
             "extra": {y.resource_id: {'regex': y.character_regex, 'tracking': y.tracking, 'compatibility': y.compatibility} for y in resource.identifiers.all()}
         }
     })
@@ -117,7 +114,37 @@ def delete_resource(request, project_id, resource_id):
             }
         }, project=project, request=request)
 
+
         return json_response({})
+
+@require_POST
+@login_required
+def delete_variant(request, project_id, resource_id, variant):
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    resource = get_object_or_404(ResourceFile, pk=resource_id, project=project)
+    if variant == '0':
+        variant = ''
+    variant_to_delete = resource.variants.get(tags=variant)
+
+    if resource.variants.count() == 1:
+        return json_failure("You cannot delete the last remaining variant of a resource.")
+    try:
+        variant_to_delete.delete()
+    except Exception as e:
+        return json_failure(str(e))
+    else:
+        send_keen_event('cloudpebble', 'cloudpebble_delete_variant', data={
+            'data': {
+                'filename': resource.file_name,
+                'kind': 'resource',
+                'resource-kind': resource.kind,
+                'variant': variant
+            }
+        }, project=project, request=request)
+
+        return json_response({'resource': {
+            'variants': [x.get_tags() for x in resource.variants.all()]
+        }})
 
 
 @require_POST
@@ -128,6 +155,8 @@ def update_resource(request, project_id, resource_id):
     resource_ids = json.loads(request.POST['resource_ids'])
     file_name = request.POST.get('file_name', None)
     target_platforms = json.loads(request.POST.get('target_platforms', None))
+    variant_tags = json.loads(request.POST.get('variants', "[]"))
+    new_tags = json.loads(request.POST.get('new_tags', "[]"))
 
     try:
         with transaction.atomic():
@@ -141,12 +170,20 @@ def update_resource(request, project_id, resource_id):
                 compat = r['compatibility'] if 'compatibility' in r else None
                 resources.append(ResourceIdentifier.objects.create(resource_file=resource, resource_id=r['id'], character_regex=regex, tracking=tracking, compatibility=compat))
 
+            # We get sent a list of (tags_before, tags_after) pairs.
+            updated_variants = []
+            for tag_update in variant_tags:
+                tags_before, tags_after = tag_update
+                variant = resource.variants.get(tags=tags_before)
+                variant.set_tags(tags_after)
+                updated_variants.append(variant)
+
+            for variant in updated_variants:
+                variant.save()
             if 'file' in request.FILES:
-                default_variant = resource.variants.get_or_create(variant=ResourceVariant.VARIANT_DEFAULT)[0]
-                default_variant.save_file(request.FILES['file'], request.FILES['file'].size)
-            if 'file_colour' in request.FILES:
-                colour_variant = resource.variants.get_or_create(variant=ResourceVariant.VARIANT_COLOUR)[0]
-                colour_variant.save_file(request.FILES['file_colour'], request.FILES['file_colour'].size)
+                variant = resource.variants.create(tags=",".join(str(int(t)) for t in new_tags))
+                variant.save_file(request.FILES['file'], request.FILES['file'].size)
+
             resource.target_platforms = None if target_platforms is None else json.dumps(target_platforms)
             if file_name and resource.file_name != file_name:
                 resource.file_name = file_name
@@ -170,7 +207,7 @@ def update_resource(request, project_id, resource_id):
             "resource_ids": [{'id': x.resource_id, 'regex': x.character_regex, 'compatibility': x.compatibility} for x in resources],
             "target_platforms": json.loads(resource.target_platforms) if resource.target_platforms else None,
             "identifiers": [x.resource_id for x in resources],
-            "variants": [x.variant for x in resource.variants.all()],
+            "variants": [x.get_tags() for x in resource.variants.all()],
             "extra": {y.resource_id: {'regex': y.character_regex, 'tracking': y.tracking, 'compatibility': y.compatibility} for y in resource.identifiers.all()}
         }})
 
@@ -179,6 +216,9 @@ def update_resource(request, project_id, resource_id):
 @login_required
 def show_resource(request, project_id, resource_id, variant):
     resource = get_object_or_404(ResourceFile, pk=resource_id, project__owner=request.user)
+    if variant == '0':
+        variant = ''
+
     variant = resource.get_best_variant(variant)
     content_types = {
         u'png': 'image/png',
