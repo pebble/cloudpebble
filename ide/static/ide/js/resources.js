@@ -26,6 +26,10 @@ CloudPebble.Resources = (function() {
         chalk: [TAG_CHALK, TAG_COLOUR, TAG_ROUND]
     };
 
+    if (CloudPebble.ProjectInfo.type != 'native') {
+        delete PLATFORMS['chalk'];
+    }
+
     /**
      * Get the tag data (from TAGS) for the tag with a specific human-readable name
      * @param {string} name
@@ -695,7 +699,6 @@ CloudPebble.Resources = (function() {
         }
         if(CloudPebble.ProjectInfo.type != 'native') {
             parent.find('.native-only').hide();
-            parent.find('#edit-resource-new-file').hide();
         }
     };
 

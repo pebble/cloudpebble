@@ -21,7 +21,7 @@
                 </div>
             </div>
 
-            <div class="control-group native-only" id="non-font-resource-group">
+            <div class="control-group" id="non-font-resource-group">
                 <label class="control-label">{% trans 'Identifier' %}</label>
                 <div class="controls">
                     <input type="text" class="edit-resource-id" placeholder="IMAGE_EXAMPLE_IDENTIFIER" pattern="[A-Za-z0-9_]+">
@@ -35,7 +35,7 @@
                 </div>
             </div>
 
-            <div id="resource-targets-section" class="sdk3-only native-only">
+            <div id="resource-targets-section" class="sdk3-only">
                 <div class="control-group">
                     <label style="width: 250px" class="control-label" for="edit-resource-target-platforms-enabled">{% trans 'Target specific platforms' %}</label>
                     <input type="checkbox" id="edit-resource-target-platforms-enabled">
@@ -55,7 +55,7 @@
 
         </div>
 
-        <div class="well image-platform-preview hide sdk3-only native-only">
+        <div class="well image-platform-preview hide sdk3-only">
             <h4>{% trans 'Preview per platform' %}</h4>
             <div class="pane-boxes pane-3-boxes ">
                 {% for platform in supported_platforms %}
@@ -84,14 +84,14 @@
                         <img src=""><p class="image-resource-preview-dimensions">52x52</p>
                     </div>
                 </div>
-                <div class="tag-edit control-group sdk3-only native-only">
+                <div class="tag-edit control-group sdk3-only">
                 {# TODO: support for/id #}
                     <label class="control-label">Tags</label>
                     <div class="controls">
                         <textarea class="resource-tags" rows="1" cols="60"></textarea>
                     </div>
                 </div>
-                <div class="variant-platform-preview control-group sdk3-only native-only">
+                <div class="variant-platform-preview control-group sdk3-only">
                     <label class="control-label">Final platforms</label>
                     <div class="controls label-list"></div>
                 </div>
@@ -111,14 +111,14 @@
                     </div>
                 </div>
 
-                <div class="tag-edit control-group sdk3-only native-only">
+                <div class="tag-edit control-group sdk3-only">
                 {# TODO: support for/id #}
                     <label class="control-label">Tags</label>
                     <div class="controls">
                         <textarea class="resource-tags" rows="1" cols="60"></textarea>
                     </div>
                 </div>
-                <div class="variant-platform-preview control-group sdk3-only native-only">
+                <div class="variant-platform-preview control-group sdk3-only">
                     <label class="control-label">{% trans 'Final platforms' %}</label>
                     <div class="controls label-list"></div>
                 </div>
@@ -172,13 +172,13 @@
                     <input type="file" id="edit-resource-file">
                 </div>
             </div>
-            <div class="tag-edit control-group sdk3-only native-only">
+            <div class="tag-edit control-group sdk3-only">
                 <label class="control-label">Tags</label>
                 <div class="controls">
                     <textarea id="new-resource-tags" class="resource-tags" rows="1" cols="60"></textarea>
                 </div>
             </div>
-            <div class="variant-platform-preview control-group sdk3-only native-only">
+            <div class="variant-platform-preview control-group sdk3-only">
                 <label class="control-label">Final platforms</label>
                 <div class="controls label-list"></div>
             </div>
