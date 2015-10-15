@@ -106,6 +106,13 @@ def restart_everything():
     execute(restart_heroku)
 
 
+def build_qemu_image(board, platform):
+    with lcd("~/projects/tintin"):
+        with prefix(". .env/bin/activate"):
+            local("pypy ./waf configure --board={} --qemu --release --sdkshell build qemu_image_spi qemu_image_micro".format(board))
+        local("cp build/qemu_* ~/projects/qemu-tintin-images/{}/3.0/".format(platform))
+
+
 @task
 @runs_once
 def update_qemu_images(sdk_version):
@@ -115,9 +122,9 @@ def update_qemu_images(sdk_version):
 
     with lcd("~/projects/tintin"):
         local("git checkout v%s" % sdk_version)
-        with prefix(". .env/bin/activate"):
-            local("pypy ./waf configure --board=snowy_bb --qemu --release --sdkshell build qemu_image_spi qemu_image_micro")
-        local("cp build/qemu_* ~/projects/qemu-tintin-images/basalt/3.0/")
+
+    build_qemu_image("snowy_bb", "basalt")
+    build_qemu_image("spalding_bb2", "chalk")
 
     with lcd("~/projects/qemu-tintin-images"):
         local("git commit -a -m 'Update to v%s'" % sdk_version)
