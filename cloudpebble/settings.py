@@ -130,7 +130,7 @@ STATICFILES_FINDERS = (
 )
 
 BOWER_INSTALLED_APPS = (
-    'fuse.js',
+    'https://github.com/krisk/Fuse.git#2c1560d763',
     'jquery',
     'underscore',
     'backbone',
