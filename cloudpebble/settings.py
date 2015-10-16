@@ -137,7 +137,6 @@ BOWER_INSTALLED_APPS = (
     'text-encoding',
     'jshint/jshint',
     'html.sortable',
-    'jquery.tablesorter',
     'alexgorbatchev/jquery-textext',
     'codemirror#4.2.0',
     'kanaka/noVNC',
