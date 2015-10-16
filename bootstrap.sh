@@ -20,6 +20,7 @@ add-apt-repository -y ppa:chris-lea/node.js
 apt-get update
 aptitude install -y nodejs
 npm install -g jshint
+npm install -g bower
 
 # Install redis
 aptitude install -y redis-server
