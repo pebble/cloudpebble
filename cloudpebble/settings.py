@@ -125,7 +125,22 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'djangobower.finders.BowerFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+)
+
+BOWER_INSTALLED_APPS = (
+    'fuse.js',
+    'jquery',
+    'underscore',
+    'backbone',
+    'text-encoding',
+    'jshint/jshint',
+    'html.sortable',
+    'jquery.tablesorter',
+    'alexgorbatchev/jquery-textext',
+    'codemirror#4.2.0',
+    'kanaka/noVNC',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -208,7 +223,8 @@ INSTALLED_APPS = (
     'qr',
     'south',
     'djcelery',
-    'registration'
+    'registration',
+    'djangobower',
 )
 
 # A sample logging configuration. The only tangible logging
