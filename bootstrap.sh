@@ -38,10 +38,11 @@ pip install -r /vagrant/requirements.txt
 # Force installation of requests 2.7.0
 easy_install requests==2.7.0
 
-# Make sure we have a useful database
+# Make sure we have a useful database and our JS dependencies.
 pushd /vagrant
     sudo -u vagrant python manage.py syncdb --noinput
     sudo -u vagrant python manage.py migrate
+    sudo -u vagrant python manage.py bower install
 popd
 
 # We'll need this later
