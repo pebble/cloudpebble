@@ -383,14 +383,24 @@ CloudPebble.Resources = (function() {
 
         var replacements_files = [];
         var replacement_map = [];
+        var okay = true;
         $.each(form.find('.edit-resource-replace-file'), function() {
-            var file = process_file(kind, this);
+            var file;
+            try {
+                file = process_file(kind, this);
+            }
+            catch (e) {
+                report_error(e);
+                okay = false;
+                return;
+            }
             if (file !== null) {
                 var tags = $(this).parents('.image-resource-preview-pane').find('.text-wrap input').val().slice(1, -1);
                 replacement_map.push([tags, replacements_files.length]);
                 replacements_files.push(file);
             }
         });
+        if (!okay) return;
 
         var form_data = new FormData();
 
