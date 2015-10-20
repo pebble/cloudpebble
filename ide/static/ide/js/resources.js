@@ -514,7 +514,9 @@ CloudPebble.Resources = (function() {
                         });
                     });
                 });
-
+                if (CloudPebble.ProjectInfo.sdk_version == '2' && resource.variants.length > 0) {
+                    pane.find('#edit-resource-new-file').hide();
+                }
                 // Only show the delete-variant buttons if there's more than one variant
                 pane.find('.btn-delvariant').toggle(resource.variants.length > 1);
             };
@@ -691,7 +693,6 @@ CloudPebble.Resources = (function() {
         }
         if(CloudPebble.ProjectInfo.sdk_version != '3') {
             parent.find('.sdk3-only').hide();
-            parent.find('#edit-resource-new-file').hide();
         }
         if(CloudPebble.ProjectInfo.type != 'native') {
             parent.find('.native-only').hide();
