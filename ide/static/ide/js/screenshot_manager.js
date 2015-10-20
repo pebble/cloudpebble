@@ -5,10 +5,12 @@ CloudPebble.MonkeyScreenshots = (function() {
     function ScreenshotFile(options) {
         var options = _.defaults(options || {}, {
             is_new: false,
+            id: null,
             file: null,
             src: ""
         });
         this.is_new = options.is_new;
+        this.id = options.id;
         this.file = options.file;
         this.src = options.src;
     }
@@ -22,17 +24,17 @@ CloudPebble.MonkeyScreenshots = (function() {
             name: "Screenshot set 1",
             id: 0,
             images: {
-                aplite: new ScreenshotFile({src: "/static/common/img/screenshot-aplite.png"}),
-                basalt: new ScreenshotFile({src: "/static/common/img/screenshot-basalt.png"}),
-                chalk:  new ScreenshotFile({src: "/static/common/img/screenshot-chalk.png"})
+                aplite: new ScreenshotFile({src: "/static/common/img/screenshot-aplite.png", id: 0}),
+                basalt: new ScreenshotFile({src: "/static/common/img/screenshot-basalt.png", id: 1}),
+                chalk:  new ScreenshotFile({src: "/static/common/img/screenshot-chalk.png",  id: 2})
             }
         }, {
             name: "Screenshot set 2",
             id: 1,
             images: {
-                aplite: new ScreenshotFile({src: "/static/common/img/screenshot-aplite.png"}),
-                basalt: new ScreenshotFile({src: "/static/common/img/screenshot-basalt.png"}),
-                chalk:  new ScreenshotFile({src: "/static/common/img/screenshot-chalk.png"})
+                aplite: new ScreenshotFile({src: "/static/common/img/screenshot-aplite.png", id: 3}),
+                basalt: new ScreenshotFile({src: "/static/common/img/screenshot-basalt.png", id: 4}),
+                chalk:  new ScreenshotFile({src: "/static/common/img/screenshot-chalk.png",  id: 5})
             }
         }];
 
@@ -47,7 +49,7 @@ CloudPebble.MonkeyScreenshots = (function() {
             _.each(screenshots, function(screenshot) {
                 var shot_data = {name: screenshot.name, id: screenshot.id};
                 _.each(screenshot.images, function(image, platform) {
-                    shot_data[platform] = {};
+                    shot_data[platform] = {id: image.id};
                     if (image.file !== null) {
                         shot_data[platform].uploadId = files.length;
                         files.push(image.file);
@@ -144,7 +146,8 @@ CloudPebble.MonkeyScreenshots = (function() {
                     var upload = screenshots[index + i];
                     if (upload) {
                         // Update existing screenshots at the current index
-                        upload.images[platform] = new ScreenshotFile({file:file, is_new: true});
+                        var id = (upload.images[platform] ? upload.images[platform].id : null);
+                        upload.images[platform] = new ScreenshotFile({file:file, id: id, is_new: true});
                     }
                     else {
                         // If there was no screenshot to update, add the remaining files as new screenshots.

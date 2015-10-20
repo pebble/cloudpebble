@@ -328,7 +328,7 @@ class SourceFile(TextFile):
         unique_together = (('project', 'file_name'),)
 
 class TestFile(TextFile):
-    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_-]$")])
+    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_-]+$")])
     project = models.ForeignKey('Project', related_name='test_files')
     bucket_name = 'source'
     folder = 'tests/scripts'
@@ -338,18 +338,21 @@ class TestFile(TextFile):
         return 'integration_tests/%s' % self.file_name
         # TODO: verify
 
+    def get_screenshot_sets(self):
+        return ScreenshotSet.objects.filter(test=self)
+
     class Meta(TextFile.Meta):
         unique_together = (('project', 'file_name'),)
 
 
 class ScreenshotSet(IdeModel):
     test = models.ForeignKey('TestFile', related_name='screenshot_sets')
-    name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_-]+\.(png)$")])
+    name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_-]+$")])
 
     def save(self, *args, **kwargs):
         self.clean_fields()
-        self.project.last_modified = now()
-        self.project.save()
+        self.test.project.last_modified = now()
+        self.test.project.save()
         super(ScreenshotSet, self).save(*args, **kwargs)
 
     class Metha(IdeModel.Meta):
@@ -358,7 +361,7 @@ class ScreenshotSet(IdeModel):
 class ScreenshotFile(BinFile):
     bucket_name = 'source'
     folder = 'tests/screenshots'
-    screenshot_set = models.ForeignKey('ScreenshotSet', related_name='screenshots')
+    screenshot_set = models.ForeignKey('ScreenshotSet', related_name='files')
     PLATFORMS = (
         ('aplite', 'Aplite'),
         ('basalt', 'Basalt'),
@@ -375,8 +378,8 @@ class ScreenshotFile(BinFile):
         return self.id
 
     def save_project(self):
-        self.screenshot_set.project.last_modified = now()
-        self.screenshot_set.project.save()
+        self.screenshot_set.test.project.last_modified = now()
+        self.screenshot_set.test.project.save()
 
     def save(self, *args, **kwargs):
         self.full_clean()

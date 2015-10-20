@@ -3,10 +3,12 @@
 
 import os
 import dj_database_url
+import sys
 _environ = os.environ
 
 DEBUG = _environ.get('DEBUG', '') != ''
 TEMPLATE_DEBUG = DEBUG
+TESTING = 'test' in sys.argv
 
 ADMINS = (
     ('Administrator', 'example@example.com'),
@@ -138,7 +140,7 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.Loader',
 )
 
-if not DEBUG:
+if not DEBUG and not TESTING:
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.CachedStaticFilesStorage'
 
 

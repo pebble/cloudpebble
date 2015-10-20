@@ -7,8 +7,9 @@ from ide.api.project import project_info, compile_project, last_build, build_his
     save_project_settings, delete_project, begin_export, import_zip, import_github, do_import_gist
 from ide.api.resource import create_resource, resource_info, delete_resource, update_resource, show_resource, \
     delete_variant
-from ide.api.source import create_source_file, load_source_file, source_file_is_safe, save_source_file, \
+from ide.api.source import create_source_file, create_test_file, load_source_file, source_file_is_safe, save_source_file, \
     delete_source_file, rename_source_file
+from ide.api.screenshots import save_screenshots, load_screenshots, show_screenshot
 from ide.api.user import transition_accept, transition_export, transition_delete, whats_new
 from ide.api.ycm import init_autocomplete
 from ide.api.qemu import launch_emulator, generate_phone_token, handle_phone_token
@@ -26,11 +27,15 @@ urlpatterns = patterns(
     url(r'^project/(?P<project_id>\d+)/save_settings', save_project_settings, name='save_project_settings'),
     url(r'^project/(?P<project_id>\d+)/delete', delete_project, name='delete_project'),
     url(r'^project/(?P<project_id>\d+)/create_source_file', create_source_file, name='create_source_file'),
-    url(r'^project/(?P<project_id>\d+)/source/(?P<file_id>\d+)/load', load_source_file, name='load_source_file'),
-    url(r'^project/(?P<project_id>\d+)/source/(?P<file_id>\d+)/save', save_source_file, name='save_source_file'),
-    url(r'^project/(?P<project_id>\d+)/source/(?P<file_id>\d+)/rename', rename_source_file, name='rename_source_file'),
-    url(r'^project/(?P<project_id>\d+)/source/(?P<file_id>\d+)/is_safe', source_file_is_safe, name='source_file_is_safe'),
-    url(r'^project/(?P<project_id>\d+)/source/(?P<file_id>\d+)/delete', delete_source_file, name='delete_source_file'),
+    url(r'^project/(?P<project_id>\d+)/create_test_file', create_test_file, name='create_test_file'),
+    url(r'^project/(?P<project_id>\d+)/(?P<kind>(source|test))/(?P<file_id>\d+)/load', load_source_file, name='load_source_file'),
+    url(r'^project/(?P<project_id>\d+)/(?P<kind>(source|test))/(?P<file_id>\d+)/save', save_source_file, name='save_source_file'),
+    url(r'^project/(?P<project_id>\d+)/test/(?P<test_id>\d+)/screenshots/save', save_screenshots, name='save_screenshots'),
+    url(r'^project/(?P<project_id>\d+)/test/(?P<test_id>\d+)/screenshots/load', load_screenshots, name='load_screenshots'),
+    url(r'^project/(?P<project_id>\d+)/(?P<kind>(source|test))/(?P<file_id>\d+)/rename', rename_source_file, name='rename_source_file'),
+    url(r'^project/(?P<project_id>\d+)/(?P<kind>(source|test))/(?P<file_id>\d+)/is_safe', source_file_is_safe, name='source_file_is_safe'),
+    url(r'^project/(?P<project_id>\d+)/(?P<kind>(source|test))/(?P<file_id>\d+)/delete', delete_source_file, name='delete_source_file'),
+    url(r'^project/(?P<project_id>\d+)/test/(?P<test_id>\d+)/screenshot/(?P<screenshot_id>\d+)/(?P<platform_name>\w{1,10})/get/', show_screenshot, name='show_screenshot'),
     url(r'^project/(?P<project_id>\d+)/create_resource', create_resource, name='create_resource'),
     url(r'^project/(?P<project_id>\d+)/resource/(?P<resource_id>\d+)/info', resource_info, name='resource_info'),
     url(r'^project/(?P<project_id>\d+)/resource/(?P<resource_id>\d+)/delete', delete_resource, name='delete_resource'),
