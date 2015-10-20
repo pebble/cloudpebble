@@ -35,7 +35,7 @@ CloudPebble.Resources = (function() {
     }
 
     /**
-     * Geet the tag data (from TAGS) for the tag with a specific numeric ID.
+     * Get the tag data (from TAGS) for the tag with a specific numeric ID.
      * @param {Number} id
      */
     function get_tag_data_for_id(id) {
@@ -381,7 +381,20 @@ CloudPebble.Resources = (function() {
         var variant_tags = extract_tags(form.find('#edit-resource-previews .text-wrap input'));
         var new_tags = extract_tags(form.find('#edit-resource-new-file .text-wrap input'));
 
+        var replacements_files = [];
+        var replacement_map = [];
+        $.each(form.find('.edit-resource-replace-file'), function() {
+            var file = process_file(kind, this);
+            if (file !== null) {
+                var tags = $(this).parents('.image-resource-preview-pane').find('.text-wrap input').val().slice(1, -1);
+                replacement_map.push([tags, replacements_files.length]);
+                replacements_files.push(file);
+            }
+        });
+
         var form_data = new FormData();
+
+        // Build replacement file map
         form_data.append("kind", kind);
         form_data.append("resource_ids", JSON.stringify(resources));
         if (file) {
@@ -393,9 +406,11 @@ CloudPebble.Resources = (function() {
             form_data.append("variants", JSON.stringify($.makeArray(variant_tags)));
         }
         form_data.append("file_name", name);
-
-
         form_data.append("target_platforms", JSON.stringify(target_platforms));
+        form_data.append("replacements", JSON.stringify(replacement_map));
+        _.each(replacements_files, function(file) {
+            form_data.append("replacement_files[]", file);
+        });
 
         disable_controls();
         $.ajax({
@@ -471,7 +486,8 @@ CloudPebble.Resources = (function() {
                             break;
                     }
 
-                    var preview_url = '/ide/project/' + PROJECT_ID + '/resource/' + resource.id + '/' + variant_string + '/get';
+                    // Add a cache-breaking query string to the end of the URL to ensure the image reloads
+                    var preview_url = '/ide/project/' + PROJECT_ID + '/resource/' + resource.id + '/' + variant_string + '/get?'+new Date().getTime();
                     var preview_pane = pane.find('#edit-'+template_name+'-resource-preview-template > div').clone();
                     preview_pane.appendTo(previews).hide();
 
@@ -785,7 +801,7 @@ CloudPebble.Resources = (function() {
             }
         });
 
-        template.find("input[type=file]").change(function() {
+        template.find("#edit-resource-file").change(function() {
             var input = $(this);
             $('#edit-resource-file-name').val(function(index, old_val) {
                 return (old_val || input.val().split(/(\\|\/)/g).pop());
@@ -800,7 +816,7 @@ CloudPebble.Resources = (function() {
             var textext = build_tags_editor(template, template.find("#new-resource-tags"), []);
             // Disable the new file tag-picker unless a file has been chosen.
             textext.enabled(false);
-            template.find("input[type='file']").change(function(e) {
+            template.find("#edit-resource-file").change(function(e) {
                 var file_exists = e.target.value.length > 0;
                 textext.enabled(file_exists);
                 template.find('#edit-resource-new-file').toggleClass('file-present', file_exists);
