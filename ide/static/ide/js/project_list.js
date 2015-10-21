@@ -186,5 +186,4 @@ $(function() {
     }
 
     jquery_csrf_setup();
-    $('table').tablesorter();
 });

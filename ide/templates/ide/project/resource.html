@@ -33,6 +33,7 @@
 
         <div id="resource-id-group">
             <div class="well resource-id-group-single">
+
                 <div class="control-group">
                     <label class="control-label">{% trans 'Identifier' %}</label>
                     <div class="controls">
@@ -91,7 +92,7 @@
             </div>
         </div>
 
-        <div class="well image-platform-preview hide sdk3-only native-only">
+        <div class="well image-platform-preview hide sdk3-only">
             <h4>{% trans 'Preview per platform' %}</h4>
             <div class="pane-boxes pane-3-boxes ">
                 {% for platform in supported_platforms %}
@@ -120,14 +121,14 @@
                         <img src=""><p class="image-resource-preview-dimensions">52x52</p>
                     </div>
                 </div>
-                <div class="tag-edit control-group sdk3-only native-only">
+                <div class="tag-edit control-group sdk3-only">
                 {# TODO: support for/id #}
                     <label class="control-label">Tags</label>
                     <div class="controls">
                         <textarea class="resource-tags" rows="1" cols="60"></textarea>
                     </div>
                 </div>
-                <div class="variant-platform-preview control-group sdk3-only native-only">
+                <div class="variant-platform-preview control-group sdk3-only">
                     <label class="control-label">Final platforms</label>
                     <div class="controls label-list"></div>
                 </div>
@@ -147,13 +148,14 @@
                     </div>
                 </div>
 
-                <div class="tag-edit control-group sdk3-only native-only">
+                <div class="tag-edit control-group sdk3-only">
+                {# TODO: support for/id #}
                     <label class="control-label">Tags</label>
                     <div class="controls">
                         <textarea class="resource-tags" rows="1" cols="60"></textarea>
                     </div>
                 </div>
-                <div class="variant-platform-preview control-group sdk3-only native-only">
+                <div class="variant-platform-preview control-group sdk3-only">
                     <label class="control-label">{% trans 'Final platforms' %}</label>
                     <div class="controls label-list"></div>
                 </div>
@@ -169,13 +171,13 @@
                     <input type="file" id="edit-resource-file">
                 </div>
             </div>
-            <div class="tag-edit control-group sdk3-only native-only">
+            <div class="tag-edit control-group sdk3-only">
                 <label class="control-label">Tags</label>
                 <div class="controls">
                     <textarea id="new-resource-tags" class="resource-tags" rows="1" cols="60"></textarea>
                 </div>
             </div>
-            <div class="variant-platform-preview control-group sdk3-only native-only">
+            <div class="variant-platform-preview control-group sdk3-only">
                 <label class="control-label">Final platforms</label>
                 <div class="controls label-list"></div>
             </div>

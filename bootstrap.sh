@@ -20,6 +20,7 @@ add-apt-repository -y ppa:chris-lea/node.js
 apt-get update
 aptitude install -y nodejs
 npm install -g jshint
+npm install -g bower
 
 # Install redis
 aptitude install -y redis-server
@@ -37,10 +38,11 @@ pip install -r /vagrant/requirements.txt
 # Force installation of requests 2.7.0
 easy_install requests==2.7.0
 
-# Make sure we have a useful database
+# Make sure we have a useful database and our JS dependencies.
 pushd /vagrant
     sudo -u vagrant python manage.py syncdb --noinput
     sudo -u vagrant python manage.py migrate
+    sudo -u vagrant python manage.py bower install
 popd
 
 # We'll need this later
@@ -61,7 +63,7 @@ popd
 # Obtain SDK3.
 sudo -u vagrant mkdir sdk3
 pushd sdk3
-    wget --progress=bar:force -O sdk.tar.gz https://sdk.getpebble.com/download/3.6-dp5?source=cloudpebble
+    wget --progress=bar:force -O sdk.tar.gz https://sdk.getpebble.com/download/3.6?source=cloudpebble
     sudo -u vagrant tar --strip 1 -xzf sdk.tar.gz
     rm sdk.tar.gz
     sudo -u vagrant ln -s ~/arm-cs-tools arm-cs-tools

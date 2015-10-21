@@ -199,7 +199,7 @@ def do_import_archive(project_id, archive, delete_project=False):
                                 identifier = resource['name']
                                 # Pebble.js and simply.js both have some internal resources that we don't import.
                                 if project.project_type in {'pebblejs', 'simplyjs'}:
-                                    if identifier in {'MONO_FONT_14', 'IMAGE_MENU_ICON', 'IMAGE_LOGO_SPLASH', 'IMAGE_TITLE_SPLASH'}:
+                                    if identifier in {'MONO_FONT_14', 'IMAGE_MENU_ICON', 'IMAGE_LOGO_SPLASH', 'IMAGE_TILE_SPLASH'}:
                                         continue
                                 tags, root_file_name = get_filename_variant(file_name, tag_map)
                                 if (len(tags) != 0):

@@ -7,7 +7,7 @@ flup==1.0.3.dev-20110405
 psycopg2==2.4.5
 South==0.8.4
 qrcode==4.0.4
-Pillow
+Pillow==2.9.0
 pygithub==1.14.2
 python-social-auth==0.1.23
 keen==0.2.3
@@ -17,6 +17,7 @@ gevent==1.0.1
 psycogreen==1.0
 requests==2.7.0
 oauth2client==1.3
+django-bower==5.0.4
 
 # This is used for Mailchimp integration
 mailchimp==2.0.9

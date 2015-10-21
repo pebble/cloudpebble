@@ -540,7 +540,9 @@ CloudPebble.Resources = (function() {
                         });
                     });
                 });
-
+                if (CloudPebble.ProjectInfo.sdk_version == '2' && resource.variants.length > 0) {
+                    pane.find('#edit-resource-new-file').hide();
+                }
                 // Only show the delete-variant buttons if there's more than one variant
                 pane.find('.btn-delvariant').toggle(resource.variants.length > 1);
             };
@@ -676,6 +678,7 @@ CloudPebble.Resources = (function() {
             });
 
             var form = pane.find('form');
+
             var live_form = make_live_settings_form({
                 form: form,
                 save_function: function() {
@@ -685,7 +688,11 @@ CloudPebble.Resources = (function() {
                     CloudPebble.Sidebar.SetIcon('resource-'+resource.id, 'edit');
                 }
             }).init();
+
             form.submit(save);
+            CloudPebble.GlobalShortcuts.SetShortcutHandlers({
+                save: save
+            });
 
             restore_pane(pane);
         });
@@ -700,11 +707,9 @@ CloudPebble.Resources = (function() {
         }
         if(CloudPebble.ProjectInfo.sdk_version != '3') {
             parent.find('.sdk3-only').hide();
-            parent.find('#edit-resource-new-file').hide();
         }
         if(CloudPebble.ProjectInfo.type != 'native') {
             parent.find('.native-only').hide();
-            parent.find('#edit-resource-new-file').hide();
         }
     };
 
@@ -851,6 +856,9 @@ CloudPebble.Resources = (function() {
         // Set up the resource editing template.
         resource_template = $('#resource-pane-template');
         resource_template.remove();
+        if (CloudPebble.ProjectInfo.type != 'native') {
+            delete PLATFORMS['chalk'];
+        }
         CloudPebble.FuzzyPrompt.AddDataSource('files', function() {
             return project_resources;
         }, function (resource, querystring) {
