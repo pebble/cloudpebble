@@ -69,7 +69,7 @@
                         <span class="help-block">{% trans 'Determines the font rendering algorithm to use. The latest looks better, but can produce slightly larger characters.' %}</span>
                     </div>
                 </div>
-                <div class="resource-targets-section" class="sdk3-only native-only">
+                <div class="resource-targets-section sdk3-only native-only">
                     <div class="control-group">
                         <label style="width: 250px" class="control-label">{% trans 'Target platforms' %}
                             <span class="text-icon" data-content="{% trans "Use the Target Platforms option when you want a specific resource ID to only be available for specific platforms. <br> If you want this resource to be available on multiple platforms but with different files, upload additional images and tag them." %}">?</span>
@@ -165,7 +165,12 @@
                     <label class="control-label">{% trans 'Final platforms' %}</label>
                     <div class="controls label-list"></div>
                 </div>
-
+                <div class="control-group">
+                    <label class="control-label">{% trans 'Replace file' %}</label>
+                    <div class="controls">
+                        <input type="file" class="edit-resource-replace-file">
+                    </div>
+                </div>
                 <button type="button" class="btn btn-small btn-danger btn-delete-well btn-delvariant">{% trans 'Delete Variant' %}</button>
             </div>
         </div>

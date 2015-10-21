@@ -89,7 +89,10 @@ CloudPebble.Resources = (function() {
             return (!is_new_file_well || should_include_new_file_tags);
         }).map(function(i, input) {
             // Just extract the tag numbers.
-            var tags = JSON.parse(input.value);
+            var tags = [];
+            if (CloudPebble.ProjectInfo.sdk_version != "2") {
+                tags = JSON.parse(input.value);
+            }
             if (do_sort) tags.sort();
             return [tags];
         }));
@@ -304,6 +307,11 @@ CloudPebble.Resources = (function() {
         // Validate the tags!
         var new_tag_values = get_new_tag_values(form, !!file, true);
 
+        if (CloudPebble.ProjectInfo.sdk_version == "2" && new_tag_values.length > 1) {
+            report_error(gettext("SDK 2 projects do not support multiple files per resource. Please delete extra files."))
+            returnl
+        }
+
         // Ensure that all variant's tags are unique
         if (_.uniq(_.map(new_tag_values, JSON.stringify)).length != new_tag_values.length) {
             report_error(gettext("Each variant must have a different set of tags"));
@@ -396,7 +404,7 @@ CloudPebble.Resources = (function() {
                 return;
             }
             if (file !== null) {
-                var tags = $(this).parents('.image-resource-preview-pane').find('.text-wrap input').val().slice(1, -1);
+                var tags = $(this).parents('.image-resource-preview-pane, .raw-resource-preview-pane').find('.text-wrap input').val().slice(1, -1);
                 replacement_map.push([tags, replacements_files.length]);
                 replacements_files.push(file);
             }
