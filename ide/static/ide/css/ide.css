@@ -632,6 +632,7 @@ table.build-results tr.pending .build-state {
     padding-left: 30px;
     padding-right: 30px;
     width: 650px;
+    position: relative;
 }
 
 .resource-pane .form-horizontal .control-group label {
@@ -1176,10 +1177,9 @@ button#add-filter {
     color: white;
 }
 .btn-delete-well {
-    float: right;
-    width: initial;
-    margin-bottom: 20px;
+    position: absolute;
     bottom: 20px;
+    right: 20px;
 }
 .image-platform-preview span {
     text-align: center;
@@ -1218,6 +1218,7 @@ button#add-filter {
     margin: 0;
 }
 
+
 .text-icon {
     border: 2px white solid;
     display: inline-block;
@@ -1230,4 +1231,52 @@ button#add-filter {
 }
 label .text-icon {
     margin-left: 5px;
+}
+
+/** jquery-textext adjustments **/
+
+/* textext-core */
+.text-core .text-wrap {
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+}
+
+.text-core .text-wrap textarea,
+.text-core .text-wrap input {
+    line-height: 30px;
+    font-size: large;
+    border: none;
+}
+
+
+/* textext - arrow */
+.text-core .text-wrap .text-arrow {
+    top: 8px;
+    right: 5px;
+    z-index: 3;
+}
+/* textext - autocomplete */
+.text-core .text-wrap .text-dropdown {
+    border: none;
+    font-size: large;
+}
+
+/* textext - prompt */
+.text-core .text-wrap .text-prompt {
+    font-size: large;
+    line-height: 30px;
+}
+
+/* textext - tags */
+.text-core .text-wrap .text-tags .text-tag .text-button {
+    -webkit-border-radius: 7px;
+    -moz-border-radius: 7px;
+    border-radius: 7px;
+    height: 100%;
+    font-size: large;
+}
+
+.text-core .text-wrap .text-tags .text-tag .text-button .text-label {
+  line-height: 30px;
 }

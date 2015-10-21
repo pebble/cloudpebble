@@ -159,7 +159,8 @@ def update_resource(request, project_id, resource_id):
     file_name = request.POST.get('file_name', None)
     variant_tags = json.loads(request.POST.get('variants', "[]"))
     new_tags = json.loads(request.POST.get('new_tags', "[]"))
-
+    replacement_map = json.loads(request.POST.get('replacements', "[]"))
+    replacement_files = request.FILES.getlist('replacement_files[]')
     try:
         with transaction.atomic():
             # Lazy approach: delete all the resource_ids and recreate them.
@@ -186,6 +187,14 @@ def update_resource(request, project_id, resource_id):
             if 'file' in request.FILES:
                 variant = resource.variants.create(tags=",".join(str(int(t)) for t in new_tags))
                 variant.save_file(request.FILES['file'], request.FILES['file'].size)
+
+            # We may get sent a list of pairs telling us which variant gets which replacement file
+            for tags, file_index in replacement_map:
+                variant = resource.variants.get(tags=tags)
+                replacement = replacement_files[int(file_index)]
+                variant.save_file(replacement, replacement.size)
+
+            resource.target_platforms = None if target_platforms is None else json.dumps(target_platforms)
 
             if file_name and resource.file_name != file_name:
                 resource.file_name = file_name
