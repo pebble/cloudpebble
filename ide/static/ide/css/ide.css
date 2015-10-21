@@ -1217,3 +1217,17 @@ button#add-filter {
     overflow: auto;
     margin: 0;
 }
+
+.text-icon {
+    border: 2px white solid;
+    display: inline-block;
+    text-align: center;
+    border-radius: 100px;
+    height: 1em;
+    width: 1em;
+    line-height: initial;
+    content: "?";
+}
+label .text-icon {
+    margin-left: 5px;
+}

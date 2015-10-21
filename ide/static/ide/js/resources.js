@@ -639,6 +639,15 @@ CloudPebble.Resources = (function() {
                     });
                 });
 
+                group.find('.resource-targets-section .text-icon').popover({
+                    container: 'body',
+                    title: null,
+                    trigger: 'hover',
+                    html: true,
+                    animation: false,
+                    delay: {show: 250},
+                });
+
                 parent.append(group);
             });
             pane.find('.btn-delidentifier').toggle(resource.resource_ids.length > 1);

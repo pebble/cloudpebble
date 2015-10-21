@@ -72,7 +72,9 @@
                 </div>
                 <div class="resource-targets-section" class="sdk3-only native-only">
                     <div class="control-group">
-                        <label style="width: 250px" class="control-label">{% trans 'Target specific platforms' %}</label>
+                        <label style="width: 250px" class="control-label">{% trans 'Target platforms' %}
+                            <span class="text-icon" data-content="{% trans "Use the Target Platforms option when you want a specific resource ID to only be available for specific platforms. <br> Use variant tags when you want a resource to use different files on different platforms." %}">?</span>
+                        </label>
                         <input type="checkbox" class="edit-resource-target-platforms-enabled"> <p></p>
 
                         <div class="edit-resource-targets">
@@ -84,7 +86,6 @@
                                 </div>
                             {% endfor %}
                             </div>
-                            <p class="help-block">{% trans "The 'targetPlatforms' option restricts all variants of a resource to a specific set of platforms. It is an advanced option, which you should only use if you require multiple Resource IDs for different platforms." %}</p>
                         </div>
                     </div>
                 </div>
