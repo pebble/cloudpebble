@@ -596,7 +596,13 @@ CloudPebble.Resources = (function() {
                     _.each(resource.variants, function (tags) {
                         var row = $('<div class="control-group font-preview"><label class="control-label">' + gettext('Preview') + '</label>');
                         var preview_holder = $('<div class="controls">');
-                        $('<div class="font-tag-preview">').appendTo(preview_holder).text(_.chain(tags).map(get_tag_data_for_id).pluck('name').value().join(', ') || gettext("No tags"));
+                        var font_tag_preview = $('<div class="font-tag-preview">').appendTo(preview_holder).text(gettext("For ") + (
+                            _.chain(tags)
+                                .map(get_tag_data_for_id)
+                                .pluck('name').value()
+                                .join(', ')
+                            || gettext("untagged")) + gettext(" file")
+                        );
                         var preview = $('<div>').appendTo(preview_holder);
                         var line = ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789~!@#$%^& *()_+[]{}\\|;:\'"<>?`'.match(preview_regex) || []).join('');
                         var font_size = id_str.match(/[0-9]+$/)[0];
@@ -617,8 +623,20 @@ CloudPebble.Resources = (function() {
                             'padding': '5px',
                             'border-radius': '5px',
                             'background-color': 'white',
-                            'color': 'black'
+                            'color': 'black',
+                            'word-wrap': 'break-word',
+                            'width': 'calc(100% * 1/0.547945)'
                         });
+                        // The parent element doesn't take the CSS transform in to account when calculating its own height
+                        // based on it children, so there is a large gap left underneath.
+                        // We fix this calculating the height of the preview's empty space and subtracting it from the
+                        // parent element's margin.
+                        _.defer(function() {
+                            preview_holder.css({
+                                'margin-bottom': (60 - (preview.height() * (1 - 96/PEBBLE_PPI))) +'px'
+                            })
+                        });
+
                         row.append(preview_holder);
                         group.append(row);
                     });
