@@ -3,17 +3,57 @@ CloudPebble.MonkeyScreenshots = (function() {
     var screenshot_editor_template;
 
     function ScreenshotFile(options) {
-        var options = _.defaults(options || {}, {
+        var final = _.defaults(options || {}, {
             is_new: false,
             id: null,
             file: null,
             src: ""
         });
-        this.is_new = options.is_new;
-        this.id = options.id;
-        this.file = options.file;
-        this.src = options.src;
+        this.is_new = final.is_new;
+        this.id = final.id;
+        this.file = final.file;
+        this.src = final.src;
     }
+
+    function ScreenshotSet(options) {
+        var final = _.defaults(options || {}, {
+            name: "",
+            id: null,
+            files: []
+        });
+        this.name = final.name;
+        this.id = final.id;
+        this.files = _.map(final.files, function (file){ return new ScreenshotFile(file); });
+    }
+
+    /**
+     * Put screenshot data in a format ready to be sent.
+     * @param screenshots
+     * @returns {{screenshots: Array, files: Array}}
+     */
+    var process_screenshots = function(screenshots) {
+        var screenshots_data = [];
+        var files = [];
+        _.each(screenshots, function(screenshot) {
+            var shot_data = {name: screenshot.name, id: screenshot.id};
+            _.each(screenshot.images, function(image, platform) {
+                shot_data[platform] = {id: image.id};
+                if (image.file !== null) {
+                    shot_data[platform].uploadId = files.length;
+                    files.push(image.file);
+                }
+            }, this);
+            screenshots_data.push(shot_data);
+        }, this);
+
+        var form_data = new FormData();
+        form_data.append('screenshots', JSON.stringify(screenshots_data));
+        _.each(files, function(file) {
+            form_data.append('files[]', file);
+        });
+
+        return form_data;
+    };
 
     /**
      * A mock API (for now)
@@ -39,31 +79,6 @@ CloudPebble.MonkeyScreenshots = (function() {
         }];
 
         /**
-         * Put screenshot data in a format ready to be sent.
-         * @param screenshots
-         * @returns {{screenshots: Array, files: Array}}
-         */
-        var process_screenshots = function(screenshots) {
-            var screenshots_data = [];
-            var files = [];
-            _.each(screenshots, function(screenshot) {
-                var shot_data = {name: screenshot.name, id: screenshot.id};
-                _.each(screenshot.images, function(image, platform) {
-                    shot_data[platform] = {id: image.id};
-                    if (image.file !== null) {
-                        shot_data[platform].uploadId = files.length;
-                        files.push(image.file);
-                    }
-                }, this);
-                screenshots_data.push(shot_data);
-            }, this);
-            return {
-                screenshots: screenshots_data,
-                files: files
-            }
-        };
-
-        /**
          * Get the current list of existing test screenshots
          * @param test_name name of test
          * @returns {jQuery.Deferred}
@@ -84,13 +99,7 @@ CloudPebble.MonkeyScreenshots = (function() {
          */
         this.saveScreenshots = function(test_name, new_screenshots) {
             var defer = $.Deferred();
-            var data = process_screenshots(new_screenshots);
-            var form_data = new FormData();
-            var screenshot_json = JSON.stringify(data.screenshots);
-            form_data.append('screenshots', screenshot_json);
-            _.each(data.files, function(file) {
-                form_data.append('files[]', file);
-            });
+            var form_data = process_screenshots(new_screenshots);
 
             // Made the form data, now we just have to send it.
 
@@ -108,7 +117,35 @@ CloudPebble.MonkeyScreenshots = (function() {
         };
     };
 
-    var API = new MockAPI();
+    var AjaxAPI = function() {
+        this.getScreenshots = function(test_id) {
+            var url = "/ide/project/" + PROJECT_ID + "/test/" + test_id + "/screenshots/load";
+            var defer = $.Deferred()
+            return $.ajax({
+                url: url,
+                dataType: 'json'
+            }).done(function(result) {
+                defer.resolve(_.map(result, function(screenshot_set) {return new ScreenshotSet(screenshot_set)}));
+            }).fail(function(err) {
+                defer.reject(err);
+            });
+        };
+
+        this.saveScreenshots = function(test_id, new_screenshots) {
+            var form_data = process_screenshots(new_screenshots);
+            return $.ajax({
+                url: url,
+                type: "POST",
+                data: form_data,
+                processData: false,
+                contentType: false,
+                dataType: 'json'
+            });
+
+        }
+    };
+
+    var API = new AjaxAPI();
 
     /**
      * ScreenshotsModel manages a list of new screenshot files to be uploaded
