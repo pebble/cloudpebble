@@ -324,12 +324,11 @@ CloudPebble.Resources = (function() {
         var okay = true;
         $.each(form.find('.resource-id-group-single'), function(index, value) {
             value = $(value);
-            var resource_id = value.find('.edit-resource-id').val();
-            if(resource_id === '') return true; // continue
+            var resource_id = value.find('.edit-resource-id:visible').val();
             var resource = {'id': resource_id};
 
             // Check the resource ID
-            if(!validate_resource_id(resource_id)) {
+            if(resource_id === '' || !validate_resource_id(resource_id)) {
                 report_error(gettext("Invalid resource identifier. Use only letters, numbers and underscores."));
                 okay = false;
                 return false;
@@ -588,67 +587,65 @@ CloudPebble.Resources = (function() {
             }
 
             var update_font_preview = function(group) {
-                if (resource.kind == 'font') {
-                    group.find('.font-preview').remove();
-                    var regex_str = group.find('.edit-resource-regex').val();
-                    var id_str = group.find('.edit-resource-id').val();
-                    var preview_regex = new RegExp('');
-                    try {
-                        preview_regex = new RegExp(regex_str ? regex_str : '.', 'g');
-                        group.find('.font-resource-regex-group').removeClass('error').find('.help-block').text(gettext("A PCRE regular expression that restricts characters."));
-                    } catch (e) {
-                        group.find('.font-resource-regex-group').addClass('error').find('.help-block').text(e);
-                    }
-                    var tracking = parseInt(group.find('.edit-resource-tracking').val(), 10) || 0;
-
-                    _.each(resource.variants, function (tags) {
-                        var row = $('<div class="control-group font-preview"><label class="control-label">' + gettext('Preview') + '</label>');
-                        var preview_holder = $('<div class="controls">');
-                        var font_tag_preview = $('<div class="font-tag-preview">').appendTo(preview_holder).text(gettext("For ") + (
-                            _.chain(tags)
-                                .map(get_tag_data_for_id)
-                                .pluck('name').value()
-                                .join(', ')
-                            || gettext("untagged")) + gettext(" file")
-                        );
-                        var preview = $('<div>').appendTo(preview_holder);
-                        var line = ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789~!@#$%^& *()_+[]{}\\|;:\'"<>?`'.match(preview_regex) || []).join('');
-                        var font_size = id_str.match(/[0-9]+$/)[0];
-
-                        preview.text(line);
-                        // Officially, a CSS pixel is defined as one pixel at 96 dpi.
-                        // 96 / PEBBLE_PPI should thus be correct.
-                        // We use 'transform' to work around https://bugs.webkit.org/show_bug.cgi?id=20606
-                        preview.css({
-                            'font-family': CloudPebble.Resources.GetFontFamily(resource, tags),
-                            'font-size': font_size + 'px',
-                            'line-height': font_size + 'px',
-                            'letter-spacing': tracking + 'px',
-                            'transform': 'scale(' + (96 / PEBBLE_PPI) + ')',
-                            'transform-origin': '0 0',
-                            'display': 'inline-block',
-                            'border': (2 * (PEBBLE_PPI / 96)) + 'px solid #767676',
-                            'padding': '5px',
-                            'border-radius': '5px',
-                            'background-color': 'white',
-                            'color': 'black',
-                            'word-wrap': 'break-word',
-                            'width': 'calc(100% * 1/0.547945)'
-                        });
-                        // The parent element doesn't take the CSS transform in to account when calculating its own height
-                        // based on it children, so there is a large gap left underneath.
-                        // We fix this calculating the height of the preview's empty space and subtracting it from the
-                        // parent element's margin.
-                        _.defer(function() {
-                            preview_holder.css({
-                                'margin-bottom': (60 - (preview.height() * (1 - 96/PEBBLE_PPI))) +'px'
-                            })
-                        });
-
-                        row.append(preview_holder);
-                        group.append(row);
-                    });
+                group.find('.font-preview').remove();
+                var regex_str = group.find('.edit-resource-regex').val();
+                var id_str = group.find('.edit-resource-id').val();
+                var preview_regex = new RegExp('');
+                try {
+                    preview_regex = new RegExp(regex_str ? regex_str : '.', 'g');
+                    group.find('.font-resource-regex-group').removeClass('error').find('.help-block').text(gettext("A PCRE regular expression that restricts characters."));
+                } catch (e) {
+                    group.find('.font-resource-regex-group').addClass('error').find('.help-block').text(e);
                 }
+                var tracking = parseInt(group.find('.edit-resource-tracking').val(), 10) || 0;
+
+                _.each(resource.variants, function (tags) {
+                    var row = $('<div class="control-group font-preview"><label class="control-label">' + gettext('Preview') + '</label>');
+                    var preview_holder = $('<div class="controls">');
+                    var font_tag_preview = $('<div class="font-tag-preview">').appendTo(preview_holder).text(gettext("For ") + (
+                        _.chain(tags)
+                            .map(get_tag_data_for_id)
+                            .pluck('name').value()
+                            .join(', ')
+                        || gettext("untagged")) + gettext(" file")
+                    );
+                    var preview = $('<div>').appendTo(preview_holder);
+                    var line = ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789~!@#$%^& *()_+[]{}\\|;:\'"<>?`'.match(preview_regex) || []).join('');
+                    var font_size = id_str.match(/[0-9]+$/)[0];
+
+                    preview.text(line);
+                    // Officially, a CSS pixel is defined as one pixel at 96 dpi.
+                    // 96 / PEBBLE_PPI should thus be correct.
+                    // We use 'transform' to work around https://bugs.webkit.org/show_bug.cgi?id=20606
+                    preview.css({
+                        'font-family': CloudPebble.Resources.GetFontFamily(resource, tags),
+                        'font-size': font_size + 'px',
+                        'line-height': font_size + 'px',
+                        'letter-spacing': tracking + 'px',
+                        'transform': 'scale(' + (96 / PEBBLE_PPI) + ')',
+                        'transform-origin': '0 0',
+                        'display': 'inline-block',
+                        'border': (2 * (PEBBLE_PPI / 96)) + 'px solid #767676',
+                        'padding': '5px',
+                        'border-radius': '5px',
+                        'background-color': 'white',
+                        'color': 'black',
+                        'word-wrap': 'break-word',
+                        'width': 'calc(100% * 1/0.547945)'
+                    });
+                    // The parent element doesn't take the CSS transform in to account when calculating its own height
+                    // based on it children, so there is a large gap left underneath.
+                    // We fix this calculating the height of the preview's empty space and subtracting it from the
+                    // parent element's margin.
+                    _.defer(function() {
+                        preview_holder.css({
+                            'margin-bottom': (60 - (preview.height() * (1 - 96/PEBBLE_PPI))) +'px'
+                        })
+                    });
+
+                    row.append(preview_holder);
+                    group.append(row);
+                });
             };
 
             var template = pane.find('.resource-id-group-single').detach();
@@ -709,9 +706,11 @@ CloudPebble.Resources = (function() {
                     clone = template.clone().removeClass('hide').attr('id','');
                 }
                 parent.append(clone);
-                clone.find('input[type=text], input[type=number]').on('input', function() {
-                    update_font_preview(clone);
-                });
+                if (resource.kind == 'font') {
+                    clone.find('input[type=text], input[type=number]').on('input', function () {
+                        update_font_preview(clone);
+                    });
+                }
                 CloudPebble.Sidebar.SetIcon('resource-'+resource.id, 'edit');
             });
 
