@@ -91,7 +91,7 @@ CloudPebble.Prompts = {
         $('#modal-text-input').modal();
         $('#modal-text-input-value').focus();
         var submit = function() {
-            callback($('#modal-text-input-value').val(), {
+            callback($('#modal-text-input-value').val(event), {
                 error: function(message) {
                     $('#modal-text-input-value').removeAttr('disabled');
                     $('#modal-text-input-confirm-button').removeClass('disabled');
@@ -107,6 +107,7 @@ CloudPebble.Prompts = {
                     $('#modal-text-input').modal('hide');
                 }
             });
+            event.preventDefault();
         };
         $('#modal-text-confirm-button').unbind('click').click(submit);
         $('#modal-text-input form').unbind('submit').submit(submit);
