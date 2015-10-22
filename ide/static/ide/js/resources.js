@@ -308,11 +308,11 @@ CloudPebble.Resources = (function() {
         var new_tag_values = get_new_tag_values(form, !!file, true);
 
         if (CloudPebble.ProjectInfo.sdk_version == "2" && new_tag_values.length > 1) {
-            report_error(gettext("SDK 2 projects do not support multiple files per resource. Please delete extra files."))
-            returnl
+            report_error(gettext("SDK 2 projects do not support multiple files per resource. Please delete extra files."));
+            return;
         }
 
-        // Ensure that all variant's tags are unique
+        // Ensure that all variants' tags are unique
         if (_.uniq(_.map(new_tag_values, JSON.stringify)).length != new_tag_values.length) {
             report_error(gettext("Each variant must have a different set of tags"));
             return;
