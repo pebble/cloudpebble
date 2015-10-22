@@ -32,6 +32,10 @@ def view_project(request, project_id):
         project.app_version_label = '1.0'
     send_keen_event('cloudpebble', 'cloudpebble_open_project', request=request, project=project)
     app_keys = sorted(json.loads(project.app_keys).iteritems(), key=lambda x: x[1])
+    supported_platforms = ["aplite", "basalt"]
+    if project.project_type != 'pebblejs' and project.sdk_version != '2':
+        supported_platforms.append("chalk")
+
     try:
         token = request.user.social_auth.get(provider='pebble').extra_data['access_token']
     except:
@@ -43,7 +47,7 @@ def view_project(request, project_id):
         'libpebble_proxy': json.dumps(settings.LIBPEBBLE_PROXY),
         'token': token,
         'phone_shorturl': settings.PHONE_SHORTURL,
-        'supported_platforms': ["aplite", "basalt", "chalk"]
+        'supported_platforms': supported_platforms
     })
 
 
