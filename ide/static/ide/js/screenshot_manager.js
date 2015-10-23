@@ -7,12 +7,14 @@ CloudPebble.MonkeyScreenshots = (function() {
             is_new: false,
             id: null,
             file: null,
-            src: ""
+            src: "",
+            _changed: false
         });
         this.is_new = final.is_new;
         this.id = final.id;
         this.file = final.file;
         this.src = final.src;
+        this._changed = final._changed;
     }
 
     function ScreenshotSet(options) {
@@ -23,7 +25,9 @@ CloudPebble.MonkeyScreenshots = (function() {
         });
         this.name = final.name;
         this.id = final.id;
-        this.files = _.map(final.files, function (file){ return new ScreenshotFile(file); });
+        this.files = _.mapObject(final.files, function (file) {
+            return ((file instanceof ScreenshotFile) ? file : new ScreenshotFile(file));
+        });
     }
 
     /**
@@ -35,15 +39,20 @@ CloudPebble.MonkeyScreenshots = (function() {
         var screenshots_data = [];
         var files = [];
         _.each(screenshots, function(screenshot) {
-            var shot_data = {name: screenshot.name, id: screenshot.id};
-            _.each(screenshot.images, function(image, platform) {
-                shot_data[platform] = {id: image.id};
-                if (image.file !== null) {
-                    shot_data[platform].uploadId = files.length;
-                    files.push(image.file);
+            var shot_data = {name: screenshot.name, files: {}};
+            if (screenshot.id) {shot_data.id = screenshot.id;}
+            _.each(screenshot.files, function(image, platform) {
+                if (image.id || image.file) {
+                    shot_data.files[platform] = {};
+                    if (image.id) {shot_data.files[platform].id = image.id;}
+                    if (image.file !== null) {
+                        shot_data.files[platform].uploadId = files.length;
+                        files.push(image.file);
+                    }
                 }
             }, this);
-            screenshots_data.push(shot_data);
+            if (_.keys(shot_data.files).length > 0)
+                screenshots_data.push(shot_data);
         }, this);
 
         var form_data = new FormData();
@@ -63,7 +72,7 @@ CloudPebble.MonkeyScreenshots = (function() {
         var screenshots = [{
             name: "Screenshot set 1",
             id: 0,
-            images: {
+            files: {
                 aplite: new ScreenshotFile({src: "/static/common/img/screenshot-aplite.png", id: 0}),
                 basalt: new ScreenshotFile({src: "/static/common/img/screenshot-basalt.png", id: 1}),
                 chalk:  new ScreenshotFile({src: "/static/common/img/screenshot-chalk.png",  id: 2})
@@ -71,7 +80,7 @@ CloudPebble.MonkeyScreenshots = (function() {
         }, {
             name: "Screenshot set 2",
             id: 1,
-            images: {
+            files: {
                 aplite: new ScreenshotFile({src: "/static/common/img/screenshot-aplite.png", id: 3}),
                 basalt: new ScreenshotFile({src: "/static/common/img/screenshot-basalt.png", id: 4}),
                 chalk:  new ScreenshotFile({src: "/static/common/img/screenshot-chalk.png",  id: 5})
@@ -104,10 +113,9 @@ CloudPebble.MonkeyScreenshots = (function() {
             // Made the form data, now we just have to send it.
 
             setTimeout(function() {
-                // TODO: AJAX request
                 screenshots = _.map(new_screenshots, function(shot) {
                     var new_shot = _.clone(shot);
-                    new_shot.images = _.mapObject(_.clone(new_shot.images), _.partial(_.extend, _, {is_new: false, file: null}));
+                    new_shot.files = _.mapObject(_.clone(new_shot.files), _.partial(_.extend, _, {is_new: false, file: null}));
                     new_shot._changed = false;
                     return new_shot;
                 });
@@ -120,19 +128,21 @@ CloudPebble.MonkeyScreenshots = (function() {
     var AjaxAPI = function() {
         this.getScreenshots = function(test_id) {
             var url = "/ide/project/" + PROJECT_ID + "/test/" + test_id + "/screenshots/load";
-            var defer = $.Deferred()
-            return $.ajax({
+            var defer = $.Deferred();
+            $.ajax({
                 url: url,
                 dataType: 'json'
             }).done(function(result) {
-                defer.resolve(_.map(result, function(screenshot_set) {return new ScreenshotSet(screenshot_set)}));
+                defer.resolve(_.map(result['screenshots'], function(screenshot_set) {return new ScreenshotSet(screenshot_set)}));
             }).fail(function(err) {
                 defer.reject(err);
             });
+            return defer.promise();
         };
 
         this.saveScreenshots = function(test_id, new_screenshots) {
             var form_data = process_screenshots(new_screenshots);
+            var url = "/ide/project/" + PROJECT_ID + "/test/" + test_id + "/screenshots/save";
             return $.ajax({
                 url: url,
                 type: "POST",
@@ -169,12 +179,10 @@ CloudPebble.MonkeyScreenshots = (function() {
             if (index === null) {
                 // Append all new screenshots, given them no name
                 _.each(files, function(file) {
-                    var upload = {
-                        name: "",
-                        images: {},
+                    var upload = new ScreenshotSet({
                         _changed: true
-                    };
-                    upload.images[platform] = new ScreenshotFile({file: file, is_new: true});
+                    });
+                    upload.files[platform] = new ScreenshotFile({file: file, is_new: true});
                     screenshots.push(upload);
                 });
             }
@@ -183,8 +191,8 @@ CloudPebble.MonkeyScreenshots = (function() {
                     var upload = screenshots[index + i];
                     if (upload) {
                         // Update existing screenshots at the current index
-                        var id = (upload.images[platform] ? upload.images[platform].id : null);
-                        upload.images[platform] = new ScreenshotFile({file:file, id: id, is_new: true});
+                        var id = (upload.files[platform] ? upload.files[platform].id : null);
+                        upload.files[platform] = new ScreenshotFile({file:file, id: id, is_new: true});
                     }
                     else {
                         // If there was no screenshot to update, add the remaining files as new screenshots.
@@ -200,13 +208,15 @@ CloudPebble.MonkeyScreenshots = (function() {
          * @constructor
          */
         this.loadScreenshots = function() {
+            this.trigger('loadStart');
             API.getScreenshots(test_name).then(function(result) {
                 screenshots = result;
                 original_screenshots = _.map(result, _.clone);
                 self.trigger('changeScreenshots', result);
-            }, function() {
+            }, function(error) {
                 self.trigger('error', gettext("Error getting screenshots"));
-            })
+                console.log(error);
+            });
         };
 
         /**
@@ -217,6 +227,13 @@ CloudPebble.MonkeyScreenshots = (function() {
             _.each(names, function(name, idx) {
                 this.setName(idx, name);
             }, this);
+        };
+
+        this.deleteFile = function(index, platform) {
+            if (_.isObject(screenshots[index].files[platform])) {
+                screenshots[index].files[platform] = {_changed: true};
+                this.trigger('changeScreenshots', screenshots);
+            }
         };
 
         this.setName = function(index, name) {
@@ -230,10 +247,10 @@ CloudPebble.MonkeyScreenshots = (function() {
 
         this.save = function() {
             API.saveScreenshots(test_name, screenshots).then(function() {
-                console.log("saved1");
-                self.trigger('saved');
-            }, function() {
-                // Error?
+                self.trigger('saved', true);
+            }, function(error) {
+                self.trigger('error', gettext("Error saving screenshots"));
+                console.error(error);
             });
         };
     }
@@ -295,6 +312,11 @@ CloudPebble.MonkeyScreenshots = (function() {
             var value = $(this).val();
             self.trigger('inputName', index, value);
         });
+        pane.on('click', '.image-resource-preview .delete-btn', function() {
+            var row = $(this).parents('.monkey-screenshot-set').data('index');
+            var col = $(this).parents('.image-resource-preview').data('platform');
+            self.trigger('fileDelete', row, col);
+        });
         /*
          * Render the list of screenshots
          * @param screenshots
@@ -305,10 +327,16 @@ CloudPebble.MonkeyScreenshots = (function() {
                 var template = screenshot_set_template.clone();
                 template.find('.monkey-screenshot-name').text(screenshot.name);
 
-                _.each(screenshot.images, function(file, platform) {
-                    var img = template.find('.platform-'+platform+' img');
+                _.each(screenshot.files, function(file, platform) {
+                    var img_container = template.find('.platform-'+platform);
+                    var img = img_container.find('img');
                     if (file.src) {
-                        img.attr('src', file.src);
+                        var src = file.src;
+                        if (!src.startsWith('data')) {
+                            src += '?'+(Date.now().toString());
+                        }
+                        img.attr('src', src);
+                        img_container.toggleClass('screenshot-empty', false);
                     }
                     else if (file.file) {
                         var reader = new FileReader();
@@ -318,6 +346,7 @@ CloudPebble.MonkeyScreenshots = (function() {
                             file.src = reader.result;
                         };
                         reader.readAsDataURL(file.file);
+                        img_container.toggleClass('screenshot-empty', false);
                     }
                     img.toggleClass('monkey-modified', file.is_new);
                 });
@@ -329,7 +358,7 @@ CloudPebble.MonkeyScreenshots = (function() {
             });
             var new_screenshot_pane = screenshot_set_template.clone();
             new_screenshot_pane.data('index', null);
-            new_screenshot_pane.find('.monkey-screenshot-title').remove();
+            new_screenshot_pane.find('.monkey-screenshot-title, .delete-btn').remove();
             pane.append(new_screenshot_pane)
         };
 
@@ -350,21 +379,41 @@ CloudPebble.MonkeyScreenshots = (function() {
             return names;
         };
 
+        this.showProgress = function() {
+            progressbar.show();
+        };
+
+        this.disable = function() {
+            pane.find('input, button').prop('disabled', true);
+        };
+
+        this.enable = function() {
+            pane.find('input').prop('disabled', false);
+        };
+
+    }
+
+    function ErrorView(pane) {
         /**
          * Render an error
          * @param error message to render
          */
         this.renderError = function(error) {
-            pane.html(interpolate('<div class="well alert alert-error">%s</div>', [error]));
+            pane.append($(interpolate('<div class="well alert alert-error">%s</div>', [error])));
         };
+
+        this.empty = function() {
+            pane.empty();
+        }
     }
 
     /**
      * This class manages the save and reset buttons
-     * @param pane
+     * @param pane jQuery element containing Save and Cancel buttons
+     * @param form jQuery Form associated with the buttons
      * @constructor
      */
-    function FormButtonsView(pane) {
+    function FormButtonsView(pane, form) {
         var self = this;
         _.extend(this, Backbone.Events);
 
@@ -374,74 +423,134 @@ CloudPebble.MonkeyScreenshots = (function() {
             });
         });
 
-        pane.on('click', '.btn-affirmative', function() {
+        form.on('submit', function(event) {
             self.trigger('save');
+            event.preventDefault();
+        });
+    }
+
+    /**
+     * Manages a progress bar, which only shows up if things are taking a while
+     * @param pane HTML element contaiing a progress bar
+     * @constructor
+     */
+    function ProgressView(pane) {
+        var timeout;
+        pane.hide();
+        this.showProgress = function() {
+            timeout = setTimeout(function() {
+                pane.show();
+            }, 500);
+        };
+
+        this.hideProgress = function() {
+            clearTimeout(timeout);
+            pane.hide();
+        }
+    }
+
+    /**
+     * MainView manages the whole pane.
+     * Specifically, it enables switching between aplite/basalt/chalk/all modes by clicking on their titles.
+     * @param pane jQuery element for .monkey-pane
+     * @constructor
+     */
+    function MainView(pane) {
+        pane.on('click', '.monkey-select-platform', function() {
+            pane.toggleClass('monkey-inline');
+            pane.toggleClass($(this).data('platform')+'-only');
+            var newsize = (pane.hasClass('monkey-inline') ? '300px' : '650px');
+            pane.trigger('resize', newsize);
         });
     }
 
     function ScreenshotPane(test_name) {
-            var pane = screenshot_editor_template.clone();
-            var screenshots;
-            var screenshots_view;
-            var buttons_view;
-            /**
-             * Set up the screenshot manager in a pane, and connect models to views.
-             * @param test_name name of test associated with screenshots
-             * @param pane HTML element containing monkey screenshot uploader
-             */
-            function setup_pane(test_name, pane) {
-                screenshots = new ScreenshotsModel(test_name);
-                screenshots_view = new ScreenshotsView(pane.find('.monkey-screenshots'));
-                buttons_view = new FormButtonsView(pane.find('.monkey-form-buttons'));
+        var self = this;
+        var pane = screenshot_editor_template.clone();
+        var screenshots;
+        var screenshots_view, buttons_view, progress_view, error_view, main_view;
+
+        _.extend(this, Backbone.Events);
+
+        /**
+         * Set up the screenshot manager in a pane, and connect models to views.
+         * @param test_name name of test associated with screenshots
+         * @param pane HTML element containing monkey screenshot uploader
+         */
+        function setup_pane(test_name, pane) {
+            screenshots = new ScreenshotsModel(test_name);
+            screenshots_view = new ScreenshotsView(pane.find('.monkey-screenshots'));
+            progress_view = new ProgressView(pane.find('.progress'));
+            buttons_view = new FormButtonsView(pane.find('.monkey-form-buttons'), pane.find('form'));
+            error_view = new ErrorView(pane.find('.errors'));
+            main_view = new MainView(pane);
+
+            screenshots.on('changeScreenshots', function(screenshots) {
                 // Render screenshots whenever we fetch them
-                screenshots.on('changeScreenshots', function(screenshots) {
-                    screenshots_view.renderScreenshots(screenshots);
-                }).on('error', function(error) {
-                    screenshots_view.renderError(error);
-                }).on('changeName', function(index, name, changed) {
-                    screenshots_view.showAsChanged(index, changed);
-                }).on('saved', function() {
-                    console.log("loading");
-                    screenshots.loadScreenshots();
-                });
-
-                // Update list of uploads when user selects files
-                screenshots_view.on('filesSelected', function(fileList, index, platform) {
-                    screenshots.setNames(screenshots_view.getNames());
-                    var files = [];
-                    _.each(fileList, function(file, i) {
-                        files[i] = file;
-                    });
-                    screenshots.addUploadedFiles(files, index, platform);
-                });
-                screenshots_view.on('inputName', function(index, value) {
-                    screenshots.setName(index, value);
-                });
-
-                // Perform actions when form buttons are clicked
-                buttons_view.on('reset', function() {
-                    screenshots.loadScreenshots();
-                });
-                buttons_view.on('save', function() {
-                    screenshots.setNames(screenshots_view.getNames());
-                    screenshots.save();
-                });
-
-                screenshots_view.renderScreenshots([]);
+                error_view.empty();
+                progress_view.hideProgress();
+                screenshots_view.renderScreenshots(screenshots);
+            }).on('error', function(error) {
+                // Show an error if we fail to fetch them
+                error_view.renderError(error);
+                progress_view.hideProgress();
+            }).on('changeName', function(index, name, changed) {
+                // Show a "changed" icon if the name of a thing changes
+                screenshots_view.showAsChanged(index, changed);
+            }).on('saved', function() {
+                // Reload the screenshots after a save
+                error_view.empty();
+                screenshots_view.enable();
                 screenshots.loadScreenshots();
-            }
 
-            setup_pane(test_name, pane);
-            this.getPane = function() {
-                return pane;
-            };
-            this.destroy = function() {
-                // TODO: what else should we destroy?
-                pane.trigger('destroy');
-            }
+            }).on('loadStart', function() {
+                progress_view.showProgress();
+            });
+
+            screenshots_view.on('filesSelected', function(fileList, index, platform) {
+                // Update list of uploads when user selects files
+                screenshots.setNames(screenshots_view.getNames());
+                var files = [];
+                _.each(fileList, function(file, i) {
+                    files[i] = file;
+                });
+                screenshots.addUploadedFiles(files, index, platform);
+            }).on('fileDelete', function(index, platform) {
+                screenshots.deleteFile(index, platform);
+            }).on('inputName', function(index, value) {
+                // Update the screenshot's model's name when a user types in a name box
+                screenshots.setName(index, value);
+            });
+
+            buttons_view.on('reset', function() {
+                // Reload the screenshots when the reset button is clicked
+                screenshots.loadScreenshots();
+            });
+            buttons_view.on('save', function() {
+                // Save the screenshot when the save button is clicked
+                // (ensure that the models names are up to date
+                screenshots.setNames(screenshots_view.getNames());
+                screenshots.save();
+                screenshots_view.disable();
+            });
+
+            // When the component is initialised, render an intitial state and load all the screenshots
+            screenshots_view.renderScreenshots([]);
+            screenshots.loadScreenshots();
+        }
+
+        setup_pane(test_name, pane);
+        this.getPane = function() {
+            return pane;
+        };
+        this.destroy = function() {
+            // TODO: what else should we destroy?
+            pane.trigger('destroy');
+            _.each([screenshots, screenshots_view, buttons_view, progress_view, error_view, main_view], function(obj) {
+                obj.off();
+            });
+        }
     }
-
-    //setup_pane("TEST", $('.monkey-pane'));
 
     return {
         Init: function() {

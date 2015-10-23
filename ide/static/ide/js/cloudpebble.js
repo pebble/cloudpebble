@@ -50,6 +50,10 @@ CloudPebble.Init = function() {
             CloudPebble.Editor.Add(value);
         });
 
+        $.each(data.test_files, function(index, value) {
+            CloudPebble.Editor.AddTest(value)
+        });
+
         $.each(data.resources, function(index, value) {
             CloudPebble.Resources.Add(value);
         });
@@ -92,7 +96,7 @@ CloudPebble.Prompts = {
         $('#modal-text-input-errors').html('');
         $('#modal-text-input').modal();
         $('#modal-text-input-value').focus();
-        var submit = function() {
+        var submit = function(event) {
             callback($('#modal-text-input-value').val(), {
                 error: function(message) {
                     $('#modal-text-input-value').removeAttr('disabled');
@@ -109,6 +113,7 @@ CloudPebble.Prompts = {
                     $('#modal-text-input').modal('hide');
                 }
             });
+            event.preventDefault();
         };
         $('#modal-text-confirm-button').unbind('click').click(submit);
         $('#modal-text-input form').unbind('submit').submit(submit);

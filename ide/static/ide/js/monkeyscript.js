@@ -85,7 +85,7 @@ $(function() {
                             return 'error';
                         }
                     } else {
-                        console.log(state.keyword, state.command);
+                        //console.log(state.keyword, state.command);
                         if (state.command === null) {
                             var thing = stream.match(/^[a-z_]+/i);
                             if (!thing) {

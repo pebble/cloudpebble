@@ -13,6 +13,16 @@ CloudPebble.Editor = (function() {
         project_source_files[file.name] = file;
     };
 
+    var add_test_file = function(file) {
+        file.target = 'test';
+        CloudPebble.Sidebar.AddTestFile(file, function() {
+            edit_source_file(file);
+        });
+
+        project_source_files[file.name] = file;
+    };
+
+
     var run = function() {
         CloudPebble.Prompts.Progress.Show(gettext("Saving..."));
         CloudPebble.Editor.SaveAll(function() {
@@ -48,9 +58,10 @@ CloudPebble.Editor = (function() {
             return;
         }
         CloudPebble.ProgressBar.Show();
-
+        var url_kind = (file.target == 'test' ? 'test' : 'source');
+        var sidebar_id = url_kind + '-' + file.id;
         // Open it.
-        $.getJSON('/ide/project/' + PROJECT_ID + '/source/' + file.id + '/load', function(data) {
+        $.getJSON('/ide/project/' + PROJECT_ID + '/' + url_kind + '/' + file.id + '/load', function(data) {
             CloudPebble.ProgressBar.Hide();
             if(!data.success) {
                 var error = $('<div class="alert alert-error"></div>');
@@ -58,8 +69,22 @@ CloudPebble.Editor = (function() {
                 CloudPebble.Sidebar.SetActivePane(error, '');
             } else {
                 var screenshot_pane;
-                var is_js = file.name.substr(-3) == '.js';
-                var is_monkey = !is_js;
+                var file_kind;
+                if (file.name.substr(-3) == '.js') {
+                    file_kind = 'js';
+                }
+                else if (file.target == "test") {
+                    file_kind = 'monkey';
+                }
+                else {
+                    file_kind = 'c';
+                }
+                var mode_for_kind = {
+                    monkey: 'MonkeyScript',
+                    js: 'javascript',
+                    c: CloudPebble.Editor.PebbleMode
+                };
+
                 var source = data.source;
                 var lastModified = data.modified;
                 var pane = $('<div>');
@@ -75,7 +100,7 @@ CloudPebble.Editor = (function() {
                     //highlightSelectionMatches: true,
                     smartIndent: true,
                     indentWithTabs: !USER_SETTINGS.use_spaces,
-                    mode: (is_js ? 'javascript' : (is_monkey ? 'MonkeyScript' : CloudPebble.Editor.PebbleMode)),
+                    mode: mode_for_kind[file_kind],
                     styleActiveLine: true,
                     value: source,
                     theme: USER_SETTINGS.theme,
@@ -86,10 +111,10 @@ CloudPebble.Editor = (function() {
                     settings.keyMap = USER_SETTINGS.keybinds;
                 }
                 if(!settings.extraKeys) settings.extraKeys = {};
-                if(!is_js && USER_SETTINGS.autocomplete === 2) {
+                if(file_kind == 'c' && USER_SETTINGS.autocomplete === 2) {
                     settings.extraKeys = {'Ctrl-Space': 'autocomplete'};
                 }
-                if(!is_js && USER_SETTINGS.autocomplete !== 0) {
+                if(file_kind == 'c' && USER_SETTINGS.autocomplete !== 0) {
                     settings.extraKeys['Tab'] = function() {
                         var marks = code_mirror.getAllMarks();
                         var cursor = code_mirror.getCursor();
@@ -179,11 +204,14 @@ CloudPebble.Editor = (function() {
                 settings.extraKeys['Ctrl-/']  = function(cm) {
                     CodeMirror.commands.toggleComment(cm);
                 };
-                if(is_js) {
-                    settings.gutters = ['gutter-hint-warnings', 'CodeMirror-linenumbers', 'CodeMirror-foldgutter'];
-                } else {
-                    settings.gutters = ['gutter-errors', 'CodeMirror-linenumbers', 'CodeMirror-foldgutter'];
+                settings.gutters = ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'];
+
+                if(file_kind == 'js') {
+                    settings.gutters.unshift('gutter-hint-warnings');
+                } else if (file_kind == 'c') {
+                    settings.gutters.unshift('gutter-errors');
                 }
+
                 var code_mirror = CodeMirror(pane[0], settings);
                 code_mirror.file_path = (file.target  == 'worker' ? 'worker_src/' : 'src/') + file.name;
                 code_mirror.file_target = file.target;
@@ -227,14 +255,14 @@ CloudPebble.Editor = (function() {
                     create_popover(cm, token.string, pos.left, pos.top);
                 };
 
-                if(!is_js && USER_SETTINGS.autocomplete === 1) {
+                if(file_kind == 'c' && USER_SETTINGS.autocomplete === 1) {
                     code_mirror.on('changes', function(instance, changes) {
                         update_patch_list(instance, changes);
                         if(!is_autocompleting)
                             CodeMirror.commands.autocomplete(code_mirror);
                     });
                 }
-                if(is_js) {
+                if(file_kind == 'js') {
                     var warning_lines = [];
                     var throttled_hint = _.throttle(function() {
                         // Clear things out, even if jslint is off
@@ -310,7 +338,7 @@ CloudPebble.Editor = (function() {
                     code_mirror.on('change', throttled_hint);
                     // Make sure we're ready when we start.
                     throttled_hint();
-                } else {
+                } else if (file_kind == 'c') {
                     var clang_lines = [];
                     var sChecking = false;
                     var throttled_check = _.throttle(function() {
@@ -389,11 +417,11 @@ CloudPebble.Editor = (function() {
                 }
 
                 var check_safe = function() {
-                    $.getJSON('/ide/project/' + PROJECT_ID + '/source/' + file.id + '/is_safe?modified=' + lastModified, function(data) {
+                    $.getJSON('/ide/project/' + PROJECT_ID + '/' + url_kind + '/' + file.id + '/is_safe?modified=' + lastModified, function(data) {
                         if(data.success && !data.safe) {
                             if(was_clean) {
                                 code_mirror.setOption('readOnly', true);
-                                $.getJSON('/ide/project/' + PROJECT_ID + '/source/' + file.id + '/load', function(data) {
+                                $.getJSON('/ide/project/' + PROJECT_ID + '/' + url_kind + '/' + file.id + '/load', function(data) {
                                     if(data.success) {
                                         code_mirror.setValue(data.source);
                                         lastModified = data.modified;
@@ -408,7 +436,7 @@ CloudPebble.Editor = (function() {
                     });
                 };
 
-                CloudPebble.Sidebar.SetActivePane(pane, 'source-' + file.id, function() {
+                CloudPebble.Sidebar.SetActivePane(pane, sidebar_id, function() {
                     code_mirror.refresh();
                     _.defer(function() { code_mirror.focus(); });
                     check_safe();
@@ -422,9 +450,8 @@ CloudPebble.Editor = (function() {
                     delete open_codemirrors[file.id];
                 });
 
-                if (is_monkey) {
-                    // TODO: test name
-                    screenshot_pane = new CloudPebble.MonkeyScreenshots.ScreenshotPane(file.name);
+                if (file_kind == 'monkey') {
+                    screenshot_pane = new CloudPebble.MonkeyScreenshots.ScreenshotPane(file.id);
                     CloudPebble.SidePane.RightPane.addPane(screenshot_pane.getPane(), 'monkey-screenshots', file.id);
                     CloudPebble.SidePane.RightPane.setSize('640px');
                 }
@@ -433,7 +460,7 @@ CloudPebble.Editor = (function() {
                 var was_clean = true;
                 code_mirror.on('change', function() {
                     if(was_clean) {
-                        CloudPebble.Sidebar.SetIcon('source-' + file.id, 'edit');
+                        CloudPebble.Sidebar.SetIcon(sidebar_id, 'edit');
                         was_clean = false;
                         ++unsaved_files;
                     }
@@ -442,7 +469,7 @@ CloudPebble.Editor = (function() {
                 var mark_clean = function() {
                     was_clean = true;
                     --unsaved_files;
-                    CloudPebble.Sidebar.ClearIcon('source-' + file.id);
+                    CloudPebble.Sidebar.ClearIcon(sidebar_id);
                 };
 
                 var save = function(callback) {
@@ -456,8 +483,7 @@ CloudPebble.Editor = (function() {
                     }
                     save_btn.attr('disabled','disabled');
                     delete_btn.attr('disabled','disabled');
-
-                    $.post("/ide/project/" + PROJECT_ID + "/source/" + file.id + "/save", {
+                    $.post("/ide/project/" + PROJECT_ID + "/" + url_kind +  "/" + file.id + "/save", {
                         content: code_mirror.getValue(),
                         modified: lastModified,
                         folded_lines: JSON.stringify(code_mirror.get_folded_lines())
@@ -487,7 +513,7 @@ CloudPebble.Editor = (function() {
                         return defer.reject(interpolate(gettext("A file called '%s' already exists."), [new_name]));
                     }
 
-                    $.post("/ide/project/" + PROJECT_ID + "/source/" + file.id + "/rename", {
+                    $.post("/ide/project/" + PROJECT_ID + "/" + url_kind + "/" + file.id + "/rename", {
                         old_name: file.name,
                         new_name: new_name,
                         modified: lastModified
@@ -498,7 +524,7 @@ CloudPebble.Editor = (function() {
                         else {
                             delete project_source_files[file.name];
                             file.name = new_name;
-                            CloudPebble.Sidebar.SetItemName('source', file.id, new_name);
+                            CloudPebble.Sidebar.SetItemName(url_kind, file.id, new_name);
                             CloudPebble.FuzzyPrompt.SetCurrentItemName(new_name);
                             project_source_files[file.name] = file;
                             defer.resolve();
@@ -619,13 +645,13 @@ CloudPebble.Editor = (function() {
                     CloudPebble.Prompts.Confirm(interpolate(fmt, file, true), gettext("This cannot be undone."), function() {
                         save_btn.attr('disabled','disabled');
                         delete_btn.attr('disabled','disabled');
-                        $.post("/ide/project/" + PROJECT_ID + "/source/" + file.id + "/delete", function(data) {
+                        $.post("/ide/project/" + PROJECT_ID + "/" + url_kind + "/" + file.id + "/delete", function(data) {
                             save_btn.removeAttr('disabled');
                             delete_btn.removeAttr('disabled');
                             if(data.success) {
                                 CloudPebble.Sidebar.DestroyActive();
                                 delete project_source_files[file.name];
-                                CloudPebble.Sidebar.Remove('source-' + file.id);
+                                CloudPebble.Sidebar.Remove(sidebar_id);
                                 CloudPebble.YCM.deleteFile(file);
                             } else {
                                 alert(data.error);
@@ -939,6 +965,20 @@ CloudPebble.Editor = (function() {
         ga('send', 'event', 'file', 'create');
     }
 
+    function create_remote_test(params, callback) {
+        if (_.isString(params)) {
+            params = {name: params};
+        }
+        $.post("/ide/project/" + PROJECT_ID + "/create_test_file", params, function(data) {
+            if(data.success) {
+                add_test_file(data.file);
+            }
+            if (callback) {
+                callback(data);
+            }
+        });
+    }
+
     function init_create_prompt() {
         var prompt = $('#editor-new-file-prompt');
         prompt.find('#new-file-type').change(function() {
@@ -1076,6 +1116,27 @@ CloudPebble.Editor = (function() {
         prompt.modal('show');
     }
 
+    function create_test_file() {
+        var pattern = "^[a-zA-Z0-9_-]+$";
+        CloudPebble.Prompts.Prompt(gettext("Create new test file"), "Test name", "", "", function(value, then) {
+            if (!(new RegExp(pattern).test(value))) {
+                then.error("You must enter a valid test name using only alphanumeric characters, dashes (-) and underscores (_)");
+            }
+            else {
+                create_remote_test(value, function(data) {
+                    if (data.success) {
+                        then.dismiss();
+                    } else {
+                        then.error(data.error);
+                        //error.text(data.error).show();
+                    }
+                });
+
+            }
+
+        }, pattern);
+    }
+
     function go_to(filename, line, ch) {
         var file = project_source_files[filename];
         if(!file) return;
@@ -1090,8 +1151,14 @@ CloudPebble.Editor = (function() {
         Create: function() {
             create_source_file();
         },
+        CreateTest: function() {
+            create_test_file();
+        },
         Add: function(file) {
             add_source_file(file);
+        },
+        AddTest: function(file) {
+            add_test_file(file)
         },
         Init: function() {
             init();

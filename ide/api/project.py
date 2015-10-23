@@ -11,7 +11,7 @@ from django.views.decorators.http import require_safe, require_POST
 from ide.api import json_response, json_failure
 from ide.models.build import BuildResult
 from ide.models.project import Project, TemplateProject
-from ide.models.files import SourceFile, ResourceFile
+from ide.models.files import SourceFile, ResourceFile, TestFile
 from ide.tasks.archive import create_archive, do_import_archive
 from ide.tasks.build import run_compile
 from ide.tasks.gist import import_gist
@@ -27,6 +27,7 @@ def project_info(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     source_files = SourceFile.objects.filter(project=project).order_by('file_name')
     resources = ResourceFile.objects.filter(project=project).order_by('file_name')
+    test_files = TestFile.objects.filter(project=project).order_by('file_name')
     output = {
         'type': project.project_type,
         'success': True,
@@ -45,6 +46,7 @@ def project_info(request, project_id):
         'sdk_version': project.sdk_version,
         'app_platforms': project.app_platforms,
         'menu_icon': project.menu_icon.id if project.menu_icon else None,
+        'test_files': [{'name': f.file_name, 'id': f.id} for f in test_files],
         'source_files': [{'name': f.file_name, 'id': f.id, 'target': f.target} for f in source_files],
         'resources': [{
             'id': x.id,

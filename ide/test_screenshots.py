@@ -51,7 +51,7 @@ class ScreenshotsTests(CloudpebbleTestCase):
             'project_id': self.project_id,
             'test_id': test_id
         })
-        data = {"screenshots": json.dumps(screenshots), "files": [file1, file2]}
+        data = {"screenshots": json.dumps(screenshots), "files[]": [file1, file2]}
         result = json.loads(self.client.post(url, data).content)['screenshots']
 
         # Check from the response that they were created properly
@@ -73,7 +73,7 @@ class ScreenshotsTests(CloudpebbleTestCase):
         del screenshots[0]['files']["aplite"]
         screenshots[0]['files']["chalk"] = {"uploadId": 0}
         url = reverse('ide:save_screenshots', args=[self.project_id, test_id])
-        data = {"screenshots": json.dumps(screenshots), "files": [data["files"][0]]}
+        data = {"screenshots": json.dumps(screenshots), "files[]": [data["files[]"][0]]}
         result2 = json.loads(self.client.post(url, data).content)['screenshots']
 
         # Check that the name changed, the basalt file remains the same, aplite is gone, and chalk is added

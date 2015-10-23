@@ -26,7 +26,7 @@ def make_screenshot_dict(screenshot_set, project_id):
                 'project_id': project_id,
                 'test_id': screenshot_set.test.id,
                 'screenshot_id': screenshot_set.id,
-                'platform_name': 'basalt'
+                'platform_name': screenshot_file.platform
             })
         }) for screenshot_file in screenshot_set.files.all()])
     }
@@ -49,7 +49,8 @@ def load_screenshots(request, project_id, test_id):
 def save_screenshots(request, project_id, test_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     screenshot_data = json.loads(request.POST['screenshots'])
-    uploaded_files = request.FILES.getlist('files')
+    uploaded_files = request.FILES.getlist('files[]')
+
     test = get_object_or_404(TestFile, pk=test_id)
     screenshots = test.screenshot_sets.all()
     # get set of screenshot IDs
@@ -70,7 +71,9 @@ def save_screenshots(request, project_id, test_id):
                     # delete removed or re-uploaded screenshot files
                     files = screenshot_set.files.all()
                     for screenshot_file in files:
-                        if screenshot_file.platform not in screenshot_info['files'] or screenshot_info['files'][screenshot_file.platform].get('uploadId', None):
+                        was_deleted = lambda: screenshot_file.platform not in screenshot_info['files']
+                        is_replaced = lambda: screenshot_info['files'][screenshot_file.platform].get('uploadId', None) is not None
+                        if was_deleted() or is_replaced():
                             screenshot_file.delete()
                 else:
                     # create a new ScreenshotSet
@@ -81,7 +84,7 @@ def save_screenshots(request, project_id, test_id):
                 for platform, upload_info in screenshot_info['files'].iteritems():
                     uploadId = upload_info.get('uploadId', None)
                     if isinstance(uploadId, int):
-                        screenshot_file = ScreenshotFile.objects.create(screenshot_set=screenshot_set, platform=platform)
+                        screenshot_file, did_create = ScreenshotFile.objects.get_or_create(screenshot_set=screenshot_set, platform=platform)
                         posted_file = uploaded_files[uploadId]
                         screenshot_file.save()
                         screenshot_file.save_file(posted_file, posted_file.size)

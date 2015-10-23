@@ -1224,7 +1224,11 @@ button#add-filter {
     bottom: 0;
     position: absolute;
     border-left: #444 3px solid;
+    /*transition:width 300ms ease-in-out, height 300ms ease-in-out;*/
 }
+/*#main-pane {*/
+    /*transition: right 300ms ease-in-out, height 300ms ease-in-out;*/
+/*}*/
 
 .monkey-pane {
     padding: 10px;
@@ -1277,6 +1281,10 @@ button#add-filter {
     display: inline-block;
 }
 
+.monkey-screenshot-set .image-resource-preview {
+    position: relative;
+}
+
 .monkey-pane h2 > span {
     display: none;
 }
@@ -1311,6 +1319,34 @@ button#add-filter {
 .monkey-screenshots .settings-status-icons {
     padding-right: 10px;
 }
+
+.monkey-screenshot-set .image-resource-preview .delete-btn {
+    position: absolute;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    top: 10px;
+    opacity: 0;
+}
+.monkey-screenshot-set .image-resource-preview:hover .delete-btn,
+.monkey-screenshot-set .image-resource-preview .delete-btn:focus {
+    opacity: 0.5;
+}
+.monkey-screenshot-set .image-resource-preview .delete-btn:hover {
+    opacity: 1;
+}
+
+.screenshot-empty .delete-btn {
+    display: none;
+}
+
+.monkey-select-platform {
+    text-decoration: underline;
+}
+.monkey-select-platform:hover {
+    cursor: pointer;
+}
+
 
 /** jquery-textext adjustments **/
 

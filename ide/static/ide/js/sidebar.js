@@ -132,6 +132,16 @@ CloudPebble.Sidebar = (function() {
             end.before(li);
             return li;
         },
+        AddTestFile: function(file, on_click) {
+            var end = $('#end-test-files');
+            var link = $('<a href="#" id="sidebar-link-'+file.id+'"></a>');
+            link.text(file.name + ' ');
+            link.click(on_click);
+            var li = $('<li id="sidebar-pane-test-'+file.id+'">');
+            li.append(link);
+            end.before(li);
+            return li;
+        },
         Remove: function(id) {
             $('#sidebar-pane-' + id).remove();
         },
@@ -155,6 +165,7 @@ CloudPebble.Sidebar = (function() {
             $('#sidebar-pane-github > a').click(CloudPebble.GitHub.Show);
             $('#sidebar-pane-timeline > a').click(CloudPebble.Timeline.show);
             $('#new-source-file').click(CloudPebble.Editor.Create);
+            $('#new-test').click(CloudPebble.Editor.CreateTest);
             init();
         },
         SetPopover: function(pane_id, title, content) {

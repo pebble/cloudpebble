@@ -16,15 +16,15 @@ CloudPebble.SidePane = (function() {
         var container;
         var main_pane;
 
+        _.extend(this, Backbone.Events);
+
         var get_suspended_pane = function(kind, id) {
             return suspended_panes[kind+'-'+id];
         };
         var set_suspended_pane = function(kind, id, pane) {
-            console.log("setting pane", kind, id);
             suspended_panes[kind+'-'+id] = pane;
         };
         var destroy_suspended_pane = function(pane) {
-            console.log("de panes", suspended_panes);
             delete suspended_panes[_.findKey(suspended_panes, function(p) {return !p.is(pane);})];
         };
 
@@ -49,6 +49,9 @@ CloudPebble.SidePane = (function() {
         };
 
         this.restorePane = function(kind, id) {
+            if (active_kind == kind && active_id == id) {
+                return active_pane;
+            }
             var pane = get_suspended_pane(kind, id);
             if (!pane) {
                 return false;
@@ -65,13 +68,16 @@ CloudPebble.SidePane = (function() {
         };
 
         this.addPane = function(pane, kind, id) {
+            var self = this;
             this.suspendActivePane();
             this.attachPane(pane, kind, id);
+            pane.on('resize', function(event, size) {
+                self.setSize(size);
+            });
         };
 
         this.setSize = function(size) {
             if (orientation === vertical) {
-                console.log(size);
                 $(container).css({width: size});
                 $(main_pane).css({right: size});
             }
