@@ -41,10 +41,7 @@ var SharedPebble = new (function() {
         gettext("Firing missiles…"),
         gettext("Never giving you up…"),
         gettext("Never letting you down…"),
-        // Translators: do whatever you like with this one.
-        gettext("Harmonising Elements…"),
-        gettext("Getting 20% cooler…"),
-        gettext("Here comes Tom!")
+        gettext("Getting twenty percent cooler…")
     ];
 
     function isRound(kind) {
