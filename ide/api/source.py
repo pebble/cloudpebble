@@ -61,7 +61,7 @@ def create_test_file(request, project_id):
 def get_source_file(kind, pk, project):
     if kind == 'source':
         return get_object_or_404(SourceFile, pk=pk, project=project)
-    elif kind == 'test':
+    elif kind == 'tests':
         return get_object_or_404(TestFile, pk=pk, project=project)
     else:
         raise ValueError('Invalid source kind %s' % kind)
@@ -97,6 +97,26 @@ def load_source_file(request, project_id, kind, file_id):
             "folded_lines": folded_lines
         })
 
+@require_safe
+@login_required
+def get_test_list(request, project_id):
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    objects = TestFile.objects.filter(project=project)
+
+    send_keen_event('cloudpebble', 'cloudpebble_list_source', data={
+        'data': {
+            'kind': 'tests'
+        }
+    }, project=project, request=request)
+
+    return json_response({
+        "success": True,
+        "tests": [{
+            "modified": time.mktime(test.last_modified.utctimetuple()),
+            "id": test.id,
+            "name": test.file_name
+        } for test in objects]
+    })
 
 @require_safe
 @csrf_protect

@@ -8,8 +8,9 @@ from ide.api.project import project_info, compile_project, last_build, build_his
 from ide.api.resource import create_resource, resource_info, delete_resource, update_resource, show_resource, \
     delete_variant
 from ide.api.source import create_source_file, create_test_file, load_source_file, source_file_is_safe, save_source_file, \
-    delete_source_file, rename_source_file
+    delete_source_file, rename_source_file, get_test_list
 from ide.api.screenshots import save_screenshots, load_screenshots, show_screenshot
+from ide.api.monkey import get_test_session, get_test_sessions, get_test_run, get_test_runs, post_test_session
 from ide.api.user import transition_accept, transition_export, transition_delete, whats_new
 from ide.api.ycm import init_autocomplete
 from ide.api.qemu import launch_emulator, generate_phone_token, handle_phone_token
@@ -28,13 +29,14 @@ urlpatterns = patterns(
     url(r'^project/(?P<project_id>\d+)/delete', delete_project, name='delete_project'),
     url(r'^project/(?P<project_id>\d+)/create_source_file', create_source_file, name='create_source_file'),
     url(r'^project/(?P<project_id>\d+)/create_test_file', create_test_file, name='create_test_file'),
-    url(r'^project/(?P<project_id>\d+)/(?P<kind>(source|test))/(?P<file_id>\d+)/load', load_source_file, name='load_source_file'),
-    url(r'^project/(?P<project_id>\d+)/(?P<kind>(source|test))/(?P<file_id>\d+)/save', save_source_file, name='save_source_file'),
+    url(r'^project/(?P<project_id>\d+)/tests$', get_test_list, name='get_test_list'),
+    url(r'^project/(?P<project_id>\d+)/(?P<kind>(source|tests))/(?P<file_id>\d+)/load', load_source_file, name='load_source_file'),
+    url(r'^project/(?P<project_id>\d+)/(?P<kind>(source|tests))/(?P<file_id>\d+)/save', save_source_file, name='save_source_file'),
     url(r'^project/(?P<project_id>\d+)/test/(?P<test_id>\d+)/screenshots/save', save_screenshots, name='save_screenshots'),
     url(r'^project/(?P<project_id>\d+)/test/(?P<test_id>\d+)/screenshots/load', load_screenshots, name='load_screenshots'),
-    url(r'^project/(?P<project_id>\d+)/(?P<kind>(source|test))/(?P<file_id>\d+)/rename', rename_source_file, name='rename_source_file'),
-    url(r'^project/(?P<project_id>\d+)/(?P<kind>(source|test))/(?P<file_id>\d+)/is_safe', source_file_is_safe, name='source_file_is_safe'),
-    url(r'^project/(?P<project_id>\d+)/(?P<kind>(source|test))/(?P<file_id>\d+)/delete', delete_source_file, name='delete_source_file'),
+    url(r'^project/(?P<project_id>\d+)/(?P<kind>(source|tests))/(?P<file_id>\d+)/rename', rename_source_file, name='rename_source_file'),
+    url(r'^project/(?P<project_id>\d+)/(?P<kind>(source|tests))/(?P<file_id>\d+)/is_safe', source_file_is_safe, name='source_file_is_safe'),
+    url(r'^project/(?P<project_id>\d+)/(?P<kind>(source|tests))/(?P<file_id>\d+)/delete', delete_source_file, name='delete_source_file'),
     url(r'^project/(?P<project_id>\d+)/test/(?P<test_id>\d+)/screenshot/(?P<screenshot_id>\d+)/(?P<platform_name>\w{1,10})/get/', show_screenshot, name='show_screenshot'),
     url(r'^project/(?P<project_id>\d+)/create_resource', create_resource, name='create_resource'),
     url(r'^project/(?P<project_id>\d+)/resource/(?P<resource_id>\d+)/info', resource_info, name='resource_info'),
@@ -42,6 +44,11 @@ urlpatterns = patterns(
     url(r'^project/(?P<project_id>\d+)/resource/(?P<resource_id>\d+)/update', update_resource, name='update_resource'),
     url(r'^project/(?P<project_id>\d+)/resource/(?P<resource_id>\d+)/(?P<variant>\d+(?:,\d+)*)/get', show_resource, name='show_resource'),
     url(r'^project/(?P<project_id>\d+)/resource/(?P<resource_id>\d+)/(?P<variant>\d+(?:,\d+)*)/delete', delete_variant, name='delete_variant'),
+    url(r'^project/(?P<project_id>\d+)/test_sessions$', get_test_sessions, name='get_test_sessions'),
+    url(r'^project/(?P<project_id>\d+)/test_sessions/(?P<session_id>\d+)$', get_test_session, name='get_test_session'),
+    url(r'^project/(?P<project_id>\d+)/test_runs$', get_test_runs, name='get_test_runs'),
+    url(r'^project/(?P<project_id>\d+)/test_runs/(?P<run_id>\d+)$', get_test_run, name='get_test_run'),
+    url(r'^project/(?P<project_id>\d+)/test_sessions/run$', post_test_session, name='post_test_session'),
     url(r'^project/(?P<project_id>\d+)/build/run', compile_project, name='compile_project'),
     url(r'^project/(?P<project_id>\d+)/build/last', last_build, name='get_last_build'),
     url(r'^project/(?P<project_id>\d+)/build/history', build_history, name='get_build_history'),

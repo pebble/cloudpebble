@@ -58,7 +58,7 @@ CloudPebble.Editor = (function() {
             return;
         }
         CloudPebble.ProgressBar.Show();
-        var url_kind = (file.target == 'test' ? 'test' : 'source');
+        var url_kind = (file.target == 'test' ? 'tests' : 'source');
         var sidebar_id = url_kind + '-' + file.id;
         // Open it.
         $.getJSON('/ide/project/' + PROJECT_ID + '/' + url_kind + '/' + file.id + '/load', function(data) {

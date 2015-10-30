@@ -1,7 +1,6 @@
 import json
-from django.test import TestCase
+from cloudpebble_test import CloudpebbleTestCase
 from django.test.utils import setup_test_environment
-from django.test.client import Client
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
@@ -10,19 +9,7 @@ from ide.models.files import TestFile, ScreenshotSet, ScreenshotFile
 
 __author__ = 'joe'
 
-setup_test_environment()
-
-class CloudpebbleTestCase(TestCase):
-    def login(self):
-        self.client = Client()
-        self.client.post('/accounts/register', {'username': 'test', 'email': 'test@test.test', 'password1': 'test', 'password2': 'test'})
-        self.assertTrue(self.client.login(username='test', password='test'))
-        self.assertJSONEqual(self.client.post('/ide/project/create', {'name': 'test', 'template': 0, 'type': 'native', 'sdk': 3}).content,
-                             {"id": 1, "success": True})
-        self.project_id = 1
-
 class ScreenshotsTests(CloudpebbleTestCase):
-
     def setUp(self):
         self.login()
 
@@ -113,7 +100,7 @@ class ScreenshotsTests(CloudpebbleTestCase):
         # Delete the test
         url = reverse('ide:delete_source_file', kwargs={
             'project_id': self.project_id,
-            'kind': 'test',
+            'kind': 'tests',
             'file_id': test_id
         })
         self.client.post(url)
@@ -125,4 +112,3 @@ class ScreenshotsTests(CloudpebbleTestCase):
             ScreenshotSet.objects.get(pk=set_id)
         with self.assertRaises(ObjectDoesNotExist):
             ScreenshotFile.objects.get(pk=file_id)
-
