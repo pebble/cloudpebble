@@ -1,10 +1,12 @@
 {% extends "common/base.html" %}
 {% load staticfiles %}
 {% load i18n %}
+{% load compress %}
 
 {% block title %}CloudPebble – {{ project.name }}{% endblock %}
 
 {% block head %}
+{% compress css %}
 <link rel="stylesheet" href="{% static 'CodeMirror/addon/hint/show-hint.css' %}">
 <link rel="stylesheet" href="{% static 'CodeMirror/addon/dialog/dialog.css' %}">
 <link rel="stylesheet" href="{% static 'CodeMirror/lib/codemirror.css' %}">
@@ -13,12 +15,15 @@
 <link rel="stylesheet" href="{% static 'CodeMirror/theme/blackboard.css' %}">
 <link rel="stylesheet" href="{% static 'CodeMirror/theme/solarized.css' %}">
 <link rel="stylesheet" href="{% static 'CodeMirror/addon/fold/foldgutter.css' %}">
+{% endcompress %}
+
 {% if font_css %}
 <link rel="stylesheet" href="{{ font_css }}" />
 {% endif %}
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Droid+Serif:700|Roboto+Condensed|Roboto:700">
 <link rel="stylesheet" href="//static.cloudpebble.net/fonts/raster-gothic/stylesheet.css">
 
+{% compress css %}
 <link rel="stylesheet" href="{%  static 'jquery-textext/src/css/textext.core.css' %}" type="text/css" />
 <link rel="stylesheet" href="{%  static 'jquery-textext/src/css/textext.plugin.tags.css' %}" type="text/css" />
 <link rel="stylesheet" href="{%  static 'jquery-textext/src/css/textext.plugin.autocomplete.css' %}" type="text/css" />
@@ -29,6 +34,7 @@
 <link rel="stylesheet" href="{% static 'ide/css/ide.css' %}">
 <link rel="stylesheet" href="{% static 'ide/css/ib.css' %}">
 <link rel="stylesheet" href="{% static 'ide/css/codemirror-default.css' %}">
+{% endcompress %}
 
 {% endblock %}
 
@@ -477,6 +483,10 @@ var USER_SETTINGS = {
 var DOC_JSON = "{% static 'ide/documentation.json' %}";
 var LIBPEBBLE_PROXY = {{ libpebble_proxy | safe }};
 </script>
+
+<script src="/ide/jsi18n/"></script>
+
+{% compress js %}
 <script src="{% static 'CodeMirror/lib/codemirror.js' %}"></script>
 <script src="{% static 'CodeMirror/addon/dialog/dialog.js' %}"></script>
 <script src="{% static 'CodeMirror/addon/search/searchcursor.js' %}"></script>
@@ -495,7 +505,6 @@ var LIBPEBBLE_PROXY = {{ libpebble_proxy | safe }};
 <script src="{% static 'CodeMirror/keymap/emacs.js' %}"></script>
 <script src="{% static 'CodeMirror/keymap/vim.js' %}"></script>
 <script src="{% static 'ide/external/uuid.js' %}"></script>
-<script src="/ide/jsi18n/"></script>
 <script src="{% static 'ide/js/csrf.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/cloudpebble.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/sidebar.js' %}" type="text/javascript"></script>
@@ -544,6 +553,7 @@ var LIBPEBBLE_PROXY = {{ libpebble_proxy | safe }};
 <script src="{% static 'html.sortable/dist/html.sortable.min.js' %}" type="text/javascript"></script>
 <script src="{% static 'text-encoding/lib/encoding.js' %}" type="text/javascript"></script>
 <script src="{% static 'noVNC/include/util.js' %}" type="text/javascript"></script>
+{% endcompress %}
 
 <script type="text/javascript">
 // Because there's apparently no good way to get these urls into javascript...
@@ -565,7 +575,7 @@ var URL_BOOT_IMG = {
 CloudPebble.Init();
 </script>
 
-
+{% compress js %}
 <script src="{% static 'jquery-textext/src/js/textext.core.js' %}" type="text/javascript" charset="utf-8"></script>
 <script src="{% static 'jquery-textext/src/js/textext.plugin.tags.js' %}" type="text/javascript" charset="utf-8"></script>
 <script src="{% static 'jquery-textext/src/js/textext.plugin.autocomplete.js' %}" type="text/javascript" charset="utf-8"></script>
@@ -575,5 +585,6 @@ CloudPebble.Init();
 <script src="{% static 'jquery-textext/src/js/textext.plugin.prompt.js' %}" type="text/javascript" charset="utf-8"></script>
 <script src="{% static 'jquery-textext/src/js/textext.plugin.ajax.js' %}" type="text/javascript" charset="utf-8"></script>
 <script src="{% static 'jquery-textext/src/js/textext.plugin.arrow.js' %}" type="text/javascript" charset="utf-8"></script>
+{% endcompress %}
 
 {% endblock %}

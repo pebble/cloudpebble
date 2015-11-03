@@ -1,14 +1,17 @@
 {% load staticfiles %}
 {% load i18n %}
+{% load compress %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="utf-8">
         <title>{% block title %}CloudPebble{% endblock %}</title>
+        {%  compress css %}
         <link rel="stylesheet" type="text/css" href="{% static 'common/fonts/fonts.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'common/css/progress.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'common/css/common.css' %}">
         <link rel="stylesheet" href="{% static 'ide/css/base.css' %}">
+        {%  endcompress %}
         <link rel="icon" href="{% static 'ide/img/favicon.png' %}" />
         <!--[if IE]>
           <link rel="Shortcut Icon" href="{% static 'ide/img/favicon.ico' %}" />
@@ -19,6 +22,7 @@
         <div class="main-container">
             {% block content %}{% endblock %}
         </div>
+        {%  compress js %}
         <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
         <script src="{% static 'common/js/modal.js' %}"></script>
         <script src="{% static 'underscore/underscore-min.js' %}"></script>
@@ -34,6 +38,7 @@
             ga('send', 'pageview');
 
         </script>
+        {%  endcompress %}
         <div id="whats-new" class="modal hide fade" tabindex="-1" role="dialog">
             <div class="modal-header">
                 {# Translators: Modal prompt header #}

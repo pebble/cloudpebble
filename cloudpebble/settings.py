@@ -126,6 +126,7 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'djangobower.finders.BowerFinder',
+    'compressor.finders.CompressorFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
@@ -224,6 +225,7 @@ INSTALLED_APPS = (
     'djcelery',
     'registration',
     'djangobower',
+    'compressor'
 )
 
 # A sample logging configuration. The only tangible logging
