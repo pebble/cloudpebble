@@ -142,6 +142,7 @@ BOWER_INSTALLED_APPS = (
     'alexgorbatchev/jquery-textext',
     'codemirror#4.2.0',
     'kanaka/noVNC',
+    'react'
 )
 
 # Make this unique, and don't share it with anybody.

@@ -64,6 +64,7 @@
                 <ul class="nav-list" id="sidebar">
                     <li class="nav-header project-name">{{ project.name }}</li>
                     <li class="nav-header" id="sidebar-pane-settings"><a href="#">{% trans 'Settings' %}</a></li>
+                    <li class="nav-header" id="sidebar-pane-testmanager"><a href="#">{% trans 'Test Manager' %}</a></li>
                     <li class="nav-header sdk3-only" id="sidebar-pane-timeline"><a href="#">Timeline (Preview)</a></li>
                     <li class="nav-header" id="sidebar-pane-compile"><a href="#">{% trans 'Compilation' %}</a></li>
                     <li id="sidebar-pane-github" class="nav-header {%if not project.owner.github%}disabled{%endif%}"><a href="#">GitHub</a></li>
@@ -484,6 +485,9 @@ var USER_SETTINGS = {
 var DOC_JSON = "{% static 'ide/documentation.json' %}";
 var LIBPEBBLE_PROXY = {{ libpebble_proxy | safe }};
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+<script src="{% static 'react/react.js' %}"></script>
+<script src="{% static 'react/react-dom.js' %}"></script>
 <script src="{% static 'CodeMirror/lib/codemirror.js' %}"></script>
 <script src="{% static 'CodeMirror/addon/dialog/dialog.js' %}"></script>
 <script src="{% static 'CodeMirror/addon/search/searchcursor.js' %}"></script>
@@ -517,6 +521,7 @@ var LIBPEBBLE_PROXY = {{ libpebble_proxy | safe }};
 <script src="{% static 'ide/js/fuzzyprompt.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/live_settings_form.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/screenshot_manager.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/test_manager.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/compile.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/resources.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/textext_tagger.js' %}" type="text/javascript"></script>

@@ -162,6 +162,7 @@ CloudPebble.Sidebar = (function() {
             $('#sidebar-pane-new-resource').click(CloudPebble.Resources.Create);
             $('#sidebar-pane-compile > a').click(CloudPebble.Compile.Show);
             $('#sidebar-pane-settings > a').click(CloudPebble.Settings.Show);
+            $('#sidebar-pane-testmanager > a').click(CloudPebble.TestManager.Show);
             $('#sidebar-pane-github > a').click(CloudPebble.GitHub.Show);
             $('#sidebar-pane-timeline > a').click(CloudPebble.Timeline.show);
             $('#new-source-file').click(CloudPebble.Editor.Create);
