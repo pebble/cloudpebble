@@ -42,6 +42,7 @@ CloudPebble.Init = function() {
         CloudPebble.FuzzyPrompt.Init();
         CloudPebble.MonkeyScreenshots.Init();
         CloudPebble.SidePane.Init();
+        CloudPebble.TestManager.Init();
 
         CloudPebble.ProgressBar.Hide();
 

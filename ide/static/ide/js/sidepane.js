@@ -22,6 +22,8 @@ CloudPebble.SidePane = (function() {
             return suspended_panes[kind+'-'+id];
         };
         var set_suspended_pane = function(kind, id, pane) {
+            active_pane = null;
+            active_id = null;
             suspended_panes[kind+'-'+id] = pane;
         };
         var destroy_suspended_pane = function(pane) {

@@ -82,9 +82,9 @@
             </div>
         </div>
         <div id="pane-parent">
-            <div id="main-pane" style="display: none;">
-            </div>
             <div id="right-pane">
+            </div>
+            <div id="main-pane" style="display: none;">
             </div>
             <div id="progress-pane">
                 <div class="row-fluid">
@@ -139,7 +139,6 @@
 
 {% block modals %}
 <!-- Create new file prompt -->
-<div id="help-prompt-holder"></div>
 <div id="editor-new-file-prompt" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
         <h3>{% trans 'Create new file' %}</h3>
@@ -204,6 +203,7 @@
         <button class="btn btn-primary" id="editor-create-file-button">{% trans 'Create' %}</button>
     </div>
 </div>
+<div id="help-prompt-holder"></div>
 <!-- Create new repo prompt -->
 <div id="github-new-repo-prompt" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
@@ -521,7 +521,6 @@ var LIBPEBBLE_PROXY = {{ libpebble_proxy | safe }};
 <script src="{% static 'ide/js/fuzzyprompt.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/live_settings_form.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/screenshot_manager.js' %}" type="text/javascript"></script>
-<script src="{% static 'ide/js/test_manager.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/compile.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/resources.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/textext_tagger.js' %}" type="text/javascript"></script>
@@ -559,6 +558,9 @@ var LIBPEBBLE_PROXY = {{ libpebble_proxy | safe }};
 <script src="{% static 'html.sortable/dist/html.sortable.min.js' %}" type="text/javascript"></script>
 <script src="{% static 'text-encoding/lib/encoding.js' %}" type="text/javascript"></script>
 <script src="{% static 'noVNC/include/util.js' %}" type="text/javascript"></script>
+
+<script src="{% static 'ide/js/test_manager/interface.jsx' %}" type="text/babel"></script>
+<script src="{% static 'ide/js/test_manager/test_manager.js' %}" type="text/javascript"></script>
 
 <script type="text/javascript">
 // Because there's apparently no good way to get these urls into javascript...

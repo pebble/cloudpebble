@@ -2,11 +2,12 @@ import datetime
 import time
 import json
 from django.contrib.auth.decorators import login_required
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST, require_safe
 from django.utils.translation import ugettext as _
+from django.core.exceptions import ObjectDoesNotExist
 from ide.api import json_failure, json_response
 from ide.models.project import Project
 from ide.models.files import SourceFile, TestFile
@@ -20,10 +21,14 @@ __author__ = 'katharine'
 def create_source_file(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     try:
-        f = SourceFile.objects.create(project=project,
-                                      file_name=request.POST['name'],
-                                      target=request.POST.get('target', 'app'))
-        f.save_file(request.POST.get('content', ''))
+        with transaction.atomic():
+
+            f = SourceFile.objects.create(project=project,
+                                          file_name=request.POST['name'],
+                                          target=request.POST.get('target', 'app'))
+            print "Made file " + request.POST['name']
+            f.save_file(request.POST.get('content', ''))
+            print "Saved file"
     except IntegrityError as e:
         return json_failure(str(e))
     else:
@@ -109,12 +114,14 @@ def get_test_list(request, project_id):
         }
     }, project=project, request=request)
 
+
     return json_response({
         "success": True,
         "tests": [{
             "modified": time.mktime(test.last_modified.utctimetuple()),
             "id": test.id,
-            "name": test.file_name
+            "name": test.file_name,
+            "last_code": test.latest_code
         } for test in objects]
     })
 

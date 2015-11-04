@@ -21,6 +21,28 @@ class Migration(SchemaMigration):
         # Adding unique constraint on 'TestFile', fields ['project', 'file_name']
         db.create_unique(u'ide_testfile', ['project_id', 'file_name'])
 
+        # Adding model 'TestLog'
+        db.create_table(u'ide_testlog', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('test_run', self.gf('django.db.models.fields.related.OneToOneField')(related_name='logfile', unique=True, to=orm['ide.TestRun'])),
+        ))
+        db.send_create_signal('ide', ['TestLog'])
+
+        # Adding model 'TestRun'
+        db.create_table(u'ide_testrun', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('session', self.gf('django.db.models.fields.related.ForeignKey')(related_name='runs', to=orm['ide.TestSession'])),
+            ('test', self.gf('django.db.models.fields.related.ForeignKey')(related_name='runs', null=True, on_delete=models.SET_NULL, to=orm['ide.TestFile'])),
+            ('date_started', self.gf('django.db.models.fields.DateTimeField')(null=True)),
+            ('date_completed', self.gf('django.db.models.fields.DateTimeField')(null=True)),
+            ('original_name', self.gf('django.db.models.fields.CharField')(max_length=100)),
+            ('code', self.gf('django.db.models.fields.IntegerField')(default=0)),
+        ))
+        db.send_create_signal('ide', ['TestRun'])
+
+        # Adding unique constraint on 'TestRun', fields ['test', 'session']
+        db.create_unique(u'ide_testrun', ['test_id', 'session_id'])
+
         # Adding model 'ScreenshotSet'
         db.create_table(u'ide_screenshotset', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
@@ -32,7 +54,7 @@ class Migration(SchemaMigration):
         # Adding model 'ScreenshotFile'
         db.create_table(u'ide_screenshotfile', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('screenshot_set', self.gf('django.db.models.fields.related.ForeignKey')(related_name='screenshots', to=orm['ide.ScreenshotSet'])),
+            ('screenshot_set', self.gf('django.db.models.fields.related.ForeignKey')(related_name='files', to=orm['ide.ScreenshotSet'])),
             ('platform', self.gf('django.db.models.fields.CharField')(max_length=10)),
         ))
         db.send_create_signal('ide', ['ScreenshotFile'])
@@ -40,10 +62,23 @@ class Migration(SchemaMigration):
         # Adding unique constraint on 'ScreenshotFile', fields ['platform', 'screenshot_set']
         db.create_unique(u'ide_screenshotfile', ['platform', 'screenshot_set_id'])
 
+        # Adding model 'TestSession'
+        db.create_table(u'ide_testsession', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('date_added', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+            ('date_started', self.gf('django.db.models.fields.DateTimeField')(null=True)),
+            ('date_completed', self.gf('django.db.models.fields.DateTimeField')(null=True)),
+            ('project', self.gf('django.db.models.fields.related.ForeignKey')(related_name='test_sessions', to=orm['ide.Project'])),
+        ))
+        db.send_create_signal('ide', ['TestSession'])
+
 
     def backwards(self, orm):
         # Removing unique constraint on 'ScreenshotFile', fields ['platform', 'screenshot_set']
         db.delete_unique(u'ide_screenshotfile', ['platform', 'screenshot_set_id'])
+
+        # Removing unique constraint on 'TestRun', fields ['test', 'session']
+        db.delete_unique(u'ide_testrun', ['test_id', 'session_id'])
 
         # Removing unique constraint on 'TestFile', fields ['project', 'file_name']
         db.delete_unique(u'ide_testfile', ['project_id', 'file_name'])
@@ -51,11 +86,20 @@ class Migration(SchemaMigration):
         # Deleting model 'TestFile'
         db.delete_table(u'ide_testfile')
 
+        # Deleting model 'TestLog'
+        db.delete_table(u'ide_testlog')
+
+        # Deleting model 'TestRun'
+        db.delete_table(u'ide_testrun')
+
         # Deleting model 'ScreenshotSet'
         db.delete_table(u'ide_screenshotset')
 
         # Deleting model 'ScreenshotFile'
         db.delete_table(u'ide_screenshotfile')
+
+        # Deleting model 'TestSession'
+        db.delete_table(u'ide_testsession')
 
 
     models = {
@@ -102,7 +146,7 @@ class Migration(SchemaMigration):
             'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'builds'", 'to': "orm['ide.Project']"}),
             'started': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'db_index': 'True', 'blank': 'True'}),
             'state': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
-            'uuid': ('django.db.models.fields.CharField', [], {'default': "'88a3e74d-2864-47ae-a07d-40a8eaab2de2'", 'max_length': '36'})
+            'uuid': ('django.db.models.fields.CharField', [], {'default': "'0db2f6af-14ee-44ea-b889-eae03ba67724'", 'max_length': '36'})
         },
         'ide.buildsize': {
             'Meta': {'object_name': 'BuildSize'},
@@ -126,7 +170,7 @@ class Migration(SchemaMigration):
             'app_long_name': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'app_platforms': ('django.db.models.fields.TextField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'app_short_name': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'app_uuid': ('django.db.models.fields.CharField', [], {'default': "'4d482d40-e5e7-4002-b690-9b78bf8b6cba'", 'max_length': '36', 'null': 'True', 'blank': 'True'}),
+            'app_uuid': ('django.db.models.fields.CharField', [], {'default': "'4d5cfc60-ef56-4f6e-8049-fa027ffaeb77'", 'max_length': '36', 'null': 'True', 'blank': 'True'}),
             'app_version_label': ('django.db.models.fields.CharField', [], {'default': "'1.0'", 'max_length': '40', 'null': 'True', 'blank': 'True'}),
             'github_branch': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'github_hook_build': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
@@ -171,7 +215,7 @@ class Migration(SchemaMigration):
             'Meta': {'unique_together': "(('platform', 'screenshot_set'),)", 'object_name': 'ScreenshotFile'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'platform': ('django.db.models.fields.CharField', [], {'max_length': '10'}),
-            'screenshot_set': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'screenshots'", 'to': "orm['ide.ScreenshotSet']"})
+            'screenshot_set': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'files'", 'to': "orm['ide.ScreenshotSet']"})
         },
         'ide.screenshotset': {
             'Meta': {'object_name': 'ScreenshotSet'},
@@ -200,6 +244,29 @@ class Migration(SchemaMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'last_modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'null': 'True', 'blank': 'True'}),
             'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'test_files'", 'to': "orm['ide.Project']"})
+        },
+        'ide.testlog': {
+            'Meta': {'object_name': 'TestLog'},
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'test_run': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'logfile'", 'unique': 'True', 'to': "orm['ide.TestRun']"})
+        },
+        'ide.testrun': {
+            'Meta': {'unique_together': "(('test', 'session'),)", 'object_name': 'TestRun'},
+            'code': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            'date_completed': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
+            'date_started': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'original_name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
+            'session': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'runs'", 'to': "orm['ide.TestSession']"}),
+            'test': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'runs'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['ide.TestFile']"})
+        },
+        'ide.testsession': {
+            'Meta': {'object_name': 'TestSession'},
+            'date_added': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'date_completed': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
+            'date_started': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'test_sessions'", 'to': "orm['ide.Project']"})
         },
         'ide.usergithub': {
             'Meta': {'object_name': 'UserGithub'},

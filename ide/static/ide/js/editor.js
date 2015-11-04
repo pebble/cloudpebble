@@ -39,10 +39,14 @@ CloudPebble.Editor = (function() {
     };
 
     var edit_source_file = function(file, show_ui_editor, callback) {
+        var url_kind = (file.target == 'test' ? 'tests' : 'source');
+        var sidebar_id = (file.target == 'test' ? 'test' : 'source') + '-' + file.id;
+
         CloudPebble.FuzzyPrompt.SetCurrentItemName(file.name);
         // See if we already had it open.
         CloudPebble.Sidebar.SuspendActive();
-        if(CloudPebble.Sidebar.Restore('source-'+file.id)) {
+
+        if(CloudPebble.Sidebar.Restore(sidebar_id)) {
             if (CloudPebble.SidePane.RightPane.restorePane('monkey-screenshots', file.id)) {
                 CloudPebble.SidePane.RightPane.setSize('640px');
             }
@@ -58,8 +62,7 @@ CloudPebble.Editor = (function() {
             return;
         }
         CloudPebble.ProgressBar.Show();
-        var url_kind = (file.target == 'test' ? 'tests' : 'source');
-        var sidebar_id = url_kind + '-' + file.id;
+
         // Open it.
         $.getJSON('/ide/project/' + PROJECT_ID + '/' + url_kind + '/' + file.id + '/load', function(data) {
             CloudPebble.ProgressBar.Hide();
@@ -735,6 +738,8 @@ CloudPebble.Editor = (function() {
                         fullscreen(code_mirror, false);
                         resume_fullscreen = true;
                     }
+                    CloudPebble.SidePane.RightPane.suspendActivePane();
+                    CloudPebble.SidePane.RightPane.setSize(0);
                 });
 
                 $(document).keyup(function(e) {

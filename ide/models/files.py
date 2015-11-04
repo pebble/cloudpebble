@@ -4,8 +4,8 @@ import traceback
 import datetime
 import re
 from django.conf import settings
-from django.core.validators import RegexValidator
-from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import models, transaction
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.utils.timezone import now
@@ -13,57 +13,14 @@ from django.core.validators import RegexValidator
 from django.utils.translation import ugettext as _
 import utils.s3 as s3
 
-from ide.models.meta import IdeModel
+from ide.models.meta import IdeModel, TextFile
 
 __author__ = 'katharine'
 
-
-class TextFile(IdeModel):
+class ScriptFile(TextFile):
+    """ScriptFiles add support to TextFiles for last-modified timestamps and code folding"""
     last_modified = models.DateTimeField(blank=True, null=True, auto_now=True)
     folded_lines = models.TextField(default="[]")
-    folder = None
-
-    def get_local_filename(self):
-        padded_id = '%05d' % self.id
-        return '%s%s/%s/%s/%s' % (settings.FILE_STORAGE, self.folder, padded_id[0], padded_id[1], padded_id)
-
-    def get_s3_path(self):
-        return '%s/%d' % (self.folder, self.id)
-
-    local_filename = property(get_local_filename)
-    s3_path = property(get_s3_path)
-
-    def get_contents(self):
-        if not settings.AWS_ENABLED:
-            try:
-                return open(self.local_filename).read()
-            except IOError:
-                return ''
-        else:
-            return s3.read_file(self.bucket_name, self.s3_path)
-
-    def save_file(self, content, folded_lines=None):
-        if not settings.AWS_ENABLED:
-            if not os.path.exists(os.path.dirname(self.local_filename)):
-                os.makedirs(os.path.dirname(self.local_filename))
-            open(self.local_filename, 'w').write(content.encode('utf-8'))
-        else:
-            s3.save_file(self.bucket_name, self.s3_path, content.encode('utf-8'))
-        if folded_lines:
-            self.folded_lines = folded_lines
-        self.save()
-
-    def copy_to_path(self, path):
-        if not settings.AWS_ENABLED:
-            try:
-                shutil.copy(self.local_filename, path)
-            except IOError as err:
-                if err.errno == 2:
-                    open(path, 'w').close()  # create the file if it's missing.
-                else:
-                    raise
-        else:
-            s3.read_file_to_filesystem(self.bucket_name, self.s3_path, path)
 
     def was_modified_since(self, expected_modification_time):
         if isinstance(expected_modification_time, int):
@@ -71,15 +28,20 @@ class TextFile(IdeModel):
         assert isinstance(expected_modification_time, datetime.datetime)
         return self.last_modified.replace(tzinfo=None, microsecond=0) > expected_modification_time
 
+    def save_file(self, content, folded_lines=None):
+        with transaction.atomic():
+            if folded_lines:
+                self.folded_lines = folded_lines
+            super(ScriptFile, self).save_file(content)
+
     def save(self, *args, **kwargs):
         self.full_clean()
         self.project.last_modified = now()
         self.project.save()
-        super(TextFile, self).save(*args, **kwargs)
+        super(ScriptFile, self).save(*args, **kwargs)
 
     class Meta(IdeModel.Meta):
         abstract = True
-
 
 class BinFile(IdeModel):
     bucket_name = ''
@@ -305,7 +267,7 @@ class ResourceIdentifier(IdeModel):
         unique_together = (('resource_file', 'resource_id'),)
 
 
-class SourceFile(TextFile):
+class SourceFile(ScriptFile):
     file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_-]+\.(c|h|js)$")])
     project = models.ForeignKey('Project', related_name='source_files')
     bucket_name = 'source'
@@ -324,10 +286,10 @@ class SourceFile(TextFile):
         else:
             return 'worker_src/%s' % self.file_name
 
-    class Meta(TextFile.Meta):
+    class Meta(ScriptFile.Meta):
         unique_together = (('project', 'file_name'),)
 
-class TestFile(TextFile):
+class TestFile(ScriptFile):
     file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_-]+$")])
     project = models.ForeignKey('Project', related_name='test_files')
     bucket_name = 'source'
@@ -336,13 +298,21 @@ class TestFile(TextFile):
     @property
     def project_path(self):
         return 'integration_tests/%s' % self.file_name
-        # TODO: verify
+
+
+    @property
+    def latest_code(self):
+        try:
+            return self.runs.latest('date_completed').code
+        except ObjectDoesNotExist:
+            return None
 
     def get_screenshot_sets(self):
         return ScreenshotSet.objects.filter(test=self)
 
-    class Meta(TextFile.Meta):
+    class Meta(ScriptFile.Meta):
         unique_together = (('project', 'file_name'),)
+        ordering = ['file_name']
 
 
 class ScreenshotSet(IdeModel):
@@ -392,7 +362,7 @@ class ScreenshotFile(BinFile):
 
 @receiver(post_delete)
 def delete_file(sender, instance, **kwargs):
-    if sender == SourceFile or sender == ResourceVariant or sender == ScreenshotFile or sender == TestFile:
+    if sender in (SourceFile, ResourceVariant, ScreenshotFile, TestFile):
         if settings.AWS_ENABLED:
             try:
                 s3.delete_file(instance.s3_path)

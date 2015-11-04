@@ -100,4 +100,4 @@ class TestsTests(CloudpebbleTestCase):
         response = sorted([int(t['id']) for t in json.loads(self.client.get(url).content)['tests']])
 
         # Check that all IDs are present
-        self.assertEqual(ids == response)
+        self.assertEqual(ids, response)

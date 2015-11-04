@@ -5,6 +5,20 @@
 
 /* New stuff. */
 
+.clearfix:after {
+     visibility: hidden;
+     display: block;
+     font-size: 0;
+     content: " ";
+     clear: both;
+     height: 0;
+     }
+.clearfix { display: inline-block; }
+/* start commented backslash hack \*/
+* html .clearfix { height: 1%; }
+.clearfix { display: block; }
+/* close commented backslash hack */
+
 /* Page layout framework */
 
 /* This disables bouncing in Safari */
@@ -35,7 +49,7 @@ strong {
     font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: large;
     padding-left: 40px;
-
+    z-index: 1;
     -webkit-transition: top 0.5s, padding-top 0.5s;
     -moz-transition: top 0.5s, padding-top 0.5s;
     -ms-transition: top 0.5s, padding-top 0.5s;
@@ -1347,6 +1361,146 @@ button#add-filter {
     cursor: pointer;
 }
 
+/* Test Manager pane */
+
+.testmanager-pane .well {
+    margin: 30px;
+    padding-left: 60px;
+    padding-right: 60px;
+}
+
+.testmanager-pane .well > div {
+    min-width: 400px;
+}
+
+.testmanager-pane table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.testmanager-pane table td {
+    border: thin #666 solid;
+    padding: 3px;
+    color: #CCC;
+}
+
+.testmanager-pane tr.clickable {
+    cursor: pointer;
+}
+.testmanager-pane tr.clickable:hover {
+    background-color: #555;
+}
+
+td.test-run {
+    text-transform: capitalize;
+}
+td.test-error {
+    background-color: #500;
+}
+td.test-failed {
+    background-color: #544;
+}
+td.test-passed {
+    background-color: #454;
+}
+
+@media (min-width: 1320px) {
+    .leftside {
+        left: 0;
+        position: absolute;
+        width: 50%;
+    }
+
+    .leftside .well {
+        margin-right: 15px;
+        margin-top: 0;
+    }
+
+    .rightside {
+        right: 0;
+        position: absolute;
+        width: 50%;
+    }
+
+    .rightside .well {
+        margin-left: 15px;
+        margin-top: 0;
+    }
+    .testmanager-backbutton-1 {
+        display: none;
+    }
+}
+
+@media (max-width: 1319px) {
+    .testmanager-pane .well {
+        min-width: 520px;
+    }
+    .testmanager-page-detail .leftside {
+        display: none;
+    }
+}
+
+.testmanager-pane .progress {
+    margin-left: 0;
+    margin-right: 0;
+}
+.testmanager-pane .progress .bar {
+    width: 100%;
+}
+.testmanager-pane tr {
+    height: 33px;
+}
+
+.testmanager-run pre {
+    /* TODO: style better? */
+    padding: 3px;
+}
+
+.testmanager-pane tr.selected {
+    background-color: #4a4a4a;
+}
+
+.alert.alert-error pre {
+    max-height: 10em;
+    overflow: auto;
+    padding: 5px;
+    background-color: #a2171e;
+}
+
+.paginator button {
+    width: 40px;
+    border-right: thin #aaa solid;
+    border-radius: initial;
+}
+.paginator button:last-child {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-right: none;
+}
+.paginator button:first-child {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+.paginator {
+    text-align: center;
+}
+.paginator button[disabled] {
+    background-color: #eee !important;
+}
+
+.well .button-close {
+    float: right;
+    background-color: #a2171e;
+    display: inline-block;
+    text-align: center;
+    vertical-align: text-top;
+    padding: 3px 8px;
+    border-radius: 10px;
+    border: none;
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+}
 
 /** jquery-textext adjustments **/
 

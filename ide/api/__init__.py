@@ -18,8 +18,8 @@ def json_response(response=None):
     return HttpResponse(json.dumps(response), content_type="application/json")
 
 
-def json_failure(error):
-    return HttpResponse(json.dumps({"success": False, "error": error}), content_type="application/json")
+def json_failure(error, status=200):
+    return HttpResponse(json.dumps({"success": False, "error": error}), content_type="application/json", status=status)
 
 
 @login_required

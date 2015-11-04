@@ -394,6 +394,7 @@ CloudPebble.MonkeyScreenshots = (function() {
     }
 
     function ErrorView(pane) {
+        _.extend(this, Backbone.Events);
         /**
          * Render an error
          * @param error message to render
@@ -436,6 +437,7 @@ CloudPebble.MonkeyScreenshots = (function() {
      */
     function ProgressView(pane) {
         var timeout;
+        _.extend(this, Backbone.Events);
         pane.hide();
         this.showProgress = function() {
             timeout = setTimeout(function() {
@@ -456,6 +458,7 @@ CloudPebble.MonkeyScreenshots = (function() {
      * @constructor
      */
     function MainView(pane) {
+        _.extend(this, Backbone.Events);
         pane.on('click', '.monkey-select-platform', function() {
             pane.toggleClass('monkey-inline');
             pane.toggleClass($(this).data('platform')+'-only');
