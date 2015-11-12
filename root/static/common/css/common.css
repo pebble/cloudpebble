@@ -558,6 +558,7 @@ body.backdrop .main-container {
 
 .modal-backdrop.in {
     opacity: 0.5;
+    z-index: 1;
 }
 
 .modal-body .control-group:not(:last-of-type) {

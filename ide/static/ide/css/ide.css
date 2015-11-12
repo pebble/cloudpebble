@@ -1249,6 +1249,7 @@ button#add-filter {
     overflow: scroll;
     height: 100%;
     background-color: #333;
+    box-sizing: border-box;
 }
 
 
@@ -1373,14 +1374,18 @@ button#add-filter {
     min-width: 400px;
 }
 
+.infoTable th {
+    width: 40%;
+    text-align: right;
+    padding-right: 20px;
+}
+
 .testmanager-pane table {
     border-collapse: collapse;
     width: 100%;
 }
 
 .testmanager-pane table td {
-    border: thin #666 solid;
-    padding: 3px;
     color: #CCC;
 }
 
@@ -1394,14 +1399,18 @@ button#add-filter {
 td.test-run {
     text-transform: capitalize;
 }
-td.test-error {
-    background-color: #500;
+.testmanager-pane td.test-error {
+    color: #FA0;
 }
-td.test-failed {
-    background-color: #544;
+.testmanager-pane td.test-failed {
+    color: #E5171F;
 }
-td.test-passed {
-    background-color: #454;
+.testmanager-pane td.test-passed {
+    color: #00B293;
+}
+
+.testmanager-pane table.table tr {
+    height: 37px;
 }
 
 @media (min-width: 1320px) {
