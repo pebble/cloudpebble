@@ -721,7 +721,7 @@ CloudPebble.Compile = (function() {
                 } else {
                     if(CloudPebble.ProjectInfo.sdk_version == '3') {
                         if (!CloudPebble.ProjectInfo.app_platforms) {
-                            return ConnectionType.QemuChalk;
+                            return ConnectionType.QemuBasalt;
                         }
                         if (CloudPebble.ProjectInfo.app_platforms.indexOf('chalk') > -1) {
                             return ConnectionType.QemuChalk;
