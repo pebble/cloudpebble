@@ -21,7 +21,7 @@
                 </div>
             </div>
         </div>
-        <div class="well native-only sdk3-only" {% if project.sdk_version == '2' %}style="display: none;"{% endif %}>
+        <div class="well sdk3-only">
             <div class="control-group">
                 {# Translators: "Aplite" is a platform name and should be left untranslated. #}
                 <label class="control-label" for="settings-build-aplite">{% trans 'Build Aplite' %}</label>
@@ -43,7 +43,7 @@
                     </span>
                 </div>
             </div>
-            <div class="control-group sdk3-only" {% if project.sdk_version == '2' %}style="display: none;"{% endif %}>
+            <div class="control-group native-only sdk3-only" >
                 {# Translators: "Chalk" is a platform name and should be left untranslated. #}
                 <label class="control-label" for="settings-build-chalk">{% trans 'Build Chalk' %}</label>
                 <div class="controls">
