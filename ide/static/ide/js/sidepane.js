@@ -39,6 +39,7 @@ CloudPebble.SidePane = (function() {
             active_kind = kind;
             active_id = id;
             active_pane = pane;
+            if (pane.css('width')) this.setSize(pane.css('width'));
             pane.trigger('attached');
         };
 

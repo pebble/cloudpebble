@@ -134,7 +134,6 @@
 {% include "ide/project/github.html" %}
 {% include "ide/project/ui-editor.html" %}
 {% include "ide/project/timeline.html" %}
-{% include "ide/project/monkeyscript.html" %}
 {% endblock %}
 
 {% block modals %}
@@ -488,6 +487,7 @@ var LIBPEBBLE_PROXY = {{ libpebble_proxy | safe }};
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
 <script src="{% static 'react/react.js' %}"></script>
 <script src="{% static 'react/react-dom.js' %}"></script>
+<script src="{% static 'classnames/index.js' %}"></script>
 <script src="{% static 'CodeMirror/lib/codemirror.js' %}"></script>
 <script src="{% static 'CodeMirror/addon/dialog/dialog.js' %}"></script>
 <script src="{% static 'CodeMirror/addon/search/searchcursor.js' %}"></script>
@@ -520,7 +520,6 @@ var LIBPEBBLE_PROXY = {{ libpebble_proxy | safe }};
 <script src="{% static 'ide/js/autocomplete.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/fuzzyprompt.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/live_settings_form.js' %}" type="text/javascript"></script>
-<script src="{% static 'ide/js/screenshot_manager.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/compile.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/resources.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/textext_tagger.js' %}" type="text/javascript"></script>
@@ -559,8 +558,10 @@ var LIBPEBBLE_PROXY = {{ libpebble_proxy | safe }};
 <script src="{% static 'text-encoding/lib/encoding.js' %}" type="text/javascript"></script>
 <script src="{% static 'noVNC/include/util.js' %}" type="text/javascript"></script>
 
-<script src="{% static 'ide/js/test_manager/interface.jsx' %}" type="text/babel"></script>
-<script src="{% static 'ide/js/test_manager/test_manager.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/monkey/screenshot_manager_interface.jsx' %}" type="text/babel"></script>
+<script src="{% static 'ide/js/monkey/screenshot_manager.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/monkey/test_manager_interface.jsx' %}" type="text/babel"></script>
+<script src="{% static 'ide/js/monkey/test_manager.js' %}" type="text/javascript"></script>
 
 <script type="text/javascript">
 // Because there's apparently no good way to get these urls into javascript...

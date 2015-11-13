@@ -77,7 +77,8 @@ CloudPebble.TestManager.Interface = (function(API) {
      */
     function Well(props) {
         var {className, children, ...other} = props;
-        return <div className={(className || '')+' well'} {...other}>{children}</div>;
+        var finalClassName = classNames('well', className);
+        return <div className={finalClassName} {...other}>{children}</div>;
     }
 
     /**
@@ -108,7 +109,9 @@ CloudPebble.TestManager.Interface = (function(API) {
     function TestList(props) {
         var tests = props.tests.map(function(test) {
             var onClick = function() {Route.navigateAfter('test', test.id, Runs.refresh({test: test.id}), true);};
-            var className = "clickable"+(props.selected == test.id ? ' selected' : '');
+            var className = classNames("clickable", {
+                selected: (props.selected == test.id)
+            });
             return (
                 <tr key={test.id} onClick={onClick} className={className}>
                     <td><Anchor scrollTo="#testmanager-test" onClick={onClick}>{test.name}</Anchor></td>
@@ -144,8 +147,8 @@ CloudPebble.TestManager.Interface = (function(API) {
             };
             return (
                 <tr key={run.id} className="clickable" onClick={show_logs}>
-                    {this.props.test ? null : <td>{run.name}</td>}
-                    {this.props.session ? null : <td>{datestring}</td>}
+                    {!this.props.test && <td>{run.name}</td>}
+                    {!this.props.session && <td>{datestring}</td>}
                     <TestResultCell code={run.code} />
                     <td>{(!run.logs ? '':
                         <Anchor href={run.logs} target='_blank' onClick={show_logs}>{gettext('Show logs')}</Anchor>
@@ -193,15 +196,14 @@ CloudPebble.TestManager.Interface = (function(API) {
         },
         renderRow: function(session) {
             var datestring = CloudPebble.Utils.FormatDatetime(session.date_added);
-            var className = 'pending';
-            if (session.fails > 0) {
-                className = 'failed';
-            }
-            else if (session.passes == session.run_count) {
-                className = 'passed';
-            }
-            var passesClassName = 'test-'+className;
-            var rowClassName = "clickable"+(this.props.selected == session.id ? ' selected' : '');
+            var rowClassName = classNames("clickable", {
+                selected: (this.props.selected == session.id)
+            });
+            var passesClassName = classNames({
+                'test-failed': session.fails > 0,
+                'test-passed': session.passes == session.run_count,
+                'test-pending': session.fails == 0 && (session.passes != session.run_count)
+            });
             return (
                 <tr className={rowClassName} key={session.id} onClick={()=>this.onClickSession(session)}>
                     <td><Anchor onClick={()=>this.onClickSession(session)}>{datestring}</Anchor></td>
@@ -354,12 +356,65 @@ CloudPebble.TestManager.Interface = (function(API) {
         return (<Anchor className={'testmanager-backbutton-'+route.length} onClick={()=>Route.up()}>← {text}</Anchor>)
     }
 
+    /**
+     * TestPage renders a different page depending on the current route.
+     */
+    function TestPage(props) {
+        var {route, tests, sessions, runs} = props;
+        var session, test, run;
+        if (route.length == 0) return null;
+        var {page, id} = route[route.length-1];
+        switch (page) {
+            case 'session':
+                session = _.findWhere(sessions, {id: id});
+                return (<SingleSession {...session} runs={runs}/>);
+            case 'test':
+                test = _.findWhere(tests, {id: id});
+                return (<SingleTest {...test} runs={runs}/>);
+            case 'loading':
+                return (<Loading />);
+            case 'logs':
+                run = _.findWhere(runs, {id: id});
+                test = _.findWhere(tests, {id: run.test.id});
+                session = _.findWhere(sessions, {id: run.session_id});
+                return (<TestLog logs={Runs.logsFor(id)} run={run} session={session} test={test}/>);
+        }
+    }
 
     /**
-     * Main strings everything together, rendering the dashboard on the left, detail page on the right, "run tests"
-     * button and any errors.
+     * The TestManager is parent UI for everything, rendering the dashboard on the left, detail page on the right,
+     * "run tests" button and any errors.
      */
-    var Main = React.createClass({
+    function TestManager(props) {
+        var {route, tests, sessions, error, closeError} = props;
+        var className = 'testmanager-page-'+(route.length == 0 ? 'dashboard' : 'detail');
+        return (
+            <div className={className}>
+                {!!error && <Error {...error} onClick={closeError} />}
+                {tests.length > 0 && (
+                    <Well>
+                        <button onClick={()=>Sessions.new()} className='btn btn-affirmative'>{gettext('Run All')}</button>
+                    </Well>
+                    )}
+                <div className="leftside">
+                    <Dashboard sessions={sessions} tests={tests} route={route}/>
+                </div>
+                <div className="rightside">
+                    {route.length > 0 &&
+                        <Well>
+                            <BackButton route={route} />
+                            <TestPage {...props} />
+                        </Well>
+                    }
+                </div>
+            </div>
+        );
+    }
+
+    /**
+     * The TestManagerContainer listens to data changes and passes them to the UI.
+     */
+    var TestManagerContainer = React.createClass({
         getInitialState: function() {
             return _.extend({'error': null}, Route.initial(), Sessions.initial(), Tests.initial(), Runs.initial());
         },
@@ -374,66 +429,20 @@ CloudPebble.TestManager.Interface = (function(API) {
             Tests.refresh();
             Sessions.refresh();
         },
-        componentWillUnmount: function() {
-            this.listener.stopListening();
-        },
-        renderPage: function () {
-            var {route, tests, sessions, runs} = this.state;
-            var session, test, run;
-            if (route.length == 0) return null;
-            var {page, id} = route[route.length-1];
-            switch (page) {
-                case 'session':
-                    session = _.findWhere(sessions, {id: id});
-                    return (<SingleSession {...session} runs={runs} />);
-                case 'test':
-                    test = _.findWhere(tests, {id: id});
-                    return (<SingleTest {...test} runs={runs}/>);
-                case 'loading':
-                    return (<Loading />);
-                case 'logs':
-                    run = _.findWhere(runs, {id: id});
-                    test = _.findWhere(tests, {id: run.test.id});
-                    session = _.findWhere(sessions, {id: run.session_id});
-                    return (<TestLog logs = {Runs.logsFor(id)} run={run} session={session} test={test}/>);
-            }
-        },
-        onRunAll: function() {
-            Sessions.new();
-        },
         closeError: function() {
             this.setState({'error': null});
         },
+        componentWillUnmount: function() {
+            this.listener.stopListening();
+        },
         render: function() {
-            var {route, tests, sessions, error} = this.state;
-            var className = 'testmanager-page-'+(route.length == 0 ? 'dashboard' : 'detail');
-            return (
-                <div className={className}>
-                    {!error ? null : <Error {...error} onClick={this.closeError} />
-                        }
-                    {tests.length == 0 ? null : (
-                    <Well>
-                        <button onClick={this.onRunAll} className='btn btn-affirmative'>{gettext('Run All')}</button>
-                    </Well>)}
-                    <div className="leftside">
-                        <Dashboard sessions={sessions} tests={tests} route={route}/>
-                    </div>
-                    <div className="rightside">
-                        {route.length == 0 ? null :
-                            <Well>
-                                <BackButton route={route} />
-                                {this.renderPage()}
-                            </Well>
-                        }
-                    </div>
-                </div>
-            );
+            return (<TestManager {...this.state} {...this.props} closeError={this.closeError}/>)
         }
     });
 
     return {
         render: function(element, props) {
-            var elm = React.createElement(Main, props);
+            var elm = React.createElement(TestManagerContainer, props);
             ReactDOM.render(elm, element);
         },
         refresh: function() {

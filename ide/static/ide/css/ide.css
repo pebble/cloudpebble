@@ -1255,6 +1255,7 @@ button#add-filter {
 
 .monkey-pane h2 {
     padding: 10px;
+    text-align: center;
 }
 
 .monkey-screenshot-set {
@@ -1262,16 +1263,22 @@ button#add-filter {
 }
 
 .monkey-pane .image-resource-preview {
-    width: 200px;
+    height: 200px;
+    width: 180px;
     display: inline-block;
 }
 
-.monkey-pane .image-resource-preview img {
+.monkey-pane .platform-aplite img, .monkey-pane .platform-basalt img {
+    width: 144px;
+    height: 168px;
+}
+.monkey-pane .platform-chalk img {
     width: 180px;
+    height: 180px;
 }
 
-.monkey-platforms div {
-    width: 200px;
+.monkey-platforms span {
+    width: 180px;
     color: white;
     font-size: 30px;
     display: inline-block;
@@ -1284,38 +1291,49 @@ button#add-filter {
     font-size: 20px;
 }
 
-.aplite-only .platform-chalk, .aplite-only .platform-basalt, .basalt-only .platform-aplite, .basalt-only .platform-chalk, .chalk-only .platform-aplite, .chalk-only .platform-basalt {
-    display: none;
-}
-
-.aplite-only .monkey-platforms, .chalk-only .monkey-platforms, .basalt-only .monkey-platforms {
-    display: none;
-}
-
-.monkey-inline .monkey-screenshot-set, #monkey-upload-previews .image-resource-preview {
+#monkey-upload-previews .image-resource-preview {
     display: inline-block;
+}
+
+.monkey-screenshot-set.disabled {
+    opacity: 0.6;
+}
+
+.will-delete {
+    opacity: 0.3;
+}
+.monkey-screenshot-will-delete-warning {
+    position: relative;
+    top: -150px;
+    margin-top: -1em;
+    text-align: center;
+    font-size: 30px;
+    color: #ccc;
 }
 
 .monkey-screenshot-set .image-resource-preview {
     position: relative;
 }
 
-.monkey-pane h2 > span {
-    display: none;
-}
-
-.monkey-inline h2 > span {
-    display: inline;
-}
-
-.monkey-inline .monkey-screenshot-set {
-    width: 200px;
-    height: 270px;
-    vertical-align: top;
+.monkey-progress-overlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.3);
+    padding-top: 400px;
 }
 
 .monkey-screenshot-set input {
     width: calc(100% - 50px);
+}
+
+.monkey-pane .field-help {
+    position: relative;
+    float: right;
+    left: -20px;
 }
 
 .monkey-screenshots .image-resource-preview img {

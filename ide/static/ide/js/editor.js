@@ -48,7 +48,6 @@ CloudPebble.Editor = (function() {
 
         if(CloudPebble.Sidebar.Restore(sidebar_id)) {
             if (CloudPebble.SidePane.RightPane.restorePane('monkey-screenshots', file.id)) {
-                CloudPebble.SidePane.RightPane.setSize('640px');
             }
             else {
                 CloudPebble.SidePane.RightPane.setSize('0');
@@ -456,7 +455,6 @@ CloudPebble.Editor = (function() {
                 if (file_kind == 'monkey') {
                     screenshot_pane = new CloudPebble.MonkeyScreenshots.ScreenshotPane(file.id);
                     CloudPebble.SidePane.RightPane.addPane(screenshot_pane.getPane(), 'monkey-screenshots', file.id);
-                    CloudPebble.SidePane.RightPane.setSize('640px');
                 }
 
 
