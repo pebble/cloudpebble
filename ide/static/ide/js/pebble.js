@@ -212,6 +212,10 @@ var SharedPebble = new (function() {
         return mPebble && !!(mConnectionType & ConnectionType.Qemu);
     };
 
+    this.getPlatformName = function() {
+        return ConnectionPlatformNames[mConnectionType];
+    };
+
     function getWebsocketURL() {
         return (mConnectionType & ConnectionType.Qemu)? mEmulator.getWebsocketURL() : LIBPEBBLE_PROXY;
     }

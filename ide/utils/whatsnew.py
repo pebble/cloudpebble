@@ -36,7 +36,9 @@ NEW_THINGS = [
     ["Fuzzy search has been expanded to help you do more on CloudPebble with your keyboard! Press cmd-shift-P (Mac) or ctrl-shift-P (Windows) in a project to try the new functions."],
     ["Introducing Pebble Round! CloudPebble has been upgraded to support the new platform (Chalk) and its SDK.",
      "Accordingly, resource management has changed significantly. Now you can tag each variant of a resource with tags such as \"Round\" or \"Monochrome\" to specify which platforms it should be used for.",
-     "See <a href=\"http://developer.getpebble.com/sdk/round-getting-started/\">this guide</a> for more information"]
+     "See <a href=\"http://developer.getpebble.com/sdk/round-getting-started/\">this guide</a> for more information"],
+    ["It's once again possible to take screenshots of your apps directly from the emulator!",
+     "You can find the screenshot button in the Compilation page, or you can run the \"Take Screenshots\" command from the fuzzy prompt (cmd-shift-P or ctrl-shift-P)"]
 ]
 
 
