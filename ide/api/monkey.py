@@ -38,7 +38,7 @@ def serialise_run(run, link_test=True, link_session=True):
     return result
 
 
-def serialise_session(session):
+def serialise_session(session, include_runs=False):
     runs = TestRun.objects.filter(session=session)
     result = {
         'id': session.id,
@@ -51,6 +51,8 @@ def serialise_session(session):
         result['date_started'] = str(session.date_started)
     if session.date_completed is not None:
         result['date_completed'] = str(session.date_completed)
+    if include_runs:
+        result['runs'] = [serialise_run(run, link_session=False, link_test=True) for run in runs]
     return result
 
 
@@ -133,7 +135,7 @@ def post_test_session(request, project_id):
     # Then run the monkeyscript task
     run_test_session.delay(session.id)
     # TODO: KEEN
-    return json_response({"data": serialise_session(session)})
+    return json_response({"data": serialise_session(session, include_runs=True)})
 
 
 # TODO: 'ping' functions to see if anything has changed. Or, "changed since" parameters.

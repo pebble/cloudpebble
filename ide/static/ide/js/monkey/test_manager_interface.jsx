@@ -120,7 +120,7 @@ CloudPebble.TestManager.Interface = (function(API) {
             );
         });
         return (
-            <table className="table">
+            <table className="table" id="testmanager-test-table">
                 <thead><tr>
                     <th>{gettext('Name')}</th>
                     <th>{gettext('Last Status')}</th>
@@ -166,7 +166,7 @@ CloudPebble.TestManager.Interface = (function(API) {
             var children = _.map(paged, this.renderRow);
             return (
                 <div>
-                    <table className="table">
+                    <table className="table" id="testmanager-run-table">
                         <thead><tr>
                             {test ? null : <th>{gettext('Name')}</th>}
                             {session ? null : <th>{gettext('Date')}</th>}
@@ -215,7 +215,7 @@ CloudPebble.TestManager.Interface = (function(API) {
             var sessions = this.page(this.props.sessions.map(this.renderRow));
             return (
                 <div>
-                    <table className="table">
+                    <table className="table" id="testmanager-job-table">
                         <thead><tr>
                             <th>{gettext('Date')}</th>
                             <th>{gettext('Passes')}</th>
@@ -348,12 +348,19 @@ CloudPebble.TestManager.Interface = (function(API) {
         if (route.length > 1) {
             page = mapping[route[route.length-2].page];
             id = route[route.length-2].id;
-            text = interpolate(gettext('Back to %s %s'), [page, id]);
+            text = interpolate(gettext('← Back to %s %s'), [page, id]);
         }
         else {
-            text = gettext('Back');
+            text = gettext('← Back');
         }
-        return (<Anchor className={'testmanager-backbutton-'+route.length} onClick={()=>Route.up()}>← {text}</Anchor>)
+        return (
+            <Anchor
+                id='testmanager-backbutton'
+                className={'testmanager-backbutton-'+route.length}
+                onClick={()=>Route.up()}>
+                {text}
+            </Anchor>
+        )
     }
 
     /**
