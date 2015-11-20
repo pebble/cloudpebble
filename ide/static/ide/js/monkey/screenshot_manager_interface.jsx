@@ -1,28 +1,31 @@
 CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
 
     /** A simple progress bar*/
-    function ProgressView() {
+    function ProgressView(props) {
         return (
                 <div className="progress progress-striped active">
-                    <div className="bar" style={{width: '100%'}}></div>
+                    <div className="bar" style={{width: props.progress+'%'}}></div>
                 </div>
         )
     }
 
     /** Render a list of errors */
     function Error(props) {
+        let text = (props.jqXHR ? props.jqXHR.responseText : props.text);
+        let kind = props.errorThrown ? interpolate(": %s", [props.errorThrown]) : "";
+        let errFor = props.errorFor ? interpolate(gettext(" trying to %s"), [props.errorFor]) : "";
         return (
             <div className="errors">
                 <div className="well alert alert-error">
-                    <p>{interpolate(gettext("Error: %s trying to %s"), [props.errorThrown, props.errorFor])}</p>
-                    <pre>{props.jqXHR.responseText}</pre>
+                    <p>{interpolate(gettext("Error%s%s"), [kind, errFor])}</p>
+                    <pre>{text}</pre>
                 </div>
             </div>
         );
     }
 
     /** An interactive editable screenshot tile */
-    var Screenshot = React.createClass({
+    let Screenshot = React.createClass({
         getInitialState: function() {
             return {
                 dragging: false
@@ -33,7 +36,7 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
             event.stopPropagation();
         },
         uploadFiles: function(fileList) {
-            var files = [];
+            let files = [];
             _.each(fileList, function(file, i) {
                 files[i] = file;
             });
@@ -57,89 +60,110 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
         },
         onDragOver: function(event) {
             this.stopEvent(event);
+            if (!this.state.dragging) this.setState({dragging: true});
             event.nativeEvent.dataTransfer.dropEffect = 'copy';
         },
         onClickDelete: function() {
             Screenshots.deleteFile(this.props.index, this.props.platform);
         },
-        onClick: function(e) {
-            // fileInput comes from the <input>'s refs
+        onClickUpload: function() {
             $(this.refs.fileInput).click();
-            e.stopPropagation();
-            e.preventDefault();
+        },
+        onClickScreenshot: function() {
+            Screenshots.takeScreenshot(this.props.index, this.props.platform);
         },
         render: function() {
-            var {platform, file, disabled} = this.props;
-            var is_new = (!file ? false : file.is_new);
-            var empty = (!file ? true : !file.src);
-            var empty_img = '/static/common/img/screenshot-empty' + (this.props.platform == 'chalk' ? '-chalk.png' : '.png');
-            var src = (!empty && file.src ? file.src : empty_img);
-            var className = classNames('image-resource-preview', 'platform-'+platform, {
+            let { platform, file, disabled } = this.props;
+            let is_new = (!file ? false : file.is_new);
+            let empty = (!file ? true : !file.src);
+            let className = classNames('image-resource-preview', 'platform-'+platform, {
                 'screenshot-empty': empty
             });
-            var imageClasses = classNames({
+            let imageClasses = classNames({
                 'monkey-modified': is_new,
-                'monkey-hover': this.state.dragging
+                'monkey-hover': this.state.dragging && !disabled
             });
-            return (
-                <div className={className}>
-                    <img onDragEnter={this.onDragEnter}
-                         onDragLeave={this.onDragLeave}
-                         onDragOver={this.onDragOver}
-                         onDrop={this.onDrop}
-                         onClick={this.onClick}
-                         src={src}
-                         className={imageClasses} />
-                    <input ref="fileInput" type="file" className="hide" multiple onChange={this.onInputChange} disabled={disabled} />
-                    {!empty && <button className="btn delete-btn" type="button" onClick={this.onClickDelete}> </button>}
+            let dragEvents = {
+                onDragEnter: this.onDragEnter,
+                onDragLeave: this.onDragLeave,
+                onDragOver: this.onDragOver,
+                onDrop: this.onDrop
+            };
+
+            if (!empty) {
+                return (
+                <div className={className} {...dragEvents}>
+                    <img src={file.src} className={imageClasses} />
+                    <button className="btn delete-btn" type="button" onClick={this.onClickDelete}> </button>
                 </div>
-            );
+                )
+            }
+            else {
+                return (
+                    <div className={classNames(className, imageClasses)} {...dragEvents}>
+                        <div {...dragEvents}>
+                            <button className="btn" onClick={this.onClickUpload} type="button" disabled={disabled}>Upload file</button><br />
+                            <button className="btn" onClick={this.onClickScreenshot} type="button" disabled={disabled}>Take Screenshot</button>
+                            <input ref="fileInput" className="hide" type="file" multiple onChange={this.onInputChange} disabled={disabled} />
+                        </div>
+
+                </div>
+                )
+            }
         }
     });
 
-    /** A row of screenshots, which may include a title */
-    function ScreenshotSet(props) {
-        var {is_new_set, name, _changed, platforms, files, index, disabled} = props;
-
-        var onChange = function(event) {
-            Screenshots.setName(index, event.target.value);
-        };
-        var will_delete = !is_new_set && _.every(files, (file) => !file.file && !file.src);
-        var titleClassName = classNames("monkey-screenshot-title", {
+    function ScreenshotTitle(props) {
+        let { will_delete, name, index, changed, disabled } = props;
+        let className = classNames("monkey-screenshot-title", {
             'will-delete': will_delete
         });
-        var className = classNames("monkey-screenshot-set", {
-            disabled: disabled
-        });
+        let onChange = function(event) {
+            Screenshots.setName(index, event.target.value);
+        };
+        return (
+            <div className={className}>
+                <input className="monkey-editing"
+                       value={name}
+                       type="text"
+                       placeholder={gettext("Screenshot name")}
+                       required={!will_delete}
+                       pattern="[a-zA-Z0-9_-]+"
+                       onChange={onChange}
+                       disabled={disabled}
+                />
+                {changed && (
+                <span className="settings-status-icons">
+                    <span className="monkey-changed icon-edit"> </span>
+                </span>
+                )}
+            </div>
+        )
+    }
+
+    function ScreenshotSet(props) {
+        let { is_new_set, name, _changed, platforms, files, index, disabled, progress } = props;
+        let will_delete = !is_new_set && _.every(files, (file) => !file.file && !file.src);
         if (will_delete && (_.isUndefined(props.id) || _.isNull(props.id)) && props.name.length == 0) {
             return null;
         }
+        let className = classNames("monkey-screenshot-set", {
+            disabled: disabled
+        });
 
         return (
             <div className={className}>
                 <div className={will_delete ? 'will-delete' : null}>
                 {platforms.map((platform)=>(
-                    <Screenshot index={index} key={platform} file={files[platform]} platform={platform} disabled={disabled} />
+                    <div key={platform} className="monkey-screenshot-container">
+                        {progress && _.has(progress, platform)
+                            ? <ProgressView progress={progress[platform]}/>
+                            : <Screenshot index={index} file={files[platform]} platform={platform} disabled={disabled}/>
+                        }
+                    </div>
                 ))}
                 </div>
-                {!is_new_set && (
-                    <div className={titleClassName}>
-                        <input className="monkey-editing"
-                               value={name}
-                               type="text"
-                               placeholder={gettext("Screenshot name")}
-                               required={!will_delete}
-                               pattern="[a-zA-Z0-9_-]+"
-                               onChange={onChange}
-                               disabled={disabled}
-                        />
-                        {_changed && (
-                        <span className="settings-status-icons">
-                            <span className="monkey-changed icon-edit"> </span>
-                        </span>
-                        )}
-                    </div>
-                    )}
+                {!is_new_set && <ScreenshotTitle will_delete={will_delete} name={name} index={index} changed={_changed} disabled={disabled} /> }
                 {will_delete && <div className='monkey-screenshot-will-delete-warning'>{gettext('This screenshot set will be deleted')}</div>}
             </div>
         )
@@ -149,8 +173,8 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
      * and an extra row for adding new screenshots
      */
     function ScreenshotForm(props) {
-        var {platforms, screenshots} = props;
-        var onSubmit = function(event) {
+        let { platforms, screenshots } = props;
+        let onSubmit = function(event) {
             event.preventDefault();
             Screenshots.save();
         };
@@ -163,14 +187,16 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
                                        is_new_set={false}
                                        {...screenshot_set}
                                        platforms={platforms}
-                                       disabled={props.disabled} />
+                                       disabled={props.disabled}
+                                       progress={props.progress[index]}/>
                         ))}
                     <ScreenshotSet index={null}
                                    is_new_set={true}
                                    changed={false}
                                    files={{}}
                                    platforms={platforms}
-                                   disabled={props.disabled} />
+                                   disabled={props.disabled}
+                                   progress={props.progress["null"]}/>
                 </div>
             </form>
         )
@@ -178,17 +204,17 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
 
     /** A clickable title for toggling the sidebar state */
     function PlatformTitle(props) {
-        var platform = props.platform;
-        var onClick = function() {
+        let platform = props.platform;
+        let onClick = function() {
             Platforms.toggle(platform);
         };
         return (<span className={'monkey-select-platform platform'+platform} onClick={onClick}>{platform}</span>)
     }
 
     /** ScreenshotManager contains all of the screenshot manager UI */
-    var ScreenshotManager = React.createClass({
+    let ScreenshotManager = React.createClass({
         componentDidMount: function() {
-            var help = gettext('<p>Click on the ＋ buttons or drag in image files to add screenshots to test against. </p>' +
+            let help = gettext('<p>Click on the ＋ buttons or drag in image files to add screenshots to test against. </p>' +
                 '<p>To add or modify the screenshots for a single platform across multiple sets of screenshots, ' +
                 'drag in multiple images.</p>');
             $(this.refs.help).popover({
@@ -201,13 +227,13 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
             });
         },
         render: function() {
-            var stopEvent = function (event) {
+            let stopEvent = function (event) {
                 // We cancel any drop events over the UI so that the user doesn't experience unexpected behaviour of they
                 // accidentally drop an image outside of a screenshot box.
                 event.preventDefault();
                 event.stopPropagation();
             };
-            var onCancel = function () {
+            let onCancel = function () {
                 CloudPebble.Prompts.Confirm(gettext("Reset all changes?"), gettext("This cannot be undone."), function () {
                     Screenshots.loadScreenshots();
                 });
@@ -225,14 +251,19 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
                     </div>
 
                     <ScreenshotForm screenshots={this.props.screenshots} platforms={this.props.platforms}
-                                    disabled={this.props.loading}/>
+                                    disabled={this.props.disabled} progress={this.props.progress}/>
 
-                    {this.props.loading && <ProgressView />}
+                    {this.props.loading && <ProgressView progress={100} />}
 
                     <div className="monkey-form-buttons">
-                        <button className="btn btn-affirmative" type="submit"
-                                form="monkey-form">{gettext('Save')}</button>
-                        <button className="btn btn-cancel" onClick={onCancel}>{gettext('Reset')}</button>
+                        <button className="btn btn-affirmative"
+                                type="submit"
+                                form="monkey-form"
+                                disabled={this.props.disabled}>{gettext('Save')}</button>
+                        <button className="btn btn-cancel"
+                                type="button"
+                                onClick={onCancel}
+                                disabled={this.props.disabled}>{gettext('Reset')}</button>
                     </div>
                 </div>
             );
@@ -240,24 +271,29 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
     });
 
     /** ScreenshotManagerContainer listens to changes in screenshot model, and passes them to the UI */
-    var ScreenshotManagerContainer = React.createClass({
+    let ScreenshotManagerContainer = React.createClass({
         getInitialState: function() {
             return {
                 screenshots: [],
                 error: null,
                 loading: false,
-                platforms: Platforms.initial()
+                disabled: false,
+                platforms: Platforms.initial(),
+                progress: {}
             }
         },
         componentDidMount: function() {
             this.listener = _.extend({}, Backbone.Events);
             // If we get a 'changed' or 'error' event, we know that loading is done.
             this.listener.listenTo(Platforms, 'changed', (state)=>this.setState(state));
+            this.listener.listenTo(Screenshots, 'disable', (state)=>this.setState({disabled: true}));
+            this.listener.listenTo(Screenshots, 'enable', (state)=>this.setState({disabled: false}));
             this.listener.listenTo(Screenshots, 'changed', (screenshots)=>this.setState({
                 screenshots: screenshots,
                 error: null,
                 loading: false
             }));
+            this.listener.listenTo(Screenshots, 'progress', (progress => this.setState({progress: progress})));
             this.listener.listenTo(Screenshots, 'error', (error) => this.setState({
                 error: error,
                 loading: false
@@ -278,7 +314,7 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
 
     return {
         render: function(element, props) {
-            var elm = React.createElement(ScreenshotManagerContainer, props);
+            let elm = React.createElement(ScreenshotManagerContainer, props);
             ReactDOM.render(elm, element);
         }
     }

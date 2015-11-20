@@ -14,6 +14,9 @@ CloudPebble.MonkeyScreenshots = (function() {
         this.id = final.id;
         this.file = final.file;
         this.src = final.src;
+        if (this.src.startsWith('/')) {
+            this.src = interpolate("%s?%s", [this.src, (new Date().getTime())]);
+        }
         this._changed = final._changed;
     }
 
@@ -157,6 +160,66 @@ CloudPebble.MonkeyScreenshots = (function() {
         }
     };
 
+    var take_screenshot = function(kind) {
+        var defer = $.Deferred();
+
+        /** Convert a data URI to a Blob so it can be uploaded normally
+         * http://stackoverflow.com/questions/4998908/convert-data-uri-to-file-then-append-to-formdata
+         */
+        function dataURItoBlob(dataURI) {
+            // convert base64/URLEncoded data component to raw binary data held in a string
+            var byteString;
+            if (dataURI.split(',')[0].indexOf('base64') >= 0)
+                byteString = atob(dataURI.split(',')[1]);
+            else
+                byteString = unescape(dataURI.split(',')[1]);
+
+            // separate out the mime component
+            var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+
+            // write the bytes of the string to a typed array
+            var ia = new Uint8Array(byteString.length);
+            for (var i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+
+            return new Blob([ia], {type:mimeString});
+        }
+
+        SharedPebble.getPebble(kind).done(function(pebble) {
+            var disconnect = function() {
+                if(!SharedPebble.isVirtual()) {
+                    SharedPebble.disconnect()
+                }
+            };
+
+            pebble.on('close', function() {
+                defer.reject(gettext("Disconnected from phone."));
+            });
+
+            pebble.on('screenshot:failed', function(reason) {
+                CloudPebble.Analytics.addEvent('monkey_app_screenshot_failed', {virtual: SharedPebble.isVirtual()});
+                defer.reject("Screenshot failed: " + reason);
+                disconnect();
+            });
+
+            pebble.on('screenshot:progress', function(received, expected) {
+                defer.notify(((received / expected) * 100));
+            });
+
+            pebble.on('screenshot:complete', function(screenshot) {
+                var src = screenshot.src;
+                var blob = dataURItoBlob(screenshot.src);
+                defer.resolve(src, blob);
+                disconnect();
+                CloudPebble.Analytics.addEvent('monkey_app_screenshot_succeeded', {virtual: SharedPebble.isVirtual()});
+            });
+
+            pebble.request_screenshot();
+        });
+        return defer.promise();
+    };
+
     var API = new AjaxAPI();
 
     /**
@@ -169,6 +232,7 @@ CloudPebble.MonkeyScreenshots = (function() {
         var screenshots = [];
         var original_screenshots = [];
         var disabled = false;
+        var progress = {};
         _.extend(this, Backbone.Events);
 
         /**
@@ -195,9 +259,7 @@ CloudPebble.MonkeyScreenshots = (function() {
             if (index === null) {
                 // Append all new screenshots, given them no name
                 _.each(files, function(file) {
-                    var upload = new ScreenshotSet({
-                        _changed: true
-                    });
+                    var upload = new ScreenshotSet({_changed: true});
                     upload.files[platform] = new ScreenshotFile({file: file, is_new: true});
                     screenshots.push(upload);
                     loadFile(upload.files[platform]);
@@ -220,6 +282,59 @@ CloudPebble.MonkeyScreenshots = (function() {
             }
             $.when.apply(this, onloads).then(function() {
                 self.trigger('changed', screenshots);
+            });
+        };
+
+        var set_progress = function(index, platform, percent) {
+            var prog_obj = {};
+            prog_obj[index] = {};
+            prog_obj[index][platform] = percent;
+            _.defaults(progress, prog_obj);
+            _.extend(progress[index], prog_obj[index]);
+            self.trigger('progress', progress);
+        };
+
+        var clear_progress = function(index, platform) {
+            if (_.isObject(progress[index])) {
+                progress[index] = _.omit(progress[index], platform);
+                if (_.keys(progress[index]).length == 0) {
+                    delete progress[index];
+                }
+            }
+            self.trigger('progress', progress);
+        };
+
+        var set_disabled = function(new_disabled) {
+            disabled = new_disabled;
+            self.trigger(disabled ? 'disable' : 'enable');
+        };
+
+        this.takeScreenshot = function(index, platform) {
+            if (disabled) return;
+            set_disabled(true);
+            set_progress(index, platform, 0);
+            take_screenshot().done(function (src, blob) {
+                var options = {file: blob, src: src, is_new: true};
+                var screenshot_set;
+                if (index === null) {
+                    screenshot_set = new ScreenshotSet({_changed: true});
+                    screenshot_set.files[platform] = new ScreenshotFile(options);
+                    screenshots.push(screenshot_set);
+                }
+                else {
+                    screenshot_set = screenshots[index];
+                    var id = (screenshot_set.files[platform] ? screenshot_set.files[platform].id : null);
+                    options[id] = id;
+                    screenshot_set.files[platform] = new ScreenshotFile(options);
+                }
+                self.trigger('changed', screenshots);
+            }.bind(this)).fail(function (error) {
+                self.trigger('error', {text: error, errorFor: gettext("take screenshot")});
+            }.bind(this)).progress(function (percentage) {
+                set_progress(index, platform, percentage);
+            }).always(function () {
+                clear_progress(index, platform);
+                set_disabled(false);
             });
         };
 
@@ -263,7 +378,7 @@ CloudPebble.MonkeyScreenshots = (function() {
 
         this.save = function() {
             if (disabled) return;
-            disabled = true;
+            set_disabled(true);
             var timeout = setTimeout(function() {
                 self.trigger('waiting');
             }, 500);
@@ -273,7 +388,7 @@ CloudPebble.MonkeyScreenshots = (function() {
             }, function(jqXHR, textStatus, errorThrown) {
                 self.trigger('error', {jqXHR: jqXHR, textStatus: textStatus, errorThrown: errorThrown, errorFor: gettext('save screenshots')});
             }).always(function() {
-                disabled = false;
+                set_disabled(false);
                 clearTimeout(timeout);
             });
         };
@@ -302,7 +417,7 @@ CloudPebble.MonkeyScreenshots = (function() {
 
         this.getSize = function() {
             var platforms = (single ? [single] : supported_platforms)
-            return (50+platforms.length*180)+"px";
+            return (50+platforms.length*200)+"px";
         };
         // Set the initial size of the side pane.
         $(pane).width(this.getSize());

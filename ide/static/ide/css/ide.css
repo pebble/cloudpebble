@@ -686,10 +686,6 @@ table.build-results tr.pending .build-state {
     display: table-row;
 }
 
-/*.image-resource-preview > div > * {*/
-    /*display: table-cell;*/
-/*}*/
-
 .resource-actions .btn {
     margin-right: 20px;
     width: 188px;
@@ -1263,22 +1259,51 @@ button#add-filter {
 }
 
 .monkey-pane .image-resource-preview {
-    height: 200px;
-    width: 180px;
     display: inline-block;
 }
 
-.monkey-pane .platform-aplite img, .monkey-pane .platform-basalt img {
-    width: 144px;
-    height: 168px;
+.monkey-screenshot-container {
+    display: inline-block;
+    width: 200px;
+    height: 200px;
+    text-align: center;
+    vertical-align: top;
 }
-.monkey-pane .platform-chalk img {
+
+.monkey-screenshot-container .progress {
+    margin: 75px 20px;
+}
+
+.monkey-screenshot-container > div {
+    margin: auto;
+}
+
+.monkey-pane .platform-chalk > * {
     width: 180px;
     height: 180px;
 }
+.monkey-pane .platform-chalk > img {
+    border-radius: 100px;
+}
+.monkey-pane .platform-aplite > *, .monkey-pane .platform-basalt > *,
+.monkey-pane .screenshot-empty> *{
+    width: 144px;
+    height: 168px;
+}
+
+.screenshot-empty .btn {
+    font-size: smaller;
+    margin: 5px;
+    background-color: #444;
+    color: white;
+}
+.screenshot-empty .btn[disabled] {
+    background-color: #393939 !important;
+    color: #888;
+}
 
 .monkey-platforms span {
-    width: 180px;
+    width: 200px;
     color: white;
     font-size: 30px;
     display: inline-block;
@@ -1291,12 +1316,17 @@ button#add-filter {
     font-size: 20px;
 }
 
+.monkey-form-buttons button {
+    margin-right: 20px;
+}
+
 #monkey-upload-previews .image-resource-preview {
     display: inline-block;
 }
 
 .monkey-screenshot-set.disabled {
     opacity: 0.6;
+    transition: opacity 1s;
 }
 
 .will-delete {
@@ -1309,6 +1339,7 @@ button#add-filter {
     text-align: center;
     font-size: 30px;
     color: #ccc;
+    pointer-events: none;
 }
 
 .monkey-screenshot-set .image-resource-preview {
@@ -1381,6 +1412,8 @@ button#add-filter {
 }
 
 /* Test Manager pane */
+
+
 
 .testmanager-pane .well {
     margin: 30px;
