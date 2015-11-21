@@ -119,9 +119,9 @@ CloudPebble.Compile = (function() {
             e.preventDefault();
             show_app_logs(ConnectionType.Phone);
         });
-        pane.find('#screenshot-btn').click(function(e) {
+        pane.find('#screenshot-btn, #screenshot-qemu-btn').click(function(e) {
             e.preventDefault();
-            take_screenshot(ConnectionType.Phone);
+            take_screenshot();
         });
         pane.find('#android-beta-link').click(function(e) {
             e.preventDefault();
@@ -147,10 +147,7 @@ CloudPebble.Compile = (function() {
             e.preventDefault();
             show_app_logs(ConnectionType.Qemu);
         });
-        pane.find('#screenshot-qemu-btn').click(function(e) {
-            e.preventDefault();
-            take_screenshot(ConnectionType.Qemu);
-        });
+
         var targetTabs = pane.find('#run-target-tabs');
         targetTabs.on('shown', function(e) {
             localStorage['activeTarget'] = $(e.target).data('run-target');
