@@ -194,7 +194,7 @@ CloudPebble.Editor = (function() {
 
                 // The browser should probably do this without our help. Sometimes Safari doesn't.
                 $(document).click(function(e) {
-                    if(!pane.find(e.target).length) {
+                    if(!is_fullscreen && !pane.find(e.target).length) {
                         $(code_mirror.display.input).blur();
                     }
                 });
