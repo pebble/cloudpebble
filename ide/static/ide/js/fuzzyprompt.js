@@ -176,6 +176,7 @@ CloudPebble.FuzzyPrompt = (function() {
         _.each(sources, function(source) {
             if (source.kind == kind) {
                 _.each(source.list_func(), function (object, name) {
+                    name = (object.name ? object.name: name);
                     var menu_item = $("<div></div>");
                     menu_item.text(name).appendTo(results);
                     // Set up the menu item handler

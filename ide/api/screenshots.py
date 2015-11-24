@@ -86,6 +86,8 @@ def save_screenshots(request, project_id, test_id):
                     if isinstance(uploadId, int):
                         screenshot_file, did_create = ScreenshotFile.objects.get_or_create(screenshot_set=screenshot_set, platform=platform)
                         posted_file = uploaded_files[uploadId]
+                        if posted_file.content_type != "image/png":
+                            raise ValueError("Screenshots must be PNG files")
                         screenshot_file.save()
                         screenshot_file.save_file(posted_file, posted_file.size)
 
@@ -95,7 +97,7 @@ def save_screenshots(request, project_id, test_id):
             for screenshot in screenshots:
                 if screenshot.id in deleted_ids:
                     screenshot.delete()
-    except FloatingPointError as e:
+    except (FloatingPointError, ValueError) as e:
         return json_failure(str(e))
     else:
         screenshots = ScreenshotSet.objects.filter(test=test)

@@ -1,6 +1,5 @@
 CloudPebble.MonkeyScreenshots = (function() {
-    var current_platforms = ['aplite', 'basalt', 'chalk'];
-    var screenshot_editor_template;
+
     /** A simple class with default values for Screenshot files */
     function ScreenshotFile(options) {
         var final = _.defaults(options || {}, {
@@ -69,65 +68,7 @@ CloudPebble.MonkeyScreenshots = (function() {
         return form_data;
     };
 
-    /** A mock API, for testing*/
-    var MockAPI = function() {
-        var screenshots = [{
-            name: "Screenshot set 1",
-            id: 0,
-            files: {
-                aplite: new ScreenshotFile({src: "/static/common/img/screenshot-aplite.png", id: 0}),
-                basalt: new ScreenshotFile({src: "/static/common/img/screenshot-basalt.png", id: 1}),
-                chalk:  new ScreenshotFile({src: "/static/common/img/screenshot-chalk.png",  id: 2})
-            }
-        }, {
-            name: "Screenshot set 2",
-            id: 1,
-            files: {
-                aplite: new ScreenshotFile({src: "/static/common/img/screenshot-aplite.png", id: 3}),
-                basalt: new ScreenshotFile({src: "/static/common/img/screenshot-basalt.png", id: 4}),
-                chalk:  new ScreenshotFile({src: "/static/common/img/screenshot-chalk.png",  id: 5})
-            }
-        }];
-
-        /**
-         * Get the current list of existing test screenshots
-         * @param test_name name of test
-         * @returns {jQuery.Deferred}
-         */
-        this.getScreenshots = function(test_name) {
-            var defer = $.Deferred();
-            setTimeout(function () {
-                defer.resolve(_.map(screenshots, _.clone));
-            }, 700);
-            return defer.promise();
-        };
-
-        /**
-         * Save the current state of the screenshots
-         * @param test_name name of test
-         * @param new_screenshots
-         * @returns {*}
-         */
-        this.saveScreenshots = function(test_name, new_screenshots) {
-            var defer = $.Deferred();
-            var form_data = process_screenshots(new_screenshots);
-
-            // Made the form data, now we just have to send it.
-
-            setTimeout(function() {
-                screenshots = _.map(new_screenshots, function(shot) {
-                    var new_shot = _.clone(shot);
-                    new_shot.files = _.mapObject(_.clone(new_shot.files), _.partial(_.extend, _, {is_new: false, file: null}));
-                    new_shot._changed = false;
-                    return new_shot;
-                });
-                defer.resolve();
-            }, 700);
-            return defer.promise();
-        };
-    };
-
-    /** The actual API, for getting and saving screenshots with the Django backend */
+    /** The screenshots API, gets from and saves to the Django backend */
     var AjaxAPI = function() {
         this.getScreenshots = function(test_id) {
             var url = "/ide/project/" + PROJECT_ID + "/test/" + test_id + "/screenshots/load";
@@ -245,6 +186,12 @@ CloudPebble.MonkeyScreenshots = (function() {
         this.addUploadedFiles = function(files, index, platform) {
             if (disabled) return;
             var onloads = [];
+            if (!_.every(files, function(file) {
+                    return (file.type == 'image/png');
+                })) {
+                this.trigger('error', {errorFor: gettext('add files'), text: 'screenshots must be PNG files.'})
+                return;
+            }
             var loadFile = function(screenshotfile) {
                 var reader = new FileReader();
                 var defer = $.Deferred();
@@ -351,7 +298,7 @@ CloudPebble.MonkeyScreenshots = (function() {
                 original_screenshots = _.map(result, _.clone);
                 self.trigger('changed', result);
             }, function(error) {
-                self.trigger('error', gettext("Error getting screenshots"));
+                self.trigger('error', {text: gettext("Error getting screenshots")});
                 console.log(error);
             }).always(function() {
                 clearTimeout(timeout);
@@ -382,11 +329,16 @@ CloudPebble.MonkeyScreenshots = (function() {
             var timeout = setTimeout(function() {
                 self.trigger('waiting');
             }, 500);
-            API.saveScreenshots(test_name, screenshots).then(function() {
-                self.trigger('saved', true);
-                self.loadScreenshots();
+            API.saveScreenshots(test_name, screenshots).then(function(result) {
+                if (result.success == false) {
+                    self.trigger('error', {errorFor: gettext('save screenshots'), text: result.error});
+                }
+                else {
+                    self.trigger('saved', true);
+                    self.loadScreenshots();
+                }
             }, function(jqXHR, textStatus, errorThrown) {
-                self.trigger('error', {jqXHR: jqXHR, textStatus: textStatus, errorThrown: errorThrown, errorFor: gettext('save screenshots')});
+                self.trigger('error', {text: jqXHR.responseText, textStatus: textStatus, errorThrown: errorThrown, errorFor: gettext('save screenshots')});
             }).always(function() {
                 set_disabled(false);
                 clearTimeout(timeout);
@@ -397,6 +349,7 @@ CloudPebble.MonkeyScreenshots = (function() {
     /** This class keeps track of which platform is currently selected, and also
      * interacts with the SidePane */
     function UIState(pane) {
+        // TODO: fetch this from somewhere more global
         var supported_platforms = ['aplite', 'basalt', 'chalk'];
         var single = false;
         _.extend(this, Backbone.Events);
@@ -407,7 +360,7 @@ CloudPebble.MonkeyScreenshots = (function() {
                 platforms: platforms
             });
             // When the user clicks a platform title, this causes the SidePane to resize appropriately.
-            $(pane).width(this.getSize());
+            $(pane).innerWidth(this.getSize());
             pane.trigger('resize', this.getSize());
         };
 
@@ -417,7 +370,7 @@ CloudPebble.MonkeyScreenshots = (function() {
 
         this.getSize = function() {
             var platforms = (single ? [single] : supported_platforms)
-            return (50+platforms.length*200)+"px";
+            return (30+platforms.length*200)+"px";
         };
         // Set the initial size of the side pane.
         $(pane).width(this.getSize());

@@ -1,4 +1,5 @@
 CloudPebble.TestManager.Interface = (function(API) {
+
     var CODES = {
         '-2': gettext('error'),
         '-1': gettext('failed'),
@@ -54,9 +55,13 @@ CloudPebble.TestManager.Interface = (function(API) {
         maxPages: function() {return Math.floor((this.getLength()-1)/this.pageSize);},
         page: function(arr) {return arr.slice(this.state.page*this.pageSize, (this.state.page+1)*this.pageSize);},
         renderButton: function(num) {
+            let className = classNames('btn', {
+                'selected': num-1 == this.state.page
+            });
+            console.log(num-1, this.state.page);
             return (_.isString(num)
                 ? <button key={num} className="btn" disabled="disabled">...</button>
-                : <button key={num} className="btn" onClick={()=>this.gotoPage(num-1)}>{num}</button>
+                : <button key={num} className={className} onClick={()=>this.gotoPage(num-1)}>{num}</button>
             );
         },
         renderPager: function() {
@@ -281,7 +286,7 @@ CloudPebble.TestManager.Interface = (function(API) {
                     <tbody>
                     <tr><th>{gettext('Test')}</th><td><Anchor onClick={()=>Route.navigate('/test', test.id)}>{test.name}</Anchor></td></tr>
                     <tr><th>{gettext('Session')}</th><td><Anchor onClick={()=>Route.navigate('/session', session.id)}>{datestring}</Anchor></td></tr>
-                    <tr><th>{gettext('Result')}</th><TestResultCell code={test.last_code} /></tr>
+                    <tr><th>{gettext('Result')}</th><TestResultCell code={run.code} /></tr>
                     </tbody>
                 </table>
                 <hr />

@@ -447,7 +447,7 @@ CloudPebble.Editor = (function() {
                     if(!was_clean) {
                         --unsaved_files;
                     }
-                    screenshot_pane.destroy();
+                    if (screenshot_pane) screenshot_pane.destroy();
                     //CloudPebble.SidePane.RightPane.destroyPane('monkey-screenshots', file.id);
                     delete open_codemirrors[file.id];
                 });
@@ -802,7 +802,12 @@ CloudPebble.Editor = (function() {
         };
 
         CloudPebble.FuzzyPrompt.AddDataSource('files', function() {
-            return project_source_files;
+            return _.mapObject(project_source_files, function(obj, key) {
+                if (obj.target == "test") {
+                    return _.extend(_.clone(obj), {name: key+".test"});
+                }
+                else return obj;
+            });
         }, function(file, querystring) {
             // When a file is selected in fuzzy search, 'edit' or 'go_to'
             // depending on whether the user included :<line-number>
@@ -975,6 +980,7 @@ CloudPebble.Editor = (function() {
         $.post("/ide/project/" + PROJECT_ID + "/create_test_file", params, function(data) {
             if(data.success) {
                 add_test_file(data.file);
+                edit_source_file(data.file);
             }
             if (callback) {
                 callback(data);
@@ -1131,12 +1137,9 @@ CloudPebble.Editor = (function() {
                         then.dismiss();
                     } else {
                         then.error(data.error);
-                        //error.text(data.error).show();
                     }
                 });
-
             }
-
         }, pattern);
     }
 

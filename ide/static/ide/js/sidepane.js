@@ -27,7 +27,9 @@ CloudPebble.SidePane = (function() {
             suspended_panes[kind+'-'+id] = pane;
         };
         var destroy_suspended_pane = function(pane) {
-            delete suspended_panes[_.findKey(suspended_panes, function(p) {return !p.is(pane);})];
+            suspended_panes = _.omit(suspended_panes, function(p) {
+                return p.is(pane);
+            });
         };
 
         this.getSuspendedPanes = function() {
@@ -64,7 +66,7 @@ CloudPebble.SidePane = (function() {
             }
             else {
                 this.suspendActivePane();
-                this.attachPane(pane);
+                this.attachPane(pane, kind, id);
                 pane.trigger('restored');
                 return pane;
             }
@@ -106,7 +108,6 @@ CloudPebble.SidePane = (function() {
                     self.setSize(0);
                 }
                 destroy_suspended_pane($(event.target));
-
             });
         };
 

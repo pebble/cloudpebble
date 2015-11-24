@@ -11,14 +11,15 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
 
     /** Render a list of errors */
     function Error(props) {
-        let text = (props.jqXHR ? props.jqXHR.responseText : props.text);
-        let kind = props.errorThrown ? interpolate(": %s", [props.errorThrown]) : "";
+        let kind = props.errorThrown ? interpolate(" %s", [props.errorThrown]) : "";
         let errFor = props.errorFor ? interpolate(gettext(" trying to %s"), [props.errorFor]) : "";
+        let multiline = ((props.text.match(/\n/g) || []).length > 0);
+        let message = (!multiline ? ": "+props.text : '');
         return (
             <div className="errors">
                 <div className="well alert alert-error">
-                    <p>{interpolate(gettext("Error%s%s"), [kind, errFor])}</p>
-                    <pre>{text}</pre>
+                    <p>{interpolate(gettext("Error%s%s%s"), [kind, errFor, message])}</p>
+                    {multiline && <pre>{props.text}</pre>}
                 </div>
             </div>
         );
@@ -102,8 +103,8 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
                 return (
                     <div className={classNames(className, imageClasses)} {...dragEvents}>
                         <div {...dragEvents}>
-                            <button className="btn" onClick={this.onClickUpload} type="button" disabled={disabled}>Upload file</button><br />
-                            <button className="btn" onClick={this.onClickScreenshot} type="button" disabled={disabled}>Take Screenshot</button>
+                            <button className="btn" onClick={this.onClickUpload} type="button" disabled={disabled}>{gettext('Upload file')}</button><br />
+                            <button className="btn" onClick={this.onClickScreenshot} type="button" disabled={disabled}>{gettext('Take Screenshot')}</button>
                             <input ref="fileInput" className="hide" type="file" multiple onChange={this.onInputChange} disabled={disabled} />
                         </div>
 
@@ -208,7 +209,7 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
         let onClick = function() {
             Platforms.toggle(platform);
         };
-        return (<span className={'monkey-select-platform platform'+platform} onClick={onClick}>{platform}</span>)
+        return (<span className={'monkey-select-platform platform-'+platform} onClick={onClick}>{platform}</span>)
     }
 
     /** ScreenshotManager contains all of the screenshot manager UI */
@@ -241,8 +242,9 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
             return (
                 <div onDragOver={stopEvent} onDrop={stopEvent}>
                     <img ref="help" src="/static/ide/img/help.png" className="field-help" data-original-title=""/>
-                    {!!this.props.error && <Error {...this.props.error} />}
                     <h2>{gettext('Screenshots')}</h2>
+
+                    {!!this.props.error && <Error {...this.props.error} />}
 
                     <div className="monkey-platforms">
                         {this.props.platforms.map((platform)=>(

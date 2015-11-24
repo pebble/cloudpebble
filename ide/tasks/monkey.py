@@ -52,7 +52,7 @@ def run_test_session(session_id):
         run.code = random.randint(-2, 1)
         if run.code == 0:
             run.code = 1
-        run.log = "Test log\nThis is a fake run :)"
+        run.log = "Test log\nThis is a fake run :)\nThis test should have code: "+str(run.code)
         run.date_completed = datetime.now()
         run.save()
 

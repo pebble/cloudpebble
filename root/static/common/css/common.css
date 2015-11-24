@@ -159,7 +159,7 @@ a.btn {
     background-color: #3f3f3f
 }
 
-.btn.btn-cancel:hover {
+.btn.btn-cancel:not([disabled]):hover {
     background-color: #333;
     color: #aaaaaa;
 }

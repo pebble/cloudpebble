@@ -167,6 +167,17 @@ CloudPebble.Sidebar = (function() {
             $('#sidebar-pane-timeline > a').click(CloudPebble.Timeline.show);
             $('#new-source-file').click(CloudPebble.Editor.Create);
             $('#new-test').click(CloudPebble.Editor.CreateTest);
+
+            var commands = {};
+            commands[gettext("Add New Resource")] = CloudPebble.Resources.Create;
+            commands[gettext("Compilation")] = CloudPebble.Compile.Show;
+            commands[gettext("Settings")] = CloudPebble.Settings.Show;
+            commands["GitHub"] = CloudPebble.GitHub.Show;
+            commands[gettext("Timeline")] = CloudPebble.Timeline.show;
+            commands[gettext("Add New Source File")] = CloudPebble.Editor.Create;
+            commands[gettext("Add New Test")] = CloudPebble.Editor.CreateTest;
+            CloudPebble.FuzzyPrompt.AddCommands(commands);
+
             init();
         },
         SetPopover: function(pane_id, title, content) {
