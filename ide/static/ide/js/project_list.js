@@ -167,7 +167,11 @@ $(function() {
     };
 
     $('#run-import').click(run_project_import);
-
+    $('#import-prompt form').submit(function(event) {
+        event.preventDefault();
+        $('#run-import').click();
+    });
+    
     $('#import-project').click(function() {
         $('#import-prompt').modal();
     });
