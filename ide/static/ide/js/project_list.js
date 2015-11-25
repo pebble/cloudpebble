@@ -167,8 +167,8 @@ $(function() {
     };
 
     $('#run-import').click(run_project_import);
-    $('#import-prompt form').submit(function(event) {
-        event.preventDefault();
+    $('#import-prompt form').submit(function (e) {
+        e.preventDefault();
         $('#run-import').click();
     });
     
