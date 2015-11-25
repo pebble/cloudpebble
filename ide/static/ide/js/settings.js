@@ -15,6 +15,9 @@ CloudPebble.Settings = (function() {
         if(CloudPebble.ProjectInfo.type != 'native') {
             pane.find('.native-only').hide();
         }
+        if(CloudPebble.ProjectInfo.sdk_version != '3') {
+            pane.find('.sdk3-only').hide();
+        }
 
         var display_error = function(message) {
             pane.find('.alert').addClass('alert-error').removeClass('hide').text(message);
@@ -37,9 +40,9 @@ CloudPebble.Settings = (function() {
             var app_keys = {};
             var app_jshint = pane.find('#settings-app-jshint').prop("checked") ? 1 : 0;
             var menu_icon = pane.find('#settings-menu-image').val();
-            var build_aplite = pane.find('#settings-build-aplite').prop('checked');
-            var build_basalt = pane.find('#settings-build-basalt').prop('checked');
-            var build_chalk = pane.find('#settings-build-chalk').prop('checked');
+            var build_aplite = pane.find('#settings-build-aplite:visible').prop('checked');
+            var build_basalt = pane.find('#settings-build-basalt:visible').prop('checked');
+            var build_chalk = pane.find('#settings-build-chalk:visible').prop('checked');
 
             var app_is_hidden = 0;
             var app_is_shown_on_communication = 0;

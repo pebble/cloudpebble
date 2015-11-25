@@ -553,10 +553,6 @@ ul.nav-pills {
     margin-right: 0;
 }
 
-.compilation-pane #run-qemu .btn-primary {
-    width: 121px;
-}
-
 .compilation-pane h3 {
     margin-top: 20px;
     margin-bottom: 20px;

@@ -167,6 +167,7 @@ CloudPebble.Compile = (function() {
         commands[gettext("Show Emulator Logs")] = function() { show_app_logs(ConnectionType.Qemu); };
         commands[gettext("Show Last Build Log")] = function() {show_build_log(mLastBuild.id)};
         commands[gettext("Clear App Logs")] = function() { show_clear_logs_prompt(); };
+        commands[gettext("Take Screenshot")] = function() { take_screenshot(); };
         CloudPebble.FuzzyPrompt.AddCommands(commands);
 
         SharedPebble.on('app_log', handle_app_log);
@@ -627,6 +628,19 @@ CloudPebble.Compile = (function() {
             };
 
             pebble.on('colour', function(colour) {
+                if (colour == 'unknown') {
+                    switch (SharedPebble.getPlatformName()) {
+                        case 'aplite':
+                            colour = 'tintin-red';
+                            break;
+                        case 'basalt':
+                            colour = 'snowy-red';
+                            break;
+                        case 'chalk':
+                            colour = 'spalding-14mm-rose-gold';
+                            break;
+                    }
+                }
                 modal.find('.screenshot-holder').addClass('screenshot-holder-' + colour);
             });
 
@@ -720,7 +734,7 @@ CloudPebble.Compile = (function() {
                 } else {
                     if(CloudPebble.ProjectInfo.sdk_version == '3') {
                         if (!CloudPebble.ProjectInfo.app_platforms) {
-                            return ConnectionType.QemuChalk;
+                            return ConnectionType.QemuBasalt;
                         }
                         if (CloudPebble.ProjectInfo.app_platforms.indexOf('chalk') > -1) {
                             return ConnectionType.QemuChalk;

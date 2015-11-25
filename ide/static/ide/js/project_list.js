@@ -167,7 +167,11 @@ $(function() {
     };
 
     $('#run-import').click(run_project_import);
-
+    $('#import-prompt form').submit(function (e) {
+        e.preventDefault();
+        $('#run-import').click();
+    });
+    
     $('#import-project').click(function() {
         $('#import-prompt').modal();
     });
@@ -177,11 +181,16 @@ $(function() {
         $('#project-confirm-button').click();
     });
 
-    if (location.pathname.indexOf('/ide/import/github/') === 0) {
-        var parts = location.pathname.substr(1).split('/');
+    // Clean up stray forward slashes.
+    var path = location.pathname.replace(/\/+/g, '/');
+    if (path.indexOf('/ide/import/github/') === 0) {
+        var parts = path.substr(1).split('/');
         $('#import-prompt').modal();
         $('#import-github-name').val(parts[3]);
         $('#import-github-url').val('github.com/' + parts[3] + '/' + parts[4]);
+        if (parts.length > 5) {
+            $('#import-github-branch').val(parts.slice(5).join('/'));
+        }
         $('a[href=#import-github]').tab('show');
     }
 
