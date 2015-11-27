@@ -1,5 +1,5 @@
 Django==1.6.2
--e hg+https://bitbucket.org/ubernostrum/django-registration#egg=django-registration
+django-registration==1.0
 amqp==1.4.4
 celery==3.1.10
 django_celery==3.1.10
