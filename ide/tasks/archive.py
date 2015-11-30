@@ -255,20 +255,19 @@ def do_import_archive(project_id, archive, delete_project=False):
                             # Now add all the resource identifiers
                             for root_file_name in desired_resources:
                                 for resource in desired_resources[root_file_name]:
-                                    print resource
-                                    identifier = resource['name']
-                                    tracking = resource.get('trackingAdjust', None)
-                                    regex = resource.get('characterRegex', None)
-                                    compatibility = resource.get('compatibility', None)
-                                    target_platforms = resource.get('targetPlatforms', None)
-                                    target_platforms = json.dumps(target_platforms) if target_platforms is not None else None
+                                    target_platforms = json.dumps(resource['targetPlatforms']) if 'targetPlatforms' in resource else None
                                     ResourceIdentifier.objects.create(
                                         resource_file=resources_files[root_file_name],
-                                        resource_id=identifier,
-                                        character_regex=regex,
-                                        tracking=tracking,
-                                        compatibility=compatibility,
-                                        target_platforms=target_platforms
+                                        resource_id=resource['name'],
+                                        target_platforms=target_platforms,
+                                        # Font options
+                                        character_regex=resource.get('characterRegex', None),
+                                        tracking=resource.get('trackingAdjust', None),
+                                        compatibility=resource.get('compatibility', None),
+                                        # Bitmap options
+                                        memory_format=resource.get('memoryFormat', None),
+                                        storage_format=resource.get('storageFormat', None),
+                                        space_optimisation=resource.get('spaceOptimization', None)
                                     )
 
                             # Check that at least one variant of each specified resource exists.

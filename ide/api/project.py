@@ -51,7 +51,7 @@ def project_info(request, project_id):
             'file_name': x.file_name,
             'kind': x.kind,
             'identifiers': [y.resource_id for y in x.identifiers.all()],
-            'extra': {y.resource_id: {'regex': y.character_regex, 'tracking': y.tracking, 'compatibility': y.compatibility} for y in x.identifiers.all()},
+            'extra': {y.resource_id: y.get_options_dict(with_id=False) for y in x.identifiers.all()},
             'variants': [y.get_tags() for y in x.variants.all()],
         } for x in resources],
         'github': {

@@ -8,14 +8,18 @@
                 <label class="control-label" for="edit-resource-type">{% trans 'Resource type' %}</label>
                 <div class="controls">
                     <select id="edit-resource-type">
-                        <option value="png">{% trans 'PNG image' %}</option>
+                        <option value="bitmap">{% trans 'Bitmap Image' %}</option>
                         {% if project.project_type == 'native' %}
-                        <option value="png-trans">{% trans 'PNG with transparency' %}</option>
-                        <option value="font">{% trans 'TrueType font' %}</option>
-                        <option value="raw">{% trans 'Raw binary blob' %}</option>
-                        {% if project.sdk_version == '3' %}
-                        <option value="pbi">{% trans '1-bit Pebble image' %}</option>
+                            <option value="font">{% trans 'TrueType font' %}</option>
+                            <option value="raw">{% trans 'Raw binary blob' %}</option>
                         {% endif %}
+
+                        <option value="png">{% trans 'PNG image (deprecated)' %}</option>
+                        {% if project.project_type == 'native' %}
+                            <option value="png-trans">{% trans 'PNG with transparency (deprecated)' %}</option>
+                            {% if project.sdk_version == '3' %}
+                                <option value="pbi">{% trans '1-bit Pebble image (deprecated)' %}</option>
+                            {% endif %}
                         {% endif %}
                     </select>
                 </div>
@@ -69,6 +73,47 @@
                         <span class="help-block">{% trans 'Determines the font rendering algorithm to use. The latest looks better, but can produce slightly larger characters.' %}</span>
                     </div>
                 </div>
+                <div class="control-group bitmap-only">
+                    <label class="control-label">{% trans 'Memory Format' %}</label>
+                    <div class="controls">
+                        <select class="bitmap-memory-format-option">
+                            <option value="">{% trans "Best" %}</option>
+                            <option value="Smallest">{% trans "Smallest" %}</option>
+                            <option value="SmallestPalette">{% trans "Smallest Palette" %}</option>
+                            <option value="1Bit">{% trans "1-bit" %}</option>
+                            <option value="8Bit">{% trans "8-bit" %}</option>
+                            <option value="1BitPalette">{% trans "1-bit Palette" %}</option>
+                            <option value="2BitPalette">{% trans "2-bit Palette" %}</option>
+                            <option value="4BitPalette">{% trans "4-bit Palette" %}</option>
+                        </select>
+                        <span class="help-block">{% trans 'Determines the bitmap type' %}</span>
+                        {# TODO: consider explaining 'best' #}
+                        {# TODO: consider linking to developer documentation #}
+                    </div>
+                </div>
+                <div class="control-group bitmap-only">
+                    <label class="control-label">{% trans 'Storage Format' %}</label>
+                    <div class="controls">
+                        <select class="bitmap-storage-format-option">
+                            <option value="">{% trans "Best" %}</option>
+                            <option value="pbi">{% trans "PBI" %}</option>
+                            <option value="png">{% trans "PNG" %}</option>
+                        </select>
+                        <span class="help-block">{% trans 'Determines the file format used for storage.' %}</span>
+                    </div>
+                </div>
+                <div class="control-group bitmap-only">
+                    <label class="control-label">{% trans 'Space Optimisation' %}</label>
+                    <div class="controls">
+                        <select class="bitmap-space-optimisation-option">
+                            <option value="">{% trans "Best" %}</option>
+                            <option value="storage">{% trans "Storage" %}</option>
+                            <option value="memory">{% trans "Memory" %}</option>
+                        </select>
+                        <span class="help-block">{% trans 'Determines whether the output resource is optimised for low runtime memory or low resource space usage.' %}</span>
+                    </div>
+                </div>
+
                 <div class="resource-targets-section sdk3-only native-only">
                     <div class="control-group controls">
                         <label style="width: 250px" class="control-label">{% trans 'Target platforms' %}

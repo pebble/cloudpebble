@@ -2,7 +2,7 @@ import os
 import shutil
 import traceback
 import datetime
-import re
+import json
 from django.conf import settings
 from django.core.validators import RegexValidator
 from django.db import models
@@ -22,6 +22,7 @@ class ResourceFile(IdeModel):
     project = models.ForeignKey('Project', related_name='resources')
     RESOURCE_KINDS = (
         ('raw', _('Binary blob')),
+        ('bitmap', _('Bitmap Image')),
         ('png', _('1-bit PNG')),
         ('png-trans', _('1-bit PNG with transparency')),
         ('font', _('True-Type Font')),
@@ -67,6 +68,7 @@ class ResourceFile(IdeModel):
         'pbi': 'images',
         'png': 'images',
         'png-trans': 'images',
+        'bitmap': 'images',
         'font': 'fonts',
         'raw': 'data'
     }
@@ -219,6 +221,49 @@ class ResourceIdentifier(IdeModel):
     tracking = models.IntegerField(blank=True, null=True)
     compatibility = models.CharField(max_length=10, blank=True, null=True)
     target_platforms = models.CharField(max_length=30, null=True, blank=True, default=None)
+
+    MEMORY_FORMATS = (
+        ('Smallest', _('Smallest')),
+        ('SmallestPalette', _('Smallest Palette')),
+        ('1Bit', _('1-bit')),
+        ('8Bit', _('8-bit')),
+        ('1BitPalette', _('1-bit Palette')),
+        ('2BitPalette', _('2-bit Palette')),
+        ('4BitPalette', _('4-bit Palette')),
+    )
+    memory_format = models.CharField(max_length=15, choices=MEMORY_FORMATS, null=True, blank=True)
+
+    STORAGE_FORMATS = (
+        ('pbi', _('1 bit Pebble Image')),
+        ('png', _('PNG'))
+    )
+    storage_format = models.CharField(max_length=3, choices=STORAGE_FORMATS, null=True, blank=True)
+
+    SPACE_OPTIMISATIONS = (
+        ('storage', _('Storage')),
+        ('memory', _('Memory'))
+    )
+    space_optimisation = models.CharField(max_length=7, choices=SPACE_OPTIMISATIONS, null=True, blank=True)
+
+    def get_options_dict(self, with_id=False):
+        """ Return the ResourceIdentifier's options as a dictionary. Optionally include its ID in the key 'id' """
+        d = {
+            # Resource ID
+            'target_platforms': json.loads(self.target_platforms) if self.target_platforms else None,
+
+            # Font options
+            'regex': self.character_regex,
+            'tracking': self.tracking,
+            'compatibility': self.compatibility,
+
+            # Bitmap options
+            'memory_format': self.memory_format,
+            'storage_format': self.storage_format,
+            'space_optimisation': self.space_optimisation
+        }
+        if with_id:
+            d['id'] = self.resource_id
+        return d
 
     def save(self, *args, **kwargs):
         self.resource_file.project.last_modified = now()

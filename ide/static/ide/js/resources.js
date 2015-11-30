@@ -203,13 +203,12 @@ CloudPebble.Resources = (function() {
 
     /**
      * Given the tags for each variant and a desired platform, figure out which variant will run.
-     * Returns null if there is no match. Throws an exception if there is a specicifity conflict for the platform.
+     * Returns null if there is no match. Throws an exception if there is a specificity conflict for the platform.
      * @param tag_values Array of arrays of tag IDs.
      * @param platform_name Name of platform to check
      * @returns {Array|null}
      */
     function get_resource_for_platform(tag_values, platform_name) {
-        // TODO: This will eventually need to be updated to support setting targetPlatforms for each resource ID.
         // Find all variants with tags which fully apply to this platform.
         var platform_tags = PLATFORMS[platform_name];
         var filtered_tags = _.filter(tag_values, function(var_tags) {
@@ -228,7 +227,7 @@ CloudPebble.Resources = (function() {
                 return "("+_.chain(conflict_tags).map(get_tag_data_for_id).pluck('name').join(', ')+")";
             }).join(gettext(' and '));
             throw {
-                description: interpolate(gettext("Conflict for platform '%s'. The variants with tags %s have the same specicifity."), [platform_name, conflict_string]),
+                description: interpolate(gettext("Conflict for platform '%s'. The variants with tags %s have the same specificity."), [platform_name, conflict_string]),
                 conflicts: conflicts
             };
         }
@@ -252,10 +251,9 @@ CloudPebble.Resources = (function() {
             form.find('input, button, select').attr('disabled', 'disabled');
         };
         var enable_controls = function() {
+            form.find('input, button, .resource-id-group-single select').removeAttr('disabled');
             if(is_new) {
-                form.find('input, button, select').removeAttr('disabled');
-            } else {
-                form.find('input, button, .font-compat-option').removeAttr('disabled');
+                form.find('select').removeAttr('disabled');
             }
         };
 
@@ -377,6 +375,16 @@ CloudPebble.Resources = (function() {
                 }
                 _(resource).extend({'regex': regex, 'tracking': tracking, 'compatibility': compat})
             }
+
+            // Add in bitmap-specific per-ID settings, if applicable
+            if (kind == 'bitmap') {
+                _(resource).extend({
+                    memory_format: value.find('.bitmap-memory-format-option').val() || null,
+                    storage_format: value.find('.bitmap-storage-format-option').val() || null,
+                    space_optimisation: value.find('.bitmap-space-optimisation-option').val() || null
+                });
+            }
+
             resource_ids[resource_id] = true;
             resources.push(resource);
         });
@@ -517,6 +525,7 @@ CloudPebble.Resources = (function() {
                         variant_string = tags.join(',');
                     }
                     switch (kind) {
+                        case 'bitmap':
                         case 'png':
                         case 'png-trans':
                             template_name = 'image';
@@ -579,12 +588,7 @@ CloudPebble.Resources = (function() {
                 pane.find('.btn-delvariant').toggle(resource.variants.length > 1);
             };
 
-            if (true || resource.kind == 'png' || resource.kind == 'png-trans') {
-                generate_resource_previews(resource.kind);
-            } else {
-                var preview_url = '/ide/project/' + PROJECT_ID + '/resource/' + resource.id + '/0/get';
-                pane.find('.resource-download-link').removeClass('hide').find('a').attr('href', preview_url);
-            }
+            generate_resource_previews(resource.kind);
 
             var update_font_preview = function(group) {
                 group.find('.font-preview').remove();
@@ -667,6 +671,16 @@ CloudPebble.Resources = (function() {
                     group.find('.font-only').remove();
                 }
 
+                if (resource.kind == 'bitmap') {
+                    console.log(value);
+                    group.find('.bitmap-memory-format-option').val(value.memory_format|| "");
+                    group.find('.bitmap-storage-format-option').val(value.storage_format || "");
+                    group.find('.bitmap-space-optimisation-option').val(value.space_optimisation || "");
+                }
+                else {
+                    group.find('.bitmap-only').remove()
+                }
+
                 var has_target_platforms = _.isArray(value["target_platforms"]);
                 if (has_target_platforms) {
                     var target_platforms_checkbox = group.find(".edit-resource-target-platforms-enabled");
@@ -714,7 +728,7 @@ CloudPebble.Resources = (function() {
                 CloudPebble.Sidebar.SetIcon('resource-'+resource.id, 'edit');
             });
 
-            pane.find('.image-platform-preview').toggle((resource.kind == 'png' || resource.kind == 'png-trans'));
+            pane.find('.image-platform-preview').toggle((_.contains(['png', 'png-trans', 'bitmap'], resource.kind)));
 
             pane.find("#edit-resource-file-name").val(resource.file_name);
 
@@ -848,13 +862,10 @@ CloudPebble.Resources = (function() {
         template.find('.nont-font-only').removeClass('hide');
         template.find('.image-platform-preview').hide();
         template.find('#edit-resource-type').change(function() {
-            if($(this).val() == 'font') {
-                template.find('.font-only').removeClass('hide');
-                template.find('.non-font-only').addClass('hide');
-            } else {
-                template.find('.font-only').addClass('hide');
-                template.find('.non-font-only').removeClass('hide');
-            }
+            var kind = $(this).val();
+            template.find('.non-font-only').toggleClass('hide', (kind === 'font'));
+            template.find('.font-only').toggleClass('hide', (kind !== 'font'));
+            template.find('.bitmap-only').toggleClass('hide', (kind !== 'bitmap'));
         });
 
         template.find("#edit-resource-file").change(function() {

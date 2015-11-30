@@ -310,6 +310,12 @@ def generate_native_resource_dict(project, resources):
                 d['characterRegex'] = resource_id.character_regex
             if resource_id.tracking:
                 d['trackingAdjust'] = resource_id.tracking
+            if resource_id.memory_format:
+                d['memoryFormat'] = resource_id.memory_format
+            if resource_id.storage_format:
+                d['storageFormat'] = resource_id.storage_format
+            if resource_id.space_optimisation:
+                d['spaceOptimization'] = resource_id.space_optimisation
             if resource.is_menu_icon:
                 d['menuIcon'] = True
             if resource_id.compatibility is not None:
