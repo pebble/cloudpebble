@@ -41,8 +41,7 @@ var SharedPebble = new (function() {
         gettext("Firing missiles…"),
         gettext("Never giving you up…"),
         gettext("Never letting you down…"),
-        // Translators: do whatever you like with this one.
-        gettext("Harmonising Elements…") // yes.
+        gettext("Getting twenty percent cooler…")
     ];
 
     function isRound(kind) {
@@ -211,6 +210,10 @@ var SharedPebble = new (function() {
 
     this.isVirtual = function() {
         return mPebble && !!(mConnectionType & ConnectionType.Qemu);
+    };
+
+    this.getPlatformName = function() {
+        return ConnectionPlatformNames[mConnectionType];
     };
 
     function getWebsocketURL() {

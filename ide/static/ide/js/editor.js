@@ -194,7 +194,7 @@ CloudPebble.Editor = (function() {
 
                 // The browser should probably do this without our help. Sometimes Safari doesn't.
                 $(document).click(function(e) {
-                    if(!pane.find(e.target).length) {
+                    if(!is_fullscreen && !pane.find(e.target).length) {
                         $(code_mirror.display.input).blur();
                     }
                 });
@@ -644,8 +644,18 @@ CloudPebble.Editor = (function() {
                             tooltip.append($(interpolate("<div><strong>%s: </strong>%s</div>", [gettext("Build for"), build_platform_names])));
                         }
                         var run_platform = CloudPebble.Compile.GetPlatformForInstall();
-                        var run_platform_name = capitalise_first_letter(run_platform == 1 ? gettext("Phone") : ConnectionPlatformNames[run_platform] + gettext(" Emulator"));
-                        tooltip.append(interpolate("<div><strong>%s: </strong>%s</div>", [gettext("Run on"), run_platform_name]));
+                        var run_platform_name;
+                        if (run_platform == ConnectionType.Phone) {
+                            run_platform_name = gettext("Phone");
+                        }
+                        else if (run_platform == ConnectionType.Qemu) {
+                            // If the emulator is already running, ask it directly what platform it's using
+                            run_platform_name = SharedPebble.getPlatformName() + gettext(" Emulator");
+                        }
+                        else {
+                            run_platform_name = ConnectionPlatformNames[run_platform] + gettext(" Emulator");
+                        }
+                        tooltip.append(interpolate("<div><strong>%s: </strong>%s</div>", [gettext("Run on"), capitalise_first_letter(run_platform_name)]));
 
                         return tooltip;
                     },
