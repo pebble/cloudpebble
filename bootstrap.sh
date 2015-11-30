@@ -32,6 +32,14 @@ ln -s /vagrant/user_data/export /var/www/export
 # Fix broken pip in 14.04
 easy_install pip
 
+# Allow pip to access pebblehq packages
+sudo -u vagrant mkdir .pip
+cat << 'EOF' >  /home/vagrant/.pip/pip.conf
+[global]
+trusted-host = pypi.hq.getpebble.com
+index-url = http://pypi.hq.getpebble.com/simple/
+EOF
+
 # CloudPebble python requirements.
 pip install -r /vagrant/requirements.txt
 
@@ -103,6 +111,14 @@ pushd /pypkjs
     source .env/bin/activate
     pip install -r requirements.txt
     deactivate
+popd
+
+
+mkdir pebble-test
+pushd pebble-test
+	git clone git@github.com:pebble/pebblesdk-test.git .
+	# must first have access to pebble.loghash
+	pip install -r requirements.txt
 popd
 
 sudo -u vagrant mkdir qemu-controller
