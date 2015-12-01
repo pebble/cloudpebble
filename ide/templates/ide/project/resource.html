@@ -7,7 +7,7 @@
             <div class="control-group">
                 <label class="control-label" for="edit-resource-type">{% trans 'Resource type' %}</label>
                 <div class="controls">
-                    <select id="edit-resource-type">
+                    <select id="edit-resource-type" autofocus>
                         <option value="bitmap">{% trans 'Bitmap Image' %}</option>
                         {% if project.is_standard_project_type  %}
                             <option value="font">{% trans 'TrueType font' %}</option>

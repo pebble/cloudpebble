@@ -464,7 +464,7 @@ CloudPebble.Resources = (function() {
         CloudPebble.ProgressBar.Show();
         Ajax.Get("/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/info").then(function(data) {
             var resource = data.resource;
-            var pane = prepare_resource_pane();
+            var pane = prepare_resource_pane({is_new: false});
 
             var list_entry = $('#sidebar-pane-resource-' + resource.id);
             if(list_entry) {
@@ -858,7 +858,8 @@ CloudPebble.Resources = (function() {
         return textext.textext()[0];
     };
 
-    var prepare_resource_pane = function() {
+    var prepare_resource_pane = function(options) {
+        var is_new = options.is_new;
         var template = resource_template.clone();
         template.removeClass('hide');
         template.find('.font-only').addClass('hide');
@@ -877,6 +878,9 @@ CloudPebble.Resources = (function() {
                 return (old_val || input.val().split(/(\\|\/)/g).pop());
             });
         });
+
+        template.find('#edit-resource-type').attr('autofocus', is_new);
+        template.find('#edit-resource-file-name').attr('autofocus', !is_new);
 
         // setTimeout is used because the textarea has to actually be visible when the textext tag editor is initialised
         setTimeout(function() {
@@ -902,7 +906,7 @@ CloudPebble.Resources = (function() {
     var create_new_resource = function() {
         CloudPebble.Sidebar.SuspendActive();
         if(CloudPebble.Sidebar.Restore('new-resource')) return;
-        var pane = prepare_resource_pane();
+        var pane = prepare_resource_pane({is_new: true});
         var form = pane.find('form');
 
         form.submit(function(e) {
