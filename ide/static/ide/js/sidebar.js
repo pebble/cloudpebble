@@ -17,6 +17,7 @@ CloudPebble.Sidebar = (function() {
         if (list_entry) {
             list_entry.removeClass('active');
         }
+
         suspended_panes[pane_id] = pane;
         pane.detach();
         // Create a new empty one.
@@ -38,7 +39,10 @@ CloudPebble.Sidebar = (function() {
     };
 
     var refocus_pane = function(pane) {
-        pane.find('*[autofocus]').first().focus();
+        setTimeout(function() {
+            var previous_focus = pane.data('previous-focus');
+            (previous_focus || pane.find('*[autofocus]').first().focus()).focus();
+        }, 50);
     };
 
     var restore_suspended_pane = function(id) {
@@ -57,7 +61,7 @@ CloudPebble.Sidebar = (function() {
                 pane.data('pane-restore-function')();
             }
 
-            refocus_pane(pane);
+            refocus_pane($('#main-pane'));
 
             return true;
         }
@@ -66,7 +70,7 @@ CloudPebble.Sidebar = (function() {
 
     var set_main_pane = function(pane, options) {
         $('#main-pane').append(pane).data('pane-id', options.id);
-        refocus_pane(pane);
+        refocus_pane($('#main-pane'));
         if (options.onRestore) {
             $('#main-pane').data('pane-restore-function', options.onRestore);
         }
@@ -176,6 +180,10 @@ CloudPebble.Sidebar = (function() {
             $('#sidebar-pane-github > a').click(CloudPebble.GitHub.Show);
             $('#sidebar-pane-timeline > a').click(CloudPebble.Timeline.show);
             create_initial_sections(CloudPebble.ProjectInfo.type);
+
+            $('#pane-parent').on('focusin', '#main-pane *', _.debounce(function(e) {
+                $('#main-pane').data('previous-focus', $(e.target));
+            }, 1));
         },
         SetPopover: function(pane_id, title, content) {
             $('#sidebar-pane-' + pane_id).find('a').popover('destroy').popover({

@@ -8,9 +8,10 @@ CloudPebble.FuzzyPrompt = (function() {
     var selected_id = null;
     var default_item;
     var selection_was_made;
+    var focus_pane;
     var opened = false;
     var prompt_kind = null;
-
+    var focus_pane_selector = '#main-pane'
     // While manual is false, always highlight the first item
     var manual = false;
 
@@ -184,6 +185,8 @@ CloudPebble.FuzzyPrompt = (function() {
         selection_was_made = false;
         opened = true;
         prompt_kind = kind;
+        focus_pane = $(focus_pane_selector).get()[0];
+        
         // Build up the list of files to search through
         var id = 0;
         _.each(sources, function(source) {
@@ -253,6 +256,11 @@ CloudPebble.FuzzyPrompt = (function() {
         if (opened) {
             opened = false;
             prompt.modal('hide');
+            // If we switched page, never refocus
+            if (focus_pane != $(focus_pane_selector).get()[0]) {
+                refocus = false;
+            }
+            // Otherwise, if we want to refocus, do so
             if (refocus) {
                 setTimeout(function () {
                     $(previously_active).focus();
