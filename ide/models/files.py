@@ -2,6 +2,8 @@ import os
 import shutil
 import traceback
 import datetime
+import tempfile
+import zipfile
 import re
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -295,10 +297,26 @@ class TestFile(ScriptFile):
     bucket_name = 'source'
     folder = 'tests/scripts'
 
+    @classmethod
+    def package_tests(cls, tests, location):
+        dir = tempfile.mkdtemp()
+        try:
+            for test in tests:
+                test_folder = os.path.join(dir, test.file_name)
+                os.mkdir(test_folder)
+                test.copy_to_path(os.path.join(test_folder, test.file_name+'.monkey'))
+                test.copy_screenshots_to_directory(test_folder)
+            return shutil.make_archive(location, 'zip', dir)
+        finally:
+            shutil.rmtree(dir)
+
+    def copy_screenshots_to_directory(self, directory):
+        for screenshot_set in self.get_screenshot_sets():
+            screenshot_set.copy_to_directory(directory)
+
     @property
     def project_path(self):
         return 'integration_tests/%s' % self.file_name
-
 
     @property
     def latest_code(self):
@@ -325,7 +343,27 @@ class ScreenshotSet(IdeModel):
         self.test.project.save()
         super(ScreenshotSet, self).save(*args, **kwargs)
 
-    class Metha(IdeModel.Meta):
+    def copy_to_directory(self, directory):
+        screenshots = ScreenshotFile.objects.filter(screenshot_set=self)
+        for screenshot in screenshots:
+            if screenshot.platform == 'aplite':
+                platform = 'tintin'
+                size = '144x168'
+            elif screenshot.platform == 'basalt':
+                platform = 'snowy'
+                size = '144x168'
+            elif screenshot.platform == 'chalk':
+                platform = 'snowy'
+                size = '180x180'
+            else:
+                raise ValueError("Invalid platform")
+            file_dir = os.path.join(directory, 'english', platform, size)
+            file_path = os.path.join(file_dir, self.name+'.png')
+            if not os.path.isdir(file_dir):
+                os.makedirs(file_dir)
+            screenshot.copy_to_path(file_path)
+
+    class Meta(IdeModel.Meta):
         unique_together = (('test', 'name'),)
 
 class ScreenshotFile(BinFile):

@@ -1,4 +1,7 @@
-
+import tempfile
+import shutil
+import os
+from cStringIO import StringIO
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse
@@ -8,7 +11,7 @@ from ide.api import json_failure, json_response
 from ide.models.project import Project
 from ide.models.monkey import TestSession, TestRun, TestCode, TestLog
 from ide.tasks.monkey import run_test_session, setup_test_session
-
+from ide.models.files import TestFile
 import utils.s3 as s3
 
 
@@ -116,6 +119,34 @@ def get_test_runs(request, project_id):
     runs = TestRun.objects.filter(**kwargs)
     # TODO: KEEN
     return json_response({"data": [serialise_run(run, link_test=True, link_session=True) for run in runs]})
+
+@require_POST
+@login_required
+def run_qemu_test(request, project_id, test_id):
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    test = get_object_or_404(TestFile, pk=test_id, owner=request.user, project=project)
+    screenshots = test.screenshot_sets.all()
+
+
+@require_safe
+@login_required
+def download_tests(request, project_id):
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    test_ids = request.GET.get('tests', None)
+    if test_ids is None:
+        tests = project.test_files.all()
+    else:
+        ids = [int(test_id) for test_id in test_ids.split(',')]
+        tests = TestFile.objects.filter(project=project, id__in=ids)
+    dir = tempfile.mkdtemp()
+    try:
+        zipname = TestFile.package_tests(tests, os.path.join(dir, 'test_archive'))
+        with open(zipname, 'r') as archive:
+            stream = StringIO(archive.read())
+    finally:
+        shutil.rmtree(dir)
+
+    return HttpResponse(stream, content_type='application/zip')
 
 
 # POST /project/<id>/test_sessions

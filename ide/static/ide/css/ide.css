@@ -1420,6 +1420,11 @@ button#add-filter {
     min-width: 400px;
 }
 
+.testmanager-download-btn {
+    width: 220px;
+    margin-left: 20px;
+}
+
 .infoTable th {
     width: 40%;
     text-align: right;

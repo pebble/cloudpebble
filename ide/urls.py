@@ -11,7 +11,7 @@ from ide.api.source import create_source_file, create_test_file, load_source_fil
     save_source_file, delete_source_file, rename_source_file, get_test_list
 from ide.api.screenshots import save_screenshots, load_screenshots, show_screenshot
 from ide.api.monkey import get_test_session, get_test_sessions, get_test_run, get_test_runs, post_test_session, \
-    get_test_run_log
+    get_test_run_log, run_qemu_test, download_tests
 from ide.api.user import transition_accept, transition_export, transition_delete, whats_new
 from ide.api.ycm import init_autocomplete
 from ide.api.qemu import launch_emulator, generate_phone_token, handle_phone_token
@@ -35,7 +35,8 @@ urlpatterns = patterns(
     url(r'^project/(?P<project_id>\d+)/(?P<kind>(source|tests))/(?P<file_id>\d+)/save', save_source_file, name='save_source_file'),
     url(r'^project/(?P<project_id>\d+)/test/(?P<test_id>\d+)/screenshots/save', save_screenshots, name='save_screenshots'),
     url(r'^project/(?P<project_id>\d+)/test/(?P<test_id>\d+)/screenshots/load', load_screenshots, name='load_screenshots'),
-
+    url(r'^project/(?P<project_id>\d+)/tests/(?P<test_id>\d+)/run_qemu', run_qemu_test, name='run_qemu_test'),
+    url(r'^project/(?P<project_id>\d+)/tests/archive$', download_tests, name='download_tests'),
     url(r'^project/(?P<project_id>\d+)/(?P<kind>(source|tests))/(?P<file_id>\d+)/rename', rename_source_file, name='rename_source_file'),
     url(r'^project/(?P<project_id>\d+)/(?P<kind>(source|tests))/(?P<file_id>\d+)/is_safe', source_file_is_safe, name='source_file_is_safe'),
     url(r'^project/(?P<project_id>\d+)/(?P<kind>(source|tests))/(?P<file_id>\d+)/delete', delete_source_file, name='delete_source_file'),

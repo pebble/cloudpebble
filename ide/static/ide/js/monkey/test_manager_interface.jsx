@@ -212,7 +212,7 @@ CloudPebble.TestManager.Interface = (function(API) {
             return (
                 <tr className={rowClassName} key={session.id} onClick={()=>this.onClickSession(session)}>
                     <td><Anchor onClick={()=>this.onClickSession(session)}>{datestring}</Anchor></td>
-                    <td className={passesClassName}>{interpolate("%s/%s", [session.passes, session.run_count])}</td>
+                    <td className={passesClassName}>{`${session.passes}/${session.run_count}`}</td>
                 </tr>
             )
         },
@@ -398,7 +398,7 @@ CloudPebble.TestManager.Interface = (function(API) {
      * "run tests" button and any errors.
      */
     function TestManager(props) {
-        var {route, tests, sessions, error, closeError} = props;
+        var {route, tests, sessions, error, closeError, project_id} = props;
         var className = 'testmanager-page-'+(route.length == 0 ? 'dashboard' : 'detail');
         return (
             <div className={className}>
@@ -406,6 +406,7 @@ CloudPebble.TestManager.Interface = (function(API) {
                 {tests.length > 0 && (
                     <Well>
                         <button onClick={()=>Sessions.new()} className='btn btn-affirmative'>{gettext('Run All')}</button>
+                        <a href={`/ide/project/${project_id}/tests/archive`} className='btn testmanager-download-btn'>{gettext('Download tests as zip')}</a>
                     </Well>
                     )}
                 <div className="leftside">

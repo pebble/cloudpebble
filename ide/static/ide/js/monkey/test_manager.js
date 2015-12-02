@@ -303,7 +303,7 @@ CloudPebble.TestManager = (function() {
         ui = CloudPebble.TestManager.Interface(api);
         ga('send', 'event', 'project', 'load testmanager');
         var pane = $('<div></div>').attr('id', '#testmanager-pane-template').toggleClass('testmanager-pane', true);
-        ui.render(pane.get(0), {});
+        ui.render(pane.get(0), {project_id: PROJECT_ID});
         CloudPebble.Sidebar.SetActivePane(pane, 'testmanager');
     };
 

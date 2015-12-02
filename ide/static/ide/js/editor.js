@@ -676,7 +676,22 @@ CloudPebble.Editor = (function() {
 
                 rename_btn.click(show_rename_prompt);
 
-                run_btn.click(run);
+                run_btn.click(function() {
+                    if (file.target == 'test') {
+                        // TODO: factor out
+                        SharedPebble.getEmulator(ConnectionType.Qemu).done(function(emulator) {
+                            var uuid = emulator.getUUID();
+                            $.ajax({
+                                method: 'POST',
+                                url: 'project/'+PROJECT_ID+'/test/'+file.id+'/run_qemu?uuid='+encodeURIComponent(uuid)
+                            });
+                        })
+                    }
+                    else {
+                        run();
+                    }
+                });
+
                 // Show the current build/run targets in a popover on the run button.
                 run_btn.popover({
                     trigger: 'hover',
