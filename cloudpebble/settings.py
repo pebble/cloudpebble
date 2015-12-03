@@ -279,7 +279,7 @@ GITHUB_CLIENT_SECRET = _environ.get('GITHUB_SECRET', '06e9f765f00016a79a38599fbd
 GITHUB_HOOK_TEMPLATE = _environ.get('GITHUB_HOOK', 'http://example.com/ide/project/%(project)d/github/push_hook?key=%(key)s')
 
 SDK2_PEBBLE_TOOL = _environ.get('SDK2_PEBBLE_TOOL', '/home/vagrant/sdk2/bin/pebble')
-SDK3_PEBBLE_TOOL = _environ.get('SDK3_PEBBLE_TOOL', '/home/vagrant/sdk3/bin/pebble')
+SDK3_PEBBLE_WAF = _environ.get('SDK3_PEBBLE_WAF', '/home/vagrant/sdk3/pebble/waf')
 
 ARM_CS_TOOLS = _environ.get('ARM_CS_TOOLS', '/home/vagrant/arm-cs-tools/bin/')
 
