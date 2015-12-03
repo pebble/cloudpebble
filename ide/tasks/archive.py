@@ -133,6 +133,7 @@ def do_import_archive(project_id, archive, delete_project=False):
                 # - Parse resource_map.json and import files it references
                 MANIFEST = 'appinfo.json'
                 SRC_DIR = 'src/'
+                WORKER_SRC_DIR = 'worker_src/'
                 RES_PATH = 'resources'
 
                 if len(contents) > 400:
@@ -296,6 +297,12 @@ def do_import_archive(project_id, archive, delete_project=False):
                             if (not filename.startswith('.')) and (filename.endswith('.c') or filename.endswith('.h') or filename.endswith('.js')):
                                 base_filename = filename[len(SRC_DIR):]
                                 source = SourceFile.objects.create(project=project, file_name=base_filename)
+                                with z.open(entry.filename) as f:
+                                    source.save_file(f.read().decode('utf-8'))
+                        elif filename.startswith(WORKER_SRC_DIR):
+                            if (not filename.startswith('.')) and (filename.endswith('.c') or filename.endswith('.h') or filename.endswith('.js')):
+                                base_filename = filename[len(WORKER_SRC_DIR):]
+                                source = SourceFile.objects.create(project=project, file_name=base_filename, target='worker')
                                 with z.open(entry.filename) as f:
                                     source.save_file(f.read().decode('utf-8'))
                     project.save()
