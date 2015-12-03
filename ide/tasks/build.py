@@ -170,12 +170,16 @@ def run_compile(build_result):
         try:
             os.chdir(base_dir)
             if project.sdk_version == '2':
+                environ = os.environ
                 command = [settings.SDK2_PEBBLE_TOOL, "build"]
             elif project.sdk_version == '3':
+                environ = os.environ.copy()
+                environ['PATH'] = '{}:{}'.format(settings.ARM_CS_TOOLS, environ['PATH'])
                 command = [settings.SDK3_PEBBLE_WAF, "configure", "build"]
             else:
                 raise Exception("invalid sdk version.")
-            output = subprocess.check_output(command, stderr=subprocess.STDOUT, preexec_fn=_set_resource_limits)
+            output = subprocess.check_output(command, stderr=subprocess.STDOUT, preexec_fn=_set_resource_limits,
+                                             env=environ)
         except subprocess.CalledProcessError as e:
             output = e.output
             print output
