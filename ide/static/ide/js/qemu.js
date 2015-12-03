@@ -297,6 +297,19 @@
                 });
         };
 
+        this.runTest = function(project_id, test_id) {
+
+            return $.ajax({
+                method: 'POST',
+                url: '/ide/project/'+project_id+'/tests/'+test_id+'/run_qemu',
+                data: {
+                    emu: mInstanceID,
+                    token: mToken,
+                    host: mHost
+                }
+            });
+        };
+
         this.getWebsocketURL = function() {
             return (mSecure ? 'wss' : 'ws') + '://' + mHost + ':' + mAPIPort + '/qemu/' + mInstanceID + '/ws/phone';
         };

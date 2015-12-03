@@ -5,6 +5,7 @@ import datetime
 import tempfile
 import zipfile
 import re
+from io import BytesIO
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models, transaction
@@ -309,6 +310,17 @@ class TestFile(ScriptFile):
             return shutil.make_archive(location, 'zip', dir)
         finally:
             shutil.rmtree(dir)
+
+    @classmethod
+    def package_tests_to_memory(cls, tests):
+        dir = tempfile.mkdtemp()
+        try:
+            zipname = TestFile.package_tests(tests, os.path.join(dir, 'archive'))
+            with open(zipname, 'rb') as archive:
+                return BytesIO(archive.read())
+        finally:
+            shutil.rmtree(dir)
+
 
     def copy_screenshots_to_directory(self, directory):
         for screenshot_set in self.get_screenshot_sets():

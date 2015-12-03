@@ -1,7 +1,9 @@
 import tempfile
 import shutil
 import os
-from cStringIO import StringIO
+import requests
+import urllib
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse
@@ -124,8 +126,20 @@ def get_test_runs(request, project_id):
 @login_required
 def run_qemu_test(request, project_id, test_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
-    test = get_object_or_404(TestFile, pk=test_id, owner=request.user, project=project)
-    screenshots = test.screenshot_sets.all()
+    test = get_object_or_404(TestFile, pk=test_id, project=project)
+    token = request.POST['token']
+    host = request.POST['host']
+    emu = urllib.quote_plus(request.POST['emu'])
+    server = next(x for x in set(settings.QEMU_URLS) if host in x)
+    stream = TestFile.package_tests_to_memory([test])
+
+    result = requests.post(server + 'qemu/'+emu+'/test',
+                             data={'token': token},
+                             verify=settings.COMPLETION_CERTS,
+                             files=[('archive', ('archive.zip', stream))])
+    result.raise_for_status()
+    response = result.json()
+    return json_response(response)
 
 
 @require_safe
@@ -138,14 +152,8 @@ def download_tests(request, project_id):
     else:
         ids = [int(test_id) for test_id in test_ids.split(',')]
         tests = TestFile.objects.filter(project=project, id__in=ids)
-    dir = tempfile.mkdtemp()
-    try:
-        zipname = TestFile.package_tests(tests, os.path.join(dir, 'test_archive'))
-        with open(zipname, 'r') as archive:
-            stream = StringIO(archive.read())
-    finally:
-        shutil.rmtree(dir)
 
+    stream = TestFile.package_tests_to_memory(tests)
     return HttpResponse(stream, content_type='application/zip')
 
 

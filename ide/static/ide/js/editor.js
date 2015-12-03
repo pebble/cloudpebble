@@ -676,16 +676,15 @@ CloudPebble.Editor = (function() {
 
                 rename_btn.click(show_rename_prompt);
 
+                function run_test() {
+                    return SharedPebble.getEmulator(ConnectionType.Qemu).then(function(emulator) {
+                        return emulator.runTest(PROJECT_ID, file.id);
+                    });
+                }
+
                 run_btn.click(function() {
                     if (file.target == 'test') {
-                        // TODO: factor out
-                        SharedPebble.getEmulator(ConnectionType.Qemu).done(function(emulator) {
-                            var uuid = emulator.getUUID();
-                            $.ajax({
-                                method: 'POST',
-                                url: 'project/'+PROJECT_ID+'/test/'+file.id+'/run_qemu?uuid='+encodeURIComponent(uuid)
-                            });
-                        })
+                        run_test();
                     }
                     else {
                         run();
