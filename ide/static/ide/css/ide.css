@@ -637,6 +637,7 @@ table.build-results tr.pending .build-state {
 
 .resource-pane .help-block {
     margin-left: 170px;
+    clear: both;
 }
 
 .resource-pane input:not([type=checkbox]):not([type=submit]) {
