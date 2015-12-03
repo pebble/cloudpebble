@@ -72,18 +72,14 @@ CloudPebble.MonkeyScreenshots = (function() {
     var AjaxAPI = function() {
         this.getScreenshots = function(test_id) {
             var url = "/ide/project/" + PROJECT_ID + "/test/" + test_id + "/screenshots/load";
-            var defer = $.Deferred();
-            $.ajax({
+            return $.ajax({
                 url: url,
                 dataType: 'json'
-            }).done(function(result) {
-                defer.resolve(_.map(result['screenshots'], function(screenshot_set) {
+            }).then(function(result) {
+                return _.map(result['screenshots'], function(screenshot_set) {
                     return new ScreenshotSet(screenshot_set);
-                }));
-            }).fail(function(err) {
-                defer.reject(err);
+                })
             });
-            return defer.promise();
         };
 
         this.saveScreenshots = function(test_id, new_screenshots) {
@@ -102,7 +98,7 @@ CloudPebble.MonkeyScreenshots = (function() {
     };
 
     var take_screenshot = function(kind) {
-        var defer = $.Deferred();
+
 
         /** Convert a data URI to a Blob so it can be uploaded normally
          * http://stackoverflow.com/questions/4998908/convert-data-uri-to-file-then-append-to-formdata
@@ -127,6 +123,7 @@ CloudPebble.MonkeyScreenshots = (function() {
             return new Blob([ia], {type:mimeString});
         }
 
+        var defer = $.Deferred();
         SharedPebble.getPebble(kind).done(function(pebble) {
             var disconnect = function() {
                 if(!SharedPebble.isVirtual()) {
