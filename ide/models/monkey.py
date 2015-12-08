@@ -21,6 +21,8 @@ class TestCode:
 
 
 class TestSession(IdeModel):
+    """ A TestSession is owned by a project contains a set of test runs. It represents a time that a set of N>=1 tests
+    were run as one job."""
     date_added = models.DateTimeField(auto_now_add=True)
     date_started = models.DateTimeField(null=True)
     date_completed = models.DateTimeField(null=True)
@@ -54,11 +56,14 @@ class TestSession(IdeModel):
         ordering = ['-date_added']
 
 class TestLog(TextFile):
+    """ A TestLog is a text file owned by a TestRun. It stores the console output from an AT process. """
     folder = 'tests/logs'
     bucket_name = 'source'  # TODO: is this OK?
     test_run = models.OneToOneField('TestRun', related_name='logfile')
 
 class TestRun(IdeModel):
+    """ A TestRun is owned by a TestSession and links to a TestFile. It stores the result code and date information for
+    a particular time that a single test was run. """
     session = models.ForeignKey('TestSession', related_name='runs')
     test = models.ForeignKey('TestFile', related_name='runs', null=True, on_delete=models.SET_NULL)
 

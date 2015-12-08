@@ -1,6 +1,8 @@
 import json
+from cStringIO import StringIO
 from cloudpebble_test import CloudpebbleTestCase
 from django.test.utils import setup_test_environment
+from PIL import Image
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
@@ -8,6 +10,9 @@ from django.core.urlresolvers import reverse
 from ide.models.files import TestFile, ScreenshotSet, ScreenshotFile
 
 __author__ = 'joe'
+
+UNCORRECTED_PATH = "ide/tests/test_screenshot_uncorrected.png"
+CORRECTED_PATH = "ide/tests/test_screenshot_corrected.png"
 
 class ScreenshotsTests(CloudpebbleTestCase):
     def setUp(self):
@@ -17,9 +22,14 @@ class ScreenshotsTests(CloudpebbleTestCase):
         url = reverse('ide:create_test_file', args=[self.project_id])
         return json.loads(self.client.post(url, {"name": "mytest"}).content)['file']['id']
 
+    def make_upload(self, name="file.png"):
+        with open(CORRECTED_PATH, 'rb') as f:
+            content = f.read()
+            return SimpleUploadedFile(name, content, content_type="image/png")
+
     def upload_screenshots(self, test_id):
-        file1 = SimpleUploadedFile("file.png", "file_content", content_type="image/png")
-        file2 = SimpleUploadedFile("file.png", "file_content", content_type="image/png")
+        file1 = self.make_upload()
+        file2 = self.make_upload()
 
         # Make a screenshot with two files
         screenshots = [{
@@ -60,7 +70,7 @@ class ScreenshotsTests(CloudpebbleTestCase):
         del screenshots[0]['files']["aplite"]
         screenshots[0]['files']["chalk"] = {"uploadId": 0}
         url = reverse('ide:save_screenshots', args=[self.project_id, test_id])
-        data = {"screenshots": json.dumps(screenshots), "files[]": [data["files[]"][0]]}
+        data = {"screenshots": json.dumps(screenshots), "files[]": [self.make_upload()]}
         result2 = json.loads(self.client.post(url, data).content)['screenshots']
 
         # Check that the name changed, the basalt file remains the same, aplite is gone, and chalk is added
@@ -78,12 +88,19 @@ class ScreenshotsTests(CloudpebbleTestCase):
 
     def test_show_screenshot(self):
         # Test that the URL that the server gives us for a screenshot is a valid
-        # URL which leads to a PNG file.
+        # URL which leads to a PNG file which has been uncorrected.
         test_id = self.make_test()
         data, result = self.upload_screenshots(test_id)
         url = result[0]['files']['aplite']['src']
         result = self.client.get(url)
         self.assertEqual(result.get('Content-Type'), 'image/png')
+        buff = StringIO("".join(result.streaming_content))
+        img1 = Image.open(buff)
+        img1.load()
+        img2 = Image.open(UNCORRECTED_PATH)
+        img2.load()
+        self.assertSequenceEqual(list(img1.getdata()), list(img2.getdata()))
+
 
     def test_delete_test(self):
         # Make a test, upload some screenshots

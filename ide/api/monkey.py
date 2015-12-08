@@ -1,6 +1,5 @@
 import requests
 import urllib
-from datetime import datetime
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
@@ -8,17 +7,26 @@ from django.core.urlresolvers import reverse
 from django.views.decorators.http import require_POST, require_safe
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
+from django.utils import timezone
 from ide.api import json_failure, json_response
 from ide.models.project import Project
 from ide.models.monkey import TestSession, TestRun, TestCode, TestLog
 from ide.tasks.monkey import run_test_session
 from ide.models.files import TestFile
+from django.db import transaction
 
 
 __author__ = 'joe'
 
 
 def serialise_run(run, link_test=True, link_session=True):
+    """ Prepare a TestRun for representation in JSON
+
+    :param run: TestRun to represent
+    :param link_test: if True, adds in data from the TestRun's test
+    :param link_session: if True, adds in data from the TestRun's session
+    :return: A dict full of info from the TestRun object
+    """
     result = {
         'id': run.id,
         'name': run.name,
@@ -30,6 +38,7 @@ def serialise_run(run, link_test=True, link_session=True):
             'id': run.test.id,
             'name': run.test.file_name
         }
+
     if link_session:
         result['session_id'] = run.session.id
     if run.code is not None:
@@ -42,6 +51,12 @@ def serialise_run(run, link_test=True, link_session=True):
 
 
 def serialise_session(session, include_runs=False):
+    """ Prepare a TestSession for representation in JSON
+
+    :param session: TestSession to represent
+    :param include_runs: if True, includes a list of serialised test runs
+    :return: A dict full of info from the TestSession object
+    """
     runs = TestRun.objects.filter(session=session)
     result = {
         'id': session.id,
@@ -63,16 +78,18 @@ def serialise_session(session, include_runs=False):
 @require_safe
 @login_required
 def get_test_session(request, project_id, session_id):
+    """ Fetch a single test session by its ID """
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     session = get_object_or_404(TestSession, pk=session_id, project=project)
     # TODO: KEEN
     return json_response({"data": serialise_session(session)})
 
 
-# GET /project/<id>/test_sessions?date_from=&date_to=
+# GET /project/<id>/test_sessions
 @require_safe
 @login_required
 def get_test_sessions(request, project_id):
+    """ Fetch all test sessions for a project, optionally filtering by ID """
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     id = request.GET.get('id', None)
     kwargs = {'project': project}
@@ -89,25 +106,17 @@ def get_test_sessions(request, project_id):
 @require_safe
 @login_required
 def get_test_run(request, project_id, run_id):
+    """ Fetch a single test run """
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     run = get_object_or_404(TestRun, pk=run_id, session__project=project)
     # TODO: KEEN
     return json_response({"data": serialise_run(run)})
 
-
-@require_safe
-@login_required
-def get_test_run_log(request, project_id, run_id):
-    project = get_object_or_404(Project, pk=project_id, owner=request.user)
-    run = get_object_or_404(TestRun, pk=run_id, session__project=project)
-    log = get_object_or_404(TestLog, test_run=run)
-    contents = log.get_contents()
-    return HttpResponse(contents, content_type="text/plain")
-
-# GET /project/<id>/test_runs?test=&session=&date_from=&date_to=
+# GET /project/<id>/test_runs?test=&session=
 @require_safe
 @login_required
 def get_test_runs(request, project_id):
+    """ Fetch a list of test runs, optionally filtering by test ID or session ID """
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     test_id = request.GET.get('test', None)
     session_id = request.GET.get('session', None)
@@ -120,9 +129,20 @@ def get_test_runs(request, project_id):
     # TODO: KEEN
     return json_response({"data": [serialise_run(run, link_test=True, link_session=True) for run in runs]})
 
+@require_safe
+@login_required
+def get_test_run_log(request, project_id, run_id):
+    """ Download the log file for a test run """
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    run = get_object_or_404(TestRun, pk=run_id, session__project=project)
+    log = get_object_or_404(TestLog, test_run=run)
+    contents = log.get_contents()
+    return HttpResponse(contents, content_type="text/plain")
+
 @require_POST
 @login_required
 def run_qemu_test(request, project_id, test_id):
+    """ Request an interactive QEMU test session """
     # Load request parameters and database objects
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     test = get_object_or_404(TestFile, pk=test_id, project=project)
@@ -137,13 +157,13 @@ def run_qemu_test(request, project_id, test_id):
     session, runs = TestSession.setup_test_session(project, [test.id])
     try:
         # TODO: Since we know we're communicating with localhost things, build_absolute_uri may not be appropriate.
-        notify = request.build_absolute_uri(reverse('ide:notify_test_session', args=[project_id, session.id]))
+        callback_url = request.build_absolute_uri(reverse('ide:notify_test_session', args=[project_id, session.id]))
         result = requests.post(server + 'qemu/%s/test' % urllib.quote_plus(emu),
-                               data={'token': token, 'notify': notify},
+                               data={'token': token, 'notify': callback_url},
                                verify=settings.COMPLETION_CERTS,
                                files=[('archive', ('archive.zip', stream))])
 
-        # Consider doing something to get more meaningful error messages
+        # TODO: Consider doing something to get more meaningful error messages
         result.raise_for_status()
     except Exception as e:
         # If there was an error starting the test, set the ERROR test code
@@ -159,13 +179,17 @@ def run_qemu_test(request, project_id, test_id):
 @require_POST
 @csrf_exempt
 def notify_test_session(request, project_id, session_id):
+    """ Callback from interactive test session. Sets the code/log/date for a test session's runs,
+    and uses the qemu launch token to ensure that only the cloudpebble-qemu-controller can call it.
+    @csrf_exempt is needed to prevent the qemu-controller from being blocked by Django's CSRF Prevention."""
+
+    # TODO: deal with invalid input/situations (e.g. notified twice)
     project = get_object_or_404(Project, pk=int(project_id))
     session = get_object_or_404(TestSession, pk=int(session_id), project=project)
     token = request.POST['token']
     if token != settings.QEMU_LAUNCH_AUTH_HEADER:
         print "Rejecting test result, posted token %s doesn't match %s" % (request.POST['token'], settings.QEMU_LAUNCH_AUTH_HEADER)
         return json_response({}, status=403)
-
     log = request.POST['log']
     code = int(request.POST['code'])
     if code == 0:
@@ -174,17 +198,22 @@ def notify_test_session(request, project_id, session_id):
         result = TestCode.FAILED
     else:
         result = TestCode.ERROR
-    for run in session.runs.all():
-        run.code = result
-        run.log = log
-        run.date_completed = datetime.now()
-        run.save()
+
+    with transaction.atomic():
+        session.date_completed = timezone.now()
+        session.save()
+        for run in session.runs.all():
+            run.code = result
+            run.log = log
+            run.date_completed = timezone.now()
+            run.save()
     return json_response({})
 
 
 @require_safe
 @login_required
 def download_tests(request, project_id):
+    """ Download all the tests for a project as a ZIP file. """
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     test_ids = request.GET.get('tests', None)
     if test_ids is None:

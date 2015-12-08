@@ -2,7 +2,7 @@ import json
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import StreamingHttpResponse, HttpResponseRedirect
 from django.db import transaction
 from django.views.decorators.http import require_POST, require_safe
 from django.core.urlresolvers import reverse
@@ -119,6 +119,6 @@ def show_screenshot(request, project_id, test_id, screenshot_id, platform_name):
         }
         return HttpResponseRedirect(s3.get_signed_url('source', screenshot_file.s3_path, headers=headers))
     else:
-        response = HttpResponse(open(screenshot_file.local_filename), content_type=content_type)
+        response = StreamingHttpResponse(open(screenshot_file.local_filename), content_type=content_type)
         response['Content-Disposition'] = content_disposition
         return response
