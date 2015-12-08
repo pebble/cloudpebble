@@ -15,7 +15,7 @@ class TestsTests(CloudpebbleTestCase):
     def setUp(self):
         self.login()
 
-    def add_and_run_tests(self, names=None):
+    def add_and_run_tests(self, names=None, run_all=True):
         url = reverse('ide:create_test_file', args=[self.project_id])
         # Insert some tests
         names = ["mytest1", "mytest2"] if names is None else names
@@ -23,7 +23,12 @@ class TestsTests(CloudpebbleTestCase):
                  (json.loads(self.client.post(url, {"name": name}).content)['file'] for name in names)}
         # Start a test session
         url = reverse('ide:post_test_session', args=[self.project_id])
-        result = json.loads(self.client.post(url, {}).content)['data']
+        if run_all:
+            result = json.loads(self.client.post(url).content)['data']
+        else:
+            data = {'tests': ",".join(str(t) for t in tests.keys())}
+            result = json.loads(self.client.post(url, data).content)['data']
+
         # Check that the server returns a session containing all the tests we added
         run_tests = {run['test']['id']: run['test'] for run in result['runs']}
         for test_id, test in tests.iteritems():
@@ -101,3 +106,26 @@ class TestsTests(CloudpebbleTestCase):
 
         # Check that all IDs are present
         self.assertEqual(ids, response)
+
+    def test_notify_test_session(self):
+        """ Create a test and run it. Notify cloudpebble that the test has been completed with a log. Check the test
+        run's final code and log file."""
+        def run_test(process_code=0, result_code=1, passes=1, fails=0):
+            session_data = self.add_and_run_tests(["mytest%s"%process_code], run_all=False)
+            notify_url = reverse('ide:notify_test_session', args=[self.project_id, session_data['id']])
+            notify_result = json.loads(self.client.post(notify_url, {'code': process_code, 'log': "The log", 'token': settings.QEMU_LAUNCH_AUTH_HEADER}).content)
+            self.assertEqual(notify_result['success'], True)
+            get_url = reverse('ide:get_test_session', args=[self.project_id, session_data['id']])
+            session_result = json.loads(self.client.get(get_url).content)['data']
+            self.assertEqual(session_result['passes'], passes)
+            self.assertEqual(session_result['fails'], fails)
+            self.assertEqual(session_result['run_count'], 1)
+            runs_url = reverse('ide:get_test_runs', args=[self.project_id])
+            runs_result = json.loads(self.client.get(runs_url, {'session': session_result['id']}).content)['data'][0]
+            self.assertEqual(runs_result['code'], result_code)
+            logs_result = self.client.get(runs_result['logs']).content
+            self.assertEqual(logs_result, "The log")
+
+        run_test(process_code=0, result_code=1, passes=1, fails=0)
+        run_test(process_code=1, result_code=-1, passes=0, fails=1)
+        run_test(process_code=2, result_code=-2, passes=0, fails=1)

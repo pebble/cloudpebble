@@ -237,6 +237,8 @@ script
     export PKJS_BIN=/pypkjs/phonesim.py
     export PKJS_VIRTUALENV=/pypkjs/.env
     export QEMU_IMAGE_ROOT=/home/vagrant/qemu-tintin-images
+    export PEBBLE_TEST_BIN=/home/vagrant/pebble-test/runner.py
+    export PEBBLE_LOGHASH_DICT=/home/vagrant/loghash/loghash_dict.json
     export DEBUG=yes
     export QCON_PORT=8003
     exec /usr/bin/python controller.py

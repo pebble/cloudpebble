@@ -1,20 +1,18 @@
-import tempfile
-import shutil
-import os
 import requests
 import urllib
+from datetime import datetime
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse
 from django.views.decorators.http import require_POST, require_safe
+from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from ide.api import json_failure, json_response
 from ide.models.project import Project
 from ide.models.monkey import TestSession, TestRun, TestCode, TestLog
-from ide.tasks.monkey import run_test_session, setup_test_session
+from ide.tasks.monkey import run_test_session
 from ide.models.files import TestFile
-import utils.s3 as s3
 
 
 __author__ = 'joe'
@@ -125,21 +123,63 @@ def get_test_runs(request, project_id):
 @require_POST
 @login_required
 def run_qemu_test(request, project_id, test_id):
+    # Load request parameters and database objects
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     test = get_object_or_404(TestFile, pk=test_id, project=project)
     token = request.POST['token']
     host = request.POST['host']
-    emu = urllib.quote_plus(request.POST['emu'])
+    emu = request.POST['emu']
+    # Get QEMU server which corresponds to the requested host
     server = next(x for x in set(settings.QEMU_URLS) if host in x)
+    # Package the tests
     stream = TestFile.package_tests_to_memory([test])
+    # Make the test session and runs
+    session, runs = TestSession.setup_test_session(project, [test.id])
+    try:
+        # TODO: Since we know we're communicating with localhost things, build_absolute_uri may not be appropriate.
+        notify = request.build_absolute_uri(reverse('ide:notify_test_session', args=[project_id, session.id]))
+        result = requests.post(server + 'qemu/%s/test' % urllib.quote_plus(emu),
+                               data={'token': token, 'notify': notify},
+                               verify=settings.COMPLETION_CERTS,
+                               files=[('archive', ('archive.zip', stream))])
 
-    result = requests.post(server + 'qemu/'+emu+'/test',
-                             data={'token': token},
-                             verify=settings.COMPLETION_CERTS,
-                             files=[('archive', ('archive.zip', stream))])
-    result.raise_for_status()
+        # Consider doing something to get more meaningful error messages
+        result.raise_for_status()
+    except Exception as e:
+        # If there was an error starting the test, set the ERROR test code
+        for run in runs:
+            run.code = TestCode.ERROR
+            run.log = e.message
+            run.save()
+        raise e
     response = result.json()
     return json_response(response)
+
+
+@require_POST
+@csrf_exempt
+def notify_test_session(request, project_id, session_id):
+    project = get_object_or_404(Project, pk=int(project_id))
+    session = get_object_or_404(TestSession, pk=int(session_id), project=project)
+    token = request.POST['token']
+    if token != settings.QEMU_LAUNCH_AUTH_HEADER:
+        print "Rejecting test result, posted token %s doesn't match %s" % (request.POST['token'], settings.QEMU_LAUNCH_AUTH_HEADER)
+        return json_response({}, status=403)
+
+    log = request.POST['log']
+    code = int(request.POST['code'])
+    if code == 0:
+        result = TestCode.PASSED
+    elif code == 1:
+        result = TestCode.FAILED
+    else:
+        result = TestCode.ERROR
+    for run in session.runs.all():
+        run.code = result
+        run.log = log
+        run.date_completed = datetime.now()
+        run.save()
+    return json_response({})
 
 
 @require_safe
@@ -169,11 +209,10 @@ def post_test_session(request, project_id):
         test_ids = [int(test_id) for test_id in test_ids.split(',')]
 
     # Make the database objects
-    session, runs = setup_test_session(project, test_ids)
-
-    # Then run the monkeyscript task
+    session, runs = TestSession.setup_test_session(project, test_ids)
+    # TODO: Real implimentation with Liam's infrastructure
     run_test_session.delay(session.id)
-    # TODO: KEEN
+
     return json_response({"data": serialise_session(session, include_runs=True)})
 
 

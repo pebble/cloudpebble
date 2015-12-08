@@ -334,6 +334,13 @@ ul.nav-pills {
     background-color: #00B293;
 }
 
+.run-test-btn {
+    background: #0093B2 url('../img/run.png') no-repeat 15px;
+}
+.run-test-btn:hover {
+    background-color: #0093B2;
+}
+
 .save-btn {
     background: white url('../img/save.png') no-repeat center;
 }

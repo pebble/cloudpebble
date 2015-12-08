@@ -632,7 +632,13 @@ CloudPebble.Editor = (function() {
 
                 // Add some buttons
                 var button_holder = $('<p class="editor-button-wrapper">');
-                var run_btn = $('<button class="btn run-btn" title="' + gettext("Save, build, install and run") + '"></button>');
+                var run_btn;
+                if (file.target === 'test') {
+                    run_btn = $('<button></button>').addClass('btn run-test-btn').attr('title', gettext("Run test in emulator"));
+                }
+                else {
+                    run_btn = $('<button></button>').addClass('btn run-btn').attr('title', gettext("Save, build, install and run"));
+                }
                 var save_btn = $('<button class="btn save-btn" title="' + gettext('Save') + '"></button>');
                 var discard_btn = $('<button class="btn reload-btn" title="' + gettext('Reload') + '"></button>');
                 var delete_btn = $('<button class="btn delete-btn" title="' + gettext('Delete') + '"></button>');
@@ -677,6 +683,7 @@ CloudPebble.Editor = (function() {
                 rename_btn.click(show_rename_prompt);
 
                 function run_test() {
+                    // TODO: start correct platforms
                     return SharedPebble.getEmulator(ConnectionType.Qemu).then(function(emulator) {
                         return emulator.runTest(PROJECT_ID, file.id);
                     });
@@ -699,13 +706,13 @@ CloudPebble.Editor = (function() {
 
                         var tooltip = $('<div>');
                         var build_platforms = CloudPebble.ProjectInfo.app_platforms;
-                        if (build_platforms) {
+                        if (build_platforms && file.target !== 'test') {
                             var build_platform_names = _.map(build_platforms.split(','), capitalise_first_letter).join(', ');
                             tooltip.append($(interpolate("<div><strong>%s: </strong>%s</div>", [gettext("Build for"), build_platform_names])));
                         }
                         var run_platform = CloudPebble.Compile.GetPlatformForInstall();
                         var run_platform_name;
-                        if (run_platform == ConnectionType.Phone) {
+                        if (run_platform == ConnectionType.Phone && file.target !== 'test') {
                             run_platform_name = gettext("Phone");
                         }
                         else if (run_platform == ConnectionType.Qemu) {

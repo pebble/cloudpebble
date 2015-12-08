@@ -8,6 +8,7 @@ from django.dispatch import receiver
 from django.db import transaction
 import utils.s3 as s3
 from ide.models.meta import IdeModel, TextFile
+from ide.models.files import TestFile
 
 __author__ = 'joe'
 
@@ -24,6 +25,30 @@ class TestSession(IdeModel):
     date_started = models.DateTimeField(null=True)
     date_completed = models.DateTimeField(null=True)
     project = models.ForeignKey('Project', related_name='test_sessions')
+
+    @staticmethod
+    def setup_test_session(project, test_ids=None):
+        with transaction.atomic():
+            # Create a test session
+            session = TestSession.objects.create(project=project)
+            session.save()
+            runs = []
+
+            if test_ids is None:
+                # If test_ids is None, get all tests for the project
+                tests = TestFile.objects.filter(project=project)
+            else:
+                # Otherwise, get all requested test(s)
+                tests = TestFile.objects.filter(project=project, id__in=test_ids)
+
+            # Then make a test run for every test
+            for test in tests:
+                run = TestRun.objects.create(session=session, test=test, original_name=test.file_name)
+                run.save()
+                runs.append(run)
+
+        # Return the session and its runs
+        return session, runs
 
     class Meta(IdeModel.Meta):
         ordering = ['-date_added']
