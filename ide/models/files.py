@@ -3,8 +3,6 @@ import shutil
 import traceback
 import datetime
 import tempfile
-import zipfile
-import re
 from io import BytesIO
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -15,7 +13,7 @@ from django.utils.timezone import now
 from django.core.validators import RegexValidator
 from django.utils.translation import ugettext as _
 import utils.s3 as s3
-
+from ide.utils.image_correction import uncorrect
 from ide.models.meta import IdeModel, TextFile
 
 __author__ = 'katharine'
@@ -405,6 +403,13 @@ class ScreenshotFile(BinFile):
         self.full_clean()
         self.screenshot_set.save()
         super(ScreenshotFile, self).save(*args, **kwargs)
+
+    def save_file(self, stream, file_size=0):
+        with BytesIO() as buff:
+            uncorrect(stream, buff, format='png')
+            buff.seek(0)
+            data = buff.read()
+            super(ScreenshotFile, self).save_string(data)
 
     class Meta(BinFile.Meta):
         unique_together = (('platform', 'screenshot_set'),)
