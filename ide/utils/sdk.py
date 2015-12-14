@@ -346,15 +346,15 @@ def generate_pebblejs_resource_dict(resources):
     media = [
         {
             "menuIcon": True,  # This must be the first entry; we adjust it later.
-            "type": "png",
+            "type": "bitmap",
             "name": "IMAGE_MENU_ICON",
             "file": "images/menu_icon.png"
         }, {
-            "type": "png",
+            "type": "bitmap",
             "name": "IMAGE_LOGO_SPLASH",
             "file": "images/logo_splash.png"
         }, {
-            "type": "png",
+            "type": "bitmap",
             "name": "IMAGE_TILE_SPLASH",
             "file": "images/tile_splash.png"
         }, {
@@ -365,7 +365,7 @@ def generate_pebblejs_resource_dict(resources):
     ]
 
     for resource in resources:
-        if resource.kind != 'png':
+        if resource.kind != 'bitmap':
             continue
 
         d = {
