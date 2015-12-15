@@ -39,8 +39,8 @@ NEW_THINGS = [
      "See <a href=\"http://developer.getpebble.com/sdk/round-getting-started/\">this guide</a> for more information"],
     ["It's once again possible to take screenshots of your apps directly from the emulator!",
      "You can find the screenshot button in the Compilation page, or you can run the \"Take Screenshots\" command from the fuzzy prompt (cmd-shift-P or ctrl-shift-P)"],
-    ["CloudPebble has been updated to SDK 3.8! Aplite now uses SDK 3. Read more at <a href='https://developer.getpebble.com/blog/2015/12/02/Bringing-the-Family-Back-Together/'>",
-     "We have converted all your png and pbi resources to the new 'bitmap' format. Read more at <a href='https://developer.getpebble.com/blog/2015/12/02/Bitmap-Resources/'>."],
+    ["CloudPebble has been updated to SDK 3.8! Aplite now uses SDK 3. Read more <a href='https://developer.getpebble.com/blog/2015/12/02/Bringing-the-Family-Back-Together/'>on our blog</a>.",
+     "We have converted all your png and pbi resources to the new 'bitmap' format. Read more <a href='https://developer.getpebble.com/blog/2015/12/02/Bitmap-Resources/'> on our blog</a>."],
 ]
 
 
