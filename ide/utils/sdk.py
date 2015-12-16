@@ -371,7 +371,7 @@ def generate_pebblejs_resource_dict(resources):
     ]
 
     for resource in resources:
-        if resource.kind != 'bitmap':
+        if resource.kind not in ('bitmap', 'png'):
             continue
 
         d = {

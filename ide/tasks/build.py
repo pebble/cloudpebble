@@ -152,7 +152,7 @@ def run_compile(build_result):
             create_source_files(project, base_dir)
 
             for f in resources:
-                if f.kind != 'png':
+                if f.kind not in ('png', 'bitmap'):
                     continue
                 target_dir = os.path.abspath(os.path.join(base_dir, resource_root, ResourceFile.DIR_MAP[f.kind]))
                 abs_target = os.path.abspath(os.path.join(target_dir, f.file_name))
