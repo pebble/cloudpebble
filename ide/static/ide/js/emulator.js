@@ -15,12 +15,14 @@ CloudPebble.Emulator = new (function() {
         popup.find('.battery-level').on('input', setBatteryState).val(self._batteryLevel);
         popup.find('#is-charging').change(setBatteryState).prop('checked', self._charging);
         popup.find('#bluetooth-enabled').change(setBluetoothState).prop('checked', self._bluetooth);
+        popup.find('#24h-enabled').change(set24HState).prop('checked', self._24h)
     }
 
     function setDefaults() {
         self._batteryLevel = 80;
         self._charging = false;
         self._bluetooth = true;
+        self._24h = true;
     }
 
     function handleClosed() {
@@ -41,6 +43,10 @@ CloudPebble.Emulator = new (function() {
             '<div class="control-group">' +
                 '<label class="control-label" for="bluetooth-enabled">Bluetooth:</label>' +
                 '<div class="controls"><input type="checkbox" id="bluetooth-enabled" checked></div>' +
+            '</div>' +
+            '<div class="control-group">' +
+                '<label class="control-label" for="24h-enabled">24-hour:</label>' +
+                '<div class="controls"><input type="checkbox" id="24h-enabled" checked></div>' +
             '</div>' +
             '<button class="btn emu-app-config">App Config</button> ' +
             '<button class="btn emu-sensors">Sensors</button> ' +
@@ -74,6 +80,11 @@ CloudPebble.Emulator = new (function() {
     function setBluetoothState(e) {
         self._bluetooth = $('.emulator-config #bluetooth-enabled').prop('checked');
         SharedPebble.getPebbleNow().emu_bluetooth(self._bluetooth);
+    }
+
+    function set24HState(e) {
+        self._24h = $('.emulator-config #24h-enabled').prop('checked');
+        SharedPebble.getPebbleNow().emu_set_24h(self._24h);
     }
 
     function doSensors(e) {
