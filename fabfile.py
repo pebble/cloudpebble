@@ -64,7 +64,6 @@ def update_ycmd_sdk(sdk_version):
         sudo("tar -xf sdk.tar.gz")
         sudo("rm -rf sdk3")
         sudo("mv sdk-core sdk3")
-        sudo("mv sdk3/pebble sdk3/Pebble")
 
 
 @task
