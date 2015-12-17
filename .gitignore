@@ -11,3 +11,4 @@ src/
 .cache/
 .env/
 .idea/
+bower_components

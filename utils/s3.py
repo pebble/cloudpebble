@@ -1,10 +1,28 @@
 import boto
 from boto.s3.key import Key
+from boto.s3.connection import OrdinaryCallingFormat
 from django.conf import settings
 import urllib
 
+def _ensure_bucket_exists(s3, bucket):
+    try:
+        s3.create_bucket(bucket)
+    except boto.exception.S3ResponseError:
+        pass
+    else:
+        print "Created bucket %s" % bucket
+
 if settings.AWS_ENABLED:
-    _s3 = boto.connect_s3(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+    if settings.AWS_S3_FAKE_S3 is None:
+        _s3 = boto.connect_s3(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+    else:
+        host, port = (settings.AWS_S3_FAKE_S3.split(':', 2) + [80])[:2]
+        port = int(port)
+        _s3 = boto.connect_s3("key_id", "secret_key", is_secure=False, port=port,
+                              host=host, calling_format=OrdinaryCallingFormat())
+        _ensure_bucket_exists(_s3, settings.AWS_S3_SOURCE_BUCKET)
+        _ensure_bucket_exists(_s3, settings.AWS_S3_EXPORT_BUCKET)
+        _ensure_bucket_exists(_s3, settings.AWS_S3_BUILDS_BUCKET)
 
     _buckets = {
         'source': _s3.get_bucket(settings.AWS_S3_SOURCE_BUCKET),
