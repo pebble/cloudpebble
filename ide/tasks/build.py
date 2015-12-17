@@ -171,7 +171,8 @@ def run_compile(build_result):
             os.chdir(base_dir)
             if project.sdk_version == '2':
                 environ = os.environ
-                command = [settings.SDK2_PEBBLE_TOOL, "build"]
+                environ['PATH'] = '{}:{}'.format(settings.ARM_CS_TOOLS, environ['PATH'])
+                command = [settings.SDK2_PEBBLE_WAF, "configure", "build"]
             elif project.sdk_version == '3':
                 environ = os.environ.copy()
                 environ['PATH'] = '{}:{}'.format(settings.ARM_CS_TOOLS, environ['PATH'])
