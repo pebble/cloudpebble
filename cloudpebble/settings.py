@@ -259,7 +259,10 @@ LOGGING = {
     }
 }
 
-BROKER_URL = _environ.get('CLOUDAMQP_URL', 'redis://:@redis/1')
+REDIS_URL = _environ.get('REDIS_URL', None) or _environ.get('REDISCLOUD_URL', 'redis://redis:6379/')
+
+BROKER_URL = REDIS_URL + '1'
+CELERY_RESULT_BACKEND = BROKER_URL
 
 BROKER_POOL_LIMIT = int(_environ.get('BROKER_POOL_LIMIT', 10))
 
@@ -304,8 +307,6 @@ AWS_S3_EXPORT_BUCKET = _environ.get('AWS_S3_EXPORT_BUCKET', 'exports.cloudpebble
 AWS_S3_FAKE_S3 = _environ.get('AWS_S3_FAKE_S3', None)
 
 TYPOGRAPHY_CSS = _environ.get('TYPOGRAPHY_CSS', None)
-
-REDIS_URL = _environ.get('REDIS_URL', None) or _environ.get('REDISCLOUD_URL', 'redis://redis:6379/')
 
 LIBPEBBLE_PROXY = _environ.get('LIBPEBBLE_PROXY', None)
 
