@@ -490,6 +490,10 @@ Pebble = function(proxy, token) {
         send_qemu_command(QEmu.Battery, pack("bb", [percent, charging|0]));
     };
 
+    this.emu_set_24h = function(enabled) {
+        send_qemu_command(QEmu.TimeFormat, pack("b", [enabled]));
+    };
+
     var mButtonState = 0;
     var mButtonStateQueue = [];
     var mButtonStateTimer = null;
@@ -792,7 +796,8 @@ Pebble = function(proxy, token) {
         Battery: 5,
         Accel: 6,
         VibrationNotification: 7,
-        Button: 8
+        Button: 8,
+        TimeFormat: 9
     };
 
     var send_message = function(endpoint, message) {
