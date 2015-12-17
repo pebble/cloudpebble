@@ -259,9 +259,9 @@ LOGGING = {
     }
 }
 
-REDIS_URL = _environ.get('REDIS_URL', None) or _environ.get('REDISCLOUD_URL', 'redis://redis:6379/')
+REDIS_URL = _environ.get('REDIS_URL', None) or _environ.get('REDISCLOUD_URL', 'redis://redis:6379')
 
-BROKER_URL = REDIS_URL + '1'
+BROKER_URL = REDIS_URL + '/1'
 CELERY_RESULT_BACKEND = BROKER_URL
 
 BROKER_POOL_LIMIT = int(_environ.get('BROKER_POOL_LIMIT', 10))
