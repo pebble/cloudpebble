@@ -2,6 +2,7 @@
 # Django settings for cloudpebble project.
 
 import os
+import socket
 import dj_database_url
 _environ = os.environ
 
@@ -328,6 +329,8 @@ try:
 except ImportError:
     print "No local settings overrides."
     pass
+
+socket.setdefaulttimeout(int(_environ.get("DEFAULT_SOCKET_TIMEOUT", 10)))
 
 # Don't keep these hanging around in the environment.
 if not DEBUG:
