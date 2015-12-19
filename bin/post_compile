@@ -6,37 +6,28 @@ set -e
 # Make sure we have the SDK in place.
 
 echo "Downloading SDK 2"
-curl -o /tmp/pebblesdk2.tar.gz -L https://sdk.getpebble.com/download/2.8.1?source=cloudpebble
+curl -o /tmp/pebblesdk2.tar.gz -L https://s3.amazonaws.com/assets.getpebble.com/sdk3/sdk-core/sdk-core-2.9.tar.bz2
 
 echo "Downloading SDK 3"
 curl -o /tmp/pebblesdk3.tar.gz -L https://s3.amazonaws.com/assets.getpebble.com/sdk3/release/sdk-core-3.8.1.tar.bz2
 
 echo "Downloading the toolchain"
-curl -o /tmp/arm-cs-tools.tar https://cloudpebble-vagrant.s3.amazonaws.com/arm-cs-tools-stripped.tar
-
-echo "Extracting SDK 2"
-tar -xf /tmp/pebblesdk2.tar.gz
-mv PebbleSDK-2.8.1 sdk2
-pushd sdk2
-    echo "Extracting the toolchain"
+pushd /
+    curl -o /tmp/arm-cs-tools.tar https://cloudpebble-vagrant.s3.amazonaws.com/arm-cs-tools-stripped.tar
     tar -xf /tmp/arm-cs-tools.tar
-    echo "Preparing virtualenv"
-    virtualenv .env
-    # Instead of actually installing the requirements, we instead just use the global ones, which are a superset
-    # of the ones here.
-#    source .env/bin/activate
-#        pip install -r requirements.txt
-#    deactivate
+popd
+
+
+mkdir sdk2
+pushd sdk2
+    echo "Extracting SDK 2"
+    tar --strip 1 -xf /tmp/pebblesdk2.tar.gz
 popd
 
 mkdir sdk3
 pushd sdk3
     echo "Extracting SDK 3"
     tar --strip 1 -xf /tmp/pebblesdk3.tar.gz
-    echo "Extracting the toolchain"
-    tar -xf /tmp/arm-cs-tools.tar
-#    echo "Preparing virtualenv"
-#    virtualenv .env
 popd
 
 touch NO_TRACKING
