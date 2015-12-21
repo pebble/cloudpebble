@@ -8,26 +8,23 @@
                 <label class="control-label" for="edit-resource-type">{% trans 'Resource type' %}</label>
                 <div class="controls">
                     <select id="edit-resource-type">
-                        <option value="png">{% trans 'PNG image' %}</option>
+                        <option value="bitmap">{% trans 'Bitmap Image' %}</option>
                         {% if project.project_type == 'native' %}
-                        <option value="png-trans">{% trans 'PNG with transparency' %}</option>
-                        <option value="font">{% trans 'TrueType font' %}</option>
-                        <option value="raw">{% trans 'Raw binary blob' %}</option>
-                        {% if project.sdk_version == '3' %}
-                        <option value="pbi">{% trans '1-bit Pebble image' %}</option>
+                            <option value="font">{% trans 'TrueType font' %}</option>
+                            <option value="raw">{% trans 'Raw binary blob' %}</option>
                         {% endif %}
+
+                        <option value="png">{% trans 'PNG image (deprecated)' %}</option>
+                        {% if project.project_type == 'native' %}
+                            <option value="png-trans">{% trans 'PNG with transparency (deprecated)' %}</option>
+                            {% if project.sdk_version == '3' %}
+                                <option value="pbi">{% trans '1-bit Pebble image (deprecated)' %}</option>
+                            {% endif %}
                         {% endif %}
                     </select>
                 </div>
             </div>
 
-            <div class="control-group" id="non-font-resource-group">
-                <label class="control-label">{% trans 'Identifier' %}</label>
-                <div class="controls">
-                    <input type="text" class="edit-resource-id" placeholder="IMAGE_EXAMPLE_IDENTIFIER" pattern="[A-Za-z0-9_]+">
-                    <span class="help-block">{% trans 'This is used in your code and must be a valid C identifier.' %}</span>
-                </div>
-            </div>
             <div class="control-group" id="edit-resource-file-name_section">
                 <label class="control-label" for="edit-resource-file-name">{% trans 'File name' %}</label>
                 <div class="controls">
@@ -35,24 +32,109 @@
                 </div>
             </div>
 
-            <div id="resource-targets-section" class="sdk3-only">
-                <div class="control-group">
-                    <label style="width: 250px" class="control-label" for="edit-resource-target-platforms-enabled">{% trans 'Target specific platforms' %}</label>
-                    <input type="checkbox" id="edit-resource-target-platforms-enabled">
-                </div>
-                <div id="edit-resource-targets">
-                    <div class="edit-resource-target-options">
-                    {% for platform in  supported_platforms %}
-                        <div class="control-group">
-                            <label class="control-label" for="edit-resource-target-{{ platform }}">{{ platform | capfirst }}</label>
-                            <input type="checkbox" id="edit-resource-target-{{ platform }}">
-                        </div>
-                    {% endfor %}
-                    </div>
-                    <p class="help-block">{% trans "The 'targetPlatforms' option restricts all variants of a resource to a specific set of platforms." %}</p>
-                </div>
-            </div>
+        </div>
 
+
+        <div id="resource-id-group">
+            <div class="well resource-id-group-single">
+                <div class="control-group">
+                    <label class="control-label">{% trans 'Identifier' %}</label>
+                    <div class="controls">
+                        {# TODO: placeholder/pattern thingybobs #}
+                        <input type="text" class="span6 edit-resource-id font-only" placeholder="FONT_EXAMPLE_BOLD_SUBSET_24" pattern="[A-Za-z0-9_]*[0-9]+">
+                        <input type="text" class="span6 edit-resource-id non-font-only" placeholder="IMAGE_EXAMPLE_IDENTIFIER" pattern="[A-Za-z0-9_]+">
+                        <span class="help-block">{% trans 'This is used in your code and must be a valid C identifier.' %}<br>
+                            <span class="font-only">{% trans 'It must end with the desired font size.' %}</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="control-group font-resource-regex-group font-only">
+                    <label class="control-label">{% trans 'Characters' context "like letters and numbers" %}</label>
+                    <div class="controls">
+                        <input type="text" class="span4 edit-resource-regex" placeholder="[0-9:. ]">
+                        <span class="help-block">{% trans 'A PCRE regular expression that restricts characters.' %}</span>
+                    </div>
+                </div>
+                <div class="control-group font-resource-tracking-group font-only">
+                    {# Translators: This refers to the number of additional pixels by which to shift each character #}
+                    <label class="control-label">{% trans 'Tracking adjust' %}</label>
+                    <div class="controls">
+                        <input type="number" class="span1 edit-resource-tracking" value="0">
+                        <span class="help-block">{% trans 'Number of additional pixels by which to shift each character.' %}</span>
+                    </div>
+                </div>
+                <div class="control-group font-resource-compatibility-group font-only">
+                    <label class="control-label">{% trans 'Compatibility' %}</label>
+                    <div class="controls">
+                        <select class="font-compat-option">
+                            <option value="">{% trans "Latest" %}</option>
+                            <option value="2.7">{% trans "2.7 and earlier" %}</option>
+                        </select>
+                        <span class="help-block">{% trans 'Determines the font rendering algorithm to use. The latest looks better, but can produce slightly larger characters.' %}</span>
+                    </div>
+                </div>
+                <div class="control-group bitmap-only">
+                    <label class="control-label">{% trans 'Memory Format' %}</label>
+                    <div class="controls">
+                        <select class="bitmap-memory-format-option">
+                            <option value="">{% trans "Best" %}</option>
+                            <option value="Smallest">{% trans "Smallest" %}</option>
+                            <option value="SmallestPalette">{% trans "Smallest Palette" %}</option>
+                            <option value="1Bit">{% trans "1-bit" %}</option>
+                            <option value="8Bit">{% trans "8-bit" %}</option>
+                            <option value="1BitPalette">{% trans "1-bit Palette" %}</option>
+                            <option value="2BitPalette">{% trans "2-bit Palette" %}</option>
+                            <option value="4BitPalette">{% trans "4-bit Palette" %}</option>
+                        </select>
+                        <span class="help-block">{% trans 'Determines the bitmap type.' %}</span>
+                        {# TODO: consider explaining 'best' #}
+                        {# TODO: consider linking to developer documentation #}
+                    </div>
+                </div>
+                <div class="control-group bitmap-only">
+                    <label class="control-label">{% trans 'Storage Format' %}</label>
+                    <div class="controls">
+                        <select class="bitmap-storage-format-option">
+                            <option value="">{% trans "Best" %}</option>
+                            <option value="pbi">{% trans "PBI" %}</option>
+                            <option value="png">{% trans "PNG" %}</option>
+                        </select>
+                        <span class="help-block">{% trans 'Determines the file format used for storage.' %}</span>
+                    </div>
+                </div>
+                <div class="control-group bitmap-only">
+                    <label class="control-label">{% trans 'Space Optimisation' %}</label>
+                    <div class="controls">
+                        <select class="bitmap-space-optimisation-option">
+                            <option value="">{% trans "Best" %}</option>
+                            <option value="storage">{% trans "Storage" %}</option>
+                            <option value="memory">{% trans "Memory" %}</option>
+                        </select>
+                        <span class="help-block">{% trans 'Determines whether the output resource is optimised for low runtime memory or low resource space usage.' %}</span>
+                    </div>
+                </div>
+
+                <div class="resource-targets-section sdk3-only native-only">
+                    <div class="control-group controls">
+                        <label style="width: 250px" class="control-label">{% trans 'Target platforms' %}
+                            <span class="text-icon" data-content="{% trans "Use the Target Platforms option when you want a specific resource ID to only be available for specific platforms. <br> If you want this resource to be available on multiple platforms but with different files, upload additional images and tag them." %}">?</span>
+                        </label>
+                        <input type="checkbox" class="edit-resource-target-platforms-enabled"> <p></p>
+
+                        <div class="edit-resource-targets">
+                            <div class="edit-resource-target-options">
+                            {% for platform in  supported_platforms %}
+                                <div class="control-group">
+                                    <label class="control-label" for="edit-resource-target-{{ platform }}">{{ platform | capfirst }}</label>
+                                    <input type="checkbox" class="edit-resource-target-{{ platform }}">
+                                </div>
+                            {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-small btn-danger btn-delete-well btn-delidentifier">{% trans 'Delete Identifier' %}</button>
+            </div>
         </div>
 
         <div class="well image-platform-preview hide sdk3-only">
@@ -101,7 +183,8 @@
                         <input type="file" class="edit-resource-replace-file">
                     </div>
                 </div>
-                <button type="button" class="btn btn-small btn-danger btn-delvariant">{% trans 'Delete Variant' %}</button>
+{#                <button type="button" class="btn btn-small btn-danger btn-delvariant">{% trans 'Delete Variant' %}</button>#}
+                <button type="button" class="btn btn-small btn-danger btn-delete-well btn-delvariant">{% trans 'Delete Variant' %}</button>
             </div>
         </div>
 
@@ -127,46 +210,13 @@
                     <label class="control-label">{% trans 'Final platforms' %}</label>
                     <div class="controls label-list"></div>
                 </div>
-
-                <button type="button" class="btn btn-small btn-danger btn-delvariant">{% trans 'Delete Variant' %}</button>
-            </div>
-        </div>
-
-        <div id="font-resource-group" class="hide">
-            <div class="well font-resource-group-single">
                 <div class="control-group">
-                    <label class="control-label">{% trans 'Identifier' %}</label>
+                    <label class="control-label">{% trans 'Replace file' %}</label>
                     <div class="controls">
-                        <input type="text" class="span6 edit-resource-id" placeholder="FONT_EXAMPLE_BOLD_SUBSET_24" pattern="[A-Za-z0-9_]*[0-9]+">
-                        <span class="help-block">{% trans 'This is used in your code and must be a valid C identifier.' %}<br>
-                            {% trans 'It must end with the desired font size.' %}</span>
+                        <input type="file" class="edit-resource-replace-file">
                     </div>
                 </div>
-                <div class="control-group font-resource-regex-group">
-                    <label class="control-label">{% trans 'Characters' context "like letters and numbers" %}</label>
-                    <div class="controls">
-                        <input type="text" class="span4 edit-resource-regex" placeholder="[0-9:. ]">
-                        <span class="help-block">{% trans 'A PCRE regular expression that restricts characters.' %}</span>
-                    </div>
-                </div>
-                <div class="control-group font-resource-tracking-group">
-                    {# Translators: This refers to the number of additional pixels by which to shift each character #}
-                    <label class="control-label">{% trans 'Tracking adjust' %}</label>
-                    <div class="controls">
-                        <input type="number" class="span1 edit-resource-tracking" value="0">
-                        <span class="help-block">{% trans 'Number of additional pixels by which to shift each character.' %}</span>
-                    </div>
-                </div>
-                <div class="control-group font-resource-compatibility-group">
-                    <label class="control-label">{% trans 'Compatibility' %}</label>
-                    <div class="controls">
-                        <select class="font-compat-option">
-                            <option value="">{% trans "Latest" %}</option>
-                            <option value="2.7">{% trans "2.7 and earlier" %}</option>
-                        </select>
-                        <span class="help-block">{% trans 'Determines the font rendering algorithm to use. The latest looks better, but can produce slightly larger characters.' %}</span>
-                    </div>
-                </div>
+                <button type="button" class="btn btn-small btn-danger btn-delete-well btn-delvariant">{% trans 'Delete Variant' %}</button>
             </div>
         </div>
 
@@ -189,11 +239,13 @@
             </div>
         </div>
 
-
         <div id="edit-resource-buttons" class="well resource-actions">
             <button type="submit" class="btn btn-affirmative">{% trans 'Save' %}</button>
             <button type="button" class="btn btn-danger hide" id="edit-resource-delete">{% trans 'Delete' %}</button>
-            <button type="button" class="btn hide" id="add-font-resource">{% trans 'Another font' %}</button>
+            <button type="button" class="btn hide" id="add-resource-id">
+                <span class="font-only">{% trans 'Another font' %}</span>
+                <span class="non-font-only">{% trans 'Another Identifer' %}</span>
+            </button>
         </div>
     </form>
 

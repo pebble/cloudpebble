@@ -24,7 +24,7 @@ def launch_emulator(request):
     oauth = request.POST['token']
     tz_offset = request.POST['tz_offset']
     versions = {
-        'aplite': '2.9',
+        'aplite': '3.0',
         'basalt': '3.0',
         'chalk': '3.0',
     }

@@ -310,12 +310,18 @@ def generate_native_resource_dict(project, resources):
                 d['characterRegex'] = resource_id.character_regex
             if resource_id.tracking:
                 d['trackingAdjust'] = resource_id.tracking
+            if resource_id.memory_format:
+                d['memoryFormat'] = resource_id.memory_format
+            if resource_id.storage_format:
+                d['storageFormat'] = resource_id.storage_format
+            if resource_id.space_optimisation:
+                d['spaceOptimization'] = resource_id.space_optimisation
             if resource.is_menu_icon:
                 d['menuIcon'] = True
             if resource_id.compatibility is not None:
                 d['compatibility'] = resource_id.compatibility
-            if project.sdk_version == '3' and resource.target_platforms:
-                d['targetPlatforms'] = json.loads(resource.target_platforms)
+            if project.sdk_version == '3' and resource_id.target_platforms:
+                d['targetPlatforms'] = json.loads(resource_id.target_platforms)
 
             resource_map['media'].append(d)
     return resource_map
@@ -346,15 +352,15 @@ def generate_pebblejs_resource_dict(resources):
     media = [
         {
             "menuIcon": True,  # This must be the first entry; we adjust it later.
-            "type": "png",
+            "type": "bitmap",
             "name": "IMAGE_MENU_ICON",
             "file": "images/menu_icon.png"
         }, {
-            "type": "png",
+            "type": "bitmap",
             "name": "IMAGE_LOGO_SPLASH",
             "file": "images/logo_splash.png"
         }, {
-            "type": "png",
+            "type": "bitmap",
             "name": "IMAGE_TILE_SPLASH",
             "file": "images/tile_splash.png"
         }, {
@@ -365,7 +371,7 @@ def generate_pebblejs_resource_dict(resources):
     ]
 
     for resource in resources:
-        if resource.kind != 'png':
+        if resource.kind not in ('bitmap', 'png'):
             continue
 
         d = {

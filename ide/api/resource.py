@@ -14,6 +14,26 @@ import utils.s3 as s3
 __author__ = 'katharine'
 
 
+def decode_resource_id_options(request):
+    """ Extract resource ID options from a HTTP request, making sure the keys have the same names as the
+    ResourceIdentifier object's fields. """
+    return {
+        # Resource ID
+        'resource_id': request['id'],
+        'target_platforms': json.dumps(request['target_platforms']) if 'target_platforms' in request else None,
+
+        # Font options
+        'character_regex': request.get('regex', None),
+        'tracking': int(request['tracking']) if 'tracking' in request else None,
+        'compatibility': request.get('compatibility', None),
+
+        # Bitmap options
+        'memory_format': request.get('memory_format', None),
+        'storage_format': request.get('storage_format', None),
+        'space_optimisation': request.get('space_optimisation', None),
+    }
+
+
 @require_POST
 @login_required
 def create_resource(request, project_id):
@@ -28,16 +48,12 @@ def create_resource(request, project_id):
         with transaction.atomic():
             rf = ResourceFile.objects.create(project=project, file_name=file_name, kind=kind)
             for r in resource_ids:
-                regex = r['regex'] if 'regex' in r else None
-                tracking = int(r['tracking']) if 'tracking' in r else None
-                resources.append(ResourceIdentifier.objects.create(resource_file=rf, resource_id=r['id'],
-                                                                   character_regex=regex, tracking=tracking))
+                resource_options = decode_resource_id_options(r)
+                resources.append(ResourceIdentifier.objects.create(resource_file=rf, **resource_options))
             if posted_file is not None:
                 variant = ResourceVariant.objects.create(resource_file=rf, tags=",".join(str(int(t)) for t in new_tags))
                 variant.save_file(posted_file, posted_file.size)
 
-            target_platforms = json.loads(request.POST.get('target_platforms', None))
-            rf.target_platforms = None if target_platforms is None else json.dumps(target_platforms)
             rf.save()
 
     except Exception as e:
@@ -55,11 +71,10 @@ def create_resource(request, project_id):
             "id": rf.id,
             "kind": rf.kind,
             "file_name": rf.file_name,
-            "target_platforms": json.loads(rf.target_platforms) if rf.target_platforms else None,
-            "resource_ids": [{'id': x.resource_id, 'regex': x.character_regex} for x in resources],
+            "resource_ids": [x.get_options_dict(with_id=True) for x in resources],
             "identifiers": [x.resource_id for x in resources],
             "variants": [x.get_tags() for x in rf.variants.all()],
-            "extra": {y.resource_id: {'regex': y.character_regex, 'tracking': y.tracking} for y in rf.identifiers.all()}
+            "extra": {y.resource_id: y.get_options_dict(with_id=False) for y in rf.identifiers.all()}
         }})
 
 
@@ -80,18 +95,12 @@ def resource_info(request, project_id, resource_id):
 
     return json_response({
         'resource': {
-            "target_platforms": json.loads(resource.target_platforms) if resource.target_platforms else None,
-            'resource_ids': [{
-                                 'id': x.resource_id,
-                                 'regex': x.character_regex,
-                                 'tracking': x.tracking,
-                                 'compatibility': x.compatibility
-                             } for x in resources],
+            'resource_ids': [x.get_options_dict(with_id=True) for x in resources],
             'id': resource.id,
             'file_name': resource.file_name,
             'kind': resource.kind,
             "variants": [x.get_tags() for x in resource.variants.all()],
-            "extra": {y.resource_id: {'regex': y.character_regex, 'tracking': y.tracking, 'compatibility': y.compatibility} for y in resource.identifiers.all()}
+            "extra": {y.resource_id: y.get_options_dict(with_id=False) for y in resource.identifiers.all()}
         }
     })
 
@@ -154,7 +163,6 @@ def update_resource(request, project_id, resource_id):
     resource = get_object_or_404(ResourceFile, pk=resource_id, project=project)
     resource_ids = json.loads(request.POST['resource_ids'])
     file_name = request.POST.get('file_name', None)
-    target_platforms = json.loads(request.POST.get('target_platforms', None))
     variant_tags = json.loads(request.POST.get('variants', "[]"))
     new_tags = json.loads(request.POST.get('new_tags', "[]"))
     replacement_map = json.loads(request.POST.get('replacements', "[]"))
@@ -166,10 +174,8 @@ def update_resource(request, project_id, resource_id):
             resources = []
             ResourceIdentifier.objects.filter(resource_file=resource).delete()
             for r in resource_ids:
-                regex = r['regex'] if 'regex' in r else None
-                tracking = int(r['tracking']) if 'tracking' in r else None
-                compat = r['compatibility'] if 'compatibility' in r else None
-                resources.append(ResourceIdentifier.objects.create(resource_file=resource, resource_id=r['id'], character_regex=regex, tracking=tracking, compatibility=compat))
+                resource_options = decode_resource_id_options(r)
+                resources.append(ResourceIdentifier.objects.create(resource_file=resource, **resource_options))
 
             # We get sent a list of (tags_before, tags_after) pairs.
             updated_variants = []
@@ -191,7 +197,6 @@ def update_resource(request, project_id, resource_id):
                 replacement = replacement_files[int(file_index)]
                 variant.save_file(replacement, replacement.size)
 
-            resource.target_platforms = None if target_platforms is None else json.dumps(target_platforms)
             if file_name and resource.file_name != file_name:
                 resource.file_name = file_name
 
@@ -211,11 +216,10 @@ def update_resource(request, project_id, resource_id):
             "id": resource.id,
             "kind": resource.kind,
             "file_name": resource.file_name,
-            "resource_ids": [{'id': x.resource_id, 'regex': x.character_regex, 'compatibility': x.compatibility} for x in resources],
-            "target_platforms": json.loads(resource.target_platforms) if resource.target_platforms else None,
+            "resource_ids": [x.get_options_dict(with_id=True) for x in resources],
             "identifiers": [x.resource_id for x in resources],
             "variants": [x.get_tags() for x in resource.variants.all()],
-            "extra": {y.resource_id: {'regex': y.character_regex, 'tracking': y.tracking, 'compatibility': y.compatibility} for y in resource.identifiers.all()}
+            "extra": {y.resource_id: y.get_options_dict(with_id=False) for y in resource.identifiers.all()}
         }})
 
 
@@ -230,6 +234,7 @@ def show_resource(request, project_id, resource_id, variant):
     content_types = {
         u'png': 'image/png',
         u'png-trans': 'image/png',
+        u'bitmap': 'image/png',
         u'font': 'application/octet-stream',
         u'raw': 'application/octet-stream'
     }

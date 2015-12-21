@@ -60,10 +60,10 @@ def restart_qemu_service():
 @parallel
 def update_ycmd_sdk(sdk_version):
     with cd("/home/ycm"), settings(sudo_user="ycm", shell="/bin/bash -c"):
-        sudo("wget -nv -O sdk.tar.gz https://sdk.getpebble.com/download/%s?source=cloudpebble" % sdk_version)
+        sudo("wget -nv -O sdk.tar.gz https://s3.amazonaws.com/assets.getpebble.com/sdk3/release/sdk-core-%s.tar.bz2" % sdk_version)
         sudo("tar -xf sdk.tar.gz")
         sudo("rm -rf sdk3")
-        sudo("mv PebbleSDK-%s sdk3" % sdk_version)
+        sudo("mv sdk-core sdk3")
 
 
 @task
@@ -123,6 +123,7 @@ def update_qemu_images(sdk_version):
     with lcd("~/projects/tintin"):
         local("git checkout v%s" % sdk_version)
 
+    build_qemu_image("bb2", "aplite")
     build_qemu_image("snowy_bb", "basalt")
     build_qemu_image("spalding_bb2", "chalk")
 
@@ -134,7 +135,7 @@ def update_qemu_images(sdk_version):
 @task
 @runs_once
 def update_cloudpebble_sdk(sdk_version):
-    local("sed -i.bak 's/download\/3.[a-z0-9-]*/download\/%s/' bin/post_compile bootstrap.sh" % sdk_version)
+    local("sed -i.bak 's/sdk-core-3.[a-z0-9-]*\.tar\.bz2/sdk-core-%s.tar.bz2/' bin/post_compile bootstrap.sh" % sdk_version)
     local("git add bin/post_compile bootstrap.sh")
     local("git commit -m 'Update to v%s'" % sdk_version)
     local("git push")

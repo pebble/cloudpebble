@@ -32,14 +32,13 @@
       "required": true
     },
     "QEMU_URLS": "https://qemu-us1.cloudpebble.net/",
-    "SDK2_PEBBLE_TOOL": "/app/sdk2/bin/pebble",
-    "SDK3_PEBBLE_TOOL": "/app/sdk3/bin/pebble",
+    "SDK2_PEBBLE_WAF": "/app/sdk2/pebble/waf",
+    "SDK3_PEBBLE_WAF": "/app/sdk3/pebble/waf",
     "TYPOGRAPHY_CSS": "//cloud.typography.com/7515512/745724/css/fonts.css",
     "WEB_CONCURRENCY": "2",
     "YCM_URLS": "https://ycm1.cloudpebble.net/"
   },
   "addons": [
-    "cloudamqp:lemur",
     "papertrail:choklad",
     "heroku-postgresql:hobby-dev",
     "heroku-redis:hobby-dev"

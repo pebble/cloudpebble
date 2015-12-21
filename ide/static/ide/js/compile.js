@@ -376,7 +376,7 @@ CloudPebble.Compile = (function() {
     var append_log_html = function(html) {
         // Append the HTML line to the log
         var at_bottom = logs_scrolled_to_bottom();
-        mLogHolder.append(html.append("\n"));
+        mLogHolder.append($(html).append("\n"));
         // Then, scroll to the bottom if we were already scrolled to the bottom before.
         if (at_bottom) {
             mLogHolder[0].scrollTop = mLogHolder[0].scrollHeight - mLogHolder.outerHeight();

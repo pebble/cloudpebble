@@ -649,6 +649,7 @@ table.build-results tr.pending .build-state {
     padding-left: 30px;
     padding-right: 30px;
     width: 650px;
+    position: relative;
 }
 
 .resource-pane .form-horizontal .control-group label {
@@ -657,6 +658,7 @@ table.build-results tr.pending .build-state {
 
 .resource-pane .help-block {
     margin-left: 170px;
+    clear: both;
 }
 
 .resource-pane input:not([type=checkbox]):not([type=submit]) {
@@ -1066,7 +1068,7 @@ span.cm-autofilled-end {
 }
 
 #help-prompt-holder {
-    z-index: 10001;
+    z-index: 10002;
     position: relative;
 }
 
@@ -1144,6 +1146,10 @@ button#add-filter {
     display: table;
 }
 
+.edit-resource-target-platforms-enabled:not(:checked) ~ .edit-resource-targets {
+    display: none;
+}
+
 .pane-boxes {
     width: 100%;
 }
@@ -1184,11 +1190,10 @@ button#add-filter {
     line-height: 40px;
     color: white;
 }
-.btn-delvariant {
-    float: right;
-    width: initial;
-    margin-bottom: 20px;
-    bottom: 30px;
+.btn-delete-well {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
 }
 .image-platform-preview span {
     text-align: center;
@@ -1575,6 +1580,19 @@ td.test-run {
     color: white;
     font-size: 15px;
     cursor: pointer;
+
+.text-icon {
+    border: 2px white solid;
+    display: inline-block;
+    text-align: center;
+    border-radius: 100px;
+    height: 1em;
+    width: 1em;
+    line-height: initial;
+    content: "?";
+}
+label .text-icon {
+    margin-left: 5px;
 }
 
 /** jquery-textext adjustments **/

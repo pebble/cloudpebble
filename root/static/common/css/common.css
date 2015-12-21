@@ -406,7 +406,6 @@ input[type=checkbox]:disabled {
 
 .help-block {
     display: block;
-    clear: both;
     margin-left: 150px;
     padding-top: 20px;
     font-family: PFD-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;

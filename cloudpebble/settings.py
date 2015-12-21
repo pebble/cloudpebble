@@ -2,6 +2,7 @@
 # Django settings for cloudpebble project.
 
 import os
+import socket
 import dj_database_url
 import sys
 _environ = os.environ
@@ -23,13 +24,11 @@ MANAGERS = ADMINS
 if 'DATABASE_URL' not in _environ:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-            'NAME': os.getcwd() + '/dev.db',                      # Or path to database file if using sqlite3.
-            # The following settings are not used with sqlite3:
-            'USER': '',
-            'PASSWORD': '',
-            'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-            'PORT': '',                      # Set to empty string for default.
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'postgres',
+            'USER': 'postgres',
+            'HOST': 'postgres',
+            'PORT': 5432,
         }
     }
 else:
@@ -195,6 +194,12 @@ SOCIAL_AUTH_PEBBLE_SECRET = _environ.get('PEBBLE_AUTH_SECRET', '7bf8b96fd736f3a2
 SOCIAL_AUTH_PEBBLE_ROOT_URL = _environ.get('PEBBLE_AUTH_URL', None)
 PEBBLE_AUTH_ADMIN_TOKEN = _environ.get('PEBBLE_AUTH_ADMIN_TOKEN', None)
 
+SHOULD_BE_SECURE = _environ.get('EXPECT_SSL', '') != ''
+
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = SHOULD_BE_SECURE
+CSRF_COOKIE_SECURE = SHOULD_BE_SECURE
+
 SOCIAL_AUTH_PEBBLE_REQUIRED = 'PEBBLE_AUTH_REQUIRED' in _environ
 
 ROOT_URLCONF = 'cloudpebble.urls'
@@ -259,7 +264,13 @@ LOGGING = {
     }
 }
 
-BROKER_URL = _environ.get('CLOUDAMQP_URL', 'amqp://guest:guest@localhost:5672/')
+REDIS_URL = _environ.get('REDIS_URL', None) or _environ.get('REDISCLOUD_URL', 'redis://redis:6379')
+
+BROKER_URL = REDIS_URL + '/1'
+CELERY_RESULT_BACKEND = BROKER_URL
+
+CELERYD_TASK_TIME_LIMIT = int(_environ.get('CELERYD_TASK_TIME_LIMIT', 620))
+CELERYD_TASK_SOFT_TIME_LIMIT = int(_environ.get('CELERYD_TASK_SOFT_TIME_LIMIT', 600))
 
 BROKER_POOL_LIMIT = int(_environ.get('BROKER_POOL_LIMIT', 10))
 
@@ -282,10 +293,10 @@ GITHUB_CLIENT_SECRET = _environ.get('GITHUB_SECRET', '06e9f765f00016a79a38599fbd
 
 GITHUB_HOOK_TEMPLATE = _environ.get('GITHUB_HOOK', 'http://example.com/ide/project/%(project)d/github/push_hook?key=%(key)s')
 
-SDK2_PEBBLE_TOOL = _environ.get('SDK2_PEBBLE_TOOL', '/home/vagrant/sdk2/bin/pebble')
-SDK3_PEBBLE_TOOL = _environ.get('SDK3_PEBBLE_TOOL', '/home/vagrant/sdk3/bin/pebble')
+SDK2_PEBBLE_WAF = _environ.get('SDK2_PEBBLE_WAF', '/sdk2/pebble/waf')
+SDK3_PEBBLE_WAF = _environ.get('SDK3_PEBBLE_WAF', '/sdk3/pebble/waf')
 
-ARM_CS_TOOLS = _environ.get('ARM_CS_TOOLS', '/home/vagrant/arm-cs-tools/bin/')
+ARM_CS_TOOLS = _environ.get('ARM_CS_TOOLS', '/arm-cs-tools/bin/')
 
 KEEN_PROJECT_ID = _environ.get('KEEN_PROJECT_ID', None)
 KEEN_WRITE_KEY = _environ.get('KEEN_WRITE_KEY', None)
@@ -298,20 +309,19 @@ AWS_ENABLED = 'AWS_ENABLED' in _environ
 AWS_ACCESS_KEY_ID = _environ.get('AWS_ACCESS_KEY_ID', None)
 AWS_SECRET_ACCESS_KEY = _environ.get('AWS_SECRET_ACCESS_KEY', None)
 
-AWS_S3_SOURCE_BUCKET = _environ.get('AWS_S3_SOURCE_BUCKET', None)
-AWS_S3_BUILDS_BUCKET = _environ.get('AWS_S3_BUILDS_BUCKET', None)
-AWS_S3_EXPORT_BUCKET = _environ.get('AWS_S3_EXPORT_BUCKET', None)
+AWS_S3_SOURCE_BUCKET = _environ.get('AWS_S3_SOURCE_BUCKET', 'source.cloudpebble.net')
+AWS_S3_BUILDS_BUCKET = _environ.get('AWS_S3_BUILDS_BUCKET', 'builds.cloudpebble.net')
+AWS_S3_EXPORT_BUCKET = _environ.get('AWS_S3_EXPORT_BUCKET', 'exports.cloudpebble.net')
+AWS_S3_FAKE_S3 = _environ.get('AWS_S3_FAKE_S3', None)
 
 TYPOGRAPHY_CSS = _environ.get('TYPOGRAPHY_CSS', None)
-
-REDIS_URL = _environ.get('REDIS_URL', None) or _environ.get('REDISCLOUD_URL', 'redis://localhost:6379/')
 
 LIBPEBBLE_PROXY = _environ.get('LIBPEBBLE_PROXY', None)
 
 YCM_URLS = _environ.get('YCM_URLS', 'http://localhost:8002/').split(',')
 COMPLETION_CERTS = _environ.get('COMPLETION_CERTS', os.getcwd() + '/completion-certs.crt')
 
-QEMU_URLS = _environ.get('QEMU_URLS', 'http://192.168.42.42:8003/').split(',')
+QEMU_URLS = _environ.get('QEMU_URLS', 'http://qemu/').split(',')
 QEMU_LAUNCH_AUTH_HEADER = _environ.get('QEMU_LAUNCH_AUTH_HEADER', 'secret')
 QEMU_LAUNCH_TIMEOUT = int(_environ.get('QEMU_LAUNCH_TIMEOUT', 15))
 
@@ -327,10 +337,12 @@ except ImportError:
     print "No local settings overrides."
     pass
 
+socket.setdefaulttimeout(int(_environ.get("DEFAULT_SOCKET_TIMEOUT", 10)))
+
 # Don't keep these hanging around in the environment.
 if not DEBUG:
     for key in _environ.keys():
         # We need these ones to run.
-        if key in {'PATH', 'TZ', 'RUN_MAIN', 'CELERY_LOADER', 'DJANGO_SETTINGS_MODULE', 'DEBUG'}:
+        if key in {'PATH', 'TZ', 'RUN_MAIN', 'CELERY_LOADER', 'DJANGO_SETTINGS_MODULE', 'DEBUG', 'C_FORCE_ROOT'}:
             continue
         del _environ[key]

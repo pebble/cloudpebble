@@ -78,9 +78,9 @@ def save_debug_info(base_dir, build_result, kind, platform, elf_file):
             build_result.save_debug_info(debug_info, platform, kind)
 
 
-def store_size_info(build_result, platform, zip_file):
+def store_size_info(project, build_result, platform, zip_file):
     platform_dir = platform + '/'
-    if platform == 'aplite':
+    if platform == 'aplite' and project.sdk_version == '2':
         platform_dir = ''
     try:
         build_size = BuildSize.objects.create(
@@ -152,7 +152,7 @@ def run_compile(build_result):
             create_source_files(project, base_dir)
 
             for f in resources:
-                if f.kind != 'png':
+                if f.kind not in ('png', 'bitmap'):
                     continue
                 target_dir = os.path.abspath(os.path.join(base_dir, resource_root, ResourceFile.DIR_MAP[f.kind]))
                 abs_target = os.path.abspath(os.path.join(target_dir, f.file_name))
@@ -170,12 +170,17 @@ def run_compile(build_result):
         try:
             os.chdir(base_dir)
             if project.sdk_version == '2':
-                tool = settings.SDK2_PEBBLE_TOOL
+                environ = os.environ
+                environ['PATH'] = '{}:{}'.format(settings.ARM_CS_TOOLS, environ['PATH'])
+                command = [settings.SDK2_PEBBLE_WAF, "configure", "build"]
             elif project.sdk_version == '3':
-                tool = settings.SDK3_PEBBLE_TOOL
+                environ = os.environ.copy()
+                environ['PATH'] = '{}:{}'.format(settings.ARM_CS_TOOLS, environ['PATH'])
+                command = [settings.SDK3_PEBBLE_WAF, "configure", "build"]
             else:
                 raise Exception("invalid sdk version.")
-            output = subprocess.check_output([tool, "build"], stderr=subprocess.STDOUT, preexec_fn=_set_resource_limits)
+            output = subprocess.check_output(command, stderr=subprocess.STDOUT, preexec_fn=_set_resource_limits,
+                                             env=environ)
         except subprocess.CalledProcessError as e:
             output = e.output
             print output
@@ -200,9 +205,9 @@ def run_compile(build_result):
                     build_result.total_size = s.st_size
                     # Now peek into the zip to see the component parts
                     with zipfile.ZipFile(temp_file, 'r') as z:
-                        store_size_info(build_result, 'aplite', z)
-                        store_size_info(build_result, 'basalt', z)
-                        store_size_info(build_result, 'chalk', z)
+                        store_size_info(project, build_result, 'aplite', z)
+                        store_size_info(project, build_result, 'basalt', z)
+                        store_size_info(project, build_result, 'chalk', z)
 
                 except Exception as e:
                     print "Couldn't extract filesizes: %s" % e

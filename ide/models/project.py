@@ -105,7 +105,17 @@ class TemplateProject(Project):
                 new_variant = ResourceVariant.objects.create(resource_file=new_resource, tags=variant.tags)
                 new_variant.save_string(variant.get_contents())
             for i in resource.identifiers.all():
-                ResourceIdentifier.objects.create(resource_file=new_resource, resource_id=i.resource_id, character_regex=i.character_regex)
+                ResourceIdentifier.objects.create(
+                    resource_file=new_resource,
+                    resource_id=i.resource_id,
+                    character_regex=i.character_regex,
+                    tracking=i.tracking,
+                    compatability=i.compatibility,
+                    target_platforms=i.target_platforms,
+                    memory_format=i.memory_format,
+                    storage_format=i.storage_format,
+                    space_optmization=i.space_optimisation
+                )
 
         for source_file in self.source_files.all():
             new_file = SourceFile.objects.create(project=project, file_name=source_file.file_name)
