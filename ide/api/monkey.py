@@ -155,21 +155,26 @@ def run_qemu_test(request, project_id, test_id):
     stream = TestFile.package_tests_to_memory([test])
     # Make the test session and runs
     session, runs = TestSession.setup_test_session(project, [test.id])
-    try:
-        # TODO: Since we know we're communicating with localhost things, build_absolute_uri may not be appropriate.
-        callback_url = request.build_absolute_uri(reverse('ide:notify_test_session', args=[project_id, session.id]))
-        result = requests.post(server + 'qemu/%s/test' % urllib.quote_plus(emu),
-                               data={'token': token, 'notify': callback_url},
-                               verify=settings.COMPLETION_CERTS,
-                               files=[('archive', ('archive.zip', stream))])
 
+    # TODO: Since we know we're communicating with localhost things, build_absolute_uri may not be appropriate.
+    callback_url = request.build_absolute_uri(reverse('ide:notify_test_session', args=[project_id, session.id]))
+    post_url = server + 'qemu/%s/test' % urllib.quote_plus(emu)
+    print "Posting to %s" % post_url
+
+    result = requests.post(post_url,
+                           data={'token': token, 'notify': callback_url},
+                           verify=settings.COMPLETION_CERTS,
+                           files=[('archive', ('archive.zip', stream))])
+
+
+    try:
         # TODO: Consider doing something to get more meaningful error messages
         result.raise_for_status()
     except Exception as e:
         # If there was an error starting the test, set the ERROR test code
         for run in runs:
             run.code = TestCode.ERROR
-            run.log = e.message
+            run.log = str(e)
             run.save()
         raise e
     response = result.json()

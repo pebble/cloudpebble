@@ -67,5 +67,5 @@ WORKDIR /code
 RUN rm -rf bower_components && cd /tmp && python /code/manage.py bower install && mv bower_components /code/
 
 RUN python manage.py compilemessages
-
+ENV PYTHONUNBUFFERED=0
 CMD ["sh", "docker_start.sh"]
