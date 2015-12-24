@@ -120,11 +120,15 @@ def get_test_runs(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     test_id = request.GET.get('test', None)
     session_id = request.GET.get('session', None)
+    run_id = request.GET.get('id', None)
     kwargs = {'session__project': project}
     if test_id is not None:
         kwargs['test__id'] = test_id
     if session_id is not None:
         kwargs['session__id'] = session_id
+    if run_id is not None:
+        kwargs['id'] = run_id
+
     runs = TestRun.objects.filter(**kwargs)
     # TODO: KEEN
     return json_response({"data": [serialise_run(run, link_test=True, link_session=True) for run in runs]})
@@ -178,6 +182,9 @@ def run_qemu_test(request, project_id, test_id):
             run.save()
         raise e
     response = result.json()
+    response['run_id'] = runs[0].id
+    response['session_id'] = session.id
+    response['test_id'] = test.id
     return json_response(response)
 
 

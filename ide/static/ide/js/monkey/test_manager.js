@@ -289,6 +289,14 @@ CloudPebble.TestManager = (function() {
         }
     }
 
+    var get_api = function() {
+        return (api ? api : (api = new API(PROJECT_ID)));
+    };
+
+    var get_interface = function() {
+        return (ui ? ui : (ui = CloudPebble.TestManager.Interface(get_api())));
+    };
+
     var show_test_manager_pane = function() {
         // Restore or create the
         CloudPebble.Sidebar.SuspendActive();
@@ -299,8 +307,8 @@ CloudPebble.TestManager = (function() {
             return;
         }
         // Otherwise, set up the APi and interface and render it into the testmanager-pane-template.
-        api = new API(PROJECT_ID);
-        ui = CloudPebble.TestManager.Interface(api);
+        api = get_api();
+        ui = get_interface();
         ga('send', 'event', 'project', 'load testmanager');
         var pane = $('<div></div>').attr('id', '#testmanager-pane-template').toggleClass('testmanager-pane', true);
         ui.render(pane.get(0), {project_id: PROJECT_ID});
@@ -310,6 +318,19 @@ CloudPebble.TestManager = (function() {
     return {
         Show: function() {
             show_test_manager_pane();
+        },
+        ShowTestRun: function(session_id, run_id, test_id) {
+            var api = get_api();
+            var run_fetch = api.Runs.refresh({id: run_id}).then(function() {
+                return api.Runs.fetchLogs(run_id);
+            });
+            var session_fetch = api.Sessions.refresh({id: session_id});
+            var test_fetch = api.Tests.refresh({id: test_id});
+            return $.when(run_fetch, session_fetch, test_fetch).then(function() {
+                show_test_manager_pane();
+                api.Route.navigate('session', session_id);
+                api.Route.navigate('/logs', run_id);
+            });
         },
         Init: function() {
             var commands = {};

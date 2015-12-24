@@ -58,7 +58,6 @@ CloudPebble.TestManager.Interface = (function(API) {
             let className = classNames('btn', {
                 'selected': num-1 == this.state.page
             });
-            console.log(num-1, this.state.page);
             return (_.isString(num)
                 ? <button key={num} className="btn" disabled="disabled">...</button>
                 : <button key={num} className={className} onClick={()=>this.gotoPage(num-1)}>{num}</button>
