@@ -182,9 +182,11 @@ def run_qemu_test(request, project_id, test_id):
             run.save()
         raise e
     response = result.json()
+    subscribe_url = server + 'qemu/%s/test/subscribe' % urllib.quote_plus(emu)
     response['run_id'] = runs[0].id
     response['session_id'] = session.id
     response['test_id'] = test.id
+    response['subscribe_url'] = subscribe_url
     return json_response(response)
 
 

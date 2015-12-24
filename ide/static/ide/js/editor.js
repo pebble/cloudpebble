@@ -687,7 +687,7 @@ CloudPebble.Editor = (function() {
                     return SharedPebble.getEmulator(ConnectionType.Qemu).then(function(emulator) {
                         return emulator.runTest(PROJECT_ID, file.id);
                     }).then(function(result) {
-                        CloudPebble.TestManager.ShowTestRun(result['session_id'], result['run_id'], result['test_id']);
+                        CloudPebble.TestManager.ShowLiveTestRun(result['subscribe_url'], result['session_id'], result['run_id'], result['test_id']);
                     });
                 }
 

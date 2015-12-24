@@ -7,7 +7,7 @@ CloudPebble.TestManager.Interface = (function(API) {
         '1' : gettext('passed')
     };
 
-    var {Route, Sessions, Tests, Runs} = API;
+    var {Route, Sessions, Tests, Runs, Logs} = API;
 
     /**
      * The Pagination object is a mixin providing most of the functions needed to support and
@@ -147,7 +147,8 @@ CloudPebble.TestManager.Interface = (function(API) {
             var datestring = CloudPebble.Utils.FormatDatetime(run.date_added);
             // TODO: nicer logs button
             var show_logs = function() {
-                Route.navigateAfter('/logs', run.id, Runs.fetchLogs(run.id));
+                Logs.refresh(run.id);
+                Route.navigate('/logs', run.id);
             };
             return (
                 <tr key={run.id} className="clickable" onClick={show_logs}>
@@ -371,8 +372,8 @@ CloudPebble.TestManager.Interface = (function(API) {
      * TestPage renders a different page depending on the current route.
      */
     function TestPage(props) {
-        var {route, tests, sessions, runs} = props;
-        var session, test, run;
+        var {route, tests, logs, sessions, runs} = props;
+        var session, test, run, log;
         if (route.length == 0) return null;
         var {page, id} = route[route.length-1];
         switch (page) {
@@ -388,7 +389,8 @@ CloudPebble.TestManager.Interface = (function(API) {
                 run = _.findWhere(runs, {id: id});
                 test = _.findWhere(tests, {id: run.test.id});
                 session = _.findWhere(sessions, {id: run.session_id});
-                return (<TestLog logs={Runs.logsFor(id)} run={run} session={session} test={test}/>);
+                log = _.findWhere(logs, {id: id});
+                return (<TestLog logs={log ? log.text : ''} run={run} session={session} test={test}/>);
         }
     }
 
@@ -433,7 +435,7 @@ CloudPebble.TestManager.Interface = (function(API) {
         componentDidMount: function() {
             // Listen to all stores
             this.listener = _.extend({}, Backbone.Events);
-            _.each([Route, Tests, Sessions, Runs], function(store) {
+            _.each([Route, Tests, Sessions, Runs, Logs], function(store) {
                 this.listener.listenTo(store, 'changed', (data) => this.setState(data));
                 this.listener.listenTo(store, 'error', (error) => this.setState({'error': error}));
             }, this);

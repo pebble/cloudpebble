@@ -2,7 +2,6 @@ CloudPebble.TestManager = (function() {
     var ui, api;
 
     function API(project_id) {
-
         var base_url = '/ide/project/'+project_id+'/';
         var noop = function(x) {return x};
         /**
@@ -29,8 +28,10 @@ CloudPebble.TestManager = (function() {
              * @param result an object with a single key containing an array of data.
              * @param filter_function e.g. the result of calling this.filter_function(options).
              */
-            syncData: function(result, filter_function) {
+            syncData: function(result, options) {
+                var filter_function = this.filter_function(options);
                 var data = result[this.server_key];
+                if (!_.isArray(data)) {data = [data];}
                 this.state = _.pick(this.state, filter_function);
                 _.extend(this.state, _.indexBy(data, 'id'));
                 this.trigger('changed', this.getState());
@@ -45,12 +46,19 @@ CloudPebble.TestManager = (function() {
              * @param options GET parameters.
              */
             refresh: function(options) {
-                options = options || {};
-                var filter_function = this.filter_function(options);
-                return $.ajax(base_url + this.url, {
-                    data: options
+                var url = base_url + this.url;
+                var query = {};
+                options = (_.isNumber(options) ? {id: options} : (options || {}));
+                if (_.isEqual(_.keys(options), ['id'])) {
+                    url += '/' + options.id;
+                }
+                else {
+                    query = options;
+                }
+                return $.ajax(url, {
+                    data: query
                 }).done(function(result) {
-                    this.syncData(result, filter_function);
+                    this.syncData(result, options);
                 }.bind(this)).fail(this.reportError.bind(this));
             },
             /**
@@ -113,6 +121,33 @@ CloudPebble.TestManager = (function() {
             };
         }
 
+        function LogsStore() {
+            _.extend(this, Store);
+            this.url = 'test_logs';
+            this.key = 'logs';
+            this.state = {};
+            this.refresh = function(id) {
+                var self = this;
+                var url = base_url+this.url+'/'+id;
+                return $.ajax(url).then(function(data) {
+                    self.state[id] = {text: data, id: id};
+                    self.trigger('changed', self.getState());
+                }, function(failure) {
+
+                });
+            };
+            this.subscribe = function(id, url) {
+                var self = this;
+                var evtSource = new EventSource(url);
+                self.state[id] = {text: '', id: id};
+                evtSource.onmessage = function(e) {
+                    console.log(e);
+                    self.state[id].text += e.data+'\n';
+                    self.trigger('changed', self.getState());
+                }
+            }
+        }
+
         /**
          * The RunsStore keeps track of TestRun objects.
          * @constructor
@@ -141,18 +176,6 @@ CloudPebble.TestManager = (function() {
                     return -(new Date(run.date_added));
                 });
             };
-            this.fetchLogs = function(id) {
-                if (this.state[id].logs) {
-                    return $.ajax(this.state[id].logs).done(function(logs) {
-                        this.logs[id] = logs;
-                    }.bind(this)).fail(this.reportError.bind(this));
-                }
-                else return null;
-
-            };
-            this.logsFor = function(id) {
-                return this.logs[id] || "";
-            }
         }
 
         /**
@@ -280,12 +303,14 @@ CloudPebble.TestManager = (function() {
         var Sessions = new SessionsStore();
         var Route = new RouteStore();
         var Runs = new RunsStore();
+        var Logs = new LogsStore();
 
         return {
             Tests: Tests,
             Sessions: Sessions,
             Route: Route,
-            Runs: Runs
+            Runs: Runs,
+            Logs: Logs
         }
     }
 
@@ -319,13 +344,12 @@ CloudPebble.TestManager = (function() {
         Show: function() {
             show_test_manager_pane();
         },
-        ShowTestRun: function(session_id, run_id, test_id) {
+        ShowLiveTestRun: function(url, session_id, run_id, test_id) {
             var api = get_api();
-            var run_fetch = api.Runs.refresh({id: run_id}).then(function() {
-                return api.Runs.fetchLogs(run_id);
-            });
+            var run_fetch = api.Runs.refresh({id: run_id});
             var session_fetch = api.Sessions.refresh({id: session_id});
-            var test_fetch = api.Tests.refresh({id: test_id});
+            var test_fetch = api.Tests.refresh();
+            api.Logs.subscribe(run_id, url);
             return $.when(run_fetch, session_fetch, test_fetch).then(function() {
                 show_test_manager_pane();
                 api.Route.navigate('session', session_id);
