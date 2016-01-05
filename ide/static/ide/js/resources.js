@@ -652,6 +652,16 @@ CloudPebble.Resources = (function() {
                 });
             };
 
+            var initialise_resource_id_group = function(group, resource) {
+                group.find('.btn-delidentifier').click(function() {
+                    CloudPebble.Prompts.Confirm(gettext("Do you want to this resource identifier?"), gettext("This cannot be undone."), function () {
+                        group.remove();
+                        CloudPebble.Sidebar.SetIcon('resource-'+resource.id, 'edit');
+                        save();
+                    });
+                });
+            };
+
             var template = pane.find('.resource-id-group-single').detach();
             var parent = $('#resource-id-group').removeClass('hide');
             $.each(resource.resource_ids, function(index, value) {
@@ -693,13 +703,7 @@ CloudPebble.Resources = (function() {
                     update_platform_labels(pane);
                 });
 
-                group.find('.btn-delidentifier').click(function() {
-                    CloudPebble.Prompts.Confirm(gettext("Do you want to this resource identifier?"), gettext("This cannot be undone."), function () {
-                        group.remove();
-                        CloudPebble.Sidebar.SetIcon('resource-'+resource.id, 'edit');
-                        save();
-                    });
-                });
+                initialise_resource_id_group(group, resource);
 
                 group.find('.resource-targets-section .text-icon').popover({
                     container: 'body',
@@ -725,6 +729,7 @@ CloudPebble.Resources = (function() {
                         update_font_preview(clone);
                     });
                 }
+                initialise_resource_id_group(clone, resource);
                 CloudPebble.Sidebar.SetIcon('resource-'+resource.id, 'edit');
             });
 
