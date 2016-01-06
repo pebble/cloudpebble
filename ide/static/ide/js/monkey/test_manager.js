@@ -141,9 +141,13 @@ CloudPebble.TestManager = (function() {
                 var evtSource = new EventSource(url);
                 self.state[id] = {text: '', id: id};
                 evtSource.onmessage = function(e) {
-                    console.log(e);
                     self.state[id].text += e.data+'\n';
                     self.trigger('changed', self.getState());
+                };
+                evtSource.onerror = function() {
+                    setTimeout(function() {
+                        Runs.refresh({id: id});
+                    }, 1000);
                 }
             }
         }

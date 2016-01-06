@@ -278,8 +278,8 @@ CloudPebble.TestManager.Interface = (function(API) {
         var datestring = CloudPebble.Utils.FormatDatetime(session.date_added);
         var split = logs.split('\n');
         var truncated = split.slice(Math.max(0, split.length-35));
-        var final = truncated.join('\n');
-
+        var final_logs = truncated.join('\n');
+        var is_live_log = (!!final_logs && !run.logs);
         return (
             <div className="testmanager-run">
                 <table>
@@ -291,11 +291,10 @@ CloudPebble.TestManager.Interface = (function(API) {
                 </table>
                 <hr />
                 {truncated.length == split.length ? null : <p>{interpolate(gettext('Showing last %s lines of %s:'), [truncated.length, split.length])}</p>}
-                <pre>{final}</pre>
-                {run.logs
-                    ? <a href={run.logs} target="_blank">{gettext('Download logs')}</a>
-                    : <span>{gettext('No logs to show')}</span>
-                    }
+                <pre>{final_logs}</pre>
+                {!!run.logs && <a href={run.logs} target="_blank">{gettext('Download logs')}</a>}
+                {(!run.logs && !is_live_log) && <span>{gettext('No logs to show')}</span>}
+                {is_live_log && <span>Test in progress</span>}
             </div>
         );
     }
