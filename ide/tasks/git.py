@@ -1,6 +1,4 @@
 import base64
-import shutil
-import tempfile
 import urllib2
 import json
 import os
@@ -104,24 +102,16 @@ def github_push(user, commit_message, repo_name, project):
                 next_tree[repo_path]._InputGitTreeElement__content = our_content
                 has_changed = True
 
-    expected_source_files = [src_root + x.file_name for x in project_sources]
-    for path in next_tree.keys():
-        if not path.startswith(src_root):
-            continue
-        if path not in expected_source_files:
-            del next_tree[path]
-            print "Deleted file: %s" % path
-            has_changed = True
-
     # Now try handling resource files.
-
     resources = project.resources.all()
-
     resource_root = root + 'resources/'
-
+    expected_resource_variant_paths = set()
     for res in resources:
         for variant in res.variants.all():
             repo_path = resource_root + variant.path
+            split_repo_path = repo_path.split('/')
+            # This adds the resource *and* all parent directories to the list of expected paths.
+            expected_resource_variant_paths.update('/'.join(split_repo_path[:x]) for x in range(2, len(split_repo_path)+1))
             if repo_path in next_tree:
                 content = variant.get_contents()
                 if git_sha(content) != next_tree[repo_path]._InputGitTreeElement__sha:
@@ -132,10 +122,23 @@ def github_push(user, commit_message, repo_name, project):
                     next_tree[repo_path]._InputGitTreeElement__sha = blob.sha
             else:
                 print "New resource: %s" % repo_path
+                has_changed = True
                 blob = repo.create_git_blob(base64.b64encode(variant.get_contents()), 'base64')
                 print "Created blob %s" % blob.sha
                 next_tree[repo_path] = InputGitTreeElement(path=repo_path, mode='100644', type='blob', sha=blob.sha)
 
+    # Manage deleted files
+    expected_source_file_paths = {src_root + x.file_name for x in project_sources}
+    expected_paths = expected_resource_variant_paths | expected_source_file_paths
+    for path in next_tree.keys():
+        if not (path.startswith(src_root) or path.startswith(resource_root)):
+            continue
+        if path not in expected_paths:
+            del next_tree[path]
+            print "Deleted file: %s" % path
+            has_changed = True
+
+    # Compare the resource dicts
     remote_manifest_path = root + 'appinfo.json'
     remote_wscript_path = root + 'wscript'
 
@@ -163,6 +166,7 @@ def github_push(user, commit_message, repo_name, project):
 
     # This one is separate because there's more than just the resource map changing.
     if their_manifest_dict != our_manifest_dict:
+        has_changed = True
         if remote_manifest_path in next_tree:
             next_tree[remote_manifest_path]._InputGitTreeElement__sha = NotSet
             next_tree[remote_manifest_path]._InputGitTreeElement__content = generate_manifest(project, resources)
