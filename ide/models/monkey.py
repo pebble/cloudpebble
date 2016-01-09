@@ -24,7 +24,6 @@ class TestSession(IdeModel):
     """ A TestSession is owned by a project contains a set of test runs. It represents a time that a set of N>=1 tests
     were run as one job."""
     date_added = models.DateTimeField(auto_now_add=True)
-    date_started = models.DateTimeField(null=True)
     date_completed = models.DateTimeField(null=True)
     project = models.ForeignKey('Project', related_name='test_sessions')
 
@@ -67,7 +66,6 @@ class TestRun(IdeModel):
     session = models.ForeignKey('TestSession', related_name='runs')
     test = models.ForeignKey('TestFile', related_name='runs', null=True, on_delete=models.SET_NULL)
 
-    date_started = models.DateTimeField(null=True)
     date_completed = models.DateTimeField(null=True)
 
     original_name = models.CharField(max_length=100)
@@ -109,7 +107,7 @@ class TestRun(IdeModel):
 
     class Meta(IdeModel.Meta):
         unique_together = ('test', 'session')
-        ordering = ['original_name', '-date_started']
+        ordering = ['original_name', '-session__date_added']
 
 
 @receiver(post_delete)

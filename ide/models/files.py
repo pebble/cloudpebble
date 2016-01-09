@@ -374,7 +374,7 @@ class TestFile(ScriptFile):
     @property
     def latest_code(self):
         try:
-            return self.runs.latest('date_completed').code
+            return self.runs.latest('session__date_added').code
         except ObjectDoesNotExist:
             return None
 

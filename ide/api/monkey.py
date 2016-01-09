@@ -11,7 +11,6 @@ from django.utils import timezone
 from ide.api import json_failure, json_response
 from ide.models.project import Project
 from ide.models.monkey import TestSession, TestRun, TestCode, TestLog
-from ide.tasks.monkey import run_test_session
 from ide.models.files import TestFile
 from django.db import transaction
 
@@ -43,8 +42,7 @@ def serialise_run(run, link_test=True, link_session=True):
         result['session_id'] = run.session.id
     if run.code is not None:
         result['code'] = run.code
-    if run.date_started is not None:
-        result['date_started'] = str(run.date_started)
+    result['date_added'] = str(run.session.date_added)
     if run.date_completed is not None:
         result['date_completed'] = str(run.date_completed)
     return result
@@ -65,8 +63,6 @@ def serialise_session(session, include_runs=False):
         'fails': len(runs.filter(code__lt=0)),
         'run_count': len(runs)
     }
-    if session.date_started is not None:
-        result['date_started'] = str(session.date_started)
     if session.date_completed is not None:
         result['date_completed'] = str(session.date_completed)
     if include_runs:
@@ -254,8 +250,7 @@ def post_test_session(request, project_id):
     # Make the database objects
     session, runs = TestSession.setup_test_session(project, test_ids)
     # TODO: Real implimentation with Liam's infrastructure
-    run_test_session.delay(session.id)
-
+    
     return json_response({"data": serialise_session(session, include_runs=True)})
 
 

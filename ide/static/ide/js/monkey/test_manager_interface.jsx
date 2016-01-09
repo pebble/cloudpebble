@@ -280,12 +280,14 @@ CloudPebble.TestManager.Interface = (function(API) {
         var truncated = split.slice(Math.max(0, split.length-35));
         var final_logs = truncated.join('\n');
         var is_live_log = (!!final_logs && !run.logs);
+        var run_completed = run.date_completed ? CloudPebble.Utils.FormatDatetime(run.date_completed) : null;
         return (
             <div className="testmanager-run">
                 <table>
                     <tbody>
                     <tr><th>{gettext('Test')}</th><td><Anchor onClick={()=>Route.navigate('/test', test.id)}>{test.name}</Anchor></td></tr>
                     <tr><th>{gettext('Session')}</th><td><Anchor onClick={()=>Route.navigate('/session', session.id)}>{datestring}</Anchor></td></tr>
+                    {run_completed && <tr><th>{gettext('Completion date')}</th><td>{run_completed}</td></tr>}
                     <tr><th>{gettext('Result')}</th><TestResultCell code={run.code} /></tr>
                     </tbody>
                 </table>
