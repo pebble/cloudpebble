@@ -84,7 +84,10 @@ def github_push(user, commit_message, repo_name, project):
     expected_paths = set()
 
     def update_expected_paths(new_path):
-        # This adds the path *and* all parent directories to the list of expected paths.
+        # This adds the path *and* its parent directories to the list of expected paths.
+        # The parent directories are already keys in next_tree, so if they aren't present in expected_paths
+        # then, when iterating over next_tree to see which files have been deleted, we would have to treat
+        # directories as special cases.
         split_path = new_path.split('/')
         expected_paths.update('/'.join(split_path[:p]) for p in range(2, len(split_path) + 1))
 
