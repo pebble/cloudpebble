@@ -353,7 +353,7 @@ def delete_file(sender, instance, **kwargs):
     if sender == SourceFile or sender == ResourceVariant:
         if settings.AWS_ENABLED:
             try:
-                s3.delete_file(instance.s3_path)
+                s3.delete_file('source', instance.s3_path)
             except:
                 traceback.print_exc()
         else:
