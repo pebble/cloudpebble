@@ -81,17 +81,23 @@ def github_push(user, commit_message, repo_name, project):
         root = find_project_root(paths)
     except:
         root = ''
+    expected_paths = set()
+
+    def update_expected_paths(new_path):
+        # This adds the path *and* all parent directories to the list of expected paths.
+        split_path = new_path.split('/')
+        expected_paths.update('/'.join(split_path[:p]) for p in range(2, len(split_path) + 1))
 
     src_root = root + 'src/'
     worker_src_root = root + 'worker_src/'
     project_sources = project.source_files.all()
     has_changed = False
     for source in project_sources:
-        repo_path = ''
         if source.target == 'worker':
             repo_path = worker_src_root + source.file_name
         else:
             repo_path = src_root + source.file_name
+        update_expected_paths(repo_path)
         if repo_path not in next_tree:
             has_changed = True
             next_tree[repo_path] = InputGitTreeElement(path=repo_path, mode='100644', type='blob',
@@ -110,13 +116,10 @@ def github_push(user, commit_message, repo_name, project):
     # Now try handling resource files.
     resources = project.resources.all()
     resource_root = root + 'resources/'
-    expected_resource_variant_paths = set()
     for res in resources:
         for variant in res.variants.all():
             repo_path = resource_root + variant.path
-            split_repo_path = repo_path.split('/')
-            # This adds the resource *and* all parent directories to the list of expected paths.
-            expected_resource_variant_paths.update('/'.join(split_repo_path[:x]) for x in range(2, len(split_repo_path)+1))
+            update_expected_paths(repo_path)
             if repo_path in next_tree:
                 content = variant.get_contents()
                 if git_sha(content) != next_tree[repo_path]._InputGitTreeElement__sha:
@@ -133,10 +136,8 @@ def github_push(user, commit_message, repo_name, project):
                 next_tree[repo_path] = InputGitTreeElement(path=repo_path, mode='100644', type='blob', sha=blob.sha)
 
     # Manage deleted files
-    expected_source_file_paths = {src_root + x.file_name for x in project_sources}
-    expected_paths = expected_resource_variant_paths | expected_source_file_paths
     for path in next_tree.keys():
-        if not (path.startswith(src_root) or path.startswith(resource_root)):
+        if not (any(path.startswith(root) for root in (src_root, resource_root, worker_src_root))):
             continue
         if path not in expected_paths:
             del next_tree[path]
