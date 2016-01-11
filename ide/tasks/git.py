@@ -85,10 +85,15 @@ def github_push(user, commit_message, repo_name, project):
         root = ''
 
     src_root = root + 'src/'
+    worker_src_root = root + 'worker_src/'
     project_sources = project.source_files.all()
     has_changed = False
     for source in project_sources:
-        repo_path = src_root + source.file_name
+        repo_path = ''
+        if source.target == 'worker':
+            repo_path = worker_src_root + source.file_name
+        else:
+            repo_path = src_root + source.file_name
         if repo_path not in next_tree:
             has_changed = True
             next_tree[repo_path] = InputGitTreeElement(path=repo_path, mode='100644', type='blob',
