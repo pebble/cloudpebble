@@ -216,9 +216,11 @@ def github_push(user, commit_message, repo_name, project):
 
     return False
 
+
 def get_root_path(path):
     path, extension = os.path.splitext(path)
     return path.split('~', 1)[0] + extension
+
 
 @git_auth_check
 def github_pull(user, project):
@@ -262,7 +264,7 @@ def github_pull(user, project):
     for resource in media:
         path = resource_root + resource['file']
         if project_type == 'pebblejs' and resource['name'] in {
-            'MONO_FONT_14', 'IMAGE_MENU_ICON', 'IMAGE_LOGO_SPLASH', 'IMAGE_TILE_SPLASH'}:
+                'MONO_FONT_14', 'IMAGE_MENU_ICON', 'IMAGE_LOGO_SPLASH', 'IMAGE_TILE_SPLASH'}:
             continue
         if path not in paths_notags:
             raise Exception("Resource %s not found in repo." % path)
