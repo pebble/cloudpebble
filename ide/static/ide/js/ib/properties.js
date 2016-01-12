@@ -197,7 +197,7 @@
      */
     IB.Properties.Colour = function(name, value) {
         Property.call(this, name, this._makeColours(value));
-        if (IB.ColourEnabled) {
+        if (IB.colourEnabled) {
             this._labelClass = 'ib-colour-label';
         }
     };
@@ -272,7 +272,7 @@
                 .val(this._value[IB.ColourModes.Monochrome].name)
                 .change(_.bind(this._handleChange, this));
 
-            if (IB.ColourEnabled) {
+            if (IB.colourEnabled) {
                 element = $(interpolate('<table class="ib-colours">' +
                     '<thead><tr><th>%s</th><th>%s</th></tr></thead>' +
                     '<tbody><tr></tr></tbody>' +

@@ -4,7 +4,7 @@
     IB.Settings.ColourMode = {
         name: gettext("Preview Mode"),
         id: 'ib-setting-colourmode',
-        isEnabled: function() {return IB.ColourEnabled;},
+        isEnabled: function() {return IB.colourEnabled;},
         renderNode: function (parent) {
             var isColour = IB.colourMode == IB.ColourModes.Colour;
             return $('<select>')
