@@ -4,14 +4,13 @@
     IB.Settings.ColourMode = {
         name: gettext("Preview Mode"),
         id: 'ib-setting-colourmode',
+        isEnabled: function() {return IB.ColourEnabled;},
         renderNode: function (parent) {
             var isColour = IB.colourMode == IB.ColourModes.Colour;
-            var node = $('<select>' +
-                interpolate('<option value="0" %s>%s</option>', [(isColour ? 'selected' : ''), gettext("Colour")]) +
-                interpolate('<option value="1" %s>%s</option>', [(isColour ? '' : 'selected'), gettext("Monochrome")]) +
-                '</select>').attr('id', 'ib-setting-colourmode');
-            node.change(_.bind(this.handleChange, parent));
-            return node;
+            return $('<select>')
+                .append(interpolate('<option value="0" %s>%s</option>', [(isColour ? 'selected' : ''), gettext("Colour")]))
+                .append(interpolate('<option value="1" %s>%s</option>', [(isColour ? '' : 'selected'), gettext("Monochrome")]))
+                .change(_.bind(this.handleChange, parent));
         },
         handleChange: function (evt) {
             IB.colourMode = parseInt(evt.target.value, 10);
@@ -43,10 +42,10 @@
 
             var form = this._formNode;
             form.empty();
-
-            _.each(IB.Settings, function (setting, name) {
-                form.append(this._generateControlGroup(setting));
-            }, this);
+            _.chain(IB.Settings)
+                .filter(function(setting){return setting.isEnabled();})
+                .map(function(setting) {return this._generateControlGroup(setting);}, this)
+                .each(function(element){form.append(element);});
         },
         /**
          * Empties the contents of the parent node

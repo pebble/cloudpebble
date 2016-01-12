@@ -32,8 +32,15 @@
             this._properties['icon_' + it].on('change', _.partial(this._handleIconChange, it), this);
         }, this);
 
-        this.setSize(20, 146);
-        this.setPos(124, 3);
+        if (CloudPebble.ProjectInfo.sdk_version == "3") {
+            this.setSize(30, 168);
+            this.setPos(114, 0);
+        }
+        else {
+            this.setSize(20, 146);
+            this.setPos(124, 3);
+        }
+
         this._size.lock();
         this._pos.lock();
     };

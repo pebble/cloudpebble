@@ -197,7 +197,9 @@
      */
     IB.Properties.Colour = function(name, value) {
         Property.call(this, name, this._makeColours(value));
-        this._labelClass = 'ib-colour-label';
+        if (IB.ColourEnabled) {
+            this._labelClass = 'ib-colour-label';
+        }
     };
     IB.Properties.Colour.prototype = Object.create(_super);
     IB.Properties.Colour.prototype.constructor = IB.Properties.Colour;
@@ -207,7 +209,7 @@
                 value = IB.ColourMap[value];
             }
             if (_.isArray(value)) {
-                if (value[0] == "COLOR_FALLBACK") {
+                if (value[0] == "PBL_IF_COLOR_ELSE") {
                     value = _.map(value.slice(1), function(c) {
                         return IB.ColourMap[c];
                     });
@@ -247,7 +249,7 @@
             if (_.uniq(this._value).length == 1) {
                 return this._value[0].name;
             } else {
-                return interpolate("COLOR_FALLBACK(%s, %s)", [this._value[0].name, this._value[1].name]);
+                return interpolate("PBL_IF_COLOR_ELSE(%s, %s)", [this._value[0].name, this._value[1].name]);
             }
         },
         /**
@@ -263,39 +265,47 @@
             }
         },
         _generateNode: function() {
+            var element;
             var mono_options = _.map(IB.MonochromeMap, this._createColour);
-            var table = $(interpolate('<table class="ib-colours">' +
-                '<thead><tr><th>%s</th><th>%s</th></tr></thead>' +
-                '<tbody><tr></tr></tbody>' +
-                '</table>', [gettext("Colour Watches"), gettext("B/W Watches")]));
-            var tr = table.find('tbody tr');
-            var td = $("<td></td>").appendTo(tr);
-            var div = $('<div></div>').appendTo(td);
-            this._colourNode =  $('<input type="text" class="item-color item-color-normal" name="color-1">')
-                .change(_.bind(this._handleChange, this))
-                .val(this._value[IB.ColourModes.Colour].name)
-                .appendTo(div);
-
             this._bwNode = $('<select class="ib-property ib-colour">')
                 .append(mono_options)
                 .val(this._value[IB.ColourModes.Monochrome].name)
                 .change(_.bind(this._handleChange, this));
-            this._bwNode.appendTo("<td>").parent().appendTo(tr);
-            var self = this;
-            setTimeout(function() {
-                self._colourNode.pebbleColourPicker({
-                    value_mapping: function(value) {
-                        if (value == "transparent") {
-                            return "GColorClear";
+
+            if (IB.ColourEnabled) {
+                element = $(interpolate('<table class="ib-colours">' +
+                    '<thead><tr><th>%s</th><th>%s</th></tr></thead>' +
+                    '<tbody><tr></tr></tbody>' +
+                    '</table>', [gettext("Colour Watches"), gettext("B/W Watches")]));
+                var tr = element.find('tbody tr');
+                var td = $("<td></td>").appendTo(tr);
+                var div = $('<div></div>').appendTo(td);
+                this._colourNode =  $('<input type="text" class="item-color item-color-normal" name="color-1">')
+                    .change(_.bind(this._handleChange, this))
+                    .val(this._value[IB.ColourModes.Colour].name)
+                    .appendTo(div);
+                this._bwNode.appendTo("<td>").parent().appendTo(tr);
+
+                var self = this;
+                setTimeout(function() {
+                    self._colourNode.pebbleColourPicker({
+                        value_mapping: function(value) {
+                            if (value == "transparent") {
+                                return "GColorClear";
+                            }
+                            else {
+                                return _.findWhere(IB.ColourMap, {css: value});
+                            }
                         }
-                        else {
-                            return _.findWhere(IB.ColourMap, {css: value});
-                        }
-                    }
-                });
-                self._setColourCSS();
-            }, 1);
-            return table;
+                    });
+                    self._setColourCSS();
+                }, 0);
+            }
+            else {
+                this._colourNode = this._bwNode;
+                element = this._bwNode;
+            }
+            return element;
         },
         _createColour: function(colour) {
             return $('<option>')

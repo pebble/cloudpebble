@@ -160,31 +160,52 @@
 
 /* ActionBarLayer */
 
-.ib-actionbarlayer {
+.ib-canvas-sdk2 .ib-actionbarlayer {
     border-top-left-radius: 3px;
     border-bottom-left-radius: 3px;
 }
 
 .ib-actionbarlayer-icon {
     position: absolute;
-    left: 1px;
-    width: 18px;
-    height: 18px;
     text-align: center;
     background-repeat: no-repeat;
     pointer-events: none;
 }
 
-.ib-icon-up {
+.ib-canvas-sdk2 .ib-actionbarlayer-icon {
+    left: 1px;
+    width: 18px;
+    height: 18px;
+}
+
+.ib-canvas-sdk3 .ib-actionbarlayer-icon {
+    left: 5px;
+    width: 22px;
+    height: 22px;
+}
+
+.ib-canvas-sdk2 .ib-icon-up {
     top: calc(16% - 9px);
 }
 
-.ib-icon-select {
+.ib-canvas-sdk2 .ib-icon-select {
     top: calc(50% - 9px);
 }
 
-.ib-icon-down {
+.ib-canvas-sdk2 .ib-icon-down {
     top: calc(83% - 9px);
+}
+
+.ib-canvas-sdk3 .ib-icon-up {
+    top: calc(19% - 11px);
+}
+
+.ib-canvas-sdk3 .ib-icon-select {
+    top: calc(50% - 11px);
+}
+
+.ib-canvas-sdk3 .ib-icon-down {
+    top: calc(80% - 11px);
 }
 
 /* MenuLayer */

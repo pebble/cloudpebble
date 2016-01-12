@@ -37,7 +37,6 @@
     };
     IB.colourMode = null;
 
-
     IB.ColourMap = {
         GColorClear: new IB.Colour('GColorClear', 'rgba(0, 0, 0, 0)', gettext('Transparent'))
     };

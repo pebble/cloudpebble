@@ -44,6 +44,8 @@
         function init(parent) {
             mNode = $('<div class="ib-canvas">');
             mNode.on('mousedown', handleMouseDown);
+            mNode.toggleClass('ib-canvas-sdk2', CloudPebble.ProjectInfo.sdk_version == "2");
+            mNode.toggleClass('ib-canvas-sdk3', CloudPebble.ProjectInfo.sdk_version == "3");
             mNode.appendTo(parent);
 
             render();
