@@ -235,6 +235,7 @@ def show_resource(request, project_id, resource_id, variant):
         u'png': 'image/png',
         u'png-trans': 'image/png',
         u'bitmap': 'image/png',
+        u'pbi': 'image/png',
         u'font': 'application/octet-stream',
         u'raw': 'application/octet-stream'
     }
