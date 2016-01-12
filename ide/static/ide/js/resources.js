@@ -195,7 +195,7 @@ CloudPebble.Resources = (function() {
         if(files.length != 1) {
             return null;
         }
-        if((kind == 'png' || kind == 'png-trans') && file.type != "image/png") {
+        if(_.contains(['bitmap', 'png', 'png-trans', 'pbi'], kind) && file.type != "image/png") {
             throw (gettext("You must upload a PNG image."));
         }
         return file;
@@ -528,10 +528,10 @@ CloudPebble.Resources = (function() {
                         case 'bitmap':
                         case 'png':
                         case 'png-trans':
+                        case 'pbi':
                             template_name = 'image';
                             break;
                         case 'raw':
-                        case 'pbi':
                         case 'font':
                             template_name = 'raw';
                             break;
@@ -652,6 +652,16 @@ CloudPebble.Resources = (function() {
                 });
             };
 
+            var initialise_resource_id_group = function(group, resource) {
+                group.find('.btn-delidentifier').click(function() {
+                    CloudPebble.Prompts.Confirm(gettext("Do you want to this resource identifier?"), gettext("This cannot be undone."), function () {
+                        group.remove();
+                        CloudPebble.Sidebar.SetIcon('resource-'+resource.id, 'edit');
+                        save();
+                    });
+                });
+            };
+
             var template = pane.find('.resource-id-group-single').detach();
             var parent = $('#resource-id-group').removeClass('hide');
             $.each(resource.resource_ids, function(index, value) {
@@ -693,13 +703,7 @@ CloudPebble.Resources = (function() {
                     update_platform_labels(pane);
                 });
 
-                group.find('.btn-delidentifier').click(function() {
-                    CloudPebble.Prompts.Confirm(gettext("Do you want to this resource identifier?"), gettext("This cannot be undone."), function () {
-                        group.remove();
-                        CloudPebble.Sidebar.SetIcon('resource-'+resource.id, 'edit');
-                        save();
-                    });
-                });
+                initialise_resource_id_group(group, resource);
 
                 group.find('.resource-targets-section .text-icon').popover({
                     container: 'body',
@@ -725,6 +729,7 @@ CloudPebble.Resources = (function() {
                         update_font_preview(clone);
                     });
                 }
+                initialise_resource_id_group(clone, resource);
                 CloudPebble.Sidebar.SetIcon('resource-'+resource.id, 'edit');
             });
 
@@ -959,7 +964,7 @@ CloudPebble.Resources = (function() {
             return names;
         },
         GetBitmaps: function() {
-            return _.filter(project_resources, function(item) { return /^png/.test(item.kind); });
+            return _.filter(project_resources, function(item) { return /^(png|pbi|bitmap)/.test(item.kind); });
         },
         GetFonts: function() {
             return _.where(project_resources, {kind: 'font'});

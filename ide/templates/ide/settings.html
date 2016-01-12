@@ -23,7 +23,6 @@
                 {% if saved %}
                     <div class="well alert alert-success">{% trans 'Settings saved!' %}</div>
                 {% endif %}
-                {%csrf_token%}
                 {% for hidden in form.hidden_fields %}
                 {{ hidden }}
                 {% endfor %}
@@ -64,23 +63,26 @@
 {% endblock %}
 {% block scripts %}
 <script type="text/javascript">
-    // Warn about emacs kinda sucking.
-    $('#id_keybinds').change(function() {
-        if($(this).val() == 'emacs') {
-            $(this)
-                .siblings('.help-block')
-                .text("Note: the emacs mapping is limited, and will not work properly in some browsers (e.g. Chrome) that prevent using certain keys.")
-                .removeClass('hide')
-        } else {
-            $(this).siblings('.help-block').addClass('hide');
-        }
-    });
-    $('#unlink-btn').click(function(e) {
-        e.preventDefault();
-        $('#unlink-form').submit();
-    });
-
     $(function() {
+        jquery_csrf_setup();
+
+        // Warn about emacs kinda sucking.
+        $('#id_keybinds').change(function() {
+            if($(this).val() == 'emacs') {
+                $(this)
+                    .siblings('.help-block')
+                    .text("Note: the emacs mapping is limited, and will not work properly in some browsers (e.g. Chrome) that prevent using certain keys.")
+                    .removeClass('hide')
+            } else {
+                $(this).siblings('.help-block').addClass('hide');
+            }
+        });
+
+        $('#unlink-btn').click(function(e) {
+            e.preventDefault();
+            $('#unlink-form').submit();
+        });
+
         var save = function() {
             var defer = $.Deferred();
             $.ajax({
@@ -96,6 +98,7 @@
             });
             return defer.promise();
         };
+
         make_live_settings_form({
             save_function: save,
             form: $("#user-settings-form")
@@ -106,7 +109,7 @@
             return false;
         });
     });
-
 </script>
 <script src="{% static 'ide/js/live_settings_form.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/csrf.js' %}" type="text/javascript"></script>
 {% endblock %}

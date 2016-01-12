@@ -1,6 +1,4 @@
 import base64
-import shutil
-import tempfile
 import urllib2
 import json
 import os
@@ -83,12 +81,26 @@ def github_push(user, commit_message, repo_name, project):
         root = find_project_root(paths)
     except:
         root = ''
+    expected_paths = set()
+
+    def update_expected_paths(new_path):
+        # This adds the path *and* its parent directories to the list of expected paths.
+        # The parent directories are already keys in next_tree, so if they aren't present in expected_paths
+        # then, when iterating over next_tree to see which files have been deleted, we would have to treat
+        # directories as special cases.
+        split_path = new_path.split('/')
+        expected_paths.update('/'.join(split_path[:p]) for p in range(2, len(split_path) + 1))
 
     src_root = root + 'src/'
+    worker_src_root = root + 'worker_src/'
     project_sources = project.source_files.all()
     has_changed = False
     for source in project_sources:
-        repo_path = src_root + source.file_name
+        if source.target == 'worker':
+            repo_path = worker_src_root + source.file_name
+        else:
+            repo_path = src_root + source.file_name
+        update_expected_paths(repo_path)
         if repo_path not in next_tree:
             has_changed = True
             next_tree[repo_path] = InputGitTreeElement(path=repo_path, mode='100644', type='blob',
@@ -104,24 +116,13 @@ def github_push(user, commit_message, repo_name, project):
                 next_tree[repo_path]._InputGitTreeElement__content = our_content
                 has_changed = True
 
-    expected_source_files = [src_root + x.file_name for x in project_sources]
-    for path in next_tree.keys():
-        if not path.startswith(src_root):
-            continue
-        if path not in expected_source_files:
-            del next_tree[path]
-            print "Deleted file: %s" % path
-            has_changed = True
-
     # Now try handling resource files.
-
     resources = project.resources.all()
-
     resource_root = root + 'resources/'
-
     for res in resources:
         for variant in res.variants.all():
             repo_path = resource_root + variant.path
+            update_expected_paths(repo_path)
             if repo_path in next_tree:
                 content = variant.get_contents()
                 if git_sha(content) != next_tree[repo_path]._InputGitTreeElement__sha:
@@ -132,10 +133,21 @@ def github_push(user, commit_message, repo_name, project):
                     next_tree[repo_path]._InputGitTreeElement__sha = blob.sha
             else:
                 print "New resource: %s" % repo_path
+                has_changed = True
                 blob = repo.create_git_blob(base64.b64encode(variant.get_contents()), 'base64')
                 print "Created blob %s" % blob.sha
                 next_tree[repo_path] = InputGitTreeElement(path=repo_path, mode='100644', type='blob', sha=blob.sha)
 
+    # Manage deleted files
+    for path in next_tree.keys():
+        if not (any(path.startswith(root) for root in (src_root, resource_root, worker_src_root))):
+            continue
+        if path not in expected_paths:
+            del next_tree[path]
+            print "Deleted file: %s" % path
+            has_changed = True
+
+    # Compare the resource dicts
     remote_manifest_path = root + 'appinfo.json'
     remote_wscript_path = root + 'wscript'
 
@@ -163,6 +175,7 @@ def github_push(user, commit_message, repo_name, project):
 
     # This one is separate because there's more than just the resource map changing.
     if their_manifest_dict != our_manifest_dict:
+        has_changed = True
         if remote_manifest_path in next_tree:
             next_tree[remote_manifest_path]._InputGitTreeElement__sha = NotSet
             next_tree[remote_manifest_path]._InputGitTreeElement__content = generate_manifest(project, resources)
@@ -206,9 +219,11 @@ def github_push(user, commit_message, repo_name, project):
 
     return False
 
+
 def get_root_path(path):
     path, extension = os.path.splitext(path)
     return path.split('~', 1)[0] + extension
+
 
 @git_auth_check
 def github_pull(user, project):
@@ -252,7 +267,7 @@ def github_pull(user, project):
     for resource in media:
         path = resource_root + resource['file']
         if project_type == 'pebblejs' and resource['name'] in {
-            'MONO_FONT_14', 'IMAGE_MENU_ICON', 'IMAGE_LOGO_SPLASH', 'IMAGE_TILE_SPLASH'}:
+                'MONO_FONT_14', 'IMAGE_MENU_ICON', 'IMAGE_LOGO_SPLASH', 'IMAGE_TILE_SPLASH'}:
             continue
         if path not in paths_notags:
             raise Exception("Resource %s not found in repo." % path)
