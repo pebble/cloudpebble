@@ -730,7 +730,7 @@ CloudPebble.Resources = (function() {
                 CloudPebble.Sidebar.SetIcon('resource-'+resource.id, 'edit');
             });
 
-            pane.find('.image-platform-preview').toggle((_.contains(['png', 'png-trans', 'bitmap'], resource.kind)));
+            pane.find('.image-platform-preview').toggle((_.contains(['png', 'png-trans', 'bitmap', 'pbi'], resource.kind)));
 
             pane.find("#edit-resource-file-name").val(resource.file_name);
 
