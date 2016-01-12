@@ -195,7 +195,7 @@ CloudPebble.Resources = (function() {
         if(files.length != 1) {
             return null;
         }
-        if((kind == 'png' || kind == 'png-trans') && file.type != "image/png") {
+        if(_.contains(['bitmap', 'png', 'png-trans', 'pbi'], kind) && file.type != "image/png") {
             throw (gettext("You must upload a PNG image."));
         }
         return file;
@@ -528,10 +528,10 @@ CloudPebble.Resources = (function() {
                         case 'bitmap':
                         case 'png':
                         case 'png-trans':
+                        case 'pbi':
                             template_name = 'image';
                             break;
                         case 'raw':
-                        case 'pbi':
                         case 'font':
                             template_name = 'raw';
                             break;
@@ -964,7 +964,7 @@ CloudPebble.Resources = (function() {
             return names;
         },
         GetBitmaps: function() {
-            return _.filter(project_resources, function(item) { return /^png/.test(item.kind); });
+            return _.filter(project_resources, function(item) { return /^(png|pbi|bitmap)/.test(item.kind); });
         },
         GetFonts: function() {
             return _.where(project_resources, {kind: 'font'});
