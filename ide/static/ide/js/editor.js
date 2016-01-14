@@ -86,7 +86,7 @@ CloudPebble.Editor = (function() {
                     js: 'javascript',
                     c: CloudPebble.Editor.PebbleMode
                 };
-
+                var language_has_autocomplete = (file_kind == 'c' || file_kind == 'monkey');
                 var source = data.source;
                 var lastModified = data.modified;
                 var pane = $('<div>');
@@ -113,10 +113,10 @@ CloudPebble.Editor = (function() {
                     settings.keyMap = USER_SETTINGS.keybinds;
                 }
                 if(!settings.extraKeys) settings.extraKeys = {};
-                if(file_kind == 'c' && USER_SETTINGS.autocomplete === 2) {
+                if(language_has_autocomplete && USER_SETTINGS.autocomplete === 2) {
                     settings.extraKeys = {'Ctrl-Space': 'autocomplete'};
                 }
-                if(file_kind == 'c' && USER_SETTINGS.autocomplete !== 0) {
+                if(language_has_autocomplete && USER_SETTINGS.autocomplete !== 0) {
                     settings.extraKeys['Tab'] = function() {
                         var marks = code_mirror.getAllMarks();
                         var cursor = code_mirror.getCursor();
@@ -257,7 +257,7 @@ CloudPebble.Editor = (function() {
                     create_popover(cm, token.string, pos.left, pos.top);
                 };
 
-                if(file_kind == 'c' && USER_SETTINGS.autocomplete === 1) {
+                if(language_has_autocomplete && USER_SETTINGS.autocomplete === 1) {
                     code_mirror.on('changes', function(instance, changes) {
                         update_patch_list(instance, changes);
                         if(!is_autocompleting)

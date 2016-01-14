@@ -131,6 +131,7 @@ CloudPebble.Editor.Autocomplete = new (function() {
             self.complete.apply(self, mLastInvocation);
         }
     }, 50);
+
     this.complete = function(editor, finishCompletion, options) {
         if(mRunning) {
             mLastInvocation = [editor, finishCompletion, options];
@@ -153,7 +154,10 @@ CloudPebble.Editor.Autocomplete = new (function() {
         }
         mRunning = true;
 
-        CloudPebble.YCM.request('completions', editor)
+        // TODO: perhaps there is a nicer way of doing this, but this will suffice for now.
+        var request_function = (editor.options.mode == "MonkeyScript" ? CloudPebble.MonkeyScript.request : CloudPebble.YCM.request);
+
+        request_function('completions', editor)
             .done(function(data) {
                 var completions = _.map(data.completions, function(item) {
                     if(item.kind == 'FUNCTION' || (item.kind == 'MACRO' && item.detailed_info.indexOf('(') > 0)) {
