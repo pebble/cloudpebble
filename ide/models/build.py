@@ -92,6 +92,12 @@ class BuildResult(IdeModel):
         else:
             return s3.read_file('builds', self.build_log)
 
+    def copy_pbw_to_path(self, path):
+        if not settings.AWS_ENABLED:
+            shutil.copy(self.local_filename, self.pbw)
+        else:
+            s3.read_file_to_filesystem('builds', self.pbw, path)
+
     def save_debug_info(self, json_info, platform, kind):
         text = json.dumps(json_info)
         if not settings.AWS_ENABLED:

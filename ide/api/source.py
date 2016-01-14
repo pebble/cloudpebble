@@ -10,7 +10,8 @@ from django.utils.translation import ugettext as _
 from django.core.exceptions import ObjectDoesNotExist
 from ide.api import json_failure, json_response
 from ide.models.project import Project
-from ide.models.files import SourceFile, TestFile
+from ide.models.files import SourceFile
+from ide.models.monkey import TestFile
 from utils.keen_helper import send_keen_event
 
 __author__ = 'katharine'

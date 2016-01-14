@@ -1,23 +1,22 @@
+import datetime
+import json
 import os
 import shutil
 import traceback
-import datetime
-import tempfile
-from io import BytesIO
-import json
+
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.validators import RegexValidator
 from django.db import models, transaction
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.utils.timezone import now
-from django.core.validators import RegexValidator
 from django.utils.translation import ugettext as _
+
 import utils.s3 as s3
-from ide.utils.image_correction import uncorrect
 from ide.models.meta import IdeModel, TextFile
 
 __author__ = 'katharine'
+
 
 class ScriptFile(TextFile):
     """ScriptFiles add support to TextFiles for last-modified timestamps and code folding"""
@@ -44,6 +43,7 @@ class ScriptFile(TextFile):
 
     class Meta(IdeModel.Meta):
         abstract = True
+
 
 class BinFile(IdeModel):
     bucket_name = ''
@@ -333,134 +333,10 @@ class SourceFile(ScriptFile):
     class Meta(ScriptFile.Meta):
         unique_together = (('project', 'file_name'),)
 
-class TestFile(ScriptFile):
-    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_-]+$")])
-    project = models.ForeignKey('Project', related_name='test_files')
-    bucket_name = 'source'
-    folder = 'tests/scripts'
-
-    @classmethod
-    def package_tests(cls, tests, location):
-        dir = tempfile.mkdtemp()
-        try:
-            for test in tests:
-                test_folder = os.path.join(dir, test.file_name)
-                os.mkdir(test_folder)
-                test.copy_to_path(os.path.join(test_folder, test.file_name+'.monkey'))
-                test.copy_screenshots_to_directory(test_folder)
-            return shutil.make_archive(location, 'zip', dir)
-        finally:
-            shutil.rmtree(dir)
-
-    @classmethod
-    def package_tests_to_memory(cls, tests):
-        dir = tempfile.mkdtemp()
-        try:
-            zipname = TestFile.package_tests(tests, os.path.join(dir, 'archive'))
-            with open(zipname, 'rb') as archive:
-                return BytesIO(archive.read())
-        finally:
-            shutil.rmtree(dir)
-
-
-    def copy_screenshots_to_directory(self, directory):
-        for screenshot_set in self.get_screenshot_sets():
-            screenshot_set.copy_to_directory(directory)
-
-    @property
-    def project_path(self):
-        return 'integration_tests/%s' % self.file_name
-
-    @property
-    def latest_code(self):
-        try:
-            return self.runs.latest('session__date_added').code
-        except ObjectDoesNotExist:
-            return None
-
-    def get_screenshot_sets(self):
-        return ScreenshotSet.objects.filter(test=self)
-
-    class Meta(ScriptFile.Meta):
-        unique_together = (('project', 'file_name'),)
-        ordering = ['file_name']
-
-
-class ScreenshotSet(IdeModel):
-    test = models.ForeignKey('TestFile', related_name='screenshot_sets')
-    name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_-]+$")])
-
-    def save(self, *args, **kwargs):
-        self.clean_fields()
-        self.test.project.last_modified = now()
-        self.test.project.save()
-        super(ScreenshotSet, self).save(*args, **kwargs)
-
-    def copy_to_directory(self, directory):
-        screenshots = ScreenshotFile.objects.filter(screenshot_set=self)
-        for screenshot in screenshots:
-            if screenshot.platform == 'aplite':
-                platform = 'tintin'
-                size = '144x168'
-            elif screenshot.platform == 'basalt':
-                platform = 'snowy'
-                size = '144x168'
-            elif screenshot.platform == 'chalk':
-                platform = 'snowy'
-                size = '180x180'
-            else:
-                raise ValueError("Invalid platform")
-            file_dir = os.path.join(directory, 'english', platform, size)
-            file_path = os.path.join(file_dir, self.name+'.png')
-            if not os.path.isdir(file_dir):
-                os.makedirs(file_dir)
-            screenshot.copy_to_path(file_path)
-
-    class Meta(IdeModel.Meta):
-        unique_together = (('test', 'name'),)
-
-class ScreenshotFile(BinFile):
-    bucket_name = 'source'
-    folder = 'tests/screenshots'
-    screenshot_set = models.ForeignKey('ScreenshotSet', related_name='files')
-    PLATFORMS = (
-        ('aplite', 'Aplite'),
-        ('basalt', 'Basalt'),
-        ('chalk', 'Chalk')
-    )
-    platform = models.CharField(max_length=10, choices=PLATFORMS)
-
-    @property
-    def padded_id(self):
-        return '%09d' % self.id
-
-    @property
-    def s3_id(self):
-        return self.id
-
-    def save_project(self):
-        self.screenshot_set.test.project.last_modified = now()
-        self.screenshot_set.test.project.save()
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        self.screenshot_set.save()
-        super(ScreenshotFile, self).save(*args, **kwargs)
-
-    def save_file(self, stream, file_size=0):
-        with BytesIO() as buff:
-            uncorrect(stream, buff, format='png')
-            buff.seek(0)
-            data = buff.read()
-            super(ScreenshotFile, self).save_string(data)
-
-    class Meta(BinFile.Meta):
-        unique_together = (('platform', 'screenshot_set'),)
-
 
 @receiver(post_delete)
 def delete_file(sender, instance, **kwargs):
-    if sender in (SourceFile, ResourceVariant, ScreenshotFile, TestFile):
+    if sender in (SourceFile, ResourceVariant):
         if settings.AWS_ENABLED:
             try:
                 s3.delete_file(sender.bucket_name, instance.s3_path)

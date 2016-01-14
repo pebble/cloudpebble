@@ -10,7 +10,7 @@ from utils.keen_helper import send_keen_event
 
 from ide.api import json_failure, json_response
 from ide.models.project import Project
-from ide.models.files import TestFile, ScreenshotSet, ScreenshotFile
+from ide.models.monkey import TestFile, ScreenshotSet, ScreenshotFile, ScreenshotSet, ScreenshotFile
 import utils.s3 as s3
 
 __author__ = 'joe'

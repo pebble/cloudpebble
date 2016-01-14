@@ -1,7 +1,8 @@
 import json
 from cloudpebble_test import CloudpebbleTestCase
 from django.core.urlresolvers import reverse
-from ide.models.files import TestFile, ScreenshotSet, ScreenshotFile
+from ide.models.files import ScreenshotSet, ScreenshotFile
+from ide.models.monkey import TestFile, ScreenshotSet, ScreenshotFile
 from django.conf import settings
 from django.test.utils import override_settings
 from collections import Counter

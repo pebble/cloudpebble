@@ -11,8 +11,8 @@ from django.utils import timezone
 from ide.api import json_failure, json_response
 from ide.models.project import Project
 from ide.models.monkey import TestSession, TestRun, TestCode, TestLog
-from ide.models.files import TestFile
 from django.db import transaction
+from utils.bundle import TestBundle
 
 
 __author__ = 'joe'
@@ -32,6 +32,7 @@ def serialise_run(run, link_test=True, link_session=True):
         'logs': reverse('ide:get_test_run_log', args=[run.session.project.id, run.id]) if run.has_log else None,
         'date_added': str(run.session.date_added)
     }
+
     if link_test and run.has_test:
         result['test'] = {
             'id': run.test.id,
@@ -145,43 +146,35 @@ def run_qemu_test(request, project_id, test_id):
     """ Request an interactive QEMU test session """
     # Load request parameters and database objects
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
-    test = get_object_or_404(TestFile, pk=test_id, project=project)
     token = request.POST['token']
     host = request.POST['host']
     emu = request.POST['emu']
     # Get QEMU server which corresponds to the requested host
     server = next(x for x in set(settings.QEMU_URLS) if host in x)
-    # Package the tests
-    stream = TestFile.package_tests_to_memory([test])
-    # Make the test session and runs
-    session, runs = TestSession.setup_test_session(project, [test.id])
 
-    # TODO: Since we know we're communicating with localhost things, build_absolute_uri may not be appropriate.
-    callback_url = request.build_absolute_uri(reverse('ide:notify_test_session', args=[project_id, session.id]))
-    post_url = server + 'qemu/%s/test' % urllib.quote_plus(emu)
-    print "Posting to %s" % post_url
+    # If the request fails, the test session/runs will not be created
+    with transaction.atomic():
+        bundle = TestBundle(project, [test_id])
+        session, runs = bundle.setup_test_session()
+        # TODO: Since we know we're communicating with localhost things, build_absolute_uri may not be appropriate.
+        callback_url = request.build_absolute_uri(reverse('ide:notify_test_session', args=[project_id, session.id]))
+        post_url = server + 'qemu/%s/test' % urllib.quote_plus(emu)
+        print "Posting to %s" % post_url
 
-    result = requests.post(post_url,
-                           data={'token': token, 'notify': callback_url},
-                           verify=settings.COMPLETION_CERTS,
-                           files=[('archive', ('archive.zip', stream))])
+        with bundle.open() as stream:
+            result = requests.post(post_url,
+                                   data={'token': token, 'notify': callback_url},
+                                   verify=settings.COMPLETION_CERTS,
+                                   files=[('archive', ('archive.zip', stream))])
 
+            # TODO: Consider doing something to get more meaningful error messages
+            result.raise_for_status()
 
-    try:
-        # TODO: Consider doing something to get more meaningful error messages
-        result.raise_for_status()
-    except Exception as e:
-        # If there was an error starting the test, set the ERROR test code
-        for run in runs:
-            run.code = TestCode.ERROR
-            run.log = str(e)
-            run.save()
-        raise e
     response = result.json()
     subscribe_url = server + 'qemu/%s/test/subscribe' % urllib.quote_plus(emu)
     response['run_id'] = runs[0].id
     response['session_id'] = session.id
-    response['test_id'] = test.id
+    response['test_id'] = int(test_id)
     response['subscribe_url'] = subscribe_url
     return json_response(response)
 
@@ -199,7 +192,7 @@ def notify_test_session(request, project_id, session_id):
     token = request.POST['token']
     if token != settings.QEMU_LAUNCH_AUTH_HEADER:
         print "Rejecting test result, posted token %s doesn't match %s" % (request.POST['token'], settings.QEMU_LAUNCH_AUTH_HEADER)
-        return json_response({}, status=403)
+        return json_failure({}, status=403)
     log = request.POST['log']
     code = int(request.POST['code'])
     if code == 0:
@@ -226,14 +219,9 @@ def download_tests(request, project_id):
     """ Download all the tests for a project as a ZIP file. """
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     test_ids = request.GET.get('tests', None)
-    if test_ids is None:
-        tests = project.test_files.all()
-    else:
-        ids = [int(test_id) for test_id in test_ids.split(',')]
-        tests = TestFile.objects.filter(project=project, id__in=ids)
 
-    stream = TestFile.package_tests_to_memory(tests)
-    return HttpResponse(stream, content_type='application/zip')
+    with TestBundle(project, test_ids, include_pbw=True).open() as f:
+        return HttpResponse(f.read(), content_type='application/zip')
 
 
 # POST /project/<id>/test_sessions
@@ -244,14 +232,14 @@ def post_test_session(request, project_id):
     # We may receive a list of particular tests to run
     # If not, all tests will be run.
     test_ids = request.POST.get('tests', None)
-    if test_ids is not None:
-        test_ids = [int(test_id) for test_id in test_ids.split(',')]
 
-    # Make the database objects
-    session, runs = TestSession.setup_test_session(project, test_ids)
-    # TODO: Real implimentation with Liam's infrastructure
+    bundle = TestBundle(project, include_pbw=True)
+    bundle.setup_test_session()
+    with bundle.open() as f:
+        # Send the tests to TA
+        pass
     
-    return json_response({"data": serialise_session(session, include_runs=True)})
+    # return json_response({"data": serialise_session(session, include_runs=True)})
 
 
 # TODO: 'ping' functions to see if anything has changed. Or, "changed since" parameters.

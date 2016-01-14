@@ -11,7 +11,8 @@ from django.views.decorators.http import require_safe, require_POST
 from ide.api import json_response, json_failure
 from ide.models.build import BuildResult
 from ide.models.project import Project, TemplateProject
-from ide.models.files import SourceFile, ResourceFile, TestFile
+from ide.models.files import SourceFile, ResourceFile
+from ide.models.monkey import TestFile
 from ide.tasks.archive import create_archive, do_import_archive
 from ide.tasks.build import run_compile
 from ide.tasks.gist import import_gist

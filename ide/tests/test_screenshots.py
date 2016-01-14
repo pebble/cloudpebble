@@ -7,7 +7,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 
-from ide.models.files import TestFile, ScreenshotSet, ScreenshotFile
+from ide.models.files import ScreenshotSet, ScreenshotFile
+from ide.models.monkey import TestFile, ScreenshotSet, ScreenshotFile
 
 __author__ = 'joe'
 

@@ -1,14 +1,19 @@
 import traceback
 import os
+from io import BytesIO
 
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.db import transaction
+from django.utils.timezone import now
 import utils.s3 as s3
+from ide.models.files import BinFile, ScriptFile
 from ide.models.meta import IdeModel, TextFile
-from ide.models.files import TestFile
+from ide.utils.image_correction import uncorrect
 
 __author__ = 'joe'
 
@@ -26,30 +31,6 @@ class TestSession(IdeModel):
     date_added = models.DateTimeField(auto_now_add=True)
     date_completed = models.DateTimeField(null=True)
     project = models.ForeignKey('Project', related_name='test_sessions')
-
-    @staticmethod
-    def setup_test_session(project, test_ids=None):
-        with transaction.atomic():
-            # Create a test session
-            session = TestSession.objects.create(project=project)
-            session.save()
-            runs = []
-
-            if test_ids is None:
-                # If test_ids is None, get all tests for the project
-                tests = TestFile.objects.filter(project=project)
-            else:
-                # Otherwise, get all requested test(s)
-                tests = TestFile.objects.filter(project=project, id__in=test_ids)
-
-            # Then make a test run for every test
-            for test in tests:
-                run = TestRun.objects.create(session=session, test=test, original_name=test.file_name)
-                run.save()
-                runs.append(run)
-
-        # Return the session and its runs
-        return session, runs
 
     class Meta(IdeModel.Meta):
         ordering = ['-date_added']
@@ -110,9 +91,141 @@ class TestRun(IdeModel):
         ordering = ['original_name', '-session__date_added']
 
 
+
+
+class TestFile(ScriptFile):
+    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_-]+$")])
+    project = models.ForeignKey('Project', related_name='test_files')
+    bucket_name = 'source'
+    folder = 'tests/scripts'
+
+    def copy_screenshots_to_directory(self, directory):
+        for screenshot_set in self.get_screenshot_sets():
+            screenshot_set.copy_to_directory(directory)
+
+    def copy_test_to_path(self, path):
+        self.copy_to_path(path)
+        with open(path, 'r+') as f:
+            full_test = """#metadata
+# {{
+#   "pebble": true
+# }}
+#/metadata
+
+setup {{
+    context bigboard
+    do factory_reset
+}}
+
+test screenshot {{
+    context bigboard
+
+    # Load the app
+    do install_app app.pbw
+    do launch_app "{app_name}"
+
+{content}
+}}""".format(app_name=self.project.app_short_name, content="".join('    %s' % l for l in f.readlines()))
+        with open(path, 'w') as f:
+            f.write(full_test)
+
+
+    @property
+    def project_path(self):
+        return 'integration_tests/%s' % self.file_name
+
+    @property
+    def latest_code(self):
+        try:
+            return self.runs.latest('session__date_added').code
+        except ObjectDoesNotExist:
+            return None
+
+    def get_screenshot_sets(self):
+        return ScreenshotSet.objects.filter(test=self)
+
+    class Meta(ScriptFile.Meta):
+        unique_together = (('project', 'file_name'),)
+        ordering = ['file_name']
+
+
+class ScreenshotSet(IdeModel):
+    test = models.ForeignKey('TestFile', related_name='screenshot_sets')
+    name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_-]+$")])
+
+    def save(self, *args, **kwargs):
+        self.clean_fields()
+        self.test.project.last_modified = now()
+        self.test.project.save()
+        super(ScreenshotSet, self).save(*args, **kwargs)
+
+    def copy_to_directory(self, directory):
+        screenshots = ScreenshotFile.objects.filter(screenshot_set=self)
+        for screenshot in screenshots:
+            if screenshot.platform == 'aplite':
+                platform = 'tintin'
+                size = '144x168'
+            elif screenshot.platform == 'basalt':
+                platform = 'snowy'
+                size = '144x168'
+            elif screenshot.platform == 'chalk':
+                platform = 'snowy'
+                size = '180x180'
+            else:
+                raise ValueError("Invalid platform")
+            file_dir = os.path.join(directory, 'english', platform, size)
+            file_path = os.path.join(file_dir, self.name+'.png')
+            if not os.path.isdir(file_dir):
+                os.makedirs(file_dir)
+            screenshot.copy_to_path(file_path)
+
+    class Meta(IdeModel.Meta):
+        unique_together = (('test', 'name'),)
+
+
+class ScreenshotFile(BinFile):
+    bucket_name = 'source'
+    folder = 'tests/screenshots'
+    screenshot_set = models.ForeignKey('ScreenshotSet', related_name='files')
+    PLATFORMS = (
+        ('aplite', 'Aplite'),
+        ('basalt', 'Basalt'),
+        ('chalk', 'Chalk')
+    )
+    platform = models.CharField(max_length=10, choices=PLATFORMS)
+
+    @property
+    def padded_id(self):
+        return '%09d' % self.id
+
+    @property
+    def s3_id(self):
+        return self.id
+
+    def save_project(self):
+        self.screenshot_set.test.project.last_modified = now()
+        self.screenshot_set.test.project.save()
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        self.screenshot_set.save()
+        super(ScreenshotFile, self).save(*args, **kwargs)
+
+    def save_file(self, stream, file_size=0):
+        with BytesIO() as buff:
+            uncorrect(stream, buff, format='png')
+            buff.seek(0)
+            data = buff.read()
+            super(ScreenshotFile, self).save_string(data)
+
+    class Meta(BinFile.Meta):
+        unique_together = (('platform', 'screenshot_set'),)
+
+
+
 @receiver(post_delete)
 def delete_file(sender, instance, **kwargs):
-    if sender in (TestLog, ):
+    if sender in (ScreenshotFile, TestFile, TestLog):
         if settings.AWS_ENABLED:
             try:
                 s3.delete_file(sender.bucket_name, instance.s3_path)
