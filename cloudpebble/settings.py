@@ -132,12 +132,12 @@ STATICFILES_FINDERS = (
 
 BOWER_INSTALLED_APPS = (
     'https://github.com/krisk/Fuse.git#2c1560d763',
-    'jquery',
+    'jquery#~2.1.3',
     'underscore',
     'backbone',
     'text-encoding',
     'jshint/jshint',
-    'html.sortable',
+    'html.sortable#~0.3.1',
     'alexgorbatchev/jquery-textext',
     'codemirror#4.2.0',
     'kanaka/noVNC',
