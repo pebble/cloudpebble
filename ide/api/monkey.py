@@ -18,6 +18,9 @@ from utils.bundle import TestBundle
 __author__ = 'joe'
 
 
+def make_notify_url_builder(request):
+    return lambda session: request.build_absolute_uri(reverse('ide:notify_test_session', args=[session.project.pk, session.id]))
+
 def serialise_run(run, link_test=True, link_session=True):
     """ Prepare a TestRun for representation in JSON
 
@@ -151,28 +154,10 @@ def run_qemu_test(request, project_id, test_id):
     emu = request.POST['emu']
     # Get QEMU server which corresponds to the requested host
     server = next(x for x in set(settings.QEMU_URLS) if host in x)
-
-    # If the request fails, the test session/runs will not be created
-    with transaction.atomic():
-        bundle = TestBundle(project, [test_id])
-        session, runs = bundle.setup_test_session()
-        # TODO: Since we know we're communicating with localhost things, build_absolute_uri may not be appropriate.
-        callback_url = request.build_absolute_uri(reverse('ide:notify_test_session', args=[project_id, session.id]))
-        post_url = server + 'qemu/%s/test' % urllib.quote_plus(emu)
-        print "Posting to %s" % post_url
-
-        with bundle.open() as stream:
-            result = requests.post(post_url,
-                                   data={'token': token, 'notify': callback_url},
-                                   verify=settings.COMPLETION_CERTS,
-                                   files=[('archive', ('archive.zip', stream))])
-
-            # TODO: Consider doing something to get more meaningful error messages
-            result.raise_for_status()
-
-    response = result.json()
+    bundle = TestBundle(project, [int(test_id)])
+    response, run, session = bundle.run_on_qemu(server, token, settings.COMPLETION_CERTS, emu, make_notify_url_builder(request))
     subscribe_url = server + 'qemu/%s/test/subscribe' % urllib.quote_plus(emu)
-    response['run_id'] = runs[0].id
+    response['run_id'] = run.id
     response['session_id'] = session.id
     response['test_id'] = int(test_id)
     response['subscribe_url'] = subscribe_url
@@ -220,26 +205,18 @@ def download_tests(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     test_ids = request.GET.get('tests', None)
 
-    with TestBundle(project, test_ids, include_pbw=True).open() as f:
+    with TestBundle(project, test_ids).open() as f:
         return HttpResponse(f.read(), content_type='application/zip')
-
 
 # POST /project/<id>/test_sessions
 @require_POST
 @login_required
 def post_test_session(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
-    # We may receive a list of particular tests to run
-    # If not, all tests will be run.
-    test_ids = request.POST.get('tests', None)
-
-    bundle = TestBundle(project, include_pbw=True)
-    bundle.setup_test_session()
-    with bundle.open() as f:
-        # Send the tests to TA
-        pass
-    
-    # return json_response({"data": serialise_session(session, include_runs=True)})
+    # TODO: accept a list of tests in POST?
+    bundle = TestBundle(project)
+    session = bundle.run_on_orchestrator(make_notify_url_builder(request))
+    return json_response({"data": serialise_session(session, include_runs=True)})
 
 
 # TODO: 'ping' functions to see if anything has changed. Or, "changed since" parameters.
