@@ -3,13 +3,10 @@
  */
 
 CloudPebble.MonkeyScript = (function() {
-    var DO_COMMANDS = ['single_click', 'long_click', 'wait', 'screenshot', 'reset', 'set_time',
-        'install_app', 'remove_app', 'launch_app', 'airplane_mode', 'command',
-        'factory_reset', 'charging', 'power_testing_enable',
-        'power_testing_disable', 'multi_click'];
+    var DO_COMMANDS = ['airplane_mode', 'charging', 'command', 'factory_reset', 'install_app', 'launch_app', 'long_click', 'multi_click',
+        'power_testing_disable', 'power_testing_enable', 'remove_app', 'reset', 'screenshot', 'set_time', 'single_click', 'wait'];
 
-    var EXPECT_COMMANDS = ['equal', 'not_equal', 'power-between', 'screenshot_app', 'screenshot',
-        'reset_output', 'captured_output', 'window'];
+    var EXPECT_COMMANDS = ['captured_output', 'equal', 'not_equal', 'power-between', 'reset_output', 'screenshot', 'screenshot_app', 'window'];
 
     var KEYWORDS = ['do', 'expect'];
 
@@ -118,10 +115,11 @@ CloudPebble.MonkeyScript = (function() {
                 });
 
                 // Fuse sorts the suggestions based on the closest match to the currently typed token and returns an array of indices.
-                // A low 'distance' and 'threshold' keep the number of matches small.
+                // If these are too high, most of the keywords get matched and reordered with each new letter, which is irritating,
+                // so low values are used to keep the number of matches low, while still tolerating typing errors.
                 var keys = (new Fuse(all_suggestions, {
-                    distance: 0,
-                    threshold: 0.1
+                    distance: 3,
+                    threshold: 0.3
                 })).search(pieces[pieces.length - 1] || "");
 
                 // Build the sorted_suggestions array using the indices
