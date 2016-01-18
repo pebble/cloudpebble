@@ -9,6 +9,7 @@ CloudPebble.FuzzyPrompt = (function() {
     var default_item;
     var selection_was_made;
     var opened = false;
+    var prompt_kind = null;
     var COMMANDS_ENABLED = true;
 
     // While manual is false, always highlight the first item
@@ -147,8 +148,7 @@ CloudPebble.FuzzyPrompt = (function() {
     // Select an item, run its callback then hide the prompt
     var select_item = function(match) {
         selection_was_made = (match != null);
-        opened = false;
-        hide_prompt(!selection_was_made);
+        hide_prompt(!selection_was_made, match);
         if (match) {
             match.callback(match.object, input.val());
         }
@@ -170,6 +170,7 @@ CloudPebble.FuzzyPrompt = (function() {
         manual = false;
         selection_was_made = false;
         opened = true;
+        prompt_kind = kind;
         // Build up the list of files to search through
         var id = 0;
         _.each(sources, function(source) {
@@ -222,18 +223,30 @@ CloudPebble.FuzzyPrompt = (function() {
         selected_id = id;
     };
 
-    // Hide the prompt and refocus on the last thing.
-    var hide_prompt = function(refocus) {
-        prompt.modal('hide');
-        if (refocus) {
-            setTimeout(function () {
-                $(previously_active).focus();
-            }, 1);
-        }
-        else {
-            prompt.blur();
-        }
+    var submit_analytics = function(selection) {
+        // If there is a dot in the name (and hence, the item is a file), only submit the extension.
+        var data = {
+            kind: prompt_kind,
+            selection: (selection ? selection.name.split('.').pop() : null)
+        };
+        CloudPebble.Analytics.addEvent("cloudpebble_fuzzyprompt_action", data, null, ['cloudpebble']);
+    };
 
+    // Hide the prompt and refocus on the last thing.
+    var hide_prompt = function(refocus, selection) {
+        if (opened) {
+            opened = false;
+            prompt.modal('hide');
+            if (refocus) {
+                setTimeout(function () {
+                    $(previously_active).focus();
+                }, 1);
+            }
+            else {
+                prompt.blur();
+            }
+            submit_analytics(selection);
+        }
     };
 
     var add_commands = function(commands) {
@@ -291,6 +304,7 @@ CloudPebble.FuzzyPrompt = (function() {
                     }
                 });
             });
+
             // At the end, we add any commands in the set which were new and note replacements.
             var filtered = _.omit(commands, all_replaced);
             add_commands(filtered);

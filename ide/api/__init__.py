@@ -47,6 +47,7 @@ def proxy_keen(request, project_id):
         'cloudpebble_timeline_displayed',
         'sdk_pin_inserted',
         'sdk_pin_deleted',
+        'cloudpebble_fuzzyprompt_action'
     }
 
     event = request.POST['event']
