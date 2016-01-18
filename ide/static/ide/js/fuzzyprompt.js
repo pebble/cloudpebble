@@ -21,10 +21,9 @@ CloudPebble.FuzzyPrompt = (function() {
                 caseSensitive: false,
                 includeScore: false,
                 shouldSort: true,
-                threshold: 0.6,
+                threshold: 0.4,
                 location: 0,
-                distance: 100,
-                maxPatternLength: 32,
+                distance: 20,
                 keys: ["name"]
             };
             fuse = new Fuse([], options);
