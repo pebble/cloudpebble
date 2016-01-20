@@ -90,7 +90,7 @@ def _convert(file_from, file_out, correct=None, format=None):
     pix = im.load()
     corrected = _is_corrected(im, pix)
     if corrected == correct:
-        im.save(file_out)
+        im.save(file_out, format=format)
     else:
         mapping = _get_mapping(correct=correct)
         for x in range(im.size[0]):

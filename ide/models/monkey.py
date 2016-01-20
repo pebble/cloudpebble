@@ -91,8 +91,6 @@ class TestRun(IdeModel):
         ordering = ['original_name', '-session__date_added']
 
 
-
-
 class TestFile(ScriptFile):
     file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_-]+$")])
     project = models.ForeignKey('Project', related_name='test_files')
@@ -123,7 +121,7 @@ test screenshot {{
     # Load the app
     do install_app app.pbw
     do launch_app "{app_name}"
-
+    do wait 2
 {content}
 }}""".format(app_name=self.project.app_short_name, content="".join('    %s' % l for l in f.readlines()))
         with open(path, 'w') as f:

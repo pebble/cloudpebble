@@ -18,8 +18,8 @@ from utils.bundle import TestBundle
 __author__ = 'joe'
 
 
-def make_notify_url_builder(request):
-    return lambda session: request.build_absolute_uri(reverse('ide:notify_test_session', args=[session.project.pk, session.id]))
+def make_notify_url_builder(request, token=None):
+    return lambda session: request.build_absolute_uri(reverse('ide:notify_test_session', args=[session.project.pk, session.id])) + ("?token=%s" % token if token else "")
 
 def serialise_run(run, link_test=True, link_session=True):
     """ Prepare a TestRun for representation in JSON
@@ -174,27 +174,64 @@ def notify_test_session(request, project_id, session_id):
     # TODO: deal with invalid input/situations (e.g. notified twice)
     project = get_object_or_404(Project, pk=int(project_id))
     session = get_object_or_404(TestSession, pk=int(session_id), project=project)
-    token = request.POST['token']
+    token = request.POST.get('token', None)
+    if not token:
+        token = request.GET['token']
     if token != settings.QEMU_LAUNCH_AUTH_HEADER:
-        print "Rejecting test result, posted token %s doesn't match %s" % (request.POST['token'], settings.QEMU_LAUNCH_AUTH_HEADER)
+        print "Rejecting test result, posted token %s doesn't match %s" % (token, settings.QEMU_LAUNCH_AUTH_HEADER)
         return json_failure({}, status=403)
-    log = request.POST['log']
-    code = int(request.POST['code'])
-    if code == 0:
-        result = TestCode.PASSED
-    elif code == 1:
-        result = TestCode.FAILED
-    else:
-        result = TestCode.ERROR
 
-    with transaction.atomic():
-        session.date_completed = timezone.now()
-        session.save()
-        for run in session.runs.all():
-            run.code = result
-            run.log = log
-            run.date_completed = timezone.now()
-            run.save()
+    orch_id = request.POST.get('id', None)
+    orch_url = 'http://orchestrator.hq.getpebble.com'
+    date_completed = timezone.now()
+
+    if orch_id:
+        # TODO: do this all in a celery task
+        with transaction.atomic():
+            # GET /api/jobs/<id>
+            result = requests.get('%s/api/jobs/%s' % (orch_url, orch_id))
+            result.raise_for_status()
+
+            # find each test in "tests"
+            for test_name, test_info in result.json()["tests"].iteritems():
+                run = session.runs.get(test__file_name=test_name)
+                # TODO: pick log artifact more robustly
+                log_url = test_info['result']['artifacts'][0][-1]
+                # for each test, download the logs
+                log = requests.get('%s/%s' % (orch_url, log_url)).text
+                test_return = test_info["result"]["ret"]
+                # TODO: better assign test result
+                # save the test results and logs in the database
+                test_result = TestCode.PASSED if int(test_return) == 0 else TestCode.FAILED
+                run.code = test_result
+                run.log = log
+                run.date_completed = date_completed
+                run.save()
+            session.date_completed = date_completed
+            session.save()
+
+
+
+        pass
+    else:
+        log = request.POST['log']
+        status = request.POST['status']
+        if status == 'passed':
+            result = TestCode.PASSED
+        elif status == 'failed':
+            result = TestCode.FAILED
+        else:
+            result = TestCode.ERROR
+        with transaction.atomic():
+            session.date_completed = date_completed
+            session.save()
+            for run in session.runs.all():
+                run.code = result
+                run.log = log
+                run.date_completed = date_completed
+                run.save()
+
+
     return json_response({})
 
 
@@ -212,10 +249,11 @@ def download_tests(request, project_id):
 @require_POST
 @login_required
 def post_test_session(request, project_id):
+    # TODO: run as celery task
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     # TODO: accept a list of tests in POST?
     bundle = TestBundle(project)
-    session = bundle.run_on_orchestrator(make_notify_url_builder(request))
+    session = bundle.run_on_orchestrator(make_notify_url_builder(request, settings.QEMU_LAUNCH_AUTH_HEADER))
     return json_response({"data": serialise_session(session, include_runs=True)})
 
 
