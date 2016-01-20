@@ -12,6 +12,7 @@ from ide.tasks.git import hooked_commit
 from ide.utils import generate_half_uuid
 from utils.keen_helper import send_keen_event
 
+
 __author__ = 'katharine'
 
 

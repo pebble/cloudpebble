@@ -77,7 +77,7 @@ class TestBundle(object):
 
         with transaction.atomic():
             # Set up the test session
-            session, runs = self.setup_test_session()
+            session, runs = self.setup_test_session(kind='orch')
 
             # Build the orchestrator job request
             # TODO: custom configuration
@@ -105,8 +105,9 @@ class TestBundle(object):
     def run_on_qemu(self, server, token, verify, emu, notify_url_builder):
         # If the request fails, the test session/runs will not be created
         assert len(self.tests) == 1
+
         with transaction.atomic():
-            session, runs = self.setup_test_session()
+            session, runs = self.setup_test_session(kind='live')
             # TODO: Since we know we're communicating with localhost things, build_absolute_uri may not be appropriate.
             callback_url = notify_url_builder(session)
             post_url = server + 'qemu/%s/test' % urllib.quote_plus(emu)
@@ -139,10 +140,12 @@ class TestBundle(object):
         finally:
             shutil.rmtree(temp_dir)
 
-    def setup_test_session(self):
+    def setup_test_session(self, kind):
+        assert kind in dict(TestSession.SESSION_KINDS).keys()
+
         with transaction.atomic():
             # Create a test session
-            session = TestSession.objects.create(project=self.project)
+            session = TestSession.objects.create(project=self.project, kind=kind)
             session.save()
             runs = []
 

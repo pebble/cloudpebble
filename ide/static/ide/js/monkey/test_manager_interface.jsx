@@ -9,6 +9,15 @@ CloudPebble.TestManager.Interface = (function(API) {
 
     var {Route, Sessions, Tests, Runs, Logs} = API;
 
+
+    function SessionKindLabel(props) {
+        var {kind, long} = props;
+        return (<div>{(long ?
+            (kind == 'live' ? gettext('Run in CloudPebble') : gettext('Testing Backend')) :
+            (kind == 'live' ? gettext('Live') : gettext('Backend')))
+        }</div>)
+    }
+
     /**
      * The Pagination object is a mixin providing most of the functions needed to support and
      * render a pagination switcher.
@@ -212,6 +221,7 @@ CloudPebble.TestManager.Interface = (function(API) {
             return (
                 <tr className={rowClassName} key={session.id} onClick={()=>this.onClickSession(session)}>
                     <td><Anchor onClick={()=>this.onClickSession(session)}>{datestring}</Anchor></td>
+                    <td><SessionKindLabel kind={session.kind} long={false} /></td>
                     <td className={passesClassName}>{`${session.passes}/${session.run_count}`}</td>
                 </tr>
             )
@@ -223,6 +233,7 @@ CloudPebble.TestManager.Interface = (function(API) {
                     <table className="table" id="testmanager-job-table">
                         <thead><tr>
                             <th>{gettext('Date')}</th>
+                            <th>{gettext('Kind')}</th>
                             <th>{gettext('Passes')}</th>
                         </tr></thead>
                         <tbody>{sessions}</tbody>
@@ -235,18 +246,19 @@ CloudPebble.TestManager.Interface = (function(API) {
     /**
      * SingleSession shows the info for a particular testing job, and all the tests run for it.
      */
-    function SingleSession(props) {
-        var filtered = _.filter(props.runs, (run) => run.session_id == props.id);
-        var datestring = CloudPebble.Utils.FormatDatetime(props.date_added);
+    function SingleSession(session) {
+        var filtered = _.filter(session.runs, (run) => run.session_id == session.id);
+        var datestring = CloudPebble.Utils.FormatDatetime(session.date_added);
         return (
             <div>
                 <table className="infoTable">
                     <tbody>
                     <tr><th>{gettext('Date')}</th><td>{datestring}</td></tr>
                     <tr><th>{gettext('Passes')}</th><td>{(_.countBy(filtered, 'code')[1] || 0)+'/'+filtered.length}</td></tr>
+                    <tr><th>{gettext('Test Kind')}</th><td><SessionKindLabel kind={session.kind} long={true} /></td></tr>
                     </tbody>
                 </table>
-                <RunList runs={filtered} session={props} />
+                <RunList runs={filtered} session={session} />
             </div>
         );
     }
@@ -254,18 +266,18 @@ CloudPebble.TestManager.Interface = (function(API) {
     /**
      * SingleTest shows the details for a single test, and all times it has been run
      */
-    function SingleTest(props) {
-        var filtered = _.filter(props.runs, (run) => (!_.isUndefined(run.test) && run.test.id == props.id));
+    function SingleTest(test) {
+        var filtered = _.filter(test.runs, (run) => (!_.isUndefined(run.test) && run.test.id == test.id));
         // TODO: 'goto source'
         return (
             <div id="testmanager-test">
                 <table className="infoTable">
                     <tbody>
-                    <tr><th>{gettext('Test')}</th><td>{props.name}</td></tr>
+                    <tr><th>{gettext('Test')}</th><td>{test.name}</td></tr>
                     <tr><th>{gettext('Passes')}</th><td>{(_.countBy(filtered, 'code')[1] || 0) + '/' + filtered.length}</td></tr>
                     </tbody>
                 </table>
-                <RunList runs={filtered} test={props}/>
+                <RunList runs={filtered} test={test}/>
             </div>
         );
     }

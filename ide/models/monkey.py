@@ -10,10 +10,12 @@ from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.db import transaction
 from django.utils.timezone import now
+from django.utils.translation import ugettext as _
 import utils.s3 as s3
 from ide.models.files import BinFile, ScriptFile
 from ide.models.meta import IdeModel, TextFile
 from ide.utils.image_correction import uncorrect
+
 
 __author__ = 'joe'
 
@@ -31,15 +33,22 @@ class TestSession(IdeModel):
     date_added = models.DateTimeField(auto_now_add=True)
     date_completed = models.DateTimeField(null=True)
     project = models.ForeignKey('Project', related_name='test_sessions')
+    SESSION_KINDS = (
+        ('orch', _('Queued Test')),
+        ('live', _('Live Test'))
+    )
+    kind = models.CharField(max_length=4, choices=SESSION_KINDS)
 
     class Meta(IdeModel.Meta):
         ordering = ['-date_added']
+
 
 class TestLog(TextFile):
     """ A TestLog is a text file owned by a TestRun. It stores the console output from an AT process. """
     folder = 'tests/logs'
     bucket_name = 'source'  # TODO: is this OK?
     test_run = models.OneToOneField('TestRun', related_name='logfile')
+
 
 class TestRun(IdeModel):
     """ A TestRun is owned by a TestSession and links to a TestFile. It stores the result code and date information for

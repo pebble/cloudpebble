@@ -14,6 +14,11 @@ class Migration(SchemaMigration):
         # Deleting field 'TestSession.date_started'
         db.delete_column(u'ide_testsession', 'date_started')
 
+        # Adding field 'TestSession.kind'
+        db.add_column(u'ide_testsession', 'kind',
+                      self.gf('django.db.models.fields.CharField')(default='live', max_length=4),
+                      keep_default=False)
+
 
     def backwards(self, orm):
         # Adding field 'TestRun.date_started'
@@ -25,6 +30,9 @@ class Migration(SchemaMigration):
         db.add_column(u'ide_testsession', 'date_started',
                       self.gf('django.db.models.fields.DateTimeField')(null=True),
                       keep_default=False)
+
+        # Deleting field 'TestSession.kind'
+        db.delete_column(u'ide_testsession', 'kind')
 
 
     models = {
@@ -71,7 +79,7 @@ class Migration(SchemaMigration):
             'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'builds'", 'to': "orm['ide.Project']"}),
             'started': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'db_index': 'True', 'blank': 'True'}),
             'state': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
-            'uuid': ('django.db.models.fields.CharField', [], {'default': "'d8400a5c-b164-4711-89a9-c7f7637fab1c'", 'max_length': '36'})
+            'uuid': ('django.db.models.fields.CharField', [], {'default': "'a0ff9719-eea1-4c9d-a844-44becbcd3cd3'", 'max_length': '36'})
         },
         'ide.buildsize': {
             'Meta': {'object_name': 'BuildSize'},
@@ -95,7 +103,7 @@ class Migration(SchemaMigration):
             'app_long_name': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'app_platforms': ('django.db.models.fields.TextField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'app_short_name': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'app_uuid': ('django.db.models.fields.CharField', [], {'default': "'2abe3370-9272-4f11-99dd-f1adb1e1fdb2'", 'max_length': '36', 'null': 'True', 'blank': 'True'}),
+            'app_uuid': ('django.db.models.fields.CharField', [], {'default': "'656ada3d-a748-4008-b794-9926c145e18c'", 'max_length': '36', 'null': 'True', 'blank': 'True'}),
             'app_version_label': ('django.db.models.fields.CharField', [], {'default': "'1.0'", 'max_length': '40', 'null': 'True', 'blank': 'True'}),
             'github_branch': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'github_hook_build': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
@@ -192,6 +200,7 @@ class Migration(SchemaMigration):
             'date_added': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'date_completed': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'kind': ('django.db.models.fields.CharField', [], {'max_length': '4'}),
             'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'test_sessions'", 'to': "orm['ide.Project']"})
         },
         'ide.usergithub': {

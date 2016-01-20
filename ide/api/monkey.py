@@ -65,7 +65,8 @@ def serialise_session(session, include_runs=False):
         'date_added': str(session.date_added),
         'passes': len(runs.filter(code=TestCode.PASSED)),
         'fails': len(runs.filter(code__lt=0)),
-        'run_count': len(runs)
+        'run_count': len(runs),
+        'kind': session.kind
     }
     if session.date_completed is not None:
         result['date_completed'] = str(session.date_completed)
