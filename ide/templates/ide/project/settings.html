@@ -189,6 +189,12 @@
                         <input type="checkbox" id="settings-capabilities-configuration" {%if 'configurable' in project.app_capabilities%}checked{%endif%}>
                     </div>
                 </div>
+                <div class="control-group">
+                    <label class="control-label" for="settings-capabilities-health">{% trans "Uses Health" context "checkbox label" %}</label>
+                    <div class="controls">
+                        <input type="checkbox" id="settings-capabilities-health" {%if 'health' in project.app_capabilities%}checked{%endif%}>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="well form-actions">

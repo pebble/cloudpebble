@@ -61,6 +61,9 @@ CloudPebble.Settings = (function() {
             if(pane.find('#settings-capabilities-configuration').is(':checked')) {
                 app_capabilities.push('configurable');
             }
+            if(pane.find('#settings-capabilities-health').is(':checked')) {
+                app_capabilities.push('health');
+            }
             app_capabilities = app_capabilities.join(',');
 
             if(name.replace(/\s/g, '') === '') {
