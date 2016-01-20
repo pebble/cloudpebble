@@ -634,16 +634,18 @@ CloudPebble.Editor = (function() {
                 var button_holder = $('<p class="editor-button-wrapper">');
                 var run_btn;
                 if (file.target === 'test') {
-                    run_btn = $('<button></button>').addClass('btn run-test-btn').attr('title', gettext("Run test in emulator"));
+                    run_btn = $('<button></button>').addClass('btn run-test-btn').prop('title', gettext("Run test in emulator"));
                 }
                 else {
-                    run_btn = $('<button></button>').addClass('btn run-btn').attr('title', gettext("Save, build, install and run"));
+                    run_btn = $('<button></button>').addClass('btn run-btn').prop('prop', gettext("Save, build, install and run"));
                 }
-                var save_btn = $('<button class="btn save-btn" title="' + gettext('Save') + '"></button>');
-                var discard_btn = $('<button class="btn reload-btn" title="' + gettext('Reload') + '"></button>');
-                var delete_btn = $('<button class="btn delete-btn" title="' + gettext('Delete') + '"></button>');
-                var ib_btn = $('<button class="btn ib-btn" title="' + gettext('UI Editor') + '"></button>');
-                var rename_btn = $('<button class="btn rename-btn" title="' + gettext('Rename File') + '"></button>');
+                var save_btn = $('<button class="btn save-btn"></button>').prop('title', gettext('Save'));
+                var discard_btn = $('<button class="btn reload-btn">').prop('title', gettext('Reload'));
+                var delete_btn = $('<button class="btn delete-btn">').prop('title', gettext('Delete'));
+                var ib_btn = $('<button class="btn ib-btn">').prop('title', gettext('UI Editor'));
+                var rename_btn = $('<button class="btn rename-btn">').prop('title', gettext('Rename File'));
+                var test_manager_btn = $('<button class="btn">').prop('title', gettext('Show in test manager'));
+
                 var error_area = $('<div>');
 
                 save_btn.click(function() { save(); });
@@ -678,6 +680,10 @@ CloudPebble.Editor = (function() {
                             edit_source_file(file);
                         }
                     );
+                });
+
+                test_manager_btn.click(function() {
+                    CloudPebble.TestManager.ShowTest(file.id);
                 });
 
                 rename_btn.click(show_rename_prompt);
@@ -749,6 +755,9 @@ CloudPebble.Editor = (function() {
                 // You must have an app.js in pebblejs projects.
                 if(CloudPebble.ProjectInfo.type != 'pebblejs' || file.name != 'app.js') {
                     button_holder.append(delete_btn);
+                }
+                if (file_kind == 'monkey') {
+                    button_holder.append(test_manager_btn);
                 }
                 pane.append(button_holder);
                 code_mirror.refresh();

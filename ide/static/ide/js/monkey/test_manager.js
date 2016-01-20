@@ -278,6 +278,7 @@ CloudPebble.TestManager = (function() {
                 if (this.isCached(page, id) || !deferred) {
                     this.navigate(page, id);
                     setCurrentRequest(deferred);
+                    return $.Deferred().resolve();
                 }
                 else {
                     // Otherwise, wait for it to finish. In the meantime, show a loading bar if it takes too long.
@@ -347,6 +348,13 @@ CloudPebble.TestManager = (function() {
     return {
         Show: function() {
             show_test_manager_pane();
+        },
+        ShowTest: function(test_id) {
+            var api = get_api();
+            $.when(api.Runs.refresh({test: test_id}), api.Tests.refresh()).done(function() {
+                show_test_manager_pane();
+                api.Route.navigate('test', test_id);
+            });
         },
         ShowLiveTestRun: function(url, session_id, run_id, test_id) {
             var api = get_api();
