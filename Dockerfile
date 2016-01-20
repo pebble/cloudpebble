@@ -53,11 +53,12 @@ RUN mkdir /sdk2 && \
   curl -L "https://s3.amazonaws.com/assets.getpebble.com/sdk3/sdk-core/sdk-core-${SDK_TWO_VERSION}.tar.bz2" | \
   tar --strip-components=1 -xj -C /sdk2
 
-ENV SDK_THREE_VERSION=3.8.1
+ENV SDK_THREE_CHANNEL=beta
+ENV SDK_THREE_VERSION=3.9-beta5
 
 # Install SDK 3
 RUN mkdir /sdk3 && \
-  curl -L "https://s3.amazonaws.com/assets.getpebble.com/sdk3/release/sdk-core-${SDK_THREE_VERSION}.tar.bz2" | \
+  curl -L "https://s3.amazonaws.com/assets.getpebble.com/sdk3/${SDK_THREE_CHANNEL}/sdk-core-${SDK_THREE_VERSION}.tar.bz2" | \
   tar --strip-components=1 -xj -C /sdk3
 
 COPY . /code
