@@ -11,7 +11,7 @@
         IB.Layer.call(this, canvas, id);
 
         _.extend(this._properties, {
-            bg: new IB.Properties.Colour(pgettext("background colour", "Background"), IB.ColourBlack),
+            bg: new IB.Properties.Colour(pgettext("background colour", "Background"), IB.ColourBlack, true),
             icon_up: new IB.Properties.Bitmap(gettext("Top icon"), ""),
             icon_select: new IB.Properties.Bitmap(gettext("Middle icon"), ""),
             icon_down: new IB.Properties.Bitmap(gettext("Bottom icon"), "")

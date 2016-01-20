@@ -195,7 +195,8 @@
      * @constructor
      * @extends {IB.Properties.Property}
      */
-    IB.Properties.Colour = function(name, value) {
+    IB.Properties.Colour = function(name, value, is_fill) {
+        this.is_fill = !!is_fill;
         Property.call(this, name, this._makeColours(value));
         if (IB.colourEnabled) {
             this._labelClass = 'ib-colour-label';
@@ -266,7 +267,7 @@
         },
         _generateNode: function() {
             var element;
-            var mono_options = _.map(IB.MonochromeMap, this._createColour);
+            var mono_options = _.map(IB.makeMonochromeMap(this.is_fill), this._createColour);
             this._bwNode = $('<select class="ib-property ib-colour">')
                 .append(mono_options)
                 .val(this._value[IB.ColourModes.Monochrome].name)

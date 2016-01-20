@@ -47,11 +47,16 @@
     IB.ColourClear = IB.ColourMap['GColorClear'];
     IB.ColourWhite = IB.ColourMap['GColorWhite'];
     IB.ColourBlack = IB.ColourMap['GColorBlack'];
-
-    IB.MonochromeMap = {
-        GColorWhite: IB.ColourWhite,
-        GColorBlack: IB.ColourBlack,
-        GColorClear: IB.ColourClear
+    IB.DitheredGray = new IB.Colour('GColorLightGray', '#7F7F7F', 'Gray');
+    IB.makeMonochromeMap = function(is_fill) {
+        colour_map = {};
+        colour_map['GColorWhite'] = IB.ColourWhite;
+        if (is_fill && CloudPebble.ProjectInfo.sdk_version == "3") {
+            colour_map['GColorLightGray'] = IB.DitheredGray;
+        }
+        colour_map['GColorBlack'] = IB.ColourBlack;
+        colour_map['GColorClear'] = IB.ColourClear;
+        return colour_map;
     };
 
     /**
