@@ -284,6 +284,9 @@ CloudPebble.TestManager.Interface = (function(API) {
         );
     }
 
+    /**
+     * A LogArtefact is a link to a resource inside a log script which shows a popover if it is an image
+     */
     var LogArtefact = React.createClass({
         url: function() {
             return '/ide/test_artefacts/' + this.props.link;
@@ -306,33 +309,36 @@ CloudPebble.TestManager.Interface = (function(API) {
         }
     });
 
+    /**
+     * LogScript renders a pebblesdk test log in react, converting artefact links to actual links.
+     */
     function LogScript(props) {
         var {log, artefacts} = props;
         var filename = (str) => str.substring(str.lastIndexOf('/') + 1);
-        function next(log, artefacts, start=0) {
-        	return artefacts.reduce((closest, match, i) => {
-        		const pos = log.indexOf(artefacts[i][0], start);
-        		return (pos > closest.pos || pos == -1) ? closest : {
-        			pos: pos,
-        			found: artefacts[i][0],
-        			replace: artefacts[i][1]
-        		};
-        	}, {pos: Infinity});
-        }
-        function all_matches(log, artifacts) {
-	        let matches = [];
-	        let start = 0;
-	        do {
-	        	let match = next(log, artifacts, start)
-	        	matches.push(match);
-	    		start = match.pos + 1;
-	        }
-	        while (start < Infinity);
-	        return matches
-        }
 
+        // Build up a list of the locations of all artefacts
+        let matches = [];
+        let start = 0;
+        do {
+            // Log through the log file, find the closest match to the current position
+            let match = artefacts.reduce((closest, match, i) => {
+                const pos = log.indexOf(artefacts[i][0], start);
+                return (pos > closest.pos || pos == -1) ? closest : {
+                    pos: pos,
+                    found: artefacts[i][0],
+                    replace: artefacts[i][1]
+                };
+            }, {pos: Infinity});
+
+            // Add the match to the list and roll the current position forward
+            matches.push(match);
+            start = match.pos + 1;
+        }
+        while (start < Infinity);
+
+        // Replace each artefact match with a link to the artefact.
         let pieces = [];
-        all_matches(log, artefacts).reduce((pos, match, i) => {
+        matches.reduce((pos, match, i) => {
         	pieces.push(log.slice(pos, match.pos));
         	if (match.replace) {
                 pieces.push(<LogArtefact key={i} name={filename(match.found)} link={filename(match.replace)} />);
@@ -341,6 +347,7 @@ CloudPebble.TestManager.Interface = (function(API) {
         	}
         }, 0);
 
+        // Return the list of log elements inside a <pre>
         return (
             <pre className="test-script">{pieces}</pre>
         )
