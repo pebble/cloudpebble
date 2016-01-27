@@ -1476,6 +1476,16 @@ td.test-run {
     height: 37px;
 }
 
+pre.test-script {
+    white-space: pre-wrap;
+    overflow: scroll;
+}
+
+.test-script a {
+    text-decoration: underline;
+    color: #00a8c6;
+}
+
 @media (min-width: 1320px) {
     .leftside {
         left: 0;

@@ -8,6 +8,15 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        # Adding model 'Artefact'
+        db.create_table(u'ide_artefact', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('log_name', self.gf('django.db.models.fields.CharField')(max_length=100)),
+            ('link_name', self.gf('django.db.models.fields.CharField')(max_length=100)),
+            ('test_log', self.gf('django.db.models.fields.related.ForeignKey')(related_name='artefacts', to=orm['ide.TestLog'])),
+        ))
+        db.send_create_signal('ide', ['Artefact'])
+
         # Deleting field 'TestRun.date_started'
         db.delete_column(u'ide_testrun', 'date_started')
 
@@ -21,6 +30,9 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
+        # Deleting model 'Artefact'
+        db.delete_table(u'ide_artefact')
+
         # Adding field 'TestRun.date_started'
         db.add_column(u'ide_testrun', 'date_started',
                       self.gf('django.db.models.fields.DateTimeField')(null=True),
@@ -72,6 +84,13 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
+        'ide.artefact': {
+            'Meta': {'object_name': 'Artefact'},
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'link_name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
+            'log_name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
+            'test_log': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'artefacts'", 'to': "orm['ide.TestLog']"})
+        },
         'ide.buildresult': {
             'Meta': {'object_name': 'BuildResult'},
             'finished': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
@@ -79,7 +98,7 @@ class Migration(SchemaMigration):
             'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'builds'", 'to': "orm['ide.Project']"}),
             'started': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'db_index': 'True', 'blank': 'True'}),
             'state': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
-            'uuid': ('django.db.models.fields.CharField', [], {'default': "'a0ff9719-eea1-4c9d-a844-44becbcd3cd3'", 'max_length': '36'})
+            'uuid': ('django.db.models.fields.CharField', [], {'default': "'e2337fb5-c1c4-427e-8f69-5cb65fd104a6'", 'max_length': '36'})
         },
         'ide.buildsize': {
             'Meta': {'object_name': 'BuildSize'},
@@ -103,7 +122,7 @@ class Migration(SchemaMigration):
             'app_long_name': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'app_platforms': ('django.db.models.fields.TextField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'app_short_name': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'app_uuid': ('django.db.models.fields.CharField', [], {'default': "'656ada3d-a748-4008-b794-9926c145e18c'", 'max_length': '36', 'null': 'True', 'blank': 'True'}),
+            'app_uuid': ('django.db.models.fields.CharField', [], {'default': "'2024fd12-ff73-4b6b-b840-2603f41cfc78'", 'max_length': '36', 'null': 'True', 'blank': 'True'}),
             'app_version_label': ('django.db.models.fields.CharField', [], {'default': "'1.0'", 'max_length': '40', 'null': 'True', 'blank': 'True'}),
             'github_branch': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'github_hook_build': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),

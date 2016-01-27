@@ -1,5 +1,6 @@
 import requests
 import urllib
+import os.path
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
@@ -21,6 +22,7 @@ __author__ = 'joe'
 def make_notify_url_builder(request, token=None):
     return lambda session: request.build_absolute_uri(reverse('ide:notify_test_session', args=[session.project.pk, session.id])) + ("?token=%s" % token if token else "")
 
+
 def serialise_run(run, link_test=True, link_session=True):
     """ Prepare a TestRun for representation in JSON
 
@@ -33,7 +35,8 @@ def serialise_run(run, link_test=True, link_session=True):
         'id': run.id,
         'name': run.name,
         'logs': reverse('ide:get_test_run_log', args=[run.session.project.id, run.id]) if run.has_log else None,
-        'date_added': str(run.session.date_added)
+        'date_added': str(run.session.date_added),
+        'artefacts': run.artefacts
     }
 
     if link_test and run.has_test:
@@ -100,7 +103,6 @@ def get_test_sessions(request, project_id):
     # TODO: KEEN
     # TODO: deal with errors here on the client
     return json_response({"data": [serialise_session(session) for session in sessions]})
-
 
 
 # GET /project/<id>/test_runs/<run_id>
@@ -183,37 +185,36 @@ def notify_test_session(request, project_id, session_id):
         return json_failure({}, status=403)
 
     orch_id = request.POST.get('id', None)
-    orch_url = 'http://orchestrator.hq.getpebble.com'
+
     date_completed = timezone.now()
 
     if orch_id:
         # TODO: do this all in a celery task
         with transaction.atomic():
             # GET /api/jobs/<id>
-            result = requests.get('%s/api/jobs/%s' % (orch_url, orch_id))
+            result = requests.get('%s/api/jobs/%s' % (settings.ORCHESTRATOR_URL, orch_id))
             result.raise_for_status()
 
             # find each test in "tests"
             for test_name, test_info in result.json()["tests"].iteritems():
                 run = session.runs.get(test__file_name=test_name)
-                # TODO: pick log artifact more robustly
-                log_url = test_info['result']['artifacts'][0][-1]
                 # for each test, download the logs
-                log = requests.get('%s/%s' % (orch_url, log_url)).text
-                test_return = test_info["result"]["ret"]
+
+                log_id = test_info['_id']
+                log_url = '%s/tasks/%s/output' % (settings.ORCHESTRATOR_URL, log_id)
+                artefacts = test_info['result']['artifacts']
+                log = requests.get(log_url).text
                 # TODO: better assign test result
+                test_return = test_info["result"]["ret"]
                 # save the test results and logs in the database
                 test_result = TestCode.PASSED if int(test_return) == 0 else TestCode.FAILED
                 run.code = test_result
                 run.log = log
+                run.artefacts = artefacts
                 run.date_completed = date_completed
                 run.save()
             session.date_completed = date_completed
             session.save()
-
-
-
-        pass
     else:
         log = request.POST['log']
         status = request.POST['status']
@@ -231,7 +232,6 @@ def notify_test_session(request, project_id, session_id):
                 run.log = log
                 run.date_completed = date_completed
                 run.save()
-
 
     return json_response({})
 
@@ -257,5 +257,12 @@ def post_test_session(request, project_id):
     session = bundle.run_on_orchestrator(make_notify_url_builder(request, settings.QEMU_LAUNCH_AUTH_HEADER))
     return json_response({"data": serialise_session(session, include_runs=True)})
 
+
+@require_safe
+@login_required
+def get_test_artefact(request, filename):
+    result = requests.get("%s/api/download/media/%s" % (settings.ORCHESTRATOR_URL, filename))
+    result.raise_for_status()
+    return HttpResponse(result.iter_content(100), content_type=result.headers['content-type'])
 
 # TODO: 'ping' functions to see if anything has changed. Or, "changed since" parameters.

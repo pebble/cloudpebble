@@ -1,3 +1,5 @@
+
+
 CloudPebble.TestManager.Interface = (function(API) {
 
     var CODES = {
@@ -13,8 +15,8 @@ CloudPebble.TestManager.Interface = (function(API) {
     function SessionKindLabel(props) {
         var {kind, long} = props;
         return (<div>{(long ?
-            (kind == 'live' ? gettext('Run in CloudPebble') : gettext('Testing Backend')) :
-            (kind == 'live' ? gettext('Live') : gettext('Backend')))
+            (kind == 'live' ? gettext('Run in CloudPebble') : gettext('Batch run')) :
+            (kind == 'live' ? gettext('Live') : gettext('Batch')))
         }</div>)
     }
 
@@ -282,16 +284,75 @@ CloudPebble.TestManager.Interface = (function(API) {
         );
     }
 
+    var LogArtefact = React.createClass({
+        url: function() {
+            return '/ide/test_artefacts/' + this.props.link;
+        },
+        componentDidMount: function() {
+            if (this.props.link.endsWith("png")) {
+                $(this.refs.a).popover({
+                    animation: false,
+                    delay: {show: 250},
+                    container: 'body',
+                    trigger: 'hover',
+                    html: true,
+                    placement: 'top',
+                    content: `<img src="${this.url()}" />`
+                });
+            }
+        },
+        render: function() {
+            return (<a ref='a' target="_blank" href={this.url()}>{this.props.name}</a>);
+        }
+    });
+
+    function LogScript(props) {
+        var {log, artefacts} = props;
+        var filename = (str) => str.substring(str.lastIndexOf('/') + 1);
+        function next(log, artefacts, start=0) {
+        	return artefacts.reduce((closest, match, i) => {
+        		const pos = log.indexOf(artefacts[i][0], start);
+        		return (pos > closest.pos || pos == -1) ? closest : {
+        			pos: pos,
+        			found: artefacts[i][0],
+        			replace: artefacts[i][1]
+        		};
+        	}, {pos: Infinity});
+        }
+        function all_matches(log, artifacts) {
+	        let matches = [];
+	        let start = 0;
+	        do {
+	        	let match = next(log, artifacts, start)
+	        	matches.push(match);
+	    		start = match.pos + 1;
+	        }
+	        while (start < Infinity);
+	        return matches
+        }
+
+        let pieces = [];
+        all_matches(log, artefacts).reduce((pos, match, i) => {
+        	pieces.push(log.slice(pos, match.pos));
+        	if (match.replace) {
+                pieces.push(<LogArtefact key={i} name={filename(match.found)} link={filename(match.replace)} />);
+	        	pos = match.pos + match.found.length;
+	        	return pos;
+        	}
+        }, 0);
+
+        return (
+            <pre className="test-script">{pieces}</pre>
+        )
+    }
+
     /**
-     * The TestLong shows the details for a single test run, and its (truncated) logs
+     * The TestRun shows the details for a single test run, and its logs
      */
-    function TestLog(props) {
+    function TestRun(props) {
         var {run, test, logs, session} = props;
         var datestring = CloudPebble.Utils.FormatDatetime(session.date_added);
-        var split = logs.split('\n');
-        var truncated = split.slice(Math.max(0, split.length-35));
-        var final_logs = truncated.join('\n');
-        var is_live_log = (!!final_logs && !run.logs);
+        var is_live_log = (!!logs && !run.logs);
         var run_completed = run.date_completed ? CloudPebble.Utils.FormatDatetime(run.date_completed) : null;
         return (
             <div className="testmanager-run">
@@ -304,15 +365,13 @@ CloudPebble.TestManager.Interface = (function(API) {
                     </tbody>
                 </table>
                 <hr />
-                {truncated.length == split.length ? null : <p>{interpolate(gettext('Showing last %s lines of %s:'), [truncated.length, split.length])}</p>}
-                <pre>{final_logs}</pre>
+                <LogScript log={logs} artefacts={run.artefacts} />
                 {!!run.logs && <a href={run.logs} target="_blank">{gettext('Download logs')}</a>}
                 {(!run.logs && !is_live_log) && <span>{gettext('No logs to show')}</span>}
                 {is_live_log && <span>Test in progress</span>}
             </div>
         );
     }
-
 
     /**
      * A simple animated loading bar div
@@ -403,7 +462,7 @@ CloudPebble.TestManager.Interface = (function(API) {
                 test = _.findWhere(tests, {id: run.test.id});
                 session = _.findWhere(sessions, {id: run.session_id});
                 log = _.findWhere(logs, {id: id});
-                return (<TestLog logs={log ? log.text : ''} run={run} session={session} test={test}/>);
+                return (<TestRun logs={log ? log.text : ''} run={run} session={session} test={test}/>);
         }
     }
 

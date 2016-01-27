@@ -11,7 +11,7 @@ from ide.api.source import create_source_file, create_test_file, load_source_fil
     save_source_file, delete_source_file, rename_source_file, get_test_list
 from ide.api.screenshots import save_screenshots, load_screenshots, show_screenshot
 from ide.api.monkey import get_test_session, get_test_sessions, get_test_run, get_test_runs, post_test_session, \
-    get_test_run_log, run_qemu_test, download_tests, notify_test_session
+    get_test_run_log, run_qemu_test, download_tests, notify_test_session, get_test_artefact
 from ide.api.user import transition_accept, transition_export, transition_delete, whats_new
 from ide.api.ycm import init_autocomplete
 from ide.api.qemu import launch_emulator, generate_phone_token, handle_phone_token
@@ -92,4 +92,5 @@ urlpatterns = patterns(
     url(r'^gist/(?P<gist_id>[0-9a-f]+)$', import_gist),
     url(r'^heartbeat$', heartbeat),
     url(r'^jsi18n/$', 'django.views.i18n.javascript_catalog', name='jsi18n'),
+    url(r'^test_artefacts/(?P<filename>[0-9a-f]+(?:\.[a-z]+)?)$', get_test_artefact, name='test_artefacts')
 )

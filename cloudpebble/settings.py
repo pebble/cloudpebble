@@ -329,6 +329,8 @@ QEMU_LAUNCH_TIMEOUT = int(_environ.get('QEMU_LAUNCH_TIMEOUT', 15))
 
 PHONE_SHORTURL = _environ.get('PHONE_SHORTURL', 'cpbl.io')
 
+ORCHESTRATOR_URL = _environ.get('ORCHESTRATOR_URL', 'http://orchestrator.hq.getpebble.com')
+
 import djcelery
 djcelery.setup_loader()
 

@@ -1,5 +1,6 @@
 import traceback
 import os
+import json
 from io import BytesIO
 
 from django.conf import settings
@@ -34,7 +35,7 @@ class TestSession(IdeModel):
     date_completed = models.DateTimeField(null=True)
     project = models.ForeignKey('Project', related_name='test_sessions')
     SESSION_KINDS = (
-        ('orch', _('Queued Test')),
+        ('batch', _('Batch Test')),
         ('live', _('Live Test'))
     )
     kind = models.CharField(max_length=4, choices=SESSION_KINDS)
@@ -50,6 +51,12 @@ class TestLog(TextFile):
     test_run = models.OneToOneField('TestRun', related_name='logfile')
 
 
+class Artefact(IdeModel):
+    log_name = models.CharField(max_length=100)
+    link_name = models.CharField(max_length=100)
+    test_log = models.ForeignKey('TestLog', related_name='artefacts')
+
+
 class TestRun(IdeModel):
     """ A TestRun is owned by a TestSession and links to a TestFile. It stores the result code and date information for
     a particular time that a single test was run. """
@@ -60,6 +67,19 @@ class TestRun(IdeModel):
 
     original_name = models.CharField(max_length=100)
     code = models.IntegerField(default=TestCode.PENDING)
+
+    @property
+    def artefacts(self):
+        if self.has_log:
+            return [[a.log_name, a.link_name] for a in Artefact.objects.filter(test_log=self.logfile)]
+
+    @artefacts.setter
+    def artefacts(self, value):
+        if self.has_log:
+            Artefact.objects.filter(test_log=self.logfile).delete()
+        for artefact in value:
+            Artefact.objects.create(test_log=self.logfile, log_name=artefact[0], link_name=artefact[1])
+
 
     @property
     def log(self):

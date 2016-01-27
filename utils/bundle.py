@@ -77,7 +77,7 @@ class TestBundle(object):
 
         with transaction.atomic():
             # Set up the test session
-            session, runs = self.setup_test_session(kind='orch')
+            session, runs = self.setup_test_session(kind='batch')
 
             # Build the orchestrator job request
             # TODO: custom configuration
@@ -93,7 +93,8 @@ class TestBundle(object):
                 },
                 "devices": {
                     "firmware": "qemu_snowy_bb2"
-                }
+                },
+                "name": "Project %s, Job %s" % (self.project.pk, session.id)
             }
 
             # Submit the orchestrator job request
