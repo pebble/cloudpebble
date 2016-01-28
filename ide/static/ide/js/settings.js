@@ -262,6 +262,46 @@ CloudPebble.Settings = (function() {
             }
         });
 
+        pane.find('#settings-modern-multi-js').change(function(e) {
+            if($(this).val() != '1') {
+                return;
+            }
+            var js_files = _.chain(CloudPebble.Editor.GetAllFiles())
+                .filter(function(x) { return x.name.endsWith('.js'); })
+                .value();
+            if(js_files.length == 0) {
+                return;
+            }
+            if(_.contains(_.pluck(js_files, 'name'), 'app.js')) {
+                return;
+            }
+            // Don't save anything until we've done this.
+            var did_rename = false;
+            e.stopPropagation();
+            $('#settings-js-migration-prompt')
+                .modal()
+                .one('hide', function() {
+                    if (!did_rename) {
+                        $('#settings-modern-multi-js').val('0');
+                    }
+                })
+                .find('select')
+                .empty()
+                .append(_.map(js_files,
+                    function(x) {
+                        return $('<option>').data('file', x).text(x.name)[0];
+                    }
+                ));
+        });
+
+        $('#settings-js-migration-rename-button').click(function() {
+            var file = $('#settings-js-new-entry-point').find(':selected').data('file');
+            CloudPebble.Editor.RenameFile(file, 'app.js').done(function() {
+                $('#settings-js-migration-prompt').modal('hide');
+                $('#settings-modern-multi-js').val('1').change();
+            });
+        });
+
         pane.find('#uuid-generate').click(function() {
             var uuid_field = settings_template.find('#settings-uuid');
             uuid_field.val(_.UUID.v4());

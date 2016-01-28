@@ -139,7 +139,7 @@
                     </div>
                 </div>
                 <div class="control-group native-only">
-                    <label class="control-label" for="settings-modern-multi-js">{% trans 'JavaScript Handling' %}</label>
+                    <label class="control-label" for="settings-modern-multi-js">{% trans 'JS Handling' %}</label>
                     <div class="controls">
                         <select id="settings-modern-multi-js">
                             <option value="1" {% if project.app_modern_multi_js %}selected{% endif%}>{% trans 'CommonJS-style' %}</option>
@@ -208,4 +208,28 @@
             <button id="project-delete" class="btn btn-danger">{% trans "Delete Project" %}</button>
         </div>
     </form>
+</div>
+
+<div id="settings-js-migration-prompt" class="modal hide fade" tabindex="-1" role="dialog">
+    <div class="modal-header">
+        <h3>{% trans 'Enable CommonJS' %}</h3>
+    </div>
+    <form class="form-horizontal">
+        <div class="modal-body">
+            <div class="control-group">
+                <label class="control-label" for="settings-js-new-entry-point">{% trans 'Entry point' %}</label>
+                <div class="controls">
+                    <select id="settings-js-new-entry-point">
+                    </select>
+                </div>
+                <div class="help-block">
+                    {% trans "You must have an app 'entry point' called <code>app.js</code> to use CommonJS-style JavaScript. Choose one to rename." %}
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">{% trans 'Cancel' %}</button>
+        <button class="btn btn-primary" id="settings-js-migration-rename-button">{% trans 'Rename' %}</button>
+    </div>
 </div>
