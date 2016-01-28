@@ -138,6 +138,18 @@
                         </span>
                     </div>
                 </div>
+                <div class="control-group native-only">
+                    <label class="control-label" for="settings-modern-multi-js">{% trans 'JavaScript Handling' %}</label>
+                    <div class="controls">
+                        <select id="settings-modern-multi-js">
+                            <option value="1" {% if project.app_modern_multi_js %}selected{% endif%}>{% trans 'CommonJS-style' %}</option>
+                            <option value="0" {% if not project.app_modern_multi_js %}selected{% endif%}>{% trans 'Concatenation (deprecated)' %}</option>
+                        </select>
+                    </div>
+                        <span class="help-block">
+                            {% trans "CommonJS-style enables you to <code>require()</code> other files; concatenation makes them into a single JS file." %}
+                        </span>
+                </div>
             </div>
             <div class="well">
                 <div class="control-group native-only">

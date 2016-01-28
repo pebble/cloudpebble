@@ -59,6 +59,7 @@ def import_gist(user_id, gist_id):
         'app_is_shown_on_communication': settings.get('watchapp', {}).get('onlyShownOnCommunication', False),
         'app_capabilities': ','.join(settings.get('capabilities', [])),
         'app_keys': dict_to_pretty_json(settings.get('appKeys', {})),
+        'app_modern_multi_js': settings.get('enableMultiJS', False),
         'project_type': project_type,
         'sdk_version': settings.get('sdkVersion', '2'),
     }
