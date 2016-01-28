@@ -35,7 +35,6 @@ rm /tmp/*.tar.*
 
 # Make sure the database is up to date.
 echo "Performing database migration."
-python manage.py syncdb --noinput
 python manage.py migrate
 
 echo "Compiling gettext files"
