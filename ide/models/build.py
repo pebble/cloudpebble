@@ -38,7 +38,7 @@ class BuildResult(IdeModel):
     DEBUG_WORKER = 1
 
     project = models.ForeignKey(Project, related_name='builds')
-    uuid = models.CharField(max_length=36, default=make_uuid())
+    uuid = models.CharField(max_length=36, default=make_uuid)
     state = models.IntegerField(choices=STATE_CHOICES, default=STATE_WAITING)
     started = models.DateTimeField(auto_now_add=True, db_index=True)
     finished = models.DateTimeField(blank=True, null=True)
