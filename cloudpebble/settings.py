@@ -167,7 +167,7 @@ MIDDLEWARE_CLASSES = (
 )
 
 AUTHENTICATION_BACKENDS = (
-    'auth.pebble.PebbleOAuth2',
+    'site_auth.pebble.PebbleOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 )
 
@@ -175,11 +175,11 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.social_details',
     'social.pipeline.social_auth.social_uid',
     'social.pipeline.social_auth.auth_allowed',
-    'auth.pebble.merge_user', # formerly social.pipeline.social_auth.social_user
+    'site_auth.pebble.merge_user', # formerly social.pipeline.social_auth.social_user
     'social.pipeline.user.get_username',
     'social.pipeline.user.create_user',
     'social.pipeline.social_auth.associate_user',
-    'auth.pebble.clear_old_login',
+    'site_auth.pebble.clear_old_login',
     'social.pipeline.social_auth.load_extra_data',
     'social.pipeline.user.user_details'
 )
@@ -222,7 +222,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'social.apps.django_app.default',
     'ide',
-    # 'auth',
+    'site_auth',
     'root',
     'qr',
     'registration',
