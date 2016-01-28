@@ -222,11 +222,9 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'social.apps.django_app.default',
     'ide',
-    'auth',
+    # 'auth',
     'root',
     'qr',
-    'south',
-    'djcelery',
     'registration',
     'djangobower',
 )
@@ -325,8 +323,6 @@ QEMU_LAUNCH_TIMEOUT = int(_environ.get('QEMU_LAUNCH_TIMEOUT', 15))
 
 PHONE_SHORTURL = _environ.get('PHONE_SHORTURL', 'cpbl.io')
 
-import djcelery
-djcelery.setup_loader()
 
 # import local settings
 try:

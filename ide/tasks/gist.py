@@ -1,6 +1,6 @@
 import json
 
-from celery import task
+from celery import shared_task
 import github
 
 from django.db import transaction
@@ -13,7 +13,7 @@ from utils.keen_helper import send_keen_event
 import urllib2
 
 
-@task(acks_late=True)
+@shared_task(acks_late=True)
 def import_gist(user_id, gist_id):
     user = User.objects.get(pk=user_id)
     g = github.Github()

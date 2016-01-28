@@ -5,7 +5,7 @@ import tempfile
 import uuid
 import zipfile
 import json
-from celery import task
+from celery import shared_task
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import SuspiciousOperation
@@ -43,7 +43,7 @@ def add_project_to_archive(z, project, prefix=''):
         z.writestr('%s/jshintrc' % prefix, generate_jshint_file(project))
 
 
-@task(acks_late=True)
+@shared_task(acks_late=True)
 def create_archive(project_id):
     project = Project.objects.get(pk=project_id)
     prefix = re.sub(r'[^\w]+', '_', project.name).strip('_').lower()
@@ -69,7 +69,7 @@ def create_archive(project_id):
             return '%s%s' % (settings.EXPORT_ROOT, outfile)
 
 
-@task(acks_late=True)
+@shared_task(acks_late=True)
 def export_user_projects(user_id):
     user = User.objects.get(pk=user_id)
     projects = Project.objects.filter(owner=user)
@@ -111,7 +111,7 @@ def make_filename_variant(file_name, variant):
     return file_name_parts[0] + variant + file_name_parts[1]
 
 
-@task(acks_late=True)
+@shared_task(acks_late=True)
 def do_import_archive(project_id, archive, delete_project=False):
     project = Project.objects.get(pk=project_id)
     try:
