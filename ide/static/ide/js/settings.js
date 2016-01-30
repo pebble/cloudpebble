@@ -39,6 +39,7 @@ CloudPebble.Settings = (function() {
             var app_is_watchface = pane.find('#settings-app-is-watchface').val();
             var app_keys = {};
             var app_jshint = pane.find('#settings-app-jshint').prop("checked") ? 1 : 0;
+            var app_modern_multi_js = pane.find('#settings-modern-multi-js').val();
             var menu_icon = pane.find('#settings-menu-image').val();
             var build_aplite = pane.find('#settings-build-aplite:visible').prop('checked');
             var build_basalt = pane.find('#settings-build-basalt:visible').prop('checked');
@@ -138,6 +139,7 @@ CloudPebble.Settings = (function() {
             saved_settings['app_jshint'] = app_jshint;
             saved_settings['menu_icon'] = menu_icon;
             saved_settings['app_platforms'] = app_platforms;
+            saved_settings['app_modern_multi_js'] = app_modern_multi_js;
 
             $.post('/ide/project/' + PROJECT_ID + '/save_settings', saved_settings, function(data) {
                 pane.find('.alert').removeClass("alert-success alert-error").addClass("hide");
@@ -155,6 +157,7 @@ CloudPebble.Settings = (function() {
                     CloudPebble.ProjectInfo.app_jshint = app_jshint;
                     CloudPebble.ProjectInfo.app_platforms = app_platforms;
                     CloudPebble.ProjectInfo.sdk_version = sdk_version;
+                    CloudPebble.ProjectInfo.app_modern_multi_js = app_modern_multi_js;
                     $('.project-name').text(name);
                     window.document.title = "CloudPebble – " + name;
                     defer.resolve();
@@ -260,6 +263,46 @@ CloudPebble.Settings = (function() {
             } else {
                 pane.find('.sdk3-only').hide();
             }
+        });
+
+        pane.find('#settings-modern-multi-js').change(function(e) {
+            if($(this).val() != '1') {
+                return;
+            }
+            var js_files = _.chain(CloudPebble.Editor.GetAllFiles())
+                .filter(function(x) { return x.name.endsWith('.js'); })
+                .value();
+            if(js_files.length == 0) {
+                return;
+            }
+            if(_.contains(_.pluck(js_files, 'name'), 'app.js')) {
+                return;
+            }
+            // Don't save anything until we've done this.
+            var did_rename = false;
+            e.stopPropagation();
+            $('#settings-js-migration-prompt')
+                .modal()
+                .one('hide', function() {
+                    if (!did_rename) {
+                        $('#settings-modern-multi-js').val('0');
+                    }
+                })
+                .find('select')
+                .empty()
+                .append(_.map(js_files,
+                    function(x) {
+                        return $('<option>').data('file', x).text(x.name)[0];
+                    }
+                ));
+        });
+
+        $('#settings-js-migration-rename-button').click(function() {
+            var file = $('#settings-js-new-entry-point').find(':selected').data('file');
+            CloudPebble.Editor.RenameFile(file, 'app.js').done(function() {
+                $('#settings-js-migration-prompt').modal('hide');
+                $('#settings-modern-multi-js').val('1').change();
+            });
         });
 
         pane.find('#uuid-generate').click(function() {

@@ -71,7 +71,8 @@ def build(ctx):
 
 def generate_wscript_file_sdk3(project, for_export):
     jshint = project.app_jshint
-    wscript = """
+    if not project.app_modern_multi_js:
+        wscript = """
     #
 # This file is the default set of rules to compile a Pebble project.
 #
@@ -133,6 +134,50 @@ def build(ctx):
     ctx.set_group('bundle')
     ctx.pbl_bundle(binaries=binaries, js='pebble-js-app.js' if has_js else [])
     """
+    else:
+        wscript = """#
+# This file is the default set of rules to compile a Pebble project.
+#
+# Feel free to customize this to your needs.
+#
+
+import os.path
+
+top = '.'
+out = 'build'
+
+
+def options(ctx):
+    ctx.load('pebble_sdk')
+
+
+def configure(ctx):
+    ctx.load('pebble_sdk')
+
+
+def build(ctx):
+    ctx.load('pebble_sdk')
+
+    build_worker = os.path.exists('worker_src')
+    binaries = []
+
+    for p in ctx.env.TARGET_PLATFORMS:
+        ctx.set_env(ctx.all_envs[p])
+        ctx.set_group(ctx.env.PLATFORM_NAME)
+        app_elf = '{}/pebble-app.elf'.format(ctx.env.BUILD_DIR)
+        ctx.pbl_program(source=ctx.path.ant_glob('src/**/*.c'), target=app_elf)
+
+        if build_worker:
+            worker_elf = '{}/pebble-worker.elf'.format(ctx.env.BUILD_DIR)
+            binaries.append({'platform': p, 'app_elf': app_elf, 'worker_elf': worker_elf})
+            ctx.pbl_worker(source=ctx.path.ant_glob('worker_src/**/*.c'), target=worker_elf)
+        else:
+            binaries.append({'platform': p, 'app_elf': app_elf})
+
+    ctx.set_group('bundle')
+    ctx.pbl_bundle(binaries=binaries, js=ctx.path.ant_glob('src/js/**/*.js'), js_entry_file='src/js/app.js')
+"""
+
     return wscript.replace('{{jshint}}', 'True' if jshint and not for_export else 'False')
 
 
@@ -254,6 +299,7 @@ def generate_v2_manifest_dict(project, resources):
 def generate_v3_manifest_dict(project, resources):
     # Just extend the v2 one.
     manifest = generate_v2_manifest_dict(project, resources)
+    manifest['enableMultiJS'] = project.app_modern_multi_js
     if project.app_platforms:
         manifest['targetPlatforms'] = project.app_platform_list
     if project.app_is_hidden:
