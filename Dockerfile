@@ -54,7 +54,7 @@ RUN mkdir /sdk2 && \
   tar --strip-components=1 -xj -C /sdk2
 
 ENV SDK_THREE_CHANNEL=beta
-ENV SDK_THREE_VERSION=3.9-beta7
+ENV SDK_THREE_VERSION=3.9-beta8
 
 # Install SDK 3
 RUN mkdir /sdk3 && \
