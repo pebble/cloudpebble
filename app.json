@@ -15,7 +15,7 @@
       "required": true
     },
     "BROKER_POOL_LIMIT": "1",
-    "BUILDPACK_URL": "https://github.com/pebble/cloudpebble-buildpack",
+    "BUILDPACK_URL": "https://github.com/pebble/cloudpebble-buildpack#pipeline",
     "COMPLETION_CERTS": "/app/completion-certs.crt",
     "ENABLE_KEEN": "yes",
     "FROM_EMAIL": "noreply@cloudpebble.net",

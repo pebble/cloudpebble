@@ -7,7 +7,6 @@ import dj_database_url
 _environ = os.environ
 
 DEBUG = _environ.get('DEBUG', '') != ''
-TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
     ('Administrator', 'example@example.com'),
@@ -37,18 +36,6 @@ else:
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__)) + '/../'
 
 LANGUAGE_COOKIE_NAME = 'cloudpebble_language'
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    "django.contrib.auth.context_processors.auth",
-    "django.core.context_processors.debug",
-    "django.core.context_processors.i18n",
-    "django.core.context_processors.media",
-    "django.core.context_processors.static",
-    "django.core.context_processors.tz",
-    "django.contrib.messages.context_processors.messages",
-    "social.apps.django_app.context_processors.backends",
-    "social.apps.django_app.context_processors.login_redirect",
-)
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
@@ -100,6 +87,8 @@ PEBBLEJS_ROOT = os.getcwd() + '/ext/pebblejs/'
 # Examples: "http://example.com/media/", "http://media.example.com/"
 MEDIA_URL = _environ.get('MEDIA_URL', 'http://localhost:8001/builds/')
 
+
+
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
@@ -125,8 +114,11 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'djangobower.finders.BowerFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    'pipeline.finders.PipelineFinder',
 )
+
+STATICFILES_STORAGE = 'pipeline.storage.PipelineStorage'
+
 
 BOWER_INSTALLED_APPS = (
     'https://github.com/krisk/Fuse.git#2c1560d763',
@@ -144,15 +136,30 @@ BOWER_INSTALLED_APPS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = _environ.get('SECRET_KEY', 'y_!-!-i!_txo$v5j(@c7m4uk^jyg)l4bf*0yqrztmax)l2027j')
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
-)
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+                "social.apps.django_app.context_processors.backends",
+                "social.apps.django_app.context_processors.login_redirect",
+            ]
+        }
+    }
+]
 
 if not DEBUG:
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.CachedStaticFilesStorage'
+    STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 
 
 MIDDLEWARE_CLASSES = (
@@ -203,11 +210,6 @@ ROOT_URLCONF = 'cloudpebble.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'cloudpebble.wsgi.application'
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-)
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -223,11 +225,63 @@ INSTALLED_APPS = (
     'social.apps.django_app.default',
     'ide',
     'site_auth',
+    'pipeline',
     'root',
     'qr',
     'registration',
     'djangobower',
 )
+
+PIPELINE = {
+    'OUTPUT_SOURCEMAPS': True,
+    'JS_COMPRESSOR': 'pipeline.compressors.uglifyjs.UglifyJSCompressor',
+    'VERBOSE': True,
+    'JAVASCRIPT': {
+        'ide': {
+            'source_filenames': (
+                'ide/js/cloudpebble.js',
+                'ide/js/editor.js',
+                'ide/js/ib/ib.js',
+                'ide/js/ib/registry.js',
+                'ide/js/*.js',
+                'ide/js/*/*.js',
+            ),
+            'output_filename': 'build/ide.js',
+        },
+        'lib': {
+            'source_filenames': (
+                'react/react.js',
+                'react/react-dom.js',
+                'classnames/index.js',
+                'CodeMirror/lib/codemirror.js',
+                'CodeMirror/addon/dialog/dialog.js',
+                'CodeMirror/addon/search/searchcursor.js',
+                'CodeMirror/addon/search/search.js',
+                'CodeMirror/addon/edit/matchbrackets.js',
+                'CodeMirror/addon/edit/closebrackets.js',
+                'CodeMirror/addon/comment/comment.js',
+                'CodeMirror/addon/fold/foldgutter.js',
+                'CodeMirror/addon/fold/foldcode.js',
+                'CodeMirror/addon/fold/brace-fold.js',
+                'CodeMirror/addon/fold/comment-fold.js',
+                'CodeMirror/addon/runmode/runmode.js',
+                'ide/external/codemirror.hint.js',
+                'fuse.js/src/fuse.js',
+                'CodeMirror/mode/clike/clike.js',
+                'CodeMirror/mode/javascript/javascript.js',
+                'CodeMirror/keymap/emacs.js',
+                'CodeMirror/keymap/vim.js',
+                'ide/external/uuid.js',
+                'jshint/dist/jshint.js',
+                'html.sortable/dist/html.sortable.min.js',
+                'text-encoding/lib/encoding.js',
+                'noVNC/include/util.js',
+                'jquery-textext/src/js/*.js',
+            ),
+            'output_filename': 'build/textext.js',
+        }
+    }
+}
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

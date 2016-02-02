@@ -38,6 +38,7 @@ EXPOSE 8000
 
 # CloudPebble stuff
 RUN npm install -g bower && echo '{"allow_root": true}' > ~/.bowerrc
+RUN npm install -g uglifyjs
 
 # Grab the toolchain
 RUN curl -o /tmp/arm-cs-tools.tar https://cloudpebble-vagrant.s3.amazonaws.com/arm-cs-tools-stripped.tar && \
@@ -67,5 +68,6 @@ WORKDIR /code
 RUN rm -rf bower_components && cd /tmp && python /code/manage.py bower install && mv bower_components /code/
 
 RUN python manage.py compilemessages
+RUN python manage.py collectstatic --noinput
 
 CMD ["sh", "docker_start.sh"]
