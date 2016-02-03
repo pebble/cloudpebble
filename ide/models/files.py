@@ -273,7 +273,7 @@ class ResourceIdentifier(IdeModel):
 
 class SourceFile(IdeModel):
     project = models.ForeignKey('Project', related_name='source_files')
-    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_-]+\.(c|h|js)$")])
+    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_.-]+\.(c|h|js)$")])
     last_modified = models.DateTimeField(blank=True, null=True, auto_now=True)
     folded_lines = models.TextField(default="[]")
 
