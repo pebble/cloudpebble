@@ -1,4 +1,4 @@
-Django==1.9.1
+Django==1.9.2
 django-registration==2.0.4
 -e git://github.com/pebble/django-pipeline.git@06e6e627e87172597f9d120c8629638a7a2aa5aa#egg=pipeline
 amqp==1.4.7
