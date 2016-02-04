@@ -182,7 +182,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.social_details',
     'social.pipeline.social_auth.social_uid',
     'social.pipeline.social_auth.auth_allowed',
-    'site_auth.pebble.merge_user', # formerly social.pipeline.social_auth.social_user
+    'site_auth.pebble.merge_user',  # formerly social.pipeline.social_auth.social_user
     'social.pipeline.user.get_username',
     'social.pipeline.user.create_user',
     'social.pipeline.social_auth.associate_user',
@@ -210,7 +210,6 @@ ROOT_URLCONF = 'cloudpebble.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'cloudpebble.wsgi.application'
 
-
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -219,7 +218,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
-    #'django.contrib.admin',
+    # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'social.apps.django_app.default',
@@ -232,6 +231,8 @@ INSTALLED_APPS = (
     'djangobower',
 )
 
+# Configuration for django-pipeline, used to concatenate and compress JS and CSS sources and
+# output source-maps.
 PIPELINE = {
     'OUTPUT_SOURCEMAPS': True,
     'JS_COMPRESSOR': 'pipeline.compressors.uglifyjs.UglifyJSCompressor',
@@ -338,11 +339,9 @@ PIPELINE = {
     }
 }
 
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error when DEBUG=False.
-# See http://docs.djangoproject.com/en/dev/topics/logging for
-# more details on how to customize your logging configuration.
+# This logging configuring ensures that debug messages are logged even when DEBUG=False
+# It replaces the previous and non-functional configuration which attempted to send
+# mail to administrators.
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -352,18 +351,17 @@ LOGGING = {
         }
     },
     'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler'
         }
     },
     'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False
+        }
     }
 }
 
