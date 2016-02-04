@@ -11,12 +11,11 @@ DEBUG = _environ.get('DEBUG', '') != ''
 ADMINS = (
     ('Administrator', 'example@example.com'),
 )
+MANAGERS = ADMINS
 
 DEFAULT_FROM_EMAIL = _environ.get('FROM_EMAIL', 'CloudPebble <cloudpebble@example.com>')
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-MANAGERS = ADMINS
 
 if 'DATABASE_URL' not in _environ:
     DATABASES = {
@@ -87,8 +86,6 @@ PEBBLEJS_ROOT = os.getcwd() + '/ext/pebblejs/'
 # Examples: "http://example.com/media/", "http://media.example.com/"
 MEDIA_URL = _environ.get('MEDIA_URL', 'http://localhost:8001/builds/')
 
-
-
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
@@ -136,7 +133,6 @@ BOWER_INSTALLED_APPS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = _environ.get('SECRET_KEY', 'y_!-!-i!_txo$v5j(@c7m4uk^jyg)l4bf*0yqrztmax)l2027j')
 
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -160,7 +156,6 @@ TEMPLATES = [
 
 if not DEBUG:
     STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
-
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -238,6 +233,7 @@ PIPELINE = {
     'JS_COMPRESSOR': 'pipeline.compressors.uglifyjs.UglifyJSCompressor',
     'CSS_COMPRESSOR': 'pipeline.compressors.cssclean.CleanCSSCompressor',
     'CLEANCSS_BINARY': 'cleancss',
+    'UGLIFYJS_BINARY': 'uglifyjs',
     'VERBOSE': True,
     'STYLESHEETS': {
         'codemirror': {
@@ -429,7 +425,6 @@ QEMU_LAUNCH_AUTH_HEADER = _environ.get('QEMU_LAUNCH_AUTH_HEADER', 'secret')
 QEMU_LAUNCH_TIMEOUT = int(_environ.get('QEMU_LAUNCH_TIMEOUT', 15))
 
 PHONE_SHORTURL = _environ.get('PHONE_SHORTURL', 'cpbl.io')
-
 
 # import local settings
 try:
