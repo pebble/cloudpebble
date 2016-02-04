@@ -96,10 +96,13 @@ def github_push(user, commit_message, repo_name, project):
     project_sources = project.source_files.all()
     has_changed = False
     for source in project_sources:
-        if source.target == 'worker':
-            repo_path = worker_src_root + source.file_name
-        else:
-            repo_path = src_root + source.file_name
+        repo_path = src_root + source.file_name
+        if project.project_type == 'native':
+            if source.target == 'worker':
+                repo_path = worker_src_root + source.file_name
+            elif project.app_modern_multi_js and source.file_name.endswith('.js'):
+                repo_path = src_root + 'js/' + source.file_name
+
         update_expected_paths(repo_path)
         if repo_path not in next_tree:
             has_changed = True
