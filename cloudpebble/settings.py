@@ -235,7 +235,52 @@ INSTALLED_APPS = (
 PIPELINE = {
     'OUTPUT_SOURCEMAPS': True,
     'JS_COMPRESSOR': 'pipeline.compressors.uglifyjs.UglifyJSCompressor',
+    'CSS_COMPRESSOR': 'pipeline.compressors.cssclean.CleanCSSCompressor',
+    'CLEANCSS_BINARY': 'cleancss',
     'VERBOSE': True,
+    'STYLESHEETS': {
+        'codemirror': {
+            'source_filenames': (
+                'CodeMirror/addon/hint/show-hint.css',
+                'CodeMirror/addon/dialog/dialog.css',
+                'CodeMirror/lib/codemirror.css',
+                'CodeMirror/theme/monokai.css',
+                'CodeMirror/theme/eclipse.css',
+                'CodeMirror/theme/blackboard.css',
+                'CodeMirror/theme/solarized.css',
+                'CodeMirror/addon/fold/foldgutter.css',
+            ),
+            'output_filename': 'build/codemirror.css'
+        },
+        'textext': {
+            'source_filenames': (
+                'jquery-textext/src/css/textext.core.css',
+                'jquery-textext/src/css/textext.plugin.tags.css',
+                'jquery-textext/src/css/textext.plugin.autocomplete.css',
+                'jquery-textext/src/css/textext.plugin.focus.css',
+                'jquery-textext/src/css/textext.plugin.prompt.css',
+                'jquery-textext/src/css/textext.plugin.arrow.css',
+            ),
+            'output_filename': 'build/textext.css'
+        },
+        'ide': {
+            'source_filenames': (
+                'ide/css/ide.css',
+                'ide/css/ib.css',
+                'ide/css/codemirror-default.css',
+            ),
+            'output_filename': 'build/ide.css'
+        },
+        'base': {
+            'source_filenames': (
+                'common/fonts/fonts.css',
+                'common/css/progress.css',
+                'common/css/common.css',
+                'ide/css/base.css',
+            ),
+            'output_filename': 'build/base.css'
+        }
+    },
     'JAVASCRIPT': {
         'ide': {
             'source_filenames': (
@@ -279,6 +324,16 @@ PIPELINE = {
                 'jquery-textext/src/js/*.js',
             ),
             'output_filename': 'build/textext.js',
+        },
+        'base': {
+            'source_filenames': (
+                'jquery/dist/jquery.min.js',
+                'common/js/modal.js',
+                'underscore/underscore-min.js',
+                'backbone/backbone-min.js',
+                'common/js/whats_new.js'
+            ),
+            'output_filename': 'build/base.js',
         }
     }
 }

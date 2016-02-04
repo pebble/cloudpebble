@@ -38,7 +38,7 @@ EXPOSE 8000
 
 # CloudPebble stuff
 RUN npm install -g bower && echo '{"allow_root": true}' > ~/.bowerrc
-RUN npm install -g uglifyjs
+RUN npm install -g uglifyjs clean-css
 
 # Grab the toolchain
 RUN curl -o /tmp/arm-cs-tools.tar https://cloudpebble-vagrant.s3.amazonaws.com/arm-cs-tools-stripped.tar && \

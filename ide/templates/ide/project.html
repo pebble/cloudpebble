@@ -5,30 +5,16 @@
 {% block title %}CloudPebble – {{ project.name }}{% endblock %}
 
 {% block head %}
-<link rel="stylesheet" href="{% static 'CodeMirror/addon/hint/show-hint.css' %}">
-<link rel="stylesheet" href="{% static 'CodeMirror/addon/dialog/dialog.css' %}">
-<link rel="stylesheet" href="{% static 'CodeMirror/lib/codemirror.css' %}">
-<link rel="stylesheet" href="{% static 'CodeMirror/theme/monokai.css' %}">
-<link rel="stylesheet" href="{% static 'CodeMirror/theme/eclipse.css' %}">
-<link rel="stylesheet" href="{% static 'CodeMirror/theme/blackboard.css' %}">
-<link rel="stylesheet" href="{% static 'CodeMirror/theme/solarized.css' %}">
-<link rel="stylesheet" href="{% static 'CodeMirror/addon/fold/foldgutter.css' %}">
+{% stylesheet 'codemirror' %}
 {% if font_css %}
 <link rel="stylesheet" href="{{ font_css }}" />
 {% endif %}
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Droid+Serif:700|Roboto+Condensed|Roboto:700">
 <link rel="stylesheet" href="//static.cloudpebble.net/fonts/raster-gothic/stylesheet.css">
 
-<link rel="stylesheet" href="{%  static 'jquery-textext/src/css/textext.core.css' %}" type="text/css" />
-<link rel="stylesheet" href="{%  static 'jquery-textext/src/css/textext.plugin.tags.css' %}" type="text/css" />
-<link rel="stylesheet" href="{%  static 'jquery-textext/src/css/textext.plugin.autocomplete.css' %}" type="text/css" />
-<link rel="stylesheet" href="{%  static 'jquery-textext/src/css/textext.plugin.focus.css' %}" type="text/css" />
-<link rel="stylesheet" href="{%  static 'jquery-textext/src/css/textext.plugin.prompt.css' %}" type="text/css" />
-<link rel="stylesheet" href="{%  static 'jquery-textext/src/css/textext.plugin.arrow.css' %}" type="text/css" />
+{% stylesheet 'textext' %}
 
-<link rel="stylesheet" href="{% static 'ide/css/ide.css' %}">
-<link rel="stylesheet" href="{% static 'ide/css/ib.css' %}">
-<link rel="stylesheet" href="{% static 'ide/css/codemirror-default.css' %}">
+{% stylesheet 'ide' %}
 
 {% endblock %}
 
