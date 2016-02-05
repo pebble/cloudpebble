@@ -157,7 +157,7 @@ TEMPLATES = [
 ]
 
 if not DEBUG:
-    STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+    STATICFILES_STORAGE = 'cloudpebble.storages.GzipManifestPipelineStorage'
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
