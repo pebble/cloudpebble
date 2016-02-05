@@ -191,6 +191,7 @@ Pebble = function(proxy, token) {
     var mOutboundParser = new PebbleProtocolParser();
 
     var handle_message_from_watch = function(pdata) {
+        var data;
         mInboundParser.addBytes(pdata);
         while((data = mInboundParser.readMessage())) {
             var command = data.command;
