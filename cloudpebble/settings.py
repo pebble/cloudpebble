@@ -8,6 +8,8 @@ _environ = os.environ
 
 DEBUG = _environ.get('DEBUG', '') != ''
 
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+
 ADMINS = (
     ('Administrator', 'example@example.com'),
 )
@@ -90,7 +92,7 @@ MEDIA_URL = _environ.get('MEDIA_URL', 'http://localhost:8001/builds/')
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = 'staticfiles'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
@@ -353,7 +355,7 @@ LOGGING = {
         }
     },
     'loggers': {
-        'django': {
+        '*': {
             'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': False
