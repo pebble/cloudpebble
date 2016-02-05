@@ -23,7 +23,7 @@ django-bower==5.0.4
 mailchimp==2.0.9
 
 # These are used for Heroku hosting setup.
-dj-static
+whitenoise>=2.0.6
 gunicorn
 dj-database-url
 newrelic
