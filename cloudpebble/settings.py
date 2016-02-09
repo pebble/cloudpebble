@@ -235,6 +235,7 @@ INSTALLED_APPS = (
 # Configuration for django-pipeline, used to concatenate and compress JS and CSS sources and
 # output source-maps.
 PIPELINE = {
+    'COMPILERS': ('react.utils.pipeline.JSXCompiler', ),
     'OUTPUT_SOURCEMAPS': True,
     'JS_COMPRESSOR': 'pipeline.compressors.uglifyjs.UglifyJSCompressor',
     'CSS_COMPRESSOR': 'pipeline.compressors.cssclean.CleanCSSCompressor',
@@ -293,6 +294,7 @@ PIPELINE = {
                 'ide/js/ib/registry.js',
                 'ide/js/*.js',
                 'ide/js/*/*.js',
+                'ide/js/*/*.jsx',
             ),
             'output_filename': 'build/ide.js',
         },
@@ -325,6 +327,7 @@ PIPELINE = {
                 'text-encoding/lib/encoding.js',
                 'noVNC/include/util.js',
                 'jquery-textext/src/js/*.js',
+                'react/react.js'
             ),
             'output_filename': 'build/textext.js',
         },

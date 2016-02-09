@@ -1,6 +1,7 @@
-
-
 CloudPebble.TestManager.Interface = (function(API) {
+    'use strict';
+
+    function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
     var CODES = {
         '-2': gettext('error'),
@@ -9,14 +10,10 @@ CloudPebble.TestManager.Interface = (function(API) {
         '1' : gettext('passed')
     };
 
-    var {Route, Sessions, Tests, Runs, Logs} = API;
-
-
     function SessionKindLabel(props) {
-        var {kind, long} = props;
-        return (<div>{(long ?
-            (kind == 'live' ? gettext('Run in CloudPebble') : gettext('Batch run')) :
-            (kind == 'live' ? gettext('Live') : gettext('Batch')))
+        return (<div>{(props.long ?
+            (props.kind == 'live' ? gettext('Run in CloudPebble') : gettext('Batch run')) :
+            (props.kind == 'live' ? gettext('Live') : gettext('Batch')))
         }</div>)
     }
 
@@ -30,12 +27,13 @@ CloudPebble.TestManager.Interface = (function(API) {
          * Given a number of pages and current page, generate Pagination indexes
          * @param page
          * @param pageMax
-         * @param minimum_bounds the guaranteed number of items to show at each end
-         * @param dot_coverage the minimum number of dots to represent with a '...'
-         * @param delta the number of items to show on each side of the current page
          * @returns {Array.<T>} an array of numbers and one or two '...' strings
          */
-        calculatePaging: function(page, pageMax, delta=2, minimum_bounds=1, dot_coverage=2) {
+        calculatePaging: function(page, pageMax) {
+            var delta = 2; // the number of items to show on each side of the current page
+            var minimum_bounds = 1; // the guaranteed number of items to show at each end
+            var dot_coverage = 2; // the minimum number of dots to represent with a '...'
+
             if (pageMax == 1) return [1];
             // 'left' and 'right' represent the indices of the pages to show around the current page.
             var left = page-delta;
@@ -66,12 +64,13 @@ CloudPebble.TestManager.Interface = (function(API) {
         maxPages: function() {return Math.floor((this.getLength()-1)/this.pageSize);},
         page: function(arr) {return arr.slice(this.state.page*this.pageSize, (this.state.page+1)*this.pageSize);},
         renderButton: function(num) {
-            let className = classNames('btn', {
+            var className = classNames('btn', {
                 'selected': num-1 == this.state.page
             });
+
             return (_.isString(num)
                 ? <button key={num} className="btn" disabled="disabled">...</button>
-                : <button key={num} className={className} onClick={()=>this.gotoPage(num-1)}>{num}</button>
+                : <button key={num} className={className} onClick={function() {this.gotoPage(num-1)}.bind(this)}>{num}</button>
             );
         },
         renderPager: function() {
@@ -91,22 +90,22 @@ CloudPebble.TestManager.Interface = (function(API) {
      * Renders a <div> with class='well'.
      */
     function Well(props) {
-        var {className, children, ...other} = props;
-        var finalClassName = classNames('well', className);
-        return <div className={finalClassName} {...other}>{children}</div>;
+        var other = _objectWithoutProperties(props, ['className', 'children']);
+        var finalClassName = classNames('well', props.className);
+        return <div className={finalClassName} {...other}>{props.children}</div>;
     }
 
     /**
      * The 'Anchor' class is an <a> tag which automatically preventDefaults clicks.
      */
     function Anchor(props) {
-        var {onClick, children, ...other} = props;
+        var other = _objectWithoutProperties(props, ['onClick', 'children']);
         var clicked = function(event) {
-            onClick();
+            props.onClick();
             event.preventDefault();
             return false;
         };
-        return (<a href='' {...other} onClick={clicked}>{children}</a>);
+        return (<a href='' {...other} onClick={clicked}>{props.children}</a>);
     }
 
     /**
@@ -123,7 +122,7 @@ CloudPebble.TestManager.Interface = (function(API) {
      */
     function TestList(props) {
         var tests = props.tests.map(function(test) {
-            var onClick = function() {Route.navigateAfter('test', test.id, Runs.refresh({test: test.id}), true);};
+            var onClick = function() {API.Route.navigateAfter('test', test.id, API.Runs.refresh({test: test.id}), true);};
             var className = classNames("clickable", {
                 selected: (props.selected == test.id)
             });
@@ -158,8 +157,8 @@ CloudPebble.TestManager.Interface = (function(API) {
             var datestring = CloudPebble.Utils.FormatDatetime(run.date_added);
             // TODO: nicer logs button
             var show_logs = function() {
-                Logs.refresh(run.id);
-                Route.navigate('/logs', run.id);
+                API.API.Logs.refresh(run.id);
+                API.API.Route.navigate('/logs', run.id);
             };
             return (
                 <tr key={run.id} className="clickable" onClick={show_logs}>
@@ -174,8 +173,7 @@ CloudPebble.TestManager.Interface = (function(API) {
             );
         },
         render: function() {
-            var {runs, test, session} = this.props;
-            var paged = this.page(runs);
+            var paged = this.page(this.props.runs);
             if (_.keys(paged).length == 0) {
                 return (<p>{gettext('Nothing to show')}</p>);
             }
@@ -184,8 +182,8 @@ CloudPebble.TestManager.Interface = (function(API) {
                 <div>
                     <table className="table" id="testmanager-run-table">
                         <thead><tr>
-                            {test ? null : <th>{gettext('Name')}</th>}
-                            {session ? null : <th>{gettext('Date')}</th>}
+                            {this.props.test ? null : <th>{gettext('Name')}</th>}
+                            {this.props.session ? null : <th>{gettext('Date')}</th>}
                             <th>{gettext('Status')}</th>
                             <th>{gettext('Logs')}</th>
                         </tr></thead>
@@ -207,8 +205,8 @@ CloudPebble.TestManager.Interface = (function(API) {
             return this.props.sessions.length;
         },
         onClickSession: function(session) {
-            Route.navigateAfter('session', session.id, Runs.refresh({session: session.id}), true);
-            Sessions.refresh({id: session.id});
+            API.Route.navigateAfter('session', session.id, API.Runs.refresh({session: session.id}), true);
+            API.Sessions.refresh({id: session.id});
         },
         renderRow: function(session) {
             var datestring = CloudPebble.Utils.FormatDatetime(session.date_added);
@@ -221,10 +219,10 @@ CloudPebble.TestManager.Interface = (function(API) {
                 'test-pending': session.fails == 0 && (session.passes != session.run_count)
             });
             return (
-                <tr className={rowClassName} key={session.id} onClick={()=>this.onClickSession(session)}>
-                    <td><Anchor onClick={()=>this.onClickSession(session)}>{datestring}</Anchor></td>
+                <tr className={rowClassName} key={session.id} onClick={function() {this.onClickSession(session)}.bind(this)}>
+                    <td><Anchor onClick={function() {this.onClickSession(session)}.bind(this)}>{datestring}</Anchor></td>
                     <td><SessionKindLabel kind={session.kind} long={false} /></td>
-                    <td className={passesClassName}>{`${session.passes}/${session.run_count}`}</td>
+                    <td className={passesClassName}>{session.passes+'/'+session.run_count}</td>
                 </tr>
             )
         },
@@ -249,7 +247,7 @@ CloudPebble.TestManager.Interface = (function(API) {
      * SingleSession shows the info for a particular testing job, and all the tests run for it.
      */
     function SingleSession(session) {
-        var filtered = _.filter(session.runs, (run) => run.session_id == session.id);
+        var filtered = _.filter(session.runs, function(run) { return run.session_id == session.id });
         var datestring = CloudPebble.Utils.FormatDatetime(session.date_added);
         return (
             <div>
@@ -269,7 +267,7 @@ CloudPebble.TestManager.Interface = (function(API) {
      * SingleTest shows the details for a single test, and all times it has been run
      */
     function SingleTest(test) {
-        var filtered = _.filter(test.runs, (run) => (!_.isUndefined(run.test) && run.test.id == test.id));
+        var filtered = _.filter(test.runs, function(run) {return !_.isUndefined(run.test) && run.test.id == test.id });
         // TODO: 'goto source'
         return (
             <div id="testmanager-test">
@@ -300,7 +298,7 @@ CloudPebble.TestManager.Interface = (function(API) {
                     trigger: 'hover',
                     html: true,
                     placement: 'top',
-                    content: `<img src="${this.url()}" />`
+                    content: '<img src="'+this.url()+'" />'
                 });
             }
         },
@@ -313,16 +311,19 @@ CloudPebble.TestManager.Interface = (function(API) {
      * LogScript renders a pebblesdk test log in react, converting artefact links to actual links.
      */
     function LogScript(props) {
-        var {log, artefacts} = props;
-        var filename = (str) => str.substring(str.lastIndexOf('/') + 1);
+        var log = props.log;
+        var artefacts = props.artefacts;
+        var filename = function(str) {
+            return str.substring(str.lastIndexOf('/') + 1);
+        };
 
         // Build up a list of the locations of all artefacts
-        let matches = [];
-        let start = 0;
+        var matches = [];
+        var start = 0;
         do {
             // Log through the log file, find the closest match to the current position
-            let match = artefacts.reduce((closest, match, i) => {
-                const pos = log.indexOf(artefacts[i][0], start);
+            var match = artefacts.reduce(function (closest, match, i)  {
+                var pos = log.indexOf(artefacts[i][0], start);
                 return (pos > closest.pos || pos == -1) ? closest : {
                     pos: pos,
                     found: artefacts[i][0],
@@ -337,8 +338,8 @@ CloudPebble.TestManager.Interface = (function(API) {
         while (start < Infinity);
 
         // Replace each artefact match with a link to the artefact.
-        let pieces = [];
-        matches.reduce((pos, match, i) => {
+        var pieces = [];
+        matches.reduce(function(pos, match, i) {
         	pieces.push(log.slice(pos, match.pos));
         	if (match.replace) {
                 pieces.push(<LogArtefact key={i} name={filename(match.found)} link={filename(match.replace)} />);
@@ -357,7 +358,10 @@ CloudPebble.TestManager.Interface = (function(API) {
      * The TestRun shows the details for a single test run, and its logs
      */
     function TestRun(props) {
-        var {run, test, logs, session} = props;
+        var run = props.run;
+        var test = props.test;
+        var logs = props.logs;
+        var session = props.session;
         var datestring = CloudPebble.Utils.FormatDatetime(session.date_added);
         var is_live_log = (!!logs && !run.logs);
         var run_completed = run.date_completed ? CloudPebble.Utils.FormatDatetime(run.date_completed) : null;
@@ -365,8 +369,8 @@ CloudPebble.TestManager.Interface = (function(API) {
             <div className="testmanager-run">
                 <table>
                     <tbody>
-                    <tr><th>{gettext('Test')}</th><td><Anchor onClick={()=>Route.navigate('/test', test.id)}>{test.name}</Anchor></td></tr>
-                    <tr><th>{gettext('Session')}</th><td><Anchor onClick={()=>Route.navigate('/session', session.id)}>{datestring}</Anchor></td></tr>
+                    <tr><th>{gettext('Test')}</th><td><Anchor onClick={function() {API.Route.navigate('/test', test.id)}}>{test.name}</Anchor></td></tr>
+                    <tr><th>{gettext('Session')}</th><td><Anchor onClick={function() {API.Route.navigate('/session', session.id)}}>{datestring}</Anchor></td></tr>
                     {run_completed && <tr><th>{gettext('Completion date')}</th><td>{run_completed}</td></tr>}
                     <tr><th>{gettext('Result')}</th><TestResultCell code={run.code} /></tr>
                     </tbody>
@@ -441,7 +445,7 @@ CloudPebble.TestManager.Interface = (function(API) {
             <Anchor
                 id='testmanager-backbutton'
                 className={'testmanager-backbutton-'+route.length}
-                onClick={()=>Route.up()}>
+                onClick={function() {API.Route.up()}}>
                 {text}
             </Anchor>
         )
@@ -451,24 +455,25 @@ CloudPebble.TestManager.Interface = (function(API) {
      * TestPage renders a different page depending on the current route.
      */
     function TestPage(props) {
-        var {route, tests, logs, sessions, runs} = props;
+        var route = props.route;
         var session, test, run, log;
         if (route.length == 0) return null;
-        var {page, id} = route[route.length-1];
+        var page = route[route.length-1].page;
+        var id = route[route.length-1].id;
         switch (page) {
             case 'session':
-                session = _.findWhere(sessions, {id: id});
-                return (<SingleSession {...session} runs={runs}/>);
+                session = _.findWhere(props.sessions, {id: id});
+                return (<SingleSession {...session} runs={props.runs}/>);
             case 'test':
-                test = _.findWhere(tests, {id: id});
-                return (<SingleTest {...test} runs={runs}/>);
+                test = _.findWhere(props.tests, {id: id});
+                return (<SingleTest {...test} runs={props.runs}/>);
             case 'loading':
                 return (<Loading />);
             case 'logs':
-                run = _.findWhere(runs, {id: id});
-                test = _.findWhere(tests, {id: run.test.id});
-                session = _.findWhere(sessions, {id: run.session_id});
-                log = _.findWhere(logs, {id: id});
+                run = _.findWhere(props.runs, {id: id});
+                test = _.findWhere(props.tests, {id: run.test.id});
+                session = _.findWhere(props.sessions, {id: run.session_id});
+                log = _.findWhere(props.logs, {id: id});
                 return (<TestRun logs={log ? log.text : ''} run={run} session={session} test={test}/>);
         }
     }
@@ -478,19 +483,19 @@ CloudPebble.TestManager.Interface = (function(API) {
      * "run tests" button and any errors.
      */
     function TestManager(props) {
-        var {route, tests, sessions, error, closeError, project_id} = props;
+        var route = props.route;
         var className = 'testmanager-page-'+(route.length == 0 ? 'dashboard' : 'detail');
         return (
             <div className={className}>
-                {!!error && <Error {...error} onClick={closeError} />}
-                {tests.length > 0 && (
+                {!!props.error && <Error {...props.error} onClick={props.closeError} />}
+                {props.tests.length > 0 && (
                     <Well>
-                        <button onClick={()=>Sessions.new()} className='btn btn-affirmative'>{gettext('Run All')}</button>
-                        <a href={`/ide/project/${project_id}/tests/archive`} className='btn testmanager-download-btn'>{gettext('Download tests as zip')}</a>
+                        <button onClick={function() {API.Sessions.new()}} className='btn btn-affirmative'>{gettext('Run All')}</button>
+                        <a href={'/ide/project/'+props.project_id+'/tests/archive'} className='btn testmanager-download-btn'>{gettext('Download tests as zip')}</a>
                     </Well>
                     )}
                 <div className="leftside">
-                    <Dashboard sessions={sessions} tests={tests} route={route}/>
+                    <Dashboard sessions={props.sessions} tests={props.tests} route={route}/>
                 </div>
                 <div className="rightside">
                     {route.length > 0 &&
@@ -509,18 +514,18 @@ CloudPebble.TestManager.Interface = (function(API) {
      */
     var TestManagerContainer = React.createClass({
         getInitialState: function() {
-            return _.extend({'error': null}, Route.initial(), Sessions.initial(), Tests.initial(), Runs.initial());
+            return _.extend({'error': null}, API.Route.initial(), API.Sessions.initial(), API.Tests.initial(), API.Runs.initial());
         },
         componentDidMount: function() {
             // Listen to all stores
             this.listener = _.extend({}, Backbone.Events);
-            _.each([Route, Tests, Sessions, Runs, Logs], function(store) {
-                this.listener.listenTo(store, 'changed', (data) => this.setState(data));
-                this.listener.listenTo(store, 'error', (error) => this.setState({'error': error}));
+            _.each([API.Route, API.Tests, API.Sessions, API.Runs, API.Logs], function(store) {
+                this.listener.listenTo(store, 'changed', function(data) { this.setState(data)}.bind(this));
+                this.listener.listenTo(store, 'error', function(error) { this.setState({'error': error}) }.bind(this));
             }, this);
-            Route.refresh();
-            Tests.refresh();
-            Sessions.refresh();
+            API.Route.refresh();
+            API.Tests.refresh();
+            API.Sessions.refresh();
         },
         closeError: function() {
             this.setState({'error': null});
@@ -539,7 +544,7 @@ CloudPebble.TestManager.Interface = (function(API) {
             ReactDOM.render(elm, element);
         },
         refresh: function() {
-            _.each(Sessions, Tests, Runs, function(api) {
+            _.each(API.Sessions, API.Tests, API.Runs, function(api) {
                 api.refresh();
             });
         }
