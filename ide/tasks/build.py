@@ -7,7 +7,7 @@ import zipfile
 import json
 import resource
 
-from celery import task
+from celery import shared_task
 
 from django.conf import settings
 from django.utils.timezone import now
@@ -49,11 +49,14 @@ def create_source_files(project, base_dir):
             raise
     for f in source_files:
         target_dir = src_dir
-        if f.target == 'worker' and project.project_type == 'native':
-            if worker_dir is None:
-                worker_dir = os.path.join(base_dir, 'worker_src')
-                os.mkdir(worker_dir)
-            target_dir = worker_dir
+        if project.project_type == 'native':
+            if f.target == 'worker':
+                if worker_dir is None:
+                    worker_dir = os.path.join(base_dir, 'worker_src')
+                    os.mkdir(worker_dir)
+                target_dir = worker_dir
+            elif f.file_name.endswith('.js'):
+                target_dir = os.path.join(target_dir, 'js')
 
         abs_target = os.path.abspath(os.path.join(target_dir, f.file_name))
         if not abs_target.startswith(target_dir):
@@ -98,7 +101,7 @@ def store_size_info(project, build_result, platform, zip_file):
         pass
 
 
-@task(ignore_result=True, acks_late=True)
+@shared_task(ignore_result=True, acks_late=True)
 def run_compile(build_result):
     build_result = BuildResult.objects.get(pk=build_result)
     project = build_result.project

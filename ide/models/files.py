@@ -312,7 +312,7 @@ class ResourceIdentifier(IdeModel):
 
 
 class SourceFile(ScriptFile):
-    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_-]+\.(c|h|js)$")])
+    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_.-]+\.(c|h|js)$")])
     project = models.ForeignKey('Project', related_name='source_files')
     bucket_name = 'source'
     folder = 'sources'

@@ -48,7 +48,6 @@ easy_install requests==2.7.0
 
 # Make sure we have a useful database and our JS dependencies.
 pushd /vagrant
-    sudo -u vagrant python manage.py syncdb --noinput
     sudo -u vagrant python manage.py migrate
     sudo -u vagrant python manage.py bower install
 popd
@@ -185,7 +184,8 @@ console log
 script
     export PATH="$PATH:/home/vagrant/arm-cs-tools/bin:/home/vagrant/sdk2/bin"
     export DEBUG=yes
-    exec /usr/bin/python manage.py celery worker --autoreload --loglevel=info --no-color
+    # The following line is untested after move to Django 1.9.2
+    exec celery worker --autoreload --loglevel=info --no-color
 end script
 
 EOF

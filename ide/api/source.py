@@ -157,7 +157,8 @@ def rename_source_file(request, project_id, kind, file_id):
             send_keen_event('cloudpebble', 'cloudpebble_rename_abort_unsafe', data={
                 'data': {
                     'filename': source_file.file_name,
-                    'kind': kind
+                    'kind': kind,
+                    'modified': time.mktime(source_file.last_modified.utctimetuple()),
                 }
             }, project=project, request=request)
             raise Exception(_("Could not rename, file has been modified since last save."))

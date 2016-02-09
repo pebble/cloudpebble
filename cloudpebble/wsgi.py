@@ -25,9 +25,6 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cloudpebble.settings")
 # file. This includes Django's development server, if the WSGI_APPLICATION
 # setting points here.
 from django.core.wsgi import get_wsgi_application
-from dj_static import Cling
-application = Cling(get_wsgi_application())
+from whitenoise.django import DjangoWhiteNoise
 
-# Apply WSGI middleware here.
-# from helloworld.wsgi import HelloWorldApplication
-# application = HelloWorldApplication(application)
+application = DjangoWhiteNoise(get_wsgi_application())

@@ -5,7 +5,7 @@ import tempfile
 import uuid
 import zipfile
 import json
-from celery import task
+from celery import shared_task
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import SuspiciousOperation
@@ -27,7 +27,13 @@ def add_project_to_archive(z, project, prefix=''):
     prefix += re.sub(r'[^\w]+', '_', project.name).strip('_').lower()
 
     for source in source_files:
-        src_dir = 'worker_src' if source.target == 'worker' else 'src'
+        src_dir = 'src'
+        if project.project_type == 'native':
+            if source.target == 'worker':
+                src_dir = 'worker_src'
+            elif project.app_modern_multi_js and source.file_name.endswith('.js'):
+                src_dir = 'src/js'
+
         z.writestr('%s/%s/%s' % (prefix, src_dir, source.file_name), source.get_contents())
 
     for resource in resources:
@@ -43,7 +49,7 @@ def add_project_to_archive(z, project, prefix=''):
         z.writestr('%s/jshintrc' % prefix, generate_jshint_file(project))
 
 
-@task(acks_late=True)
+@shared_task(acks_late=True)
 def create_archive(project_id):
     project = Project.objects.get(pk=project_id)
     prefix = re.sub(r'[^\w]+', '_', project.name).strip('_').lower()
@@ -69,7 +75,7 @@ def create_archive(project_id):
             return '%s%s' % (settings.EXPORT_ROOT, outfile)
 
 
-@task(acks_late=True)
+@shared_task(acks_late=True)
 def export_user_projects(user_id):
     user = User.objects.get(pk=user_id)
     projects = Project.objects.filter(owner=user)
@@ -111,7 +117,7 @@ def make_filename_variant(file_name, variant):
     return file_name_parts[0] + variant + file_name_parts[1]
 
 
-@task(acks_late=True)
+@shared_task(acks_late=True)
 def do_import_archive(project_id, archive, delete_project=False):
     project = Project.objects.get(pk=project_id)
     try:
@@ -179,6 +185,7 @@ def do_import_archive(project_id, archive, delete_project=False):
                             project.app_is_hidden = m.get('watchapp', {}).get('hiddenApp', False)
                             project.app_is_shown_on_communication = m.get('watchapp', {}).get('onlyShownOnCommunication', False)
                             project.app_capabilities = ','.join(m.get('capabilities', []))
+                            project.app_modern_multi_js = m.get('enableMultiJS', False)
                             if 'targetPlatforms' in m:
                                 project.app_platforms = ','.join(m['targetPlatforms'])
                             project.app_keys = dict_to_pretty_json(m.get('appKeys', {}))
@@ -279,6 +286,8 @@ def do_import_archive(project_id, archive, delete_project=False):
                         elif filename.startswith(SRC_DIR):
                             if (not filename.startswith('.')) and (filename.endswith('.c') or filename.endswith('.h') or filename.endswith('.js')):
                                 base_filename = filename[len(SRC_DIR):]
+                                if project.app_modern_multi_js and filename.endswith('.js') and filename.startswith('js/'):
+                                    base_filename = base_filename[len('js/'):]
                                 source = SourceFile.objects.create(project=project, file_name=base_filename)
                                 with z.open(entry.filename) as f:
                                     source.save_file(f.read().decode('utf-8'))

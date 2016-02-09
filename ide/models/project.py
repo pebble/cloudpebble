@@ -44,6 +44,7 @@ class Project(IdeModel):
     app_keys = models.TextField(default="{}")
     app_jshint = models.BooleanField(default=True)
     app_platforms = models.TextField(max_length=255, blank=True, null=True)
+    app_modern_multi_js = models.BooleanField(default=True)
 
     app_capability_list = property(lambda self: self.app_capabilities.split(','))
     app_platform_list = property(lambda self: self.app_platforms.split(',') if self.app_platforms else [])

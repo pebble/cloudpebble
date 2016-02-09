@@ -1,6 +1,7 @@
 import os
 import re
 import tempfile
+import time
 import json
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -46,9 +47,15 @@ def project_info(request, project_id):
         'app_jshint': project.app_jshint,
         'sdk_version': project.sdk_version,
         'app_platforms': project.app_platforms,
+        'app_modern_multi_js': project.app_modern_multi_js,
         'menu_icon': project.menu_icon.id if project.menu_icon else None,
         'test_files': [{'name': f.file_name, 'id': f.id} for f in test_files],
-        'source_files': [{'name': f.file_name, 'id': f.id, 'target': f.target} for f in source_files],
+        'source_files': [{
+                             'name': f.file_name,
+                             'id': f.id,
+                             'target': f.target,
+                             'lastModified': time.mktime(f.last_modified.utctimetuple())
+                         } for f in source_files],
         'resources': [{
             'id': x.id,
             'file_name': x.file_name,
@@ -215,6 +222,7 @@ def save_project_settings(request, project_id):
             project.app_jshint = bool(int(request.POST['app_jshint']))
             project.sdk_version = request.POST['sdk_version']
             project.app_platforms = request.POST['app_platforms']
+            project.app_modern_multi_js = bool(int(request.POST['app_modern_multi_js']))
 
             menu_icon = request.POST['menu_icon']
             old_icon = project.menu_icon

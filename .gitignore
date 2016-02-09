@@ -12,3 +12,4 @@ src/
 .env/
 .idea/
 bower_components
+staticfiles

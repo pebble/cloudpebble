@@ -1,7 +1,7 @@
 FROM python:2.7
 MAINTAINER Katharine Berry <katharine@pebble.com>
 
-ENV NPM_CONFIG_LOGLEVEL=info NODE_VERSION=4.2.3 DJANGO_VERSION=1.6
+ENV NPM_CONFIG_LOGLEVEL=info NODE_VERSION=4.2.3 DJANGO_VERSION=1.9.2
 
 # Node stuff.
 
@@ -38,6 +38,7 @@ EXPOSE 8000
 
 # CloudPebble stuff
 RUN npm install -g bower && echo '{"allow_root": true}' > ~/.bowerrc
+RUN npm install -g uglify-js clean-css
 
 # Grab the toolchain
 RUN curl -o /tmp/arm-cs-tools.tar https://cloudpebble-vagrant.s3.amazonaws.com/arm-cs-tools-stripped.tar && \
@@ -53,11 +54,12 @@ RUN mkdir /sdk2 && \
   curl -L "https://s3.amazonaws.com/assets.getpebble.com/sdk3/sdk-core/sdk-core-${SDK_TWO_VERSION}.tar.bz2" | \
   tar --strip-components=1 -xj -C /sdk2
 
-ENV SDK_THREE_VERSION=3.8.1
+ENV SDK_THREE_CHANNEL=beta
+ENV SDK_THREE_VERSION=3.9-beta8
 
 # Install SDK 3
 RUN mkdir /sdk3 && \
-  curl -L "https://s3.amazonaws.com/assets.getpebble.com/sdk3/release/sdk-core-${SDK_THREE_VERSION}.tar.bz2" | \
+  curl -L "https://s3.amazonaws.com/assets.getpebble.com/sdk3/${SDK_THREE_CHANNEL}/sdk-core-${SDK_THREE_VERSION}.tar.bz2" | \
   tar --strip-components=1 -xj -C /sdk3
 
 COPY . /code
@@ -66,6 +68,9 @@ WORKDIR /code
 # Bower is awful.
 RUN rm -rf bower_components && cd /tmp && python /code/manage.py bower install && mv bower_components /code/
 
+ENV PYTHONUNBUFFERED 1
+
 RUN python manage.py compilemessages
-ENV PYTHONUNBUFFERED=0
+RUN python manage.py collectstatic --noinput
+
 CMD ["sh", "docker_start.sh"]

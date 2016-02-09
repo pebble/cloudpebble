@@ -8,18 +8,18 @@ import sys
 _environ = os.environ
 
 DEBUG = _environ.get('DEBUG', '') != ''
-TEMPLATE_DEBUG = DEBUG
+
 TESTING = 'test' in sys.argv
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 ADMINS = (
     ('Administrator', 'example@example.com'),
 )
+MANAGERS = ADMINS
 
 DEFAULT_FROM_EMAIL = _environ.get('FROM_EMAIL', 'CloudPebble <cloudpebble@example.com>')
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-MANAGERS = ADMINS
 
 if 'DATABASE_URL' not in _environ:
     DATABASES = {
@@ -39,18 +39,6 @@ else:
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__)) + '/../'
 
 LANGUAGE_COOKIE_NAME = 'cloudpebble_language'
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    "django.contrib.auth.context_processors.auth",
-    "django.core.context_processors.debug",
-    "django.core.context_processors.i18n",
-    "django.core.context_processors.media",
-    "django.core.context_processors.static",
-    "django.core.context_processors.tz",
-    "django.contrib.messages.context_processors.messages",
-    "social.apps.django_app.context_processors.backends",
-    "social.apps.django_app.context_processors.login_redirect",
-)
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
@@ -106,7 +94,7 @@ MEDIA_URL = _environ.get('MEDIA_URL', 'http://localhost:8001/builds/')
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = 'staticfiles'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
@@ -127,8 +115,11 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'djangobower.finders.BowerFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    'pipeline.finders.PipelineFinder',
 )
+
+STATICFILES_STORAGE = 'pipeline.storage.PipelineStorage'
+
 
 BOWER_INSTALLED_APPS = (
     'https://github.com/krisk/Fuse.git#2c1560d763',
@@ -148,16 +139,29 @@ BOWER_INSTALLED_APPS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = _environ.get('SECRET_KEY', 'y_!-!-i!_txo$v5j(@c7m4uk^jyg)l4bf*0yqrztmax)l2027j')
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+                "social.apps.django_app.context_processors.backends",
+                "social.apps.django_app.context_processors.login_redirect",
+            ]
+        }
+    }
+]
 
 if not DEBUG and not TESTING:
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.CachedStaticFilesStorage'
-
+    STATICFILES_STORAGE = 'cloudpebble.storages.GzipManifestPipelineStorage'
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -171,7 +175,7 @@ MIDDLEWARE_CLASSES = (
 )
 
 AUTHENTICATION_BACKENDS = (
-    'auth.pebble.PebbleOAuth2',
+    'site_auth.pebble.PebbleOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 )
 
@@ -179,11 +183,11 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.social_details',
     'social.pipeline.social_auth.social_uid',
     'social.pipeline.social_auth.auth_allowed',
-    'auth.pebble.merge_user', # formerly social.pipeline.social_auth.social_user
+    'site_auth.pebble.merge_user',  # formerly social.pipeline.social_auth.social_user
     'social.pipeline.user.get_username',
     'social.pipeline.user.create_user',
     'social.pipeline.social_auth.associate_user',
-    'auth.pebble.clear_old_login',
+    'site_auth.pebble.clear_old_login',
     'social.pipeline.social_auth.load_extra_data',
     'social.pipeline.user.user_details'
 )
@@ -207,12 +211,6 @@ ROOT_URLCONF = 'cloudpebble.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'cloudpebble.wsgi.application'
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-)
-
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -221,25 +219,131 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
-    #'django.contrib.admin',
+    # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'social.apps.django_app.default',
     'ide',
-    'auth',
+    'site_auth',
+    'pipeline',
     'root',
     'qr',
-    'south',
-    'djcelery',
     'registration',
     'djangobower',
 )
 
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error when DEBUG=False.
-# See http://docs.djangoproject.com/en/dev/topics/logging for
-# more details on how to customize your logging configuration.
+# Configuration for django-pipeline, used to concatenate and compress JS and CSS sources and
+# output source-maps.
+PIPELINE = {
+    'OUTPUT_SOURCEMAPS': True,
+    'JS_COMPRESSOR': 'pipeline.compressors.uglifyjs.UglifyJSCompressor',
+    'CSS_COMPRESSOR': 'pipeline.compressors.cssclean.CleanCSSCompressor',
+    'CLEANCSS_BINARY': 'cleancss',
+    'UGLIFYJS_BINARY': 'uglifyjs',
+    'VERBOSE': True,
+    'STYLESHEETS': {
+        'codemirror': {
+            'source_filenames': (
+                'CodeMirror/addon/hint/show-hint.css',
+                'CodeMirror/addon/dialog/dialog.css',
+                'CodeMirror/lib/codemirror.css',
+                'CodeMirror/theme/monokai.css',
+                'CodeMirror/theme/eclipse.css',
+                'CodeMirror/theme/blackboard.css',
+                'CodeMirror/theme/solarized.css',
+                'CodeMirror/addon/fold/foldgutter.css',
+            ),
+            'output_filename': 'build/codemirror.css'
+        },
+        'textext': {
+            'source_filenames': (
+                'jquery-textext/src/css/textext.core.css',
+                'jquery-textext/src/css/textext.plugin.tags.css',
+                'jquery-textext/src/css/textext.plugin.autocomplete.css',
+                'jquery-textext/src/css/textext.plugin.focus.css',
+                'jquery-textext/src/css/textext.plugin.prompt.css',
+                'jquery-textext/src/css/textext.plugin.arrow.css',
+            ),
+            'output_filename': 'build/textext.css'
+        },
+        'ide': {
+            'source_filenames': (
+                'ide/css/ide.css',
+                'ide/css/ib.css',
+                'ide/css/codemirror-default.css',
+            ),
+            'output_filename': 'build/ide.css'
+        },
+        'base': {
+            'source_filenames': (
+                'common/fonts/fonts.css',
+                'common/css/progress.css',
+                'common/css/common.css',
+                'ide/css/base.css',
+            ),
+            'output_filename': 'build/base.css'
+        }
+    },
+    'JAVASCRIPT': {
+        'ide': {
+            'source_filenames': (
+                'ide/js/cloudpebble.js',
+                'ide/js/editor.js',
+                'ide/js/ib/ib.js',
+                'ide/js/ib/registry.js',
+                'ide/js/*.js',
+                'ide/js/*/*.js',
+            ),
+            'output_filename': 'build/ide.js',
+        },
+        'lib': {
+            'source_filenames': (
+                'react/react.js',
+                'react/react-dom.js',
+                'classnames/index.js',
+                'CodeMirror/lib/codemirror.js',
+                'CodeMirror/addon/dialog/dialog.js',
+                'CodeMirror/addon/search/searchcursor.js',
+                'CodeMirror/addon/search/search.js',
+                'CodeMirror/addon/edit/matchbrackets.js',
+                'CodeMirror/addon/edit/closebrackets.js',
+                'CodeMirror/addon/comment/comment.js',
+                'CodeMirror/addon/fold/foldgutter.js',
+                'CodeMirror/addon/fold/foldcode.js',
+                'CodeMirror/addon/fold/brace-fold.js',
+                'CodeMirror/addon/fold/comment-fold.js',
+                'CodeMirror/addon/runmode/runmode.js',
+                'ide/external/codemirror.hint.js',
+                'fuse.js/src/fuse.js',
+                'CodeMirror/mode/clike/clike.js',
+                'CodeMirror/mode/javascript/javascript.js',
+                'CodeMirror/keymap/emacs.js',
+                'CodeMirror/keymap/vim.js',
+                'ide/external/uuid.js',
+                'jshint/dist/jshint.js',
+                'html.sortable/dist/html.sortable.min.js',
+                'text-encoding/lib/encoding.js',
+                'noVNC/include/util.js',
+                'jquery-textext/src/js/*.js',
+            ),
+            'output_filename': 'build/textext.js',
+        },
+        'base': {
+            'source_filenames': (
+                'jquery/dist/jquery.min.js',
+                'common/js/modal.js',
+                'underscore/underscore-min.js',
+                'backbone/backbone-min.js',
+                'common/js/whats_new.js'
+            ),
+            'output_filename': 'build/base.js',
+        }
+    }
+}
+
+# This logging configuring ensures that debug messages are logged even when DEBUG=False
+# It replaces the previous and non-functional configuration which attempted to send
+# mail to administrators.
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -249,18 +353,17 @@ LOGGING = {
         }
     },
     'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler'
         }
     },
     'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
+        '*': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False
+        }
     }
 }
 
@@ -330,9 +433,6 @@ QEMU_LAUNCH_TIMEOUT = int(_environ.get('QEMU_LAUNCH_TIMEOUT', 15))
 PHONE_SHORTURL = _environ.get('PHONE_SHORTURL', 'cpbl.io')
 
 ORCHESTRATOR_URL = _environ.get('ORCHESTRATOR_URL', 'http://orchestrator.hq.getpebble.com')
-
-import djcelery
-djcelery.setup_loader()
 
 # import local settings
 try:

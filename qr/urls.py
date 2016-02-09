@@ -2,7 +2,6 @@ from django.conf.urls import patterns, url
 
 from qr import views
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url('$^', views.render, name='render')
-)
+]

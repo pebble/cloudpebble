@@ -38,6 +38,42 @@ CloudPebble.Editor = (function() {
         });
     };
 
+    // TODO: fix for test files
+    var rename_file = function(file, new_name) {
+        var defer = $.Deferred();
+        // Check no-change or duplicate filenames
+        if (new_name == file.name) {
+            return defer.resolve();
+        }
+        if (project_source_files[new_name]) {
+            return defer.reject(interpolate(gettext("A file called '%s' already exists."), [new_name]));
+        }
+
+        $.post("/ide/project/" + PROJECT_ID + "/source/" + file.id + "/rename", {
+            old_name: file.name,
+            new_name: new_name,
+            modified: file.lastModified
+        }).done(function(response) {
+            if (!response.success) {
+                defer.reject(response.error);
+            }
+            else {
+                delete project_source_files[file.name];
+                file.name = new_name;
+                file.lastModified = response.modified;
+                CloudPebble.Sidebar.SetItemName('source', file.id, new_name);
+                CloudPebble.FuzzyPrompt.SetCurrentItemName(new_name);
+                project_source_files[file.name] = file;
+                defer.resolve();
+            }
+        }).fail(function(error) {
+            console.log(error);
+            defer.reject(gettext("Error renaming file"));
+        });
+
+        return defer.promise();
+    };
+
     var edit_source_file = function(file, show_ui_editor, callback) {
         var url_kind = (file.target == 'test' ? 'tests' : 'source');
         var sidebar_id = (file.target == 'test' ? 'test' : 'source') + '-' + file.id;
@@ -88,7 +124,7 @@ CloudPebble.Editor = (function() {
                 };
                 var language_has_autocomplete = (file_kind == 'c' || file_kind == 'monkey');
                 var source = data.source;
-                var lastModified = data.modified;
+                file.lastModified = data.modified;
                 var pane = $('<div>');
                 var is_autocompleting = false;
                 var settings = {
@@ -419,14 +455,14 @@ CloudPebble.Editor = (function() {
                 }
 
                 var check_safe = function() {
-                    $.getJSON('/ide/project/' + PROJECT_ID + '/' + url_kind + '/' + file.id + '/is_safe?modified=' + lastModified, function(data) {
+                    $.getJSON('/ide/project/' + PROJECT_ID + '/' + url_kind + '/' + file.id + '/is_safe?modified=' + file.lastModified, function(data) {
                         if(data.success && !data.safe) {
                             if(was_clean) {
                                 code_mirror.setOption('readOnly', true);
                                 $.getJSON('/ide/project/' + PROJECT_ID + '/' + url_kind + '/' + file.id + '/load', function(data) {
                                     if(data.success) {
                                         code_mirror.setValue(data.source);
-                                        lastModified = data.modified;
+                                        file.lastModified = data.modified;
                                         was_clean = true; // this will get reset to false by setValue.
                                     }
                                     code_mirror.setOption('readOnly', false);
@@ -486,13 +522,13 @@ CloudPebble.Editor = (function() {
                     delete_btn.attr('disabled','disabled');
                     $.post("/ide/project/" + PROJECT_ID + "/" + url_kind +  "/" + file.id + "/save", {
                         content: code_mirror.getValue(),
-                        modified: lastModified,
+                        modified: file.lastModified,
                         folded_lines: JSON.stringify(code_mirror.get_folded_lines())
                     }, function(data) {
                         save_btn.removeAttr('disabled');
                         delete_btn.removeAttr('disabled');
                         if(data.success) {
-                            lastModified = data.modified;
+                            file.lastModified = data.modified;
                             mark_clean();
                             ga('send', 'event' ,'file', 'save');
                         } else {
@@ -502,40 +538,6 @@ CloudPebble.Editor = (function() {
                             callback();
                         }
                     });
-                };
-
-                var rename_file = function(new_name) {
-                    var defer = $.Deferred();
-                    // Check no-change or duplicate filenames
-                    if (new_name == file.name) {
-                        return defer.resolve();
-                    }
-                    if (project_source_files[new_name]) {
-                        return defer.reject(interpolate(gettext("A file called '%s' already exists."), [new_name]));
-                    }
-
-                    $.post("/ide/project/" + PROJECT_ID + "/" + url_kind + "/" + file.id + "/rename", {
-                        old_name: file.name,
-                        new_name: new_name,
-                        modified: lastModified
-                    }).done(function(response) {
-                        if (!response.success) {
-                            defer.reject(response.error);
-                        }
-                        else {
-                            delete project_source_files[file.name];
-                            file.name = new_name;
-                            CloudPebble.Sidebar.SetItemName(url_kind, file.id, new_name);
-                            CloudPebble.FuzzyPrompt.SetCurrentItemName(new_name);
-                            project_source_files[file.name] = file;
-                            defer.resolve();
-                        }
-                    }).fail(function(error) {
-                        console.log(error);
-                        defer.reject(gettext("Error renaming file"));
-                    });
-
-                    return defer.promise();
                 };
 
                 var show_rename_prompt = function() {
@@ -561,7 +563,7 @@ CloudPebble.Editor = (function() {
                             if (value.match(regexp) === null) {
                                 prompt.error(gettext("Invalid filename"));
                             }
-                            rename_file(value).done(function() {
+                            rename_file(file, value).done(function() {
                                 prompt.dismiss();
                                 code_mirror.focus();
                             }).fail(function(error) {
@@ -1035,6 +1037,12 @@ CloudPebble.Editor = (function() {
         prompt.find('#new-file-type').change(function() {
             prompt.find('.file-group').hide();
             prompt.find('.' + $(this).val() + '-file-options').show();
+            if($(this).val() == 'js') {
+                if(!_.some(project_source_files, function(x) {return x.name.endsWith('.js')})) {
+                    $('#new-js-file-name').val('app.js');
+                    $('.js-file-options').hide();
+                }
+            }
         });
         // If this isn't a native project, only JS files should exist.
         if(CloudPebble.ProjectInfo.type != 'native') {
@@ -1164,6 +1172,7 @@ CloudPebble.Editor = (function() {
         // reset the prompt
         prompt.find('.alert').text('').hide();
         prompt.find('input[type=text]').val('');
+        prompt.find('#new-file-type').change();
         prompt.modal('show');
     }
 
@@ -1225,6 +1234,12 @@ CloudPebble.Editor = (function() {
         },
         GetAllEditors: function() {
             return open_codemirrors;
+        },
+        GetAllFiles: function() {
+            return project_source_files;
+        },
+        RenameFile: function(file, new_name) {
+            return rename_file(file, new_name)
         }
     };
 })();

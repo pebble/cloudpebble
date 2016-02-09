@@ -24,8 +24,8 @@ def logout_view(request):
 
 
 def login_action(request):
-    username = request.REQUEST['username']
-    password = request.REQUEST['password']
+    username = request.POST['username']
+    password = request.POST['password']
     user = authenticate(username=username, password=password)
     if user is None:
         return json_failure(_("Invalid username or password"))

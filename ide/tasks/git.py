@@ -2,7 +2,7 @@ import base64
 import urllib2
 import json
 import os
-from celery import task
+from celery import shared_task
 from django.conf import settings
 from django.utils.timezone import now
 from github.GithubObject import NotSet
@@ -19,7 +19,7 @@ from utils.keen_helper import send_keen_event
 __author__ = 'katharine'
 
 
-@task(acks_late=True)
+@shared_task(acks_late=True)
 def do_import_github(project_id, github_user, github_project, github_branch, delete_project=False):
     try:
         url = "https://github.com/%s/%s/archive/%s.zip" % (github_user, github_project, github_branch)
@@ -96,10 +96,13 @@ def github_push(user, commit_message, repo_name, project):
     project_sources = project.source_files.all()
     has_changed = False
     for source in project_sources:
-        if source.target == 'worker':
-            repo_path = worker_src_root + source.file_name
-        else:
-            repo_path = src_root + source.file_name
+        repo_path = src_root + source.file_name
+        if project.project_type == 'native':
+            if source.target == 'worker':
+                repo_path = worker_src_root + source.file_name
+            elif project.app_modern_multi_js and source.file_name.endswith('.js'):
+                repo_path = src_root + 'js/' + source.file_name
+
         update_expected_paths(repo_path)
         if repo_path not in next_tree:
             has_changed = True
@@ -296,19 +299,19 @@ def github_pull(user, project):
     return import_result
 
 
-@task
+@shared_task
 def do_github_push(project_id, commit_message):
     project = Project.objects.select_related('owner__github').get(pk=project_id)
     return github_push(project.owner, commit_message, project.github_repo, project)
 
 
-@task
+@shared_task
 def do_github_pull(project_id):
     project = Project.objects.select_related('owner__github').get(pk=project_id)
     return github_pull(project.owner, project)
 
 
-@task
+@shared_task
 def hooked_commit(project_id, target_commit):
     project = Project.objects.select_related('owner__github').get(pk=project_id)
     did_something = False
