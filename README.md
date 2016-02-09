@@ -17,6 +17,9 @@ appropriate values there. Setting environment variables also works.
 Note that you won't be able to set up integration with certain Pebble systems (e.g. Pebble SSO). This shouldn't usually
 matter; whenever these are used, an alternative route is provided and should be invoked in its absence.
 
+In order to run locally with `DEBUG=False` set, add the setting `STATICFILES_STORAGE = 'pipeline.storage.PipelineStorage'`
+to `cloudpebble/settings_local.py`.
+
 Contributing
 ------------
 

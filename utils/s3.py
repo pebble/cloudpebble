@@ -12,27 +12,43 @@ def _ensure_bucket_exists(s3, bucket):
     else:
         print "Created bucket %s" % bucket
 
-if settings.AWS_ENABLED:
-    if settings.AWS_S3_FAKE_S3 is None:
-        _s3 = boto.connect_s3(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
-    else:
-        host, port = (settings.AWS_S3_FAKE_S3.split(':', 2) + [80])[:2]
-        port = int(port)
-        _s3 = boto.connect_s3("key_id", "secret_key", is_secure=False, port=port,
-                              host=host, calling_format=OrdinaryCallingFormat())
-        _ensure_bucket_exists(_s3, settings.AWS_S3_SOURCE_BUCKET)
-        _ensure_bucket_exists(_s3, settings.AWS_S3_EXPORT_BUCKET)
-        _ensure_bucket_exists(_s3, settings.AWS_S3_BUILDS_BUCKET)
 
-    _buckets = {
-        'source': _s3.get_bucket(settings.AWS_S3_SOURCE_BUCKET),
-        'export': _s3.get_bucket(settings.AWS_S3_EXPORT_BUCKET),
-        'builds': _s3.get_bucket(settings.AWS_S3_BUILDS_BUCKET),
-    }
-else:
-    _s3 = None
-    _buckets = None
+class BucketHolder(object):
+    """ The bucket holder configures s3 when it is first accessed. This cannot be done on module import due to quirks in Django's settings system.
+    See: https://docs.djangoproject.com/en/dev/internals/contributing/writing-code/coding-style/#use-of-django-conf-settings """
 
+    def __init__(self):
+        self.buckets = {}
+        self.configured = False
+        self.s3 = None
+
+    def configure(self):
+        if settings.AWS_ENABLED:
+            if settings.AWS_S3_FAKE_S3 is None:
+                self.s3 = boto.connect_s3(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+            else:
+                host, port = (settings.AWS_S3_FAKE_S3.split(':', 2) + [80])[:2]
+                port = int(port)
+                self.s3 = boto.connect_s3("key_id", "secret_key", is_secure=False, port=port,
+                                          host=host, calling_format=OrdinaryCallingFormat())
+                _ensure_bucket_exists(self.s3, settings.AWS_S3_SOURCE_BUCKET)
+                _ensure_bucket_exists(self.s3, settings.AWS_S3_EXPORT_BUCKET)
+                _ensure_bucket_exists(self.s3, settings.AWS_S3_BUILDS_BUCKET)
+
+            self.buckets = {
+                'source': self.s3.get_bucket(settings.AWS_S3_SOURCE_BUCKET),
+                'export': self.s3.get_bucket(settings.AWS_S3_EXPORT_BUCKET),
+                'builds': self.s3.get_bucket(settings.AWS_S3_BUILDS_BUCKET),
+            }
+        else:
+            self.s3 = None
+            self.buckets = None
+
+    def __getitem__(self, item):
+        if not self.configured:
+            self.configure()
+        return self.buckets[item]
+_buckets = BucketHolder()
 
 def _requires_aws(fn):
     if settings.AWS_ENABLED:
