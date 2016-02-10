@@ -191,9 +191,13 @@ CloudPebble.YCM = new (function() {
         return mUUID;
     };
 
+    this.isFileYCMCompatible = function(file) {
+        return file.target != 'test';
+    };
+
     this.deleteFile = function(file) {
         var promise = $.Deferred();
-        if(!mInitialised) {
+        if(!mInitialised || !this.isFileYCMCompatible(file)) {
             promise.reject();
             return promise.promise();
         }
@@ -209,7 +213,7 @@ CloudPebble.YCM = new (function() {
 
     this.createFile = function(file, content) {
         var promise = $.Deferred();
-        if(!mInitialised) {
+        if(!mInitialised || !this.isFileYCMCompatible(file)) {
             promise.reject();
             return promise.promise();
         }
