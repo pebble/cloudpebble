@@ -231,6 +231,9 @@ Pebble = function(proxy, token) {
     };
 
     var manipulate_url = function(url) {
+        if (url.startsWith("data")) {
+            return url;
+        }
         var hash_parts = url.split('#');
         var query_parts = hash_parts[0].split('?');
         console.log(hash_parts, query_parts);
