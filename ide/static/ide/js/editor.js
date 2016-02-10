@@ -48,12 +48,14 @@ CloudPebble.Editor = (function() {
         if (project_source_files[new_name]) {
             return defer.reject(interpolate(gettext("A file called '%s' already exists."), [new_name]));
         }
-
-        $.post("/ide/project/" + PROJECT_ID + "/source/" + file.id + "/rename", {
+        var url_kind = (file.target == 'test' ? 'tests' : 'source');
+        var sidebar_kind = (file.target == 'test' ? 'test' : 'source');
+        $.post("/ide/project/" + PROJECT_ID + "/" + url_kind + "/" + file.id + "/rename", {
             old_name: file.name,
             new_name: new_name,
             modified: file.lastModified
         }).done(function(response) {
+
             if (!response.success) {
                 defer.reject(response.error);
             }
@@ -61,7 +63,7 @@ CloudPebble.Editor = (function() {
                 delete project_source_files[file.name];
                 file.name = new_name;
                 file.lastModified = response.modified;
-                CloudPebble.Sidebar.SetItemName('source', file.id, new_name);
+                CloudPebble.Sidebar.SetItemName(sidebar_kind, file.id, new_name);
                 CloudPebble.FuzzyPrompt.SetCurrentItemName(new_name);
                 project_source_files[file.name] = file;
                 defer.resolve();
@@ -542,15 +544,20 @@ CloudPebble.Editor = (function() {
 
                 var show_rename_prompt = function() {
                     var old_type = file.name.split('.').pop();
-                    var c_pattern = "[a-zA-Z0-9_-]+\.(c|h)$";
-                    var js_pattern = "[a-zA-Z0-9_-]+\.js$";
+                    var c_pattern = "^[a-zA-Z0-9_-]+\.(c|h)$";
+                    var js_pattern = "^[a-zA-Z0-9_-]+\.js$";
+                    var test_pattern = "^[/a-zA-Z0-9_-]+$";
                     var pattern = "";
-                    if (old_type == "c" || old_type == "h") {
+                    if (file.target == 'test') {
+                        pattern = test_pattern;
+                    }
+                    else if (old_type == "c" || old_type == "h") {
                         pattern = c_pattern;
                     }
-                    if (old_type == "js") {
+                    else if (old_type == "js") {
                         pattern = js_pattern;
                     }
+
                     CloudPebble.Prompts.Prompt(
                         gettext("Rename File"),
                         gettext("Filename"),
@@ -563,12 +570,14 @@ CloudPebble.Editor = (function() {
                             if (value.match(regexp) === null) {
                                 prompt.error(gettext("Invalid filename"));
                             }
-                            rename_file(file, value).done(function() {
-                                prompt.dismiss();
-                                code_mirror.focus();
-                            }).fail(function(error) {
-                                prompt.error(error);
-                            });
+                            else {
+                                rename_file(file, value).done(function () {
+                                    prompt.dismiss();
+                                    code_mirror.focus();
+                                }).fail(function (error) {
+                                    prompt.error(error);
+                                });
+                            }
                         },
                         pattern)
                 };

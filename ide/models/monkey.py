@@ -125,6 +125,7 @@ class TestFile(ScriptFile):
     project = models.ForeignKey('Project', related_name='test_files')
     bucket_name = 'source'
     folder = 'tests/scripts'
+    target = 'test'
 
     def copy_screenshots_to_directory(self, directory):
         for screenshot_set in self.get_screenshot_sets():

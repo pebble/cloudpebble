@@ -62,7 +62,7 @@ def create_test_file(request, project_id):
             }
         }, project=project, request=request)
 
-        return json_response({"file": {"id": f.id, "name": f.file_name}})
+        return json_response({"file": {"id": f.id, "name": f.file_name, "target": f.target}})
 
 def get_source_file(kind, pk, project):
     if kind == 'source':

@@ -49,7 +49,12 @@ def project_info(request, project_id):
         'app_platforms': project.app_platforms,
         'app_modern_multi_js': project.app_modern_multi_js,
         'menu_icon': project.menu_icon.id if project.menu_icon else None,
-        'test_files': [{'name': f.file_name, 'id': f.id} for f in test_files],
+        'test_files': [{
+                           'name': f.file_name,
+                           'id': f.id,
+                           'target': f.target,
+                           'lastModified': time.mktime(f.last_modified.utctimetuple())
+                       } for f in test_files],
         'source_files': [{
                              'name': f.file_name,
                              'id': f.id,
