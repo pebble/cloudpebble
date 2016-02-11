@@ -157,8 +157,8 @@ CloudPebble.TestManager.Interface = (function(API) {
             var datestring = CloudPebble.Utils.FormatDatetime(run.date_added);
             // TODO: nicer logs button
             var show_logs = function() {
-                API.API.Logs.refresh(run.id);
-                API.API.Route.navigate('/logs', run.id);
+                API.Logs.refresh(run.id);
+                API.Route.navigate('/logs', run.id);
             };
             return (
                 <tr key={run.id} className="clickable" onClick={show_logs}>
@@ -312,7 +312,7 @@ CloudPebble.TestManager.Interface = (function(API) {
      */
     function LogScript(props) {
         var log = props.log;
-        var artefacts = props.artefacts;
+        var artefacts = props.artefacts || [];
         var filename = function(str) {
             return str.substring(str.lastIndexOf('/') + 1);
         };
