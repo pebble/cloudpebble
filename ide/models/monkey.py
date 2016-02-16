@@ -21,6 +21,29 @@ from ide.utils.image_correction import uncorrect
 __author__ = 'joe'
 
 
+_TEMPLATE = """
+#metadata
+# {{
+#   "pebble": true
+# }}
+#/metadata
+
+setup {{
+    context bigboard
+    do factory_reset
+}}
+
+test {test_name} {{
+    context bigboard
+
+    # Load the app
+    do install_app app.pbw
+    do launch_app "{app_name}"
+    do wait 2
+{content}
+}}
+"""
+
 class TestCode:
     ERROR = -2
     FAILED = -1
@@ -134,26 +157,11 @@ class TestFile(ScriptFile):
     def copy_test_to_path(self, path):
         self.copy_to_path(path)
         with open(path, 'r+') as f:
-            full_test = """#metadata
-# {{
-#   "pebble": true
-# }}
-#/metadata
-
-setup {{
-    context bigboard
-    do factory_reset
-}}
-
-test screenshot {{
-    context bigboard
-
-    # Load the app
-    do install_app app.pbw
-    do launch_app "{app_name}"
-    do wait 2
-{content}
-}}""".format(app_name=self.project.app_short_name, content="".join('    %s' % l for l in f.readlines()))
+            full_test = _TEMPLATE.format(
+                    test_name=self.file_name,
+                    app_name=self.project.app_short_name,
+                    content="".join('    %s' % l for l in f.readlines())
+            )
         with open(path, 'w') as f:
             f.write(full_test)
 
