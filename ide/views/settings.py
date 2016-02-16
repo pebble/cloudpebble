@@ -39,7 +39,7 @@ def settings_page(request):
 
 
 @login_required
-@require_safe
+@require_POST
 def start_github_auth(request):
     nonce = uuid.uuid4().hex
     try:
@@ -54,7 +54,7 @@ def start_github_auth(request):
 
 
 @login_required
-@require_safe
+@require_POST
 def remove_github_auth(request):
     try:
         user_github = request.user.github
