@@ -3,10 +3,10 @@
  */
 
 CloudPebble.MonkeyScript = (function() {
-    var DO_COMMANDS = ['airplane_mode', 'charging', 'command', 'factory_reset', 'install_app', 'launch_app', 'long_click', 'multi_click',
-        'power_testing_disable', 'power_testing_enable', 'remove_app', 'reset', 'screenshot', 'set_time', 'single_click', 'wait'];
+    var DO_COMMANDS = ['airplane_mode', 'charging', 'launch_app', 'long_click', 'multi_click',
+        'reset', 'screenshot', 'set_time', 'single_click', 'wait'];
 
-    var EXPECT_COMMANDS = ['captured_output', 'equal', 'not_equal', 'power-between', 'reset_output', 'screenshot', 'screenshot_app', 'window'];
+    var EXPECT_COMMANDS = ['captured_output', 'equal', 'not_equal', 'reset_output', 'screenshot'];
 
     var KEYWORDS = ['do', 'expect'];
 
