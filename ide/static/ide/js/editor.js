@@ -493,6 +493,7 @@ CloudPebble.Editor = (function() {
                 if (file_kind == 'monkey') {
                     screenshot_pane = new CloudPebble.MonkeyScreenshots.ScreenshotPane(file.id);
                     CloudPebble.SidePane.RightPane.addPane(screenshot_pane.getPane(), 'monkey-screenshots', file.id);
+                    code_mirror.screenshot_pane = screenshot_pane;
                 }
 
 

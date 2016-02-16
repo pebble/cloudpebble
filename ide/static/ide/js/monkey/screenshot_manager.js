@@ -173,6 +173,10 @@ CloudPebble.MonkeyScreenshots = (function() {
         var progress = {};
         _.extend(this, Backbone.Events);
 
+        this.getScreenshots = function() {
+            return _.clone(screenshots);
+        };
+
         /**
          * Update the list of screenshots to be uploaded with some new files. If multiple files are added at one index,
          * each file[i] is added to the screenshot[index+i]
@@ -400,6 +404,10 @@ CloudPebble.MonkeyScreenshots = (function() {
             pane.trigger('destroy');
             pane.empty();
             view = pane = screenshots = uiState = null;
+        };
+
+        this.getScreenshots = function() {
+            return screenshots.getScreenshots();
         }
     }
 
