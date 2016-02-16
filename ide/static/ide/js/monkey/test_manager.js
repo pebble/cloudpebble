@@ -136,7 +136,7 @@ CloudPebble.TestManager = (function() {
 
                 });
             };
-            this.subscribe = function(id, url) {
+            this.subscribe = function(id, session_id, url) {
                 var self = this;
                 var evtSource = new EventSource(url);
                 self.state[id] = {text: '', id: id};
@@ -147,6 +147,8 @@ CloudPebble.TestManager = (function() {
                 evtSource.onerror = function() {
                     setTimeout(function() {
                         Runs.refresh({id: id});
+                        Tests.refresh();
+                        Sessions.refresh({id: session_id});
                     }, 1000);
                 }
             }
@@ -361,7 +363,7 @@ CloudPebble.TestManager = (function() {
             var run_fetch = api.Runs.refresh({id: run_id});
             var session_fetch = api.Sessions.refresh({id: session_id});
             var test_fetch = api.Tests.refresh();
-            api.Logs.subscribe(run_id, url);
+            api.Logs.subscribe(run_id, session_id, url);
             return $.when(run_fetch, session_fetch, test_fetch).then(function() {
                 show_test_manager_pane();
                 api.Route.navigate('session', session_id);
