@@ -23,20 +23,38 @@ CloudPebble.Editor = (function() {
     };
 
 
-    var run = function() {
+    var run = function(install_options) {
+        var defer = $.Deferred();
         CloudPebble.Prompts.Progress.Show(gettext("Saving..."));
         CloudPebble.Editor.SaveAll(function() {
             CloudPebble.Prompts.Progress.Show(gettext("Compiling..."));
             CloudPebble.Compile.RunBuild(function (success) {
                 CloudPebble.Prompts.Progress.Hide();
                 if(success) {
-                    CloudPebble.Compile.DoInstall();
+                    CloudPebble.Compile.DoInstall(install_options).done(function(result) {
+                        console.log(result);
+                        defer.resolve(result);
+                    }).fail(function(reason) {
+                        defer.reject(reason);
+                    });
                 } else {
                     CloudPebble.Compile.Show();
+                    defer.reject();
                 }
             });
         });
+        return defer.promise();
     };
+
+    function run_test(file) {
+        return run({
+            show_logs_prompt: false
+        }).then(function() {
+            return SharedPebble.getCurrentEmulator().runTest(PROJECT_ID, file.id);
+        }).then(function(result) {
+            return CloudPebble.TestManager.ShowLiveTestRun(result['subscribe_url'], result['session_id'], result['run_id'], result['test_id']);
+        });
+    }
 
     // TODO: fix for test files
     var rename_file = function(file, new_name) {
@@ -700,18 +718,9 @@ CloudPebble.Editor = (function() {
 
                 rename_btn.click(show_rename_prompt);
 
-                function run_test() {
-                    // TODO: start correct platforms
-                    return SharedPebble.getEmulator(ConnectionType.Qemu).then(function(emulator) {
-                        return emulator.runTest(PROJECT_ID, file.id);
-                    }).then(function(result) {
-                        CloudPebble.TestManager.ShowLiveTestRun(result['subscribe_url'], result['session_id'], result['run_id'], result['test_id']);
-                    });
-                }
-
                 run_btn.click(function() {
                     if (file.target == 'test') {
-                        run_test();
+                        run_test(file);
                     }
                     else {
                         run();

@@ -466,13 +466,19 @@ CloudPebble.Compile = (function() {
         }
     }
 
-    var install_on_watch = function(kind) {
+    var install_on_watch = function(kind, options) {
+        var defer = $.Deferred();
         var modal = $('#phone-install-progress');
+
+        options = _.defaults(options || {
+            show_logs_prompt: true
+        });
 
         var report_error = function(message) {
             modal.find('.modal-body > p').html(message);
             modal.find('.dismiss-btn').removeClass('hide');
             modal.find('.progress').addClass('progress-danger').removeClass('progress-striped');
+            defer.reject(message);
         };
 
         SharedPebble.getPebble(kind).done(function(pebble) {
@@ -481,23 +487,32 @@ CloudPebble.Compile = (function() {
                 if(code === 0) {
                     add_log_divider();
                     pebble.enable_app_logs();
-                    modal.find('.modal-body > p').text(gettext("Installed successfully!"));
-                    modal.find('.btn').removeClass('hide');
-                    modal.find('.logs-btn').off('click').click(function() {
-                        modal.off('hide');
-                        show_app_logs();
+                    if (options.show_logs_prompt) {
+                        modal.find('.modal-body > p').text(gettext("Installed successfully!"));
+                        modal.find('.btn').removeClass('hide');
+
+                        modal.find('.logs-btn').off('click').click(function() {
+                            modal.off('hide');
+                            show_app_logs();
+                            modal.modal('hide');
+                        });
+                        modal.on('hide', stop_logs);
+                        modal.find('.progress').addClass('progress-success').removeClass('progress-striped').find('.bar').css({width: '100%'});
+                    }
+                    else {
                         modal.modal('hide');
-                    });
-                    modal.on('hide', stop_logs);
-                    modal.find('.progress').addClass('progress-success').removeClass('progress-striped').find('.bar').css({width: '100%'});
+                    }
                     ga('send', 'event', 'install', 'direct', 'success');
                     CloudPebble.Analytics.addEvent('app_install_succeeded', {virtual: SharedPebble.isVirtual()});
+                    defer.resolve(pebble);
                 } else {
+
                     if (SharedPebble.isVirtual()) {
                         report_error(gettext("Installation rejected. Try rebooting the emulator and trying again."));
                     } else {
                         report_error(gettext("Installation rejected. Check your phone for details."));
                     }
+
                     ga('send', 'event', 'install', 'direct', 'phone-error');
                     CloudPebble.Analytics.addEvent('app_install_failed', {cause: 'rejected', virtual: SharedPebble.isVirtual()});
                 }
@@ -561,7 +576,10 @@ CloudPebble.Compile = (function() {
                 }
             });
             pebble.request_version();
+        }).fail(function(reason) {
+            defer.reject(reason);
         });
+        return defer.promise();
     };
 
     var show_clear_logs_prompt = function() {
@@ -748,8 +766,8 @@ CloudPebble.Compile = (function() {
                 }
             }
         },
-        DoInstall: function() {
-            install_on_watch(CloudPebble.Compile.GetPlatformForInstall());
+        DoInstall: function(options) {
+            return install_on_watch(CloudPebble.Compile.GetPlatformForInstall(), options);
         }
     };
 })();

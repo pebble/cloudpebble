@@ -80,7 +80,7 @@ var SharedPebble = new (function() {
         }
 
         mEmulator.connect().done(function() {
-            deferred.resolve();
+            deferred.resolve(mEmulator);
         }).fail(function(reason) {
             deferred.reject(reason);
         }).always(function() {
@@ -104,6 +104,10 @@ var SharedPebble = new (function() {
         }
         _getEmulator(kind, deferred);
         return deferred.promise();
+    };
+
+    this.getCurrentEmulator = function() {
+        return mEmulator;
     };
 
     function handleEmulatorDisconnected() {
