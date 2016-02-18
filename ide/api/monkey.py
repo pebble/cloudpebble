@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from django.utils import timezone
 from ide.api import json_failure, json_response
 from ide.models.project import Project
-from ide.models.monkey import TestSession, TestRun, TestCode, TestLog
+from ide.models.monkey import TestSession, TestRun, TestCode, TestLog, ScreenshotSet, ScreenshotFile
 from django.db import transaction
 from utils.bundle import TestBundle
 
@@ -188,6 +188,7 @@ def notify_test_session(request, project_id, session_id):
 
     date_completed = timezone.now()
 
+    # Different procedures depending on whether orchestrator or qemu-controller are notifying.
     if orch_id:
         # TODO: do this all in a celery task
         with transaction.atomic():
@@ -224,14 +225,29 @@ def notify_test_session(request, project_id, session_id):
             result = TestCode.FAILED
         else:
             result = TestCode.ERROR
+        # Non-orchestrator notifications should only be for sessions with single runs
+        run = TestRun.objects.get(session=session)
         with transaction.atomic():
             session.date_completed = date_completed
+            run.code = result
+            run.log = log
+            run.date_completed = date_completed
             session.save()
-            for run in session.runs.all():
-                run.code = result
-                run.log = log
-                run.date_completed = date_completed
-                run.save()
+            run.save()
+
+        uploaded_files = request.FILES.getlist('uploads[]')
+        if uploaded_files:
+            platform = request.POST['uploads_platform']
+            test = run.test
+            for posted_file in uploaded_files:
+                if posted_file.content_type != "image/png":
+                    raise ValueError("Screenshots must be PNG files")
+                name = os.path.splitext(os.path.basename(posted_file.name))[0]
+                screenshot_set, did_create_set = ScreenshotSet.objects.get_or_create(test=test, name=name)
+                screenshot_file, did_create_file = ScreenshotFile.objects.get_or_create(screenshot_set=screenshot_set, platform=platform)
+                screenshot_file.save()
+                screenshot_file.save_file(posted_file, posted_file.size)
+
 
     return json_response({})
 
