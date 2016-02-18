@@ -9,7 +9,7 @@ from ide.api.resource import create_resource, resource_info, delete_resource, up
     delete_variant
 from ide.api.source import create_source_file, create_test_file, load_source_file, source_file_is_safe, \
     save_source_file, delete_source_file, rename_source_file, get_test_list
-from ide.api.screenshots import save_screenshots, load_screenshots, show_screenshot
+from ide.api.screenshots import sync_screenshots, load_screenshots, show_screenshot
 from ide.api.monkey import get_test_session, get_test_sessions, get_test_run, get_test_runs, post_test_session, \
     get_test_run_log, run_qemu_test, download_tests, notify_test_session, get_test_artefact
 from ide.api.user import transition_accept, transition_export, transition_delete, whats_new
@@ -33,7 +33,7 @@ urlpatterns = [
     url(r'^project/(?P<project_id>\d+)/tests$', get_test_list, name='get_test_list'),
     url(r'^project/(?P<project_id>\d+)/(?P<kind>(source|tests))/(?P<file_id>\d+)/load', load_source_file, name='load_source_file'),
     url(r'^project/(?P<project_id>\d+)/(?P<kind>(source|tests))/(?P<file_id>\d+)/save', save_source_file, name='save_source_file'),
-    url(r'^project/(?P<project_id>\d+)/test/(?P<test_id>\d+)/screenshots/save', save_screenshots, name='save_screenshots'),
+    url(r'^project/(?P<project_id>\d+)/test/(?P<test_id>\d+)/screenshots/save', sync_screenshots, name='sync_screenshots'),
     url(r'^project/(?P<project_id>\d+)/test/(?P<test_id>\d+)/screenshots/load', load_screenshots, name='load_screenshots'),
     url(r'^project/(?P<project_id>\d+)/tests/(?P<test_id>\d+)/run_qemu', run_qemu_test, name='run_qemu_test'),
     url(r'^project/(?P<project_id>\d+)/tests/archive$', download_tests, name='download_tests'),

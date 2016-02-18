@@ -10,7 +10,7 @@ from utils.keen_helper import send_keen_event
 
 from ide.api import json_failure, json_response
 from ide.models.project import Project
-from ide.models.monkey import TestFile, ScreenshotSet, ScreenshotFile, ScreenshotSet, ScreenshotFile
+from ide.models.monkey import TestFile, ScreenshotSet, ScreenshotFile
 import utils.s3 as s3
 
 __author__ = 'joe'
@@ -46,42 +46,58 @@ def load_screenshots(request, project_id, test_id):
 
 @require_POST
 @login_required
-def save_screenshots(request, project_id, test_id):
+def sync_screenshots(request, project_id, test_id):
+    """ Synchronise screenshots between the client and server
+    Takes a JSON parameter 'screenshots'. An example:
+    [
+      {
+        "name": "one",
+        "id": 2
+        "files": {
+          "chalk": {"id": 5},
+          "basalt": {"id": 2}
+        },
+      }, {
+        "name": "two",
+        "files": {"basalt": {"uploadId": 0}}
+      }
+    ]
+    - Chalk and basalt screenshots for one.png are kept
+    - A new screenshot for "two.png" is uploaded, using the first uploaded file
+    - Any other screenshots are deleted.
+    """
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     screenshot_data = json.loads(request.POST['screenshots'])
     uploaded_files = request.FILES.getlist('files[]')
 
     test = get_object_or_404(TestFile, pk=test_id)
-    screenshots = test.screenshot_sets.all()
-    # get set of screenshot IDs
-    deleted_ids = [shot.id for shot in screenshots]
+    current_screenshot_sets = test.screenshot_sets.all()
+    # Get the list of screenshot set IDs
+    deleted_screenshot_set_ids = [shot.id for shot in current_screenshot_sets]
     try:
         with transaction.atomic():
-            # go through uploaded screenshots
-            for screenshot_info in screenshot_data:
-                # if uploaded screenshot has an ID
-                id = screenshot_info.get('id', None)
-                if id:
-                    # Remove ID from set
-                    deleted_ids.remove(id)
-                    # Fetch the screenshot
-                    screenshot_set = get_object_or_404(ScreenshotSet, pk=id)
-                    # edit name
-                    screenshot_set.name = screenshot_info['name']
-                    # delete removed or re-uploaded screenshot files
-                    files = screenshot_set.files.all()
-                    for screenshot_file in files:
-                        was_deleted = lambda: screenshot_file.platform not in screenshot_info['files']
-                        is_replaced = lambda: screenshot_info['files'][screenshot_file.platform].get('uploadId', None) is not None
-                        if was_deleted() or is_replaced():
+            # Go through uploaded screenshot sets
+            for screenshot_set_info in screenshot_data:
+                # If uploaded screenshot set has an ID, mark it as not deleted and update it
+                screenshot_set_id = screenshot_set_info.get('id', None)
+                if screenshot_set_id:
+                    deleted_screenshot_set_ids.remove(screenshot_set_id)
+                    screenshot_set = get_object_or_404(ScreenshotSet, pk=screenshot_set_id)
+                    # Set a new name
+                    screenshot_set.name = screenshot_set_info['name']
+                    # Delete any removed or replaced screenshot files
+                    for screenshot_file in screenshot_set.files.all():
+                        if screenshot_file.platform not in screenshot_set_info['files']:
+                            screenshot_file.delete()
+                        elif screenshot_set_info['files'][screenshot_file.platform].get('uploadId', None) is not None:
                             screenshot_file.delete()
                 else:
-                    # create a new ScreenshotSet
-                    screenshot_set = ScreenshotSet.objects.create(test=test, name=screenshot_info['name'])
+                    # Create a new ScreenshotSet if no ID was given
+                    screenshot_set = ScreenshotSet.objects.create(test=test, name=screenshot_set_info['name'])
                 screenshot_set.save()
 
-                # add new uploads
-                for platform, upload_info in screenshot_info['files'].iteritems():
+                # Add new uploads
+                for platform, upload_info in screenshot_set_info['files'].iteritems():
                     uploadId = upload_info.get('uploadId', None)
                     if isinstance(uploadId, int):
                         screenshot_file, did_create = ScreenshotFile.objects.get_or_create(screenshot_set=screenshot_set, platform=platform)
@@ -93,15 +109,15 @@ def save_screenshots(request, project_id, test_id):
 
                 screenshot_set.save()
 
-            # delete all screenshots missing from POST request
-            for screenshot in screenshots:
-                if screenshot.id in deleted_ids:
+            # Delete all screenshot sets missing from POST request
+            for screenshot in current_screenshot_sets:
+                if screenshot.id in deleted_screenshot_set_ids:
                     screenshot.delete()
     except (FloatingPointError, ValueError) as e:
         return json_failure(str(e))
     else:
-        screenshots = ScreenshotSet.objects.filter(test=test)
-        return json_response({"screenshots": [make_screenshot_dict(screenshot, project_id) for screenshot in screenshots]})
+        current_screenshot_sets = ScreenshotSet.objects.filter(test=test)
+        return json_response({"screenshots": [make_screenshot_dict(screenshot, project_id) for screenshot in current_screenshot_sets]})
 
 @require_safe
 @login_required

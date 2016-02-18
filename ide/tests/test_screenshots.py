@@ -45,7 +45,7 @@ class ScreenshotsTests(CloudpebbleTestCase):
             }
         }]
         # Save the screenshots
-        url = reverse('ide:save_screenshots', kwargs={
+        url = reverse('ide:sync_screenshots', kwargs={
             'project_id': self.project_id,
             'test_id': test_id
         })
@@ -70,7 +70,7 @@ class ScreenshotsTests(CloudpebbleTestCase):
         screenshots[0]["name"] = "Set_1_edited"
         del screenshots[0]['files']["aplite"]
         screenshots[0]['files']["chalk"] = {"uploadId": 0}
-        url = reverse('ide:save_screenshots', args=[self.project_id, test_id])
+        url = reverse('ide:sync_screenshots', args=[self.project_id, test_id])
         data = {"screenshots": json.dumps(screenshots), "files[]": [self.make_upload()]}
         result2 = json.loads(self.client.post(url, data).content)['screenshots']
 
