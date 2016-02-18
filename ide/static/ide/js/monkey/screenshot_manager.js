@@ -399,6 +399,11 @@ CloudPebble.MonkeyScreenshots = (function() {
             return pane;
         };
 
+        pane.on('restored', function() {
+            // This is triggered by the SidePane holder whenever the pane is restored
+            screenshots.loadScreenshots();
+        });
+
         /** Destroy the contents of the pane */
         this.destroy = function() {
             pane.trigger('destroy');

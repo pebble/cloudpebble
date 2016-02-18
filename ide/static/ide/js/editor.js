@@ -103,7 +103,8 @@ CloudPebble.Editor = (function() {
         CloudPebble.Sidebar.SuspendActive();
 
         if(CloudPebble.Sidebar.Restore(sidebar_id)) {
-            if (CloudPebble.SidePane.RightPane.restorePane('monkey-screenshots', file.id)) {
+            if (file.target == 'test' && CloudPebble.SidePane.RightPane.restorePane('monkey-screenshots', file.id)) {
+
             }
             else {
                 CloudPebble.SidePane.RightPane.setSize('0');
@@ -735,7 +736,7 @@ CloudPebble.Editor = (function() {
 
                         var tooltip = $('<div>');
                         var build_platforms = CloudPebble.ProjectInfo.app_platforms;
-                        if (build_platforms && file.target !== 'test') {
+                        if (build_platforms) {
                             var build_platform_names = _.map(build_platforms.split(','), capitalise_first_letter).join(', ');
                             tooltip.append($(interpolate("<div><strong>%s: </strong>%s</div>", [gettext("Build for"), build_platform_names])));
                         }
