@@ -78,15 +78,20 @@ CloudPebble.Compile = (function() {
         });
     };
 
+    var fetch_build_history = function() {
+        return $.getJSON('/ide/project/' + PROJECT_ID + '/build/history').then(function(data) {
+            if (!data.success) {
+                return $.Deferred().reject(data.error);
+            }
+            mLastBuild = (data.builds.length > 0) ? data.builds[0] : null;
+            return data;
+        });
+    };
+
     var update_build_history = function(pane) {
-        $.getJSON('/ide/project/' + PROJECT_ID + '/build/history', function(data) {
+        return fetch_build_history().then(function(data) {
             CloudPebble.ProgressBar.Hide();
             pane.removeClass('hide');
-            if(!data.success) {
-                alert(interpolate(gettext("Something went wrong:\n%s"), [data.error])); // This should be prettier.
-                CloudPebble.Sidebar.DestroyActive();
-                return;
-            }
             if(data.builds.length > 0) {
                 update_last_build(pane, data.builds[0]);
             } else {
@@ -105,6 +110,11 @@ CloudPebble.Compile = (function() {
                 });
                 mPendingCallbacks = [];
             }
+        }).fail(function(reason) {
+            CloudPebble.ProgressBar.Hide();
+            pane.removeClass('hide');
+            alert(interpolate(gettext("Something went wrong:\n%s"), [reason])); // This should be prettier.
+            CloudPebble.Sidebar.DestroyActive();
         });
     };
 
@@ -113,7 +123,7 @@ CloudPebble.Compile = (function() {
         pane = $('#compilation-pane-template').clone();
         pane.find('#install-on-phone-btn').click(function(e) {
             e.preventDefault();
-            install_on_watch(ConnectionType.Phone);
+            install_on_watch({platform: ConnectionType.Phone});
         });
         pane.find('#show-app-logs-btn').click(function(e) {
             e.preventDefault();
@@ -131,16 +141,16 @@ CloudPebble.Compile = (function() {
 
         pane.find('#install-in-qemu-aplite-btn').click(function(e) {
             e.preventDefault();
-            install_on_watch(ConnectionType.QemuAplite);
+            install_on_watch({platform: ConnectionType.QemuAplite});
         });
 
         pane.find('#install-in-qemu-basalt-btn').click(function(e) {
             e.preventDefault();
-            install_on_watch(ConnectionType.QemuBasalt);
+            install_on_watch({platform: ConnectionType.QemuBasalt});
         });
         pane.find('#install-in-qemu-chalk-btn').click(function(e) {
             e.preventDefault();
-            install_on_watch(ConnectionType.QemuChalk);
+            install_on_watch({platform: ConnectionType.QemuChalk});
         });
 
         pane.find('#show-qemu-logs-btn').click(function(e) {
@@ -466,13 +476,21 @@ CloudPebble.Compile = (function() {
         }
     }
 
-    var install_on_watch = function(kind, options) {
+    /**
+     * Install the app on to a watch or emulator
+     * @param options.show_logs_prompt, whether to show the "Show logs" prompt afterwards, default True
+     * @param options.platform Name of platform, defaults to auto-detect
+     */
+    var install_on_watch = function(options) {
         var defer = $.Deferred();
         var modal = $('#phone-install-progress');
 
-        options = _.defaults(options || {
-            show_logs_prompt: true
+        options = _.defaults(options, {
+                show_logs_prompt: true,
+                platform: CloudPebble.Compile.GetPlatformForInstall()
         });
+        console.log("options", options);
+        var kind = options.platform;
 
         var report_error = function(message) {
             modal.find('.modal-body > p').html(message);
@@ -767,7 +785,9 @@ CloudPebble.Compile = (function() {
             }
         },
         DoInstall: function(options) {
-            return install_on_watch(CloudPebble.Compile.GetPlatformForInstall(), options);
+            return fetch_build_history().then(function() {
+                return install_on_watch(options);
+            });
         }
     };
 })();

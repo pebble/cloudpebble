@@ -165,7 +165,7 @@ CloudPebble.MonkeyScreenshots = (function() {
      * @fires ScreenshotsModel.change when files are added or modified
      * @constructor
      */
-    function ScreenshotsModel(test_name) {
+    function ScreenshotsModel(test_id) {
         var self = this;
         var screenshots = [];
         var original_screenshots = [];
@@ -294,7 +294,7 @@ CloudPebble.MonkeyScreenshots = (function() {
             var timeout = setTimeout(function() {
                 self.trigger('waiting');
             }, 500);
-            API.getScreenshots(test_name).then(function(result) {
+            API.getScreenshots(test_id).then(function(result) {
                 screenshots = result;
                 original_screenshots = _.map(result, _.clone);
                 self.trigger('changed', result);
@@ -330,7 +330,7 @@ CloudPebble.MonkeyScreenshots = (function() {
             var timeout = setTimeout(function() {
                 self.trigger('waiting');
             }, 500);
-            API.saveScreenshots(test_name, screenshots).then(function(result) {
+            API.saveScreenshots(test_id, screenshots).then(function(result) {
                 if (result.success == false) {
                     self.trigger('error', {errorFor: gettext('save screenshots'), text: result.error});
                 }
@@ -380,19 +380,19 @@ CloudPebble.MonkeyScreenshots = (function() {
 
     /**
      * This sets up a screenshot editor pane
-     * @param test_name Name of test for this ScreenshotPane
+     * @param test_id ID of test for this ScreenshotPane
      * @constructor
      */
-    function ScreenshotPane(test_name) {
+    function ScreenshotPane(test_id) {
         var pane = $('<div>').toggleClass('monkey-pane');
         var uiState, screenshots, view;
 
         _.extend(this, Backbone.Events);
         // Set up the data/models and pass them to the UI.
         uiState = new UIState(pane);
-        screenshots = new ScreenshotsModel(test_name);
+        screenshots = new ScreenshotsModel(test_id);
         view = CloudPebble.MonkeyScreenshots.Interface(screenshots, uiState);
-        view.render(pane.get()[0], {});
+        view.render(pane.get()[0], {test_id: test_id});
 
         /** Get the actual pane so it can be attached to an object */
         this.getPane = function() {

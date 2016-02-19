@@ -18,6 +18,12 @@ var ConnectionPlatformNames = {
     18: 'chalk'
 };
 
+var QEMUConnectionTypes = {
+    'aplite': ConnectionType.QemuAplite,
+    'basalt': ConnectionType.QemuBasalt,
+    'chalk': ConnectionType.QemuChalk
+}
+
 var SharedPebble = new (function() {
     var self = this;
     var mPebble = null;

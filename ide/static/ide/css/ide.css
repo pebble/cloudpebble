@@ -336,9 +336,11 @@ ul.nav-pills {
 
 .run-test-btn {
     background: #0093B2 url('../img/run.png') no-repeat 15px;
+    color: white;
 }
 .run-test-btn:hover {
     background-color: #0093B2;
+    color: white;
 }
 
 .save-btn {
@@ -1313,6 +1315,14 @@ button#add-filter {
     width: 200px;
     color: white;
     font-size: 30px;
+    display: inline-block;
+    text-align: center;
+}
+
+.monkey-platforms button {
+    width: 160px;
+    font-size: 15px;
+    margin: 3px 20px;
     display: inline-block;
     text-align: center;
 }

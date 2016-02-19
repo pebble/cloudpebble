@@ -24,33 +24,26 @@ CloudPebble.Editor = (function() {
 
 
     var run = function(install_options) {
-        var defer = $.Deferred();
         CloudPebble.Prompts.Progress.Show(gettext("Saving..."));
         CloudPebble.Editor.SaveAll(function() {
             CloudPebble.Prompts.Progress.Show(gettext("Compiling..."));
             CloudPebble.Compile.RunBuild(function (success) {
                 CloudPebble.Prompts.Progress.Hide();
                 if(success) {
-                    CloudPebble.Compile.DoInstall(install_options).done(function(result) {
-                        console.log(result);
-                        defer.resolve(result);
-                    }).fail(function(reason) {
-                        defer.reject(reason);
-                    });
+                    CloudPebble.Compile.DoInstall(install_options);
                 } else {
                     CloudPebble.Compile.Show();
-                    defer.reject();
                 }
             });
         });
-        return defer.promise();
     };
 
-    function run_test(file) {
-        return run({
-            show_logs_prompt: false
+    function run_test(test_id, platform) {
+        CloudPebble.Compile.DoInstall({
+            show_logs_prompt: false,
+            platform: platform
         }).then(function() {
-            return SharedPebble.getCurrentEmulator().runTest(PROJECT_ID, file.id);
+            return SharedPebble.getCurrentEmulator().runTest(PROJECT_ID, test_id);
         }).then(function(result) {
             return CloudPebble.TestManager.ShowLiveTestRun(result['subscribe_url'], result['session_id'], result['run_id'], result['test_id']);
         });
@@ -721,7 +714,7 @@ CloudPebble.Editor = (function() {
 
                 run_btn.click(function() {
                     if (file.target == 'test') {
-                        run_test(file);
+                        run_test(file.id, undefined);
                     }
                     else {
                         run();
@@ -1260,6 +1253,9 @@ CloudPebble.Editor = (function() {
         },
         RenameFile: function(file, new_name) {
             return rename_file(file, new_name)
+        },
+        RunTest: function(test_id, platform) {
+            run_test(test_id, platform);
         }
     };
 })();
