@@ -155,10 +155,18 @@ def run_qemu_test(request, project_id, test_id):
     token = request.POST['token']
     host = request.POST['host']
     emu = request.POST['emu']
+    update = request.POST.get('update', False)
     # Get QEMU server which corresponds to the requested host
     server = next(x for x in set(settings.QEMU_URLS) if host in x)
     bundle = TestBundle(project, [int(test_id)])
-    response, run, session = bundle.run_on_qemu(server, token, settings.COMPLETION_CERTS, emu, make_notify_url_builder(request))
+    response, run, session = bundle.run_on_qemu(
+            server=server,
+            token=token,
+            verify=settings.COMPLETION_CERTS,
+            emu=emu,
+            notify_url_builder=make_notify_url_builder(request),
+            update=update
+    )
     subscribe_url = server + 'qemu/%s/test/subscribe' % urllib.quote_plus(emu)
     response['run_id'] = run.id
     response['session_id'] = session.id

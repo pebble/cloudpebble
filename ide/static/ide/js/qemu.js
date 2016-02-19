@@ -297,16 +297,19 @@
                 });
         };
 
-        this.runTest = function(project_id, test_id) {
-
+        this.runTest = function(project_id, test_id, update) {
+            var data ={
+                emu: mInstanceID,
+                token: mToken,
+                host: mHost,
+            };
+            if (update) {
+                data['update'] = true;
+            }
             return $.ajax({
                 method: 'POST',
                 url: '/ide/project/'+project_id+'/tests/'+test_id+'/run_qemu',
-                data: {
-                    emu: mInstanceID,
-                    token: mToken,
-                    host: mHost
-                }
+                data: data
             });
         };
 

@@ -213,7 +213,9 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
 
     function RunButton(props) {
         var onClick = function() {
-            CloudPebble.Editor.RunTest(props.test_id, QEMUConnectionTypes[props.platform]);
+            CloudPebble.Editor.RunTest(props.test_id, {
+                platform: QEMUConnectionTypes[props.platform], update: false
+            });
         };
         return (<button className='btn run-test-btn' onClick={onClick}>Run Test</button>)
     }
@@ -221,7 +223,9 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
     function UpdateButton(props) {
         var platform = props.platform;
         var onClick = function() {
-
+            CloudPebble.Editor.RunTest(props.test_id, {
+                platform: QEMUConnectionTypes[props.platform], update: true
+            });
         };
         return (<button className='btn btn-affirmative' onClick={onClick}>Update Screenshots</button>)
     }
@@ -267,8 +271,8 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
                     </div>
                     <div className="monkey-platforms">
                         {this.props.platforms.map(function(platform) { return (
-                            <UpdateButton key={platform} platform={platform}/>
-                        )})}
+                            <UpdateButton key={platform} test_id={this.props.test_id} platform={platform}/>
+                        )}.bind(this))}
                     </div>
                     <div className="monkey-platforms">
                         {this.props.platforms.map(function(platform) { return (

@@ -103,7 +103,7 @@ class TestBundle(object):
             result.raise_for_status()
         return session
 
-    def run_on_qemu(self, server, token, verify, emu, notify_url_builder):
+    def run_on_qemu(self, server, token, verify, emu, notify_url_builder, update):
         # If the request fails, the test session/runs will not be created
         assert len(self.tests) == 1
 
@@ -113,10 +113,12 @@ class TestBundle(object):
             callback_url = notify_url_builder(session)
             post_url = server + 'qemu/%s/test' % urllib.quote_plus(emu)
             print "Posting to %s" % post_url
-
+            data = {'token': token, 'notify': callback_url}
+            if update:
+                data['update'] = 'update'
             with self.open(include_pbw=True) as stream:
                 result = requests.post(post_url,
-                                       data={'token': token, 'notify': callback_url},
+                                       data=data,
                                        verify=verify,
                                        files=[('archive', ('archive.zip', stream))])
 

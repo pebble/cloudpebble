@@ -38,12 +38,17 @@ CloudPebble.Editor = (function() {
         });
     };
 
-    function run_test(test_id, platform) {
+    function run_test(test_id, options) {
+        options = _.defaults(options, {
+            update: false,
+            platform: CloudPebble.Compile.GetPlatformForInstall()
+        });
+
         CloudPebble.Compile.DoInstall({
             show_logs_prompt: false,
-            platform: platform
+            platform: options.platform
         }).then(function() {
-            return SharedPebble.getCurrentEmulator().runTest(PROJECT_ID, test_id);
+            return SharedPebble.getCurrentEmulator().runTest(PROJECT_ID, test_id, options.update);
         }).then(function(result) {
             return CloudPebble.TestManager.ShowLiveTestRun(result['subscribe_url'], result['session_id'], result['run_id'], result['test_id']);
         });
@@ -714,7 +719,7 @@ CloudPebble.Editor = (function() {
 
                 run_btn.click(function() {
                     if (file.target == 'test') {
-                        run_test(file.id, undefined);
+                        run_test(file.id, {update: false});
                     }
                     else {
                         run();
@@ -1254,8 +1259,8 @@ CloudPebble.Editor = (function() {
         RenameFile: function(file, new_name) {
             return rename_file(file, new_name)
         },
-        RunTest: function(test_id, platform) {
-            run_test(test_id, platform);
+        RunTest: function(test_id, options) {
+            run_test(test_id, options);
         }
     };
 })();
