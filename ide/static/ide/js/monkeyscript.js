@@ -94,8 +94,7 @@ CloudPebble.MonkeyScript = (function() {
                     }
 
                 },
-
-                lineComment: '//'
+                lineComment: '#'
             }
         };
     };
