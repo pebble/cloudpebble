@@ -139,17 +139,29 @@ CloudPebble.TestManager = (function() {
             this.subscribe = function(id, session_id, url) {
                 var self = this;
                 var evtSource = new EventSource(url);
+                var done = false;
                 self.state[id] = {text: '', id: id};
-                evtSource.onmessage = function(e) {
+
+                var onClose = function() {
+                    if (!done) {
+                        done = true;
+                        setTimeout(function () {
+                            Runs.refresh({id: id});
+                            Tests.refresh();
+                            Sessions.refresh({id: session_id});
+                        }, 1000);
+                    }
+                };
+                evtSource.addEventListener('log', function(e) {
                     self.state[id].text += e.data+'\n';
                     self.trigger('changed', self.getState());
-                };
+                });
+                evtSource.addEventListener('done', function(e) {
+                    evtSource.close();
+                    onClose();
+                });
                 evtSource.onerror = function() {
-                    setTimeout(function() {
-                        Runs.refresh({id: id});
-                        Tests.refresh();
-                        Sessions.refresh({id: session_id});
-                    }, 1000);
+                    onClose();
                 }
             }
         }
