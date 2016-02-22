@@ -1,16 +1,18 @@
-import os
-import zipfile
-import tempfile
-import shutil
 import contextlib
-import requests
+import os
+import shutil
+import tempfile
 import urllib
+import zipfile
+
+import requests
 from django.db import transaction
-from io import BytesIO
+
 from ide.models.monkey import TestRun, TestSession, TestFile
+from utils.orchestrator import submit_test, upload_test
 
 
-def zip_directory(input_dir, output_zip):
+def _zip_directory(input_dir, output_zip):
     """ Zip up a directory and preserve symlinks and empty directories
     Adapted from https://gist.github.com/kgn/610907
 
@@ -43,6 +45,7 @@ def zip_directory(input_dir, output_zip):
                     zip_out.writestr(zip_info, os.readlink(full_path))
                 else:
                     zip_out.write(full_path, archive_root, zipfile.ZIP_DEFLATED)
+
     _ArchiveDirectory(input_dir)
 
     zip_out.close()
@@ -56,20 +59,13 @@ class TestBundle(object):
         else:
             self.tests = project.test_files.all()
         self.project = project
-        self.orch_url = 'http://orchestrator.hq.getpebble.com'
 
     def upload_to_orchestrator(self):
         """ Post the bundle to orchestrator's upload endpoint
         :return: URL of the uploaded bundle
         """
-
-        upload_api = "%s/api/upload" % self.orch_url
-
         with self.open(include_pbw=True) as f:
-            result = requests.post(upload_api, files=[("file", ("test_archive.test", f))])
-        result.raise_for_status()
-        # Get the download link
-        return "%s/api/download/test_bundle/%s" % (self.orch_url, result.json()['filename'])
+            return upload_test(f)
 
     def run_on_orchestrator(self, notify_url_builder):
         # Send the bundle to orchestrator
@@ -78,29 +74,9 @@ class TestBundle(object):
         with transaction.atomic():
             # Set up the test session
             session, runs = self.setup_test_session(kind='batch')
+            orch_name = "Project %s, Job %s" % (self.project.pk, session.id)
 
-            # Build the orchestrator job request
-            # TODO: custom configuration
-            data = {
-                "requestor": "cloudpebble@pebble.com",
-                "tests": [bundle_url],
-                "notify": {
-                    "http": notify_url_builder(session)
-                },
-                "sw_ver": {
-                    "sdk": "master",
-                    "firmware": "LKGR"
-                },
-                "devices": {
-                    "firmware": "qemu_snowy_bb2"
-                },
-                "name": "Project %s, Job %s" % (self.project.pk, session.id)
-            }
-
-            # Submit the orchestrator job request
-            submit_url = "%s/api/jobs/submit" % self.orch_url
-            result = requests.post(submit_url, json=data)
-            result.raise_for_status()
+            submit_test(bundle_url, notify_url_builder, orch_name, session)
         return session
 
     def run_on_qemu(self, server, token, verify, emu, notify_url_builder, update):
@@ -135,11 +111,11 @@ class TestBundle(object):
             for test in self.tests:
                 test_folder = os.path.join(archive_dir, test.file_name)
                 os.mkdir(test_folder)
-                test.copy_test_to_path(os.path.join(test_folder, test.file_name+'.monkey'))
+                test.copy_test_to_path(os.path.join(test_folder, test.file_name + '.monkey'))
                 test.copy_screenshots_to_directory(test_folder)
                 if include_pbw:
                     latest_build.copy_pbw_to_path(os.path.join(test_folder, "app.pbw"))
-            zip_directory(archive_dir, filename)
+            _zip_directory(archive_dir, filename)
         finally:
             shutil.rmtree(temp_dir)
 

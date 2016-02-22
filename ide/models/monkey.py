@@ -1,48 +1,25 @@
-import traceback
 import os
-import json
+import traceback
 from io import BytesIO
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import RegexValidator
 from django.db import models
+from django.db import transaction
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
-from django.db import transaction
 from django.utils.timezone import now
 from django.utils.translation import ugettext as _
+
 import utils.s3 as s3
 from ide.models.files import BinFile, ScriptFile
 from ide.models.meta import IdeModel, TextFile
 from ide.utils.image_correction import uncorrect
-
+from utils.orchestrator import frame_test_file
 
 __author__ = 'joe'
 
-
-_TEMPLATE = """
-#metadata
-# {{
-#   "pebble": true
-# }}
-#/metadata
-
-setup {{
-    context bigboard
-    do factory_reset
-}}
-
-test {test_name} {{
-    context bigboard
-
-    # Load the app
-    do install_app app.pbw
-    do launch_app "{app_name}"
-    do wait 2
-{content}
-}}
-"""
 
 class TestCode:
     ERROR = -2
@@ -103,7 +80,6 @@ class TestRun(IdeModel):
         for artefact in value:
             Artefact.objects.create(test_log=self.logfile, log_name=artefact[0], link_name=artefact[1])
 
-
     @property
     def log(self):
         if self.has_log:
@@ -157,14 +133,9 @@ class TestFile(ScriptFile):
     def copy_test_to_path(self, path):
         self.copy_to_path(path)
         with open(path, 'r+') as f:
-            full_test = _TEMPLATE.format(
-                    test_name=self.file_name,
-                    app_name=self.project.app_short_name,
-                    content="".join('    %s' % l for l in f.readlines())
-            )
+            full_test = frame_test_file(f, self.file_name, self.project.app_short_name)
         with open(path, 'w') as f:
             f.write(full_test)
-
 
     @property
     def project_path(self):
@@ -210,7 +181,7 @@ class ScreenshotSet(IdeModel):
             else:
                 raise ValueError("Invalid platform")
             file_dir = os.path.join(directory, 'english', platform, size)
-            file_path = os.path.join(file_dir, self.name+'.png')
+            file_path = os.path.join(file_dir, self.name + '.png')
             if not os.path.isdir(file_dir):
                 os.makedirs(file_dir)
             screenshot.copy_to_path(file_path)
@@ -256,7 +227,6 @@ class ScreenshotFile(BinFile):
 
     class Meta(BinFile.Meta):
         unique_together = (('platform', 'screenshot_set'),)
-
 
 
 @receiver(post_delete)
