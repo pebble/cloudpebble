@@ -50,7 +50,7 @@ CloudPebble.Editor = (function() {
         }).then(function() {
             return SharedPebble.getCurrentEmulator().runTest(PROJECT_ID, test_id, options.update);
         }).then(function(result) {
-            return CloudPebble.TestManager.ShowLiveTestRun(result['subscribe_url'], result['session_id'], result['run_id'], result['test_id']);
+            return CloudPebble.TestManager.ShowLiveTestRun(result['subscribe_url'], result['session_id'], result['run_id']);
         });
     }
 

@@ -21,12 +21,14 @@ CloudPebble.TestManager = (function() {
              * @returns {Function} by default, returns a function which always returns True, since the default behaviour
              * of 'refresh' is to fetch all items.
              */
-            filter_function: function(options) { return function(obj) { return true;}},
+            filter_function: function(options) {
+                return function() { return !!options };
+            },
             /**
              * Given the result of a request, a function which should filter out any objects which might be deleted,
              * update the state of the store and send a 'changed' event.
              * @param result an object with a single key containing an array of data.
-             * @param filter_function e.g. the result of calling this.filter_function(options).
+             * @param options e.g. options to pass to the filter function
              */
             syncData: function(result, options) {
                 var filter_function = this.filter_function(options);
@@ -48,7 +50,7 @@ CloudPebble.TestManager = (function() {
             refresh: function(options) {
                 var url = base_url + this.url;
                 var query = {};
-                options = (_.isNumber(options) ? {id: options} : (options || {}));
+                options = (_.isNumber(options) ? {id: options} : (options));
                 if (_.isEqual(_.keys(options), ['id'])) {
                     url += '/' + options.id;
                 }
@@ -181,6 +183,9 @@ CloudPebble.TestManager = (function() {
              */
             this.filter_function = function(options) {
                 return function(run) {
+                    if (!options) {
+                        return false;
+                    }
                     return !(_.isUndefined(run) ||
                     (options.test && run.test && run.test.id == options.test) ||
                     (options.session && run.session_id == options.session));
@@ -341,22 +346,20 @@ CloudPebble.TestManager = (function() {
         return (ui ? ui : (ui = CloudPebble.TestManager.Interface(get_api())));
     };
 
+
     var show_test_manager_pane = function() {
-        // Restore or create the
-        CloudPebble.Sidebar.SuspendActive();
-        if (CloudPebble.Sidebar.Restore("testmanager")) {
-            // If we're re-opening the manager, just refresh some data and return.
-            api.Tests.refresh();
-            api.Sessions.refresh();
-            return;
-        }
-        // Otherwise, set up the APi and interface and render it into the testmanager-pane-template.
-        api = get_api();
-        ui = get_interface();
-        ga('send', 'event', 'project', 'load testmanager');
-        var pane = $('<div></div>').attr('id', '#testmanager-pane-template').toggleClass('testmanager-pane', true);
-        ui.render(pane.get(0), {project_id: PROJECT_ID});
-        CloudPebble.Sidebar.SetActivePane(pane, 'testmanager');
+        var api = get_api();
+        var ui = get_interface();
+        return $.when(api.Tests.refresh()).then(function() {
+            CloudPebble.Sidebar.SuspendActive();
+            if (!CloudPebble.Sidebar.Restore("testmanager")) {
+                ga('send', 'event', 'project', 'load testmanager');
+                var pane = $('<div></div>').attr('id', '#testmanager-pane-template').toggleClass('testmanager-pane', true);
+                CloudPebble.Sidebar.SetActivePane(pane, 'testmanager');
+                ui.render(pane.get(0), {project_id: PROJECT_ID});
+            }
+            return api.Sessions.refresh();
+        });
     };
 
     return {
@@ -365,19 +368,17 @@ CloudPebble.TestManager = (function() {
         },
         ShowTest: function(test_id) {
             var api = get_api();
-            $.when(api.Runs.refresh({test: test_id}), api.Tests.refresh()).done(function() {
-                show_test_manager_pane();
+            return api.Runs.refresh({test: test_id}).done(function() {
                 api.Route.navigate('test', test_id);
+                return show_test_manager_pane();
             });
         },
-        ShowLiveTestRun: function(url, session_id, run_id, test_id) {
+        ShowLiveTestRun: function(url, session_id, run_id) {
             var api = get_api();
-            var run_fetch = api.Runs.refresh({id: run_id});
-            var session_fetch = api.Sessions.refresh({id: session_id});
-            var test_fetch = api.Tests.refresh();
             api.Logs.subscribe(run_id, session_id, url);
-            return $.when(run_fetch, session_fetch, test_fetch).then(function() {
-                show_test_manager_pane();
+            return api.Runs.refresh({id: run_id}).then(function() {
+                return show_test_manager_pane();
+            }).then(function() {
                 api.Route.navigate('session', session_id);
                 api.Route.navigate('/logs', run_id);
             });

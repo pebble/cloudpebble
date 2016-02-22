@@ -101,7 +101,9 @@ CloudPebble.TestManager.Interface = (function(API) {
     function Anchor(props) {
         var other = _objectWithoutProperties(props, ['onClick', 'children']);
         var clicked = function(event) {
-            props.onClick();
+            if (_.isFunction(props.onClick)) {
+                props.onClick();
+            }
             event.preventDefault();
             return false;
         };
@@ -144,6 +146,13 @@ CloudPebble.TestManager.Interface = (function(API) {
         );
     }
 
+    var RunTitle = function(props) {
+        var titleClassName = classNames({
+            'monkey-run-deleted': (!props.run.test)
+        });
+        return (<span className={titleClassName}>{props.run.name}</span>)
+    };
+
     /**
      * RunList shows a list of test runs, e.g. for a single test or session
      */
@@ -157,12 +166,14 @@ CloudPebble.TestManager.Interface = (function(API) {
             var datestring = CloudPebble.Utils.FormatDatetime(run.date_added);
             // TODO: nicer logs button
             var show_logs = function() {
-                API.Logs.refresh(run.id);
-                API.Route.navigate('/logs', run.id);
+                if (run.test) {
+                    API.Logs.refresh(run.id);
+                    API.Route.navigate('/logs', run.id);
+                }
             };
             return (
                 <tr key={run.id} className="clickable" onClick={show_logs}>
-                    {!this.props.test && <td>{run.name}</td>}
+                    {!this.props.test && <td><RunTitle run={run} /></td>}
                     {!this.props.session && <td>{datestring}</td>}
                     <TestResultCell code={run.code} />
                     <td>{(!run.logs ? '':
@@ -490,7 +501,7 @@ CloudPebble.TestManager.Interface = (function(API) {
                 {!!props.error && <Error {...props.error} onClick={props.closeError} />}
                 {props.tests.length > 0 && (
                     <Well>
-                        <button onClick={function() {API.Sessions.new()}} className='btn btn-affirmative'>{gettext('Run All')}</button>
+                        <button onClick={function() {API.Sessions.new()}} className='btn btn-affirmative'>{gettext('Batch run')}</button>
                         <a href={'/ide/project/'+props.project_id+'/tests/archive'} className='btn testmanager-download-btn'>{gettext('Download tests as zip')}</a>
                     </Well>
                     )}
@@ -509,6 +520,20 @@ CloudPebble.TestManager.Interface = (function(API) {
         );
     }
 
+    var NoTestsDisplay = function(props) {
+        var createTest = function() {
+            CloudPebble.Editor.CreateTest();
+        };
+        return (
+            <Well>
+                <div className='monkey-no-tests'>
+                    <p>The Test Manager allows lets you browse results and logs for your project's automated tests.</p>
+                    <p><button className="btn btn-small" onClick={createTest}>Create a test</button> to get started</p>
+                </div>
+            </Well>
+        )
+    };
+
     /**
      * The TestManagerContainer listens to data changes and passes them to the UI.
      */
@@ -523,9 +548,6 @@ CloudPebble.TestManager.Interface = (function(API) {
                 this.listener.listenTo(store, 'changed', function(data) { this.setState(data)}.bind(this));
                 this.listener.listenTo(store, 'error', function(error) { this.setState({'error': error}) }.bind(this));
             }, this);
-            API.Route.refresh();
-            API.Tests.refresh();
-            API.Sessions.refresh();
         },
         closeError: function() {
             this.setState({'error': null});
@@ -534,7 +556,13 @@ CloudPebble.TestManager.Interface = (function(API) {
             this.listener.stopListening();
         },
         render: function() {
-            return (<TestManager {...this.state} {...this.props} closeError={this.closeError}/>)
+            if (this.state.tests.length == 0 && this.state.sessions.length == 0) {
+                return (<NoTestsDisplay />)
+            }
+            else {
+                return (<TestManager {...this.state} {...this.props} closeError={this.closeError}/>)
+            }
+
         }
     });
 

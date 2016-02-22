@@ -1236,6 +1236,17 @@ button#add-filter {
 
 /* Monkey editor */
 
+.monkey-no-tests {
+    font-size: larger;
+    line-height: 40px;
+}
+.monkey-no-tests button {
+    vertical-align: middle;
+}
+.monkey-no-tests p + p {
+    margin-top: 20px;
+}
+
 #right-pane {
     box-sizing: border-box;
     width: 0;
@@ -1426,6 +1437,10 @@ button#add-filter {
 }
 .monkey-select-platform:hover {
     cursor: pointer;
+}
+
+.monkey-run-deleted {
+    text-decoration: line-through;
 }
 
 /* Test Manager pane */
