@@ -4,12 +4,11 @@ import shutil
 import tempfile
 import urllib
 import zipfile
-
 import requests
-from django.db import transaction
 
+from utils import orchestrator
+from django.db import transaction
 from ide.models.monkey import TestRun, TestSession, TestFile
-from utils.orchestrator import submit_test, upload_test
 
 
 def _zip_directory(input_dir, output_zip):
@@ -60,23 +59,17 @@ class TestBundle(object):
             self.tests = project.test_files.all()
         self.project = project
 
-    def upload_to_orchestrator(self):
-        """ Post the bundle to orchestrator's upload endpoint
-        :return: URL of the uploaded bundle
-        """
-        with self.open(include_pbw=True) as f:
-            return upload_test(f)
-
     def run_on_orchestrator(self, notify_url_builder):
         # Send the bundle to orchestrator
-        bundle_url = self.upload_to_orchestrator()
+        with self.open(include_pbw=True) as f:
+            bundle_url = orchestrator.upload_test(f)
 
         with transaction.atomic():
             # Set up the test session
             session, runs = self.setup_test_session(kind='batch')
             orch_name = "Project %s, Job %s" % (self.project.pk, session.id)
 
-            submit_test(bundle_url, notify_url_builder, orch_name, session)
+            orchestrator.submit_test(bundle_url, orch_name, notify_url_builder(session))
         return session
 
     def run_on_qemu(self, server, token, verify, emu, notify_url_builder, update):
@@ -102,7 +95,7 @@ class TestBundle(object):
             result.raise_for_status()
             return result.json(), runs[0], session
 
-    def write_to_file(self, filename, include_pbw):
+    def write_to_file(self, filename, include_pbw=True, frame_tests=True):
         temp_dir = tempfile.mkdtemp()
         archive_dir = os.path.join(temp_dir, 'tests')
         os.mkdir(archive_dir)
@@ -111,7 +104,7 @@ class TestBundle(object):
             for test in self.tests:
                 test_folder = os.path.join(archive_dir, test.file_name)
                 os.mkdir(test_folder)
-                test.copy_test_to_path(os.path.join(test_folder, test.file_name + '.monkey'))
+                test.copy_test_to_path(os.path.join(test_folder, test.file_name + '.monkey'), frame_test=frame_tests)
                 test.copy_screenshots_to_directory(test_folder)
                 if include_pbw:
                     latest_build.copy_pbw_to_path(os.path.join(test_folder, "app.pbw"))
@@ -139,11 +132,11 @@ class TestBundle(object):
         return session, runs
 
     @contextlib.contextmanager
-    def open(self, include_pbw=False):
+    def open(self, include_pbw=False, frame_tests=True):
         temp_dir = tempfile.mkdtemp()
         location = os.path.join(temp_dir, 'archive.zip')
         try:
-            self.write_to_file(location, include_pbw=include_pbw)
+            self.write_to_file(location, include_pbw=include_pbw, frame_tests=False)
             with open(location, 'rb') as archive:
                 yield archive
         finally:

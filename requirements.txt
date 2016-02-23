@@ -19,7 +19,7 @@ psycogreen==1.0
 requests==2.9.1
 oauth2client==1.5.2
 django-bower==5.0.4
-
+mock==1.3.0
 # This is used for Mailchimp integration
 mailchimp==2.0.9
 

@@ -228,6 +228,7 @@ INSTALLED_APPS = (
     'pipeline',
     'root',
     'qr',
+    'orchestrator_proxy',
     'registration',
     'djangobower',
 )

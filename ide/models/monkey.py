@@ -16,7 +16,7 @@ import utils.s3 as s3
 from ide.models.files import BinFile, ScriptFile
 from ide.models.meta import IdeModel, TextFile
 from ide.utils.image_correction import uncorrect
-from utils.orchestrator import frame_test_file
+from utils.test_bundle_helpers import frame_test_file
 
 __author__ = 'joe'
 
@@ -130,12 +130,13 @@ class TestFile(ScriptFile):
         for screenshot_set in self.get_screenshot_sets():
             screenshot_set.copy_to_directory(directory)
 
-    def copy_test_to_path(self, path):
+    def copy_test_to_path(self, path, frame_test=True):
         self.copy_to_path(path)
-        with open(path, 'r+') as f:
-            full_test = frame_test_file(f, self.file_name, self.project.app_short_name)
-        with open(path, 'w') as f:
-            f.write(full_test)
+        if frame_test:
+            with open(path, 'r+') as f:
+                full_test = frame_test_file(f, self.file_name, self.project.app_short_name)
+            with open(path, 'w') as f:
+                f.write(full_test)
 
     @property
     def project_path(self):

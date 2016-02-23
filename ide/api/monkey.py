@@ -1,20 +1,21 @@
-import requests
-import urllib
 import os.path
+import urllib
+
+import requests
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse
-from django.views.decorators.http import require_POST, require_safe
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
-from django.utils import timezone
-from ide.api import json_failure, json_response
-from ide.models.project import Project
-from ide.models.monkey import TestSession, TestRun, TestCode, TestLog, ScreenshotSet, ScreenshotFile
 from django.db import transaction
-from utils.bundle import TestBundle
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST, require_safe
 
+from ide.api import json_failure, json_response
+from ide.models.monkey import TestSession, TestRun, TestCode, TestLog, ScreenshotSet, ScreenshotFile
+from ide.models.project import Project
+from utils.bundle import TestBundle
 
 __author__ = 'joe'
 
@@ -115,6 +116,7 @@ def get_test_run(request, project_id, run_id):
     # TODO: KEEN
     return json_response({"data": serialise_run(run)})
 
+
 # GET /project/<id>/test_runs?test=&session=
 @require_safe
 @login_required
@@ -136,6 +138,7 @@ def get_test_runs(request, project_id):
     # TODO: KEEN
     return json_response({"data": [serialise_run(run, link_test=True, link_session=True) for run in runs]})
 
+
 @require_safe
 @login_required
 def get_test_run_log(request, project_id, run_id):
@@ -145,6 +148,7 @@ def get_test_run_log(request, project_id, run_id):
     log = get_object_or_404(TestLog, test_run=run)
     contents = log.get_contents()
     return HttpResponse(contents, content_type="text/plain")
+
 
 @require_POST
 @login_required
@@ -160,12 +164,12 @@ def run_qemu_test(request, project_id, test_id):
     server = next(x for x in set(settings.QEMU_URLS) if host in x)
     bundle = TestBundle(project, [int(test_id)])
     response, run, session = bundle.run_on_qemu(
-            server=server,
-            token=token,
-            verify=settings.COMPLETION_CERTS,
-            emu=emu,
-            notify_url_builder=make_notify_url_builder(request),
-            update=update
+        server=server,
+        token=token,
+        verify=settings.COMPLETION_CERTS,
+        emu=emu,
+        notify_url_builder=make_notify_url_builder(request),
+        update=update
     )
     subscribe_url = server + 'qemu/%s/test/subscribe' % urllib.quote_plus(emu)
     response['run_id'] = run.id
@@ -198,7 +202,7 @@ def notify_test_session(request, project_id, session_id):
 
     # Different procedures depending on whether orchestrator or qemu-controller are notifying.
     if orch_id:
-        # TODO: do this all in a celery task
+        # TODO: do this all in a celery task?
         with transaction.atomic():
             # GET /api/jobs/<id>
             result = requests.get('%s/api/jobs/%s' % (settings.ORCHESTRATOR_URL, orch_id))
@@ -256,7 +260,6 @@ def notify_test_session(request, project_id, session_id):
                 screenshot_file.save()
                 screenshot_file.save_file(posted_file, posted_file.size)
 
-
     return json_response({})
 
 
@@ -267,26 +270,19 @@ def download_tests(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     test_ids = request.GET.get('tests', None)
 
-    with TestBundle(project, test_ids).open() as f:
+    with TestBundle(project, test_ids).open(include_pbw=True, frame_tests=False) as f:
         return HttpResponse(f.read(), content_type='application/zip')
+
 
 # POST /project/<id>/test_sessions
 @require_POST
 @login_required
 def post_test_session(request, project_id):
-    # TODO: run as celery task
+    # TODO: run as celery task?
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     # TODO: accept a list of tests in POST?
     bundle = TestBundle(project)
     session = bundle.run_on_orchestrator(make_notify_url_builder(request, settings.QEMU_LAUNCH_AUTH_HEADER))
-    return json_response({"data": serialise_session(session, include_runs=True)})
-
-
-@require_safe
-@login_required
-def get_test_artefact(request, filename):
-    result = requests.get("%s/api/download/media/%s" % (settings.ORCHESTRATOR_URL, filename))
-    result.raise_for_status()
-    return HttpResponse(result.iter_content(100), content_type=result.headers['content-type'])
+    return json_response({"data": serialise_session(session)})
 
 # TODO: 'ping' functions to see if anything has changed. Or, "changed since" parameters.

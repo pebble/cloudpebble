@@ -298,7 +298,7 @@ CloudPebble.TestManager.Interface = (function(API) {
      */
     var LogArtefact = React.createClass({
         url: function() {
-            return '/ide/test_artefacts/' + this.props.link;
+            return '/orchestrator/artefact/' + this.props.link;
         },
         componentDidMount: function() {
             if (this.props.link.endsWith("png")) {

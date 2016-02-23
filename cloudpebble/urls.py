@@ -13,11 +13,12 @@ urlpatterns = [
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-     #url(r'^admin/', include(admin.site.urls)),
-     url(r'^ide/', include('ide.urls', namespace='ide')),
-     url(r'^accounts/', include('site_auth.urls')),  # Namespacing this breaks things.
-     url(r'^qr/', include('qr.urls', namespace='qr')),
-     url(r'^', include('root.urls', namespace='root')),
-     url(r'', include('social.apps.django_app.urls', namespace='social')),
-     url(r'^i18n/', include('django.conf.urls.i18n'))
+    # url(r'^admin/', include(admin.site.urls)),
+    url(r'^ide/', include('ide.urls', namespace='ide')),
+    url(r'^accounts/', include('site_auth.urls')),  # Namespacing this breaks things.
+    url(r'^qr/', include('qr.urls', namespace='qr')),
+    url(r'^', include('root.urls', namespace='root')),
+    url(r'', include('social.apps.django_app.urls', namespace='social')),
+    url(r'^i18n/', include('django.conf.urls.i18n')),
+    url(r'^orchestrator/', include('orchestrator_proxy.urls', namespace='orchestrator')),
 ]
