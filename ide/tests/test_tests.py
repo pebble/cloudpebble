@@ -1,22 +1,28 @@
 import json
-from cloudpebble_test import CloudpebbleTestCase
-from django.core.urlresolvers import reverse
-from ide.models.files import ScreenshotSet, ScreenshotFile
-from ide.models.monkey import TestFile, ScreenshotSet, ScreenshotFile
-from django.conf import settings
-from django.test.utils import override_settings
+import mock
+
 from collections import Counter
+from django.conf import settings
+from django.test import override_settings
+from django.core.urlresolvers import reverse
+
+from cloudpebble_test import CloudpebbleTestCase
 
 __author__ = 'joe'
 
 
+@override_settings(AWS_ENABLED=False)
 class TestsTests(CloudpebbleTestCase):
     """Tests for the Tests models"""
 
     def setUp(self):
         self.login()
 
-    def add_and_run_tests(self, names=None, run_all=True):
+    @mock.patch('utils.bundle.orchestrator')
+    def add_and_run_tests(self, orchestrator, names=None, run_all=True):
+        orchestrator.upload_test.return_value = 'bundle_url'
+        orchestrator.submit_test.return_value.json.return_value = {"job_id": "a_job_id"}
+
         url = reverse('ide:create_test_file', args=[self.project_id])
         # Insert some tests
         names = ["mytest1", "mytest2"] if names is None else names
@@ -28,7 +34,8 @@ class TestsTests(CloudpebbleTestCase):
             result = json.loads(self.client.post(url).content)['data']
         else:
             data = {'tests': ",".join(str(t) for t in tests.keys())}
-            result = json.loads(self.client.post(url, data).content)['data']
+            result = self.client.post(url, data).content
+            result = json.loads(result)['data']
 
         # Check that the server returns a session containing all the tests we added
         run_tests = {run['test']['id']: run['test'] for run in result['runs']}
@@ -43,6 +50,7 @@ class TestsTests(CloudpebbleTestCase):
         # Check that the list of all sessions contains the session
         self.assertEqual(sessions[0]['id'], session_data['id'])
 
+    #
     def test_get_session(self):
         session_data = self.add_and_run_tests()
         url = reverse('ide:get_test_session', args=[self.project_id, session_data['id']])
@@ -50,16 +58,17 @@ class TestsTests(CloudpebbleTestCase):
         # Check that we can get the test session
         self.assertEqual(session['id'], session_data['id'])
 
+    #
     def test_run_multiple(self):
-        session_data1 = self.add_and_run_tests(["mytest1", "mytest2"])
-        session_data2 = self.add_and_run_tests(["mytest3", "mytest4"])
+        session_data1 = self.add_and_run_tests(names=["mytest1", "mytest2"])
+        session_data2 = self.add_and_run_tests(names=["mytest3", "mytest4"])
         # The second session should run all four tests
         self.assertEqual(len(session_data2['runs']), 4)
 
     def test_get_all_runs(self):
         # Add two tests and run, then add another two tests and run
-        self.add_and_run_tests(["mytest1", "mytest2"])
-        self.add_and_run_tests(["mytest3", "mytest4"])
+        self.add_and_run_tests(names=["mytest1", "mytest2"])
+        self.add_and_run_tests(names=["mytest3", "mytest4"])
         url = reverse('ide:get_test_runs', args=[self.project_id])
 
         # When we get all runs, we expect to have run the first two tests twice
@@ -74,8 +83,8 @@ class TestsTests(CloudpebbleTestCase):
 
     def test_get_runs_for_session(self):
         # Add two tests and run, then add another two tests and run
-        session_data1 = self.add_and_run_tests(["mytest1", "mytest2"])
-        session_data2 = self.add_and_run_tests(["mytest3", "mytest4"])
+        session_data1 = self.add_and_run_tests(names=["mytest1", "mytest2"])
+        session_data2 = self.add_and_run_tests(names=["mytest3", "mytest4"])
         url = reverse('ide:get_test_runs', args=[self.project_id])
 
         # We expect each session to run all previously added tests
@@ -86,8 +95,8 @@ class TestsTests(CloudpebbleTestCase):
 
     def test_get_runs_for_test(self):
         # Add two tests and run, then add another two tests and run
-        session_data1 = self.add_and_run_tests(["mytest1", "mytest2"])
-        session_data2 = self.add_and_run_tests(["mytest3", "mytest4"])
+        session_data1 = self.add_and_run_tests(names=["mytest1", "mytest2"])
+        session_data2 = self.add_and_run_tests(names=["mytest3", "mytest4"])
         url = reverse('ide:get_test_runs', args=[self.project_id])
 
         # Get details for mytest1, and mytest4. mytest1 should get run twice.
@@ -99,7 +108,7 @@ class TestsTests(CloudpebbleTestCase):
     def test_list_tests(self):
         # Make a collection of test files
         post_url = reverse('ide:create_test_file', args=[self.project_id])
-        ids = sorted([int(json.loads(self.client.post(post_url, {"name": "mytest"+str(x)}).content)['file']['id']) for x in range(5)])
+        ids = sorted([int(json.loads(self.client.post(post_url, {"name": "mytest" + str(x)}).content)['file']['id']) for x in range(5)])
 
         # Get the list test files
         url = reverse('ide:get_test_list', args=[self.project_id])
@@ -111,10 +120,15 @@ class TestsTests(CloudpebbleTestCase):
     def test_notify_test_session(self):
         """ Create a test and run it. Notify cloudpebble that the test has been completed with a log. Check the test
         run's final code and log file."""
-        def run_test(process_code=0, result_code=1, passes=1, fails=0):
-            session_data = self.add_and_run_tests(["mytest%s"%process_code], run_all=False)
+
+        def run_test(status='passed', result_code=1, passes=1, fails=0):
+            session_data = self.add_and_run_tests(names=["mytest_%s" % status], run_all=False)
             notify_url = reverse('ide:notify_test_session', args=[self.project_id, session_data['id']])
-            notify_result = json.loads(self.client.post(notify_url, {'code': process_code, 'log': "The log", 'token': settings.QEMU_LAUNCH_AUTH_HEADER}).content)
+            notify_result = json.loads(self.client.post(notify_url, {
+                'log': 'The log',
+                'status': status,
+                'token': settings.QEMU_LAUNCH_AUTH_HEADER
+            }).content)
             self.assertEqual(notify_result['success'], True)
             get_url = reverse('ide:get_test_session', args=[self.project_id, session_data['id']])
             session_result = json.loads(self.client.get(get_url).content)['data']
@@ -127,6 +141,6 @@ class TestsTests(CloudpebbleTestCase):
             logs_result = self.client.get(runs_result['logs']).content
             self.assertEqual(logs_result, "The log")
 
-        run_test(process_code=0, result_code=1, passes=1, fails=0)
-        run_test(process_code=1, result_code=-1, passes=0, fails=1)
-        run_test(process_code=2, result_code=-2, passes=0, fails=1)
+        run_test(status='passed', result_code=1, passes=1, fails=0)
+        run_test(status='failed', result_code=-1, passes=0, fails=1)
+        run_test(status='error', result_code=-2, passes=0, fails=1)

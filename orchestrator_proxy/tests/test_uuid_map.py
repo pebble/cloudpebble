@@ -2,8 +2,8 @@ from unittest import TestCase
 
 import mock
 
-from orchestrator_proxy.tests.fakes import FakeRedis
 from orchestrator_proxy.utils import uuid_map
+from tests.fakes import FakeRedis
 
 
 class TestUUIDMap(TestCase):

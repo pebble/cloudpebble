@@ -7,6 +7,7 @@ import ide.git
 
 __author__ = 'joe'
 
+
 class UrlToReposTest(TestCase):
     def test_basic_url_to_repo(self):
         """
@@ -20,7 +21,7 @@ class UrlToReposTest(TestCase):
         """
         Tests that a non-standard repo url is correctly recognized.
         """
-        username, reponame  = ide.git.url_to_repo("git://github.com:foo/bar.git")
+        username, reponame = ide.git.url_to_repo("git://github.com:foo/bar.git")
         self.assertEqual("foo", username)
         self.assertEqual("bar", reponame)
 

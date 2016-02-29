@@ -6,9 +6,9 @@ import urllib
 import zipfile
 import requests
 
-from utils import orchestrator
 from django.db import transaction
 from ide.models.monkey import TestRun, TestSession, TestFile
+from utils import orchestrator
 
 
 def _zip_directory(input_dir, output_zip):
@@ -105,7 +105,7 @@ class TestBundle(object):
                 os.mkdir(test_folder)
                 test.copy_test_to_path(os.path.join(test_folder, test.file_name + '.monkey'), frame_test=frame_tests)
                 test.copy_screenshots_to_directory(test_folder)
-                if include_pbw:
+                if include_pbw and latest_build:
                     latest_build.copy_pbw_to_path(os.path.join(test_folder, "app.pbw"))
             _zip_directory(archive_dir, filename)
         finally:

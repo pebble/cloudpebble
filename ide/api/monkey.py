@@ -1,7 +1,7 @@
 import os.path
 import urllib
-
 import requests
+
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
@@ -268,7 +268,7 @@ def notify_test_session(request, project_id, session_id):
 def download_tests(request, project_id):
     """ Download all the tests for a project as a ZIP file. """
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
-    test_ids = request.GET.get('tests', None)
+    test_ids = [int(test) for test in request.GET.get('tests', "").split(",") if test] or None
 
     with TestBundle(project, test_ids).open(include_pbw=True, frame_tests=False) as f:
         return HttpResponse(f.read(), content_type='application/zip')
@@ -280,9 +280,9 @@ def download_tests(request, project_id):
 def post_test_session(request, project_id):
     # TODO: run as celery task?
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
-    # TODO: accept a list of tests in POST?
-    bundle = TestBundle(project)
+    test_ids = [int(test) for test in request.POST.get('tests', "").split(",") if test] or None
+    bundle = TestBundle(project, test_ids=test_ids)
     session = bundle.run_on_orchestrator(make_notify_url_builder(request, settings.QEMU_LAUNCH_AUTH_HEADER))
-    return json_response({"data": serialise_session(session)})
+    return json_response({"data": serialise_session(session, include_runs=True)})
 
 # TODO: 'ping' functions to see if anything has changed. Or, "changed since" parameters.

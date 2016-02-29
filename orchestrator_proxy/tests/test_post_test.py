@@ -3,7 +3,6 @@ from orchestrator_proxy.api.post_test import post_archive
 from unittest import TestCase
 
 
-
 class TestFilterDict(TestCase):
     @mock.patch('orchestrator_proxy.api.post_test.uuid_map')
     @mock.patch('orchestrator_proxy.api.post_test.orchestrator')
@@ -13,7 +12,7 @@ class TestFilterDict(TestCase):
         # Set up return values
         orchestrator.upload_test.return_value = 'bundle_url'
         orchestrator.submit_test.return_value.json.return_value = {"job_id": "a_job_id"}
-        uuid_mapper.make_uuid.return_value = "f"*36
+        uuid_mapper.make_uuid.return_value = "f" * 36
 
         # Run the function and check that it returns a dict containing the right job ID
         result = post_archive("A file")

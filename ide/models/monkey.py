@@ -38,7 +38,7 @@ class TestSession(IdeModel):
         ('batch', _('Batch Test')),
         ('live', _('Live Test'))
     )
-    kind = models.CharField(max_length=4, choices=SESSION_KINDS)
+    kind = models.CharField(max_length=5, choices=SESSION_KINDS)
 
     class Meta(IdeModel.Meta):
         ordering = ['-date_added']

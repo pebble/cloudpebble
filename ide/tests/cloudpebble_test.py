@@ -10,6 +10,6 @@ class CloudpebbleTestCase(TestCase):
         self.client = Client()
         self.client.post('/accounts/register', {'username': 'test', 'email': 'test@test.test', 'password1': 'test', 'password2': 'test'})
         self.assertTrue(self.client.login(username='test', password='test'))
-        self.assertJSONEqual(self.client.post('/ide/project/create', {'name': 'test', 'template': 0, 'type': 'native', 'sdk': 3}).content,
-                             {"id": 1, "success": True})
-        self.project_id = 1
+        new_project = self.client.post('/ide/project/create', {'name': 'test', 'template': 0, 'type': 'native', 'sdk': 3}).json()
+        self.assertTrue(new_project['success'])
+        self.project_id = new_project['id']

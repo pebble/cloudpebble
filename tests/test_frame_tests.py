@@ -53,7 +53,7 @@ class TestFilterDict(TestCase):
         self.assertEqual(output, EXPECTED_TEST_FILE)
 
     def test_frame_tests_in_bundle(self):
-        """ Test that frame_tests_in_bundle correctly modifies the test file in the minimal test bundle"""
+        """ Test that frame_tests_in_bundle correctly modifies the test file in the minimal test bundle """
         infile = self.build_bundle()
         outfile = BytesIO()
         frame_tests_in_bundle(infile, outfile)

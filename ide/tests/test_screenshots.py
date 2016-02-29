@@ -1,20 +1,22 @@
 import json
-from cStringIO import StringIO
-from cloudpebble_test import CloudpebbleTestCase
-from django.test.utils import setup_test_environment
 from PIL import Image
+from cStringIO import StringIO
+
+from django.test import override_settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 
-from ide.models.files import ScreenshotSet, ScreenshotFile
 from ide.models.monkey import TestFile, ScreenshotSet, ScreenshotFile
+from cloudpebble_test import CloudpebbleTestCase
 
 __author__ = 'joe'
 
 UNCORRECTED_PATH = "ide/tests/test_screenshot_uncorrected.png"
 CORRECTED_PATH = "ide/tests/test_screenshot_corrected.png"
 
+
+@override_settings(AWS_ENABLED=False)
 class ScreenshotsTests(CloudpebbleTestCase):
     def setUp(self):
         self.login()
@@ -54,13 +56,13 @@ class ScreenshotsTests(CloudpebbleTestCase):
 
         # Check from the response that they were created properly
         self.assertEqual(result[0]['name'], "Set_1")
-        self.assertEqual(result[0]['id'], 1)
         self.assertGreaterEqual(result[0]['files']['basalt']['id'], 0)
         self.assertGreaterEqual(result[0]['files']['aplite']['id'], 0)
 
         return data, result
 
     def test_edit_and_load_screenshots(self):
+        """ Test that edited screenshots remain correctly edited """
         # Make a screenshot to play with
         test_id = self.make_test()
         data, result1 = self.upload_screenshots(test_id)
@@ -80,6 +82,7 @@ class ScreenshotsTests(CloudpebbleTestCase):
             self.assertEqual(result1[0]['files']['basalt']['id'], result[0]['files']['basalt']['id'])
             self.assertTrue('aplite' not in result[0]['files'])
             self.assertGreaterEqual(result[0]['files']['chalk']['id'], 0)
+
         check(result2)
 
         # Now try the load URL, and re-run the above assertions
@@ -88,12 +91,13 @@ class ScreenshotsTests(CloudpebbleTestCase):
         check(result3)
 
     def test_show_screenshot(self):
+        """ Test that uploaded screenshots are correctly 'uncorrected' by the server """
         # Test that the URL that the server gives us for a screenshot is a valid
         # URL which leads to a PNG file which has been uncorrected.
         test_id = self.make_test()
         data, result = self.upload_screenshots(test_id)
         url = result[0]['files']['aplite']['src']
-        result = self.client.get(url)
+        result = self.client.get(url, follow=True)
         self.assertEqual(result.get('Content-Type'), 'image/png')
         buff = StringIO("".join(result.streaming_content))
         img1 = Image.open(buff)
@@ -102,8 +106,8 @@ class ScreenshotsTests(CloudpebbleTestCase):
         img2.load()
         self.assertSequenceEqual(list(img1.getdata()), list(img2.getdata()))
 
-
     def test_delete_test(self):
+        """ Test that we can't get screenshots which were just deleted """
         # Make a test, upload some screenshots
         test_id = self.make_test()
         data, result = self.upload_screenshots(test_id)
