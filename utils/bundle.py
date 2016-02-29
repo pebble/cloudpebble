@@ -52,7 +52,6 @@ def _zip_directory(input_dir, output_zip):
 
 class TestBundle(object):
     def __init__(self, project, test_ids=None):
-        print test_ids
         if test_ids is not None:
             self.tests = TestFile.objects.filter(project=project, id__in=test_ids)
         else:
@@ -122,7 +121,6 @@ class TestBundle(object):
             runs = []
 
             # Then make a test run for every test
-
             for test in self.tests:
                 run = TestRun.objects.create(session=session, test=test, original_name=test.file_name)
                 run.save()
@@ -136,7 +134,7 @@ class TestBundle(object):
         temp_dir = tempfile.mkdtemp()
         location = os.path.join(temp_dir, 'archive.zip')
         try:
-            self.write_to_file(location, include_pbw=include_pbw, frame_tests=False)
+            self.write_to_file(location, include_pbw=include_pbw, frame_tests=frame_tests)
             with open(location, 'rb') as archive:
                 yield archive
         finally:

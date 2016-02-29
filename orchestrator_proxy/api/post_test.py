@@ -6,7 +6,7 @@ from django.views.decorators.http import require_POST
 from ide.api import json_response
 from orchestrator_proxy.utils import uuid_map
 from utils import orchestrator
-from utils.test_bundle_helpers import frame_tests_in_bundle
+from utils.monkeyscript_helpers import frame_tests_in_bundle
 
 
 def post_archive(archive_file):
@@ -33,11 +33,3 @@ def post_test(request):
     result = post_archive(infile)
     return json_response(result)
 
-
-def local_test():
-    with open('archive.zip', 'r') as infile, open('out_archive.zip', 'w') as outfile:
-        frame_tests_in_bundle(infile, outfile)
-
-
-if __name__ == '__main__':
-    local_test()

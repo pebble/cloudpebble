@@ -16,7 +16,7 @@ import utils.s3 as s3
 from ide.models.files import BinFile, ScriptFile
 from ide.models.meta import IdeModel, TextFile
 from ide.utils.image_correction import uncorrect
-from utils.test_bundle_helpers import frame_test_file
+from utils.monkeyscript_helpers import frame_test_file
 
 __author__ = 'joe'
 
