@@ -4,6 +4,7 @@ from ide.models.user import UserGithub
 from ide.models.project import Project
 import ide.utils.mailinglist as mailinglist
 
+
 class PebbleOAuth2(BaseOAuth2):
     name = 'pebble'
     AUTHORIZATION_URL = '{0}/oauth/authorize'.format(settings.SOCIAL_AUTH_PEBBLE_ROOT_URL)
@@ -25,6 +26,7 @@ class PebbleOAuth2(BaseOAuth2):
             url,
             headers={'Authorization': 'Bearer {0}'.format(access_token)}
         )
+
 
 def merge_user(strategy, uid, user=None, *args, **kwargs):
     provider = strategy.backend.name
@@ -56,6 +58,7 @@ def merge_user(strategy, uid, user=None, *args, **kwargs):
             'user': user,
             'is_new': user is None,
             'new_association': False}
+
 
 def clear_old_login(strategy, uid, user=None, *args, **kwargs):
     provider = strategy.backend.name

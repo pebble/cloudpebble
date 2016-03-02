@@ -10,11 +10,12 @@ from ide.models.project import Project
 __author__ = 'katharine'
 
 
-def json_response(response=None):
+def json_response(response=None, success=True):
     if response is None:
         response = {}
 
-    response["success"] = True
+    if success is not None:
+        response["success"] = success
     return HttpResponse(json.dumps(response), content_type="application/json")
 
 

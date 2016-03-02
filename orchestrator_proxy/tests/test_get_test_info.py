@@ -67,8 +67,6 @@ PASSED_TEST_OUTPUT = {
                            'log': u'/orchestrator/logs/ffffffffffffffffffffffffffffffffffff',
                            'ret': 0,
                        }}},
-    'name': u'3rd party test',
-    'requestor': u'cloudpebble@pebble.com',
     'submitted_time': 1456347633,
     'id': 1,
 }

@@ -21,5 +21,5 @@ class TestFilterDict(TestCase):
 
         # Check that it actually made a bundle, submitted a test and made a UUID for it
         frame_tests_in_bundle.assert_called_with("A file", mock.ANY)
-        orchestrator.submit_test.assert_called_with('bundle_url', job_name=mock.ANY)
+        orchestrator.submit_test.assert_called_with('bundle_url', job_name=mock.ANY, notify_url=None)
         uuid_mapper.make_uuid.assert_called_with('a_job_id')

@@ -3,10 +3,12 @@ import os
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_safe
+from django.http import HttpResponse
 
-from ide.api import json_response
+from ide.api import json_response, json_failure
 from orchestrator_proxy.utils.filter_dict import filter_dict
 from orchestrator_proxy.utils import uuid_map
+from orchestrator_proxy.utils.auth import check_token
 from utils import orchestrator
 
 
@@ -14,11 +16,22 @@ from utils import orchestrator
 @csrf_exempt
 def get_test_info(request, uuid):
     """ Fetches test result info from Orchestrator and returns it in a form suitable for 3rd party developers """
-    job_id = uuid_map.lookup_uuid(uuid)
-    info = orchestrator.get_job_info(job_id)
-    processor = TestInfoProcessor(request.build_absolute_uri)
-    filtered_info = processor.process(info, uuid)
-    return json_response(filtered_info)
+    if not check_token(request.GET.get('token', None)):
+        return HttpResponse(status=401)
+    try:
+        job_id = uuid_map.lookup_uuid(uuid)
+    except KeyError:
+        return json_failure("Job not found", 404)
+
+    if uuid_map.is_notified(job_id):
+        info = orchestrator.get_job_info(job_id)
+        processor = TestInfoProcessor(request.build_absolute_uri)
+        filtered_info = processor.process(info, uuid)
+        return json_response(filtered_info, success=None)
+    else:
+        return json_response({
+            'status': 'running'
+        }, success=None)
 
 
 class TestInfoProcessor(object):
@@ -41,7 +54,7 @@ class TestInfoProcessor(object):
         return out
 
     def make_test_url(self, test_id):
-        test_uuid = uuid_map.make_uuid(test_id, kind='log')
+        test_uuid = uuid_map.make_uuid(test_id, unique=True)
         return self.build_absolute_uri(reverse('orchestrator:get_log', args=[test_uuid]))
 
     def process(self, info, new_id):
@@ -53,9 +66,7 @@ class TestInfoProcessor(object):
         # Whitelist the keys and rewrite artefact URLs
         whitelist = {
             "status": True,
-            "name": True,
             "submitted_time": True,
-            "requestor": True,
             "tests": {
                 True: {
                     "status": True,
