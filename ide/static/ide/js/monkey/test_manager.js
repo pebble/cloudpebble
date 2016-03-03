@@ -254,8 +254,12 @@ CloudPebble.TestManager = (function() {
                 currently_waiting_for = deferred;
             };
 
+            this.getRoute = function() {
+                return {route: route.map(from_key)};
+            };
+
             this.triggerCurrent = function() {
-                this.trigger('changed', {route: route.map(from_key)});
+                this.trigger('changed', this.getRoute());
             };
 
             /**
@@ -319,7 +323,7 @@ CloudPebble.TestManager = (function() {
                 }
 
             };
-            this.initial = function() {return {route: route}};
+            this.initial = function() {return this.getRoute()};
             this.refresh = noop;
         }
 

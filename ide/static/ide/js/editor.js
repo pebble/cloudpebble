@@ -673,7 +673,7 @@ CloudPebble.Editor = (function() {
                 var delete_btn = $('<button class="btn delete-btn">').prop('title', gettext('Delete'));
                 var ib_btn = $('<button class="btn ib-btn">').prop('title', gettext('UI Editor'));
                 var rename_btn = $('<button class="btn rename-btn">').prop('title', gettext('Rename File'));
-                var test_manager_btn = $('<button class="btn">').prop('title', gettext('Show in test manager'));
+                var test_manager_btn = $('<button class="btn show-test-btn">').prop('title', gettext('Show in test manager'));
 
                 var error_area = $('<div>');
 
@@ -772,12 +772,12 @@ CloudPebble.Editor = (function() {
                 if(source.indexOf('// BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY') != -1) {
                     button_holder.append(ib_btn);
                 }
+                if (file_kind == 'monkey') {
+                    button_holder.append(test_manager_btn);
+                }
                 // You must have an app.js in pebblejs projects.
                 if(CloudPebble.ProjectInfo.type != 'pebblejs' || file.name != 'app.js') {
                     button_holder.append(delete_btn);
-                }
-                if (file_kind == 'monkey') {
-                    button_holder.append(test_manager_btn);
                 }
                 pane.append(button_holder);
                 code_mirror.refresh();

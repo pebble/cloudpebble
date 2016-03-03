@@ -343,6 +343,10 @@ ul.nav-pills {
     color: white;
 }
 
+.show-test-btn {
+    background: #FFFFFF url('../img/info.png') no-repeat center;
+}
+
 .save-btn {
     background: white url('../img/save.png') no-repeat center;
 }
