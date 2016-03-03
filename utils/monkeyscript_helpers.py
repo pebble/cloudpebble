@@ -69,6 +69,7 @@ test {test_name} {{
     do install_app app.pbw
     do launch_app "{app_name}"
     do wait 2
+
 {content}
 
     do remove_app "{app_name}"

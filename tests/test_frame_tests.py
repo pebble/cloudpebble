@@ -24,7 +24,10 @@ test test {
     do install_app app.pbw
     do launch_app "MyApp"
     do wait 2
+
     do set_time 1470000000
+
+    do remove_app "MyApp"
 }
 """
 
