@@ -73,6 +73,12 @@ CloudPebble.TestManager.Interface = (function(API) {
                 : <button key={num} className={className} onClick={function() {this.gotoPage(num-1)}.bind(this)}>{num}</button>
             );
         },
+        fillEmpty: function(items) {
+            var num_fillers = this.pageSize - items.length;
+            return items.concat(_.map(Array(num_fillers), function(_, i) {
+                return (<tr key={-i-1} className={"testmanager-table-filler"}></tr>)
+            }));
+        },
         renderPager: function() {
             var page = this.state.page;
             var pageMax = this.maxPages();
@@ -119,32 +125,59 @@ CloudPebble.TestManager.Interface = (function(API) {
         return (<td className={classes}>{result_name}</td>);
     }
 
+    function ViewTestSourceLink(props) {
+        var onClick = function() {
+            var file = CloudPebble.Editor.GetAllFiles()[props.name];
+            CloudPebble.Editor.Open(file);
+        };
+        return (<Anchor onClick={onClick}>View Source</Anchor>)
+    }
+
     /**
      * TestList allows navigation between each individual tests
      */
-    function TestList(props) {
-        var tests = props.tests.map(function(test) {
-            var onClick = function() {API.Route.navigateAfter('test', test.id, API.Runs.refresh({test: test.id}), true);};
-            var className = classNames("clickable", {
-                selected: (props.selected == test.id)
+    var TestList = React.createClass({
+        mixins: [Pagination],
+        pageSize: 5,
+        getLength: function() {
+            return this.props.tests.length;
+        },
+        render: function() {
+            var props = this.props;
+            var tests = this.page(props.tests).map(function (test) {
+                var onClickTest = function () {
+                    API.Route.navigateAfter('test', test.id, API.Runs.refresh({test: test.id}), true);
+                };
+
+                var className = classNames("clickable", {
+                    selected: (props.selected == test.id)
+                });
+                return (
+                    <tr key={test.id} onClick={onClickTest} className={className}>
+                        <td><Anchor scrollTo="#testmanager-test" onClick={onClickTest}>{test.name}</Anchor></td>
+                        <TestResultCell code={test.last_code}/>
+                        <td><ViewTestSourceLink name={test.name}/></td>
+                    </tr>
+                );
             });
+            tests = this.fillEmpty(tests);
             return (
-                <tr key={test.id} onClick={onClick} className={className}>
-                    <td><Anchor scrollTo="#testmanager-test" onClick={onClick}>{test.name}</Anchor></td>
-                    <TestResultCell code={test.last_code} />
-                </tr>
+                <div>
+                    <table className="table" id="testmanager-test-table">
+                        <thead>
+                        <tr>
+                            <th>{gettext('Name')}</th>
+                            <th>{gettext('Last Status')}</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>{tests}</tbody>
+                    </table>
+                    {this.renderPager()}
+                </div>
             );
-        });
-        return (
-            <table className="table" id="testmanager-test-table">
-                <thead><tr>
-                    <th>{gettext('Name')}</th>
-                    <th>{gettext('Last Status')}</th>
-                </tr></thead>
-                <tbody>{tests}</tbody>
-            </table>
-        );
-    }
+        }
+    });
 
     var RunTitle = function(props) {
         var titleClassName = classNames({
@@ -184,11 +217,13 @@ CloudPebble.TestManager.Interface = (function(API) {
             );
         },
         render: function() {
-            var paged = this.page(this.props.runs);
-            if (_.keys(paged).length == 0) {
-                return (<p>{gettext('Nothing to show')}</p>);
+            var paged_runs = this.page(this.props.runs);
+            if (_.keys(paged_runs).length == 0) {
+                return (<p>{gettext('This test has never been run!')}</p>);
             }
-            var children = _.map(paged, this.renderRow);
+            var children = _.map(paged_runs, this.renderRow);
+            children = this.fillEmpty(children);
+
             return (
                 <div>
                     <table className="table" id="testmanager-run-table">
@@ -196,7 +231,7 @@ CloudPebble.TestManager.Interface = (function(API) {
                             {this.props.test ? null : <th>{gettext('Name')}</th>}
                             {this.props.session ? null : <th>{gettext('Date')}</th>}
                             <th>{gettext('Status')}</th>
-                            <th>{gettext('Logs')}</th>
+                            <th></th>
                         </tr></thead>
                         <tbody>{children}</tbody>
                     </table>
@@ -238,7 +273,8 @@ CloudPebble.TestManager.Interface = (function(API) {
             )
         },
         render: function() {
-            var sessions = this.page(this.props.sessions.map(this.renderRow));
+            var sessions = this.page(this.props.sessions).map(this.renderRow);
+            sessions = this.fillEmpty(sessions);
             return (
                 <div>
                     <table className="table" id="testmanager-job-table">
@@ -286,6 +322,7 @@ CloudPebble.TestManager.Interface = (function(API) {
                     <tbody>
                     <tr><th>{gettext('Test')}</th><td>{test.name}</td></tr>
                     <tr><th>{gettext('Passes')}</th><td>{(_.countBy(filtered, 'code')[1] || 0) + '/' + filtered.length}</td></tr>
+                    <tr><td></td><td><ViewTestSourceLink name={test.name} /></td></tr>
                     </tbody>
                 </table>
                 <RunList runs={filtered} test={test}/>

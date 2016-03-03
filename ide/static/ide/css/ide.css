@@ -1549,6 +1549,9 @@ pre.test-script {
     .testmanager-page-detail .leftside {
         display: none;
     }
+    .testmanager-table-filler {
+        display: none;
+    }
 }
 
 .testmanager-pane .progress {
