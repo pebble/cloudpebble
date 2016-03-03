@@ -125,7 +125,7 @@ CloudPebble.MonkeyScript = (function() {
                 var search_string = pieces[pieces.length - 1];
 
                 // If the suggestions value is an object, an external lookup is needed for autocomplete suggestions
-                if (_.isObject(all_suggestions)) {
+                if (!_.isArray(all_suggestions)) {
                     if (all_suggestions.command == 'screenshot') {
                         // Autocompletion for screenshots gets them from the editor's screenshot pane
                         all_suggestions = _.map(editor.screenshot_pane.getScreenshots(), function(screenshot) {

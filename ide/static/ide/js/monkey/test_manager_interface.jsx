@@ -130,7 +130,7 @@ CloudPebble.TestManager.Interface = (function(API) {
             var file = CloudPebble.Editor.GetAllFiles()[props.name];
             CloudPebble.Editor.Open(file);
         };
-        return (<Anchor onClick={onClick}>View Source</Anchor>)
+        return (<Anchor onClick={onClick}>Edit</Anchor>)
     }
 
     /**
