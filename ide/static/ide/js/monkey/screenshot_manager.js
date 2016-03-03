@@ -375,7 +375,9 @@ CloudPebble.MonkeyScreenshots = (function() {
 
         this.updateSupportedPlatforms = function() {
             return CloudPebble.Compile.GetPlatformsCompiledFor().then(function(platforms) {
-                supported_platforms = platforms;
+                if (platforms.length > 0) {
+                    supported_platforms = platforms;
+                }
                 this.update();
             }.bind(this));
 

@@ -743,7 +743,7 @@ CloudPebble.Compile = (function() {
 
     var get_platforms_compiled_for = function() {
         return fetch_build_history().then(function() {
-            return _.keys(mLastBuild.sizes);
+            return _.keys((mLastBuild || {}).sizes);
         })
     };
 
