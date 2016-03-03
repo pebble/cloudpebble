@@ -43,7 +43,7 @@ CloudPebble.Editor = (function() {
             update: false,
             platform: CloudPebble.Compile.GetPlatformForInstall()
         });
-
+        SharedPebble.disconnect(true);
         CloudPebble.Compile.DoInstall({
             show_logs_prompt: false,
             platform: options.platform
