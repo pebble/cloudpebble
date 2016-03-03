@@ -306,7 +306,7 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
     var ScreenshotManagerContainer = React.createClass({
         getInitialState: function() {
             return {
-                screenshots: [],
+                screenshots: Screenshots.getScreenshots(),
                 error: null,
                 loading: false,
                 disabled: false,
@@ -334,7 +334,6 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
             this.listener.listenTo(Screenshots, 'waiting', function() { this.setState({
                 loading: true
             })}.bind(this));
-            Screenshots.loadScreenshots();
         },
         componentWillUnmount: function() {
             this.listener.stopListening();

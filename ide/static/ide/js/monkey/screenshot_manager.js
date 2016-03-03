@@ -294,7 +294,7 @@ CloudPebble.MonkeyScreenshots = (function() {
             var timeout = setTimeout(function() {
                 self.trigger('waiting');
             }, 500);
-            API.getScreenshots(test_id).then(function(result) {
+            return API.getScreenshots(test_id).then(function(result) {
                 screenshots = result;
                 original_screenshots = _.map(result, _.clone);
                 self.trigger('changed', result);
@@ -356,7 +356,11 @@ CloudPebble.MonkeyScreenshots = (function() {
         _.extend(this, Backbone.Events);
         this.toggle = function(platform) {
             single = (single ? false : platform);
-            var platforms = (single ? [single] : supported_platforms)
+            this.update();
+        };
+
+        this.update = function() {
+            var platforms = (single ? [single] : supported_platforms);
             this.trigger('changed', {
                 platforms: platforms
             });
@@ -369,8 +373,16 @@ CloudPebble.MonkeyScreenshots = (function() {
             return _.clone(supported_platforms);
         };
 
+        this.updateSupportedPlatforms = function() {
+            return CloudPebble.Compile.GetPlatformsCompiledFor().then(function(platforms) {
+                supported_platforms = platforms;
+                this.update();
+            }.bind(this));
+
+        };
+
         this.getSize = function() {
-            var platforms = (single ? [single] : supported_platforms)
+            var platforms = (single ? [single] : supported_platforms);
             return (30+platforms.length*200)+"px";
         };
         // Set the initial size of the side pane.
@@ -391,8 +403,11 @@ CloudPebble.MonkeyScreenshots = (function() {
         // Set up the data/models and pass them to the UI.
         uiState = new UIState(pane);
         screenshots = new ScreenshotsModel(test_id);
-        view = CloudPebble.MonkeyScreenshots.Interface(screenshots, uiState);
-        view.render(pane.get()[0], {test_id: test_id});
+
+        $.when(screenshots.loadScreenshots(), uiState.updateSupportedPlatforms()).then(function() {
+            view = CloudPebble.MonkeyScreenshots.Interface(screenshots, uiState);
+            view.render(pane.get()[0], {test_id: test_id});
+        });
 
         /** Get the actual pane so it can be attached to an object */
         this.getPane = function() {
@@ -402,6 +417,7 @@ CloudPebble.MonkeyScreenshots = (function() {
         pane.on('restored', function() {
             // This is triggered by the SidePane holder whenever the pane is restored
             screenshots.loadScreenshots();
+            uiState.updateSupportedPlatforms();
         });
 
         /** Destroy the contents of the pane */

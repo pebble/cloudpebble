@@ -260,24 +260,21 @@ CloudPebble.Compile = (function() {
                     pane.find('#last-compilation-pbw').removeClass('hide').attr('href', build.pbw);
                     pane.find("#run-on-phone").removeClass('hide');
                     if(build.sizes) {
-                        if(build.sizes.aplite) {
-                            var aplite_size_text = format_build_size(build.sizes.aplite, 24576, 10240, 98304);
-                            pane.find('#last-compilation-size-aplite').removeClass('hide').find('.text').text(aplite_size_text);
-                        } else {
-                            pane.find('#last-compilation-size-aplite').addClass('hide');
-                        }
-                        if(build.sizes.basalt) {
-                            var basalt_size_text = format_build_size(build.sizes.basalt, 65536, 10240, 262144);
-                            pane.find('#last-compilation-size-basalt').removeClass('hide').find('.text').text(basalt_size_text);
-                        } else {
-                            pane.find('#last-compilation-size-basalt').addClass('hide');
-                        }
-                        if(build.sizes.chalk) {
-                            var chalk_size_text = format_build_size(build.sizes.chalk, 65536, 10240, 262144);
-                            pane.find('#last-compilation-size-chalk').removeClass('hide').find('.text').text(chalk_size_text);
-                        } else {
-                            pane.find('#last-compilation-size-chalk').addClass('hide');
-                        }
+                        var build_size_params = {
+                            aplite: [24576, 10240, 98304],
+                            basalt: [65536, 10240, 262144],
+                            chalk: [65536, 10240, 262144]
+                        };
+                        _.each(['aplite', 'basalt', 'chalk'], function(platform) {
+                            if (build.sizes[platform]) {
+                                var params = build_size_params[platform];
+                                var size_text = format_build_size(build.sizes[platform], params[0], params[1], params[2]);
+                                pane.find('#last-compilation-size-'+platform).removeClass('hide').find('.text').text(size_text);
+                            }
+                            else {
+                                pane.find('#last-compilation-size-'+platform).addClass('hide');
+                            }
+                        });
                     }
                     // Only enable emulator buttons for built platforms.
                     pane.find('#run-qemu .btn-primary').attr('disabled', function() {
@@ -744,15 +741,25 @@ CloudPebble.Compile = (function() {
         return 0;
     };
 
+    var get_platforms_compiled_for = function() {
+        return fetch_build_history().then(function() {
+            return _.keys(mLastBuild.sizes);
+        })
+    };
+
     return {
         Show: function() {
             show_compile_pane();
         },
         Init: function() {
             init();
+
         },
         RunBuild: function(callback) {
             run_build(callback);
+        },
+        GetPlatformsCompiledFor: function() {
+            return get_platforms_compiled_for();
         },
         /**
          * Get the platform to install and run the the app on, given details of the project and last build.
