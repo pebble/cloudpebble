@@ -250,7 +250,7 @@ PIPELINE = {
     'COMPILERS': ('react.utils.pipeline.JSXCompiler', ),
     'OUTPUT_SOURCEMAPS': True,
     'JS_COMPRESSOR': 'pipeline.compressors.uglifyjs.UglifyJSCompressor',
-    'CSS_COMPRESSOR': 'pipeline.compressors.cssclean.CleanCSSCompressor',
+    'CSS_COMPRESSOR': 'pipeline.compressors.cleancss.CleanCSSCompressor',
     'CLEANCSS_BINARY': 'cleancss',
     'UGLIFYJS_BINARY': 'uglifyjs',
     'VERBOSE': True,
