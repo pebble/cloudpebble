@@ -108,7 +108,7 @@ CloudPebble.TestManager = (function() {
             this.new = function () {
                 return $.ajax(base_url + 'test_sessions/run', {
                     method: 'POST'
-                }).done(function (result) {
+                }).then(function (result) {
                     var session = {data: [result.data]};
                     this.syncData(session, noop);
                 }.bind(this));

@@ -531,32 +531,46 @@ CloudPebble.TestManager.Interface = (function(API) {
      * The TestManager is parent UI for everything, rendering the dashboard on the left, detail page on the right,
      * "run tests" button and any errors.
      */
-    function TestManager(props) {
-        var route = props.route;
-        var className = 'testmanager-page-'+(route.length == 0 ? 'dashboard' : 'detail');
-        return (
-            <div className={className}>
-                {!!props.error && <Error {...props.error} onClick={props.closeError} />}
-                {props.tests.length > 0 && (
-                    <Well>
-                        <button onClick={function() {API.Sessions.new()}} className='btn btn-affirmative'>{gettext('Batch run')}</button>
-                        <a href={'/ide/project/'+props.project_id+'/tests/archive'} className='btn testmanager-download-btn'>{gettext('Download tests as zip')}</a>
-                    </Well>
-                    )}
-                <div className="leftside">
-                    <Dashboard sessions={props.sessions} tests={props.tests} route={route}/>
-                </div>
-                <div className="rightside">
-                    {route.length > 0 &&
+    var TestManager = React.createClass({
+        getInitialState: function() {
+            return {batch_waiting: false};
+        },
+        render: function() {
+            var props = this.props;
+            var route = props.route;
+            var className = 'testmanager-page-' + (route.length == 0 ? 'dashboard' : 'detail');
+
+            var onClickBatchRun = function () {
+                this.setState({batch_waiting: true});
+                API.Sessions.new().always(function() {
+                    this.setState({batch_waiting: false});
+                }.bind(this));
+            }.bind(this);
+
+            return (
+                <div className={className}>
+                    {!!props.error && <Error {...props.error} onClick={props.closeError}/>}
+                    {props.tests.length > 0 && (
                         <Well>
-                            <BackButton route={route} />
+                            <button onClick={onClickBatchRun} className='btn btn-affirmative' disabled={this.state.batch_waiting ? "disabled" : null}>{gettext('Batch run')}</button>
+                            <a href={'/ide/project/'+props.project_id+'/tests/archive'} className='btn testmanager-download-btn'>{gettext('Download tests as zip')}</a>
+                        </Well>
+                    )}
+                    <div className="leftside">
+                        <Dashboard sessions={props.sessions} tests={props.tests} route={route}/>
+                    </div>
+                    <div className="rightside">
+                        {route.length > 0 &&
+                        <Well>
+                            <BackButton route={route}/>
                             <TestPage {...props} />
                         </Well>
-                    }
+                        }
+                    </div>
                 </div>
-            </div>
-        );
-    }
+            );
+        }
+    });
 
     var NoTestsDisplay = function(props) {
         var createTest = function() {
