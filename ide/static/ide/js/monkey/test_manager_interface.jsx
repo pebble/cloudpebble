@@ -335,7 +335,8 @@ CloudPebble.TestManager.Interface = (function(API) {
      */
     var LogArtefact = React.createClass({
         url: function() {
-            return '/orchestrator/artefact/' + this.props.link;
+            // TODO: consider a way of getting this URL from Django instead of hardcoding it.
+            return '/orchestrator/artefacts/' + this.props.link;
         },
         componentDidMount: function() {
             if (this.props.link.endsWith("png")) {

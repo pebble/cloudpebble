@@ -10,6 +10,6 @@ urlpatterns = [
     url(r'^tests$', post_test, name="post_test"),
     url(r'^tests/(?P<uuid>[0-9a-f-]{36})$', get_test_info, name="get_test_info"),
     url(r'^logs/(?P<uuid>[0-9a-f-]{36})$', get_log, name="get_log"),
-    url(r'^artefacts/(?P<filename>[0-9a-f]+\.png)$', get_artefact, name="get_artefact"),
+    url(r'^artefacts/(?P<filename>[0-9a-f]+\.(png|log))$', get_artefact, name="get_artefact"),
     url(r'^tests/(?P<private_uuid>[0-9a-f-]{36})/notify$', notify_test, name="notify_test")
 ]
