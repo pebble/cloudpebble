@@ -93,6 +93,8 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
                 onDrop: this.onDrop
             };
 
+            var screenshotsDisabled = disabled || !this.props.screenshotsEnabled;
+
             if (!empty) {
                 return (
                 <div className={className} {...dragEvents}>
@@ -106,7 +108,7 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
                     <div className={classNames(className, imageClasses)} {...dragEvents}>
                         <div {...dragEvents}>
                             <button className="btn" onClick={this.onClickUpload} type="button" disabled={disabled}>{gettext('Upload file')}</button><br />
-                            <button className="btn" onClick={this.onClickScreenshot} type="button" disabled={disabled}>{gettext('Take Screenshot')}</button>
+                            <button className="btn" onClick={this.onClickScreenshot} type="button" disabled={screenshotsDisabled}>{gettext('Take Screenshot')}</button>
                             <input ref="fileInput" className="hide" type="file" multiple onChange={this.onInputChange} disabled={disabled} />
                         </div>
 
@@ -158,8 +160,16 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
                 {props.platforms.map(function(platform) { return (
                     <div key={platform} className="monkey-screenshot-container">
                         {props.progress && _.has(props.progress, platform)
-                            ? <ProgressView progress={props.progress[platform]}/>
-                            : <Screenshot index={props.index} file={props.files[platform]} platform={platform} disabled={props.disabled}/>
+                            ?
+                            <ProgressView progress={props.progress[platform]}/>
+                            :
+                            <Screenshot
+                                index={props.index}
+                                file={props.files[platform]}
+                                platform={platform}
+                                disabled={props.disabled}
+                                screenshotsEnabled={props.screenshotsEnabled}
+                            />
                         }
                     </div>
                 )})}
@@ -188,6 +198,7 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
                                        {...screenshot_set}
                                        platforms={props.platforms}
                                        disabled={props.disabled}
+                                       screenshotsEnabled={props.screenshotsEnabled}
                                        progress={props.progress[index]}/>
                         )})}
                     <ScreenshotSet index={null}
@@ -196,6 +207,7 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
                                    files={{}}
                                    platforms={props.platforms}
                                    disabled={props.disabled}
+                                   screenshotsEnabled={props.screenshotsEnabled}
                                    progress={props.progress["null"]}/>
                 </div>
             </form>
@@ -260,8 +272,6 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
             return (
                 <div onDragOver={stopEvent} onDrop={stopEvent}>
                     { /* <img ref="help" src="/static/ide/img/help.png" className="field-help" data-original-title=""/> */ }
-
-
                     {!!this.props.error && <Error {...this.props.error} />}
 
                     <div className="monkey-platforms">
@@ -282,8 +292,12 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
 
                     <h2>{gettext('Screenshots')}</h2>
 
-                    <ScreenshotForm screenshots={this.props.screenshots} platforms={this.props.platforms}
-                                    disabled={this.props.disabled} progress={this.props.progress}/>
+                    <ScreenshotForm screenshots={this.props.screenshots}
+                                    platforms={this.props.platforms}
+                                    disabled={this.props.disabled}
+                                    progress={this.props.progress}
+                                    screenshotsEnabled={this.props.activePebble}
+                    />
 
                     {this.props.loading && <ProgressView progress={100} />}
 
@@ -311,7 +325,8 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
                 loading: false,
                 disabled: false,
                 platforms: Platforms.initial(),
-                progress: {}
+                progress: {},
+                activePebble: !!SharedPebble.getPebbleNow()
             }
         },
         componentDidMount: function() {
@@ -334,6 +349,14 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
             this.listener.listenTo(Screenshots, 'waiting', function() { this.setState({
                 loading: true
             })}.bind(this));
+            this.listener.listenTo(SharedPebble, 'status', function(pebble, code) {
+                if (code == 0) {
+                    this.setState({activePebble: true});
+                }
+            }.bind(this));
+            this.listener.listenTo(SharedPebble, 'close error', function() {
+                this.setState({activePebble: false});
+            }.bind(this));
         },
         componentWillUnmount: function() {
             this.listener.stopListening();

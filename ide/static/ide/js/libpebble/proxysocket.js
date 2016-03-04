@@ -19,7 +19,7 @@
             mSocket = new WebSocket(proxy);
             mSocket.binaryType = "arraybuffer";
             mSocket.onerror = handle_socket_error;
-            mSocket.onerror = handle_socket_close;
+            mSocket.onclose = handle_socket_close;
             mSocket.onmessage = handle_socket_message;
             mSocket.onopen = handle_socket_open;
             console.log("Connecting to " + proxy);
