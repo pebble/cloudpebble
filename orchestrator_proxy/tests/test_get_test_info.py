@@ -60,10 +60,16 @@ PASSED_TEST_OUTPUT = {
                        'submitted_time': 1456347633,
                        'result': {
                            'duration': 100.97341203689575,
-                           'artifacts': [[
-                               u'/tmp/tmp9e_TX9/tmpfHwwM1/tests/omg/english/snowy/144x168/one.png',
-                               u'/orchestrator/artefacts/74265ff70c9f22ff42a60d5718b8c58aeb95373d.png'
-                           ]],
+                           'artifacts': [
+                               [
+                                   u'/tmp/tmp9e_TX9/tmpJGZgkm_hashed.log',
+                                   u'/orchestrator/artefacts/52a0d40ef8177bccd650d37097168359c16d6fcc.log'
+                               ],
+                               [
+                                   u'/tmp/tmp9e_TX9/tmpfHwwM1/tests/omg/english/snowy/144x168/one.png',
+                                   u'/orchestrator/artefacts/74265ff70c9f22ff42a60d5718b8c58aeb95373d.png'
+                               ]
+                           ],
                            'log': u'/orchestrator/logs/ffffffffffffffffffffffffffffffffffff',
                            'ret': 0,
                        }}},

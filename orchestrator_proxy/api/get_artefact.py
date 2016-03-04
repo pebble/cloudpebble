@@ -8,6 +8,7 @@ from django.http import HttpResponse
 @csrf_exempt
 def get_artefact(request, filename):
     """ This API call proxies test artefact downloads to Orchestrator. """
+
     result = requests.get("%s/api/download/media/%s" % (settings.ORCHESTRATOR_URL, filename))
     result.raise_for_status()
     return HttpResponse(result.iter_content(100), content_type=result.headers['content-type'])
