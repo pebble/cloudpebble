@@ -124,7 +124,7 @@ CloudPebble.MonkeyScreenshots = (function() {
         }
 
         var defer = $.Deferred();
-        SharedPebble.getPebble(kind).done(function(pebble) {
+        SharedPebble.getPebble(kind).then(function(pebble) {
             var disconnect = function() {
                 if(!SharedPebble.isVirtual()) {
                     SharedPebble.disconnect()
@@ -154,6 +154,8 @@ CloudPebble.MonkeyScreenshots = (function() {
             });
 
             pebble.request_screenshot();
+        }).fail(function(error) {
+            defer.reject(error);
         });
         return defer.promise();
     };
