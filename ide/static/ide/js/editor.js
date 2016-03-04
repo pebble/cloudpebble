@@ -456,7 +456,7 @@ CloudPebble.Editor = (function() {
                         }
                     });
                 }
-                
+
                 code_mirror.force_fold_lines(data.folded_lines);
                 // This is needed to force focus on the editor
                 setTimeout(function() { code_mirror.focus();}, 1);
@@ -1031,6 +1031,8 @@ CloudPebble.Editor = (function() {
             if(callback) {
                 callback(data);
             }
+        }).fail(function(xhr, code, description) {
+            callback({success: false, error: description});
         });
         ga('send', 'event', 'file', 'create');
     }
@@ -1047,6 +1049,8 @@ CloudPebble.Editor = (function() {
             if (callback) {
                 callback(data);
             }
+        }).fail(function(xhr, code, description) {
+            callback({success: false, error: description});
         });
     }
 

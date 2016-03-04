@@ -20,7 +20,16 @@ def json_response(response=None, success=True):
 
 
 def json_failure(error, status=200):
-    return HttpResponse(json.dumps({"success": False, "error": error}), content_type="application/json", status=status)
+    if isinstance(error, basestring):
+        message = error
+    elif hasattr(error, 'messages'):
+        message = ", ".join(error.messages)
+    elif hasattr(error, 'message'):
+        message = error.message
+    else:
+        message = "Internal server error"
+
+    return HttpResponse(json.dumps({"success": False, "error": message}), content_type="application/json", status=status)
 
 
 @login_required

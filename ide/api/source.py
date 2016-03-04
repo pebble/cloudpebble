@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST, require_safe
 from django.utils.translation import ugettext as _
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ValidationError
 from ide.api import json_failure, json_response
 from ide.models.project import Project
 from ide.models.files import SourceFile
@@ -30,8 +30,9 @@ def create_source_file(request, project_id):
             print "Made file " + request.POST['name']
             f.save_file(request.POST.get('content', ''))
             print "Saved file"
-    except IntegrityError as e:
-        return json_failure(str(e))
+    except (IntegrityError, ValidationError) as e:
+
+        return json_failure(e)
     else:
         send_keen_event('cloudpebble', 'cloudpebble_create_file', data={
             'data': {
@@ -52,8 +53,8 @@ def create_test_file(request, project_id):
         f = TestFile.objects.create(project=project,
                                     file_name=request.POST['name'])
         f.save_file(request.POST.get('content', ''))
-    except IntegrityError as e:
-        return json_failure(str(e))
+    except (IntegrityError, ValidationError) as e:
+        return json_failure(e)
     else:
         send_keen_event('cloudpebble', 'cloudpebble_create_file', data={
             'data': {
