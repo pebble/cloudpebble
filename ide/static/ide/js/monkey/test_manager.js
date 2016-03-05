@@ -110,8 +110,22 @@ CloudPebble.TestManager = (function() {
                     method: 'POST'
                 }).then(function (result) {
                     var session = {data: [result.data]};
-                    this.syncData(session, noop);
+                    session.data[0].is_new = true;
+                    this.syncData(session, {});
                 }.bind(this));
+            };
+
+            // TODO: remove this or factor it out at some point.
+            this.fakeNew = function() {
+                var d = $.Deferred();
+                setTimeout(function() {
+                    var session = {data: [_.clone(this.state[1])]};
+                    session.data[0].is_new = true;
+                    session.data[0].id = _.max(_.keys(this.state))+1;
+                    this.syncData(session, {});
+                    d.resolve();
+                }.bind(this), 1000);
+                return d.promise();
             };
             /**
              * Sorts sessions by date

@@ -339,7 +339,6 @@ PIPELINE = {
                 'text-encoding/lib/encoding.js',
                 'noVNC/include/util.js',
                 'jquery-textext/src/js/*.js',
-                'react/react.js'
             ),
             'output_filename': 'build/textext.js',
         },

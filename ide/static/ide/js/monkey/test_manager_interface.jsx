@@ -241,6 +241,45 @@ CloudPebble.TestManager.Interface = (function(API) {
         }
     });
 
+
+    var SessionListRow = React.createClass({
+        getInitialState: function() {
+            return {flashing: !!this.props.session.is_new};
+        },
+        componentDidMount: function() {
+            if (this.state.flashing) {
+                setTimeout(function() {
+                    this.setState({flashing: false});
+                }.bind(this), 1500);
+            }
+        },
+        onClickSession: function() {
+            var id = this.props.session.id;
+            API.Route.navigateAfter('session', id, API.Runs.refresh({session: id}), true);
+            API.Sessions.refresh({id: id});
+        },
+        render: function() {
+            var session = this.props.session;
+            var datestring = CloudPebble.Utils.FormatDatetime(session.date_added);
+            var rowClassName = classNames("clickable", {
+                selected: (this.props.selected),
+                flash: (this.state.flashing)
+            });
+            var passesClassName = classNames({
+                'test-failed': session.fails > 0,
+                'test-passed': session.passes == session.run_count,
+                'test-pending': session.fails == 0 && (session.passes != session.run_count)
+            });
+            return (
+                <tr className={rowClassName} onClick={this.onClickSession}>
+                    <td><Anchor onClick={this.onClickSession}>{datestring}</Anchor></td>
+                    <td><SessionKindLabel kind={session.kind} long={false} /></td>
+                    <td className={passesClassName}>{session.passes+'/'+session.run_count}</td>
+                </tr>
+            )
+        }
+    });
+
     /**
      * SessionList allows navigation through every test job.
      */
@@ -250,30 +289,10 @@ CloudPebble.TestManager.Interface = (function(API) {
         getLength: function() {
             return this.props.sessions.length;
         },
-        onClickSession: function(session) {
-            API.Route.navigateAfter('session', session.id, API.Runs.refresh({session: session.id}), true);
-            API.Sessions.refresh({id: session.id});
-        },
-        renderRow: function(session) {
-            var datestring = CloudPebble.Utils.FormatDatetime(session.date_added);
-            var rowClassName = classNames("clickable", {
-                selected: (this.props.selected == session.id)
-            });
-            var passesClassName = classNames({
-                'test-failed': session.fails > 0,
-                'test-passed': session.passes == session.run_count,
-                'test-pending': session.fails == 0 && (session.passes != session.run_count)
-            });
-            return (
-                <tr className={rowClassName} key={session.id} onClick={function() {this.onClickSession(session)}.bind(this)}>
-                    <td><Anchor onClick={function() {this.onClickSession(session)}.bind(this)}>{datestring}</Anchor></td>
-                    <td><SessionKindLabel kind={session.kind} long={false} /></td>
-                    <td className={passesClassName}>{session.passes+'/'+session.run_count}</td>
-                </tr>
-            )
-        },
         render: function() {
-            var sessions = this.page(this.props.sessions).map(this.renderRow);
+            var sessions = this.page(this.props.sessions).map(function(session) {
+                return (<SessionListRow key={session.id} session={session} selected={this.props.selected == session.id} />);
+            }.bind(this));
             sessions = this.fillEmpty(sessions);
             return (
                 <div>

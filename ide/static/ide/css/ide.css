@@ -1570,6 +1570,16 @@ pre.test-script {
     padding: 3px;
 }
 
+tr.flash {
+    animation-name: flash;
+    animation-duration: 1.5s;
+}
+
+@keyframes flash {
+    from {background-color: green;}
+    to {background-color: initial;}
+}
+
 .testmanager-pane tr.selected {
     background-color: #4a4a4a;
 }
