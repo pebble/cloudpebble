@@ -9,7 +9,7 @@ from ide.models.project import Project
 from ide.models.files import SourceFile, ResourceFile, ResourceIdentifier, ResourceVariant
 from ide.utils.sdk import dict_to_pretty_json
 from ide.utils import generate_half_uuid
-from utils.keen_helper import send_keen_event
+from utils.td_helper import send_td_event
 import urllib2
 
 
@@ -21,7 +21,7 @@ def import_gist(user_id, gist_id):
     try:
         gist = g.get_gist(gist_id)
     except github.UnknownObjectException:
-        send_keen_event('cloudpebble', 'cloudpebble_gist_not_found', user=user, data={'data': {'gist_id': gist_id}})
+        send_td_event('cloudpebble_gist_not_found', data={'data': {'gist_id': gist_id}}, user=user)
         raise Exception("Couldn't find gist to import.")
 
     files = gist.files
@@ -115,5 +115,5 @@ def import_gist(user_id, gist_id):
             source_file = SourceFile.objects.create(project=project, file_name='app.js')
             source_file.save_file(gist.files['simply.js'].content)
 
-    send_keen_event('cloudpebble', 'cloudpebble_gist_import', project=project, data={'data': {'gist_id': gist_id}})
+    send_td_event('cloudpebble_gist_import', data={'data': {'gist_id': gist_id}}, project=project)
     return project.id

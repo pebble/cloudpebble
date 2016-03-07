@@ -1,11 +1,12 @@
-from ide.tasks.keen_task import keen_add_events
+from ide.tasks.td_task import td_add_events
 
 __author__ = 'katharine'
 
-from django.conf import settings
+import collections
+import json
+import time
 
-import keen
-import keen.scoped_keys
+from django.conf import settings
 
 
 # WARNING: Keen does not appear to respect the filters on scoped write keys.
@@ -21,8 +22,19 @@ def generate_scoped_key(user):
     return keen.scoped_keys.encrypt(settings.KEEN_API_KEY, {'filters': filters, 'allowed_operations': ['write']})
 
 
-def send_keen_event(collections, event, data=None, request=None, project=None, user=None):
-    if not settings.KEEN_ENABLED:
+def _flatten(d, parent_key=''):
+    items = []
+    for k, v in d.iteritems():
+        new_key = parent_key + '_0_' + k if parent_key else k
+        if isinstance(v, collections.MutableMapping):
+            items.extend(_flatten(v, new_key).iteritems())
+        else:
+            items.append((new_key, v))
+    return dict(items)
+
+
+def send_td_event(event, data=None, request=None, project=None, user=None):
+    if not settings.TD_ENABLED:
         return
 
     data = data.copy() if data is not None else {}
@@ -66,13 +78,8 @@ def send_keen_event(collections, event, data=None, request=None, project=None, u
             'url': request.build_absolute_uri(),
         }
 
-    keen_request = {"events": [data]}
-
-    if not hasattr(collections, '__iter__'):
-        collections = [collections]
-
-    for collection in collections:
-        keen_request[collection] = [data]
+    flat = _flatten(data)
+    td_request = {"json": json.dumps(flat), "time": int(time.time())}
 
     # keen.add_events(keen_request) # probably don't want to block while this processes...
-    keen_add_events.delay(keen_request)
+    td_add_events.delay(td_request)

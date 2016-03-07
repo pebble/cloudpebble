@@ -8,7 +8,7 @@ from django.views.decorators.http import require_POST, require_safe
 from ide.api import json_failure, json_response
 from ide.models.project import Project
 from ide.models.files import ResourceFile, ResourceIdentifier, ResourceVariant
-from utils.keen_helper import send_keen_event
+from utils.td_helper import send_td_event
 import utils.s3 as s3
 
 __author__ = 'katharine'
@@ -59,13 +59,13 @@ def create_resource(request, project_id):
     except Exception as e:
         return json_failure(str(e))
     else:
-        send_keen_event('cloudpebble', 'cloudpebble_create_file', data={
+        send_td_event('cloudpebble_create_file', data={
             'data': {
                 'filename': file_name,
                 'kind': 'resource',
                 'resource-kind': kind
             }
-        }, project=project, request=request)
+        }, request=request, project=project)
 
         return json_response({"file": {
             "id": rf.id,
@@ -85,13 +85,13 @@ def resource_info(request, project_id, resource_id):
     resource = get_object_or_404(ResourceFile, pk=resource_id)
     resources = resource.get_identifiers()
 
-    send_keen_event('cloudpebble', 'cloudpebble_open_file', data={
+    send_td_event('cloudpebble_open_file', data={
         'data': {
             'filename': resource.file_name,
             'kind': 'resource',
             'resource-kind': resource.kind
         }
-    }, project=project, request=request)
+    }, request=request, project=project)
 
     return json_response({
         'resource': {
@@ -115,13 +115,13 @@ def delete_resource(request, project_id, resource_id):
     except Exception as e:
         return json_failure(str(e))
     else:
-        send_keen_event('cloudpebble', 'cloudpebble_delete_file', data={
+        send_td_event('cloudpebble_delete_file', data={
             'data': {
                 'filename': resource.file_name,
                 'kind': 'resource',
                 'resource-kind': resource.kind
             }
-        }, project=project, request=request)
+        }, request=request, project=project)
 
 
         return json_response({})
@@ -142,14 +142,14 @@ def delete_variant(request, project_id, resource_id, variant):
     except Exception as e:
         return json_failure(str(e))
     else:
-        send_keen_event('cloudpebble', 'cloudpebble_delete_variant', data={
+        send_td_event('cloudpebble_delete_variant', data={
             'data': {
                 'filename': resource.file_name,
                 'kind': 'resource',
                 'resource-kind': resource.kind,
                 'variant': variant
             }
-        }, project=project, request=request)
+        }, request=request, project=project)
 
         return json_response({'resource': {
             'variants': [x.get_tags() for x in resource.variants.all()]
@@ -205,12 +205,12 @@ def update_resource(request, project_id, resource_id):
     except Exception as e:
         return json_failure(str(e))
     else:
-        send_keen_event('cloudpebble', 'cloudpebble_save_file', data={
+        send_td_event('cloudpebble_save_file', data={
             'data': {
                 'filename': resource.file_name,
                 'kind': 'source'
             }
-        }, project=project, request=request)
+        }, request=request, project=project)
 
         return json_response({"file": {
             "id": resource.id,

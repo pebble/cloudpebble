@@ -10,7 +10,7 @@ from django.shortcuts import render
 from django.views.decorators.http import require_safe, require_POST
 from ide.forms import SettingsForm
 from ide.models.user import UserGithub
-from utils.keen_helper import send_keen_event
+from utils.td_helper import send_td_event
 
 __author__ = 'katharine'
 
@@ -27,13 +27,13 @@ def settings_page(request):
         form = SettingsForm(request.POST, instance=user_settings)
         if form.is_valid():
             form.save()
-            send_keen_event('cloudpebble', 'cloudpebble_change_user_settings', request=request)
+            send_td_event('cloudpebble_change_user_settings', request=request)
             return render(request, 'ide/settings.html', {'form': form, 'saved': True, 'github': github})
 
     else:
         form = SettingsForm(instance=user_settings)
 
-    send_keen_event('cloudpebble', 'cloudpebble_view_user_settings', request=request)
+    send_td_event('cloudpebble_view_user_settings', request=request)
 
     return render(request, 'ide/settings.html', {'form': form, 'saved': False, 'github': github})
 
@@ -48,7 +48,7 @@ def start_github_auth(request):
         user_github = UserGithub.objects.create(user=request.user)
     user_github.nonce = nonce
     user_github.save()
-    send_keen_event('cloudpebble', 'cloudpebble_github_started', request=request)
+    send_td_event('cloudpebble_github_started', request=request)
     return HttpResponseRedirect('https://github.com/login/oauth/authorize?client_id=%s&scope=repo&state=%s' %
                                 (settings.GITHUB_CLIENT_ID, nonce))
 
@@ -61,7 +61,7 @@ def remove_github_auth(request):
         user_github.delete()
     except UserGithub.DoesNotExist:
         pass
-    send_keen_event('cloudpebble', 'cloudpebble_github_revoked', request=request)
+    send_td_event('cloudpebble_github_revoked', request=request)
     return HttpResponseRedirect('/ide/settings')
 
 
@@ -100,8 +100,8 @@ def complete_github_auth(request):
 
     user_github.save()
 
-    send_keen_event('cloudpebble', 'cloudpebble_github_linked', request=request, data={
+    send_td_event('cloudpebble_github_linked', data={
         'data': {'username': user_github.username}
-    })
+    }, request=request)
 
     return HttpResponseRedirect('/ide/settings')
