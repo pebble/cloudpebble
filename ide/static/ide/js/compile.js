@@ -1,4 +1,5 @@
 CloudPebble.Compile = (function() {
+    var MINIMUM_SDK2_VERSION = "v2.9";
     var MINIMUM_INSTALL_VERSION = "v3.10";
 
     var COMPILE_SUCCESS_STATES = {
@@ -519,7 +520,8 @@ CloudPebble.Compile = (function() {
                 console.log(version_string);
                 // Make sure that we have the required version - but also assume that anyone who has the string 'test'
                 // in their firmware version number (e.g. me) knows what they're doing.
-                if(/test/.test(version_string) || compare_version_strings(version_string, MINIMUM_INSTALL_VERSION) >= 0) {
+                var min_version = CloudPebble.ProjectInfo.sdk_version == '2'? MINIMUM_SDK2_VERSION : MINIMUM_INSTALL_VERSION;
+                if(/test/.test(version_string) || compare_version_strings(version_string, min_version) >= 0) {
                     var platform = Pebble.version_to_platform(version_info);
                     var sizes = {
                         aplite: mLastBuild.sizes.aplite,
@@ -552,12 +554,21 @@ CloudPebble.Compile = (function() {
                         modal.find('.progress').removeClass('progress-striped').find('.bar').css({width: (bytes * 100 / expectedBytes) + '%'})
                     });
                 } else {
-                    var fmt = gettext("Please <a href='%(update_url)s'>update your pebble</a> to %(min_version)s to install apps from CloudPebble and the appstore (you're on version %(real_version)s).");
-                    var str = interpolate(fmt, {
-                        update_url: 'https://developer.getpebble.com/2/getting-started/',
-                        min_version: MINIMUM_INSTALL_VERSION,
-                        real_version: version_string
-                    }, true);
+                    var fmt, str;
+                    if(CloudPebble.ProjectInfo.sdk_version != '2' && version_string.substr(0, 3) == "v2.") {
+                        fmt = gettext("Please <a href='%(update_url)s' target='_blank'>update your Pebble</a> to firmware %(min_version)s to install apps from CloudPebble (you're on version %(real_version)s).");
+                        str = interpolate(fmt, {
+                            update_url: "https://help.getpebble.com/customer/portal/articles/2256017",
+                            min_version: min_version,
+                            real_version: version_string
+                        }, true);
+                    } else {
+                        fmt = gettext("Please launch the Pebble phone app and update your pebble to %(min_version)s to install apps from CloudPebble and the appstore (you're on version %(real_version)s).");
+                        str = interpolate(fmt, {
+                            min_version: min_version,
+                            real_version: version_string
+                        }, true);
+                    }
                     report_error(str);
                 }
             });
