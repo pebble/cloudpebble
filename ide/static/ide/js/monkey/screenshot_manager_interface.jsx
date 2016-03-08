@@ -12,14 +12,13 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
 
     /** Render a list of errors */
     function Error(props) {
-        var kind = props.errorThrown ? interpolate(" %s", [props.errorThrown]) : "";
         var errFor = props.errorFor ? interpolate(gettext(" trying to %s"), [props.errorFor]) : "";
         var multiline = ((props.text.match(/\n/g) || []).length > 0);
         var message = (!multiline ? ": "+props.text : '');
         return (
             <div className="errors">
                 <div className="well alert alert-error">
-                    <p>{interpolate(gettext("Error%s%s%s"), [kind, errFor, message])}</p>
+                    <p>{interpolate(gettext("Error%s%s"), [errFor, message])}</p>
                     {multiline && <pre>{props.text}</pre>}
                 </div>
             </div>

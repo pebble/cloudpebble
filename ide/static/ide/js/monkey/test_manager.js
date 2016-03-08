@@ -38,11 +38,6 @@ CloudPebble.TestManager = (function() {
                 _.extend(this.state, _.indexBy(data, 'id'));
                 this.trigger('changed', this.getState());
             },
-            reportError: function(jqXHR, textStatus, errorThrown) {
-                if (textStatus !== 'abort') {
-                    this.trigger('error', {jqXHR: jqXHR, textStatus: textStatus, errorThrown: errorThrown, errorFor: this.name});
-                }
-            },
             /**
              * Send a GET request to refresh the store.
              * @param options GET parameters.
@@ -57,11 +52,13 @@ CloudPebble.TestManager = (function() {
                 else {
                     query = options;
                 }
-                return $.ajax(url, {
+                return CloudPebble.Ajax(url, {
                     data: query
                 }).done(function(result) {
                     this.syncData(result, options);
-                }.bind(this)).fail(this.reportError.bind(this));
+                }.bind(this)).fail(function(reason) {
+                    this.trigger('error', {text: reason, errorFor: this.name})
+                }.bind(this));
             },
             /**
              * The ordering function should sort the store's data.
@@ -106,7 +103,7 @@ CloudPebble.TestManager = (function() {
              * Post a new test session, running all of the tests in the project.
              */
             this.new = function () {
-                return $.ajax(base_url + 'test_sessions/run', {
+                return CloudPebble.Ajax(base_url + 'test_sessions/run', {
                     method: 'POST'
                 }).then(function (result) {
                     var session = {data: [result.data]};
@@ -145,12 +142,11 @@ CloudPebble.TestManager = (function() {
             this.refresh = function(id) {
                 var self = this;
                 var url = base_url+this.url+'/'+id;
-                return $.ajax(url).then(function(data) {
+                return CloudPebble.Ajax(url).then(function(data) {
                     self.state[id] = {text: data, id: id};
                     self.trigger('changed', self.getState());
-                }, function(failure) {
-
                 });
+                // TODO: consider handling failure here
             };
             this.subscribe = function(id, session_id, url) {
                 var self = this;

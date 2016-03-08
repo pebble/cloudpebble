@@ -24,24 +24,21 @@ CloudPebble.ProjectInfo = {};
 (function() {
     var process_response = function(data) {
         if (!data.success) {
-            return $.Deferred().reject({responseJSON: data});
+            return $.Deferred().reject(data.error ? data.error : gettext("Unknown error"));
         }
-        else return data;
+        else {
+            return data;
+        }
     };
     var process_failure = function(jqXHR, textStatus, errorThrown) {
-        console.log("Omg, failure! Now what?");
         if (textStatus == 'abort') {
             return null;
         }
-        if (jqXHR) {
-            console.log("Reject with error data");
+        if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.error) {
             return $.Deferred().reject(jqXHR.responseJSON.error);
-            //throw new Error(jqXHR.responseJSON.error);
         }
         else {
-            console.log("Reject with errorThrown");
             return $.Deferred().reject(errorThrown);
-            //throw new Error(errorThrown)
         }
     };
 

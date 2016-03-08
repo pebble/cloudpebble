@@ -490,8 +490,7 @@ CloudPebble.TestManager.Interface = (function(API) {
         return (
             <Well className="alert alert-error" >
                 <button className="button-close" onClick={props.onClick}>⨉</button>
-                <p>{interpolate(gettext("Error: %s trying to fetch %s"), [props.errorThrown, props.errorFor])}</p>
-                <pre>{props.jqXHR.responseText}</pre>
+                <p>{interpolate(gettext("Error trying to fetch %s: %s"), [props.errorFor, props.text])}</p>
             </Well>
         )
     }

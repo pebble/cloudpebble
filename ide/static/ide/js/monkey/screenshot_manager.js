@@ -72,7 +72,7 @@ CloudPebble.MonkeyScreenshots = (function() {
     var AjaxAPI = function() {
         this.getScreenshots = function(test_id) {
             var url = "/ide/project/" + PROJECT_ID + "/test/" + test_id + "/screenshots/load";
-            return $.ajax({
+            return CloudPebble.Ajax({
                 url: url,
                 dataType: 'json'
             }).then(function(result) {
@@ -85,7 +85,7 @@ CloudPebble.MonkeyScreenshots = (function() {
         this.saveScreenshots = function(test_id, new_screenshots) {
             var form_data = process_screenshots(new_screenshots);
             var url = "/ide/project/" + PROJECT_ID + "/test/" + test_id + "/screenshots/save";
-            return $.ajax({
+            return CloudPebble.Ajax({
                 url: url,
                 type: "POST",
                 data: form_data,
@@ -263,7 +263,7 @@ CloudPebble.MonkeyScreenshots = (function() {
             if (disabled) return;
             set_disabled(true);
             set_progress(index, platform, 0);
-            take_screenshot().done(function (src, blob) {
+            return take_screenshot().done(function (src, blob) {
                 var options = {file: blob, src: src, is_new: true};
                 var screenshot_set;
                 if (index === null) {
@@ -333,15 +333,10 @@ CloudPebble.MonkeyScreenshots = (function() {
                 self.trigger('waiting');
             }, 500);
             API.saveScreenshots(test_id, screenshots).then(function(result) {
-                if (result.success == false) {
-                    self.trigger('error', {errorFor: gettext('save screenshots'), text: result.error});
-                }
-                else {
-                    self.trigger('saved', true);
-                    self.loadScreenshots();
-                }
-            }, function(jqXHR, textStatus, errorThrown) {
-                self.trigger('error', {text: jqXHR.responseText, textStatus: textStatus, errorThrown: errorThrown, errorFor: gettext('save screenshots')});
+                self.trigger('saved', true);
+                self.loadScreenshots();
+            }).fail(function(reason) {
+                self.trigger('error', {text: reason, errorFor: gettext('save screenshots')});
             }).always(function() {
                 set_disabled(false);
                 clearTimeout(timeout);
