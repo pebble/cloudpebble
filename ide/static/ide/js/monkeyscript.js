@@ -79,17 +79,16 @@ CloudPebble.MonkeyScript = (function() {
                                 return result('error', list);
                             }
                         } else {
-                            var value = stream.match(/^.*$/i);
-                            value = value[0];
-                            var thing;
+                            var parse_result = null;
                             if (state.command == 'screenshot') {
-                                thing = result(null, {command: 'screenshot'});
+                                var is_valid_screenshot = stream.match(/^\s*[.a-zA-Z0-9_-]+$/i);
+                                parse_result = result(is_valid_screenshot ? null : 'error', {command: 'screenshot'});
                             }
-                            stream.skipToEnd();
                             state.command = null;
                             state.keyword = null;
                             state.value = null;
-                            return thing;
+                            stream.skipToEnd();
+                            return parse_result;
                         }
                     }
 
