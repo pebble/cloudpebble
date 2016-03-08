@@ -6,6 +6,7 @@ import urllib
 import zipfile
 import requests
 
+from django.conf import settings
 from django.db import transaction
 from ide.models.monkey import TestRun, TestSession, TestFile
 from utils import orchestrator
@@ -104,7 +105,7 @@ class TestBundle(object):
         os.mkdir(archive_dir)
         try:
             latest_build = self.project.get_last_build()
-            if include_pbw and not latest_build:
+            if settings.STRICT_TEST_BUNDLES and include_pbw and not latest_build:
                 raise BundleException("Cannot test a project with no builds")
             for test in self.tests:
                 test_folder = os.path.join(archive_dir, test.file_name)

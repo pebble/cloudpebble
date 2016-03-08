@@ -448,6 +448,10 @@ PHONE_SHORTURL = _environ.get('PHONE_SHORTURL', 'cpbl.io')
 
 ORCHESTRATOR_URL = _environ.get('ORCHESTRATOR_URL', 'http://orchestrator.hq.getpebble.com')
 
+# Tests can set this setting to false to override the server-side check for existing builds
+# when running monkeyscript tests
+STRICT_TEST_BUNDLES = True
+
 # import local settings
 try:
     from settings_local import *

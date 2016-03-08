@@ -18,6 +18,7 @@ class TestsTests(CloudpebbleTestCase):
     def setUp(self):
         self.login()
 
+    @override_settings(STRICT_TEST_BUNDLES=False)
     @mock.patch('utils.bundle.orchestrator')
     def add_and_run_tests(self, orchestrator, names=None, run_all=True):
         orchestrator.upload_test.return_value = 'bundle_url'
