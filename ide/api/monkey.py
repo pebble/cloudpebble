@@ -64,12 +64,18 @@ def serialise_session(session, include_runs=False):
     :return: A dict full of info from the TestSession object
     """
     runs = TestRun.objects.filter(session=session)
+
+    pendings = runs.filter(code=TestCode.PENDING)
+    passes = runs.filter(code=TestCode.PASSED)
+    fails = runs.filter(code__lt=0)
+    status = TestCode.PENDING if pendings.count() > 0 else (TestCode.FAILED if fails.count() > 0 else TestCode.PASSED)
     result = {
         'id': session.id,
         'date_added': str(session.date_added),
-        'passes': len(runs.filter(code=TestCode.PASSED)),
-        'fails': len(runs.filter(code__lt=0)),
-        'run_count': len(runs),
+        'passes': passes.count(),
+        'fails': fails.count(),
+        'run_count': runs.count(),
+        'status': status,
         'kind': session.kind
     }
     if session.date_completed is not None:

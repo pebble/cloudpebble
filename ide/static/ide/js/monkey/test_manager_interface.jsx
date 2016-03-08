@@ -270,10 +270,12 @@ CloudPebble.TestManager.Interface = (function(API) {
                 'test-passed': session.passes == session.run_count,
                 'test-pending': session.fails == 0 && (session.passes != session.run_count)
             });
+
             return (
                 <tr className={rowClassName} onClick={this.onClickSession}>
                     <td><Anchor onClick={this.onClickSession}>{datestring}</Anchor></td>
                     <td><SessionKindLabel kind={session.kind} long={false} /></td>
+                    <TestResultCell code={session.status} />
                     <td className={passesClassName}>{session.passes+'/'+session.run_count}</td>
                 </tr>
             )
@@ -300,6 +302,7 @@ CloudPebble.TestManager.Interface = (function(API) {
                         <thead><tr>
                             <th>{gettext('Date')}</th>
                             <th>{gettext('Kind')}</th>
+                            <th>{gettext('Status')}</th>
                             <th>{gettext('Passes')}</th>
                         </tr></thead>
                         <tbody>{sessions}</tbody>
