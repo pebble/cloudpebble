@@ -36,7 +36,7 @@
             }
             var tz_offset = -(new Date()).getTimezoneOffset(); // Negative because JS does timezones backwards.
             $.post('/ide/emulator/launch', {platform: mPlatform, token: USER_SETTINGS.token, tz_offset: tz_offset})
-                .done(function (data) {
+                .then(function (data) {
                     console.log(data);
                     if (data.success) {
                         mHost = data.host;
@@ -271,7 +271,7 @@
             showLaunchSplash();
             mPendingDeferred = $.Deferred();
             spawn()
-                .done(function() {
+                .then(function() {
                     CloudPebble.Analytics.addEvent('qemu_launched', {success: true});
                     startVNC();
                 })
@@ -288,8 +288,8 @@
                 return;
             }
             mRFB.disconnect();
-            killEmulator()
-                .done(function() {
+            return killEmulator()
+                .then(function() {
                     console.log('killed emulator.');
                 })
                 .fail(function() {
@@ -301,12 +301,12 @@
             var data ={
                 emu: mInstanceID,
                 token: mToken,
-                host: mHost,
+                host: mHost
             };
             if (update) {
                 data['update'] = true;
             }
-            return $.ajax({
+            return CloudPebble.Ajax({
                 method: 'POST',
                 url: '/ide/project/'+project_id+'/tests/'+test_id+'/run_qemu',
                 data: data

@@ -21,8 +21,44 @@ CloudPebble.ProgressBar = (function() {
 
 CloudPebble.ProjectInfo = {};
 
+(function() {
+    var process_response = function(data) {
+        if (!data.success) {
+            return $.Deferred().reject({responseJSON: data});
+        }
+        else return data;
+    };
+    var process_failure = function(jqXHR, textStatus, errorThrown) {
+        console.log("Omg, failure! Now what?");
+        if (textStatus == 'abort') {
+            return null;
+        }
+        if (jqXHR) {
+            console.log("Reject with error data");
+            return $.Deferred().reject(jqXHR.responseJSON.error);
+            //throw new Error(jqXHR.responseJSON.error);
+        }
+        else {
+            console.log("Reject with errorThrown");
+            return $.Deferred().reject(errorThrown);
+            //throw new Error(errorThrown)
+        }
+    };
+
+    CloudPebble.Post = function() {
+        //return Promise.resolve($.post.apply(null, arguments)).then(process_response).catch(process_failure);
+        return $.post.apply(null, arguments).then(process_response, process_failure);
+    };
+
+    CloudPebble.Ajax = function() {
+        //return Promise.resolve($.ajax.apply(null, arguments)).then(process_response).catch(process_failure);
+        return $.ajax.apply(null, arguments).then(process_response, process_failure);
+    };
+})();
+
 CloudPebble.Init = function() {
     jquery_csrf_setup();
+
 
     // Load in project data.
     $.getJSON('/ide/project/' + PROJECT_ID + '/info', function(data) {
@@ -188,6 +224,13 @@ CloudPebble.Utils = {
         var t = Math.round(Math.abs(Date.parse(s2.replace(' ','T')) - Date.parse(s1.replace(' ','T'))) / 1000);
         var n = t.toFixed(0);
         return interpolate(ngettext("%s second", "%s seconds", n), [n]);
+    },
+    Delay: function(time) {
+        var d = $.Deferred();
+        setTimeout(function() {
+            d.resolve();
+        }, time);
+        return d.promise();
     }
 };
 

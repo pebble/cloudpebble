@@ -15,7 +15,7 @@ from django.views.decorators.http import require_POST, require_safe
 from ide.api import json_failure, json_response
 from ide.models.monkey import TestSession, TestRun, TestCode, TestLog, ScreenshotSet, ScreenshotFile
 from ide.models.project import Project
-from utils.bundle import TestBundle
+from utils.bundle import TestBundle, BundleException
 
 __author__ = 'joe'
 
@@ -168,21 +168,24 @@ def run_qemu_test(request, project_id, test_id):
     update = request.POST.get('update', False)
     # Get QEMU server which corresponds to the requested host
     server = next(x for x in set(settings.QEMU_URLS) if host in x)
-    bundle = TestBundle(project, [int(test_id)])
-    response, run, session = bundle.run_on_qemu(
-        server=server,
-        token=token,
-        verify=settings.COMPLETION_CERTS,
-        emu=emu,
-        notify_url_builder=make_notify_url_builder(request),
-        update=update
-    )
-    subscribe_url = server + 'qemu/%s/test/subscribe' % urllib.quote_plus(emu)
-    response['run_id'] = run.id
-    response['session_id'] = session.id
-    response['test_id'] = int(test_id)
-    response['subscribe_url'] = subscribe_url
-    return json_response(response)
+    try:
+        bundle = TestBundle(project, [int(test_id)])
+        response, run, session = bundle.run_on_qemu(
+            server=server,
+            token=token,
+            verify=settings.COMPLETION_CERTS,
+            emu=emu,
+            notify_url_builder=make_notify_url_builder(request),
+            update=update
+        )
+        subscribe_url = server + 'qemu/%s/test/subscribe' % urllib.quote_plus(emu)
+        response['run_id'] = run.id
+        response['session_id'] = session.id
+        response['test_id'] = int(test_id)
+        response['subscribe_url'] = subscribe_url
+        return json_response(response)
+    except BundleException as e:
+        return json_failure(e, 400)
 
 
 @require_POST
@@ -276,7 +279,7 @@ def download_tests(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     test_ids = [int(test) for test in request.GET.get('tests', "").split(",") if test] or None
 
-    with TestBundle(project, test_ids).open(include_pbw=True, frame_tests=False) as f:
+    with TestBundle(project, test_ids).open(frame_tests=False) as f:
         return HttpResponse(f.read(), content_type='application/zip')
 
 
@@ -287,8 +290,11 @@ def post_test_session(request, project_id):
     # TODO: run as celery task?
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     test_ids = [int(test) for test in request.POST.get('tests', "").split(",") if test] or None
-    bundle = TestBundle(project, test_ids=test_ids)
-    session = bundle.run_on_orchestrator(make_notify_url_builder(request, settings.QEMU_LAUNCH_AUTH_HEADER))
-    return json_response({"data": serialise_session(session, include_runs=True)})
+    try:
+        bundle = TestBundle(project, test_ids=test_ids)
+        session = bundle.run_on_orchestrator(make_notify_url_builder(request, settings.QEMU_LAUNCH_AUTH_HEADER))
+        return json_response({"data": serialise_session(session, include_runs=True)})
+    except BundleException as e:
+        return json_failure(e, 400)
 
 # TODO: 'ping' functions to see if anything has changed. Or, "changed since" parameters.

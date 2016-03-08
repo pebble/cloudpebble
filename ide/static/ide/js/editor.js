@@ -43,13 +43,20 @@ CloudPebble.Editor = (function() {
             update: false,
             platform: CloudPebble.Compile.GetPlatformForInstall()
         });
-        SharedPebble.disconnect(true);
-        CloudPebble.Compile.DoInstall({
-            show_logs_prompt: false,
-            platform: options.platform
-        }).then(function() {
-            return SharedPebble.getCurrentEmulator().runTest(PROJECT_ID, test_id, options.update);
-        }).then(function(result) {
+
+        SharedPebble.disconnect(true).then(function(did_close) {
+            // Wait for a second if we needed to disconnect before starting again.
+            return (did_close ? CloudPebble.Utils.Delay(1000) : null);
+        }).then(function () {
+            return SharedPebble.getEmulator(options.platform);
+        }).then(function (emulator) {
+            CloudPebble.Prompts.Progress.Update(gettext("Starting test"));
+            return emulator.runTest(PROJECT_ID, test_id, options.update);
+        }).fail(function (reason) {
+            CloudPebble.Prompts.Progress.Update(reason);
+            CloudPebble.Prompts.Progress.Fail();
+        }).then(function (result) {
+            CloudPebble.Prompts.Progress.Hide();
             return CloudPebble.TestManager.ShowLiveTestRun(result['subscribe_url'], result['session_id'], result['run_id']);
         });
     }

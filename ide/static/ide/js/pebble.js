@@ -70,11 +70,12 @@ var SharedPebble = new (function() {
             down: emulator_container.find('.down'),
             back: emulator_container.find('.back'),
         });
-        window.emu = mEmulator;
-        mEmulator.on('disconnected', function() {
+        var hide_emulator = function() {
             $('#sidebar').removeClass('with-emulator');
             mEmulator = null;
-        });
+        };
+        window.emu = mEmulator;
+        mEmulator.on('disconnected', hide_emulator);
         $('#sidebar').addClass('with-emulator');
         var canvas_size = URL_BOOT_IMG[ConnectionPlatformNames[kind]].size;
         if (isRound(kind)) {
@@ -88,6 +89,7 @@ var SharedPebble = new (function() {
         mEmulator.connect().done(function() {
             deferred.resolve(mEmulator);
         }).fail(function(reason) {
+            hide_emulator();
             deferred.reject(reason);
         }).always(function() {
             clearInterval(statementInterval);
@@ -204,22 +206,34 @@ var SharedPebble = new (function() {
         return mPebble;
     };
 
+    // Resolves with 'true' if anything actually disconnected, or false otherwise
     this.disconnect = function(shutdown) {
+        var close_pebble = null;
+        var disconnect_emu = null;
+
         if(mPebble) {
+            close_pebble = $.Deferred();
             mPebble.disable_app_logs();
             mPebble.close();
+            // Wait for a close or error event before disabling events,
             // Wait for a close or error event before disabling events,
             // in order to allow the events to be receieved by any listeners
             mPebble.on('close error', function() {
                 mPebble.off();
                 mPebble = null;
+                close_pebble.resolve(true);
             });
             mConnectionType = ConnectionType.None;
+            close_pebble.promise();
         }
         if(shutdown === true && mEmulator) {
-            mEmulator.disconnect();
+            disconnect_emu = mEmulator.disconnect();
             mEmulator = null;
         }
+
+        return $.when([close_pebble, disconnect_emu]).then(function(results) {
+            return _.any(results);
+        });
     };
 
     this.isVirtual = function() {

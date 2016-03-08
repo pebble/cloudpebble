@@ -50,6 +50,10 @@ def _zip_directory(input_dir, output_zip):
     zip_out.close()
 
 
+class BundleException(Exception):
+    pass
+
+
 class TestBundle(object):
     def __init__(self, project, test_ids=None):
         if test_ids is not None:
@@ -100,6 +104,8 @@ class TestBundle(object):
         os.mkdir(archive_dir)
         try:
             latest_build = self.project.get_last_build()
+            if include_pbw and not latest_build:
+                raise BundleException("Cannot test a project with no builds")
             for test in self.tests:
                 test_folder = os.path.join(archive_dir, test.file_name)
                 os.mkdir(test_folder)

@@ -114,7 +114,7 @@ def sync_screenshots(request, project_id, test_id):
                 if screenshot.id in deleted_screenshot_set_ids:
                     screenshot.delete()
     except (FloatingPointError, ValueError) as e:
-        return json_failure(str(e))
+        return json_failure(e)
     else:
         current_screenshot_sets = ScreenshotSet.objects.filter(test=test)
         return json_response({"screenshots": [make_screenshot_dict(screenshot, project_id) for screenshot in current_screenshot_sets]})
