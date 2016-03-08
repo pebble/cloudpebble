@@ -379,6 +379,8 @@ CloudPebble.MonkeyScreenshots = (function() {
             return CloudPebble.Compile.GetPlatformsCompiledFor().then(function(platforms) {
                 if (platforms.length > 0) {
                     supported_platforms = platforms;
+                    // Sorting platforms alphabetically is practically *and* technically correct
+                    platforms.sort();
                 }
                 this.update();
             }.bind(this));
