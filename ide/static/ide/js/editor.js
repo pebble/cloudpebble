@@ -44,7 +44,7 @@ CloudPebble.Editor = (function() {
             platform: CloudPebble.Compile.GetPlatformForInstall()
         });
 
-        SharedPebble.disconnect(true).then(function(did_close) {
+        return SharedPebble.disconnect(true).then(function(did_close) {
             // Wait for a second if we needed to disconnect before starting again.
             return (did_close ? CloudPebble.Utils.Delay(1000) : null);
         }).then(function () {
@@ -726,7 +726,7 @@ CloudPebble.Editor = (function() {
 
                 run_btn.click(function() {
                     if (file.target == 'test') {
-                        run_test(file.id, {update: false});
+                        show_run_test_prompt(file.id);
                     }
                     else {
                         run();
@@ -737,29 +737,34 @@ CloudPebble.Editor = (function() {
                 run_btn.popover({
                     trigger: 'hover',
                     content: function() {
-                        var capitalise_first_letter = function(str) {return str.charAt(0).toUpperCase() + str.slice(1);};
+                        var capitalise_first_letter = function(str) {
+                            return str.charAt(0).toUpperCase() + str.slice(1);
+                        };
+                        if (file.target !== 'test') {
+                            var tooltip = $('<div>');
+                            var build_platforms = CloudPebble.ProjectInfo.app_platforms;
+                            if (build_platforms) {
+                                var build_platform_names = _.map(build_platforms.split(','), capitalise_first_letter).join(', ');
+                                tooltip.append($(interpolate("<div><strong>%s: </strong>%s</div>", [gettext("Build for"), build_platform_names])));
+                            }
+                            var run_platform = CloudPebble.Compile.GetPlatformForInstall();
+                            var run_platform_name;
+                            if (run_platform == ConnectionType.Phone) {
+                                run_platform_name = gettext("Phone");
+                            }
+                            else if (run_platform == ConnectionType.Qemu) {
+                                // If the emulator is already running, ask it directly what platform it's using
+                                run_platform_name = SharedPebble.getPlatformName() + gettext(" Emulator");
+                            }
+                            else {
+                                run_platform_name = ConnectionPlatformNames[run_platform] + gettext(" Emulator");
+                            }
+                            tooltip.append(interpolate("<div><strong>%s: </strong>%s</div>", [gettext("Run on"), capitalise_first_letter(run_platform_name)]));
 
-                        var tooltip = $('<div>');
-                        var build_platforms = CloudPebble.ProjectInfo.app_platforms;
-                        if (build_platforms) {
-                            var build_platform_names = _.map(build_platforms.split(','), capitalise_first_letter).join(', ');
-                            tooltip.append($(interpolate("<div><strong>%s: </strong>%s</div>", [gettext("Build for"), build_platform_names])));
+                            return tooltip;
+                        } else {
+                            return gettext("Run this test now and watch it run in the emulator.");
                         }
-                        var run_platform = CloudPebble.Compile.GetPlatformForInstall();
-                        var run_platform_name;
-                        if (run_platform == ConnectionType.Phone && file.target !== 'test') {
-                            run_platform_name = gettext("Phone");
-                        }
-                        else if (run_platform == ConnectionType.Qemu) {
-                            // If the emulator is already running, ask it directly what platform it's using
-                            run_platform_name = SharedPebble.getPlatformName() + gettext(" Emulator");
-                        }
-                        else {
-                            run_platform_name = ConnectionPlatformNames[run_platform] + gettext(" Emulator");
-                        }
-                        tooltip.append(interpolate("<div><strong>%s: </strong>%s</div>", [gettext("Run on"), capitalise_first_letter(run_platform_name)]));
-
-                        return tooltip;
                     },
                     html: true,
                     placement: 'left',
@@ -860,6 +865,7 @@ CloudPebble.Editor = (function() {
 
     function init() {
         init_create_prompt();
+        init_test_prompt();
         CodeMirror.commands.autocomplete = function(cm) {
             cm.showHint({hint: CloudPebble.Editor.Autocomplete.complete, completeSingle: false});
         };
@@ -1059,6 +1065,35 @@ CloudPebble.Editor = (function() {
         }).fail(function(xhr, code, description) {
             callback({success: false, error: description});
         });
+    }
+
+    function init_test_prompt() {
+        var prompt = $('#run-live-test-prompt');
+        var run_button = prompt.find('#run-live-test-button');
+        var platform_select = prompt.find('#run-live-test-platform');
+        var update_checkbox = prompt.find('#run-live-test-update-screenshots');
+        var test_id_input = prompt.find('#run-live-test-id');
+        var error_box = prompt.find('.alert');
+
+
+        run_button.click(function() {
+            var platform = QEMUConnectionTypes[platform_select.val()];
+            var update = update_checkbox.is(':checked');
+            var test_id = test_id_input.val();
+            console.log("test id", test_id_input);
+            prompt.modal('hide');
+            run_test(test_id, {platform: platform, update: update});
+
+        });
+
+    }
+
+    function show_run_test_prompt(test_id) {
+        var prompt = $('#run-live-test-prompt');
+        // reset the prompt
+        prompt.find('.alert').text('').hide();
+        prompt.find('#run-live-test-id').val(test_id);
+        prompt.modal('show');
     }
 
     function init_create_prompt() {

@@ -222,25 +222,6 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
         return (<span className={'monkey-select-platform platform-'+platform} onClick={onClick}>{platform}</span>)
     }
 
-    function RunButton(props) {
-        var onClick = function() {
-            CloudPebble.Editor.RunTest(props.test_id, {
-                platform: QEMUConnectionTypes[props.platform], update: false
-            });
-        };
-        return (<button className='btn run-test-btn' onClick={onClick}>Run Test</button>)
-    }
-
-    function UpdateButton(props) {
-        var platform = props.platform;
-        var onClick = function() {
-            CloudPebble.Editor.RunTest(props.test_id, {
-                platform: QEMUConnectionTypes[props.platform], update: true
-            });
-        };
-        return (<button className='btn btn-affirmative' onClick={onClick}>Update Screenshots</button>)
-    }
-
     /** ScreenshotManager contains all of the screenshot manager UI */
     var ScreenshotManager = React.createClass({
         componentDidMount: function() {
@@ -270,7 +251,9 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
             };
             return (
                 <div onDragOver={stopEvent} onDrop={stopEvent}>
-                    { /* <img ref="help" src="/static/ide/img/help.png" className="field-help" data-original-title=""/> */ }
+                    <img ref="help" src="/static/ide/img/help.png" className="field-help" data-original-title=""/>
+                    <h2>{gettext('Screenshots')}</h2>
+
                     {!!this.props.error && <Error {...this.props.error} />}
 
                     <div className="monkey-platforms">
@@ -278,19 +261,6 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
                             <PlatformTitle key={platform} platform={platform}/>
                         )})}
                     </div>
-                    <div className="monkey-platforms">
-                        {this.props.platforms.map(function(platform) { return (
-                            <UpdateButton key={platform} test_id={this.props.test_id} platform={platform}/>
-                        )}.bind(this))}
-                    </div>
-                    <div className="monkey-platforms">
-                        {this.props.platforms.map(function(platform) { return (
-                            <RunButton key={platform} test_id={this.props.test_id} platform={platform}/>
-                        )}.bind(this))}
-                    </div>
-
-                    <h2>{gettext('Screenshots')}</h2>
-
                     <ScreenshotForm screenshots={this.props.screenshots}
                                     platforms={this.props.platforms}
                                     disabled={this.props.disabled}

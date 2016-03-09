@@ -123,6 +123,38 @@
 
 {% block modals %}
 <!-- Create new file prompt -->
+<div id="run-live-test-prompt" class="modal hide fade" tabindex="-1" role="dialog">
+    <div class="modal-header">
+        <h3>{% trans 'Run test in emulator' %}</h3>
+    </div>
+    <form class="form-horizontal">
+        <input type="hidden" id="run-live-test-id" />
+        <div class="modal-body">
+            <div class="alert alert-error hide"></div>
+            <div class="control-group">
+                <label class="control-label" for="run-live-test-platform">{% trans 'Platform' %}</label>
+                <div class="controls">
+                    <select id="run-live-test-platform">
+                        <option value="aplite" selected>Aplite</option>
+                        <option value="basalt" selected>Basalt</option>
+                        <option value="chalk" selected>Chalk</option>
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="run-live-test-update-screenshots" class="long-form-label">{% trans 'Update screenshots' %}</label>
+                <div class="controls">
+                    <input type="checkbox" id="run-live-test-update-screenshots">
+                    <p>{% trans 'If this checkbox is ticked, any missing screenshots will be uploaded automatically, instead of causing a test failure.' %}</p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" data-dismiss="modal">{% trans 'Cancel' %}</button>
+            <button class="btn btn-primary" id="run-live-test-button">{% trans 'Run Test' %}</button>
+        </div>
+    </form>
+</div>
 <div id="editor-new-file-prompt" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
         <h3>{% trans 'Create new file' %}</h3>

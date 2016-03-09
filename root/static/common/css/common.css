@@ -313,6 +313,11 @@ h2.section-heading {
     padding-right: 20px;
 }
 
+.form-horizontal .control-group label.long-form-label {
+    /* This should be applied to labels which are too long for one line */
+    line-height: 33px;
+}
+
 .form-horizontal .controls {
     margin-bottom: 20px;
 }
