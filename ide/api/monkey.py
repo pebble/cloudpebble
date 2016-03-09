@@ -102,10 +102,10 @@ def get_test_session(request, project_id, session_id):
 def get_test_sessions(request, project_id):
     """ Fetch all test sessions for a project, optionally filtering by ID """
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
-    id = request.GET.get('id', None)
+    session_id = request.GET.get('id', None)
     kwargs = {'project': project}
-    if id is not None:
-        kwargs['id'] = id
+    if session_id is not None:
+        kwargs['id'] = session_id
     sessions = TestSession.objects.filter(**kwargs)
     # TODO: KEEN
     # TODO: deal with errors here on the client

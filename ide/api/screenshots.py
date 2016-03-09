@@ -66,6 +66,7 @@ def sync_screenshots(request, project_id, test_id):
     - A new screenshot for "two.png" is uploaded, using the first uploaded file
     - Any other screenshots are deleted.
     """
+
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     screenshot_data = json.loads(request.POST['screenshots'])
     uploaded_files = request.FILES.getlist('files[]')
