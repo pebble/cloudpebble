@@ -209,6 +209,7 @@ CloudPebble.TestManager.Interface = (function(API) {
                     {!this.props.test && <td><RunTitle run={run} /></td>}
                     {!this.props.session && <td>{datestring}</td>}
                     <TestResultCell code={run.code} />
+                    <td>{run.platform}</td>
                     <td>{(!run.logs ? '':
                         <Anchor href={run.logs} target='_blank' onClick={show_logs}>{gettext('Show logs')}</Anchor>
                         )}
@@ -231,6 +232,7 @@ CloudPebble.TestManager.Interface = (function(API) {
                             {this.props.test ? null : <th>{gettext('Name')}</th>}
                             {this.props.session ? null : <th>{gettext('Date')}</th>}
                             <th>{gettext('Status')}</th>
+                            <th>{gettext('Platform')}</th>
                             <th></th>
                         </tr></thead>
                         <tbody>{children}</tbody>
@@ -441,6 +443,7 @@ CloudPebble.TestManager.Interface = (function(API) {
                 <table>
                     <tbody>
                     <tr><th>{gettext('Test')}</th><td><Anchor onClick={function() {API.Route.navigate('/test', test.id)}}>{test.name}</Anchor></td></tr>
+                    <tr><th>{gettext('Platform')}</th><td> {run.platform} </td></tr>
                     <tr><th>{gettext('Session')}</th><td><Anchor onClick={function() {API.Route.navigate('/session', session.id)}}>{datestring}</Anchor></td></tr>
                     {run_completed && <tr><th>{gettext('Completion date')}</th><td>{run_completed}</td></tr>}
                     <tr><th>{gettext('Result')}</th><TestResultCell code={run.code} /></tr>

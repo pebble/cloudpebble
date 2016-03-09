@@ -1,15 +1,15 @@
 import os
 
 from django.core.urlresolvers import reverse, NoReverseMatch
+from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_safe
-from django.http import HttpResponse
 
 from ide.api import json_response, json_failure
-from orchestrator_proxy.utils.filter_dict import filter_dict
 from orchestrator_proxy.utils import uuid_map
 from orchestrator_proxy.utils.auth import check_token
 from utils import orchestrator
+from utils.filter_dict import filter_dict, TransformValue, TransformKeyAndValue
 
 
 @require_safe
@@ -63,6 +63,9 @@ class TestInfoProcessor(object):
         :param new_id: ID to assign to the output
         :param build_absolute_uri: A function which builds an absolute URL for CloudPebble given a local URL
         """
+        get_platform = TransformKeyAndValue(lambda configs: ('platform', orchestrator.platform_for_device(configs['firmware']['device_type'])))
+        process_artefacts = TransformValue(self.process_artefacts)
+
         # Whitelist the keys and rewrite artefact URLs
         whitelist = {
             "status": True,
@@ -74,10 +77,11 @@ class TestInfoProcessor(object):
                     "result": {
                         "duration": True,
                         "ret": True,
-                        "artifacts": self.process_artefacts
+                        "artifacts": process_artefacts
                     }
                 }
-            }
+            },
+            "sw_configs": get_platform
         }
         filtered_info = filter_dict(info, whitelist)
 

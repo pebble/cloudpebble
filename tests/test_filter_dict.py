@@ -1,6 +1,6 @@
-from orchestrator_proxy.utils.filter_dict import filter_dict
-
 from unittest import TestCase
+
+from utils.filter_dict import filter_dict, TransformValue, TransformKeyAndValue
 
 
 class TestFilterDict(TestCase):
@@ -33,7 +33,7 @@ class TestFilterDict(TestCase):
             'numbers': [2, 10, 'aa'],
         }
         spec = {
-            'numbers': lambda v: [x * 2 for x in v]
+            'numbers': TransformValue(lambda v: [x * 2 for x in v])
         }
         self.assertDictEqual(filter_dict(before, spec), after)
 
@@ -57,7 +57,7 @@ class TestFilterDict(TestCase):
             'a': 2,
             'b': 3
         }
-        spec = {True: lambda x: x + 1}
+        spec = {True: TransformValue(lambda x: x + 1)}
         self.assertDictEqual(filter_dict(before, spec), after)
 
     def test_wildcard_values(self):
@@ -85,4 +85,20 @@ class TestFilterDict(TestCase):
         spec = {True: {
             'key': True
         }}
+        self.assertDictEqual(filter_dict(before, spec), after)
+
+    def test_transform_key_and_value(self):
+        before = {
+            'a': 'change_me',
+            'b': 'filter_me',
+            'c': 'keep_me'
+        }
+        after = {
+            'newkey': 'change_me_changed',
+            'c': 'keep_me'
+        }
+        spec = {
+            'a': TransformKeyAndValue(lambda x: ('newkey', x + '_changed')),
+            'c': True,
+        }
         self.assertDictEqual(filter_dict(before, spec), after)

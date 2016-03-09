@@ -297,10 +297,11 @@
                 });
         };
 
-        this.runTest = function(project_id, test_id, update) {
+        this.runTest = function(project_id, test_id, platform, update) {
             var data ={
                 emu: mInstanceID,
                 token: mToken,
+                platform: platform,
                 host: mHost
             };
             if (update) {

@@ -65,23 +65,32 @@ class TestBundle(object):
 
     def run_on_orchestrator(self, notify_url_builder):
         # Send the bundle to orchestrator
+        try:
+            platforms = self.project.get_last_build().get_sizes().keys()
+        except AttributeError as e:
+            if not settings.STRICT_TEST_BUNDLES:
+                platforms = ['basalt']
+            else:
+                raise e
+
         with self.open(include_pbw=True) as f:
             bundle_url = orchestrator.upload_test(f)
 
         with transaction.atomic():
             # Set up the test session
-            session, runs = self.setup_test_session(kind='batch')
-            orch_name = "Project %s, Job %s" % (self.project.pk, session.id)
+            session, runs = self.setup_test_session(kind='batch', platforms=platforms)
 
-            orchestrator.submit_test(bundle_url, orch_name, notify_url_builder(session))
+            for platform in platforms:
+                orch_name = "Project %s, Job %s for %s" % (self.project.pk, session.id, platform.capitalize())
+                orchestrator.submit_test(bundle_url, platform=platform, job_name=orch_name, notify_url=notify_url_builder(session))
         return session
 
-    def run_on_qemu(self, server, token, verify, emu, notify_url_builder, update):
+    def run_on_qemu(self, server, token, verify, emu, platform, notify_url_builder, update):
         # If the request fails, the test session/runs will not be created
         assert len(self.tests) == 1
 
         with transaction.atomic():
-            session, runs = self.setup_test_session(kind='live')
+            session, runs = self.setup_test_session(kind='live', platforms=[platform])
             # TODO: Since we know we're communicating with localhost things, build_absolute_uri may not be appropriate.
             callback_url = notify_url_builder(session)
             post_url = server + 'qemu/%s/test' % urllib.quote_plus(emu)
@@ -118,7 +127,7 @@ class TestBundle(object):
         finally:
             shutil.rmtree(temp_dir)
 
-    def setup_test_session(self, kind):
+    def setup_test_session(self, kind, platforms):
         assert kind in dict(TestSession.SESSION_KINDS).keys()
 
         with transaction.atomic():
@@ -128,10 +137,12 @@ class TestBundle(object):
             runs = []
 
             # Then make a test run for every test
-            for test in self.tests:
-                run = TestRun.objects.create(session=session, test=test, original_name=test.file_name)
-                run.save()
-                runs.append(run)
+            for platform in platforms:
+                assert platform in [x[0] for x in TestRun.PLATFORM_CHOICES]
+                for test in self.tests:
+                    run = TestRun.objects.create(session=session, test=test, platform=platform, original_name=test.file_name)
+                    run.save()
+                    runs.append(run)
 
         # Return the session and its runs
         return session, runs

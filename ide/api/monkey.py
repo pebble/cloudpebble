@@ -16,6 +16,7 @@ from ide.api import json_failure, json_response
 from ide.models.monkey import TestSession, TestRun, TestCode, TestLog, ScreenshotSet, ScreenshotFile
 from ide.models.project import Project
 from utils.bundle import TestBundle, BundleException
+from utils import orchestrator
 
 __author__ = 'joe'
 
@@ -37,7 +38,8 @@ def serialise_run(run, link_test=True, link_session=True):
         'name': run.name,
         'logs': reverse('ide:get_test_run_log', args=[run.session.project.id, run.id]) if run.has_log else None,
         'date_added': str(run.session.date_added),
-        'artefacts': run.artefacts
+        'artefacts': run.artefacts,
+        'platform': run.platform
     }
 
     if link_test and run.has_test:
@@ -165,6 +167,8 @@ def run_qemu_test(request, project_id, test_id):
     token = request.POST['token']
     host = request.POST['host']
     emu = request.POST['emu']
+    platform = request.POST['platform']
+
     update = request.POST.get('update', False)
     # Get QEMU server which corresponds to the requested host
     server = next(x for x in set(settings.QEMU_URLS) if host in x)
@@ -175,6 +179,7 @@ def run_qemu_test(request, project_id, test_id):
             token=token,
             verify=settings.COMPLETION_CERTS,
             emu=emu,
+            platform=platform,
             notify_url_builder=make_notify_url_builder(request),
             update=update
         )
@@ -210,66 +215,88 @@ def notify_test_session(request, project_id, session_id):
     date_completed = timezone.now()
 
     # Different procedures depending on whether orchestrator or qemu-controller are notifying.
+    # TODO: consider whether either of these functions should be celery tasks
     if orch_id:
-        # TODO: do this all in a celery task?
-        with transaction.atomic():
-            # GET /api/jobs/<id>
-            result = requests.get('%s/api/jobs/%s' % (settings.ORCHESTRATOR_URL, orch_id))
-            result.raise_for_status()
-
-            # find each test in "tests"
-            for test_name, test_info in result.json()["tests"].iteritems():
-                run = session.runs.get(test__file_name=test_name)
-                # for each test, download the logs
-
-                log_id = test_info['_id']
-                log_url = '%s/tasks/%s/output' % (settings.ORCHESTRATOR_URL, log_id)
-                artefacts = test_info['result']['artifacts']
-                log = requests.get(log_url).text
-                # TODO: better assign test result
-                test_return = test_info["result"]["ret"]
-                # save the test results and logs in the database
-                test_result = TestCode.PASSED if int(test_return) == 0 else TestCode.FAILED
-                run.code = test_result
-                run.log = log
-                run.artefacts = artefacts
-                run.date_completed = date_completed
-                run.save()
-            session.date_completed = date_completed
-            session.save()
+        # GET /api/jobs/<id>
+        job_info = orchestrator.get_job_info(orch_id)
+        notify_orchestrator_session(date_completed, session, job_info)
     else:
+        uploaded_files = request.FILES.getlist('uploads[]')
+        platform = request.POST.get('uploads_platform', None)
         log = request.POST['log']
         status = request.POST['status']
-        if status == 'passed':
-            result = TestCode.PASSED
-        elif status == 'failed':
-            result = TestCode.FAILED
-        else:
-            result = TestCode.ERROR
-        # Non-orchestrator notifications should only be for sessions with single runs
-        run = TestRun.objects.get(session=session)
-        with transaction.atomic():
-            session.date_completed = date_completed
-            run.code = result
-            run.log = log
-            run.date_completed = date_completed
-            session.save()
-            run.save()
-
-        uploaded_files = request.FILES.getlist('uploads[]')
-        if uploaded_files:
-            platform = request.POST['uploads_platform']
-            test = run.test
-            for posted_file in uploaded_files:
-                if posted_file.content_type != "image/png":
-                    raise ValueError("Screenshots must be PNG files")
-                name = os.path.splitext(os.path.basename(posted_file.name))[0]
-                screenshot_set, did_create_set = ScreenshotSet.objects.get_or_create(test=test, name=name)
-                screenshot_file, did_create_file = ScreenshotFile.objects.get_or_create(screenshot_set=screenshot_set, platform=platform)
-                screenshot_file.save()
-                screenshot_file.save_file(posted_file, posted_file.size)
+        notify_qemu_session(date_completed, session, platform, status, log, uploaded_files)
 
     return json_response({})
+
+
+def notify_qemu_session(date_completed, session, platform, status, log, uploaded_files):
+    if status == 'passed':
+        result = TestCode.PASSED
+    elif status == 'failed':
+        result = TestCode.FAILED
+    else:
+        result = TestCode.ERROR
+    # Non-orchestrator notifications should only be for sessions with single runs
+    run = TestRun.objects.get(session=session)
+    with transaction.atomic():
+        session.date_completed = date_completed
+        run.code = result
+        run.log = log
+        run.date_completed = date_completed
+        session.save()
+        run.save()
+    if uploaded_files:
+        test = run.test
+        for posted_file in uploaded_files:
+            if posted_file.content_type != "image/png":
+                raise ValueError("Screenshots must be PNG files")
+            name = os.path.splitext(os.path.basename(posted_file.name))[0]
+            screenshot_set, did_create_set = ScreenshotSet.objects.get_or_create(test=test, name=name)
+            screenshot_file, did_create_file = ScreenshotFile.objects.get_or_create(screenshot_set=screenshot_set, platform=platform)
+            screenshot_file.save()
+            screenshot_file.save_file(posted_file, posted_file.size)
+
+
+def notify_orchestrator_session(date_completed, session, job_info):
+        try:
+            with transaction.atomic():
+                # find each test in "tests"
+                for test_name, test_info in job_info["tests"].iteritems():
+                    # extract information from the test info
+                    platform = orchestrator.platform_for_device(test_info['devices']['firmware'])
+                    log_id = test_info['_id']
+                    artefacts = test_info['result']['artifacts']
+                    test_return = test_info["result"]["ret"]
+
+                    # for each test, download the logs
+                    log = orchestrator.get_job_log(log_id)
+                    # save the test results and logs in the database
+                    # TODO: better assign test result
+                    test_result = TestCode.PASSED if int(test_return) == 0 else TestCode.FAILED
+                    run = session.runs.get(test__file_name=test_name, platform=platform)
+                    run.code = test_result
+                    run.log = log
+                    run.artefacts = artefacts
+                    run.date_completed = date_completed
+                    run.save()
+        except Exception as e:
+            # If anything goes wrong, mark all pending runs for the session as errors
+            with transaction.atomic():
+                for run in session.runs.filter(code=0):
+                    run.code = TestCode.ERROR
+                    run.log = str(e)
+                    run.date_completed = date_completed
+                    run.save()
+            raise e
+        finally:
+            # If the session has no pending runs, it is complete.
+            # Select for update here is used to prevent a race condition which could occur
+            # if multiple notifications happen simultaneously
+            pending_run_count = session.runs.select_for_update().filter(code=0)
+            if pending_run_count > 0:
+                session.date_completed = date_completed
+                session.save()
 
 
 @require_safe

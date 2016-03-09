@@ -43,6 +43,7 @@ CloudPebble.Editor = (function() {
             update: false,
             platform: CloudPebble.Compile.GetPlatformForInstall()
         });
+        var platform_name = ConnectionPlatformNames[options.platform];
 
         return SharedPebble.disconnect(true).then(function(did_close) {
             // Wait for a second if we needed to disconnect before starting again.
@@ -51,7 +52,7 @@ CloudPebble.Editor = (function() {
             return SharedPebble.getEmulator(options.platform);
         }).then(function (emulator) {
             CloudPebble.Prompts.Progress.Update(gettext("Starting test"));
-            return emulator.runTest(PROJECT_ID, test_id, options.update);
+            return emulator.runTest(PROJECT_ID, test_id, platform_name, options.update);
         }).fail(function (reason) {
             CloudPebble.Prompts.Progress.Update(reason);
             CloudPebble.Prompts.Progress.Fail();
@@ -1304,9 +1305,6 @@ CloudPebble.Editor = (function() {
         },
         RenameFile: function(file, new_name) {
             return rename_file(file, new_name)
-        },
-        RunTest: function(test_id, options) {
-            run_test(test_id, options);
         }
     };
 })();

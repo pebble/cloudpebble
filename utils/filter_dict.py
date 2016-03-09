@@ -1,5 +1,28 @@
 import collections
 
+__author__ = 'joe'
+
+
+class _Transform(object):
+    def __init__(self, func):
+        assert callable(func)
+        self.func = func
+
+    def __call__(self, *args, **kwargs):
+        return self.func(*args, **kwargs)
+
+
+class TransformValue(_Transform):
+    pass
+
+
+class TransformKeyAndValue(_Transform):
+    def __call__(self, *args, **kwargs):
+        v = self.func(*args, **kwargs)
+        assert isinstance(v, tuple)
+        assert len(v) == 2, "Transform function must return a tuple of (key, value)"
+        return v
+
 
 def filter_dict(dictionary, spec):
     """ Return a dictionary with whitelisted keys only.
@@ -28,21 +51,26 @@ def _filter_dict(dictionary, spec, strict=False):
         # Wildcard case
         spec_value = spec[True]
         for key in dictionary:
-            out[key] = _transform_value(spec_value, dictionary[key], strict=False)
+            _transform_value(out, key, dictionary, spec_value, strict=False)
     else:
         # Non-wildcard case
         for key, spec_value in spec.iteritems():
             if key in dictionary:
-                out[key] = _transform_value(spec_value, dictionary[key], strict=True)
+                _transform_value(out, key, dictionary, spec_value, strict=True)
     return out
 
 
-def _transform_value(spec_value, v, strict):
+def _transform_value(out, key, dictionary, spec_value, strict):
+    v = dictionary[key]
+
     if spec_value is True:
-        return v
-    elif callable(spec_value):
-        return spec_value(v)
+        out[key] = v
+    elif isinstance(spec_value, TransformValue):
+        out[key] = spec_value(v)
+    elif isinstance(spec_value, TransformKeyAndValue):
+        result = spec_value(v)
+        out[result[0]] = result[1]
     elif isinstance(spec_value, collections.Mapping):
-        return _filter_dict(v, spec_value, strict=strict)
+        out[key] = _filter_dict(v, spec_value, strict=strict)
     else:
         raise ValueError('Invalid filter spec value')

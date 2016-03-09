@@ -62,6 +62,12 @@ class TestRun(IdeModel):
     a particular time that a single test was run. """
     session = models.ForeignKey('TestSession', related_name='runs')
     test = models.ForeignKey('TestFile', related_name='runs', null=True, on_delete=models.SET_NULL)
+    PLATFORM_CHOICES = (
+        ('aplite', 'Aplite'),
+        ('basalt', 'Basalt'),
+        ('chalk', 'Chalk')
+    )
+    platform = models.CharField(max_length=10, choices=PLATFORM_CHOICES)
 
     date_completed = models.DateTimeField(null=True)
 
@@ -115,7 +121,7 @@ class TestRun(IdeModel):
             return self.original_name
 
     class Meta(IdeModel.Meta):
-        unique_together = ('test', 'session')
+        unique_together = ('test', 'session', 'platform')
         ordering = ['original_name', '-session__date_added']
 
 

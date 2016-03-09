@@ -73,6 +73,7 @@ PASSED_TEST_OUTPUT = {
                            'log': u'/orchestrator/logs/ffffffffffffffffffffffffffffffffffff',
                            'ret': 0,
                        }}},
+    'platform': 'basalt',
     'submitted_time': 1456347633,
     'id': 1,
 }
@@ -82,6 +83,7 @@ class TestTestInfoProcessor(TestCase):
     @mock.patch('orchestrator_proxy.api.get_test_info.uuid_map')
     def test_process_passed_test_info(self, uuid_mapper):
         """ Test that info from orchestrator is correctly filtered and processed """
+        self.maxDiff = None
         uuid_mapper.make_uuid.return_value = "f"*36
         processor = TestInfoProcessor(lambda x: x)
         output = processor.process(PASSED_TEST_INPUT, 1)

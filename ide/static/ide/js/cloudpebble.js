@@ -23,7 +23,7 @@ CloudPebble.ProjectInfo = {};
 
 (function() {
     var process_response = function(data) {
-        if (!data.success) {
+        if (_.isObject(data) && !data.success) {
             return $.Deferred().reject(data.error ? data.error : gettext("Unknown error"));
         }
         else {

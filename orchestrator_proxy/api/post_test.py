@@ -12,7 +12,12 @@ from utils.monkeyscript_helpers import frame_tests_in_bundle
 from orchestrator_proxy.utils.auth import check_token
 
 
-def post_archive(archive_file, notify_url_builder=None, email="cloudpebble@pebble.com"):
+def post_archive(archive_file, platform, notify_url_builder=None, email="cloudpebble@pebble.com"):
+    try:
+        orchestrator.device_for_platform(platform)
+    except KeyError:
+        raise ValueError("Invalid platform specified")
+
     # Add test framing to the tests in the bundle file
     outfile = StringIO()
     frame_tests_in_bundle(archive_file, outfile)
@@ -26,7 +31,8 @@ def post_archive(archive_file, notify_url_builder=None, email="cloudpebble@pebbl
 
     # Submit a new test job pointing to the uploaded test bundle
     job_name = "3rd Party Test for {}".format(email)
-    result = orchestrator.submit_test(bundle_url, job_name=job_name, notify_url=notify_url).json()
+
+    result = orchestrator.submit_test(bundle_url, platform=platform, job_name=job_name, notify_url=notify_url).json()
 
     # Link the new job ID to UUIDs for the user and for the Orchestrator callback
     job_id = result['job_id']
@@ -46,7 +52,9 @@ def post_test(request):
     """ Process a test bundle uploaded from the SDK and send it to orchestrator """
     # The API receives a test bundle.
     # Add framing to the tests in a new zip archive
-    user_email = check_token(request.GET.get('token', None))
+    user_email = check_token(request.POST.get('token', None))
+    platform = request.POST['platform']
+
     if user_email is False:
         return HttpResponse(status=401)
     infile = request.FILES['archive']
@@ -54,6 +62,6 @@ def post_test(request):
     def build_notify_url(uuid):
         return request.build_absolute_uri(reverse('orchestrator:notify_test', args=[uuid]))
 
-    uuid = post_archive(infile, notify_url_builder=build_notify_url, email=user_email)
+    uuid = post_archive(infile, platform=platform, notify_url_builder=build_notify_url, email=user_email)
 
     return json_response({'job_id': uuid}, success=None)
