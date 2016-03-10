@@ -10,7 +10,7 @@ from ide.api.resource import create_resource, resource_info, delete_resource, up
 from ide.api.source import create_source_file, create_test_file, load_source_file, source_file_is_safe, \
     save_source_file, delete_source_file, rename_source_file, get_test_list
 from ide.api.screenshots import sync_screenshots, load_screenshots, show_screenshot
-from ide.api.monkey import get_test_session, get_test_sessions, get_test_run, get_test_runs, post_test_session, \
+from ide.api.monkey import get_test_session, get_test_sessions, get_test_runs, post_test_session, \
     get_test_run_log, run_qemu_test, download_tests, notify_test_session
 from ide.api.user import transition_accept, transition_export, transition_delete, whats_new
 from ide.api.ycm import init_autocomplete
@@ -51,7 +51,6 @@ urlpatterns = [
     url(r'^project/(?P<project_id>\d+)/test_sessions/(?P<session_id>\d+)$', get_test_session, name='get_test_session'),
     url(r'^project/(?P<project_id>\d+)/test_sessions/(?P<session_id>\d+)/notify$', notify_test_session, name='notify_test_session'),
     url(r'^project/(?P<project_id>\d+)/test_runs$', get_test_runs, name='get_test_runs'),
-    url(r'^project/(?P<project_id>\d+)/test_runs/(?P<run_id>\d+)$', get_test_run, name='get_test_run'),
     url(r'^project/(?P<project_id>\d+)/test_logs/(?P<run_id>\d+)$', get_test_run_log, name='get_test_run_log'),
     url(r'^project/(?P<project_id>\d+)/test_sessions/run$', post_test_session, name='post_test_session'),
     url(r'^project/(?P<project_id>\d+)/build/run', compile_project, name='compile_project'),

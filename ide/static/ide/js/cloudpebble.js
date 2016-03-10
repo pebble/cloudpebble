@@ -42,11 +42,6 @@ CloudPebble.ProjectInfo = {};
         }
     };
 
-    CloudPebble.Post = function() {
-        //return Promise.resolve($.post.apply(null, arguments)).then(process_response).catch(process_failure);
-        return $.post.apply(null, arguments).then(process_response, process_failure);
-    };
-
     CloudPebble.Ajax = function() {
         //return Promise.resolve($.ajax.apply(null, arguments)).then(process_response).catch(process_failure);
         return $.ajax.apply(null, arguments).then(process_response, process_failure);

@@ -107,10 +107,10 @@ CloudPebble.TestManager.Interface = (function(API) {
     function Anchor(props) {
         var other = _objectWithoutProperties(props, ['onClick', 'children']);
         var clicked = function(event) {
+            event.preventDefault();
             if (_.isFunction(props.onClick)) {
                 props.onClick();
             }
-            event.preventDefault();
             return false;
         };
         return (<a href='' {...other} onClick={clicked}>{props.children}</a>);
@@ -514,11 +514,14 @@ CloudPebble.TestManager.Interface = (function(API) {
         else {
             text = gettext('← Back');
         }
+        var onClick = function() {
+            API.Route.up()
+        };
         return (
             <Anchor
                 id='testmanager-backbutton'
                 className={'testmanager-backbutton-'+route.length}
-                onClick={function() {API.Route.up()}}>
+                onClick={onClick}>
                 {text}
             </Anchor>
         )

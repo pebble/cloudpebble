@@ -1,7 +1,7 @@
 import os.path
 import urllib
-import requests
 
+from django.views.decorators.http import last_modified
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
@@ -19,6 +19,11 @@ from utils.bundle import TestBundle, BundleException
 from utils import orchestrator
 
 __author__ = 'joe'
+
+
+def _filtered_max(*args):
+    """ Find the maximum of all arguments, completely ignoring any values of None """
+    return max(a for a in args if a)
 
 
 def make_notify_url_builder(request, token=None):
@@ -87,7 +92,41 @@ def serialise_session(session, include_runs=False):
     return result
 
 
+def get_latest_run_date_for_sessions(sessions):
+    """ Given a list of sessions, find the latest date_completed of all of their runs
+    :param sessions: List or queryset of TestSessions
+    """
+    try:
+        return TestRun.objects.filter(session__in=sessions).exclude(date_completed__isnull=True).latest("date_completed").date_completed
+    except TestRun.DoesNotExist:
+        return None
+
+
+def get_latest_session_date(sessions):
+    """ Given a list of sessions, find the latest time that any of them or their runs were added/completed
+    :param sessions: List or queryset of TestSessions
+    """
+    try:
+        latest_completed = sessions.exclude(date_completed__isnull=True).latest("date_completed").date_completed
+    except TestSession.DoesNotExist:
+        latest_completed = None
+    try:
+        latest_added = sessions.latest("date_added").date_added
+    except TestSession.DoesNotExist:
+        latest_added = None
+    latest_run_completed = get_latest_run_date_for_sessions(sessions)
+    return _filtered_max(latest_added, latest_completed, latest_run_completed)
+
+
+def get_test_session_latest(request, project_id, session_id):
+    """ Get the last-modified date for a get_test_session request """
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    session = get_object_or_404(TestSession, pk=session_id, project=project)
+    return _filtered_max(session.date_completed, session.date_added, get_latest_run_date_for_sessions([session]))
+
+
 # GET /project/<id>/test_sessions/<session_id>
+@last_modified(get_test_session_latest)
 @require_safe
 @login_required
 def get_test_session(request, project_id, session_id):
@@ -98,38 +137,34 @@ def get_test_session(request, project_id, session_id):
     return json_response({"data": serialise_session(session)})
 
 
-# GET /project/<id>/test_sessions
-@require_safe
-@login_required
-def get_test_sessions(request, project_id):
-    """ Fetch all test sessions for a project, optionally filtering by ID """
+def get_sessions_for_get_sessions_request(request, project_id):
+    """ Get the sessions relevant to a get_sessions request """
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     session_id = request.GET.get('id', None)
     kwargs = {'project': project}
     if session_id is not None:
         kwargs['id'] = session_id
-    sessions = TestSession.objects.filter(**kwargs)
-    # TODO: KEEN
-    # TODO: deal with errors here on the client
+    return TestSession.objects.filter(**kwargs)
+
+
+def get_test_sessions_latest(request, project_id):
+    """ Get the last-modified date for a get_test_sessions request """
+    sessions = get_sessions_for_get_sessions_request(request, project_id)
+    return get_latest_session_date(sessions)
+
+
+# GET /project/<id>/test_sessions
+@last_modified(get_test_sessions_latest)
+@require_safe
+@login_required
+def get_test_sessions(request, project_id):
+    """ Fetch all test sessions for a project, optionally filtering by ID """
+    sessions = get_sessions_for_get_sessions_request(request, project_id)
     return json_response({"data": [serialise_session(session) for session in sessions]})
 
 
-# GET /project/<id>/test_runs/<run_id>
-@require_safe
-@login_required
-def get_test_run(request, project_id, run_id):
-    """ Fetch a single test run """
-    project = get_object_or_404(Project, pk=project_id, owner=request.user)
-    run = get_object_or_404(TestRun, pk=run_id, session__project=project)
-    # TODO: KEEN
-    return json_response({"data": serialise_run(run)})
-
-
-# GET /project/<id>/test_runs?test=&session=
-@require_safe
-@login_required
-def get_test_runs(request, project_id):
-    """ Fetch a list of test runs, optionally filtering by test ID or session ID """
+def get_test_runs_for_get_test_runs_request(project_id, request):
+    """ Get the runs relevant to a get_test_runs request """
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     test_id = request.GET.get('test', None)
     session_id = request.GET.get('session', None)
@@ -141,9 +176,28 @@ def get_test_runs(request, project_id):
         kwargs['session__id'] = session_id
     if run_id is not None:
         kwargs['id'] = run_id
-
     runs = TestRun.objects.filter(**kwargs)
-    # TODO: KEEN
+    return runs
+
+
+def get_test_runs_latest(request, project_id):
+    """ Get the last-modified date for a get_test_runs request """
+    runs = get_test_runs_for_get_test_runs_request(project_id, request)
+    try:
+        latest_run_completed = runs.exclude(date_completed__isnull=True).latest("date_completed").date_completed
+    except TestRun.DoesNotExist:
+        latest_run_completed = None
+    latest_session = get_latest_session_date(TestSession.objects.filter(runs__in=runs))
+    return _filtered_max(latest_run_completed, latest_session)
+
+
+# GET /project/<id>/test_runs?test=&session=
+@last_modified(get_test_runs_latest)
+@require_safe
+@login_required
+def get_test_runs(request, project_id):
+    """ Fetch a list of test runs, optionally filtering by test ID or session ID """
+    runs = get_test_runs_for_get_test_runs_request(project_id, request)
     return json_response({"data": [serialise_run(run, link_test=True, link_session=True) for run in runs]})
 
 
@@ -259,44 +313,44 @@ def notify_qemu_session(date_completed, session, platform, status, log, uploaded
 
 
 def notify_orchestrator_session(date_completed, session, job_info):
-        try:
-            with transaction.atomic():
-                # find each test in "tests"
-                for test_name, test_info in job_info["tests"].iteritems():
-                    # extract information from the test info
-                    platform = orchestrator.platform_for_device(test_info['devices']['firmware'])
-                    log_id = test_info['_id']
-                    artefacts = test_info['result']['artifacts']
-                    test_return = test_info["result"]["ret"]
+    try:
+        with transaction.atomic():
+            # find each test in "tests"
+            for test_name, test_info in job_info["tests"].iteritems():
+                # extract information from the test info
+                platform = orchestrator.platform_for_device(test_info['devices']['firmware'])
+                log_id = test_info['_id']
+                artefacts = test_info['result']['artifacts']
+                test_return = test_info["result"]["ret"]
 
-                    # for each test, download the logs
-                    log = orchestrator.get_job_log(log_id)
-                    # save the test results and logs in the database
-                    # TODO: better assign test result
-                    test_result = TestCode.PASSED if int(test_return) == 0 else TestCode.FAILED
-                    run = session.runs.get(test__file_name=test_name, platform=platform)
-                    run.code = test_result
-                    run.log = log
-                    run.artefacts = artefacts
-                    run.date_completed = date_completed
-                    run.save()
-        except Exception as e:
-            # If anything goes wrong, mark all pending runs for the session as errors
-            with transaction.atomic():
-                for run in session.runs.filter(code=0):
-                    run.code = TestCode.ERROR
-                    run.log = str(e)
-                    run.date_completed = date_completed
-                    run.save()
-            raise e
-        finally:
-            # If the session has no pending runs, it is complete.
-            # Select for update here is used to prevent a race condition which could occur
-            # if multiple notifications happen simultaneously
-            pending_run_count = session.runs.select_for_update().filter(code=0)
-            if pending_run_count > 0:
-                session.date_completed = date_completed
-                session.save()
+                # for each test, download the logs
+                log = orchestrator.get_job_log(log_id)
+                # save the test results and logs in the database
+                # TODO: better assign test result
+                test_result = TestCode.PASSED if int(test_return) == 0 else TestCode.FAILED
+                run = session.runs.get(test__file_name=test_name, platform=platform)
+                run.code = test_result
+                run.log = log
+                run.artefacts = artefacts
+                run.date_completed = date_completed
+                run.save()
+    except Exception as e:
+        # If anything goes wrong, mark all pending runs for the session as errors
+        with transaction.atomic():
+            for run in session.runs.filter(code=0):
+                run.code = TestCode.ERROR
+                run.log = str(e)
+                run.date_completed = date_completed
+                run.save()
+        raise e
+    finally:
+        # If the session has no pending runs, it is complete.
+        # Select for update here is used to prevent a race condition which could occur
+        # if multiple notifications happen simultaneously
+        pending_run_count = session.runs.select_for_update().filter(code=0)
+        if pending_run_count > 0:
+            session.date_completed = date_completed
+            session.save()
 
 
 @require_safe
@@ -325,3 +379,4 @@ def post_test_session(request, project_id):
         return json_failure(e, 400)
 
 # TODO: 'ping' functions to see if anything has changed. Or, "changed since" parameters.
+# TODO: Analytics

@@ -54,7 +54,7 @@ CloudPebble.TestManager = (function() {
                 }
                 return CloudPebble.Ajax(url, {
                     data: query
-                }).done(function(result) {
+                }).then(function(result) {
                     this.syncData(result, options);
                 }.bind(this)).fail(function(reason) {
                     this.trigger('error', {text: reason, errorFor: this.name})
@@ -231,6 +231,7 @@ CloudPebble.TestManager = (function() {
             };
             /** split a page:id key */
             var from_key = function(key) {
+                if (!key) return null;
                 var split = key.split(':');
                 var ret = {page: split[0]};
                 if (split[1]) {
@@ -250,18 +251,12 @@ CloudPebble.TestManager = (function() {
             };
 
             /** Set the current request to (a promise object) and cancel the previous one. */
-            var setCurrentRequest = function(deferred) {
-                if (deferred) {
-                    deferred.always(function () {
-                        if (currently_waiting_for == this) {
-                            currently_waiting_for = null;
-                        }
-                    }.bind(deferred));
-                }
-                if (currently_waiting_for) {
-                    currently_waiting_for.abort();
-                }
-                currently_waiting_for = deferred;
+            var setCurrentRequest = function(page, id) {
+                currently_waiting_for = [page, id];
+            };
+
+            var isCurrentRequest = function(page, id) {
+                return _.isEqual(currently_waiting_for, [page, id]);
             };
 
             this.getRoute = function() {
@@ -310,21 +305,25 @@ CloudPebble.TestManager = (function() {
                 // If we've already been the page, don't actually wait for the request
                 if (this.isCached(page, id) || !deferred) {
                     this.navigate(page, id);
-                    setCurrentRequest(deferred);
                     return $.Deferred().resolve();
                 }
                 else {
                     // Otherwise, wait for it to finish. In the meantime, show a loading bar if it takes too long.
-                    setCurrentRequest(deferred);
+                    setCurrentRequest(page, id);
                     var timeout = setTimeout(function() {
                         self.trigger('changed', {route: [{page: 'loading'}]});
                     }.bind(this), 300);
                     return deferred
-                        .done(function() {
+                        .then(function() {
                             // When the request finishes, remember that it's been visited and then navigate to
                             // the requested page.
                             setCached(page, id);
-                            this.navigate(page, id);
+                            if (isCurrentRequest(page, id)) {
+                                this.navigate(page, id);
+                            }
+                            else {
+                                console.log("Abandoned request", page, id);
+                            }
                         }.bind(this))
                         .always(function() {
                             // No matter how the request ends, clear the loading-bar timeout.
@@ -382,7 +381,7 @@ CloudPebble.TestManager = (function() {
         },
         ShowTest: function(test_id) {
             var api = get_api();
-            return api.Runs.refresh({test: test_id}).done(function() {
+            return api.Runs.refresh({test: test_id}).then(function() {
                 api.Route.navigate('test', test_id);
                 return show_test_manager_pane();
             });
