@@ -1510,7 +1510,7 @@ pre.test-script {
     overflow: scroll;
 }
 
-.testmanager-pane a {
+.testmanager-pane a:not(.btn) {
     text-decoration: underline;
     color: #00a8c6;
 }
