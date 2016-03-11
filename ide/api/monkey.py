@@ -1,6 +1,7 @@
 import os.path
 import urllib
 
+from django.views.decorators.cache import cache_control
 from django.views.decorators.http import last_modified
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -126,6 +127,7 @@ def get_test_session_latest(request, project_id, session_id):
 
 
 # GET /project/<id>/test_sessions/<session_id>
+@cache_control(must_revalidate=True, max_age=1)
 @last_modified(get_test_session_latest)
 @require_safe
 @login_required
@@ -155,6 +157,7 @@ def get_test_sessions_latest(request, project_id):
 
 # GET /project/<id>/test_sessions
 @last_modified(get_test_sessions_latest)
+@cache_control(must_revalidate=True, max_age=1)
 @require_safe
 @login_required
 def get_test_sessions(request, project_id):
@@ -192,6 +195,7 @@ def get_test_runs_latest(request, project_id):
 
 
 # GET /project/<id>/test_runs?test=&session=
+@cache_control(must_revalidate=True, max_age=1)
 @last_modified(get_test_runs_latest)
 @require_safe
 @login_required
