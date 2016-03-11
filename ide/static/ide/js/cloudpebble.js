@@ -34,12 +34,20 @@ CloudPebble.ProjectInfo = {};
         if (textStatus == 'abort') {
             return null;
         }
-        if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.error) {
-            return $.Deferred().reject(jqXHR.responseJSON.error);
+        var error = {};
+        if (jqXHR) {
+            error.jqXHR = jqXHR;
+            error.status = jqXHR.status;
+            if (error.responseJSON && jqXHR.responseJSON.error) {
+                error.message = jqXHR.responseJSON.error;
+            }
         }
-        else {
-            return $.Deferred().reject(errorThrown);
+        if (!error.message) {
+            error.message = errorThrown;
         }
+        error.errorThrown = errorThrown;
+        error.textStatus = textStatus;
+        return $.Deferred().reject(error);
     };
 
     CloudPebble.Ajax = function() {

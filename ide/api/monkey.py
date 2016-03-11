@@ -205,6 +205,7 @@ def get_test_runs(request, project_id):
 @login_required
 def get_test_run_log(request, project_id, run_id):
     """ Download the log file for a test run """
+    # TODO: catch errors
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     run = get_object_or_404(TestRun, pk=run_id, session__project=project)
     log = get_object_or_404(TestLog, test_run=run)

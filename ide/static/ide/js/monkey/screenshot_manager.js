@@ -135,9 +135,9 @@ CloudPebble.MonkeyScreenshots = (function() {
                 defer.reject(gettext("Disconnected from phone."));
             });
 
-            pebble.on('screenshot:failed', function(reason) {
+            pebble.on('screenshot:failed', function(error) {
                 CloudPebble.Analytics.addEvent('monkey_app_screenshot_failed', {virtual: SharedPebble.isVirtual()});
-                defer.reject("Screenshot failed: " + reason);
+                defer.reject("Screenshot failed: " + error.message);
                 disconnect();
             });
 
@@ -335,8 +335,8 @@ CloudPebble.MonkeyScreenshots = (function() {
             API.saveScreenshots(test_id, screenshots).then(function(result) {
                 self.trigger('saved', true);
                 self.loadScreenshots();
-            }).fail(function(reason) {
-                self.trigger('error', {text: reason, errorFor: gettext('save screenshots')});
+            }).fail(function(error) {
+                self.trigger('error', {text: error.message, errorFor: gettext('save screenshots')});
             }).always(function() {
                 set_disabled(false);
                 clearTimeout(timeout);

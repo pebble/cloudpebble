@@ -53,8 +53,8 @@ CloudPebble.Editor = (function() {
         }).then(function (emulator) {
             CloudPebble.Prompts.Progress.Update(gettext("Starting test"));
             return emulator.runTest(PROJECT_ID, test_id, platform_name, options.update);
-        }).fail(function (reason) {
-            CloudPebble.Prompts.Progress.Update(reason);
+        }).fail(function (error) {
+            CloudPebble.Prompts.Progress.Update(error.message);
             CloudPebble.Prompts.Progress.Fail();
         }).then(function (result) {
             CloudPebble.Prompts.Progress.Hide();

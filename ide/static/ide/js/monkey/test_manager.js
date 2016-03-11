@@ -56,8 +56,8 @@ CloudPebble.TestManager = (function() {
                     data: query
                 }).then(function(result) {
                     this.syncData(result, options);
-                }.bind(this)).fail(function(reason) {
-                    this.trigger('error', {text: reason, errorFor: this.name})
+                }.bind(this)).fail(function(error) {
+                    this.trigger('error', {text: error.message, errorFor: this.name})
                 }.bind(this));
             },
             /**
@@ -145,8 +145,12 @@ CloudPebble.TestManager = (function() {
                 return CloudPebble.Ajax(url).then(function(data) {
                     self.state[id] = {text: data, id: id};
                     self.trigger('changed', self.getState());
+                }).fail(function(error) {
+                    if (error.status == 400) {
+                        return null;
+                    }
+
                 });
-                // TODO: consider handling failure here
             };
             this.subscribe = function(id, session_id, url) {
                 var self = this;
