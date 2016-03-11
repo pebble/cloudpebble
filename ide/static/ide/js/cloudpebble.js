@@ -38,7 +38,7 @@ CloudPebble.ProjectInfo = {};
         if (jqXHR) {
             error.jqXHR = jqXHR;
             error.status = jqXHR.status;
-            if (error.responseJSON && jqXHR.responseJSON.error) {
+            if (jqXHR.responseJSON && jqXHR.responseJSON.error) {
                 error.message = jqXHR.responseJSON.error;
             }
         }
