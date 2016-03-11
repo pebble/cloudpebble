@@ -154,7 +154,7 @@ CloudPebble.TestManager.Interface = (function(API) {
                 });
                 return (
                     <tr key={test.id} onClick={onClickTest} className={className}>
-                        <td>test.name</td>
+                        <td>{test.name}</td>
                         <TestResultCell code={test.last_code}/>
                         <td><ViewTestSourceLink name={test.name}/></td>
                     </tr>
