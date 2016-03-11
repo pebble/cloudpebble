@@ -154,7 +154,7 @@ CloudPebble.TestManager.Interface = (function(API) {
                 });
                 return (
                     <tr key={test.id} onClick={onClickTest} className={className}>
-                        <td><Anchor scrollTo="#testmanager-test" onClick={onClickTest}>{test.name}</Anchor></td>
+                        <td>test.name</td>
                         <TestResultCell code={test.last_code}/>
                         <td><ViewTestSourceLink name={test.name}/></td>
                     </tr>
@@ -197,7 +197,6 @@ CloudPebble.TestManager.Interface = (function(API) {
         },
         renderRow: function(run) {
             var datestring = CloudPebble.Utils.FormatDatetime(run.date_added);
-            // TODO: nicer logs button
             var show_logs = function() {
                 if (run.test) {
                     API.Logs.refresh(run.id);
@@ -210,10 +209,6 @@ CloudPebble.TestManager.Interface = (function(API) {
                     {!this.props.session && <td>{datestring}</td>}
                     <TestResultCell code={run.code} />
                     <td>{run.platform}</td>
-                    <td>{(!run.logs ? '':
-                        <Anchor href={run.logs} target='_blank' onClick={show_logs}>{gettext('Show logs')}</Anchor>
-                        )}
-                    </td>
                 </tr>
             );
         },
@@ -233,7 +228,6 @@ CloudPebble.TestManager.Interface = (function(API) {
                             {this.props.session ? null : <th>{gettext('Date')}</th>}
                             <th>{gettext('Status')}</th>
                             <th>{gettext('Platform')}</th>
-                            <th></th>
                         </tr></thead>
                         <tbody>{children}</tbody>
                     </table>
@@ -275,7 +269,7 @@ CloudPebble.TestManager.Interface = (function(API) {
 
             return (
                 <tr className={rowClassName} onClick={this.onClickSession}>
-                    <td><Anchor onClick={this.onClickSession}>{datestring}</Anchor></td>
+                    <td>{datestring}</td>
                     <td><SessionKindLabel kind={session.kind} long={false} /></td>
                     <TestResultCell code={session.status} />
                     <td className={passesClassName}>{session.passes+'/'+session.run_count}</td>
