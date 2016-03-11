@@ -149,6 +149,25 @@ def get_sessions_for_get_sessions_request(request, project_id):
     return TestSession.objects.filter(**kwargs)
 
 
+def get_test_run_latest(request, project_id, run_id):
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    run = get_object_or_404(TestRun, pk=run_id, session__project=project)
+    return _filtered_max(run.session.date_added, run.date_completed)
+
+
+# GET /project/<id>/test_runs/<run_id>
+@last_modified(get_test_run_latest)
+@cache_control(must_revalidate=True, max_age=1)
+@require_safe
+@login_required
+def get_test_run(request, project_id, run_id):
+    """ Fetch a single test run """
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    run = get_object_or_404(TestRun, pk=run_id, session__project=project)
+    # TODO: KEEN
+    return json_response({"data": serialise_run(run)})
+
+
 def get_test_sessions_latest(request, project_id):
     """ Get the last-modified date for a get_test_sessions request """
     sessions = get_sessions_for_get_sessions_request(request, project_id)

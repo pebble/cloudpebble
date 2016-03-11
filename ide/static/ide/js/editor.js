@@ -62,7 +62,6 @@ CloudPebble.Editor = (function() {
         });
     }
 
-    // TODO: fix for test files
     var rename_file = function(file, new_name) {
         var defer = $.Deferred();
         // Check no-change or duplicate filenames
@@ -93,7 +92,7 @@ CloudPebble.Editor = (function() {
                 defer.resolve();
             }
         }).fail(function(error) {
-            console.log(error);
+            console.error(error);
             defer.reject(gettext("Error renaming file"));
         });
 
@@ -1081,7 +1080,6 @@ CloudPebble.Editor = (function() {
             var platform = QEMUConnectionTypes[platform_select.val()];
             var update = update_checkbox.is(':checked');
             var test_id = test_id_input.val();
-            console.log("test id", test_id_input);
             prompt.modal('hide');
             run_test(test_id, {platform: platform, update: update});
 
