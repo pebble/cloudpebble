@@ -44,8 +44,16 @@ CloudPebble.Editor = (function() {
             platform: CloudPebble.Compile.GetPlatformForInstall()
         });
         var platform_name = ConnectionPlatformNames[options.platform];
-
-        return SharedPebble.disconnect(true).then(function(did_close) {
+        CloudPebble.Prompts.Progress.Show("Testing", "Starting test");
+        CloudPebble.Compile.GetPlatformsCompiledFor().then(function(platforms) {
+            if (platforms.length == 0) {
+                return $.Deferred().reject({message: "Project must be compiled before testing"});
+            }
+            if (!_.contains(platforms, platform_name)) {
+                return $.Deferred().reject({message: "Project not compiled for "+platform_name});
+            }
+            return SharedPebble.disconnect(true);
+        }).then(function(did_close) {
             // Wait for a second if we needed to disconnect before starting again.
             return (did_close ? CloudPebble.Utils.Delay(1000) : null);
         }).then(function () {
@@ -54,7 +62,7 @@ CloudPebble.Editor = (function() {
             CloudPebble.Prompts.Progress.Update(gettext("Starting test"));
             return emulator.runTest(PROJECT_ID, test_id, platform_name, options.update);
         }).fail(function (error) {
-            CloudPebble.Prompts.Progress.Update(error.message);
+            CloudPebble.Prompts.Progress.Update(error.message ? error.message : error);
             CloudPebble.Prompts.Progress.Fail();
         }).then(function (result) {
             CloudPebble.Prompts.Progress.Hide();
@@ -1088,11 +1096,33 @@ CloudPebble.Editor = (function() {
     }
 
     function show_run_test_prompt(test_id) {
-        var prompt = $('#run-live-test-prompt');
-        // reset the prompt
-        prompt.find('.alert').text('').hide();
-        prompt.find('#run-live-test-id').val(test_id);
-        prompt.modal('show');
+        CloudPebble.Compile.GetPlatformsCompiledFor().then(function(platforms) {
+            // Disable options for platforms not build for
+            var prompt = $('#run-live-test-prompt');
+            var select = prompt.find('#run-live-test-platform');
+            var options = select.find("option").prop('disabled', false);
+            var error_box = prompt.find('.alert');
+            var go_btn = prompt.find('.btn-primary');
+            options.filter(function() {return !_.contains(platforms, this.value)}).prop('disabled', true);
+            // If the previously selected option was disabled, select the first available platform
+            if (select.val() == null) {
+                select.find('option:enabled').first().prop('selected', true);
+            }
+
+            // Reset the prompt and show an error if the project has not been compiled for any platforms
+            if (platforms.length == 0) {
+                error_box.text('Project must be compiled before testing').show();
+                go_btn.add(select).prop('disabled', true);
+            }
+            else {
+                error_box.find('.alert').text('').hide();
+                go_btn.add(select).prop('disabled', false);
+            }
+
+            prompt.find('#run-live-test-id').val(test_id);
+            prompt.modal('show');
+        });
+
     }
 
     function init_create_prompt() {

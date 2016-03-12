@@ -742,9 +742,11 @@ CloudPebble.Compile = (function() {
     };
 
     var get_platforms_compiled_for = function() {
-        return fetch_build_history().then(function() {
+        var get_keys = function() {
             return _.keys((mLastBuild || {}).sizes);
-        });
+        };
+        if (mLastBuild) return $.Deferred().resolve(get_keys());
+        return fetch_build_history().then(get_keys);
     };
 
     return {
