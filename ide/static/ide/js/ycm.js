@@ -18,7 +18,7 @@ var EventedWebSocket = function(host) {
         mSocket = new WebSocket(host);
         mSocket.onerror = function(e) { self.trigger('error', e); };
         mSocket.onclose = handle_socket_close;
-        mSocket.onmessage = handle_socket_message;
+
         mSocket.onopen = function() { self.trigger('open'); };
     };
 
@@ -28,19 +28,32 @@ var EventedWebSocket = function(host) {
     };
 
     this.send = function(data) {
-        var d = $.Deferred();
-        // Find the first free ID
-        var id = 0;
-        while(id in ids) id++;
-
-        // Register the promise
-        ids[id] = d;
-        data._id = id;
-        // Send the data
-        var text = JSON.stringify(data);
-        mSocket.send(text);
-
-        return d.promise();
+        return new Promise(function(resolve, reject) {
+            // Take the first free ID
+            var id = 0;
+            while(id in ids) id++;
+            ids[id] = true;
+            data._id = id;
+            // Send the data
+            var text = JSON.stringify(data);
+            mSocket.send(text);
+            var callback;
+            callback = function(e) {
+                var data = JSON.parse(e.data);
+                var m_id = data._id;
+                if (m_id == id) {
+                    mSocket.removeEventListener("message", callback);
+                    delete ids[id];
+                    if (!data.success) {
+                        reject(data);
+                    }
+                    else {
+                        resolve(data);
+                    }
+                }
+            };
+            mSocket.addEventListener("message", callback, false);
+        });
     };
 
     this.isOpen = function() {
@@ -55,22 +68,6 @@ var EventedWebSocket = function(host) {
             promise.reject({'error': 'closed'})
         });
         ids = {};
-    };
-
-    var handle_socket_message = function(e) {
-        var data = JSON.parse(e.data);
-        var id = data._id;
-        if (id in ids) {
-            // Trigger the promise
-            var promise = ids[id];
-            delete ids[id];
-            if (!data['success']) {
-                promise.reject(data);
-            }
-            else {
-                promise.resolve(data);
-            }
-        }
     };
 };
 
@@ -88,7 +85,7 @@ CloudPebble.YCM = new (function() {
     var mPingTimer = null;
 
     function pingServer() {
-        ws_send('ping',{}).always(function() {
+        ws_send('ping',{}).finally(function() {
             mPingTimer = _.delay(pingServer, PING_INTERVAL);
         });
     }
@@ -111,7 +108,7 @@ CloudPebble.YCM = new (function() {
             ws_send('create', {
                     filename: editor.file_path,
                     content: editor.getValue()
-            }).done(function() {
+            }).then(function() {
                 if(--pending == 0) {
                     console.log('restart done.');
                     $('.prepare-autocomplete').hide();
@@ -119,7 +116,7 @@ CloudPebble.YCM = new (function() {
                     mInitialised = true;
                     mRestarting = false;
                 }
-            }).fail(function() {
+            }).catch(function() {
                 mFailed = true;
                 $('.prepare-autocomplete').text(gettext("Code completion resync failed."));
             });
@@ -136,34 +133,29 @@ CloudPebble.YCM = new (function() {
             platforms = 'aplite';
         }
         var sdk_version = CloudPebble.ProjectInfo.sdk_version;
-        $.post('/ide/project/' + PROJECT_ID + '/autocomplete/init', {platforms: platforms, sdk: sdk_version})
-            .done(function(data) {
-                if(data.success) {
-                    mUUID = data.uuid;
-                    mURL = data.server + 'ycm/' + data.uuid + '/ws';
-                    mSocket = new EventedWebSocket(mURL);
-                    mSocket.on('open', function() {
-                        if(mRestarting) {
-                            sendBuffers();
-                        } else {
-                            mInitialised = true;
-                            mPingTimer = _.delay(pingServer, PING_INTERVAL);
-                            $('.prepare-autocomplete').hide();
-                            $('.footer-credits').show();
-                        }
-                    });
+        Ajax.Post('/ide/project/' + PROJECT_ID + '/autocomplete/init', {platforms: platforms, sdk: sdk_version})
+            .then(function(data) {
+                mUUID = data.uuid;
+                mURL = data.server + 'ycm/' + data.uuid + '/ws';
+                mSocket = new EventedWebSocket(mURL);
+                mSocket.on('open', function() {
+                    if(mRestarting) {
+                        sendBuffers();
+                    } else {
+                        mInitialised = true;
+                        mPingTimer = _.delay(pingServer, PING_INTERVAL);
+                        $('.prepare-autocomplete').hide();
+                        $('.footer-credits').show();
+                    }
+                });
 
-                    mSocket.on('close error', function() {
-                        setTimeout(function() {self.restart();}, 1000);
-                    });
+                mSocket.on('close error', function() {
+                    setTimeout(function() {self.restart();}, 1000);
+                });
 
-                    mSocket.connect();
-                } else {
-                    mFailed = true;
-                    $('.prepare-autocomplete').text(gettext("Code completion unavailable."));
-                }
+                mSocket.connect();
             })
-            .fail(function() {
+            .catch(function() {
                 mFailed = true;
                 $('.prepare-autocomplete').text(gettext("Code completion unavailable."));
             });
@@ -192,36 +184,22 @@ CloudPebble.YCM = new (function() {
     };
 
     this.deleteFile = function(file) {
-        var promise = $.Deferred();
         if(!mInitialised) {
-            promise.reject();
-            return promise.promise();
+            return Promise.reject();
         }
-        ws_send('delete', {
-                filename: ((file.target == 'worker') ? 'worker_src/' : 'src/') + file.name
-        }).done(function() {
-            promise.resolve();
-        }).fail(function() {
-            promise.reject();
+        return ws_send('delete', {
+            filename: ((file.target == 'worker') ? 'worker_src/' : 'src/') + file.name
         });
-        return promise.promise();
     };
 
     this.createFile = function(file, content) {
-        var promise = $.Deferred();
         if(!mInitialised) {
-            promise.reject();
-            return promise.promise();
+            return Promise.reject();
         }
-        ws_send('create', {
-                filename: ((file.target == 'worker') ? 'worker_src/' : 'src/') + file.name,
-                content: content || ''
-        }).done(function() {
-            promise.resolve();
-        }).fail(function() {
-            promise.reject();
+        return ws_send('create', {
+            filename: ((file.target == 'worker') ? 'worker_src/' : 'src/') + file.name,
+            content: content || ''
         });
-        return promise.promise();
     };
 
     this.updateResources = function(resources) {
@@ -243,32 +221,26 @@ CloudPebble.YCM = new (function() {
             }
         });
         defines.push("");
-        ws_send('create',{
-                filename: 'build/src/resource_ids.auto.h',
-                content: defines.join("\n")
+        ws_send('create', {
+            filename: 'build/src/resource_ids.auto.h',
+            content: defines.join("\n")
         });
     };
 
     this.request = function(endpoint, editor, cursor) {
-        var promise = $.Deferred();
         if(!mInitialised) {
-            promise.reject();
-            return promise.promise();
+            return Promise.reject();
         }
-
         cursor = cursor || editor.getCursor();
         var these_patches = editor.patch_list;
         editor.patch_list = [];
-        ws_send(endpoint, {
+        return ws_send(endpoint, {
             file: editor.file_path,
             line: cursor.line,
             ch: cursor.ch,
             patches: these_patches
-        }).done(function(data) {
-            promise.resolve(data['data']);
-        }).fail(function(error) {
-            promise.reject();
+        }).then(function(data) {
+            return data['data'];
         });
-        return promise.promise();
     };
 })();

@@ -138,6 +138,7 @@ BOWER_INSTALLED_APPS = (
     'html.sortable#~0.3.1',
     'alexgorbatchev/jquery-textext',
     'codemirror#4.2.0',
+    'bluebird#3.3.4',
     'kanaka/noVNC',
 )
 

@@ -239,53 +239,67 @@ CloudPebble.Resources = (function() {
         return conflicts[0];
     }
 
-    var process_resource_form = function(form, is_new, current_filename, url, callback) {
-        var report_error = function(message) {
-            form.find('.alert:first').removeClass("hide").text(message);
-            $("#main-pane").animate({ scrollTop: 0 }, "fast");
-        };
-        var remove_error = function() {
-            form.find('.alert:first').addClass("hide");
-        };
-        var disable_controls = function() {
-            form.find('input, button, select').attr('disabled', 'disabled');
-        };
-        var enable_controls = function() {
-            form.find('input, button, .resource-id-group-single select').removeAttr('disabled');
-            if(is_new) {
-                form.find('select').removeAttr('disabled');
-            }
-        };
+    function save_resource(url, parameters) {
+        var kind = parameters.kind;
+        var resources = parameters.resources;
+        var file = parameters.file;
+        var new_tags = parameters.new_tags;
+        var is_new = parameters.is_new;
+        var variant_tags = parameters.variant_tags;
+        var name = parameters.name;
+        var replacement_map = parameters.replacement_map;
+        var replacements_files = parameters.replacements_files;
+        var form_data = new FormData();
 
-        remove_error();
+        // Build replacement file map
+        form_data.append("kind", kind);
+        form_data.append("resource_ids", JSON.stringify(resources));
+        if (file) {
+            var arr = $.makeArray(new_tags)[0];
+            form_data.append("new_tags", JSON.stringify(arr ? arr[1] : []));
+            form_data.append("file", file);
+        }
+        if (!is_new) {
+            form_data.append("variants", JSON.stringify($.makeArray(variant_tags)));
+        }
+        form_data.append("file_name", name);
+        form_data.append("replacements", JSON.stringify(replacement_map));
+        _.each(replacements_files, function (file) {
+            form_data.append("replacement_files[]", file);
+        });
+
+
+        return Ajax.Ajax({
+            url: url,
+            type: "POST",
+            data: form_data,
+            processData: false,
+            contentType: false,
+            dataType: 'json'
+        });
+    }
+
+    var get_resource_form_data = function(form, is_new, current_filename) {
         var kind = form.find('#edit-resource-type').val();
         var name = form.find("#edit-resource-file-name").val();
         var file;
 
         // Process the file to be uploaded
-        try {
-            file = process_file(kind, form.find('#edit-resource-file'));
-        }
-        catch (e) {
-            report_error(e);
-            return;
-        }
+        file = process_file(kind, form.find('#edit-resource-file'));
 
         // Check that the user uploaded a new file for a new resource
         if(is_new && !file) {
-            report_error("You must upload a resource.");
+            throw new Error(gettext("You must upload a resource."));
         }
 
         // Check for file name conflicts
         if (_.has(project_resources, name) && name !== current_filename) {
-            report_error(interpolate(gettext("A resource called '%s' already exists in the project."), [name]));
-            return;
+            throw new Error(interpolate(gettext("A resource called '%s' already exists in the project."), [name]));
         }
 
         // Validate the file name
         if (!/^[a-zA-Z0-9_(). -]+$/.test(name)) {
-            report_error(gettext("You must provide a valid filename. Only alphanumerics and characters in the set \"_(). -\" are allowed."));
-            return;
+            throw new Error(gettext("You must provide a valid filename. Only alphanumerics and characters in the set \"_(). -\" are allowed."));
         }
 
         // Extract the tags from each variant which has changed
@@ -306,20 +320,17 @@ CloudPebble.Resources = (function() {
         var new_tag_values = get_new_tag_values(form, !!file, true);
 
         if (CloudPebble.ProjectInfo.sdk_version == "2" && new_tag_values.length > 1) {
-            report_error(gettext("SDK 2 projects do not support multiple files per resource. Please delete extra files."));
-            return;
+            throw new Error(gettext("SDK 2 projects do not support multiple files per resource. Please delete extra files."));
         }
 
         // Ensure that all variants' tags are unique
         if (_.uniq(_.map(new_tag_values, JSON.stringify)).length != new_tag_values.length) {
-            report_error(gettext("Each variant must have a different set of tags"));
-            return;
+            throw new Error(gettext("Each variant must have a different set of tags"));
         }
 
         var resources = [];
 
         var resource_ids = {};
-        var okay = true;
         $.each(form.find('.resource-id-group-single'), function(index, value) {
             value = $(value);
             var resource_id = value.find('.edit-resource-id:visible').val();
@@ -327,33 +338,25 @@ CloudPebble.Resources = (function() {
 
             // Check the resource ID
             if(resource_id === '' || !validate_resource_id(resource_id)) {
-                report_error(gettext("Invalid resource identifier. Use only letters, numbers and underscores."));
-                okay = false;
-                return false;
+                throw new Error(gettext("Invalid resource identifier. Use only letters, numbers and underscores."));
             }
 
             // Extract target platforms and verify that they're valid
             var target_platforms = get_target_platforms(value);
             var targeted_platform_tags = (target_platforms!== null ? _.pick(PLATFORMS, target_platforms) : PLATFORMS);
             if (_.isEqual(target_platforms, [])) {
-                report_error(gettext("You cannot specifically target no platforms."));
-                okay = false;
-                return;
+                throw new Error(gettext("You cannot specifically target no platforms."));
             }
 
             // Validate the tags: detect ambiguities and check that each targeted platform has a matching variant
             for (var platform_name in targeted_platform_tags) {
                 try {
                     if (get_resource_for_platform(new_tag_values, platform_name) == null) {
-                        report_error(interpolate(gettext("There is no variant matching the target platform '%s'."), [platform_name]));
-                        okay = false;
-                        return false;
+                        throw new Error (interpolate(gettext("There is no variant matching the target platform '%s'."), [platform_name]));
                     }
                 }
                 catch (err) {
-                    report_error(err.description || err);
-                    okay = false;
-                    return false;
+                    throw (new Error(err.description || err.toString()));
                 }
             }
             resource.target_platforms = target_platforms;
@@ -364,14 +367,10 @@ CloudPebble.Resources = (function() {
                 var tracking = parseInt(value.find('.edit-resource-tracking').val() || '0', 10);
                 var compat = value.find('.font-compat-option').val() || null;
                 if(!/[0-9]+$/.test(resource_id)) {
-                    report_error(interpolate(gettext("Font resource identifiers must end with the desired font size, e.g. %s_24"), [resource_id]));
-                    okay = false;
-                    return false;
+                    throw new Error(interpolate(gettext("Font resource identifiers must end with the desired font size, e.g. %s_24"), [resource_id]));
                 }
                 if(tracking != tracking) {
-                    report_error(gettext("Tracking must be an integer."));
-                    okay = false;
-                    return false;
+                    throw new Error(gettext("Tracking must be an integer."));
                 }
                 _(resource).extend({'regex': regex, 'tracking': tracking, 'compatibility': compat})
             }
@@ -388,10 +387,8 @@ CloudPebble.Resources = (function() {
             resource_ids[resource_id] = true;
             resources.push(resource);
         });
-        if(!okay) return;
         if(resources.length === 0) {
-            report_error(gettext("You must specify at least one resource."));
-            return;
+            throw new Error(gettext("You must specify at least one resource."));
         }
 
         var variant_tags = extract_tags(form.find('#edit-resource-previews .text-wrap input'));
@@ -399,62 +396,63 @@ CloudPebble.Resources = (function() {
 
         var replacements_files = [];
         var replacement_map = [];
-        okay = true;
         $.each(form.find('.edit-resource-replace-file'), function() {
             var file;
-            try {
-                file = process_file(kind, this);
-            }
-            catch (e) {
-                report_error(e);
-                okay = false;
-                return;
-            }
+            file = process_file(kind, this);
             if (file !== null) {
                 var tags = $(this).parents('.image-resource-preview-pane, .raw-resource-preview-pane').find('.text-wrap input').val().slice(1, -1);
                 replacement_map.push([tags, replacements_files.length]);
                 replacements_files.push(file);
             }
         });
-        if (!okay) return;
+        return {
+            kind: kind,
+            resources: resources,
+            file: file,
+            new_tags: new_tags,
+            is_new: is_new,
+            variant_tags: variant_tags,
+            name: name,
+            replacement_map: replacement_map,
+            replacements_files: replacements_files,
+            url: url
+        };
+    };
 
-        var form_data = new FormData();
-
-        // Build replacement file map
-        form_data.append("kind", kind);
-        form_data.append("resource_ids", JSON.stringify(resources));
-        if (file) {
-            var arr = $.makeArray(new_tags)[0];
-            form_data.append("new_tags", JSON.stringify(arr ? arr[1] : []));
-            form_data.append("file", file);
-        }
-        if (!is_new) {
-            form_data.append("variants", JSON.stringify($.makeArray(variant_tags)));
-        }
-        form_data.append("file_name", name);
-        form_data.append("replacements", JSON.stringify(replacement_map));
-        _.each(replacements_files, function(file) {
-            form_data.append("replacement_files[]", file);
-        });
-
-        disable_controls();
-        $.ajax({
-            url: url,
-            type: "POST",
-            data: form_data,
-            processData: false,
-            contentType: false,
-            dataType: 'json',
-            success: function(data) {
-                enable_controls();
-                if(data.success) {
-                    callback(data.file);
-                } else {
-                    report_error(data.error);
-                }
+    var process_resource_form = function(form, is_new, current_filename) {
+        var report_error = function(message) {
+            form.find('.alert:first').removeClass("hide").text(message);
+            $("#main-pane").animate({ scrollTop: 0 }, "fast");
+        };
+        var remove_error = function() {
+            form.find('.alert:first').addClass("hide");
+        };
+        var disable_controls = function() {
+            form.find('input, button, select').attr('disabled', 'disabled');
+        };
+        var enable_controls = function() {
+            form.find('input, button, .resource-id-group-single select').removeAttr('disabled');
+            if(is_new) {
+                form.find('select').removeAttr('disabled');
             }
-        });
+        };
+
+        remove_error();
+        disable_controls();
         ga('send', 'event', 'resource', 'save');
+        // TODO: CHECK THIS IS CORRECT!!!!!
+        return Promise.resolve(function() {
+            return get_resource_form_data(form, is_new, current_filename);
+        }).then(function(resource_data) {
+            return save_resource(url, resource_data);
+        }).catch(function(err) {
+            report_error(err.toString());
+            throw err;
+        }).finally(function() {
+            enable_controls();
+        }).then(function(data) {
+            return data.file;
+        });
     };
 
     var edit_resource = function(resource) {
@@ -464,9 +462,7 @@ CloudPebble.Resources = (function() {
         ga('send', 'event', 'resource', 'open');
 
         CloudPebble.ProgressBar.Show();
-        $.getJSON("/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/info", function(data) {
-            CloudPebble.ProgressBar.Hide();
-            if(!data.success) return;
+        Ajax.Get("/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/info").then(function(data) {
             var resource = data.resource;
             var pane = prepare_resource_pane();
 
@@ -481,7 +477,7 @@ CloudPebble.Resources = (function() {
 
             var save = function(e) {
                 if (e) e.preventDefault();
-                process_resource_form(form, false, resource.file_name, "/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/update", function(data) {
+                process_resource_form(form, false, resource.file_name, "/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/update").then(function(data) {
                     delete project_resources[resource.file_name];
                     // Update our information about the resource.
                     update_resource(data);
@@ -562,21 +558,20 @@ CloudPebble.Resources = (function() {
                     }
 
                     preview_pane.find('.btn-delvariant').click(function() {
-                        CloudPebble.Prompts.Confirm(gettext("Do you want to this resource variant?"), gettext("This cannot be undone."), function () {
+                        CloudPebble.Prompts.Confirm(gettext("Do you want to delete this resource variant?"), gettext("This cannot be undone."), function () {
                             pane.find('input, button, select').attr('disabled', true);
 
-                            $.post('/ide/project/' + PROJECT_ID + '/resource/' + resource.id + '/' + variant_string + '/delete', function (data) {
-                                pane.find('input, button, select').removeAttr('disabled');
-                                if (data.success) {
-                                    // Regenerate all the previews from scratch.
-                                    // It's the easiest way.
-                                    resource.variants = data.resource.variants;
-                                    project_resources[resource.file_name].variants = resource.variants;
-                                    generate_resource_previews(resource.kind);
-                                } else {
-                                    alert(data.error);
-                                }
+                            Ajax.Post('/ide/project/' + PROJECT_ID + '/resource/' + resource.id + '/' + variant_string + '/delete').then(function (data) {
+                                // Regenerate all the previews from scratch.
+                                // It's the easiest way.
+                                resource.variants = data.resource.variants;
+                                project_resources[resource.file_name].variants = resource.variants;
+                                generate_resource_previews(resource.kind);
                                 ga('send', 'event', 'resource', 'delete')
+                            }).catch(function(error) {
+                                alert(error.toString())
+                            }).finally(function() {
+                                pane.find('input, button, select').removeAttr('disabled');
                             });
                         });
                     });
@@ -740,16 +735,15 @@ CloudPebble.Resources = (function() {
             pane.find('#edit-resource-delete').removeClass('hide').click(function() {
                 CloudPebble.Prompts.Confirm(interpolate(gettext("Do you want to delete %s?"), [resource.file_name]), gettext("This cannot be undone."), function() {
                     pane.find('input, button, select').attr('disabled', 'disabled');
-                    $.post("/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/delete", function(data) {
+                    Ajax.Post("/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/delete").then(function() {
+                        CloudPebble.Sidebar.DestroyActive();
+                        delete project_resources[resource.file_name];
+                        list_entry.remove();
+                        CloudPebble.Settings.RemoveResource(resource);
+                    }).catch(function(error) {
+                        alert(error);
+                    }).finally(function() {
                         pane.find('input, button, select').removeAttr('disabled');
-                        if(data.success) {
-                            CloudPebble.Sidebar.DestroyActive();
-                            delete project_resources[resource.file_name];
-                            list_entry.remove();
-                            CloudPebble.Settings.RemoveResource(resource);
-                        } else {
-                            alert(data.error);
-                        }
                         ga('send', 'event', 'resource', 'delete')
                     });
                 });
@@ -773,6 +767,8 @@ CloudPebble.Resources = (function() {
             });
 
             restore_pane(pane);
+        }).finally(function() {
+            CloudPebble.ProgressBar.Hide();
         });
     };
 
@@ -909,7 +905,7 @@ CloudPebble.Resources = (function() {
 
         form.submit(function(e) {
             e.preventDefault();
-            process_resource_form(form, true, null, "/ide/project/" + PROJECT_ID + "/create_resource", function(data) {
+            process_resource_form(form, true, null, "/ide/project/" + PROJECT_ID + "/create_resource").then(function(data) {
                 CloudPebble.Sidebar.DestroyActive();
                 resource_created(data);
             });

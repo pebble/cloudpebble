@@ -22,10 +22,10 @@ function make_live_settings_form(options) {
         var promise = opts.save_function(event);
 
         if (promise) {
-            promise.done(function () {
+            promise.then(function () {
                 clear_changed_icons();
                 if (element) flash_tick_icon(element);
-            }).fail(function (error) {
+            }).catch(function (error) {
                 opts.error_function(error);
                 if (element) show_changed_icon(element);
             });
@@ -84,19 +84,19 @@ function make_live_settings_form(options) {
                 values[this.id] = $(this).val();
             });
 
-            setTimeout(function() {
+            _.defer(function() {
                 var func = null;
                 // After saving, show 'tick' or 'changed' icons for all modified settings.
                 opts.save_function()
-                    .done(function() {
+                    .then(function() {
                         clear_changed_icons();
                         func = flash_tick_icon;
                     })
-                    .fail(function(error) {
+                    .catch(function(error) {
                         opts.error_function(error);
                         func = show_changed_icon;
                     })
-                    .always(function() {
+                    .finally(function() {
                         opts.form.find(opts.control_selector).each(function() {
                             if (_.has(values, this.id) && values[this.id] !== $(this).val()) {
                                 func($(this));

@@ -8,10 +8,8 @@ $(function() {
     });
 
     var run_import = function(gist_id) {
-        $.post('/ide/import/gist', {gist_id: gist_id}, function(data) {
-            if(data.success) {
-                handle_import_progress(data.task_id);
-            }
+        Ajax.Post('/ide/import/gist', {gist_id: gist_id}, function(data) {
+            handle_import_progress(data.task_id);
         });
     };
 
