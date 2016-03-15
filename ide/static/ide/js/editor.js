@@ -277,6 +277,7 @@ CloudPebble.Editor = (function() {
                         var jshint_globals = {
                             Pebble: true,
                             console: true,
+                            WebSocket: true,
                             XMLHttpRequest: true,
                             navigator: true, // For navigator.geolocation
                             localStorage: true,
