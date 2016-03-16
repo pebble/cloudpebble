@@ -291,6 +291,8 @@ CloudPebble.Settings = (function() {
             CloudPebble.Editor.RenameFile(file, 'app.js').then(function() {
                 $('#settings-js-migration-prompt').modal('hide');
                 $('#settings-modern-multi-js').val('1').change();
+            }).catch(function(error) {
+                alert(error);
             });
         });
 

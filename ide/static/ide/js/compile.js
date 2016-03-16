@@ -196,7 +196,7 @@ CloudPebble.Compile = (function() {
         var temp_build = {started: (new Date()).toISOString(), finished: null, state: 1, uuid: null, id: null, size: {total: null, binary: null, resources: null}};
         update_last_build(pane, temp_build);
         pane.find('#run-build-table').prepend(build_history_row(temp_build));
-        Ajax.Post('/ide/project/' + PROJECT_ID + '/build/run', function() {
+        return Ajax.Post('/ide/project/' + PROJECT_ID + '/build/run', function() {
             mRunningBuild = true;
             return update_build_history(pane);
         });
