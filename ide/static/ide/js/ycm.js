@@ -15,11 +15,19 @@ var EventedWebSocket = function(host) {
     };
 
     this.connect = function() {
-        mSocket = new WebSocket(host);
-        mSocket.onerror = function(e) { self.trigger('error', e); };
-        mSocket.onclose = handle_socket_close;
+        return new Promise(function(resolve, reject) {
+            mSocket = new WebSocket(host);
+            mSocket.onerror = function(e) {
+                self.trigger('error', e);
+                reject(e);
+            };
+            mSocket.onclose = handle_socket_close;
+            mSocket.onopen = function() {
+                self.trigger('open');
+                resolve();
+            };
+        })
 
-        mSocket.onopen = function() { self.trigger('open'); };
     };
 
     this.close = function() {
@@ -45,7 +53,7 @@ var EventedWebSocket = function(host) {
                     mSocket.removeEventListener("message", callback);
                     delete ids[id];
                     if (!data.success) {
-                        reject(data);
+                        reject(new Error(data.error));
                     }
                     else {
                         resolve(data);
@@ -83,6 +91,7 @@ CloudPebble.YCM = new (function() {
     var mSocket = null;
     var mUUID = null;
     var mPingTimer = null;
+    var mInitPromise = null;
 
     function pingServer() {
         ws_send('ping',{}).finally(function() {
@@ -125,7 +134,7 @@ CloudPebble.YCM = new (function() {
 
     this.initialise = function() {
         if(mInitialised || mIsInitialising || mFailed) {
-            return;
+            return mInitPromise;
         }
         mIsInitialising = true;
         var platforms = (CloudPebble.ProjectInfo.app_platforms || 'aplite,basalt');
@@ -133,7 +142,7 @@ CloudPebble.YCM = new (function() {
             platforms = 'aplite';
         }
         var sdk_version = CloudPebble.ProjectInfo.sdk_version;
-        Ajax.Post('/ide/project/' + PROJECT_ID + '/autocomplete/init', {platforms: platforms, sdk: sdk_version})
+        mInitPromise = Ajax.Post('/ide/project/' + PROJECT_ID + '/autocomplete/init', {platforms: platforms, sdk: sdk_version})
             .then(function(data) {
                 mUUID = data.uuid;
                 mURL = data.server + 'ycm/' + data.uuid + '/ws';
@@ -153,12 +162,15 @@ CloudPebble.YCM = new (function() {
                     setTimeout(function() {self.restart();}, 1000);
                 });
 
-                mSocket.connect();
+                return mSocket.connect();
             })
-            .catch(function() {
+            .catch(function(e) {
                 mFailed = true;
                 $('.prepare-autocomplete').text(gettext("Code completion unavailable."));
+                throw e;
             });
+        return mInitPromise;
+
     };
 
     this.restart = function() {
@@ -228,17 +240,25 @@ CloudPebble.YCM = new (function() {
     };
 
     this.request = function(endpoint, editor, cursor) {
-        if(!mInitialised) {
-            return Promise.reject();
+        var init_step = Promise.resolve();
+        if (mFailed) {
+            var err = new Error("YCM not functioning");
+            err.noYCM = true;
+            return Promise.reject(err);
+        }
+        else if (!mInitialised) {
+            init_step = this.initialise();
         }
         cursor = cursor || editor.getCursor();
         var these_patches = editor.patch_list;
         editor.patch_list = [];
-        return ws_send(endpoint, {
-            file: editor.file_path,
-            line: cursor.line,
-            ch: cursor.ch,
-            patches: these_patches
+        return init_step.then(function() {
+            return ws_send(endpoint, {
+                file: editor.file_path,
+                line: cursor.line,
+                ch: cursor.ch,
+                patches: these_patches
+            })
         }).then(function(data) {
             return data['data'];
         });

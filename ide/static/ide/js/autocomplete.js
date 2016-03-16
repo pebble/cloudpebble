@@ -185,6 +185,9 @@ CloudPebble.Editor.Autocomplete = new (function() {
                 CodeMirror.on(result, 'close', hideSummary);
                 CodeMirror.on(result, 'pick', _.partial(didPick, result));
                 finishCompletion(result);
+            }).catch(function(e) {
+                // Discard "ycm is generally broken" errors
+                if (!e.noYCM) throw e;
             }).finally(function() {
                 mRunning = false;
                 run_last();

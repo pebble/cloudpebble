@@ -367,6 +367,9 @@ CloudPebble.Editor = (function() {
                                         }
                                     });
                                 }
+                            }).catch(function(e) {
+                                // Discard "ycm is generally broken" errors
+                                if (!e.noYCM) throw e;
                             }).finally(function() {
                                 sChecking = false;
                             });
@@ -384,6 +387,8 @@ CloudPebble.Editor = (function() {
                                         var location = data.location;
                                         CloudPebble.Editor.GoTo(location.filepath.replace(/^(worker_)?src\//, ''), location.line, location.ch);
                                     }
+                                }).catch(function() {
+                                    alert(gettext("Cannot go to symbol while code completion is unavailable."));
                                 });
                         }
                     });
@@ -592,9 +597,10 @@ CloudPebble.Editor = (function() {
                             CloudPebble.Sidebar.DestroyActive();
                             delete project_source_files[file.name];
                             CloudPebble.Sidebar.Remove('source-' + file.id);
-                            CloudPebble.YCM.deleteFile(file);
+                            return CloudPebble.YCM.deleteFile(file);
                         }).catch(function(error) {
-                            alert(error);
+                            alert(error.toString());
+                            throw error;
                         }).finally(function() {
                             save_btn.removeAttr('disabled');
                             delete_btn.removeAttr('disabled');

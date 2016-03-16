@@ -74,4 +74,4 @@ def _spin_up_server(request):
             traceback.print_exc()
         print "Server %s failed; trying another." % server
     # If we get out of here, something went wrong.
-    return json_failure({'success': False, 'error': 'No servers'})
+    return json_failure('No servers')
