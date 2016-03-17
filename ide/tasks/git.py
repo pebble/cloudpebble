@@ -14,7 +14,7 @@ from ide.tasks import do_import_archive, run_compile
 from ide.utils.git import git_sha, git_blob
 from ide.utils.project import find_project_root
 from ide.utils.sdk import generate_manifest_dict, generate_manifest, generate_wscript_file
-from utils.keen_helper import send_keen_event
+from utils.td_helper import send_td_event
 
 __author__ = 'katharine'
 
@@ -40,14 +40,14 @@ def do_import_github(project_id, github_user, github_project, github_branch, del
                 project.delete()
             except:
                 pass
-        send_keen_event('cloudpebble', 'cloudpebble_github_import_failed', user=user, data={
+        send_td_event('cloudpebble_github_import_failed', data={
             'data': {
                 'reason': e.message,
                 'github_user': github_user,
                 'github_project': github_project,
                 'github_branch': github_branch
             }
-        })
+        }, user=user)
         raise
 
 
@@ -214,11 +214,11 @@ def github_push(user, commit_message, repo_name, project):
         project.save()
         return True
 
-    send_keen_event('cloudpebble', 'cloudpebble_github_push', user=user, data={
+    send_td_event('cloudpebble_github_push', data={
         'data': {
             'repo': project.github_repo
         }
-    })
+    }, user=user)
 
     return False
 
@@ -290,11 +290,11 @@ def github_pull(user, project):
 
     import_result = do_import_archive(project.id, u.read())
 
-    send_keen_event('cloudpebble', 'cloudpebble_github_pull', user=user, data={
+    send_td_event('cloudpebble_github_pull', data={
         'data': {
             'repo': project.github_repo
         }
-    })
+    }, user=user)
 
     return import_result
 

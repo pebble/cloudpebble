@@ -18,7 +18,7 @@ from ide.tasks.archive import create_archive, do_import_archive
 from ide.tasks.build import run_compile
 from ide.tasks.gist import import_gist
 from ide.tasks.git import do_import_github
-from utils.keen_helper import send_keen_event
+from utils.td_helper import send_td_event
 
 __author__ = 'katharine'
 
@@ -149,11 +149,11 @@ def build_log(request, project_id, build_id):
     except Exception as e:
         return json_failure(str(e))
 
-    send_keen_event('cloudpebble', 'cloudpebble_view_build_log', data={
+    send_td_event('cloudpebble_view_build_log', data={
         'data': {
             'build_state': build.state
         }
-    }, project=project, request=request)
+    }, request=request, project=project)
 
     return json_response({"log": log})
 
@@ -196,13 +196,8 @@ def create_project(request):
         return json_failure(str(e))
     else:
 
-        send_keen_event(
-            'cloudpebble',
-            'cloudpebble_create_project',
-            {'data': {'template': {'id': template_id, 'name': template_name}}},
-            project=project,
-            request=request
-        )
+        send_td_event('cloudpebble_create_project', {'data': {'template': {'id': template_id, 'name': template_name}}},
+                      request=request, project=project)
 
         return json_response({"id": project.id})
 
@@ -247,7 +242,7 @@ def save_project_settings(request, project_id):
     except IntegrityError as e:
         return json_failure(str(e))
     else:
-        send_keen_event('cloudpebble', 'cloudpebble_save_project_settings', project=project, request=request)
+        send_td_event('cloudpebble_save_project_settings', request=request, project=project)
 
         return json_response({})
 
@@ -263,7 +258,7 @@ def delete_project(request, project_id):
     except Exception as e:
         return json_failure(str(e))
     else:
-        send_keen_event('cloudpebble', 'cloudpebble_delete_project', project=project, request=request)
+        send_td_event('cloudpebble_delete_project', request=request, project=project)
         return json_response({})
 
 

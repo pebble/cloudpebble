@@ -131,4 +131,5 @@ class TemplateProject(Project):
         project.app_is_shown_on_communication = self.app_is_shown_on_communication
         project.app_keys = self.app_keys
         project.app_jshint = self.app_jshint
+        project.app_modern_multi_js = self.app_modern_multi_js
         project.save()

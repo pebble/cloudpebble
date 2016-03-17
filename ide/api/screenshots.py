@@ -6,7 +6,7 @@ from django.http import StreamingHttpResponse, HttpResponseRedirect
 from django.db import transaction
 from django.views.decorators.http import require_POST, require_safe
 from django.core.urlresolvers import reverse
-from utils.keen_helper import send_keen_event
+from utils.td_helper import send_td_event
 
 from ide.api import json_failure, json_response
 from ide.models.project import Project
@@ -38,7 +38,7 @@ def load_screenshots(request, project_id, test_id):
     test = get_object_or_404(TestFile, pk=test_id)
     screenshots = test.screenshot_sets.all()
 
-    send_keen_event('cloudpebble', 'cloudpebble_load_screenshots', data={'data': {
+    send_td_event('cloudpebble_load_screenshots', data={'data': {
         'test': test.id
     }}, project=project, request=request)
 

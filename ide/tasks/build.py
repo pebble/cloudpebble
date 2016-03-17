@@ -15,7 +15,7 @@ from django.utils.timezone import now
 import apptools.addr2lines
 from ide.utils.sdk import generate_wscript_file, generate_jshint_file, generate_manifest_dict, \
     generate_simplyjs_manifest_dict, generate_pebblejs_manifest_dict
-from utils.keen_helper import send_keen_event
+from utils.td_helper import send_td_event
 
 from ide.models.build import BuildResult, BuildSize
 from ide.models.files import SourceFile, ResourceFile, ResourceVariant
@@ -246,7 +246,7 @@ def run_compile(build_result):
 
             event_name = 'app_build_succeeded' if success else 'app_build_failed'
 
-            send_keen_event(['cloudpebble', 'sdk'], event_name, data, project=project)
+            send_td_event(event_name, data, project=project)
 
     except Exception as e:
         print "Build failed due to internal error: %s" % e

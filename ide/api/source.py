@@ -12,7 +12,7 @@ from ide.api import json_failure, json_response
 from ide.models.project import Project
 from ide.models.files import SourceFile
 from ide.models.monkey import TestFile
-from utils.keen_helper import send_keen_event
+from utils.td_helper import send_td_event
 
 __author__ = 'katharine'
 
@@ -34,13 +34,13 @@ def create_source_file(request, project_id):
 
         return json_failure(e)
     else:
-        send_keen_event('cloudpebble', 'cloudpebble_create_file', data={
+        send_td_event('cloudpebble_create_file', data={
             'data': {
                 'filename': request.POST['name'],
                 'kind': 'source',
                 'target': f.target,
             }
-        }, project=project, request=request)
+        }, request=request, project=project)
 
         return json_response({"file": {"id": f.id, "name": f.file_name, "target": f.target}})
 
@@ -56,7 +56,7 @@ def create_test_file(request, project_id):
     except (IntegrityError, ValidationError) as e:
         return json_failure(e)
     else:
-        send_keen_event('cloudpebble', 'cloudpebble_create_file', data={
+        send_td_event('cloudpebble_create_file', data={
             'data': {
                 'filename': request.POST['name'],
                 'kind': 'test'
@@ -87,12 +87,12 @@ def load_source_file(request, project_id, kind, file_id):
         except ValueError:
             folded_lines = []
 
-        send_keen_event('cloudpebble', 'cloudpebble_open_file', data={
+        send_td_event('cloudpebble_open_file', data={
             'data': {
                 'filename': source_file.file_name,
                 'kind': kind
             }
-        }, project=project, request=request)
+        }, request=request, project=project)
 
     except Exception as e:
         return json_failure(str(e))
@@ -110,7 +110,7 @@ def get_test_list(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     objects = TestFile.objects.filter(project=project)
 
-    send_keen_event('cloudpebble', 'cloudpebble_list_source', data={
+    send_td_event('cloudpebble_list_source', data={
         'data': {
             'kind': 'tests'
         }
@@ -147,21 +147,21 @@ def rename_source_file(request, project_id, kind, file_id):
     old_filename = source_file.file_name
     try:
         if source_file.file_name != request.POST['old_name']:
-            send_keen_event('cloudpebble', 'cloudpebble_rename_abort_unsafe', data={
+            send_td_event('cloudpebble_rename_abort_unsafe', data={
                 'data': {
                     'filename': source_file.file_name,
                     'kind': kind
                 }
-            }, project=project, request=request)
+            }, request=request, project=project)
             raise Exception(_("Could not rename, file has been renamed already."))
         if source_file.was_modified_since(int(request.POST['modified'])):
-            send_keen_event('cloudpebble', 'cloudpebble_rename_abort_unsafe', data={
+            send_td_event('cloudpebble_rename_abort_unsafe', data={
                 'data': {
                     'filename': source_file.file_name,
                     'kind': kind,
                     'modified': time.mktime(source_file.last_modified.utctimetuple()),
                 }
-            }, project=project, request=request)
+            }, request=request, project=project)
             raise Exception(_("Could not rename, file has been modified since last save."))
         source_file.file_name = request.POST['new_name']
         source_file.save()
@@ -169,13 +169,13 @@ def rename_source_file(request, project_id, kind, file_id):
     except Exception as e:
         return json_failure(str(e))
     else:
-        send_keen_event('cloudpebble', 'cloudpebble_rename_file', data={
+        send_td_event('cloudpebble_rename_file', data={
             'data': {
                 'old_filename': old_filename,
                 'new_filename': source_file.file_name,
                 'kind': kind
             }
-        }, project=project, request=request)
+        }, request=request, project=project)
         return json_response({"modified": time.mktime(source_file.last_modified.utctimetuple())})
 
 
@@ -186,24 +186,24 @@ def save_source_file(request, project_id, kind, file_id):
     source_file = get_source_file(kind, pk=file_id, project=project)
     try:
         if source_file.was_modified_since(int(request.POST['modified'])):
-            send_keen_event('cloudpebble', 'cloudpebble_save_abort_unsafe', data={
+            send_td_event('cloudpebble_save_abort_unsafe', data={
                 'data': {
                     'filename': source_file.file_name,
                     'kind': kind
                 }
-            }, project=project, request=request)
+            }, request=request, project=project)
             raise Exception(_("Could not save: file has been modified since last save."))
         source_file.save_file(request.POST['content'], folded_lines=request.POST['folded_lines'])
 
     except Exception as e:
         return json_failure(str(e))
     else:
-        send_keen_event('cloudpebble', 'cloudpebble_save_file', data={
+        send_td_event('cloudpebble_save_file', data={
             'data': {
                 'filename': source_file.file_name,
                 'kind': kind
             }
-        }, project=project, request=request)
+        }, request=request, project=project)
 
         return json_response({"modified": time.mktime(source_file.last_modified.utctimetuple())})
 
@@ -218,10 +218,10 @@ def delete_source_file(request, project_id, kind, file_id):
     except Exception as e:
         return json_failure(str(e))
     else:
-        send_keen_event('cloudpebble', 'cloudpebble_delete_file', data={
+        send_td_event('cloudpebble_delete_file', data={
             'data': {
                 'filename': source_file.file_name,
                 'kind': kind
             }
-        }, project=project, request=request)
+        }, request=request, project=project)
         return json_response({})

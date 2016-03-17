@@ -35,7 +35,7 @@ def json_failure(error, status=200):
 @login_required
 @require_POST
 def proxy_keen(request, project_id):
-    from utils.keen_helper import send_keen_event
+    from utils.td_helper import send_td_event
     project = get_object_or_404(Project, pk=project_id)
 
     acceptable_events = {
@@ -57,6 +57,7 @@ def proxy_keen(request, project_id):
         'cloudpebble_timeline_displayed',
         'sdk_pin_inserted',
         'sdk_pin_deleted',
+        'cloudpebble_fuzzyprompt_action'
     }
 
     event = request.POST['event']
@@ -77,7 +78,7 @@ def proxy_keen(request, project_id):
     if len(data.items()) == 0:
         data = None
 
-    send_keen_event(collections, event, project=project, request=request, data=data)
+    send_td_event(event, data=data, request=request, project=project)
     return json_response({})
 
 
@@ -94,7 +95,7 @@ def check_task(request, task_id):
 
 @require_POST
 def get_shortlink(request):
-    from utils.keen_helper import send_keen_event
+    from utils.td_helper import send_td_event
     url = request.POST['url']
     try:
         r = urllib2.Request('http://api.small.cat/entries', json.dumps({'value': url, 'duration': 60}), headers={'Content-Type': 'application/json'})
@@ -102,7 +103,7 @@ def get_shortlink(request):
     except urllib2.URLError as e:
         return json_failure(str(e))
     else:
-        send_keen_event('cloudpebble', 'cloudpebble_generate_shortlink', data={
+        send_td_event('cloudpebble_generate_shortlink', data={
             'data': {'short_url': response['url']}
         }, request=request)
         return json_response({'url': response['url']})

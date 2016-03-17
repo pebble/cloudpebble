@@ -200,6 +200,7 @@ def generate_jshint_file(project):
   "globals": {
     "Pebble": true,
     "console": true,
+    "WebSocket": true,
     "XMLHttpRequest": true,
     "navigator": true, // For navigator.geolocation
     "localStorage": true,

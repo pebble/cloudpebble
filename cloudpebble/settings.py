@@ -417,9 +417,8 @@ SDK3_PEBBLE_WAF = _environ.get('SDK3_PEBBLE_WAF', '/sdk3/pebble/waf')
 
 ARM_CS_TOOLS = _environ.get('ARM_CS_TOOLS', '/arm-cs-tools/bin/')
 
-KEEN_PROJECT_ID = _environ.get('KEEN_PROJECT_ID', None)
-KEEN_WRITE_KEY = _environ.get('KEEN_WRITE_KEY', None)
-KEEN_ENABLED = 'ENABLE_KEEN' in _environ
+TD_URL = _environ.get('TD_URL', None)
+TD_ENABLED = _environ.get('TD_ENABLED', False)
 
 MAILCHIMP_API_KEY = _environ.get('MAILCHIMP_API_KEY', None)
 MAILCHIMP_LIST_ID = _environ.get('MAILCHIMP_LIST_ID', None)

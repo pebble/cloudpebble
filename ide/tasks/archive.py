@@ -12,7 +12,7 @@ from django.core.exceptions import SuspiciousOperation
 from django.db import transaction
 from ide.utils.project import find_project_root
 from ide.utils.sdk import generate_manifest, generate_wscript_file, generate_jshint_file, dict_to_pretty_json
-from utils.keen_helper import send_keen_event
+from utils.td_helper import send_td_event
 
 from ide.models.files import SourceFile, ResourceFile, ResourceIdentifier, ResourceVariant
 from ide.models.project import Project
@@ -61,7 +61,7 @@ def create_archive(project_id):
         # Generate a URL
         u = uuid.uuid4().hex
 
-        send_keen_event('cloudpebble', 'cloudpebble_export_project', project=project)
+        send_td_event('cloudpebble_export_project', project=project)
 
         if not settings.AWS_ENABLED:
             outfile = '%s%s/%s.zip' % (settings.EXPORT_DIRECTORY, u, prefix)
@@ -92,7 +92,7 @@ def export_user_projects(user_id):
         shutil.copy(filename, outfile)
         os.chmod(outfile, 0644)
 
-        send_keen_event('cloudpebble', 'cloudpebble_export_all_projects', user=user)
+        send_td_event('cloudpebble_export_all_projects', user=user)
         return '%s%s/%s.zip' % (settings.EXPORT_ROOT, u, 'cloudpebble-export')
 
 
@@ -298,7 +298,7 @@ def do_import_archive(project_id, archive, delete_project=False):
                                 with z.open(entry.filename) as f:
                                     source.save_file(f.read().decode('utf-8'))
                     project.save()
-                    send_keen_event('cloudpebble', 'cloudpebble_zip_import_succeeded', project=project)
+                    send_td_event('cloudpebble_zip_import_succeeded', project=project)
 
         # At this point we're supposed to have successfully created the project.
         return True
@@ -308,11 +308,11 @@ def do_import_archive(project_id, archive, delete_project=False):
                 Project.objects.get(pk=project_id).delete()
             except:
                 pass
-        send_keen_event('cloudpebble', 'cloudpebble_zip_import_failed', user=project.owner, data={
+        send_td_event('cloudpebble_zip_import_failed', data={
             'data': {
                 'reason': e.message
             }
-        })
+        }, user=project.owner)
         raise
 
 
