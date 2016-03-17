@@ -154,7 +154,7 @@ CloudPebble.Resources = (function() {
                     per_platform_preview_pane.find('span').text("Conflict!").addClass('conflict');
                     _.each(err.conflicts, function(tags) {
                         var list = get_image_preview_for_tag_input(tags).find('.label-list').empty();
-                        $("<span>").text(gettext("conflict")).attr('title', err.description).addClass('label').addClass('label-error').appendTo(list);
+                        $("<span>").text(gettext("conflict")).attr('title', err.message).addClass('label').addClass('label-error').appendTo(list);
                     });
                 }
                 else {
@@ -226,10 +226,9 @@ CloudPebble.Resources = (function() {
             var conflict_string = _.map(conflicts, function(conflict_tags) {
                 return "("+_.chain(conflict_tags).map(get_tag_data_for_id).pluck('name').join(', ')+")";
             }).join(gettext(' and '));
-            throw {
-                description: interpolate(gettext("Conflict for platform '%s'. The variants with tags %s have the same specificity."), [platform_name, conflict_string]),
-                conflicts: conflicts
-            };
+            var err = new Error(interpolate(gettext("Conflict for platform '%s'. The variants with tags %s have the same specificity."), [platform_name, conflict_string]));
+            err.conflicts = conflicts;
+            throw err;
         }
         // There may be no resource for this platform
         if (conflicts.length == 0) {
@@ -350,13 +349,8 @@ CloudPebble.Resources = (function() {
 
             // Validate the tags: detect ambiguities and check that each targeted platform has a matching variant
             for (var platform_name in targeted_platform_tags) {
-                try {
-                    if (get_resource_for_platform(new_tag_values, platform_name) == null) {
-                        throw new Error (interpolate(gettext("There is no variant matching the target platform '%s'."), [platform_name]));
-                    }
-                }
-                catch (err) {
-                    throw (new Error(err.description || err.toString()));
+                if (get_resource_for_platform(new_tag_values, platform_name) == null) {
+                    throw new Error (interpolate(gettext("There is no variant matching the target platform '%s'."), [platform_name]));
                 }
             }
             resource.target_platforms = target_platforms;
@@ -414,12 +408,11 @@ CloudPebble.Resources = (function() {
             variant_tags: variant_tags,
             name: name,
             replacement_map: replacement_map,
-            replacements_files: replacements_files,
-            url: url
+            replacements_files: replacements_files
         };
     };
 
-    var process_resource_form = function(form, is_new, current_filename) {
+    var process_resource_form = function(form, is_new, current_filename, url) {
         var report_error = function(message) {
             form.find('.alert:first').removeClass("hide").text(message);
             $("#main-pane").animate({ scrollTop: 0 }, "fast");
@@ -441,17 +434,18 @@ CloudPebble.Resources = (function() {
         disable_controls();
         ga('send', 'event', 'resource', 'save');
         // TODO: CHECK THIS IS CORRECT!!!!!
-        return Promise.resolve(function() {
+        return Promise.resolve().then(function() {
             return get_resource_form_data(form, is_new, current_filename);
         }).then(function(resource_data) {
+            console.log(resource_data);
             return save_resource(url, resource_data);
+        }).then(function(data) {
+            return data.file;
         }).catch(function(err) {
             report_error(err.toString());
             throw err;
         }).finally(function() {
             enable_controls();
-        }).then(function(data) {
-            return data.file;
         });
     };
 
@@ -503,7 +497,7 @@ CloudPebble.Resources = (function() {
 
                     // Only show the delete-identifiers button if there is more than one ID.
                     pane.find('.btn-delidentifier').toggle(resource.resource_ids.length > 1);
-                });
+                }).catch(function() {/* ignore failure */});;
             };
 
             // Generate a preview.
@@ -908,7 +902,7 @@ CloudPebble.Resources = (function() {
             process_resource_form(form, true, null, "/ide/project/" + PROJECT_ID + "/create_resource").then(function(data) {
                 CloudPebble.Sidebar.DestroyActive();
                 resource_created(data);
-            });
+            }).catch(function() {/* ignore failure */});
         });
 
         CloudPebble.Sidebar.SetActivePane(pane, 'new-resource', _.partial(restore_pane, pane));

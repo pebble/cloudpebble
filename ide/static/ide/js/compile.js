@@ -39,7 +39,7 @@ CloudPebble.Compile = (function() {
     };
 
     var show_build_log = function(build) {
-        Ajax.Get('/ide/project/' + PROJECT_ID + '/build/' + build + '/log').then(function(data){
+        return Ajax.Get('/ide/project/' + PROJECT_ID + '/build/' + build + '/log').then(function(data){
             CloudPebble.Sidebar.SuspendActive();
             // Sanitise the HTML.
             var log = data.log.replace('&', '&amp;').replace('<', '&lt;');
@@ -78,7 +78,7 @@ CloudPebble.Compile = (function() {
     };
 
     var update_build_history = function(pane) {
-        return Ajax.Get('/ide/project/' + PROJECT_ID + '/build/history', function(data) {
+        return Ajax.Get('/ide/project/' + PROJECT_ID + '/build/history').then(function(data) {
             CloudPebble.ProgressBar.Hide();
             pane.removeClass('hide');
             if(data.builds.length > 0) {
@@ -196,7 +196,7 @@ CloudPebble.Compile = (function() {
         var temp_build = {started: (new Date()).toISOString(), finished: null, state: 1, uuid: null, id: null, size: {total: null, binary: null, resources: null}};
         update_last_build(pane, temp_build);
         pane.find('#run-build-table').prepend(build_history_row(temp_build));
-        return Ajax.Post('/ide/project/' + PROJECT_ID + '/build/run', function() {
+        return Ajax.Post('/ide/project/' + PROJECT_ID + '/build/run').then(function() {
             mRunningBuild = true;
             return update_build_history(pane);
         });
@@ -465,12 +465,6 @@ CloudPebble.Compile = (function() {
         var modal = $('#phone-install-progress');
         return SharedPebble.getPebble(kind).then(function(pebble) {
             return new Promise(function(resolve, reject) {
-                var report_error = function(message) {
-                    modal.find('.modal-body > p').html(message);
-                    modal.find('.dismiss-btn').removeClass('hide');
-                    modal.find('.progress').addClass('progress-danger').removeClass('progress-striped');
-                    reject(message);
-                };
                 pebble.on('status', function(code) {
                     pebble.off('install:progress');
                     if(code === 0) {
@@ -490,16 +484,16 @@ CloudPebble.Compile = (function() {
                         resolve(pebble);
                     } else {
                         if (SharedPebble.isVirtual()) {
-                            report_error(gettext("Installation rejected. Try rebooting the emulator and trying again."));
+                            reject(new Error(gettext("Installation rejected. Try rebooting the emulator and trying again.")));
                         } else {
-                            report_error(gettext("Installation rejected. Check your phone for details."));
+                            reject(new Error(gettext("Installation rejected. Check your phone for details.")));
                         }
                         ga('send', 'event', 'install', 'direct', 'phone-error');
                         CloudPebble.Analytics.addEvent('app_install_failed', {cause: 'rejected', virtual: SharedPebble.isVirtual()});
                     }
                 });
                 pebble.on('error', function(e) {
-                    report_error("Installation failed: " + e);
+                    reject(new Error("Installation failed: " + e));
                     ga('send', 'event', 'install', 'direct', 'connection-error');
                     CloudPebble.Analytics.addEvent('app_install_failed', {cause: 'phone_disconnected', virtual: SharedPebble.isVirtual()});
                 });
@@ -525,9 +519,9 @@ CloudPebble.Compile = (function() {
                         var size = sizes[platform];
                         var install_timer = setTimeout(function() {
                             if (SharedPebble.isVirtual()) {
-                                report_error(gettext("Installation failed (timeout). Try rebooting the emulator and trying again."));
+                                reject(new Error(gettext("Installation failed (timeout). Try rebooting the emulator and trying again.")));
                             } else {
-                                report_error(gettext("Installation failed; no response from phone."));
+                                reject(new Error(gettext("Installation failed; no response from phone.")));
                             }
                             CloudPebble.Analytics.addEvent('app_install_failed', {
                                 cause: 'target_not_responding',
@@ -563,10 +557,16 @@ CloudPebble.Compile = (function() {
                                 real_version: version_string
                             }, true);
                         }
-                        report_error(str);
+                        reject(new Error(str));
                     }
                 });
                 pebble.request_version();
+            }).catch(function(error) {
+                var message = error.message ? error.message : error.toString();
+                modal.find('.modal-body > p').html(message);
+                modal.find('.dismiss-btn').removeClass('hide');
+                modal.find('.progress').addClass('progress-danger').removeClass('progress-striped');
+                throw error;
             });
         });
     };

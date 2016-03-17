@@ -73,7 +73,7 @@ var EventedWebSocket = function(host) {
         self.trigger('close', e);
         mSocket = null;
         _.each(ids, function(promise, key) {
-            promise.reject({'error': 'closed'})
+            Promise.reject({'error': 'closed'})
         });
         ids = {};
     };

@@ -53,23 +53,20 @@ CloudPebble.Editor = (function() {
         });
     };
 
-    var edit_source_file = function(file, show_ui_editor, callback) {
+    var edit_source_file = function(file, show_ui_editor) {
         CloudPebble.FuzzyPrompt.SetCurrentItemName(file.name);
         // See if we already had it open.
         CloudPebble.Sidebar.SuspendActive();
         if(CloudPebble.Sidebar.Restore('source-'+file.id)) {
-            if(callback) {
-                callback(open_codemirrors[file.id]);
-            }
             if (resume_fullscreen) {
                 fullscreen(open_codemirrors[file.id], true);
             }
-            return;
+            return Promise.resolve(open_codemirrors[file.id]);
         }
         CloudPebble.ProgressBar.Show();
 
         // Open it.
-        Ajax.Get('/ide/project/' + PROJECT_ID + '/source/' + file.id + '/load').then(function(data) {
+        return Ajax.Get('/ide/project/' + PROJECT_ID + '/source/' + file.id + '/load').then(function(data) {
             var is_js = file.name.substr(-3) == '.js';
             var source = data.source;
             file.lastModified = data.modified;
@@ -379,10 +376,10 @@ CloudPebble.Editor = (function() {
                             .then(function(data) {
                                 if(data.location) {
                                     var location = data.location;
-                                    CloudPebble.Editor.GoTo(location.filepath.replace(/^(worker_)?src\//, ''), location.line, location.ch);
+                                    return CloudPebble.Editor.GoTo(location.filepath.replace(/^(worker_)?src\//, ''), location.line, location.ch);
                                 }
-                            }).catch(function() {
-                                alert(gettext("Cannot go to symbol while code completion is unavailable."));
+                            }).catch(function(err) {
+                                alert(gettext("Cannot go to symbol: ")+(err.message.trim() || gettext("code completion is unavailable.")));
                             });
                     }
                 });
@@ -700,9 +697,6 @@ CloudPebble.Editor = (function() {
             if (resume_fullscreen) {
                 fullscreen(code_mirror, true);
             }
-            if(callback) {
-                callback(code_mirror);
-            }
 
             var commands = {};
             commands[gettext('Rename File')] = function() {
@@ -713,7 +707,7 @@ CloudPebble.Editor = (function() {
 
             // Tell Google
             ga('send', 'event', 'file', 'open');
-            return null;
+            return code_mirror;
         }).catch(function(error) {
             var error_box = $('<div class="alert alert-error"></div>');
             error_box.text(interpolate(gettext("Something went wrong: %s"), [error.toString()]));
@@ -738,7 +732,6 @@ CloudPebble.Editor = (function() {
             cm.cloudpebble_save().catch(alert);;
         };
         CodeMirror.commands.saveAll = function(cm) {
-            console.log("WANK");
             save_all().catch(alert);
         };
 
@@ -960,7 +953,7 @@ CloudPebble.Editor = (function() {
                             target: target
                         }).then(function (data) {
                             prompt.modal('hide');
-                            edit_source_file(data.file);
+                            return edit_source_file(data.file);
                         }).catch(function(err) {
                             error.text(err.toString()).show();
                         });
@@ -976,7 +969,7 @@ CloudPebble.Editor = (function() {
                     } else {
                         create_remote_file(name).then(function(data) {
                             prompt.modal('hide');
-                            edit_source_file(data.file);
+                            return edit_source_file(data.file);
                         }).catch(function(err) {
                             error.text(err.toString()).show();
                         });
@@ -1016,8 +1009,8 @@ CloudPebble.Editor = (function() {
                                 "}\n"
                         });
                         Promise.join(make_c_file, make_h_file).then(function(c_file, h_file) {
-                            edit_source_file(c_file.file, true);
                             prompt.modal('hide');
+                            return edit_source_file(c_file.file, true);
                         }).catch(function(err) {
                             error.text(err.toString()).show();
                         });
@@ -1049,12 +1042,18 @@ CloudPebble.Editor = (function() {
 
     function go_to(filename, line, ch) {
         var file = project_source_files[filename];
-        if(!file) return;
-        edit_source_file(file, false, function(cm) {
-            cm.scrollIntoView({line: line, ch: ch});
-            cm.setCursor({line: line, ch: ch});
-            cm.focus();
-        });
+        if(!file) {
+            return Promise.reject(new Error(gettext("File not found")));
+        }
+        else {
+            return edit_source_file(file, false).then(function(cm) {
+                if (cm) {
+                    cm.scrollIntoView({line: line, ch: ch});
+                    cm.setCursor({line: line, ch: ch});
+                    cm.focus();
+                }
+            });
+        }
     }
 
     return {
@@ -1077,7 +1076,7 @@ CloudPebble.Editor = (function() {
             return save_all();
         },
         GoTo: function(file, line, ch) {
-            go_to(file, line, ch);
+            return go_to(file, line, ch);
         },
         GetAllEditors: function() {
             return open_codemirrors;

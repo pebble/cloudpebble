@@ -130,7 +130,7 @@ CloudPebble.GitHub = (function() {
         });
 
         var poll_commit_status = function(task_id) {
-            return Ajax.Get('/ide/task/' + task_id, function(data) {
+            return Ajax.Get('/ide/task/' + task_id).then(function(data) {
                 var state = data.state;
                 if(state.status == 'SUCCESS' || state.status == 'FAILURE') {
                     $('#github-commit-prompt').find('.progress').addClass('hide');
@@ -152,7 +152,7 @@ CloudPebble.GitHub = (function() {
         };
 
         var poll_pull_status = function(task_id) {
-            return Ajax.Get('/ide/task/' + task_id, function(data) {
+            return Ajax.Get('/ide/task/' + task_id).then(function(data) {
                 var state = data.state;
                 if(state.status == 'SUCCESS' || state.status == 'FAILURE') {
                     var prompt = $('#github-pull-prompt').modal('hide');

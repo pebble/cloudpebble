@@ -21,7 +21,7 @@
         Ajax.Post('/ide/transition/export', {}).then(function(data) {
             var task_id = data.task_id;
             var check_update = function() {
-                return Ajax.Get('/ide/task/' + task_id, function(data) {
+                return Ajax.Get('/ide/task/' + task_id).then(function(data) {
                     if(data.state.status == 'SUCCESS') {
                         dialog.find('.progress').removeClass('progress-striped').addClass('progress-success');
                         dialog.find('p').html("<a href='" + data.state.result + "' class='btn btn-primary'>Download</a>");

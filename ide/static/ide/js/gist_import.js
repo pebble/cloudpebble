@@ -21,7 +21,7 @@ $(function() {
 
     var handle_import_progress = function(task_id) {
         var check = function() {
-            return Ajax.Get('/ide/task/' + task_id, function(data) {
+            return Ajax.Get('/ide/task/' + task_id).then(function(data) {
                 if(data.state.status == 'SUCCESS') {
                     return '/ide/project/' + data.state.result;
                 } else if(data.state.status == 'FAILURE') {

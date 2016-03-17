@@ -62,7 +62,7 @@ $(function() {
 
     var handle_import_progress = function(task_id) {
         var check = function() {
-            Ajax.Get('/ide/task/' + task_id, function(data) {
+            return Ajax.Get('/ide/task/' + task_id).then(function(data) {
                 if(data.state.status == 'SUCCESS') {
                     return true;
                 } else if(data.state.status == 'FAILURE') {
