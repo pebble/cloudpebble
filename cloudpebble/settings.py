@@ -294,7 +294,6 @@ PIPELINE = {
                 'common/css/progress.css',
                 'common/css/common.css',
                 'ide/css/base.css',
-                'bluebird/js/browser/bluebird.js'
             ),
             'output_filename': 'build/base.css'
         }
@@ -348,9 +347,11 @@ PIPELINE = {
             'source_filenames': (
                 'jquery/dist/jquery.min.js',
                 'common/js/modal.js',
+                'bluebird/js/browser/bluebird.js',
                 'underscore/underscore-min.js',
                 'backbone/backbone-min.js',
-                'common/js/whats_new.js'
+                'common/js/whats_new.js',
+                'common/js/ajax.js'
             ),
             'output_filename': 'build/base.js',
         }
