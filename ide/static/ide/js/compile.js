@@ -39,11 +39,7 @@ CloudPebble.Compile = (function() {
     };
 
     var show_build_log = function(build) {
-        $.getJSON('/ide/project/' + PROJECT_ID + '/build/' + build + '/log', function(data) {
-            if(!data.success) {
-                alert(interpolate(gettext("Something went wrong:\n\n%s"), [data.error]));
-                return;
-            }
+        return Ajax.Get('/ide/project/' + PROJECT_ID + '/build/' + build + '/log').then(function(data){
             CloudPebble.Sidebar.SuspendActive();
             // Sanitise the HTML.
             var log = data.log.replace('&', '&amp;').replace('<', '&lt;');
@@ -76,14 +72,13 @@ CloudPebble.Compile = (function() {
             setTimeout(function() { if(log.find('.log-error').length) {
                 log.scrollTop($(log.find('.log-error')[0]).offset().top - log.offset().top + log.scrollTop());
             }}, 1);
+        }).catch(function(err) {
+            alert(interpolate(gettext("Something went wrong:\n\n%s"), [err.toString()]));
         });
     };
 
     var fetch_build_history = function() {
-        return $.getJSON('/ide/project/' + PROJECT_ID + '/build/history').then(function(data) {
-            if (!data.success) {
-                return $.Deferred().reject(data.error);
-            }
+        return Ajax.Get('/ide/project/' + PROJECT_ID + '/build/history').then(function(data) {
             mLastBuild = (data.builds.length > 0) ? data.builds[0] : null;
             return data;
         });
@@ -103,19 +98,17 @@ CloudPebble.Compile = (function() {
                 pane.find('#run-build-table').append(build_history_row(value));
             });
             if(data.builds.length > 0 && data.builds[0].state == 1) {
-                setTimeout(function() { update_build_history(pane); }, 1000);
+                return Promise.delay(1000).then(function() {
+                    return update_build_history(pane)
+                });
             } else if(mRunningBuild) {
                 mRunningBuild = false;
-                _.each(mPendingCallbacks, function(callback) {
-                    callback(data.builds[0].state == 3);
-                });
-                mPendingCallbacks = [];
+                return (data.builds[0].state == 3)
             }
-        }).fail(function(reason) {
-            CloudPebble.ProgressBar.Hide();
-            pane.removeClass('hide');
-            alert(interpolate(gettext("Something went wrong:\n%s"), [reason])); // This should be prettier.
+        }).catch(function(error) {
+            alert(interpolate(gettext("Something went wrong:\n%s"), [error.toString()])); // This should be prettier.
             CloudPebble.Sidebar.DestroyActive();
+            throw error;
         });
     };
 
@@ -124,7 +117,7 @@ CloudPebble.Compile = (function() {
         pane = $('#compilation-pane-template').clone();
         pane.find('#install-on-phone-btn').click(function(e) {
             e.preventDefault();
-            install_on_watch({platform: ConnectionType.Phone});
+            install_on_watch(ConnectionType.Phone);
         });
         pane.find('#show-app-logs-btn').click(function(e) {
             e.preventDefault();
@@ -142,16 +135,16 @@ CloudPebble.Compile = (function() {
 
         pane.find('#install-in-qemu-aplite-btn').click(function(e) {
             e.preventDefault();
-            install_on_watch({platform: ConnectionType.QemuAplite});
+            install_on_watch(ConnectionType.QemuAplite);
         });
 
         pane.find('#install-in-qemu-basalt-btn').click(function(e) {
             e.preventDefault();
-            install_on_watch({platform: ConnectionType.QemuBasalt});
+            install_on_watch(ConnectionType.QemuBasalt);
         });
         pane.find('#install-in-qemu-chalk-btn').click(function(e) {
             e.preventDefault();
-            install_on_watch({platform: ConnectionType.QemuChalk});
+            install_on_watch(ConnectionType.QemuChalk);
         });
 
         pane.find('#show-qemu-logs-btn').click(function(e) {
@@ -205,16 +198,13 @@ CloudPebble.Compile = (function() {
         }
     };
 
-    var run_build = function(callback) {
+    var run_build = function() {
         var temp_build = {started: (new Date()).toISOString(), finished: null, state: 1, uuid: null, id: null, size: {total: null, binary: null, resources: null}};
         update_last_build(pane, temp_build);
         pane.find('#run-build-table').prepend(build_history_row(temp_build));
-        $.post('/ide/project/' + PROJECT_ID + '/build/run', function() {
+        return Ajax.Post('/ide/project/' + PROJECT_ID + '/build/run').then(function() {
             mRunningBuild = true;
-            if(callback) {
-                mPendingCallbacks.push(callback);
-            }
-            update_build_history(pane);
+            return update_build_history(pane);
         });
         ga('send','event', 'build', 'run', {eventValue: ++m_build_count});
     };
@@ -476,136 +466,116 @@ CloudPebble.Compile = (function() {
 
     /**
      * Install the app on to a watch or emulator
-     * @param options.show_logs_prompt, whether to show the "Show logs" prompt afterwards, default True
-     * @param options.platform Name of platform, defaults to auto-detect
+     * @param kind platform kind
      */
-    var install_on_watch = function(options) {
-        var defer = $.Deferred();
+    var install_on_watch = function(kind) {
         var modal = $('#phone-install-progress');
-
-        options = _.defaults(options, {
-                show_logs_prompt: true,
-                platform: CloudPebble.Compile.GetPlatformForInstall()
-        });
-        console.log("options", options);
-        var kind = options.platform;
-
-        var report_error = function(message) {
-            modal.find('.modal-body > p').html(message);
-            modal.find('.dismiss-btn').removeClass('hide');
-            modal.find('.progress').addClass('progress-danger').removeClass('progress-striped');
-            defer.reject(message);
-        };
-
-        SharedPebble.getPebble(kind).done(function(pebble) {
-            pebble.on('status', function(code) {
-                pebble.off('install:progress');
-                if(code === 0) {
-                    add_log_divider();
-                    pebble.enable_app_logs();
-                    if (options.show_logs_prompt) {
+        return SharedPebble.getPebble(kind).then(function(pebble) {
+            return new Promise(function(resolve, reject) {
+                pebble.on('status', function(code) {
+                    pebble.off('install:progress');
+                    if(code === 0) {
+                        add_log_divider();
+                        pebble.enable_app_logs();
                         modal.find('.modal-body > p').text(gettext("Installed successfully!"));
                         modal.find('.btn').removeClass('hide');
-
-                        modal.find('.logs-btn').off('click').click(function() {
+                        modal.find('.logs-btn').off('click').click(function () {
                             modal.off('hide');
                             show_app_logs();
                             modal.modal('hide');
                         });
                         modal.on('hide', stop_logs);
                         modal.find('.progress').addClass('progress-success').removeClass('progress-striped').find('.bar').css({width: '100%'});
-                    }
-                    else {
-                        modal.modal('hide');
-                    }
-                    ga('send', 'event', 'install', 'direct', 'success');
-                    CloudPebble.Analytics.addEvent('app_install_succeeded', {virtual: SharedPebble.isVirtual()});
-                    defer.resolve(pebble);
-                } else {
-
-                    if (SharedPebble.isVirtual()) {
-                        report_error(gettext("Installation rejected. Try rebooting the emulator and trying again."));
+                        ga('send', 'event', 'install', 'direct', 'success');
+                        CloudPebble.Analytics.addEvent('app_install_succeeded', {virtual: SharedPebble.isVirtual()});
+                        resolve(pebble);
                     } else {
-                        report_error(gettext("Installation rejected. Check your phone for details."));
-                    }
-
-                    ga('send', 'event', 'install', 'direct', 'phone-error');
-                    CloudPebble.Analytics.addEvent('app_install_failed', {cause: 'rejected', virtual: SharedPebble.isVirtual()});
-                }
-            });
-            pebble.on('error', function(e) {
-                report_error("Installation failed: " + e);
-                ga('send', 'event', 'install', 'direct', 'connection-error');
-                CloudPebble.Analytics.addEvent('app_install_failed', {cause: 'phone_disconnected', virtual: SharedPebble.isVirtual()});
-            });
-
-            modal.modal();
-            modal.find('.modal-body > p').text(gettext("Preparing to install app…"));
-            modal.find('.btn').addClass('hide');
-            modal.find('.progress').removeClass('progress-danger progress-success').addClass('progress-striped').find('.bar').css({width: '100%'});
-            modal.off('hide');
-            pebble.once('version', function(version_info) {
-                var version_string = version_info.running.version;
-                console.log(version_string);
-                // Make sure that we have the required version - but also assume that anyone who has the string 'test'
-                // in their firmware version number (e.g. me) knows what they're doing.
-                var min_version = CloudPebble.ProjectInfo.sdk_version == '2'? MINIMUM_SDK2_VERSION : MINIMUM_INSTALL_VERSION;
-                if(/test/.test(version_string) || compare_version_strings(version_string, min_version) >= 0) {
-                    var platform = Pebble.version_to_platform(version_info);
-                    var sizes = {
-                        aplite: mLastBuild.sizes.aplite,
-                        basalt: mLastBuild.sizes.basalt,
-                        chalk: mLastBuild.sizes.chalk
-                    };
-                    var size = sizes[platform];
-                    var install_timer = setTimeout(function() {
                         if (SharedPebble.isVirtual()) {
-                            report_error(gettext("Installation failed (timeout). Try rebooting the emulator and trying again."));
+                            reject(new Error(gettext("Installation rejected. Try rebooting the emulator and trying again.")));
                         } else {
-                            report_error(gettext("Installation failed; no response from phone."));
+                            reject(new Error(gettext("Installation rejected. Check your phone for details.")));
                         }
-                        CloudPebble.Analytics.addEvent('app_install_failed', {
-                            cause: 'target_not_responding',
-                            virtual: SharedPebble.isVirtual()
-                        });
-                    }, 30000);
-                    pebble.install_app(mLastBuild.pbw);
-                    var expectedBytes = (size.binary + size.worker + size.resources);
-                    pebble.on('install:progress', function(bytes) {
-                        clearTimeout(install_timer);
-                        modal.find('.modal-body > p').text(gettext("Installing app on watch…"));
-                        if(modal.find('.progress').hasClass('progress-striped')) {
-                            modal.find('.progress').addClass('no-animation');
-                            _.defer(function() {
-                                modal.find('.progress').removeClass('no-animation');
-                            });
-                        }
-                        modal.find('.progress').removeClass('progress-striped').find('.bar').css({width: (bytes * 100 / expectedBytes) + '%'})
-                    });
-                } else {
-                    var fmt, str;
-                    if(CloudPebble.ProjectInfo.sdk_version != '2' && version_string.substr(0, 3) == "v2.") {
-                        fmt = gettext("Please <a href='%(update_url)s' target='_blank'>update your Pebble</a> to firmware %(min_version)s to install apps from CloudPebble (you're on version %(real_version)s).");
-                        str = interpolate(fmt, {
-                            update_url: "https://help.getpebble.com/customer/portal/articles/2256017",
-                            min_version: min_version,
-                            real_version: version_string
-                        }, true);
-                    } else {
-                        fmt = gettext("Please launch the Pebble phone app and update your pebble to %(min_version)s to install apps from CloudPebble and the appstore (you're on version %(real_version)s).");
-                        str = interpolate(fmt, {
-                            min_version: min_version,
-                            real_version: version_string
-                        }, true);
+                        ga('send', 'event', 'install', 'direct', 'phone-error');
+                        CloudPebble.Analytics.addEvent('app_install_failed', {cause: 'rejected', virtual: SharedPebble.isVirtual()});
                     }
-                    report_error(str);
-                }
+                });
+                pebble.on('error', function(e) {
+                    reject(new Error("Installation failed: " + e));
+                    ga('send', 'event', 'install', 'direct', 'connection-error');
+                    CloudPebble.Analytics.addEvent('app_install_failed', {cause: 'phone_disconnected', virtual: SharedPebble.isVirtual()});
+                });
+
+                modal.modal();
+                modal.find('.modal-body > p').text(gettext("Preparing to install app…"));
+                modal.find('.btn').addClass('hide');
+                modal.find('.progress').removeClass('progress-danger progress-success').addClass('progress-striped').find('.bar').css({width: '100%'});
+                modal.off('hide');
+                pebble.once('version', function(version_info) {
+                    var version_string = version_info.running.version;
+                    console.log(version_string);
+                    // Make sure that we have the required version - but also assume that anyone who has the string 'test'
+                    // in their firmware version number (e.g. me) knows what they're doing.
+                    var min_version = CloudPebble.ProjectInfo.sdk_version == '2'? MINIMUM_SDK2_VERSION : MINIMUM_INSTALL_VERSION;
+                    if(/test/.test(version_string) || compare_version_strings(version_string, min_version) >= 0) {
+                        var platform = Pebble.version_to_platform(version_info);
+                        var sizes = {
+                            aplite: mLastBuild.sizes.aplite,
+                            basalt: mLastBuild.sizes.basalt,
+                            chalk: mLastBuild.sizes.chalk
+                        };
+                        var size = sizes[platform];
+                        var install_timer = setTimeout(function() {
+                            if (SharedPebble.isVirtual()) {
+                                reject(new Error(gettext("Installation failed (timeout). Try rebooting the emulator and trying again.")));
+                            } else {
+                                reject(new Error(gettext("Installation failed; no response from phone.")));
+                            }
+                            CloudPebble.Analytics.addEvent('app_install_failed', {
+                                cause: 'target_not_responding',
+                                virtual: SharedPebble.isVirtual()
+                            });
+                        }, 30000);
+                        pebble.install_app(mLastBuild.pbw);
+                        var expectedBytes = (size.binary + size.worker + size.resources);
+                        pebble.on('install:progress', function(bytes) {
+                            clearTimeout(install_timer);
+                            modal.find('.modal-body > p').text(gettext("Installing app on watch…"));
+                            if(modal.find('.progress').hasClass('progress-striped')) {
+                                modal.find('.progress').addClass('no-animation');
+                                _.defer(function() {
+                                    modal.find('.progress').removeClass('no-animation');
+                                });
+                            }
+                            modal.find('.progress').removeClass('progress-striped').find('.bar').css({width: (bytes * 100 / expectedBytes) + '%'})
+                        });
+                    } else {
+                        var fmt, str;
+                        if(CloudPebble.ProjectInfo.sdk_version != '2' && version_string.substr(0, 3) == "v2.") {
+                            fmt = gettext("Please <a href='%(update_url)s' target='_blank'>update your Pebble</a> to firmware %(min_version)s to install apps from CloudPebble (you're on version %(real_version)s).");
+                            str = interpolate(fmt, {
+                                update_url: "https://help.getpebble.com/customer/portal/articles/2256017",
+                                min_version: min_version,
+                                real_version: version_string
+                            }, true);
+                        } else {
+                            fmt = gettext("Please launch the Pebble phone app and update your pebble to %(min_version)s to install apps from CloudPebble and the appstore (you're on version %(real_version)s).");
+                            str = interpolate(fmt, {
+                                min_version: min_version,
+                                real_version: version_string
+                            }, true);
+                        }
+                        reject(new Error(str));
+                    }
+                });
+                pebble.request_version();
+            }).catch(function(error) {
+                var message = error.message ? error.message : error.toString();
+                modal.find('.modal-body > p').html(message);
+                modal.find('.dismiss-btn').removeClass('hide');
+                modal.find('.progress').addClass('progress-danger').removeClass('progress-striped');
+                throw error;
             });
-            pebble.request_version();
-        }).fail(function(reason) {
-            defer.reject(reason);
         });
-        return defer.promise();
     };
 
     var show_clear_logs_prompt = function() {
@@ -756,7 +726,7 @@ CloudPebble.Compile = (function() {
         var get_keys = function() {
             return _.keys((mLastBuild || {}).sizes);
         };
-        if (mLastBuild) return $.Deferred().resolve(get_keys());
+        if (mLastBuild) return Promise.resolve(get_keys());
         return fetch_build_history().then(get_keys);
     };
 
@@ -768,8 +738,8 @@ CloudPebble.Compile = (function() {
             init();
 
         },
-        RunBuild: function(callback) {
-            run_build(callback);
+        RunBuild: function() {
+            return run_build();
         },
         GetPlatformsCompiledFor: function() {
             return get_platforms_compiled_for();
@@ -804,9 +774,9 @@ CloudPebble.Compile = (function() {
                 }
             }
         },
-        DoInstall: function(options) {
+        DoInstall: function() {
             return fetch_build_history().then(function() {
-                return install_on_watch(options);
+                return install_on_watch(CloudPebble.Compile.GetPlatformForInstall());
             });
         }
     };

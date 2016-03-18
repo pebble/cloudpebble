@@ -72,7 +72,7 @@ CloudPebble.MonkeyScreenshots = (function() {
     var AjaxAPI = function() {
         this.getScreenshots = function(test_id) {
             var url = "/ide/project/" + PROJECT_ID + "/test/" + test_id + "/screenshots/load";
-            return CloudPebble.Ajax({
+            return Ajax.Ajax({
                 url: url,
                 dataType: 'json'
             }).then(function(result) {
@@ -85,7 +85,7 @@ CloudPebble.MonkeyScreenshots = (function() {
         this.saveScreenshots = function(test_id, new_screenshots) {
             var form_data = process_screenshots(new_screenshots);
             var url = "/ide/project/" + PROJECT_ID + "/test/" + test_id + "/screenshots/save";
-            return CloudPebble.Ajax({
+            return Ajax.Ajax({
                 url: url,
                 type: "POST",
                 data: form_data,
@@ -122,7 +122,8 @@ CloudPebble.MonkeyScreenshots = (function() {
 
             return new Blob([ia], {type:mimeString});
         }
-
+        // jQuery deferred is still used here for now because it suppose progress events.
+        // TODO: fix this.
         var defer = $.Deferred();
         SharedPebble.getPebble(kind).then(function(pebble) {
             var disconnect = function() {
@@ -154,7 +155,7 @@ CloudPebble.MonkeyScreenshots = (function() {
             });
 
             pebble.request_screenshot();
-        }).fail(function(error) {
+        }).catch(function(error) {
             defer.reject(error);
         });
         return defer.promise();
@@ -197,12 +198,13 @@ CloudPebble.MonkeyScreenshots = (function() {
             }
             var loadFile = function(screenshotfile) {
                 var reader = new FileReader();
-                var defer = $.Deferred();
-                reader.onload = function() {
-                    screenshotfile.src = reader.result;
-                    defer.resolve();
-                };
-                onloads.push(defer.promise());
+                var promise = new Promise(function(resolve) {
+                    reader.onload = function() {
+                        screenshotfile.src = reader.result;
+                        resolve();
+                    };
+                });
+                onloads.push(promise);
                 reader.readAsDataURL(screenshotfile.file);
             };
 
@@ -230,7 +232,7 @@ CloudPebble.MonkeyScreenshots = (function() {
                     }
                 }, this);
             }
-            $.when.apply(this, onloads).then(function() {
+            Promise.all(onloads).then(function() {
                 self.trigger('changed', screenshots);
             });
         };
@@ -303,7 +305,7 @@ CloudPebble.MonkeyScreenshots = (function() {
             }, function(error) {
                 self.trigger('error', {text: gettext("Error getting screenshots")});
                 console.log(error);
-            }).always(function() {
+            }).finally(function() {
                 clearTimeout(timeout);
             });
         };
@@ -335,9 +337,9 @@ CloudPebble.MonkeyScreenshots = (function() {
             API.saveScreenshots(test_id, screenshots).then(function(result) {
                 self.trigger('saved', true);
                 self.loadScreenshots();
-            }).fail(function(error) {
+            }).catch(function(error) {
                 self.trigger('error', {text: error.message, errorFor: gettext('save screenshots')});
-            }).always(function() {
+            }).finally(function() {
                 set_disabled(false);
                 clearTimeout(timeout);
             });

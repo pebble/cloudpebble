@@ -21,51 +21,13 @@ CloudPebble.ProgressBar = (function() {
 
 CloudPebble.ProjectInfo = {};
 
-(function() {
-    var process_response = function(data) {
-        if (_.isObject(data) && !data.success) {
-            return $.Deferred().reject(data.error ? data.error : gettext("Unknown error"));
-        }
-        else {
-            return data;
-        }
-    };
-    var process_failure = function(jqXHR, textStatus, errorThrown) {
-        if (textStatus == 'abort') {
-            return null;
-        }
-        var error = {};
-        if (jqXHR) {
-            error.jqXHR = jqXHR;
-            error.status = jqXHR.status;
-            if (jqXHR.responseJSON && jqXHR.responseJSON.error) {
-                error.message = jqXHR.responseJSON.error;
-            }
-        }
-        if (!error.message) {
-            error.message = errorThrown;
-        }
-        error.errorThrown = errorThrown;
-        error.textStatus = textStatus;
-        return $.Deferred().reject(error);
-    };
-
-    CloudPebble.Ajax = function() {
-        //return Promise.resolve($.ajax.apply(null, arguments)).then(process_response).catch(process_failure);
-        return $.ajax.apply(null, arguments).then(process_response, process_failure);
-    };
-})();
 
 CloudPebble.Init = function() {
     jquery_csrf_setup();
 
 
     // Load in project data.
-    $.getJSON('/ide/project/' + PROJECT_ID + '/info', function(data) {
-        if(!data.success) {
-            alert("Something went wrong:\n" + data.error);
-            return;
-        }
+    Ajax.Get('/ide/project/' + PROJECT_ID + '/info').then(function(data) {
         CloudPebble.ProjectInfo = data;
 
         CloudPebble.Compile.Init();
@@ -78,7 +40,6 @@ CloudPebble.Init = function() {
         CloudPebble.FuzzyPrompt.Init();
         CloudPebble.SidePane.Init();
         CloudPebble.TestManager.Init();
-
         CloudPebble.ProgressBar.Hide();
 
         // Add source files.
@@ -101,6 +62,9 @@ CloudPebble.Init = function() {
         if(CloudPebble.ProjectInfo.sdk_version != '3') {
             $('.sdk3-only').hide();
         }
+        return null;
+    }).catch(function(err) {
+        alert("Something went wrong:\n" + err.toString());
     });
 
     window.addEventListener('beforeunload', function(e) {
@@ -224,13 +188,6 @@ CloudPebble.Utils = {
         var t = Math.round(Math.abs(Date.parse(s2.replace(' ','T')) - Date.parse(s1.replace(' ','T'))) / 1000);
         var n = t.toFixed(0);
         return interpolate(ngettext("%s second", "%s seconds", n), [n]);
-    },
-    Delay: function(time) {
-        var d = $.Deferred();
-        setTimeout(function() {
-            d.resolve();
-        }, time);
-        return d.promise();
     }
 };
 

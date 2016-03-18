@@ -142,6 +142,7 @@ BOWER_INSTALLED_APPS = (
     'html.sortable#~0.3.1',
     'alexgorbatchev/jquery-textext',
     'codemirror#4.2.0',
+    'bluebird#3.3.4',
     'kanaka/noVNC',
     'react',
     'classnames'
@@ -293,6 +294,7 @@ PIPELINE = {
                 'common/css/progress.css',
                 'common/css/common.css',
                 'ide/css/base.css',
+                'bluebird/js/browser/bluebird.js'
             ),
             'output_filename': 'build/base.css'
         }

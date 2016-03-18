@@ -170,7 +170,7 @@ CloudPebble.MonkeyScript = (function() {
                     return {insertion_text: suggestion}
                 });
 
-                return $.Deferred().resolve({
+                return Promise.resolve({
                     completions: final_suggestions,
                     start_column: start_column
                 });

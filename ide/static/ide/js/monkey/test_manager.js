@@ -52,11 +52,11 @@ CloudPebble.TestManager = (function() {
                 else {
                     query = options;
                 }
-                return CloudPebble.Ajax(url, {
+                return Ajax.Ajax(url, {
                     data: query
                 }).then(function(result) {
                     this.syncData(result, options);
-                }.bind(this)).fail(function(error) {
+                }.bind(this)).catch(function(error) {
                     this.trigger('error', {text: error.message, errorFor: this.name})
                 }.bind(this));
             },
@@ -103,7 +103,7 @@ CloudPebble.TestManager = (function() {
              * Post a new test session, running all of the tests in the project.
              */
             this.new = function () {
-                return CloudPebble.Ajax(base_url + 'test_sessions/run', {
+                return Ajax.Ajax(base_url + 'test_sessions/run', {
                     method: 'POST'
                 }).then(function (result) {
                     var session = {data: [result.data]};
@@ -114,15 +114,12 @@ CloudPebble.TestManager = (function() {
 
             // TODO: remove this or factor it out at some point.
             this.fakeNew = function() {
-                var d = $.Deferred();
-                setTimeout(function() {
+                return Promise.delay(1000).then(function() {
                     var session = {data: [_.clone(this.state[1])]};
                     session.data[0].is_new = true;
                     session.data[0].id = _.max(_.keys(this.state))+1;
                     this.syncData(session, {});
-                    d.resolve();
-                }.bind(this), 1000);
-                return d.promise();
+                });
             };
             /**
              * Sorts sessions by date
@@ -142,10 +139,10 @@ CloudPebble.TestManager = (function() {
             this.refresh = function(id) {
                 var self = this;
                 var url = base_url+this.url+'/'+id;
-                return CloudPebble.Ajax(url).then(function(data) {
+                return Ajax.Ajax(url).then(function(data) {
                     self.state[id] = {text: data, id: id};
                     self.trigger('changed', self.getState());
-                }).fail(function(error) {
+                }).catch(function(error) {
                     if (error.status == 400) {
                         return null;
                     }
@@ -309,7 +306,7 @@ CloudPebble.TestManager = (function() {
                 // If we've already been the page, don't actually wait for the request
                 if (this.isCached(page, id) || !deferred) {
                     this.navigate(page, id);
-                    return $.Deferred().resolve();
+                    return Promise.resolve();
                 }
                 else {
                     // Otherwise, wait for it to finish. In the meantime, show a loading bar if it takes too long.

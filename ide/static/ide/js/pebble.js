@@ -11,18 +11,18 @@ var ConnectionType = {
     QemuChalk: 18
 };
 
+var QEMUConnectionTypes = {
+    'aplite': ConnectionType.QemuAplite,
+    'basalt': ConnectionType.QemuBasalt,
+    'chalk': ConnectionType.QemuChalk
+};
+
 var ConnectionPlatformNames = {
     2: 'aplite',
     6: 'aplite',
     10: 'basalt',
     18: 'chalk'
 };
-
-var QEMUConnectionTypes = {
-    'aplite': ConnectionType.QemuAplite,
-    'basalt': ConnectionType.QemuBasalt,
-    'chalk': ConnectionType.QemuChalk
-}
 
 var SharedPebble = new (function() {
     var self = this;
@@ -54,7 +54,7 @@ var SharedPebble = new (function() {
         return ((kind & ConnectionType.QemuChalk) == ConnectionType.QemuChalk);
     }
 
-    function _getEmulator(kind, deferred) {
+    function _getEmulator(kind) {
         var statementInterval = null;
         var randomStatements = LOADING_STATEMENTS.slice(0);
 
@@ -70,11 +70,11 @@ var SharedPebble = new (function() {
             down: emulator_container.find('.down'),
             back: emulator_container.find('.back'),
         });
+        window.emu = mEmulator;
         var hide_emulator = function() {
             $('#sidebar').removeClass('with-emulator');
             mEmulator = null;
         };
-        window.emu = mEmulator;
         mEmulator.on('disconnected', hide_emulator);
         $('#sidebar').addClass('with-emulator');
         var canvas_size = URL_BOOT_IMG[ConnectionPlatformNames[kind]].size;
@@ -85,37 +85,33 @@ var SharedPebble = new (function() {
         else {
             emulator_container.removeClass('emulator-round');
         }
-
-        mEmulator.connect().done(function() {
-            deferred.resolve(mEmulator);
-        }).fail(function(reason) {
+        mEmulator.on('disconnected', handleEmulatorDisconnected);
+        return mEmulator.connect().catch(function(err) {
             hide_emulator();
-            deferred.reject(reason);
-        }).always(function() {
+            throw err;
+        }).finally(function() {
             clearInterval(statementInterval);
         });
-        mEmulator.on('disconnected', handleEmulatorDisconnected);
     }
-
-    this.getEmulator = function(kind) {
-        var deferred = $.Deferred();
-        if(mEmulator != null) {
-            if((kind & mConnectionType) == kind) {
-                deferred.resolve(mEmulator);
-                return deferred.promise();
-            } else {
-                mEmulator.once('disconnected', function() { _getEmulator(kind, deferred); });
-                mEmulator.disconnect(true);
-                mEmulator = null;
-                return deferred.promise();
-            }
-        }
-        _getEmulator(kind, deferred);
-        return deferred.promise();
-    };
 
     this.getCurrentEmulator = function() {
         return mEmulator;
+    };
+
+    this.getEmulator = function(kind) {
+        if(mEmulator != null) {
+            if((kind & mConnectionType) == kind) {
+                return Promise.resolve(mEmulator);
+            } else {
+                return mEmulator.disconnect(true).then(function() {
+                    return _getEmulator(kind);
+                });
+            }
+        }
+        else {
+            return _getEmulator(kind);
+        }
+
     };
 
     function handleEmulatorDisconnected() {
@@ -126,11 +122,9 @@ var SharedPebble = new (function() {
     }
 
     this.getPebble = function(kind) {
-        var deferred = $.Deferred();
         if(mPebble && mPebble.is_connected()) {
             if(kind === undefined || mConnectionType == kind || (kind == ConnectionType.Qemu && self.isVirtual())) {
-                deferred.resolve(mPebble);
-                return deferred.promise();
+                return Promise.resolve(mPebble);
             }
         }
 
@@ -140,10 +134,10 @@ var SharedPebble = new (function() {
         if(kind & ConnectionType.Qemu) {
             watchPromise = self.getEmulator(kind);
         } else {
-            watchPromise = $.Deferred().resolve();
+            watchPromise = Promise.resolve();
         }
-        watchPromise
-            .done(function() {
+        return watchPromise.then(function() {
+            return new Promise(function(resolve, reject) {
                 var did_connect = false;
                 mConnectionType = kind;
                 CloudPebble.Prompts.Progress.Show(gettext("Connecting..."), gettext("Establishing connection..."), function() {
@@ -151,7 +145,7 @@ var SharedPebble = new (function() {
                         mPebble.off();
                         mPebble.close();
                         mPebble = null;
-                        deferred.reject("Connection interrupted.");
+                        reject("Connection interrupted.");
                     }
                 });
                 mPebble = new Pebble(getWebsocketURL(), getToken());
@@ -167,7 +161,7 @@ var SharedPebble = new (function() {
                     CloudPebble.Prompts.Progress.Fail();
                     CloudPebble.Prompts.Progress.Update(gettext("Connection interrupted."));
                     mPebble = null;
-                    deferred.reject("Connection interrupted");
+                    reject("Connection interrupted");
                 };
                 mPebble.on('close error', connectionError);
                 mPebble.on('open', function() {
@@ -189,50 +183,49 @@ var SharedPebble = new (function() {
                     mPebble.off(null, connectionError);
                     mPebble.off('proxy:authenticating proxy:waiting');
                     CloudPebble.Prompts.Progress.Hide();
-                    deferred.resolve(mPebble);
+                    resolve(mPebble);
                 });
             })
-            .fail(function(reason) {
+            .catch(function(reason) {
                 mEmulator = null;
                 CloudPebble.Prompts.Progress.Fail();
-                CloudPebble.Prompts.Progress.Update(interpolate(gettext("Emulator boot failed: %s"), [reason]));
+                CloudPebble.Prompts.Progress.Update(interpolate(gettext("Emulator boot failed: %s"), [reason.toString()]));
                 $('#sidebar').removeClass('with-emulator');
-                deferred.reject(reason);
+                throw reason.toString();
             });
-        return deferred.promise();
+        });
     };
 
     this.getPebbleNow = function() {
         return mPebble;
     };
 
-    // Resolves with 'true' if anything actually disconnected, or false otherwise
     this.disconnect = function(shutdown) {
         var close_pebble = null;
         var disconnect_emu = null;
 
         if(mPebble) {
-            close_pebble = $.Deferred();
-            mPebble.disable_app_logs();
-            mPebble.close();
-            // Wait for a close or error event before disabling events,
-            // Wait for a close or error event before disabling events,
-            // in order to allow the events to be receieved by any listeners
-            mPebble.on('close error', function() {
-                mPebble.off();
-                mPebble = null;
-                close_pebble.resolve(true);
+            close_pebble = new Promise(function(resolve, reject) {
+                mPebble.disable_app_logs();
+                mPebble.close();
+                // Wait for a close or error event before disabling events,
+                // in order to allow the events to be received by any listeners
+                mPebble.on('close error', function() {
+                    mPebble.off();
+                    mPebble = null;
+                    resolve(true);
+                });
+                mConnectionType = ConnectionType.None;
+                close_pebble.promise();
             });
-            mConnectionType = ConnectionType.None;
-            close_pebble.promise();
         }
         if(shutdown === true && mEmulator) {
             disconnect_emu = mEmulator.disconnect();
             mEmulator = null;
         }
 
-        return $.when([close_pebble, disconnect_emu]).then(function(results) {
-            return _.any(results);
+        return Promise.join(close_pebble, disconnect_emu).then(function(pebble_closed, emu_disconnected) {
+            return pebble_closed || emu_disconnected;
         });
     };
 
