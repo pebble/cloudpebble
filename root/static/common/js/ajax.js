@@ -5,11 +5,11 @@ Ajax = {
          * The promise will fail if the HTTP request fails, _or_ if the request
          * returns a JSON object containing "success: false".
          *
-         * The rejection object will some properties from the jqXHR object if HTTP request
-         * returned an an error code.
-         * It will always have a .message property with some kind of message.
+         * The rejection will be an Error instance, and may include properties from the jqXHR 
+         * object if the HTTP request returned an an error code.
+         * Being an Error, it will always have a .message property with some kind of message.
          *
-         * If the returned JSON object contains a .error property, .message will be set to that.
+         * If the server's JSON object contains a .error property, .message will be set to that.
          * Otherwise, .message will come from jQuery's "errorThrown" parameter. Either way,
          * the object will have a toString() function which just returns .messsage
          */
