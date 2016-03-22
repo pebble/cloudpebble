@@ -197,7 +197,8 @@ CloudPebble.YCM = new (function() {
 
     this.deleteFile = function(file) {
         if(!mInitialised) {
-            return Promise.reject();
+            // We resolve here (and in createFile) because YCM not working isn't actually a problem.
+            return Promise.resolve();
         }
         return ws_send('delete', {
             filename: ((file.target == 'worker') ? 'worker_src/' : 'src/') + file.name
@@ -206,7 +207,7 @@ CloudPebble.YCM = new (function() {
 
     this.createFile = function(file, content) {
         if(!mInitialised) {
-            return Promise.reject();
+            return Promise.resolve();
         }
         return ws_send('create', {
             filename: ((file.target == 'worker') ? 'worker_src/' : 'src/') + file.name,
