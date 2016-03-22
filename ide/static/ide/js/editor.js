@@ -254,6 +254,7 @@ CloudPebble.Editor = (function() {
                 CodeMirror.commands.toggleComment(cm);
             };
 
+            settings.gutters = ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'];
             if(file_kind == 'js') {
                 settings.gutters.unshift('gutter-hint-warnings');
             } else if (file_kind == 'c') {
@@ -1026,13 +1027,8 @@ CloudPebble.Editor = (function() {
             params = {name: params};
         }
         return Ajax.Post("/ide/project/" + PROJECT_ID + "/create_test_file", params).then(function(data) {
-            if(data.success) {
-                add_test_file(data.file);
-                edit_source_file(data.file);
-            }
-            if (callback) {
-                callback(data);
-            }
+            add_test_file(data.file);
+            return data.file;
         });
     }
 
@@ -1233,7 +1229,9 @@ CloudPebble.Editor = (function() {
                 prompt_action.error("You must enter a valid test name using only alphanumeric characters, dashes (-) and underscores (_)");
             }
             else {
-                create_remote_test(value).then(function(data) {
+                create_remote_test(value).then(function(file) {
+                    return edit_source_file(file);
+                }).then(function() {
                     prompt_action.dismiss();
                 }).catch(function(error) {
                     prompt_action.error(error.message);

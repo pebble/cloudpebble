@@ -24,7 +24,8 @@ __author__ = 'joe'
 
 def _filtered_max(*args):
     """ Find the maximum of all arguments, completely ignoring any values of None """
-    return max(a for a in args if a)
+    filtered = [a for a in args if a]
+    return max(filtered) if len(filtered) > 0 else None
 
 
 def make_notify_url_builder(request, token=None):
