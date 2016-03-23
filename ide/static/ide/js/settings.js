@@ -68,7 +68,7 @@ CloudPebble.Settings = (function() {
             app_capabilities = app_capabilities.join(',');
 
             if(name.replace(/\s/g, '') === '') {
-                return Promise.reject(gettext("You must specify a project name"));
+                return Promise.reject(new Error(gettext("You must specify a project name")));
             }
 
             var saved_settings = {
@@ -76,28 +76,28 @@ CloudPebble.Settings = (function() {
             };
 
             if(short_name.replace(/\s/g, '') == '') {
-                return Promise.reject(gettext("You must specify a short name."));
+                return Promise.reject(new Error(gettext("You must specify a short name.")));
             }
             if(long_name.replace(/\s/g, '') == '') {
-                return Promise.reject(gettext("You must specify a long name."));
+                return Promise.reject(new Error(gettext("You must specify a long name.")));
             }
             if(company_name.replace(/\s/g, '') == '') {
-                return Promise.reject(gettext("You must specify a company name."));
+                return Promise.reject(new Error(gettext("You must specify a company name.")));
             }
             // This is not an appropriate use of a regex, but we have to have it for the HTML5 pattern attribute anyway,
             // so we may as well reuse the effort here.
             // It validates that the format matches x[.y] with x, y in [0, 255].
             if(!version_label.match(/^(\d{1,2}|1\d{2}|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d{2}|2[0-4]\d|25[0-5]))?$/)) {
-                return Promise.reject(gettext("You must specify a valid version number."));
+                return Promise.reject(new Error(gettext("You must specify a valid version number.")));
             }
             if(!app_uuid.match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}/)) {
-                return Promise.reject(gettext("You must specify a valid UUID (of the form 00000000-0000-0000-0000-000000000000)"));
+                return Promise.reject(new Error(gettext("You must specify a valid UUID (of the form 00000000-0000-0000-0000-000000000000)")));
             }
 
 
             if(sdk_version == '3') {
                 if (!build_aplite && !build_basalt && !build_chalk) {
-                    return Promise.reject(gettext("You must build your app for at least one platform."));
+                    return Promise.reject(new Error(gettext("You must build your app for at least one platform.")));
                 }
             }
 

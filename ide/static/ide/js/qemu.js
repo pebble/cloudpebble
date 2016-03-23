@@ -30,7 +30,7 @@
             console.log(mPlatform);
             // First verify that this is actually plausible.
             if (!window.WebSocket) {
-                return Promise.reject("You need a browser that supports websockets.");
+                return Promise.reject(new Error(gettext("You need a browser that supports websockets.")));
             }
             var tz_offset = -(new Date()).getTimezoneOffset(); // Negative because JS does timezones backwards.
             return Ajax.Post('/ide/emulator/launch', {platform: mPlatform, token: USER_SETTINGS.token, tz_offset: tz_offset})

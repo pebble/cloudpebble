@@ -131,7 +131,7 @@ var SharedPebble = new (function() {
                         mPebble.off();
                         mPebble.close();
                         mPebble = null;
-                        reject("Connection interrupted.");
+                        reject(new Error(gettext("Connection interrupted.")));
                     }
                 });
                 mPebble = new Pebble(getWebsocketURL(), getToken());
@@ -147,7 +147,7 @@ var SharedPebble = new (function() {
                     CloudPebble.Prompts.Progress.Fail();
                     CloudPebble.Prompts.Progress.Update(gettext("Connection interrupted."));
                     mPebble = null;
-                    reject("Connection interrupted");
+                    reject(new Error(gettext("Connection interrupted")));
                 };
                 mPebble.on('close error', connectionError);
                 mPebble.on('open', function() {
