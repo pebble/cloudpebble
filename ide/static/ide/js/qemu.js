@@ -71,7 +71,7 @@
         }
 
         function killEmulator() {
-            return Ajax.Post(buildURL('kill'));
+            return Ajax.Wrap($.post(buildURL('kill')), 'status');
         }
 
         function updateStateHandler(resolve, reject) {
