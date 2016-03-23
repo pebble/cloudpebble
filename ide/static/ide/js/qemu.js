@@ -51,7 +51,7 @@
         }
 
         function sendPing() {
-            Ajax.Post(buildURL('ping'))
+            (new Ajax.Wrapper('alive')).post(buildURL('ping'))
                 .then(function() {
                     console.log('qemu ping!');
                 })
@@ -73,7 +73,7 @@
         var killPromise = null;
         function killEmulator() {
             if (!killPromise) {
-                killPromise = Ajax.Wrap($.post(buildURL('kill')), 'status').finally(function() {
+                killPromise = (new Ajax.Wrapper('status')).post(buildURL('kill')).finally(function() {
                     killPromise = null;
                 });
             }
