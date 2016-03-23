@@ -82,7 +82,7 @@ CloudPebble.Editor = (function() {
             return Promise.resolve();
         }
         if (project_source_files[new_name]) {
-            return Promise.reject(interpolate(gettext("A file called '%s' already exists."), [new_name]));
+            return Promise.reject(new Error(interpolate(gettext("A file called '%s' already exists."), [new_name])));
         }
         return Ajax.Post("/ide/project/" + PROJECT_ID + "/" + url_kind + "/" + file.id + "/rename", {
             old_name: file.name,

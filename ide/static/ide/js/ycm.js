@@ -10,10 +10,6 @@ var EventedWebSocket = function(host) {
 
     _.extend(this, Backbone.Events);
 
-    this.getSocket = function() {
-        return mSocket;
-    };
-
     this.connect = function() {
         return new Promise(function(resolve, reject) {
             mSocket = new WebSocket(host);
@@ -21,36 +17,38 @@ var EventedWebSocket = function(host) {
                 self.trigger('error', e);
                 reject(e);
             };
-            mSocket.onclose = handle_socket_close;
+            mSocket.addEventListener("close", function() {
+                self.trigger('close', e);
+                mSocket = null;
+                ids = {};
+            }, false);
             mSocket.onopen = function() {
                 self.trigger('open');
                 resolve();
             };
-        })
+        });
 
-    };
-
-    this.close = function() {
-        mSocket.close();
-        mSocket = null;
     };
 
     this.send = function(data) {
         return new Promise(function(resolve, reject) {
-            // Take the first free ID
+            var on_message, on_close, remove_listeners;
             var id = 0;
+            // Take the first free ID
             while(id in ids) id++;
             ids[id] = true;
             data._id = id;
-            // Send the data
-            var text = JSON.stringify(data);
-            mSocket.send(text);
-            var callback;
-            callback = function(e) {
+
+            remove_listeners = function() {
+                mSocket.removeEventListener("message", on_message);
+                mSocket.removeEventListener("close", on_close);
+            };
+            on_message = function(e) {
+                // Deal with the message if it a response to the one we sent.
                 var data = JSON.parse(e.data);
                 var m_id = data._id;
                 if (m_id == id) {
-                    mSocket.removeEventListener("message", callback);
+                    remove_listeners();
                     delete ids[id];
                     if (!data.success) {
                         reject(new Error(data.error));
@@ -60,22 +58,16 @@ var EventedWebSocket = function(host) {
                     }
                 }
             };
-            mSocket.addEventListener("message", callback, false);
+            on_close = function() {
+                // If the socket closes, reject all open promises.
+                remove_listeners();
+                reject(new Error(gettext("Socket closed.")));
+            };
+            mSocket.addEventListener("message", on_message, false);
+            mSocket.addEventListener("close", on_close, false);
+            // Send the data as a JSON encoded string
+            mSocket.send(JSON.stringify(data));
         });
-    };
-
-    this.isOpen = function() {
-        return (mSocket.readyState == WebSocket.OPEN);
-    };
-
-
-    var handle_socket_close = function(e) {
-        self.trigger('close', e);
-        mSocket = null;
-        _.each(ids, function(promise, key) {
-            promise.reject({'error': 'closed'})
-        });
-        ids = {};
     };
 };
 
@@ -147,24 +139,22 @@ CloudPebble.YCM = new (function() {
                 mUUID = data.uuid;
                 mURL = data.server + 'ycm/' + data.uuid + '/ws';
                 mSocket = new EventedWebSocket(mURL);
-                mSocket.on('open', function() {
-                    if(mRestarting) {
-                        sendBuffers();
-                    } else {
-                        mInitialised = true;
-                        mPingTimer = _.delay(pingServer, PING_INTERVAL);
-                        $('.prepare-autocomplete').hide();
-                        $('.footer-credits').show();
-                    }
-                });
 
                 mSocket.on('close error', function() {
                     setTimeout(function() {self.restart();}, 1000);
                 });
 
                 return mSocket.connect();
-            })
-            .catch(function(e) {
+            }).then(function() {
+                if(mRestarting) {
+                    sendBuffers();
+                } else {
+                    mInitialised = true;
+                    mPingTimer = _.delay(pingServer, PING_INTERVAL);
+                    $('.prepare-autocomplete').hide();
+                    $('.footer-credits').show();
+                }
+            }).catch(function(e) {
                 mFailed = true;
                 $('.prepare-autocomplete').text(gettext("Code completion unavailable."));
                 throw e;
@@ -175,7 +165,7 @@ CloudPebble.YCM = new (function() {
 
     this.restart = function() {
         if(mRestarting) {
-            return;
+            return mInitPromise ? mInitPromise : Promise.reject(new Error("Failed to restart"));
         }
         clearTimeout(mPingTimer);
         mPingTimer = null;
@@ -188,7 +178,7 @@ CloudPebble.YCM = new (function() {
         mUUID = null;
         $('.prepare-autocomplete').text(gettext("Code completion lost; retrying...")).show();
         $('.footer-credits').hide();
-        this.initialise();
+        return this.initialise();
     };
 
     this.getUUID = function() {

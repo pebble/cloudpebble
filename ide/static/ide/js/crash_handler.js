@@ -65,7 +65,7 @@ CloudPebble.CrashChecker = function(app_uuid) {
     function get_debug_json(platform, process) {
         function go(urls) {
             if (urls.length == 0) {
-                return Promise.reject();
+                return Promise.reject(new Error());
             }
             var url = urls[0];
             return Ajax.Ajax({
