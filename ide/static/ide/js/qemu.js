@@ -70,8 +70,14 @@
             mRFB.sendKey(XK_Shift_L);
         }
 
+        var killPromise = null;
         function killEmulator() {
-            return Ajax.Wrap($.post(buildURL('kill')), 'status');
+            if (!killPromise) {
+                killPromise = Ajax.Wrap($.post(buildURL('kill')), 'status').finally(function() {
+                    killPromise = null;
+                });
+            }
+            return killPromise;
         }
 
         function updateStateHandler(resolve, reject) {
