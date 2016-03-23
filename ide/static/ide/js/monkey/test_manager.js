@@ -322,11 +322,9 @@ CloudPebble.TestManager = (function() {
                             if (isCurrentRequest(page, id)) {
                                 this.navigate(page, id);
                             }
-                            else {
-                                console.log("Abandoned request", page, id);
-                            }
+                            // If the current request doesn't match this one, then this request is abandoned.
                         }.bind(this))
-                        .always(function() {
+                        .finally(function() {
                             // No matter how the request ends, clear the loading-bar timeout.
                             clearTimeout(timeout);
                         });

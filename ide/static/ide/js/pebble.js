@@ -89,6 +89,8 @@ var SharedPebble = new (function() {
         return mEmulator.connect().catch(function(err) {
             hide_emulator();
             throw err;
+        }).then(function() {
+            return mEmulator;
         }).finally(function() {
             clearInterval(statementInterval);
         });

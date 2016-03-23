@@ -57,18 +57,18 @@ CloudPebble.Editor = (function() {
             return SharedPebble.disconnect(true);
         }).then(function(did_close) {
             // Wait for a second if we needed to disconnect before starting again.
-            return (did_close ? CloudPebble.Utils.Delay(1000) : null);
+            return (did_close ? Promise.delay(1000) : null);
         }).then(function () {
             return SharedPebble.getEmulator(options.platform);
         }).then(function (emulator) {
             CloudPebble.Prompts.Progress.Update(gettext("Starting test"));
             return emulator.runTest(PROJECT_ID, test_id, platform_name, options.update);
-        }).catch(function (error) {
-            CloudPebble.Prompts.Progress.Update(error.message ? error.message : error);
-            CloudPebble.Prompts.Progress.Fail();
         }).then(function (result) {
             CloudPebble.Prompts.Progress.Hide();
             return CloudPebble.TestManager.ShowLiveTestRun(result['subscribe_url'], result['session_id'], result['run_id']);
+        }).catch(function (error) {
+            CloudPebble.Prompts.Progress.Update(error.message ? error.message : error);
+            CloudPebble.Prompts.Progress.Fail();
         });
     }
 
