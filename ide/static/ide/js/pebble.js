@@ -191,7 +191,7 @@ var SharedPebble = new (function() {
         var disconnect_emu = null;
 
         if(mPebble) {
-            close_pebble = new Promise(function(resolve, reject) {
+            close_pebble = new Promise(function(resolve) {
                 mPebble.disable_app_logs();
                 mPebble.close();
                 // Wait for a close or error event before disabling events,
@@ -202,7 +202,6 @@ var SharedPebble = new (function() {
                     resolve(true);
                 });
                 mConnectionType = ConnectionType.None;
-                close_pebble.promise();
             });
         }
         if(shutdown === true && mEmulator) {
