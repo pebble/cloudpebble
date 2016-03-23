@@ -115,7 +115,6 @@ var SharedPebble = new (function() {
         }
 
         var watchPromise;
-        var statementInterval = null;
 
         if(kind & ConnectionType.Qemu) {
             watchPromise = self.getEmulator(kind);
@@ -130,7 +129,6 @@ var SharedPebble = new (function() {
                     if(!did_connect && mPebble) {
                         mPebble.off();
                         mPebble.close();
-                        mPebble = null;
                         reject(new Error(gettext("Connection interrupted.")));
                     }
                 });
@@ -143,23 +141,18 @@ var SharedPebble = new (function() {
                     CloudPebble.Prompts.Progress.Update(gettext("Waiting for phone. Make sure the developer connection is enabled."));
                 });
                 var connectionError = function() {
-                    mPebble.off();
-                    CloudPebble.Prompts.Progress.Fail();
-                    CloudPebble.Prompts.Progress.Update(gettext("Connection interrupted."));
-                    mPebble = null;
                     reject(new Error(gettext("Connection interrupted")));
                 };
                 mPebble.on('close error', connectionError);
                 mPebble.on('open', function() {
                     if(self.isVirtual()) {
+                        var date = new Date();
                         if((mConnectionType & ConnectionType.QemuAplite) != ConnectionType.QemuAplite) {
-                            // Set pebble timzeone
-                            var date = new Date();
+                            // Set pebble timezone
                             mPebble.set_time_utc(date.getTime());
                             console.log("setting pebble clock to utc.");
                         } else {
                             // Set the clock to localtime.
-                            var date = new Date();
                             mPebble.set_time(date.getTime() - date.getTimezoneOffset() * 60000);
                             console.log("setting pebble clock to localtime.");
                         }
@@ -171,13 +164,14 @@ var SharedPebble = new (function() {
                     CloudPebble.Prompts.Progress.Hide();
                     resolve(mPebble);
                 });
-            })
-            .catch(function(reason) {
+            }).catch(function(error) {
+                mPebble.off();
+                mPebble = null;
                 mEmulator = null;
                 CloudPebble.Prompts.Progress.Fail();
-                CloudPebble.Prompts.Progress.Update(interpolate(gettext("Emulator boot failed: %s"), [reason.toString()]));
+                CloudPebble.Prompts.Progress.Update(interpolate(gettext("Emulator boot failed: %s"), [error.message]));
                 $('#sidebar').removeClass('with-emulator');
-                throw reason.toString();
+                throw error;
             });
         });
     };
