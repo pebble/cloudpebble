@@ -549,55 +549,59 @@ CloudPebble.TestManager.Interface = (function(API) {
     }
 
     /**
-     * The TestManager is parent UI for everything, rendering the dashboard on the left, detail page on the right,
-     * "run tests" button and any errors.
+     * Renders a button which starts all tests in batch mode when clicked.
      */
-    var TestManager = React.createClass({
+    var BatchRunButton = React.createClass({
         getInitialState: function() {
             return {batch_waiting: false};
         },
+        onClick: function() {
+            this.setState({batch_waiting: true});
+            API.Sessions.new().finally(function() {
+                this.setState({batch_waiting: false});
+            }.bind(this));
+        },
         render: function() {
-            var props = this.props;
-            var route = props.route;
-            var is_log = (route.length>0 && (route[route.length-1].page == 'logs'));
-
-            var className = 'testmanager-page-' + (route.length == 0 ? 'dashboard' : 'detail');
-
-            var onClickBatchRun = function () {
-                this.setState({batch_waiting: true});
-                API.Sessions.new().always(function() {
-                    this.setState({batch_waiting: false});
-                }.bind(this));
-            }.bind(this);
-
-            // This logic is used to always render test logs across the full screen width.
-            var leftclass = is_log ? 'hide' : 'leftside';
-            var rightclass = is_log ? '' : 'rightside';
-
-            return (
-                <div className={className}>
-                    {!!props.error && <Error {...props.error} onClick={props.closeError}/>}
-                    {props.tests.length > 0 && (
-                        <Well>
-                            <button onClick={onClickBatchRun} className='btn btn-affirmative' disabled={this.state.batch_waiting ? "disabled" : null}>{gettext('Batch run')}</button>
-                            <a href={'/ide/project/'+props.project_id+'/tests/archive'} className='btn testmanager-download-btn'>{gettext('Download tests as zip')}</a>
-                        </Well>
-                    )}
-                    <div className={leftclass}>
-                        <Dashboard sessions={props.sessions} tests={props.tests} route={route}/>
-                    </div>
-                    <div className={rightclass}>
-                        {route.length > 0 &&
-                        <Well>
-                            <BackButton route={route}/>
-                            <TestPage {...props} />
-                        </Well>
-                        }
-                    </div>
-                </div>
-            );
+            return (<button onClick={this.onClick} className='btn btn-affirmative' disabled={this.state.batch_waiting ? "disabled" : null}>{gettext('Batch run')}</button>)
         }
     });
+
+    /**
+     * The TestManager is parent UI for everything, rendering the dashboard on the left, detail page on the right,
+     * "run tests" button and any errors.
+     */
+    function TestManager(props) {
+        var route = props.route;
+        var is_log = (route.length>0 && (route[route.length-1].page == 'logs'));
+        var className = 'testmanager-page-' + (route.length == 0 ? 'dashboard' : 'detail');
+
+        // This logic is used to always render test logs across the full screen width.
+        var leftclass = is_log ? 'hide' : 'leftside';
+        var rightclass = is_log ? '' : 'rightside';
+
+        return (
+            <div className={className}>
+                {!!props.error && <Error {...props.error} onClick={props.closeError}/>}
+                {props.tests.length > 0 && (
+                    <Well>
+                        <BatchRunButton />
+                        <a href={'/ide/project/'+props.project_id+'/tests/archive'} className='btn testmanager-download-btn'>{gettext('Download tests as zip')}</a>
+                    </Well>
+                )}
+                <div className={leftclass}>
+                    <Dashboard sessions={props.sessions} tests={props.tests} route={route}/>
+                </div>
+                <div className={rightclass}>
+                    {route.length > 0 &&
+                    <Well>
+                        <BackButton route={route}/>
+                        <TestPage {...props} />
+                    </Well>
+                    }
+                </div>
+            </div>
+        );
+    }
 
     /**
      * Renders the text and "create a test" button displayed when the user has no tests or test runs.
