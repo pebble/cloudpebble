@@ -1,8 +1,12 @@
 CloudPebble = CloudPebble || {};
 
-// This is a drop-in replacement for $.ajax
-// TODO: is this overkill? It seems to work, and means that very few changes to other code are required.
-// TODO: If we do keep this, (a) stick it in another file, (b) make sure it's robust
+/**
+ * EventedWebSocket is a promise-based websocket interface. It sends JSON messages
+ * and adds an integer '_id' attribute to all messages, which is used to connect
+ * responses to requests.
+ * @param {string} host URL of websocket to connect to
+ * @constructor
+ */
 var EventedWebSocket = function(host) {
     var self = this;
     var mSocket = null;
@@ -10,6 +14,9 @@ var EventedWebSocket = function(host) {
 
     _.extend(this, Backbone.Events);
 
+    /** Connect to a host, returning a promise which is resolved on successful connection.
+     * @returns {Promise}
+     */
     this.connect = function() {
         return new Promise(function(resolve, reject) {
             mSocket = new WebSocket(host);
@@ -17,11 +24,13 @@ var EventedWebSocket = function(host) {
                 self.trigger('error', e);
                 reject(e);
             };
-            mSocket.addEventListener("close", function() {
-                self.trigger('close', e);
-                mSocket = null;
+            var close_listener = mSocket.addEventListener("close", function(error) {
+                self.trigger('close', error);
                 ids = {};
+                mSocket.removeEventListener("close", close_listener);
+                mSocket = null;
             }, false);
+
             mSocket.onopen = function() {
                 self.trigger('open');
                 resolve();
@@ -29,8 +38,14 @@ var EventedWebSocket = function(host) {
         });
 
     };
-
+    
+    /** Send an object (as JSON). The returned promise will be resolved or rejected
+     * depending on the value of the 'success' key in the response.
+     * @param {object} data
+     * @returns {Promise}
+     */
     this.send = function(data) {
+        var socket = mSocket;
         return new Promise(function(resolve, reject) {
             var on_message, on_close, remove_listeners;
             var id = 0;
@@ -40,8 +55,8 @@ var EventedWebSocket = function(host) {
             data._id = id;
 
             remove_listeners = function() {
-                mSocket.removeEventListener("message", on_message);
-                mSocket.removeEventListener("close", on_close);
+                socket.removeEventListener("message", on_message);
+                socket.removeEventListener("close", on_close);
             };
             on_message = function(e) {
                 // Deal with the message if it a response to the one we sent.
@@ -60,13 +75,12 @@ var EventedWebSocket = function(host) {
             };
             on_close = function() {
                 // If the socket closes, reject all open promises.
-                remove_listeners();
                 reject(new Error(gettext("Socket closed.")));
             };
-            mSocket.addEventListener("message", on_message, false);
-            mSocket.addEventListener("close", on_close, false);
+            socket.addEventListener("message", on_message, false);
+            socket.addEventListener("close", on_close, false);
             // Send the data as a JSON encoded string
-            mSocket.send(JSON.stringify(data));
+            socket.send(JSON.stringify(data));
         });
     };
 };
