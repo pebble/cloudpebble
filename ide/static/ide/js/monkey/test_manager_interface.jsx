@@ -559,6 +559,8 @@ CloudPebble.TestManager.Interface = (function(API) {
         render: function() {
             var props = this.props;
             var route = props.route;
+            var is_log = (route.length>0 && (route[route.length-1].page == 'logs'));
+
             var className = 'testmanager-page-' + (route.length == 0 ? 'dashboard' : 'detail');
 
             var onClickBatchRun = function () {
@@ -567,6 +569,10 @@ CloudPebble.TestManager.Interface = (function(API) {
                     this.setState({batch_waiting: false});
                 }.bind(this));
             }.bind(this);
+
+            // This logic is used to always render test logs across the full screen width.
+            var leftclass = is_log ? 'hide' : 'leftside';
+            var rightclass = is_log ? '' : 'rightside';
 
             return (
                 <div className={className}>
@@ -577,10 +583,10 @@ CloudPebble.TestManager.Interface = (function(API) {
                             <a href={'/ide/project/'+props.project_id+'/tests/archive'} className='btn testmanager-download-btn'>{gettext('Download tests as zip')}</a>
                         </Well>
                     )}
-                    <div className="leftside">
+                    <div className={leftclass}>
                         <Dashboard sessions={props.sessions} tests={props.tests} route={route}/>
                     </div>
-                    <div className="rightside">
+                    <div className={rightclass}>
                         {route.length > 0 &&
                         <Well>
                             <BackButton route={route}/>
@@ -593,6 +599,9 @@ CloudPebble.TestManager.Interface = (function(API) {
         }
     });
 
+    /**
+     * Renders the text and "create a test" button displayed when the user has no tests or test runs.
+     */
     var NoTestsDisplay = function(props) {
         var createTest = function() {
             CloudPebble.Editor.CreateTest();

@@ -15,7 +15,18 @@ CloudPebble.TestManager = (function() {
             /** name of key to use when returning from getState() **/
             key: 'data',
             /** name of key in the resulting request to fetch data from**/
-            server_key: 'data', /**
+            server_key: 'data',
+
+            /** Trigger a Backbone event asynchronously.
+             * @param {string} event name of event
+             * @param {object} data object to send
+             */
+            triggerLater: function(event, data) {
+                _.defer(function() {
+                    this.trigger(event, data);
+                }.bind(this));
+            },
+            /**
              * This function should return true for any object which we would expect to be sent in a GET request
              * @param options The options for the GET request.
              * @returns {Function} by default, returns a function which always returns True, since the default behaviour
@@ -36,7 +47,7 @@ CloudPebble.TestManager = (function() {
                 if (!_.isArray(data)) {data = [data];}
                 this.state = _.pick(this.state, filter_function);
                 _.extend(this.state, _.indexBy(data, 'id'));
-                this.trigger('changed', this.getState());
+                this.triggerLater('changed', this.getState());
             },
             /**
              * Send a GET request to refresh the store.
@@ -57,7 +68,8 @@ CloudPebble.TestManager = (function() {
                 }).then(function(result) {
                     this.syncData(result, options);
                 }.bind(this)).catch(function(error) {
-                    this.trigger('error', {text: error.message, errorFor: this.name})
+                    this.triggerLater('error', {text: error.message, errorFor: this.name});
+                    throw error;
                 }.bind(this));
             },
             /**
@@ -112,15 +124,6 @@ CloudPebble.TestManager = (function() {
                 }.bind(this));
             };
 
-            // TODO: remove this or factor it out at some point.
-            this.fakeNew = function() {
-                return Promise.delay(1000).then(function() {
-                    var session = {data: [_.clone(this.state[1])]};
-                    session.data[0].is_new = true;
-                    session.data[0].id = _.max(_.keys(this.state))+1;
-                    this.syncData(session, {});
-                });
-            };
             /**
              * Sorts sessions by date
              */
@@ -141,7 +144,7 @@ CloudPebble.TestManager = (function() {
                 var url = base_url+this.url+'/'+id;
                 return Ajax.Ajax(url).then(function(data) {
                     self.state[id] = {text: data, id: id};
-                    self.trigger('changed', self.getState());
+                    self.triggerLater('changed', self.getState());
                 }).catch(function(error) {
                     if (error.status == 400) {
                         return null;
@@ -167,9 +170,9 @@ CloudPebble.TestManager = (function() {
                 };
                 evtSource.addEventListener('log', function(e) {
                     self.state[id].text += e.data+'\n';
-                    self.trigger('changed', self.getState());
+                    self.triggerLater('changed', self.getState());
                 });
-                evtSource.addEventListener('done', function(e) {
+                evtSource.addEventListener('done', function() {
                     evtSource.close();
                     onClose();
                 });
@@ -265,7 +268,7 @@ CloudPebble.TestManager = (function() {
             };
 
             this.triggerCurrent = function() {
-                this.trigger('changed', this.getRoute());
+                _.defer(function() {this.trigger('changed', this.getRoute());}.bind(this));
             };
 
             /**
