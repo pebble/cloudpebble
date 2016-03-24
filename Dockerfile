@@ -47,7 +47,6 @@ RUN curl -o /tmp/arm-cs-tools.tar https://cloudpebble-vagrant.s3.amazonaws.com/a
   tar -xf /tmp/arm-cs-tools.tar -C / && rm /tmp/arm-cs-tools.tar
 
 ADD requirements.txt /tmp/requirements.txt
-
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
 ENV SDK_TWO_VERSION=2.9
