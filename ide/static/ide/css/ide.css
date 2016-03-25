@@ -1240,6 +1240,16 @@ button#add-filter {
 
 /* Monkey editor */
 
+.form-horizontal .control-group label.control-label-multiline {
+    line-height: 25px;
+}
+
+.modal-checkbox-explanation  {
+    display: inline-block;
+    width: calc(100% - 213px);
+    padding-left: 13px;
+}
+
 .monkey-no-tests {
     font-size: larger;
     line-height: 40px;
