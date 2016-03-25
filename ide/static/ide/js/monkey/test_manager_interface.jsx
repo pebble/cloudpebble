@@ -463,6 +463,31 @@ CloudPebble.TestManager.Interface = (function(API) {
     }
 
     /**
+     * Renders a button which starts all tests in batch mode when clicked.
+     */
+    var BatchRunButton = React.createClass({
+        getInitialState: function() {
+            return {batch_waiting: false};
+        },
+        onClick: function() {
+            this.setState({batch_waiting: true});
+            API.Sessions.new().finally(function() {
+                this.setState({batch_waiting: false});
+            }.bind(this));
+        },
+        render: function() {
+            return (<button onClick={this.onClick} className='btn btn-affirmative' disabled={this.state.batch_waiting ? "disabled" : null}>{gettext('Batch run')}</button>)
+        }
+    });
+
+    /**
+     * Button to download all the tests as a zip
+     */
+    function TestDownloadButton(props) {
+        return (<a href={'/ide/project/'+props.project_id+'/tests/archive'} className='btn testmanager-download-btn'>{gettext('Download tests as zip')}</a>);
+    }
+
+    /**
      * The Dashboard shows the list of all tests and jobs
      */
     function Dashboard(props) {
@@ -470,6 +495,12 @@ CloudPebble.TestManager.Interface = (function(API) {
         var top_id = props.route[0] ? props.route[0].id : null;
         return (
             <div>
+                {props.tests.length > 0 && (
+                <Well>
+                    <BatchRunButton />
+                    <TestDownloadButton />
+                </Well>
+                )}
                 <Well>
                     <h2>{gettext('Tests')}</h2>
                     <TestList tests={props.tests} selected={top_page == 'test' ? top_id: null}/>
@@ -549,24 +580,6 @@ CloudPebble.TestManager.Interface = (function(API) {
     }
 
     /**
-     * Renders a button which starts all tests in batch mode when clicked.
-     */
-    var BatchRunButton = React.createClass({
-        getInitialState: function() {
-            return {batch_waiting: false};
-        },
-        onClick: function() {
-            this.setState({batch_waiting: true});
-            API.Sessions.new().finally(function() {
-                this.setState({batch_waiting: false});
-            }.bind(this));
-        },
-        render: function() {
-            return (<button onClick={this.onClick} className='btn btn-affirmative' disabled={this.state.batch_waiting ? "disabled" : null}>{gettext('Batch run')}</button>)
-        }
-    });
-
-    /**
      * The TestManager is parent UI for everything, rendering the dashboard on the left, detail page on the right,
      * "run tests" button and any errors.
      */
@@ -582,12 +595,6 @@ CloudPebble.TestManager.Interface = (function(API) {
         return (
             <div className={className}>
                 {!!props.error && <Error {...props.error} onClick={props.closeError}/>}
-                {props.tests.length > 0 && (
-                    <Well>
-                        <BatchRunButton />
-                        <a href={'/ide/project/'+props.project_id+'/tests/archive'} className='btn testmanager-download-btn'>{gettext('Download tests as zip')}</a>
-                    </Well>
-                )}
                 <div className={leftclass}>
                     <Dashboard sessions={props.sessions} tests={props.tests} route={route}/>
                 </div>
