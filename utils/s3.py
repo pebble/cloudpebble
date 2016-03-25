@@ -23,7 +23,6 @@ class BucketHolder(object):
         self.s3 = None
 
     def configure(self):
-        self.configured = True
         if settings.AWS_ENABLED:
             if settings.AWS_S3_FAKE_S3 is None:
                 self.s3 = boto.connect_s3(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
@@ -41,6 +40,7 @@ class BucketHolder(object):
                 'export': self.s3.get_bucket(settings.AWS_S3_EXPORT_BUCKET),
                 'builds': self.s3.get_bucket(settings.AWS_S3_BUILDS_BUCKET),
             }
+            self.configured = True
         else:
             self.s3 = None
             self.buckets = None
