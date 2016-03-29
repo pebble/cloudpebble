@@ -36,7 +36,7 @@ Ajax = (function() {
                         resolve();
                     }
                     var message;
-                    if (jqXHR & jqXHR.responseJSON && jqXHR.responseJSON.error) {
+                    if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.error) {
                         message = jqXHR.responseJSON.error;
                     }
                     else {
