@@ -24,8 +24,15 @@ Ajax = (function() {
          */
         this.wrap = function (deferred) {
             return new Promise(function (resolve, reject) {
+                function handle_traceback(tb) {
+                    // Print a Python traceback into the console, if it exists.
+                    if (tb) {
+                        console.log(tb);
+                    }
+                }
                 deferred.then(function (data) {
                     if (_.isObject(data) && !!success_key && !data[success_key]) {
+                        handle_traceback(data.traceback);
                         reject(data.error ? new Error(data.error) : new Error(gettext("Unknown error")));
                     }
                     else {
@@ -38,6 +45,7 @@ Ajax = (function() {
                     var message;
                     if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.error) {
                         message = jqXHR.responseJSON.error;
+                        handle_traceback(jqXHR.responseJSON.traceback);
                     }
                     else {
                         message = errorThrown;
