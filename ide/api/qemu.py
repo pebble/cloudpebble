@@ -3,20 +3,19 @@ __author__ = 'katharine'
 import json
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseNotFound
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 from django.views.decorators.http import require_POST
-from ide.api import json_response, json_failure
 import requests
 import random
 import urlparse
-import urllib
 import string
 from utils.redis_helper import redis_client
+from utils.jsonview import json_view, InternalServerError
 
 
 @login_required
 @require_POST
+@json_view
 def launch_emulator(request):
     user_id = request.user.id
     platform = request.POST['platform']
@@ -39,10 +38,9 @@ def launch_emulator(request):
             response = response.json()
         except (requests.RequestException, ValueError) as e:
             print "couldn't fetch old instance: %s" % e
-            pass
         else:
             if response.get('alive', False):
-                return json_response(qemu_instance)
+                return qemu_instance
             else:
                 print "old instance is dead."
 
@@ -72,24 +70,24 @@ def launch_emulator(request):
             response['kill_url'] = '%sqemu/%s/kill' % (server, response['uuid'])
             response['token'] = token
             redis_client.set(redis_key, json.dumps(response))
-            return json_response(response)
+            return response
         except requests.HTTPError as e:
             print e.response.text
         except (requests.RequestException, ValueError) as e:
             print e
-            pass
-    return json_failure("Unable to create emulator instance.")
+    raise InternalServerError(_("Unable to create emulator instance."))
 
 
 @login_required
 @require_POST
+@json_view
 def generate_phone_token(request, emulator_id):
     phone_token = random.randint(100000, 999999)
     token = request.POST['token']
     url = request.POST['url']
     redis_key = 'qemu-phone-token-%s' % phone_token
     redis_client.set(redis_key, json.dumps({'uuid': emulator_id, 'token': token, 'url': url}), ex=300)
-    return json_response({'token': phone_token})
+    return {'token': phone_token}
 
 
 def handle_phone_token(request, token):
