@@ -15,6 +15,9 @@ def _ensure_bucket_exists(s3, bucket):
 
 if settings.AWS_ENABLED:
     if settings.AWS_S3_FAKE_S3 is None:
+        # The host must be manually specified in Python 2.7.9+ due to
+        # https://github.com/boto/boto/issues/2836 this bug in boto with .s in
+        # bucket names.
         host = settings.AWS_S3_HOST if settings.AWS_S3_HOST else NoHostProvided
 
         _s3 = boto.connect_s3(
