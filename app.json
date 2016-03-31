@@ -3,7 +3,7 @@
   "description": "CloudPebble Staging Configuration",
   "scripts": {},
   "env": {
-    "ARM_CS_TOOLS": "/app/sdk2/arm-cs-tools/bin/",
+    "ARM_CS_TOOLS": "/app/arm-cs-tools/bin/",
     "AWS_ACCESS_KEY_ID": {
       "required": true
     },
