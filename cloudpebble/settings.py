@@ -113,23 +113,30 @@ STATIC_URL = '/static/'
 
 PUBLIC_URL = _environ.get('PUBLIC_URL', 'http://localhost:8000/') # This default is completely useless.
 
-# Additional locations of static files
-STATICFILES_DIRS = (
-    # Put strings here, like "/home/html/static" or "C:/www/django/static".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-)
 
-# List of finder classes that know how to find static files in
-# various locations.
-STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'djangobower.finders.BowerFinder',
-    'pipeline.finders.PipelineFinder',
-)
+if DEBUG or TESTING:
+    # Additional locations of static files
+    STATICFILES_DIRS = (
+        # This is used instead of django-bower's finder, because django-pipeline
+        # is actually better than django-bower at filtering out unneeded static
+        # files.
+        os.path.join(os.path.dirname(__file__), '..', 'bower_components'),
+    )
+    STATICFILES_FINDERS = (
+        'pipeline.finders.FileSystemFinder',
+        'pipeline.finders.AppDirectoriesFinder',
+        'pipeline.finders.PipelineFinder',
+    )
+    STATICFILES_STORAGE = 'pipeline.storage.PipelineStorage'
 
-STATICFILES_STORAGE = 'pipeline.storage.PipelineStorage'
+else:
+    STATICFILES_FINDERS = (
+        'django.contrib.staticfiles.finders.FileSystemFinder',
+        'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+        'djangobower.finders.BowerFinder',
+        'pipeline.finders.PipelineFinder',
+    )
+    STATICFILES_STORAGE = 'cloudpebble.storages.GzipManifestPipelineStorage'
 
 
 BOWER_INSTALLED_APPS = (
@@ -164,6 +171,7 @@ TEMPLATES = [
                 'django.template.context_processors.media',
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
+                'django.core.context_processors.request',
                 'django.contrib.messages.context_processors.messages',
                 "social.apps.django_app.context_processors.backends",
                 "social.apps.django_app.context_processors.login_redirect",
@@ -171,9 +179,6 @@ TEMPLATES = [
         }
     }
 ]
-
-if not DEBUG and not TESTING:
-    STATICFILES_STORAGE = 'cloudpebble.storages.GzipManifestPipelineStorage'
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
