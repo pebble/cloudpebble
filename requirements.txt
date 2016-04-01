@@ -3,17 +3,17 @@ django-registration==2.0.4
 -e git://github.com/pebble/django-pipeline.git@7c1bb9f4a90a5911c94e24bee79dfed48602a19f#egg=pipeline
 pyreact>=0.6.0
 amqp==1.4.7
-celery==3.1.20
+celery==3.1.23
 flup==1.0.3.dev-20110405
 psycopg2==2.6.1
-South==1.0.1
+South==1.0.2
 qrcode==4.0.4
 Pillow==2.9.0
 pygithub==1.14.2
 python-social-auth==0.2.14
 redis==2.10.5
 boto==2.39.0
-gevent>=1.1rc2
+gevent==1.1
 psycogreen==1.0
 requests==2.9.1
 oauth2client==1.5.2
