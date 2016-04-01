@@ -2,14 +2,11 @@ import os
 import re
 import tempfile
 import time
-import json
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db import transaction, IntegrityError
-from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_safe, require_POST
-from ide.api import json_response, json_failure
 from ide.models.build import BuildResult
 from ide.models.project import Project, TemplateProject
 from ide.models.files import SourceFile, ResourceFile
@@ -19,18 +16,20 @@ from ide.tasks.build import run_compile
 from ide.tasks.gist import import_gist
 from ide.tasks.git import do_import_github
 from utils.td_helper import send_td_event
+from utils.jsonview import json_view, BadRequest
 
 __author__ = 'katharine'
 
 
 @require_safe
 @login_required
+@json_view
 def project_info(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     source_files = SourceFile.objects.filter(project=project).order_by('file_name')
     resources = ResourceFile.objects.filter(project=project).order_by('file_name')
     test_files = TestFile.objects.filter(project=project).order_by('file_name')
-    output = {
+    return {
         'type': project.project_type,
         'success': True,
         'name': project.name,
@@ -79,26 +78,26 @@ def project_info(request, project_id):
         }
     }
 
-    return json_response(output)
-
 
 @require_POST
 @login_required
+@json_view
 def compile_project(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     build = BuildResult.objects.create(project=project)
     task = run_compile.delay(build.id)
-    return json_response({"build_id": build.id, "task_id": task.task_id})
+    return {"build_id": build.id, "task_id": task.task_id}
 
 
 @require_safe
 @login_required
+@json_view
 def last_build(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     try:
         build = project.builds.order_by('-started')[0]
     except (IndexError, BuildResult.DoesNotExist):
-        return json_response({"build": None})
+        return {"build": None}
     else:
         b = {
             'uuid': build.uuid,
@@ -111,43 +110,43 @@ def last_build(request, project_id):
             'build_dir': build.get_url(),
             'sizes': build.get_sizes(),
         }
-        return json_response({"build": b})
+        return {"build": b}
 
 
 @require_safe
 @login_required
+@json_view
 def build_history(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     try:
         builds = project.builds.order_by('-started')[:10]
     except (IndexError, BuildResult.DoesNotExist):
-        return json_response({"build": None})
-    else:
-        out = []
-        for build in builds:
-            out.append({
-                'uuid': build.uuid,
-                'state': build.state,
-                'started': str(build.started),
-                'finished': str(build.finished) if build.finished else None,
-                'id': build.id,
-                'pbw': build.pbw_url,
-                'log': build.build_log_url,
-                'build_dir': build.get_url(),
-                'sizes': build.get_sizes()
-            })
-        return json_response({"builds": out})
+        return {"build": None}
+
+    out = []
+    for build in builds:
+        out.append({
+            'uuid': build.uuid,
+            'state': build.state,
+            'started': str(build.started),
+            'finished': str(build.finished) if build.finished else None,
+            'id': build.id,
+            'pbw': build.pbw_url,
+            'log': build.build_log_url,
+            'build_dir': build.get_url(),
+            'sizes': build.get_sizes()
+        })
+    return {"builds": out}
 
 
 @require_safe
 @login_required
+@json_view
 def build_log(request, project_id, build_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     build = get_object_or_404(BuildResult, project=project, pk=build_id)
-    try:
-        log = build.read_build_log()
-    except Exception as e:
-        return json_failure(str(e))
+
+    log = build.read_build_log()
 
     send_td_event('cloudpebble_view_build_log', data={
         'data': {
@@ -155,11 +154,12 @@ def build_log(request, project_id, build_id):
         }
     }, request=request, project=project)
 
-    return json_response({"log": log})
+    return {"log": log}
 
 
 @require_POST
 @login_required
+@json_view
 def create_project(request):
     name = request.POST['name']
     template_id = request.POST.get('template', None)
@@ -193,17 +193,17 @@ def create_project(request):
                 f = SourceFile.objects.create(project=project, file_name="app.js")
                 f.save_file(open('{}/src/js/app.js'.format(settings.PEBBLEJS_ROOT)).read())
     except IntegrityError as e:
-        return json_failure(str(e))
+        raise BadRequest(str(e))
     else:
-
         send_td_event('cloudpebble_create_project', {'data': {'template': {'id': template_id, 'name': template_name}}},
                       request=request, project=project)
 
-        return json_response({"id": project.id})
+        return {"id": project.id}
 
 
 @require_POST
 @login_required
+@json_view
 def save_project_settings(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     try:
@@ -240,52 +240,49 @@ def save_project_settings(request, project_id):
 
             project.save()
     except IntegrityError as e:
-        return json_failure(str(e))
+        return BadRequest(str(e))
     else:
         send_td_event('cloudpebble_save_project_settings', request=request, project=project)
 
-        return json_response({})
-
 
 @require_POST
 @login_required
+@json_view
 def delete_project(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     if not bool(request.POST.get('confirm', False)):
-        return json_failure("Not confirmed")
-    try:
-        project.delete()
-    except Exception as e:
-        return json_failure(str(e))
-    else:
-        send_td_event('cloudpebble_delete_project', request=request, project=project)
-        return json_response({})
+        raise BadRequest(_("Not confirmed"))
+    project.delete()
+    send_td_event('cloudpebble_delete_project', request=request, project=project)
 
 
 @login_required
 @require_POST
+@json_view
 def begin_export(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     result = create_archive.delay(project.id)
-    return json_response({'task_id': result.task_id})
+    return {'task_id': result.task_id}
 
 
 @login_required
 @require_POST
+@json_view
 def import_zip(request):
     zip_file = request.FILES['archive']
     name = request.POST['name']
     try:
         project = Project.objects.create(owner=request.user, name=name)
     except IntegrityError as e:
-        return json_failure(str(e))
+        raise BadRequest(str(e))
     task = do_import_archive.delay(project.id, zip_file.read(), delete_project=True)
 
-    return json_response({'task_id': task.task_id, 'project_id': project.id})
+    return {'task_id': task.task_id, 'project_id': project.id}
 
 
 @login_required
 @require_POST
+@json_view
 def import_github(request):
     name = request.POST['name']
     repo = request.POST['repo']
@@ -293,15 +290,15 @@ def import_github(request):
     add_remote = (request.POST['add_remote'] == 'true')
     match = re.match(r'^(?:https?://|git@|git://)?(?:www\.)?github\.com[/:]([\w.-]+)/([\w.-]+?)(?:\.git|/|$)', repo)
     if match is None:
-        return HttpResponse(json.dumps({"success": False, 'error': _("Invalid Github URL.")}),
-                            content_type="application/json")
+        raise BadRequest(_("Invalid Github URL."))
+
     github_user = match.group(1)
     github_project = match.group(2)
 
     try:
         project = Project.objects.create(owner=request.user, name=name)
     except IntegrityError as e:
-        return json_failure(str(e))
+        raise BadRequest(str(e))
 
     if add_remote:
         project.github_repo = "%s/%s" % (github_user, github_project)
@@ -309,11 +306,12 @@ def import_github(request):
         project.save()
 
     task = do_import_github.delay(project.id, github_user, github_project, branch, delete_project=True)
-    return json_response({'task_id': task.task_id, 'project_id': project.id})
+    return {'task_id': task.task_id, 'project_id': project.id}
 
 
 @login_required
 @require_POST
+@json_view
 def do_import_gist(request):
     task = import_gist.delay(request.user.id, request.POST['gist_id'])
-    return json_response({'task_id': task.task_id})
+    return {'task_id': task.task_id}

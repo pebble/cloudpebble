@@ -85,28 +85,32 @@ CloudPebble.Compile = (function() {
     };
 
     var update_build_history = function(pane) {
-        return fetch_build_history().then(function(data) {
-            CloudPebble.ProgressBar.Hide();
-            pane.removeClass('hide');
-            if(data.builds.length > 0) {
-                update_last_build(pane, data.builds[0]);
-            } else {
-                update_last_build(pane, null);
-            }
-            pane.find('#run-build-table').html('');
-            $.each(data.builds, function(index, value) {
-                pane.find('#run-build-table').append(build_history_row(value));
-            });
-            if(data.builds.length > 0 && data.builds[0].state == 1) {
-                return Promise.delay(1000).then(function() {
-                    return update_build_history(pane)
+        var check = function() {
+            return fetch_build_history().then(function(data) {
+                CloudPebble.ProgressBar.Hide();
+                pane.removeClass('hide');
+                if(data.builds.length > 0) {
+                    update_last_build(pane, data.builds[0]);
+                } else {
+                    update_last_build(pane, null);
+                }
+                pane.find('#run-build-table').html('');
+                $.each(data.builds, function(index, value) {
+                    pane.find('#run-build-table').append(build_history_row(value));
                 });
-            } else if(mRunningBuild) {
-                mRunningBuild = false;
-                return (data.builds[0].state == 3)
-            }
-        }).catch(function(error) {
-            alert(interpolate(gettext("Something went wrong:\n%s"), [error.toString()])); // This should be prettier.
+                if(data.builds.length > 0 && data.builds[0].state == 1) {
+                    return Promise.delay(1000).then(function() {
+                        return check()
+                    });
+                } else if(mRunningBuild) {
+                    mRunningBuild = false;
+                    return (data.builds[0].state == 3)
+                }
+            });
+        };
+
+        return check().catch(function(error) {
+            alert(interpolate(gettext("Something went wrong:\n%s"), [error.message])); // This should be prettier.
             CloudPebble.Sidebar.DestroyActive();
             throw error;
         });

@@ -3,11 +3,10 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_exempt
 from urlparse import urlparse
-
-from ide.api import json_response, json_failure
 from ide.models.project import Project
+from utils.jsonview import json_view
+
 import requests
 import random
 
@@ -17,6 +16,7 @@ __author__ = 'katharine'
 
 @login_required
 @require_POST
+@json_view
 def init_autocomplete(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     source_files = project.source_files.all()
@@ -66,11 +66,12 @@ def _spin_up_server(request):
                     secure = response['secure']
                     scheme = "wss" if secure else "ws"
                     ws_server = urlparse(server)._replace(scheme=scheme).geturl()
-                    return json_response({'uuid': response['uuid'], 'server': ws_server, 'secure': secure})
+                    return {'uuid': response['uuid'], 'server': ws_server, 'secure': secure}
 
         except (requests.RequestException, ValueError):
             import traceback
             traceback.print_exc()
         print "Server %s failed; trying another." % server
     # If we get out of here, something went wrong.
-    return json_failure('No servers')
+    raise Exception(_('No Servers'))
+
