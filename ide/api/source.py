@@ -44,6 +44,7 @@ def create_source_file(request, project_id):
 
 @require_POST
 @login_required
+@json_view
 def create_test_file(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     try:
