@@ -12,12 +12,12 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_safe
-
-from ide.api import json_failure, json_response
+from django.core.exceptions import PermissionDenied
 from ide.models.monkey import TestSession, TestRun, TestCode, TestLog, ScreenshotSet, ScreenshotFile
 from ide.models.project import Project
 from utils.bundle import TestBundle, BundleException
 from utils import orchestrator
+from utils.jsonview import json_view, BadRequest
 
 __author__ = 'joe'
 
@@ -128,16 +128,16 @@ def get_test_session_latest(request, project_id, session_id):
 
 
 # GET /project/<id>/test_sessions/<session_id>
-@cache_control(must_revalidate=True, max_age=1)
 @last_modified(get_test_session_latest)
+@cache_control(must_revalidate=True, max_age=1)
 @require_safe
 @login_required
+@json_view
 def get_test_session(request, project_id, session_id):
     """ Fetch a single test session by its ID """
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     session = get_object_or_404(TestSession, pk=session_id, project=project)
-    # TODO: KEEN
-    return json_response({"data": serialise_session(session)})
+    return {"data": serialise_session(session)}
 
 
 def get_sessions_for_get_sessions_request(request, project_id):
@@ -161,12 +161,12 @@ def get_test_run_latest(request, project_id, run_id):
 @cache_control(must_revalidate=True, max_age=1)
 @require_safe
 @login_required
+@json_view
 def get_test_run(request, project_id, run_id):
     """ Fetch a single test run """
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     run = get_object_or_404(TestRun, pk=run_id, session__project=project)
-    # TODO: KEEN
-    return json_response({"data": serialise_run(run)})
+    return {"data": serialise_run(run)}
 
 
 def get_test_sessions_latest(request, project_id):
@@ -180,10 +180,11 @@ def get_test_sessions_latest(request, project_id):
 @cache_control(must_revalidate=True, max_age=1)
 @require_safe
 @login_required
+@json_view
 def get_test_sessions(request, project_id):
     """ Fetch all test sessions for a project, optionally filtering by ID """
     sessions = get_sessions_for_get_sessions_request(request, project_id)
-    return json_response({"data": [serialise_session(session) for session in sessions]})
+    return {"data": [serialise_session(session) for session in sessions]}
 
 
 def get_test_runs_for_get_test_runs_request(project_id, request):
@@ -219,10 +220,11 @@ def get_test_runs_latest(request, project_id):
 @last_modified(get_test_runs_latest)
 @require_safe
 @login_required
+@json_view
 def get_test_runs(request, project_id):
     """ Fetch a list of test runs, optionally filtering by test ID or session ID """
     runs = get_test_runs_for_get_test_runs_request(project_id, request)
-    return json_response({"data": [serialise_run(run, link_test=True, link_session=True) for run in runs]})
+    return {"data": [serialise_run(run, link_test=True, link_session=True) for run in runs]}
 
 
 @require_safe
@@ -239,6 +241,7 @@ def get_test_run_log(request, project_id, run_id):
 
 @require_POST
 @login_required
+@json_view
 def run_qemu_test(request, project_id, test_id):
     """ Request an interactive QEMU test session """
     # Load request parameters and database objects
@@ -267,13 +270,14 @@ def run_qemu_test(request, project_id, test_id):
         response['session_id'] = session.id
         response['test_id'] = int(test_id)
         response['subscribe_url'] = subscribe_url
-        return json_response(response)
+        return response
     except BundleException as e:
-        return json_failure(e, 400)
+        return BadRequest(str(e))
 
 
 @require_POST
 @csrf_exempt
+@json_view
 def notify_test_session(request, project_id, session_id):
     """ Callback from interactive test session. Sets the code/log/date for a test session's runs,
     and uses the qemu launch token to ensure that only the cloudpebble-qemu-controller can call it.
@@ -287,7 +291,7 @@ def notify_test_session(request, project_id, session_id):
         token = request.GET['token']
     if token != settings.QEMU_LAUNCH_AUTH_HEADER:
         print "Rejecting test result, posted token %s doesn't match %s" % (token, settings.QEMU_LAUNCH_AUTH_HEADER)
-        return json_failure({}, status=403)
+        raise PermissionDenied
 
     orch_id = request.POST.get('id', None)
 
@@ -305,8 +309,6 @@ def notify_test_session(request, project_id, session_id):
         log = request.POST['log']
         status = request.POST['status']
         notify_qemu_session(date_completed, session, platform, status, log, uploaded_files)
-
-    return json_response({})
 
 
 def notify_qemu_session(date_completed, session, platform, status, log, uploaded_files):
@@ -392,6 +394,7 @@ def download_tests(request, project_id):
 # POST /project/<id>/test_sessions
 @require_POST
 @login_required
+@json_view
 def post_test_session(request, project_id):
     # TODO: run as celery task?
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
@@ -399,9 +402,8 @@ def post_test_session(request, project_id):
     try:
         bundle = TestBundle(project, test_ids=test_ids)
         session = bundle.run_on_orchestrator(make_notify_url_builder(request, settings.QEMU_LAUNCH_AUTH_HEADER))
-        return json_response({"data": serialise_session(session, include_runs=True)})
+        return {"data": serialise_session(session, include_runs=True)}
     except BundleException as e:
-        return json_failure(e, 400)
+        raise BadRequest(str(e))
 
-# TODO: 'ping' functions to see if anything has changed. Or, "changed since" parameters.
 # TODO: Analytics
