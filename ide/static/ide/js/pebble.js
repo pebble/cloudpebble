@@ -88,6 +88,8 @@ var SharedPebble = new (function() {
         mEmulator.on('disconnected', handleEmulatorDisconnected);
         return mEmulator.connect().catch(function(err) {
             hide_emulator();
+            CloudPebble.Prompts.Progress.Fail();
+            CloudPebble.Prompts.Progress.Update(err.message);
             throw err;
         }).then(function() {
             return mEmulator;
