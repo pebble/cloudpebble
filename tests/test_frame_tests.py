@@ -14,7 +14,6 @@ EXPECTED_TEST_FILE = """
 
 setup {
     context bigboard
-    do factory_reset
 }
 
 test test {
