@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
+from django.utils.translation import ugettext as _
 import requests
 import random
 import urlparse
@@ -43,7 +44,6 @@ def launch_emulator(request):
                 return qemu_instance
             else:
                 print "old instance is dead."
-
 
     token = _generate_token()
     servers = set(settings.QEMU_URLS)
