@@ -59,7 +59,6 @@ def frame_test_file(test_file, test_name, app_name):
 
 setup {{
     context bigboard
-    do factory_reset
 }}
 
 test {test_name} {{
