@@ -65,10 +65,11 @@ var SharedPebble = new (function() {
             back: emulator_container.find('.back'),
         });
         window.emu = mEmulator;
-        mEmulator.on('disconnected', function() {
+        var hide_emulator = function() {
             $('#sidebar').removeClass('with-emulator');
             mEmulator = null;
-        });
+        };
+        mEmulator.on('disconnected', hide_emulator);
         $('#sidebar').addClass('with-emulator');
         var canvas_size = URL_BOOT_IMG[ConnectionPlatformNames[kind]].size;
         if (isRound(kind)) {
@@ -79,7 +80,14 @@ var SharedPebble = new (function() {
             emulator_container.removeClass('emulator-round');
         }
         mEmulator.on('disconnected', handleEmulatorDisconnected);
-        return mEmulator.connect().finally(function() {
+        return mEmulator.connect().catch(function(err) {
+            hide_emulator();
+            CloudPebble.Prompts.Progress.Fail();
+            CloudPebble.Prompts.Progress.Update(err.message);
+            throw err;
+        }).then(function() {
+            return mEmulator;
+        }).finally(function() {
             clearInterval(statementInterval);
         });
     }
