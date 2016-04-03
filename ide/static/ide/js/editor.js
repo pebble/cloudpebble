@@ -1040,13 +1040,14 @@ CloudPebble.Editor = (function() {
         var test_id_input = prompt.find('#run-live-test-id');
         var error_box = prompt.find('.alert');
 
-        run_button.click(function() {
+        run_button.click(function(e) {
+            e.preventDefault();
             var platform = QEMUConnectionTypes[platform_select.val()];
             var update = update_checkbox.is(':checked');
             var test_id = test_id_input.val();
             prompt.modal('hide');
             run_test(test_id, {platform: platform, update: update});
-
+            return false;
         });
 
     }

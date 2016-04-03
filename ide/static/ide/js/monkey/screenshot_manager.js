@@ -193,7 +193,7 @@ CloudPebble.MonkeyScreenshots = (function() {
             if (!_.every(files, function(file) {
                     return (file.type == 'image/png');
                 })) {
-                this.trigger('error', {errorFor: gettext('add files'), text: 'screenshots must be PNG files.'})
+                this.trigger('error', {errorFor: gettext('add files'), message: 'screenshots must be PNG files.'})
                 return;
             }
             var loadFile = function(screenshotfile) {
@@ -281,7 +281,7 @@ CloudPebble.MonkeyScreenshots = (function() {
                 }
                 self.trigger('changed', screenshots);
             }.bind(this)).fail(function (error) {
-                self.trigger('error', {text: error, errorFor: gettext("take screenshot")});
+                self.trigger('error', {message: error.toString(), errorFor: gettext("take screenshot")});
             }.bind(this)).progress(function (percentage) {
                 set_progress(index, platform, percentage);
             }).always(function () {
@@ -302,9 +302,8 @@ CloudPebble.MonkeyScreenshots = (function() {
                 screenshots = result;
                 original_screenshots = _.map(result, _.clone);
                 self.trigger('changed', result);
-            }, function(error) {
-                self.trigger('error', {text: gettext("Error getting screenshots")});
-                console.log(error);
+            }).catch(function(error) {
+                self.trigger('error', {message: error.message, errorfor: gettext('get screenshots')});
             }).finally(function() {
                 clearTimeout(timeout);
             });
@@ -334,11 +333,11 @@ CloudPebble.MonkeyScreenshots = (function() {
             var timeout = setTimeout(function() {
                 self.trigger('waiting');
             }, 500);
-            API.saveScreenshots(test_id, screenshots).then(function(result) {
+            return API.saveScreenshots(test_id, screenshots).then(function(result) {
                 self.trigger('saved', true);
-                self.loadScreenshots();
+                return self.loadScreenshots();
             }).catch(function(error) {
-                self.trigger('error', {text: error.message, errorFor: gettext('save screenshots')});
+                self.trigger('error', {message: error.message, errorFor: gettext('save screenshots')});
             }).finally(function() {
                 set_disabled(false);
                 clearTimeout(timeout);
