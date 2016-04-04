@@ -4,7 +4,7 @@
 # - An EC2 keypair in ~/Downloads/katharine-keypair.pem
 # - A keypair for the ycmd servers in ~/.ssh/id_rsa
 # - The tintin source tree in ~/projects/tintin
-#   - With an appropriate pypy virtualenv in .env/
+#   - With an appropriate python virtualenv in .env/
 # - A clone of qemu-tintin-images in ~/projects/qemu-tintin-images
 # - Access to the cloudpebble heroku app
 
@@ -121,7 +121,7 @@ def restart_everything():
 def build_qemu_image(board, platform):
     with lcd(get_project_path("tintin")):
         with prefix(". .env/bin/activate"):
-            local("pypy ./waf configure --board={} --qemu --release --sdkshell build qemu_image_spi qemu_image_micro".format(board))
+            local("python ./waf configure --board={} --qemu --release --sdkshell build qemu_image_spi qemu_image_micro".format(board))
         local("cp build/qemu_* {}".format(os.path.join(get_project_path('qemu-tintin-images'), platform, "3.0")))
 
 
