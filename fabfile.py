@@ -47,6 +47,9 @@ def update_qemu_service():
 def update_qemu_sdk():
     with cd('qemu'):
         run("git pull")
+
+        # This is currently the last qemu commit which works with CloudPebble
+        run("git checkout 01b08e22cfc7c1e08d5087d669a5a2f4703d5a20")
         run("make -j8")
 
     with cd("qemu-tintin-images"):
