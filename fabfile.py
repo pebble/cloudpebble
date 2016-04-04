@@ -10,13 +10,24 @@
 
 from fabric.api import *
 from fabric.tasks import execute
+import os
+
+PROJECTS_PATH = env.get('pebble_projects_path', '~/projects')
+
+
+def get_project_path(name):
+    return os.path.join(PROJECTS_PATH, name)
+
 
 env.roledefs = {
     'qemu': ['ec2-user@qemu-us1.cloudpebble.net', 'ec2-user@qemu-us2.cloudpebble.net'],
     'ycmd': ['root@ycm1.cloudpebble.net', 'root@ycm2.cloudpebble.net',
              'root@ycm3.cloudpebble.net', 'root@ycm4.cloudpebble.net',],
 }
-env.key_filename = ['~/.ssh/id_rsa', '~/Downloads/katharine-keypair.pem']
+
+# This needs to stay commented out for anyone except Katharine to use the script
+# env.key_filename = ['~/.ssh/id_rsa', '~/Downloads/katharine-keypair.pem']
+
 
 @task
 @roles('qemu')
@@ -75,6 +86,7 @@ def update_ycmd_service():
         run("pip install --upgrade -r requirements.txt")
         run("restart ycmd-proxy")
 
+
 @task
 @roles('ycmd')
 @parallel
@@ -107,27 +119,27 @@ def restart_everything():
 
 
 def build_qemu_image(board, platform):
-    with lcd("~/projects/tintin"):
+    with lcd(get_project_path("tintin")):
         with prefix(". .env/bin/activate"):
             local("pypy ./waf configure --board={} --qemu --release --sdkshell build qemu_image_spi qemu_image_micro".format(board))
-        local("cp build/qemu_* ~/projects/qemu-tintin-images/{}/3.0/".format(platform))
+        local("cp build/qemu_* {}".format(os.path.join(get_project_path('qemu-tintin-images'), platform, "3.0")))
 
 
 @task
 @runs_once
 def update_qemu_images(sdk_version):
     # Merge conflicts are no fun.
-    with lcd("~/projects/qemu-tintin-images"):
+    with lcd(get_project_path("qemu-tintin-images")):
         local("git pull")
 
-    with lcd("~/projects/tintin"):
+    with lcd(get_project_path("tintin")):
         local("git checkout v%s" % sdk_version)
 
     build_qemu_image("bb2", "aplite")
     build_qemu_image("snowy_bb", "basalt")
     build_qemu_image("spalding_bb2", "chalk")
 
-    with lcd("~/projects/qemu-tintin-images"):
+    with lcd(get_project_path("qemu-tintin-images")):
         local("git commit -a -m 'Update to v%s'" % sdk_version)
         local("git push")
 
