@@ -2,7 +2,7 @@
  * Created by katharine on 7/23/15.
  */
 
-CloudPebble.MonkeyScript = (function() {
+CloudPebble.MonkeyScript = (function () {
     var DO_COMMANDS = ['airplane_mode', 'charging', 'launch_app', 'long_click', 'multi_click',
         'reset', 'screenshot', 'set_time', 'single_click', 'wait'];
 
@@ -10,101 +10,217 @@ CloudPebble.MonkeyScript = (function() {
 
     var KEYWORDS = ['do', 'expect'];
 
-    var make_mode = function(is_highlighter) {
+
+    function nextState(state, kind, nextkind) {
+        if (!_.isString(kind)) throw new Error("Invalid argument");
+        state.kind = kind;
+        state.nextkind = (_.isUndefined(nextkind) ? null : nextkind);
+    }
+
+    function pushSpace(state, nextkind) {
+        nextState(state, 'space', nextkind);
+    }
+
+    function resetState(state) {
+        state.kind = 'keyword';
+        state.nextkind = null;
+        state.keyword = null;
+        state.command = null;
+    }
+
+    var make_mode = function (is_highlighter) {
         // Return a CSS class or a list of suggestions, depending on the parser's mode.
-        var result = (is_highlighter ? function(kind, suggestions) {
+        var result = (is_highlighter ? function (kind, suggestions) {
             return kind;
-        } : function(kind, suggestions) {
+        } : function (kind, suggestions) {
             return suggestions;
         });
 
-        return function() {
+        return function () {
             return {
-                startState: function() {
-                    return {keyword: null, command: null};
+                startState: function () {
+                    var state = {};
+                    resetState(state);
+                    return state;
                 },
-                token: function(stream, state) {
-                    if (stream.peek() == '#') {
-                        stream.skipToEnd();
-                        return result('comment');
-                    }
-                    if(stream.eatSpace()) {
-                        return;
+                token: function (stream, state) {
+                    if (stream.sol()) {
+                        resetState(state);
                     }
 
-                    if (stream.sol()) {
-                        state.keyword = null;
-                    }
-                    if (state.keyword === null) {
-                        var keyword = stream.match(/^[a-z_]+/i);
+                    if (state.kind == 'keyword') {
+                        // Allow infinite whitespace at the start of lines
+                        if (stream.eatSpace()) {
+                            return;
+                        }
+
+                        // Allow fully commented lines
+                        if (stream.match('#')) {
+                            stream.skipToEnd();
+                            return result('comment');
+                        }
+
+                        // Keywords only contain letters
+                        var keyword = stream.match(/^[a-z]+/i);
                         if (!keyword) {
                             stream.skipToEnd();
                             return result('error');
                         }
-                        keyword = keyword[0];
-                        if (keyword == 'do' || keyword == 'expect') {
-                            state.keyword = keyword;
+
+                        if (_.contains(KEYWORDS, keyword[0])) {
+                            // Commands come exactly one space after a valid keyword
+                            state.keyword = keyword[0];
+                            pushSpace(state, 'command');
                             return result('keyword');
-                        } else {
-                            return result('error', KEYWORDS);
                         }
-                    } else {
-                        if (state.command === null) {
-                            var command = stream.match(/^[a-z_]+/i);
-                            if (!command) {
-                                stream.skipToEnd();
-                                return result('error');
-                            }
-                            command = command[0];
-                            var list = [];
-                            if (state.keyword == 'do') {
-                                list = DO_COMMANDS;
-                            } else if (state.keyword == 'expect') {
-                                list = EXPECT_COMMANDS;
-                            }
-                            if (_.contains(list, command)) {
-                                if (stream.eol()) {
-                                    state.command = null;
-                                    state.keyword = null;
-                                    state.value = null;
-                                } else {
-                                    state.command = command;
-                                }
-                                return result('variable');
-                            } else {
-                                stream.skipToEnd();
-                                state.command = null;
-                                state.keyword = null;
-                                state.value = null;
-                                return result('error', list);
-                            }
-                        } else {
-                            var parse_result = null;
-                            if (state.command == 'screenshot') {
-                                var is_valid_screenshot = stream.match(/^\s*[.a-zA-Z0-9_-]+$/i);
-                                parse_result = result(is_valid_screenshot ? null : 'error', {command: 'screenshot'});
-                            }
-                            state.command = null;
-                            state.keyword = null;
-                            state.value = null;
+                        else if (stream.peek() == ' ') {
+                            // Invalid keywords are errors if they are followed by spaces
                             stream.skipToEnd();
-                            return parse_result;
+                            return result('error');
+                        }
+                        else {
+                            // If they are not followed by spaces, they are just unfinished
+                            stream.skipToEnd();
+                            return result('keyword', KEYWORDS);
                         }
                     }
+                    if (state.kind == 'space') {
+                        // Match a single space
+                        if (!stream.match(/ /)) {
+                            stream.skipToEnd();
+                            return result('error');
+                        }
+                        // Then, match no more spaces
+                        nextState(state, 'nospace', state.nextkind);
+                        return null;
+                    }
+                    if (state.kind == 'nospace') {
+                        // Any spaces matched after 'space' state are errors
+                        if (stream.match(/ +/)) {
+                            stream.skipToEnd();
+                            return result('error');
+                        }
+                        nextState(state, state.nextkind);
+                        return null;
+                    }
+                    if (state.kind == 'command') {
+                        // Commands are text with underscores
+                        var command = stream.match(/^[a-z_]+/i);
+                        var suggestions = [];
+                        if (!command) {
+                            stream.skipToEnd();
+                            return result('error');
+                        }
+                        // The available commands depend on whether the keyword was 'do' or 'expect'
+                        command = command[0];
+                        if (state.keyword == 'do') {
+                            suggestions = DO_COMMANDS;
+                        } else if (state.keyword == 'expect') {
+                            suggestions = EXPECT_COMMANDS;
+                        }
 
+                        if (_.contains(suggestions, command)) {
+                            // Move into arguments if the command is valid
+                            if (stream.eol()) {
+                                resetState(state);
+                            } else {
+                                state.command = command;
+                                pushSpace(state, 'argument');
+                            }
+                            return result('variable');
+                        }
+                        else if (stream.peek() == ' ') {
+                            // Invalid commands are errors if followed by spaces
+                            stream.skipToEnd();
+                            resetState(state);
+                            return result('error', suggestions);
+                        }
+                        else {
+                            // If they are not followed by spaces, they are just unfinished
+                            stream.skipToEnd();
+                            return result('variable', suggestions);
+                        }
+                    }
+                    if (state.kind == 'argument') {
+                        // The user may finish with a comment (and perhaps no arguments)
+                        if (stream.match(/\s*#.*/)) {
+                            resetState(state);
+                            return result('comment');
+                        }
+                        // Or there may be no arguments at all
+                        if (stream.eol()) {
+                            resetState(state);
+                            return null;
+                        }
+
+                        // Arguments might start with quotes. These are quoted arguments.
+                        var arg, another, content;
+                        var quote = stream.match(/['"]/);
+                        if (quote) {
+                            quote = quote[0];
+                            // Match a right quote after some arbitrary text.
+                            arg = stream.match(new RegExp("((\\\\"+ quote + "|[^" + quote + "])*)(" + quote + ")?"));
+                            console.log(arg);
+                            another = (!!arg && arg[3]);
+                            content = (!!arg ? arg[1] : null);
+                        }
+                        else {
+                            // If the argument is not quoted it may not contain quotes or spaces
+                            arg = stream.match(/[^'"\s]+/);
+                            another = (!!arg);
+                            content = (!!arg ? arg[0] : null);
+                        }
+                        if (!quote && !content) {
+                            // If no quotes or content was matched, the input was invalid.
+                            nextState(state, 'end');
+                            return result('error');
+                        }
+                        if (state.command == 'screenshot') {
+                            // Screenshot commands are a special case. There is only one argument
+                            // and it must look like a file name.
+                            another = false;
+                            var is_valid = (!!content.match(/^([.a-zA-Z0-9_-]+)$/i));
+                            nextState(state, 'end');
+                            return result(is_valid ? null : 'error', {command: 'screenshot'});
+                        }
+                        if (another) {
+                            // If there's no reason not to have more arguments, do so
+                            pushSpace(state, 'argument');
+                        }
+                        else {
+                            stream.skipToEnd();
+                            resetState(state);
+                        }
+                        return (!!quote ? result('string') : null);
+                    }
+                    if (state.kind == 'end') {
+                        // 'End' comes after certain things e.g. screenshot names
+                        // It may be a comment, or whitespace.
+                        resetState(state);
+                        stream.eatSpace();
+                        if (stream.match('#')) {
+                            stream.skipToEnd();
+                            return result('comment');
+                        }
+                        if (!stream.eol()) {
+                            stream.skipToEnd();
+                            return result('error');
+                        }
+                        return null;
+                    }
                 },
                 lineComment: '#'
             }
         };
     };
 
-    $(function() {
+    $(function () {
         CodeMirror.defineMode('MonkeyScript', make_mode(true));
         CodeMirror.defineMode('MonkeyScript_autocomplete', make_mode(false));
     });
 
     return {
-        request: function(endpoint, editor, cursor) {
+        request: function (endpoint, editor, cursor) {
             // Get autocompletion suggestions for MonkeyScript.
             if (endpoint == 'completions') {
                 cursor = cursor || editor.getCursor();
@@ -127,8 +243,8 @@ CloudPebble.MonkeyScript = (function() {
                 if (!_.isArray(all_suggestions)) {
                     if (all_suggestions.command == 'screenshot') {
                         // Autocompletion for screenshots gets them from the editor's screenshot pane
-                        all_suggestions = _.map(editor.screenshot_pane.getScreenshots(), function(screenshot) {
-                            return screenshot.name+".png";
+                        all_suggestions = _.map(editor.screenshot_pane.getScreenshots(), function (screenshot) {
+                            return screenshot.name + ".png";
                         });
                     }
                     else {
@@ -138,7 +254,9 @@ CloudPebble.MonkeyScript = (function() {
 
                 var keys;
                 // Don't bother searching if the typed command is longer than the longest possible command.
-                var max_suggestion_length = _.max(all_suggestions, function(x) { return x.length }).length;
+                var max_suggestion_length = _.max(all_suggestions, function (x) {
+                    return x.length
+                }).length;
                 if (search_string.length > max_suggestion_length) {
                     keys = [];
                 }
