@@ -55,7 +55,6 @@ def _choose_ycm_server():
 
 def _spin_up_server(request):
     servers = set(settings.YCM_URLS)
-    print request
     while len(servers) > 0:
         server = random.choice(list(servers))
         servers.remove(server)
