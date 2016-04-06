@@ -58,7 +58,7 @@ CloudPebble.Init = function() {
         }
         return null;
     }).catch(function(err) {
-        alert("Something went wrong:\n" + err.toString());
+        alert("Something went wrong:\n" + err.message);
     });
 
     window.addEventListener('beforeunload', function(e) {

@@ -270,7 +270,7 @@
                     return startVNC();
                 })
                 .catch(function(error) {
-                    CloudPebble.Analytics.addEvent('qemu_launched', {success: false, reason: error.toString()});
+                    CloudPebble.Analytics.addEvent('qemu_launched', {success: false, reason: error.message});
                     throw error;
                 });
             mPendingPromise = promise;

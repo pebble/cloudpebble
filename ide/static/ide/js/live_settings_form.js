@@ -14,7 +14,7 @@ function make_live_settings_form(options) {
         || (!_.isObject(opts.form))
         || (!_.isFunction(opts.error_function))
         || (!!opts.on_change_function && !_.isFunction(opts.on_change_function))) {
-        throw "Invalid arguments to make_live_settings_form";
+        throw new Error("Invalid arguments to make_live_settings_form");
     }
 
     var save = function(element, event) {

@@ -196,7 +196,7 @@ CloudPebble.Resources = (function() {
             return null;
         }
         if(_.contains(['bitmap', 'png', 'png-trans', 'pbi'], kind) && file.type != "image/png") {
-            throw (gettext("You must upload a PNG image."));
+            throw new Error(gettext("You must upload a PNG image."));
         }
         return file;
     }

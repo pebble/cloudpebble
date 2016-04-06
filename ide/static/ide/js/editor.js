@@ -502,7 +502,7 @@ CloudPebble.Editor = (function() {
                             prompt.dismiss();
                             code_mirror.focus();
                         }).catch(function(error) {
-                            prompt.error(gettext("Failed to rename file. ") + error.toString());
+                            prompt.error(gettext("Failed to rename file. ") + error.message);
                         });
                     },
                     pattern)
@@ -710,7 +710,7 @@ CloudPebble.Editor = (function() {
             return code_mirror;
         }).catch(function(error) {
             var error_box = $('<div class="alert alert-error"></div>');
-            error_box.text(interpolate(gettext("Something went wrong: %s"), [error.toString()]));
+            error_box.text(interpolate(gettext("Something went wrong: %s"), [error.message]));
             CloudPebble.Sidebar.SetActivePane(error_box, '');
         }).finally(function() {
             CloudPebble.ProgressBar.Hide();
