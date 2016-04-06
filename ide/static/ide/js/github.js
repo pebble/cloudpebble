@@ -53,7 +53,13 @@ CloudPebble.GitHub = (function() {
                 return;
             }
             disable_all();
-            Ajax.Ajax('/ide/project/' + PROJECT_ID + '/github/repo', {repo: new_repo, auto_pull: auto_pull ? '1' : '0', auto_build: auto_build ? '1' : '0', branch: repo_branch}).then(function(data) {
+            var data = {
+                repo: new_repo,
+                auto_pull: auto_pull ? '1' : '0',
+                auto_build: auto_build ? '1' : '0',
+                branch: repo_branch
+            };
+            Ajax.Post('/ide/project/' + PROJECT_ID + '/github/repo', data).then(function(data) {
                 enable_all();
                 if(data.updated) {
                     show_alert('success', gettext("Updated repo."));
@@ -69,11 +75,12 @@ CloudPebble.GitHub = (function() {
                     return;
                 }
                 if(!data.access) {
-                    throw gettext("You don't have access to that repository.")
+                    throw new Error(gettext("You don't have access to that repository."));
                 }
             }).catch(function(error) {
+                enable_all();
                 disable_needy();
-                show_alert('error', error);
+                show_alert('error', error.message);
             });
         });
 
@@ -155,7 +162,6 @@ CloudPebble.GitHub = (function() {
             return Ajax.Get('/ide/task/' + task_id).then(function(data) {
                 var state = data.state;
                 if(state.status == 'SUCCESS' || state.status == 'FAILURE') {
-                    var prompt = $('#github-pull-prompt').modal('hide');
                     if(state.status == 'SUCCESS') {
                         if(state.result) {
                             show_alert('success', gettext("Pulled successfully."));
@@ -215,6 +221,7 @@ CloudPebble.GitHub = (function() {
                 show_alert('error', interpolate(gettext("Pull failed: %s"), [error]));
             }).finally(function() {
                 enable_all();
+                prompt.modal('hide');
             });
             ga('send', 'event', 'github', 'pull');
         });
