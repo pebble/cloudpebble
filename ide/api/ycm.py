@@ -1,4 +1,8 @@
 import json
+import logging
+import random
+
+import requests
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
@@ -8,11 +12,10 @@ from urlparse import urlparse
 
 from ide.api import json_response, json_failure
 from ide.models.project import Project
-import requests
-import random
-
 
 __author__ = 'katharine'
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -32,7 +35,7 @@ def init_autocomplete(request, project_id):
             if f.kind == 'png-trans':
                 resource_ids.extend([
                     '#define RESOURCE_ID_%s_BLACK %d' % (identifier.resource_id, count),
-                    '#define RESOURCE_ID_%s_WHITE %d' % (identifier.resource_id, count+1)
+                    '#define RESOURCE_ID_%s_WHITE %d' % (identifier.resource_id, count + 1)
                 ])
                 count += 2
             else:
@@ -71,6 +74,6 @@ def _spin_up_server(request):
         except (requests.RequestException, ValueError):
             import traceback
             traceback.print_exc()
-        print "Server %s failed; trying another." % server
+        logger.warning("Server %s failed; trying another.", server)
     # If we get out of here, something went wrong.
     return json_failure({'success': False, 'error': 'No servers'})

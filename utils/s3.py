@@ -1,8 +1,12 @@
+import logging
+
 import boto
 from boto.s3.key import Key
 from boto.s3.connection import OrdinaryCallingFormat
 from django.conf import settings
-import urllib
+
+logger = logging.getLogger(__name__)
+
 
 def _ensure_bucket_exists(s3, bucket):
     try:
@@ -10,7 +14,8 @@ def _ensure_bucket_exists(s3, bucket):
     except boto.exception.S3ResponseError:
         pass
     else:
-        print "Created bucket %s" % bucket
+        logger.info("Created bucket %s" % bucket)
+
 
 if settings.AWS_ENABLED:
     if settings.AWS_S3_FAKE_S3 is None:
@@ -40,6 +45,7 @@ def _requires_aws(fn):
     else:
         def complain(*args, **kwargs):
             raise Exception("AWS_ENABLED must be True to call %s" % fn.__name__)
+
         return complain
 
 
@@ -56,11 +62,13 @@ def read_file_to_filesystem(bucket_name, path, destination):
     key = bucket.get_key(path)
     key.get_contents_to_filename(destination)
 
+
 @_requires_aws
 def delete_file(bucket_name, path):
     bucket = _buckets[bucket_name]
     key = bucket.get_key(path)
     key.delete()
+
 
 @_requires_aws
 def save_file(bucket_name, path, value, public=False, content_type='application/octet-stream'):
@@ -92,7 +100,7 @@ def upload_file(bucket_name, dest_path, src_path, public=False, content_type='ap
     }
 
     if download_filename is not None:
-        headers['Content-Disposition'] = 'attachment;filename="%s"' % download_filename.replace(' ','_')
+        headers['Content-Disposition'] = 'attachment;filename="%s"' % download_filename.replace(' ', '_')
 
     key.set_contents_from_filename(src_path, policy=policy, headers=headers)
 
