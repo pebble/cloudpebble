@@ -10,7 +10,7 @@ from ide.models.build import BuildResult
 from ide.models.project import Project
 from ide.tasks.git import hooked_commit
 from ide.utils import generate_half_uuid
-from utils.keen_helper import send_keen_event
+from utils.td_helper import send_td_event
 
 __author__ = 'katharine'
 
@@ -30,7 +30,7 @@ def view_project(request, project_id):
         project.app_long_name = project.app_short_name
     if project.app_version_label is None:
         project.app_version_label = '1.0'
-    send_keen_event('cloudpebble', 'cloudpebble_open_project', request=request, project=project)
+    send_td_event('cloudpebble_open_project', request=request, project=project)
     app_keys = sorted(json.loads(project.app_keys).iteritems(), key=lambda x: x[1])
     supported_platforms = ["aplite", "basalt"]
     if project.project_type != 'pebblejs' and project.sdk_version != '2':
@@ -81,7 +81,7 @@ def build_status(request, project_id):
 @login_required
 @ensure_csrf_cookie
 def import_gist(request, gist_id):
-    send_keen_event('cloudpebble', 'cloudpebble_gist_landing', request=request, data={'data': {'gist_id': gist_id}})
+    send_td_event('cloudpebble_gist_landing', data={'data': {'gist_id': gist_id}}, request=request)
     return render(request, 'ide/gist-import.html', {
         'gist_id': gist_id,
         'blurb': request.GET.get('blurb', None)

@@ -9,7 +9,7 @@ from ide.api import json_response, json_failure
 import ide.git
 from ide.models.project import Project
 from ide.tasks.git import do_github_push, do_github_pull
-from utils.keen_helper import send_keen_event
+from utils.td_helper import send_td_event
 
 __author__ = 'katharine'
 
@@ -111,12 +111,12 @@ def set_project_repo(request, project_id):
 
         project.save()
 
-    send_keen_event('cloudpebble', 'cloudpebble_project_github_linked', project=project, request=request, data={
+    send_td_event('cloudpebble_project_github_linked', data={
         'data': {
             'repo': project.github_repo,
             'branch': project.github_branch
         }
-    })
+    }, request=request, project=project)
 
     return json_response({'exists': True, 'access': True, 'updated': True, 'branch_exists': True})
 
@@ -138,11 +138,11 @@ def create_project_repo(request, project_id):
         project.github_last_commit = None
         project.save()
 
-    send_keen_event('cloudpebble', 'cloudpebble_created_github_repo', project=project, request=request, data={
+    send_td_event('cloudpebble_created_github_repo', data={
         'data': {
             'repo': project.github_repo
         }
-    })
+    }, request=request, project=project)
 
     return json_response({"repo": repo.html_url})
 

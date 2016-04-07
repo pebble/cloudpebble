@@ -1,4 +1,4 @@
-FROM python:2.7
+FROM python:2.7.8
 MAINTAINER Katharine Berry <katharine@pebble.com>
 
 ENV NPM_CONFIG_LOGLEVEL=info NODE_VERSION=4.2.3 DJANGO_VERSION=1.9.2
@@ -24,6 +24,9 @@ RUN curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-
   && grep " node-v$NODE_VERSION-linux-x64.tar.gz\$" SHASUMS256.txt.asc | sha256sum -c - \
   && tar -xzf "node-v$NODE_VERSION-linux-x64.tar.gz" -C /usr/local --strip-components=1 \
   && rm "node-v$NODE_VERSION-linux-x64.tar.gz" SHASUMS256.txt.asc
+
+# Upgrade pip
+RUN pip install --upgrade pip
 
 # Django stuff
 
@@ -54,8 +57,8 @@ RUN mkdir /sdk2 && \
   curl -L "https://s3.amazonaws.com/assets.getpebble.com/sdk3/sdk-core/sdk-core-${SDK_TWO_VERSION}.tar.bz2" | \
   tar --strip-components=1 -xj -C /sdk2
 
-ENV SDK_THREE_CHANNEL=beta
-ENV SDK_THREE_VERSION=3.9-beta8
+ENV SDK_THREE_CHANNEL=release
+ENV SDK_THREE_VERSION=3.11
 
 # Install SDK 3
 RUN mkdir /sdk3 && \

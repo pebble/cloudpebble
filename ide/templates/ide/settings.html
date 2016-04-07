@@ -49,10 +49,25 @@
             <img src="{{ github.avatar }}" class="github-avatar">
             <h2 class="github-username">{{ github.username }}</h2>
             <div class="github-options">
-                <p><a href="{% url 'ide:start_github_auth' %}" class="btn btn-primary">{% trans 'Re-authenticate' %}</a></p>
-                <p><a href="{% url 'ide:remove_github_auth' %}" class="btn btn-primary">{% trans 'Unlink account' %}</a></p>
+                <p>
+                    <form method="post" action="{% url 'ide:start_github_auth' %}">
+                        <input type="submit" class="btn btn-primary" value="{% trans 'Re-authenticate' %}">
+                        {% csrf_token %}
+                    </form>
+                </p>
+                <p>
+                    <form method="post" action="{% url 'ide:remove_github_auth' %}">
+                        <input type="submit" class="btn btn-primary" value="{% trans 'Unlink account' %}">
+                        {% csrf_token %}
+                    </form>
+                </p>
                 {% else %}
-                <p><a href="{% url 'ide:start_github_auth' %}" class="btn btn-primary">{% trans 'Link your GitHub account' %}</a></p>
+                <p>
+                    <form method="post" action="{% url 'ide:start_github_auth' %}">
+                        <input type="submit" class="btn btn-primary" value="{% trans 'Link your GitHub account' %}">
+                        {% csrf_token %}
+                    </form>
+                </p>
                 {% endif %}
                 <hr>
                 <p>{% trans 'Connecting your GitHub account enables you to connect your projects to GitHub repositories.' %}</p>

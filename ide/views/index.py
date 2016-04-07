@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_safe
 from ide.models.project import Project, TemplateProject
-from utils.keen_helper import send_keen_event
+from utils.td_helper import send_td_event
 
 __author__ = 'katharine'
 
@@ -27,7 +27,7 @@ def index(request, github_account=None, github_project=None):
     elif settings.SOCIAL_AUTH_PEBBLE_REQUIRED and user.social_auth.filter(provider='pebble').count() == 0:
         return render(request, 'registration/merge_account.html')
     else:
-        send_keen_event('cloudpebble', 'cloudpebble_project_list', request=request)
+        send_td_event('cloudpebble_project_list', request=request)
         return render(request, 'ide/index.html', {
             'my_projects': my_projects,
             'sdk_templates': TemplateProject.objects.filter(template_kind=TemplateProject.KIND_TEMPLATE),

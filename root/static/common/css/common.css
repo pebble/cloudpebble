@@ -587,6 +587,11 @@ body.backdrop .main-container {
     width: 325px;
 }
 
+.modal-body a {
+    text-decoration: underline;
+    color: #3DBFFF;
+}
+
 .tab-pane {
     display: none;
 }
@@ -597,11 +602,6 @@ body.backdrop .main-container {
 
 .whats-new-text {
     color: white;
-}
-
-.whats-new-text a {
-    text-decoration: underline;
-    color: #3DBFFF;
 }
 
 #whats-new p {
