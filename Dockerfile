@@ -1,4 +1,4 @@
-FROM python:2.7.8
+FROM python:2.7.11
 MAINTAINER Katharine Berry <katharine@pebble.com>
 
 ENV NPM_CONFIG_LOGLEVEL=info NODE_VERSION=4.2.3 DJANGO_VERSION=1.9.2
@@ -24,9 +24,6 @@ RUN curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-
   && grep " node-v$NODE_VERSION-linux-x64.tar.gz\$" SHASUMS256.txt.asc | sha256sum -c - \
   && tar -xzf "node-v$NODE_VERSION-linux-x64.tar.gz" -C /usr/local --strip-components=1 \
   && rm "node-v$NODE_VERSION-linux-x64.tar.gz" SHASUMS256.txt.asc
-
-# Upgrade pip
-RUN pip install --upgrade pip
 
 # Django stuff
 

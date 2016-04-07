@@ -417,6 +417,7 @@ AWS_SECRET_ACCESS_KEY = _environ.get('AWS_SECRET_ACCESS_KEY', None)
 AWS_S3_SOURCE_BUCKET = _environ.get('AWS_S3_SOURCE_BUCKET', 'source.cloudpebble.net')
 AWS_S3_BUILDS_BUCKET = _environ.get('AWS_S3_BUILDS_BUCKET', 'builds.cloudpebble.net')
 AWS_S3_EXPORT_BUCKET = _environ.get('AWS_S3_EXPORT_BUCKET', 'export.cloudpebble.net')
+AWS_S3_HOST = _environ.get('AWS_S3_HOST', None)
 AWS_S3_FAKE_S3 = _environ.get('AWS_S3_FAKE_S3', None)
 
 TYPOGRAPHY_CSS = _environ.get('TYPOGRAPHY_CSS', None)
