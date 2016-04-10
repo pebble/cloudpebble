@@ -476,6 +476,7 @@ var USER_SETTINGS = {
 };
 var DOC_JSON = "{% static 'ide/documentation.json' %}";
 var LIBPEBBLE_PROXY = {{ libpebble_proxy | safe }};
+var QEMU_DISABLED = {{ qemu_disabled|yesno:"true,false"}};
 </script>
 <script src="{% static 'CodeMirror/lib/codemirror.js' %}"></script>
 <script src="{% static 'CodeMirror/addon/dialog/dialog.js' %}"></script>

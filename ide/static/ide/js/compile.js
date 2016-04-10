@@ -273,7 +273,7 @@ CloudPebble.Compile = (function() {
                     }
                     // Only enable emulator buttons for built platforms.
                     pane.find('#run-qemu .btn-primary').attr('disabled', function() {
-                        return !_.isObject(build.sizes[$(this).data('platform')]);
+                        return QEMU_DISABLED ? true : !_.isObject(build.sizes[$(this).data('platform')]);
                     })
                 }
             } else {

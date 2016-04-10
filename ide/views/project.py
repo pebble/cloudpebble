@@ -47,7 +47,8 @@ def view_project(request, project_id):
         'libpebble_proxy': json.dumps(settings.LIBPEBBLE_PROXY),
         'token': token,
         'phone_shorturl': settings.PHONE_SHORTURL,
-        'supported_platforms': supported_platforms
+        'supported_platforms': supported_platforms,
+        'qemu_disabled': bool(settings.QEMU_DISABLED)
     })
 
 

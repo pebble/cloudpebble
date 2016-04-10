@@ -26,6 +26,9 @@
                     </div>
                     <div id="run-qemu" class="tab-pane active">
                         <hr>
+                        {% if qemu_disabled %}
+                        <span>Emulators are currently unavailable due to technical issues. Please try again later.</span>
+                        {% endif %}
                         <div>
                             <button class="btn btn-primary" id="install-in-qemu-aplite-btn" data-platform="aplite">Aplite</button>
                             <button class="btn btn-primary" id="install-in-qemu-basalt-btn" data-platform="basalt">Basalt</button>
