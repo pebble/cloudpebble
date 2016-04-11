@@ -120,7 +120,7 @@ class TemplateProject(Project):
 
         for source_file in self.source_files.all():
             new_file = SourceFile.objects.create(project=project, file_name=source_file.file_name)
-            new_file.save_file(source_file.get_contents().replace("__UUID_GOES_HERE__", uuid_string))
+            new_file.save_text(source_file.get_contents().replace("__UUID_GOES_HERE__", uuid_string))
 
         # Copy over relevant project properties.
         # NOTE: If new, relevant properties are added, they must be copied here.

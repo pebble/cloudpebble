@@ -13,92 +13,11 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
 import utils.s3 as s3
-from ide.models.meta import IdeModel, TextFile
+from ide.models.meta import IdeModel
+from ide.models.s3file import S3File
+from ide.models.scriptfile import ScriptFile
 
 __author__ = 'katharine'
-
-
-class ScriptFile(TextFile):
-    """ScriptFiles add support to TextFiles for last-modified timestamps and code folding"""
-    last_modified = models.DateTimeField(blank=True, null=True, auto_now=True)
-    folded_lines = models.TextField(default="[]")
-
-    def was_modified_since(self, expected_modification_time):
-        if isinstance(expected_modification_time, int):
-            expected_modification_time = datetime.datetime.fromtimestamp(expected_modification_time)
-        assert isinstance(expected_modification_time, datetime.datetime)
-        return self.last_modified.replace(tzinfo=None, microsecond=0) > expected_modification_time
-
-    def save_file(self, content, folded_lines=None):
-        with transaction.atomic():
-            if folded_lines:
-                self.folded_lines = folded_lines
-            super(ScriptFile, self).save_file(content)
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        self.project.last_modified = now()
-        self.project.save()
-        super(ScriptFile, self).save(*args, **kwargs)
-
-    class Meta(IdeModel.Meta):
-        abstract = True
-
-
-class BinFile(IdeModel):
-    bucket_name = ''
-    folder = None
-
-    def get_local_filename(self, create=False):
-        padded_id = self.padded_id
-        filename = '%s%s/%s/%s/%s' % (settings.FILE_STORAGE, self.folder, padded_id[0], padded_id[1], padded_id)
-        if create:
-            if not os.path.exists(os.path.dirname(filename)):
-                os.makedirs(os.path.dirname(filename))
-        return filename
-
-    def get_s3_path(self):
-        return '%s/%s' % (self.folder, self.s3_id)
-
-    local_filename = property(get_local_filename)
-    s3_path = property(get_s3_path)
-
-    def save_file(self, stream, file_size=0):
-        if file_size > 5*1024*1024:
-            raise Exception(_("Uploaded file too big."))
-        if not settings.AWS_ENABLED:
-            if not os.path.exists(os.path.dirname(self.local_filename)):
-                os.makedirs(os.path.dirname(self.local_filename))
-            with open(self.local_filename, 'wb') as out:
-                out.write(stream.read())
-        else:
-            s3.save_file(self.bucket_name, self.s3_path, stream.read())
-
-        self.save_project()
-
-    def save_string(self, string):
-        if not settings.AWS_ENABLED:
-            if not os.path.exists(os.path.dirname(self.local_filename)):
-                os.makedirs(os.path.dirname(self.local_filename))
-            with open(self.local_filename, 'wb') as out:
-                out.write(string)
-        else:
-            s3.save_file(self.bucket_name, self.s3_path, string)
-
-    def copy_to_path(self, path):
-        if not settings.AWS_ENABLED:
-            shutil.copy(self.local_filename, path)
-        else:
-            s3.read_file_to_filesystem(self.bucket_name, self.s3_path, path)
-
-    def get_contents(self):
-        if not settings.AWS_ENABLED:
-            return open(self.local_filename).read()
-        else:
-            return s3.read_file(self.bucket_name, self.s3_path)
-
-    class Meta(IdeModel.Meta):
-        abstract = True
 
 
 class ResourceFile(IdeModel):
@@ -172,8 +91,7 @@ class ResourceFile(IdeModel):
         unique_together = (('project', 'file_name'),)
 
 
-class ResourceVariant(BinFile):
-    bucket_name = 'source'
+class ResourceVariant(S3File):
     resource_file = models.ForeignKey(ResourceFile, related_name='variants')
 
     VARIANT_DEFAULT = 0
@@ -200,6 +118,19 @@ class ResourceVariant(BinFile):
     tags = models.CommaSeparatedIntegerField(max_length=50, blank=True)
     is_legacy = models.BooleanField(default=False)  # True for anything migrated out of ResourceFile
 
+    # The following three properties are overridden to support is_legacy
+    @property
+    def padded_id(self):
+        return '%05d' % self.resource_file.id if self.is_legacy else '%09d' % self.id
+
+    @property
+    def s3_id(self):
+        return self.resource_file.id if self.is_legacy else self.id
+
+    @property
+    def folder(self):
+        return 'resources' if self.is_legacy else 'resources/variants'
+
     def save_project(self):
         self.resource_file.project.last_modified = now()
         self.resource_file.project.save()
@@ -215,18 +146,6 @@ class ResourceVariant(BinFile):
 
     def get_tags_string(self):
         return "".join(self.get_tag_names())
-
-    @property
-    def padded_id(self):
-        return '%05d' % self.resource_file.id if self.is_legacy else '%09d' % self.id
-
-    @property
-    def s3_id(self):
-        return self.resource_file.id if self.is_legacy else self.id
-
-    @property
-    def folder(self):
-        return 'resources' if self.is_legacy else 'resources/variants'
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -250,7 +169,7 @@ class ResourceVariant(BinFile):
     path = property(get_path)
     root_path = property(get_root_path)
 
-    class Meta(BinFile.Meta):
+    class Meta(S3File.Meta):
         unique_together = (('resource_file', 'tags'),)
 
 
@@ -312,9 +231,8 @@ class ResourceIdentifier(IdeModel):
 
 
 class SourceFile(ScriptFile):
-    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_.-]+\.(c|h|js)$")])
     project = models.ForeignKey('Project', related_name='source_files')
-    bucket_name = 'source'
+    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_.-]+\.(c|h|js)$")])
     folder = 'sources'
 
     TARGETS = (
@@ -336,7 +254,7 @@ class SourceFile(ScriptFile):
 
 @receiver(post_delete)
 def delete_file(sender, instance, **kwargs):
-    if sender in (SourceFile, ResourceVariant):
+    if issubclass(sender, S3File):
         if settings.AWS_ENABLED:
             try:
                 s3.delete_file(sender.bucket_name, instance.s3_path)

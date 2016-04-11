@@ -112,7 +112,7 @@ def sync_screenshots(request, project_id, test_id):
                         if posted_file.content_type != "image/png":
                             raise ValueError("Screenshots must be PNG files")
                         screenshot_file.save()
-                        screenshot_file.save_file(posted_file, posted_file.size)
+                        screenshot_file.save_file(posted_file, file_size=posted_file.size)
 
                 screenshot_set.save()
 

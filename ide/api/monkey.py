@@ -336,7 +336,7 @@ def notify_qemu_session(date_completed, session, platform, status, log, uploaded
             screenshot_set, did_create_set = ScreenshotSet.objects.get_or_create(test=test, name=name)
             screenshot_file, did_create_file = ScreenshotFile.objects.get_or_create(screenshot_set=screenshot_set, platform=platform)
             screenshot_file.save()
-            screenshot_file.save_file(posted_file, posted_file.size)
+            screenshot_file.save_file(posted_file, file_size=posted_file.size)
 
 
 def notify_orchestrator_session(date_completed, session, job_info):

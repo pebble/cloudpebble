@@ -27,7 +27,7 @@ def create_source_file(request, project_id):
             f = SourceFile.objects.create(project=project,
                                           file_name=request.POST['name'],
                                           target=request.POST.get('target', 'app'))
-            f.save_file(request.POST.get('content', ''))
+            f.save_text(request.POST.get('content', ''))
     except (IntegrityError, ValidationError) as e:
         raise BadRequest(str(e))
     else:
@@ -50,7 +50,7 @@ def create_test_file(request, project_id):
     try:
         f = TestFile.objects.create(project=project,
                                     file_name=request.POST['name'])
-        f.save_file(request.POST.get('content', ''))
+        f.save_text(request.POST.get('content', ''))
     except (IntegrityError, ValidationError) as e:
         raise BadRequest(str(e))
     else:
@@ -188,7 +188,8 @@ def save_source_file(request, project_id, kind, file_id):
             }
         }, request=request, project=project)
         raise Exception(_("Could not save: file has been modified since last save."))
-    source_file.save_file(request.POST['content'], folded_lines=request.POST['folded_lines'])
+    source_file.save_text(request.POST['content'], folded_lines=request.POST['folded_lines'])
+    source_file.save_lines(folded_lines=request.POST['folded_lines'])
 
     send_td_event('cloudpebble_save_file', data={
         'data': {

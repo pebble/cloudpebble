@@ -1,21 +1,17 @@
 import os
-import traceback
 from io import BytesIO
-
-from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db import transaction
-from django.db.models.signals import post_delete
-from django.dispatch import receiver
 from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
-import utils.s3 as s3
-from ide.models.files import BinFile, ScriptFile
-from ide.models.meta import IdeModel, TextFile
+from ide.models.scriptfile import ScriptFile
+from ide.models.s3file import S3File
+from ide.models.meta import IdeModel
 from ide.utils.image_correction import uncorrect
+
 from utils.monkeyscript_helpers import frame_test_file
 
 __author__ = 'joe'
@@ -44,10 +40,9 @@ class TestSession(IdeModel):
         ordering = ['-date_added']
 
 
-class TestLog(TextFile):
+class TestLog(S3File):
     """ A TestLog is a text file owned by a TestRun. It stores the console output from an AT process. """
     folder = 'tests/logs'
-    bucket_name = 'source'  # TODO: is this OK?
     test_run = models.OneToOneField('TestRun', related_name='logfile')
 
 
@@ -100,7 +95,7 @@ class TestRun(IdeModel):
                 self.logfile.delete()
             logfile = TestLog.objects.create(test_run=self)
             logfile.save()
-            logfile.save_file(value)
+            logfile.save_text(value)
 
     @property
     def has_log(self):
@@ -128,7 +123,6 @@ class TestRun(IdeModel):
 class TestFile(ScriptFile):
     file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_-]+$")])
     project = models.ForeignKey('Project', related_name='test_files')
-    bucket_name = 'source'
     folder = 'tests/scripts'
     target = 'test'
 
@@ -197,8 +191,7 @@ class ScreenshotSet(IdeModel):
         unique_together = (('test', 'name'),)
 
 
-class ScreenshotFile(BinFile):
-    bucket_name = 'source'
+class ScreenshotFile(S3File):
     folder = 'tests/screenshots'
     screenshot_set = models.ForeignKey('ScreenshotSet', related_name='files')
     PLATFORMS = (
@@ -209,16 +202,8 @@ class ScreenshotFile(BinFile):
     platform = models.CharField(max_length=10, choices=PLATFORMS)
 
     @property
-    def padded_id(self):
-        return '%09d' % self.id
-
-    @property
-    def s3_id(self):
-        return self.id
-
-    def save_project(self):
-        self.screenshot_set.test.project.last_modified = now()
-        self.screenshot_set.test.project.save()
+    def project(self):
+        return self.screenshot_set.test.project
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -232,20 +217,6 @@ class ScreenshotFile(BinFile):
             data = buff.read()
             super(ScreenshotFile, self).save_string(data)
 
-    class Meta(BinFile.Meta):
+    class Meta(S3File.Meta):
         unique_together = (('platform', 'screenshot_set'),)
 
-
-@receiver(post_delete)
-def delete_file(sender, instance, **kwargs):
-    if sender in (ScreenshotFile, TestFile, TestLog):
-        if settings.AWS_ENABLED:
-            try:
-                s3.delete_file(sender.bucket_name, instance.s3_path)
-            except:
-                traceback.print_exc()
-        else:
-            try:
-                os.unlink(instance.local_filename)
-            except OSError:
-                pass
