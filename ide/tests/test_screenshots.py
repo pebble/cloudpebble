@@ -96,10 +96,9 @@ class ScreenshotsTests(CloudpebbleTestCase):
         # URL which leads to a PNG file which has been uncorrected.
         test_id = self.make_test()
         data, result = self.upload_screenshots(test_id)
-        url = result[0]['files']['aplite']['src']
-        result = self.client.get(url, follow=True)
-        self.assertEqual(result.get('Content-Type'), 'image/png')
-        buff = StringIO("".join(result.streaming_content))
+        id = result[0]['files']['aplite']['id']
+        contents = ScreenshotFile.objects.get(pk=id).get_contents()
+        buff = StringIO(contents)
         img1 = Image.open(buff)
         img1.load()
         img2 = Image.open(UNCORRECTED_PATH)
