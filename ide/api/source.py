@@ -23,7 +23,7 @@ def create_source_file(request, project_id):
         f = SourceFile.objects.create(project=project,
                                       file_name=request.POST['name'],
                                       target=request.POST.get('target', 'app'))
-        f.save_file(request.POST.get('content', ''))
+        f.save_text(request.POST.get('content', ''))
     except IntegrityError as e:
         return json_failure(str(e))
     else:
@@ -136,7 +136,8 @@ def save_source_file(request, project_id, file_id):
                 }
             }, request=request, project=project)
             raise Exception(_("Could not save: file has been modified since last save."))
-        source_file.save_file(request.POST['content'], folded_lines=request.POST['folded_lines'])
+        source_file.save_text(request.POST['content'])
+        source_file.save_lines(folded_lines=request.POST['folded_lines'])
 
     except Exception as e:
         return json_failure(str(e))

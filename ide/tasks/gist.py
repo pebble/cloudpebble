@@ -76,7 +76,7 @@ def import_gist(user_id, gist_id):
                     else:
                         cp_filename = filename
                     source_file = SourceFile.objects.create(project=project, file_name=cp_filename)
-                    source_file.save_file(gist.files[filename].content)
+                    source_file.save_text(gist.files[filename].content)
 
             media = settings.get('resources', {}).get('media', [])
             resources = {}
@@ -113,7 +113,7 @@ def import_gist(user_id, gist_id):
                 )
         else:
             source_file = SourceFile.objects.create(project=project, file_name='app.js')
-            source_file.save_file(gist.files['simply.js'].content)
+            source_file.save_text(gist.files['simply.js'].content)
 
     send_td_event('cloudpebble_gist_import', data={'data': {'gist_id': gist_id}}, project=project)
     return project.id

@@ -290,13 +290,13 @@ def do_import_archive(project_id, archive, delete_project=False):
                                     base_filename = base_filename[len('js/'):]
                                 source = SourceFile.objects.create(project=project, file_name=base_filename)
                                 with z.open(entry.filename) as f:
-                                    source.save_file(f.read().decode('utf-8'))
+                                    source.save_text(f.read().decode('utf-8'))
                         elif filename.startswith(WORKER_SRC_DIR):
                             if (not filename.startswith('.')) and (filename.endswith('.c') or filename.endswith('.h') or filename.endswith('.js')):
                                 base_filename = filename[len(WORKER_SRC_DIR):]
                                 source = SourceFile.objects.create(project=project, file_name=base_filename, target='worker')
                                 with z.open(entry.filename) as f:
-                                    source.save_file(f.read().decode('utf-8'))
+                                    source.save_text(f.read().decode('utf-8'))
                     project.save()
                     send_td_event('cloudpebble_zip_import_succeeded', project=project)
 
