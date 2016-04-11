@@ -1,8 +1,5 @@
 import uuid
 import json
-import shutil
-import os
-import os.path
 from django.conf import settings
 from django.db import models
 from ide.models.project import Project
@@ -42,19 +39,10 @@ class BuildResult(IdeModel):
     finished = models.DateTimeField(blank=True, null=True)
 
     def _get_dir(self):
-        if settings.AWS_ENABLED:
-            return '%s/' % self.uuid
-        else:
-            path = '%s%s/%s/%s/' % (settings.MEDIA_ROOT, self.uuid[0], self.uuid[1], self.uuid)
-            if not os.path.exists(path):
-                os.makedirs(path)
-            return path
+        return '%s/' % self.uuid
 
     def get_url(self):
-        if settings.AWS_ENABLED:
-            return "%s%s/" % (settings.MEDIA_URL, self.uuid)
-        else:
-            return '%s%s/%s/%s/' % (settings.MEDIA_URL, self.uuid[0], self.uuid[1], self.uuid)
+        return "%s%s/" % (settings.MEDIA_URL, self.uuid)
 
     @property
     def pbw(self):
@@ -88,46 +76,24 @@ class BuildResult(IdeModel):
         return self._get_dir() + self.DEBUG_INFO_MAP[platform][kind]
 
     def save_build_log(self, text):
-        if not settings.AWS_ENABLED:
-            with open(self.build_log, 'w') as f:
-                f.write(text)
-        else:
-            s3.save_file('builds', self.build_log, text, public=True, content_type='text/plain')
+        s3.save_file('builds', self.build_log, text, public=True, content_type='text/plain')
 
     def read_build_log(self):
-        if not settings.AWS_ENABLED:
-            with open(self.build_log, 'r') as f:
-                return f.read()
-        else:
-            return s3.read_file('builds', self.build_log)
+        return s3.read_file('builds', self.build_log)
 
     def save_debug_info(self, json_info, platform, kind):
         text = json.dumps(json_info)
-        if not settings.AWS_ENABLED:
-            with open(self.get_debug_info_filename(platform, kind), 'w') as f:
-                f.write(text)
-        else:
-            s3.save_file('builds', self.get_debug_info_filename(platform, kind), text, public=True, content_type='application/json')
+        s3.save_file('builds', self.get_debug_info_filename(platform, kind), text, public=True, content_type='application/json')
 
     def save_package(self, package_path):
-        if not settings.AWS_ENABLED:
-            shutil.move(package_path, self.package)
-        else:
-            filename = '%s.tar.gz' % self.project.app_short_name.replace('/', '-')
-            s3.upload_file('builds', self.package, package_path, public=True, download_filename=filename, content_type='application/gzip')
+        filename = '%s.tar.gz' % self.project.app_short_name.replace('/', '-')
+        s3.upload_file('builds', self.package, package_path, public=True, download_filename=filename, content_type='application/gzip')
 
     def save_pbw(self, pbw_path):
-        if not settings.AWS_ENABLED:
-            shutil.move(pbw_path, self.pbw)
-        else:
-            s3.upload_file('builds', self.pbw, pbw_path, public=True, download_filename='%s.pbw' % self.project.app_short_name.replace('/','-'))
+        s3.upload_file('builds', self.pbw, pbw_path, public=True, download_filename='%s.pbw' % self.project.app_short_name.replace('/','-'))
 
     def save_simplyjs(self, javascript):
-        if not settings.AWS_ENABLED:
-            with open(self.simplyjs, 'w') as f:
-                f.write(javascript)
-        else:
-            s3.save_file('builds', self.simplyjs, javascript, public=True, content_type='text/javascript')
+        s3.save_file('builds', self.simplyjs, javascript, public=True, content_type='text/javascript')
 
     def get_sizes(self):
         sizes = {}

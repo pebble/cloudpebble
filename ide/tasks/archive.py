@@ -61,16 +61,9 @@ def create_archive(project_id):
 
         send_td_event('cloudpebble_export_project', project=project)
 
-        if not settings.AWS_ENABLED:
-            outfile = '%s%s/%s.zip' % (settings.EXPORT_DIRECTORY, u, prefix)
-            os.makedirs(os.path.dirname(outfile), 0755)
-            shutil.copy(filename, outfile)
-            os.chmod(outfile, 0644)
-            return '%s%s/%s.zip' % (settings.EXPORT_ROOT, u, prefix)
-        else:
-            outfile = '%s/%s.zip' % (u, prefix)
-            s3.upload_file('export', outfile, filename, public=True, content_type='application/zip')
-            return '%s%s' % (settings.EXPORT_ROOT, outfile)
+        outfile = '%s/%s.zip' % (u, prefix)
+        s3.upload_file('export', outfile, filename, public=True, content_type='application/zip')
+        return '%s%s' % (settings.EXPORT_ROOT, outfile)
 
 
 @task(acks_late=True)

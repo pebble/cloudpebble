@@ -1,5 +1,4 @@
 import json
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db import transaction, IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
@@ -238,13 +237,8 @@ def show_resource(request, project_id, resource_id, variant):
     }
     content_disposition = "attachment; filename=\"%s\"" % resource.file_name
     content_type = content_types[resource.kind]
-    if settings.AWS_ENABLED:
-        headers = {
-            'response-content-disposition': content_disposition,
-            'Content-Type': content_type
-        }
-        return HttpResponseRedirect(s3.get_signed_url('source', variant.s3_path, headers=headers))
-    else:
-        response = HttpResponse(open(variant.local_filename), content_type=content_type)
-        response['Content-Disposition'] = content_disposition
-        return response
+    headers = {
+        'response-content-disposition': content_disposition,
+        'Content-Type': content_type
+    }
+    return HttpResponseRedirect(s3.get_signed_url('source', variant.s3_path, headers=headers))

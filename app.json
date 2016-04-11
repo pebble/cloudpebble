@@ -7,7 +7,6 @@
     "AWS_ACCESS_KEY_ID": {
       "required": true
     },
-    "AWS_ENABLED": "yes",
     "AWS_S3_BUILDS_BUCKET": "builds-staging.cloudpebble.net",
     "AWS_S3_EXPORT_BUCKET": "export-staging.cloudpebble.net",
     "AWS_S3_SOURCE_BUCKET": "source-staging.cloudpebble.net",

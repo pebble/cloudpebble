@@ -263,6 +263,7 @@ def save_project_dependencies(request, project_id):
     else:
         send_td_event('cloudpebble_save_project_settings', request=request, project=project)
 
+
 @require_POST
 @login_required
 @json_view
