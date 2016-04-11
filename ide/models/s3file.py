@@ -21,7 +21,7 @@ class S3File(IdeModel):
 
     @property
     def local_filename(self):
-        padded_id = self.paded_id
+        padded_id = self.padded_id
         return '%s%s/%s/%s/%s' % (settings.FILE_STORAGE, self.folder, padded_id[0], padded_id[1], padded_id)
 
     @property
