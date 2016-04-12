@@ -1,3 +1,4 @@
+import mock
 import json
 from PIL import Image
 from cStringIO import StringIO
@@ -9,14 +10,17 @@ from django.core.urlresolvers import reverse
 
 from ide.models.monkey import TestFile, ScreenshotSet, ScreenshotFile
 from cloudpebble_test import CloudpebbleTestCase
+from tests.fakes import FakeS3
 
 __author__ = 'joe'
 
 UNCORRECTED_PATH = "ide/tests/test_screenshot_uncorrected.png"
 CORRECTED_PATH = "ide/tests/test_screenshot_corrected.png"
 
+fake_s3 = FakeS3()
 
-@override_settings(AWS_ENABLED=False)
+
+@mock.patch('ide.models.s3file.s3', fake_s3)
 class ScreenshotsTests(CloudpebbleTestCase):
     def setUp(self):
         self.login()

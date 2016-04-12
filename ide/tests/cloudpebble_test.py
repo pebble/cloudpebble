@@ -4,8 +4,10 @@ from django.test.utils import setup_test_environment
 
 setup_test_environment()
 
+
 class CloudpebbleTestCase(TestCase):
     """CloudpebbleTestCase provides convenience functions for other test cases"""
+
     def login(self):
         self.client = Client()
         self.client.post('/accounts/register', {'username': 'test', 'email': 'test@test.test', 'password1': 'test', 'password2': 'test'})

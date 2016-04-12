@@ -10,8 +10,12 @@ from cloudpebble_test import CloudpebbleTestCase
 
 __author__ = 'joe'
 
+from tests.fakes import FakeS3
 
-@override_settings(AWS_ENABLED=False)
+fake_s3 = FakeS3()
+
+
+@mock.patch('ide.models.s3file.s3', fake_s3)
 class TestsTests(CloudpebbleTestCase):
     """Tests for the Tests models"""
 
