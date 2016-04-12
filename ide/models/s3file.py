@@ -1,9 +1,12 @@
 import shutil
 import os
+import traceback
 
 from django.utils.translation import ugettext as _
 from django.conf import settings
 from django.utils.timezone import now
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 
 import utils.s3 as s3
 from ide.models.meta import IdeModel
@@ -87,3 +90,18 @@ class S3File(IdeModel):
 
     class Meta(IdeModel.Meta):
         abstract = True
+
+
+@receiver(post_delete)
+def delete_file(sender, instance, **kwargs):
+    if issubclass(sender, S3File):
+        if settings.AWS_ENABLED:
+            try:
+                s3.delete_file(sender.bucket_name, instance.s3_path)
+            except:
+                traceback.print_exc()
+        else:
+            try:
+                os.unlink(instance.local_filename)
+            except OSError:
+                pass
