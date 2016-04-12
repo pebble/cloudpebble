@@ -21,6 +21,8 @@ DEFAULT_FROM_EMAIL = _environ.get('FROM_EMAIL', 'CloudPebble <cloudpebble@exampl
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
+MANAGERS = ADMINS
+
 if 'TRAVIS' in _environ:
     DATABASES = {
         'default': {

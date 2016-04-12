@@ -5,8 +5,6 @@ Tests in this file can be run with run_tests.py
 from django.test import TestCase
 import ide.git
 
-__author__ = 'joe'
-
 
 class UrlToReposTest(TestCase):
     def test_basic_url_to_repo(self):

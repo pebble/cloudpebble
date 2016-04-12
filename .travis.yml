@@ -5,7 +5,7 @@ services:
   - rabbitmq
   - postgresql
 before_script:
-  - psql -c "CREATE DATABASE mydb;" -U postgres
+  - psql -c "CREATE DATABASE travisci;" -U postgres
 install:
   - pip install -r requirements.txt
 script: python manage.py test
