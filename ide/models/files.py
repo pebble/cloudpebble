@@ -1,18 +1,11 @@
-import datetime
 import json
 import os
-import shutil
-import traceback
 
-from django.conf import settings
 from django.core.validators import RegexValidator
-from django.db import models, transaction
-from django.db.models.signals import post_delete
-from django.dispatch import receiver
+from django.db import models
 from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
-import utils.s3 as s3
 from ide.models.meta import IdeModel
 from ide.models.s3file import S3File
 from ide.models.scriptfile import ScriptFile
@@ -250,18 +243,3 @@ class SourceFile(ScriptFile):
 
     class Meta(ScriptFile.Meta):
         unique_together = (('project', 'file_name'),)
-
-
-@receiver(post_delete)
-def delete_file(sender, instance, **kwargs):
-    if issubclass(sender, S3File):
-        if settings.AWS_ENABLED:
-            try:
-                s3.delete_file(sender.bucket_name, instance.s3_path)
-            except:
-                traceback.print_exc()
-        else:
-            try:
-                os.unlink(instance.local_filename)
-            except OSError:
-                pass
