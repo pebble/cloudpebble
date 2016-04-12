@@ -1,7 +1,9 @@
-import mock
 from unittest import TestCase
+
+import mock
+
 from orchestrator_proxy.utils import uuid_map
-from tests.fakes import FakeRedis
+from utils.fakes import FakeRedis
 
 fake_redis = FakeRedis()
 

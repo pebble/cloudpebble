@@ -1,16 +1,15 @@
-import mock
 import json
-from PIL import Image
 from cStringIO import StringIO
 
-from django.test import override_settings
-from django.core.files.uploadedfile import SimpleUploadedFile
+import mock
+from PIL import Image
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 
 from ide.models.monkey import TestFile, ScreenshotSet, ScreenshotFile
-from cloudpebble_test import CloudpebbleTestCase
-from tests.fakes import FakeS3
+from ide.utils.cloudpebble_test import CloudpebbleTestCase
+from utils.fakes import FakeS3
 
 __author__ = 'joe'
 

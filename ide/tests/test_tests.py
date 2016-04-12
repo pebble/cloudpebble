@@ -1,16 +1,16 @@
 import json
-import mock
-
 from collections import Counter
-from django.conf import settings
-from django.test import override_settings
-from django.core.urlresolvers import reverse
 
-from cloudpebble_test import CloudpebbleTestCase
+import mock
+from django.conf import settings
+from django.core.urlresolvers import reverse
+from django.test import override_settings
+
+from ide.utils.cloudpebble_test import CloudpebbleTestCase
 
 __author__ = 'joe'
 
-from tests.fakes import FakeS3
+from utils.fakes import FakeS3
 
 fake_s3 = FakeS3()
 
