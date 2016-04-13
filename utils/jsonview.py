@@ -30,81 +30,89 @@ class InternalServerError(Exception):
     pass
 
 
-def _make_error(message):
-    return {
-        'success': False,
-        'error': message
-    }
+def json_view(*args, **kwargs):
 
+    include_success = kwargs.get('include_success', True)
 
-def json_view(f):
-    @wraps(f)
-    def _wrapped(request, *args, **kwargs):
-        try:
-            ret = f(request, *args, **kwargs)
+    def _make_error(message):
+        err = {'error': message}
+        if include_success:
+            err['success'] = False
+        return err
 
-            # Some errors are not exceptions
-            if isinstance(ret, http.HttpResponseNotAllowed):
-                return http.HttpResponse(json.dumps(_make_error(_('HTTP method not allowed.'))), status=405, content_type=JSON)
+    def decorator(f):
+        @wraps(f)
+        def _wrapped(request, *args, **kwargs):
+            try:
+                ret = f(request, *args, **kwargs)
 
-            if isinstance(ret, http.HttpResponseBadRequest):
-                return http.HttpResponse(json.dumps(_make_error(_('Bad Request'))), status=400, content_type=JSON)
+                # Some errors are not exceptions
+                if isinstance(ret, http.HttpResponseNotAllowed):
+                    return http.HttpResponse(json.dumps(_make_error(_('HTTP method not allowed.'))), status=405, content_type=JSON)
 
-            # Allow other HttpResponses through
-            if isinstance(ret, http.HttpResponse):
-                return ret
+                if isinstance(ret, http.HttpResponseBadRequest):
+                    return http.HttpResponse(json.dumps(_make_error(_('Bad Request'))), status=400, content_type=JSON)
 
-            # Functions without return values default to a dict which just contains {success: true}
-            if ret is None:
-                ret = {}
-            if 'success' not in ret:
-                ret['success'] = True
+                # Allow other HttpResponses through
+                if isinstance(ret, http.HttpResponse):
+                    return ret
 
-            content = json.dumps(ret)
-            return http.HttpResponse(content, status=200, content_type=JSON)
+                # Functions without return values default to a dict which just contains {success: true}
+                if ret is None:
+                    ret = {}
+                if include_success and 'success' not in ret:
+                    ret['success'] = True
 
-        except http.Http404 as e:
-            logger.warning('Not found: %s', request.path,
-                           extra={
-                               'status_code': 404,
-                               'request': request,
-                           })
-            return http.HttpResponseNotFound(json.dumps(_make_error(str(e))), content_type=JSON)
+                content = json.dumps(ret)
+                return http.HttpResponse(content, status=200, content_type=JSON)
 
-        except PermissionDenied as e:
-            logger.warning(
-                'Forbidden (Permission denied): %s', request.path,
-                extra={
-                    'status_code': 403,
-                    'request': request,
-                })
-            return http.HttpResponseForbidden(json.dumps(_make_error(str(e))), content_type=JSON)
-        except BadRequest as e:
-            return http.HttpResponseBadRequest(json.dumps(_make_error(str(e))), content_type=JSON)
-        except Exception as e:
-            data = _make_error(_('An error has occurred'))
-            if settings.DEBUG or isinstance(e, InternalServerError):
-                data['error'] = str(e)
-            if settings.DEBUG:
-                data['traceback'] = traceback.format_exc()
-            content = json.dumps(data)
+            except http.Http404 as e:
+                logger.warning('Not found: %s', request.path,
+                               extra={
+                                   'status_code': 404,
+                                   'request': request,
+                               })
+                return http.HttpResponseNotFound(json.dumps(_make_error(str(e))), content_type=JSON)
 
-            # Generate the usual 500 error email with stack trace and full
-            # debugging information
-            logger.error(
-                'Internal Server Error: %s', request.path,
-                exc_info=True,
-                extra={
-                    'status_code': 500,
-                    'request': request
-                }
-            )
+            except PermissionDenied as e:
+                logger.warning(
+                    'Forbidden (Permission denied): %s', request.path,
+                    extra={
+                        'status_code': 403,
+                        'request': request,
+                    })
+                return http.HttpResponseForbidden(json.dumps(_make_error(str(e))), content_type=JSON)
+            except BadRequest as e:
+                return http.HttpResponseBadRequest(json.dumps(_make_error(str(e))), content_type=JSON)
+            except Exception as e:
+                data = _make_error(_('An error has occurred'))
+                if settings.DEBUG or isinstance(e, InternalServerError):
+                    data['error'] = str(e)
+                if settings.DEBUG:
+                    data['traceback'] = traceback.format_exc()
+                content = json.dumps(data)
 
-            # Here we lie a little bit. Because we swallow the exception,
-            # the BaseHandler doesn't get to send this signal. It sets the
-            # sender argument to self.__class__, in case the BaseHandler
-            # is subclassed.
-            got_request_exception.send(sender=BaseHandler, request=request)
-            return http.HttpResponseServerError(content, content_type=JSON)
+                # Generate the usual 500 error email with stack trace and full
+                # debugging information
+                logger.error(
+                    'Internal Server Error: %s', request.path,
+                    exc_info=True,
+                    extra={
+                        'status_code': 500,
+                        'request': request
+                    }
+                )
 
-    return _wrapped
+                # Here we lie a little bit. Because we swallow the exception,
+                # the BaseHandler doesn't get to send this signal. It sets the
+                # sender argument to self.__class__, in case the BaseHandler
+                # is subclassed.
+                got_request_exception.send(sender=BaseHandler, request=request)
+                return http.HttpResponseServerError(content, content_type=JSON)
+
+        return _wrapped
+
+    if len(args) == 1 and callable(args[0]):
+        return decorator(args[0])
+    else:
+        return decorator

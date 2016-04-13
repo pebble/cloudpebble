@@ -160,7 +160,7 @@ CloudPebble.Settings = (function() {
                 $('.project-name').text(name);
                 window.document.title = "CloudPebble – " + name;
             }).catch(function(e) {
-                throw (interpolate("Failed to save project settings. (%s) %s", [e.status, e.toString()]));
+                throw new Error(interpolate("Failed to save project settings. (%s) %s", [e.status, e.message]));
             });
         };
 

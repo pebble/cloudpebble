@@ -66,7 +66,7 @@ $(function() {
                 if(data.state.status == 'SUCCESS') {
                     return true;
                 } else if(data.state.status == 'FAILURE') {
-                    throw interpolate(gettext("Error: %s"), [data.state.result]);
+                    throw new Error(interpolate(gettext("Error: %s"), [data.state.result]));
                 } else {
                     return Promise.delay(1000).then(check)
                 }

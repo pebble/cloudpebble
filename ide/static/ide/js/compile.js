@@ -73,7 +73,7 @@ CloudPebble.Compile = (function() {
                 log.scrollTop($(log.find('.log-error')[0]).offset().top - log.offset().top + log.scrollTop());
             }}, 1);
         }).catch(function(err) {
-            alert(interpolate(gettext("Something went wrong:\n\n%s"), [err.toString()]));
+            alert(interpolate(gettext("Something went wrong:\n\n%s"), [err.message]));
         });
     };
 
@@ -573,8 +573,7 @@ CloudPebble.Compile = (function() {
                 });
                 pebble.request_version();
             }).catch(function(error) {
-                var message = error.message ? error.message : error.toString();
-                modal.find('.modal-body > p').html(message);
+                modal.find('.modal-body > p').html(error.message);
                 modal.find('.dismiss-btn').removeClass('hide');
                 modal.find('.progress').addClass('progress-danger').removeClass('progress-striped');
                 throw error;
