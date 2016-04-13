@@ -1,15 +1,16 @@
 from cStringIO import StringIO
+from uuid import uuid4
 
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse
-from uuid import uuid4
-from ide.api import json_response
+from django.core.exceptions import PermissionDenied
+
 from orchestrator_proxy.utils import uuid_map
+from orchestrator_proxy.utils.auth import check_token
 from utils import orchestrator
 from utils.monkeyscript_helpers import frame_tests_in_bundle
-from orchestrator_proxy.utils.auth import check_token
+from utils.jsonview import json_view, BadRequest
 
 
 def post_archive(archive_file, platform, notify_url_builder=None, email="cloudpebble@pebble.com"):
@@ -48,6 +49,7 @@ def post_archive(archive_file, platform, notify_url_builder=None, email="cloudpe
 
 @require_POST
 @csrf_exempt
+@json_view(include_success=False)
 def post_test(request):
     """ Process a test bundle uploaded from the SDK and send it to orchestrator """
     # The API receives a test bundle.
@@ -56,12 +58,15 @@ def post_test(request):
     platform = request.POST['platform']
 
     if user_email is False:
-        return HttpResponse(status=401)
+        raise PermissionDenied
     infile = request.FILES['archive']
 
     def build_notify_url(uuid):
         return request.build_absolute_uri(reverse('orchestrator:notify_test', args=[uuid]))
 
-    uuid = post_archive(infile, platform=platform, notify_url_builder=build_notify_url, email=user_email)
+    try:
+        uuid = post_archive(infile, platform=platform, notify_url_builder=build_notify_url, email=user_email)
+    except KeyError as e:
+        raise BadRequest(str(e))
 
-    return json_response({'job_id': uuid}, success=None)
+    return {'job_id': uuid}

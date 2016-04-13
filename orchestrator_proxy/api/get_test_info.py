@@ -1,37 +1,39 @@
 import os
 
 from django.core.urlresolvers import reverse, NoReverseMatch
-from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_safe
+from django.http import Http404
+from django.core.exceptions import PermissionDenied
 
-from ide.api import json_response, json_failure
 from orchestrator_proxy.utils import uuid_map
 from orchestrator_proxy.utils.auth import check_token
 from utils import orchestrator
 from utils.filter_dict import filter_dict, TransformValue, TransformKeyAndValue
+from utils.jsonview import json_view
 
 
 @require_safe
 @csrf_exempt
+@json_view(include_success=False)
 def get_test_info(request, uuid):
     """ Fetches test result info from Orchestrator and returns it in a form suitable for 3rd party developers """
     if not check_token(request.GET.get('token', None)):
-        return HttpResponse(status=401)
+        raise PermissionDenied
     try:
         job_id = uuid_map.lookup_uuid(uuid)
     except KeyError:
-        return json_failure("Job not found", 404)
+        raise Http404("Job not found")
 
     if uuid_map.is_notified(job_id):
         info = orchestrator.get_job_info(job_id)
         processor = TestInfoProcessor(request.build_absolute_uri)
         filtered_info = processor.process(info, uuid)
-        return json_response(filtered_info, success=None)
+        return filtered_info
     else:
-        return json_response({
+        return {
             'status': 'running'
-        }, success=None)
+        }
 
 
 class TestInfoProcessor(object):
