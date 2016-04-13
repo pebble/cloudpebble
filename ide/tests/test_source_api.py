@@ -2,8 +2,6 @@ import json
 
 import mock
 from django.core.urlresolvers import reverse
-from django.core.exceptions import ValidationError
-from django.utils.datastructures import MultiValueDictKeyError
 from ide.utils.cloudpebble_test import CloudpebbleTestCase
 from utils.fakes import FakeS3
 
@@ -18,7 +16,7 @@ __author__ = 'joe'
 fake_s3 = FakeS3()
 
 
-@mock.patch('ide.models.files.s3', fake_s3)
+@mock.patch('ide.models.s3file.s3', fake_s3)
 class TestsSource(CloudpebbleTestCase):
     """Tests for the Tests models"""
 
@@ -40,18 +38,18 @@ class TestsSource(CloudpebbleTestCase):
         if success:
             self.assertEqual(result['file']['name'], name)
             self.assertEqual(result['file']['target'], target if target else 'app')
-        return result['file']
+        return result['file'] if 'file' in result else result
 
     def load_file(self, id, success=True):
         """ Load a source file's content """
-        url = reverse('ide:load_source_file', args=[self.project_id, id])
+        url = reverse('ide:load_source_file', args=[self.project_id, 'source', id])
         result = json.loads(self.client.get(url).content)
         self.assertEqual(result['success'], success)
         return result
 
     def rename_file(self, id, modified, old_name=None, new_name=None, success=True):
         """ Rename a source file """
-        url = reverse('ide:rename_source_file', args=[self.project_id, id])
+        url = reverse('ide:rename_source_file', args=[self.project_id, 'source', id])
         data = {}
         if old_name is not None:
             data['old_name'] = old_name
@@ -72,7 +70,7 @@ class TestsSource(CloudpebbleTestCase):
             data['folded_lines'] = folded_lines
         if modified is not None:
             data['modified'] = modified
-        url = reverse('ide:save_source_file', args=[self.project_id, id])
+        url = reverse('ide:save_source_file', args=[self.project_id, 'source', id])
         result = json.loads(self.client.post(url, data).content)
         self.assertEqual(result['success'], success)
 
@@ -102,24 +100,17 @@ class TestsSource(CloudpebbleTestCase):
         loaded = self.load_file(info['id'])
         self.assertEqual(new_content, loaded['source'])
 
-
     def test_create_with_invalid_target_throws_error(self):
         """ Test that attempting to create a file with an invalid target throws an error """
-        with self.assertRaises(ValidationError):
-            self.create_file(target='invalid')
+        self.create_file(target='invalid', success=False)
 
     def test_create_with_invalid_names_throws_error(self):
         """ Check that attempts to create files with invalid names throw errors """
-        with self.assertRaises(MultiValueDictKeyError):
-            self.create_file(name=None)
-        with self.assertRaises(ValidationError):
-            self.create_file("no_extension")
-        with self.assertRaises(ValidationError):
-            self.create_file("bad_extension.html")
-        with self.assertRaises(ValidationError):
-            self.create_file(".c")
-        with self.assertRaises(ValidationError):
-            self.create_file("`unsafe characters`.c")
+        self.create_file("no_extension", success=False)
+        self.create_file("no_extension", success=False)
+        self.create_file("bad_extension.html", success=False)
+        self.create_file(".c", success=False)
+        self.create_file("`unsafe characters`.c", success=False)
 
     def test_rename(self):
         """ Check that files can be renamed """
@@ -136,5 +127,5 @@ class TestsSource(CloudpebbleTestCase):
         name2 = "name2.c"
         info = self.create_file(name1)
         loaded = self.load_file(info['id'])
-        self.rename_file(info['id'], int(loaded['modified']-5000), name1, name2, success=False)
+        self.rename_file(info['id'], int(loaded['modified'] - 5000), name1, name2, success=False)
         self.assertIn(name1, self.get_source_names())

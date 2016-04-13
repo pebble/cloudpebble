@@ -188,7 +188,7 @@ def save_source_file(request, project_id, kind, file_id):
             }
         }, request=request, project=project)
         raise Exception(_("Could not save: file has been modified since last save."))
-    source_file.save_text(request.POST['content'], folded_lines=request.POST['folded_lines'])
+    source_file.save_text(request.POST['content'])
     source_file.save_lines(folded_lines=request.POST['folded_lines'])
 
     send_td_event('cloudpebble_save_file', data={
