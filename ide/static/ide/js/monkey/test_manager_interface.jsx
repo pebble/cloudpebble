@@ -498,7 +498,7 @@ CloudPebble.TestManager.Interface = (function(API) {
                 {props.tests.length > 0 && (
                 <Well>
                     <BatchRunButton />
-                    <TestDownloadButton />
+                    <TestDownloadButton project_id={props.project_id} />
                 </Well>
                 )}
                 <Well>
@@ -596,7 +596,7 @@ CloudPebble.TestManager.Interface = (function(API) {
             <div className={className}>
                 {!!props.error && <Error {...props.error} onClick={props.closeError}/>}
                 <div className={leftclass}>
-                    <Dashboard sessions={props.sessions} tests={props.tests} route={route}/>
+                    <Dashboard sessions={props.sessions} tests={props.tests} route={route} project_id={props.project_id}/>
                 </div>
                 <div className={rightclass}>
                     {route.length > 0 &&
