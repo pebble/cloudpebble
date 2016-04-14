@@ -97,75 +97,69 @@ CloudPebble.MonkeyScreenshots = (function() {
         }
     };
 
-    var take_screenshot = function(kind) {
-
-
-        /** Convert a data URI to a Blob so it can be uploaded normally
-         * http://stackoverflow.com/questions/4998908/convert-data-uri-to-file-then-append-to-formdata
-         */
-        function dataURItoBlob(dataURI) {
-            // convert base64/URLEncoded data component to raw binary data held in a string
-            var byteString;
-            if (dataURI.split(',')[0].indexOf('base64') >= 0)
-                byteString = atob(dataURI.split(',')[1]);
-            else
-                byteString = unescape(dataURI.split(',')[1]);
-
-            // separate out the mime component
-            var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
-
-            // write the bytes of the string to a typed array
-            var ia = new Uint8Array(byteString.length);
-            for (var i = 0; i < byteString.length; i++) {
-                ia[i] = byteString.charCodeAt(i);
-            }
-
-            return new Blob([ia], {type:mimeString});
-        }
-        // jQuery deferred is still used here for now because it suppose progress events.
-        // TODO: fix this.
-        var defer = $.Deferred();
-        SharedPebble.getPebble(kind).then(function(pebble) {
-            var disconnect = function() {
-                if(!SharedPebble.isVirtual()) {
+    /** Given a pebble object, request a screenshot from it
+     * @param pebble{Pebble} Pebble to request a screenshot from
+     * @param on_progress{Function} A callback to send progress to
+     * @returns {Promise.<ScreenshotFile>} A promise which resolves with the new screenshot
+     */
+    function request_screenshot(pebble, on_progress) {
+        var listener = _.extend({}, Backbone.Events);
+        return (new Promise(function (resolve, reject) {
+            var disconnect_if_not_virtual = function () {
+                if (!SharedPebble.isVirtual()) {
                     SharedPebble.disconnect()
                 }
             };
-
-            pebble.on('close', function() {
+            listener.listenTo(pebble, 'close', function () {
                 defer.reject(gettext("Disconnected from phone."));
             });
 
-            pebble.on('screenshot:failed', function(error) {
+            listener.listenTo(pebble, 'screenshot:failed', function (error) {
                 CloudPebble.Analytics.addEvent('monkey_app_screenshot_failed', {virtual: SharedPebble.isVirtual()});
-                defer.reject("Screenshot failed: " + error.message);
-                disconnect();
+                reject(new Error("Screenshot failed: " + error.message));
+                disconnect_if_not_virtual();
             });
 
-            pebble.on('screenshot:progress', function(received, expected) {
-                defer.notify(((received / expected) * 100));
+            listener.listenTo(pebble, 'screenshot:progress', function (received, expected) {
+                if (_.isFunction(on_progress)) {
+                    on_progress((received / expected) * 100);
+                }
             });
 
-            pebble.on('screenshot:complete', function(screenshot) {
+            listener.listenTo(pebble, 'screenshot:complete', function (screenshot) {
                 var src = screenshot.src;
-                var blob = dataURItoBlob(screenshot.src);
-                defer.resolve(src, blob);
-                disconnect();
+                var blob = CloudPebble.Utils.ConvertDataURItoBlob(screenshot.src);
+                resolve(new ScreenshotFile({src: src, blob: blob, is_new: true}));
+                disconnect_if_not_virtual();
                 CloudPebble.Analytics.addEvent('monkey_app_screenshot_succeeded', {virtual: SharedPebble.isVirtual()});
             });
-
             pebble.request_screenshot();
-        }).catch(function(error) {
-            defer.reject(error);
+        })).finally(function () {
+            listener.stopListening();
         });
-        return defer.promise();
+    }
+
+    /**
+     * Get a pebble instance and take a screenshot from it
+     * @param on_progress{Function} A callback to send progress to
+     * @returns {Promise.<ScreenshotFile>} A promise which resolves with the new screenshot
+     */
+    var take_screenshot = function(on_progress) {
+        return SharedPebble.getPebble().then(function(pebble) {
+            return request_screenshot(pebble, on_progress);
+        });
     };
 
     var API = new AjaxAPI();
 
     /**
      * ScreenshotsModel manages a list of new screenshot files to be uploaded
-     * @fires ScreenshotsModel.change when files are added or modified
+     * @fires 'changed' when files are added or modified
+     * @fires 'progress' to indicate screenshot progress
+     * @fires 'disabled' when beginning a save/screenshot process
+     * @fires 'enabled' when a saves/screenshot process is complete
+     * @fires 'error' when there are errors
+     * @fires 'saved' when the screenshot form is successfully submitted
      * @constructor
      */
     function ScreenshotsModel(test_id) {
@@ -265,26 +259,25 @@ CloudPebble.MonkeyScreenshots = (function() {
             if (disabled) return;
             set_disabled(true);
             set_progress(index, platform, 0);
-            return take_screenshot().done(function (src, blob) {
-                var options = {file: blob, src: src, is_new: true};
+            var on_progress = function(percentage) {
+                set_progress(index, platform, percentage);
+            };
+            return take_screenshot(on_progress).then(function (screenshot) {
                 var screenshot_set;
                 if (index === null) {
                     screenshot_set = new ScreenshotSet({_changed: true});
-                    screenshot_set.files[platform] = new ScreenshotFile(options);
+                    screenshot_set.files[platform] = screenshot;
                     screenshots.push(screenshot_set);
                 }
                 else {
                     screenshot_set = screenshots[index];
-                    var id = (screenshot_set.files[platform] ? screenshot_set.files[platform].id : null);
-                    options[id] = id;
-                    screenshot_set.files[platform] = new ScreenshotFile(options);
+                    screenshot.id = (screenshot_set.files[platform] ? screenshot_set.files[platform].id : null);
+                    screenshot_set.files[platform] = screenshot;
                 }
                 self.trigger('changed', screenshots);
-            }.bind(this)).fail(function (error) {
+            }.bind(this)).catch(function (error) {
                 self.trigger('error', {message: error.toString(), errorFor: gettext("take screenshot")});
-            }.bind(this)).progress(function (percentage) {
-                set_progress(index, platform, percentage);
-            }).always(function () {
+            }.bind(this)).always(function () {
                 clear_progress(index, platform);
                 set_disabled(false);
             });

@@ -9,7 +9,7 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
                 </div>
         )
     }
-
+    
     /** Render a list of errors */
     function Error(props) {
         var errFor = props.errorFor ? interpolate(gettext(" trying to %s"), [props.errorFor]) : "";
@@ -247,6 +247,7 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
                     Screenshots.loadScreenshots();
                 });
             };
+            var form_disabled = this.props.disabled;
             return (
                 <div onDragOver={stopEvent} onDrop={stopEvent}>
                     <img ref="help" src="/static/ide/img/help.png" className="field-help" data-original-title=""/>
@@ -272,11 +273,13 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
                         <button className="btn btn-affirmative"
                                 type="submit"
                                 form="monkey-form"
-                                disabled={this.props.disabled}>{gettext('Save')}</button>
+                                disabled={form_disabled}>{gettext('Save')}
+                        </button>
                         <button className="btn btn-cancel"
                                 type="button"
                                 onClick={onCancel}
-                                disabled={this.props.disabled}>{gettext('Reset')}</button>
+                                disabled={form_disabled}>{gettext('Reset')}
+                        </button>
                     </div>
                 </div>
             );
@@ -298,24 +301,28 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
         },
         componentDidMount: function() {
             this.listener = _.extend({}, Backbone.Events);
-            // If we get a 'changed' or 'error' event, we know that loading is done.
+            // Listen to changes in the available platforms
             this.listener.listenTo(Platforms, 'changed', function (state) { this.setState(state)}.bind(this));
+            // Listen to events which directly enable/disable the form
             this.listener.listenTo(Screenshots, 'disable', function () { this.setState({disabled: true})}.bind(this));
             this.listener.listenTo(Screenshots, 'enable', function () { this.setState({disabled: false})}.bind(this));
+            // Listen to updates in screenshot and error information
+            // If we get a 'changed' or 'error' event, we know that loading is done.
             this.listener.listenTo(Screenshots, 'changed', function (screenshots) { this.setState({
                 screenshots: screenshots,
                 error: null,
                 loading: false
             })}.bind(this));
-            this.listener.listenTo(Screenshots, 'progress', function(progress) { this.setState({progress: progress})}.bind(this));
             this.listener.listenTo(Screenshots, 'error', function(error) { this.setState({
                 error: error,
                 loading: false
             })}.bind(this));
-
+            // Listen to event indicating upload progress or things loading
+            this.listener.listenTo(Screenshots, 'progress', function(progress) { this.setState({progress: progress})}.bind(this));
             this.listener.listenTo(Screenshots, 'waiting', function() { this.setState({
                 loading: true
             })}.bind(this));
+            // Listen to the activePebble
             this.listener.listenTo(SharedPebble, 'status', function(pebble, code) {
                 if (code == 0) {
                     this.setState({activePebble: true});
