@@ -153,7 +153,7 @@ BOWER_INSTALLED_APPS = (
     'codemirror#4.2.0',
     'bluebird#3.3.4',
     'kanaka/noVNC',
-    'react',
+    'react#15.0.1',
     'classnames'
 )
 
@@ -252,10 +252,19 @@ INSTALLED_APPS = (
     'djangobower',
 )
 
+NODE_MODULES_PATH = _environ.get('NODE_MODULES_PATH')
+NODE_MODULES = {
+    'BABEL': os.path.join(NODE_MODULES_PATH, 'babel-cli/bin/babel.js'),
+    'BABEL-REACT': os.path.join(NODE_MODULES_PATH, 'babel-preset-react'),
+    'BABEL-ES2015': os.path.join(NODE_MODULES_PATH, 'babel-preset-es2015'),
+}
+
 # Configuration for django-pipeline, used to concatenate and compress JS and CSS sources and
 # output source-maps.
 PIPELINE = {
-    'COMPILERS': ('react.utils.pipeline.JSXCompiler', ),
+    'COMPILERS': ('pipeline.compilers.es6.ES6Compiler', ),
+    'BABEL_BINARY': NODE_MODULES['BABEL'],
+    'BABEL_ARGUMENTS': '--presets {},{}'.format(NODE_MODULES['BABEL-REACT'], NODE_MODULES['BABEL-ES2015']),
     'OUTPUT_SOURCEMAPS': True,
     'JS_COMPRESSOR': 'pipeline.compressors.uglifyjs.UglifyJSCompressor',
     'CSS_COMPRESSOR': 'pipeline.compressors.cleancss.CleanCSSCompressor',
@@ -314,7 +323,7 @@ PIPELINE = {
                 'ide/js/ib/registry.js',
                 'ide/js/*.js',
                 'ide/js/*/*.js',
-                'ide/js/*/*.jsx',
+                'ide/js/*/*.es6',
             ),
             'output_filename': 'build/ide.js',
         },

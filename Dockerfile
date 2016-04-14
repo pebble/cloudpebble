@@ -40,6 +40,12 @@ EXPOSE 8000
 RUN npm install -g bower && echo '{"allow_root": true}' > ~/.bowerrc
 RUN npm install -g uglify-js clean-css
 
+ADD package.json /tmp/package.json
+RUN cd /tmp && npm install
+RUN mkdir -p /opt/npm && cp -a /tmp/node_modules /opt/npm/
+ENV NODE_MODULES_PATH /opt/npm/node_modules
+
+
 # Grab the toolchain
 RUN curl -o /tmp/arm-cs-tools.tar https://cloudpebble-vagrant.s3.amazonaws.com/arm-cs-tools-stripped.tar && \
   tar -xf /tmp/arm-cs-tools.tar -C / && rm /tmp/arm-cs-tools.tar
