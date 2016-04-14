@@ -44,7 +44,7 @@ def submit_test(bundle_url, platform, job_name=None, notify_url=None, requestor=
         "requestor": requestor,
         "tests": [bundle_url],
         "sw_ver": {
-            "sdk": "master",
+            "sdk": "LKGR",
             "firmware": "LKGR"
         },
         "devices": {
