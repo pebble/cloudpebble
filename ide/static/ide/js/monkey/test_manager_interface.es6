@@ -2,8 +2,8 @@ CloudPebble.TestManager.Interface = (function(API) {
     const CODES = {
         '-2': gettext('error'),
         '-1': gettext('failed'),
-        '0' : gettext('pending'),
-        '1' : gettext('passed')
+        '0': gettext('pending'),
+        '1': gettext('passed')
     };
 
     function SessionKindLabel(props) {
@@ -28,26 +28,26 @@ CloudPebble.TestManager.Interface = (function(API) {
          * @param dot_coverage the minimum number of dots to represent with a '...'
          * @returns {Array.<String|Number>} an array of numbers and one or two '...' strings
          */
-        calculatePaging: function(page, pageMax, delta=2, minimum_bounds=1, dot_coverage=2) {
+        calculatePaging: function(page, pageMax, delta = 2, minimum_bounds = 1, dot_coverage = 2) {
             if (pageMax == 1) return [1];
             // 'left' and 'right' represent the indices of the pages to show around the current page.
-            let left = page-delta;
-            let right = page+delta;
+            let left = page - delta;
+            let right = page + delta;
             // If they are close enough to first or last pages, shift them
-            if (left <= minimum_bounds + dot_coverage ) {
+            if (left <= minimum_bounds + dot_coverage) {
                 left -= (dot_coverage - 1);
             }
             if (right >= pageMax - minimum_bounds - dot_coverage + 1) {
                 right += (dot_coverage - 1);
             }
             // Ensure that 'left'/'right' don't cross into the boundary pages
-            left = Math.max(left, minimum_bounds+1);
-            right = Math.min(right, pageMax-minimum_bounds);
+            left = Math.max(left, minimum_bounds + 1);
+            right = Math.min(right, pageMax - minimum_bounds);
             // Build the list of pages to show
-            let range = _.range(1, minimum_bounds+1).concat(_.range(left, right+1), _.range(pageMax-minimum_bounds+1, pageMax+1));
+            let range = _.range(1, minimum_bounds + 1).concat(_.range(left, right + 1), _.range(pageMax - minimum_bounds + 1, pageMax + 1));
             // Add '...'s to fill in the gaps, if necessary
             if (left > dot_coverage + minimum_bounds) range.splice(minimum_bounds, 0, '...l');
-            if (right < pageMax - minimum_bounds - dot_coverage + 1) range.splice(range.length-(minimum_bounds), 0, '...r');
+            if (right < pageMax - minimum_bounds - dot_coverage + 1) range.splice(range.length - (minimum_bounds), 0, '...r');
             return range;
         },
         getInitialState: function() {
@@ -55,29 +55,30 @@ CloudPebble.TestManager.Interface = (function(API) {
                 page: 0
             }
         },
-        gotoPage: function(n) {this.setState({page: Math.max(0, Math.min( this.maxPages(), n))});},
-        maxPages: function() {return Math.floor((this.getLength()-1)/this.pageSize);},
-        page: function(arr) {return arr.slice(this.state.page*this.pageSize, (this.state.page+1)*this.pageSize);},
+        gotoPage: function(n) {this.setState({page: Math.max(0, Math.min(this.maxPages(), n))});},
+        maxPages: function() {return Math.floor((this.getLength() - 1) / this.pageSize);},
+        page: function(arr) {return arr.slice(this.state.page * this.pageSize, (this.state.page + 1) * this.pageSize);},
         renderButton: function(num) {
             const className = classNames('btn', {
-                'selected': num-1 == this.state.page
+                'selected': num - 1 == this.state.page
             });
 
             return (_.isString(num)
-                ? <button poop={num} key={num} className="btn" disabled="disabled">...</button>
-                : <button poop={num} key={num} className={className} onClick={()=>{this.gotoPage(num-1)}}>{num}</button>
+                    ? <button key={num} className="btn" disabled="disabled">...</button>
+                    : <button key={num} className={className}
+                              onClick={()=>{this.gotoPage(num-1)}}>{num}</button>
             );
         },
         fillEmpty: function(items) {
             const num_fillers = this.pageSize - items.length;
             return items.concat(_.map(new Array(num_fillers), function(_, i) {
-                return (<tr key={-i-1} poop={-i-1} className={"testmanager-table-filler"}></tr>)
+                return (<tr key={-i-1} className={"testmanager-table-filler"}></tr>)
             }));
         },
         renderPager: function() {
             const pageMax = this.maxPages();
             if (pageMax <= 0) return null;
-            const indices = this.calculatePaging(this.state.page+1, pageMax+1);
+            const indices = this.calculatePaging(this.state.page + 1, pageMax + 1);
             return (
                 <div className="paginator">
                     {indices.map(this.renderButton)}
@@ -115,7 +116,7 @@ CloudPebble.TestManager.Interface = (function(API) {
      */
     function TestResultCell(props) {
         const result_name = CODES[props.code];
-        const classes = "test-run test-"+result_name;
+        const classes = "test-run test-" + result_name;
         return (<td className={classes}>{result_name}</td>);
     }
 
@@ -138,7 +139,7 @@ CloudPebble.TestManager.Interface = (function(API) {
         },
         render: function() {
             let tests = this.page(this.props.tests).map((test) => {
-                const onClickTest = function () {
+                const onClickTest = function() {
                     API.Route.navigateAfter('test', test.id, API.Runs.refresh({test: test.id}), true);
                 };
                 const className = classNames("clickable", {
@@ -197,9 +198,9 @@ CloudPebble.TestManager.Interface = (function(API) {
             };
             return (
                 <tr key={run.id} className="clickable" onClick={show_logs}>
-                    {!this.props.test && <td><RunTitle run={run} /></td>}
+                    {!this.props.test && <td><RunTitle run={run}/></td>}
                     {!this.props.session && <td>{datestring}</td>}
-                    <TestResultCell code={run.code} />
+                    <TestResultCell code={run.code}/>
                     <td>{run.platform}</td>
                 </tr>
             );
@@ -215,12 +216,14 @@ CloudPebble.TestManager.Interface = (function(API) {
             return (
                 <div>
                     <table className="table" id="testmanager-run-table">
-                        <thead><tr>
+                        <thead>
+                        <tr>
                             {this.props.test ? null : <th>{gettext('Name')}</th>}
                             {this.props.session ? null : <th>{gettext('Date')}</th>}
                             <th>{gettext('Status')}</th>
                             <th>{gettext('Platform')}</th>
-                        </tr></thead>
+                        </tr>
+                        </thead>
                         <tbody>{children}</tbody>
                     </table>
                     {this.renderPager()}
@@ -262,9 +265,9 @@ CloudPebble.TestManager.Interface = (function(API) {
             return (
                 <tr className={rowClassName} onClick={this.onClickSession}>
                     <td>{datestring}</td>
-                    <td><SessionKindLabel kind={session.kind} long={false} /></td>
-                    <TestResultCell code={session.status} />
-                    <td className={passesClassName}>{session.passes+'/'+session.run_count}</td>
+                    <td><SessionKindLabel kind={session.kind} long={false}/></td>
+                    <TestResultCell code={session.status}/>
+                    <td className={passesClassName}>{session.passes + '/' + session.run_count}</td>
                 </tr>
             )
         }
@@ -281,18 +284,21 @@ CloudPebble.TestManager.Interface = (function(API) {
         },
         render: function() {
             let sessions = this.page(this.props.sessions).map((session) => {
-                return (<SessionListRow key={session.id} poop={session.id} session={session} selected={this.props.selected == session.id} />);
+                return (<SessionListRow key={session.id} session={session}
+                                        selected={this.props.selected == session.id}/>);
             });
             sessions = this.fillEmpty(sessions);
             return (
                 <div>
                     <table className="table" id="testmanager-job-table">
-                        <thead><tr>
+                        <thead>
+                        <tr>
                             <th>{gettext('Date')}</th>
                             <th>{gettext('Kind')}</th>
                             <th>{gettext('Status')}</th>
                             <th>{gettext('Passes')}</th>
-                        </tr></thead>
+                        </tr>
+                        </thead>
                         <tbody>{sessions}</tbody>
                     </table>
                     {this.renderPager()}
@@ -310,12 +316,21 @@ CloudPebble.TestManager.Interface = (function(API) {
             <div>
                 <table className="infoTable">
                     <tbody>
-                    <tr><th>{gettext('Date')}</th><td>{datestring}</td></tr>
-                    <tr><th>{gettext('Passes')}</th><td>{(_.countBy(filtered, 'code')[1] || 0)+'/'+filtered.length}</td></tr>
-                    <tr><th>{gettext('Test Kind')}</th><td><SessionKindLabel kind={session.kind} long={true} /></td></tr>
+                    <tr>
+                        <th>{gettext('Date')}</th>
+                        <td>{datestring}</td>
+                    </tr>
+                    <tr>
+                        <th>{gettext('Passes')}</th>
+                        <td>{(_.countBy(filtered, 'code')[1] || 0) + '/' + filtered.length}</td>
+                    </tr>
+                    <tr>
+                        <th>{gettext('Test Kind')}</th>
+                        <td><SessionKindLabel kind={session.kind} long={true}/></td>
+                    </tr>
                     </tbody>
                 </table>
-                <RunList runs={filtered} session={session} />
+                <RunList runs={filtered} session={session}/>
             </div>
         );
     }
@@ -330,9 +345,18 @@ CloudPebble.TestManager.Interface = (function(API) {
             <div id="testmanager-test">
                 <table className="infoTable">
                     <tbody>
-                    <tr><th>{gettext('Test')}</th><td>{test.name}</td></tr>
-                    <tr><th>{gettext('Passes')}</th><td>{(_.countBy(filtered, 'code')[1] || 0) + '/' + filtered.length}</td></tr>
-                    <tr><td></td><td><ViewTestSourceLink name={test.name} /></td></tr>
+                    <tr>
+                        <th>{gettext('Test')}</th>
+                        <td>{test.name}</td>
+                    </tr>
+                    <tr>
+                        <th>{gettext('Passes')}</th>
+                        <td>{(_.countBy(filtered, 'code')[1] || 0) + '/' + filtered.length}</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><ViewTestSourceLink name={test.name}/></td>
+                    </tr>
                     </tbody>
                 </table>
                 <RunList runs={filtered} test={test}/>
@@ -399,12 +423,12 @@ CloudPebble.TestManager.Interface = (function(API) {
         // Replace each artefact match with a link to the artefact.
         const pieces = [];
         matches.reduce((pos, match, i) => {
-        	pieces.push(log.slice(pos, match.pos));
-        	if (match.replace) {
-                pieces.push(<LogArtefact key={i} name={filename(match.found)} link={filename(match.replace)} />);
-	        	pos = match.pos + match.found.length;
-	        	return pos;
-        	}
+            pieces.push(log.slice(pos, match.pos));
+            if (match.replace) {
+                pieces.push(<LogArtefact key={i} name={filename(match.found)} link={filename(match.replace)}/>);
+                pos = match.pos + match.found.length;
+                return pos;
+            }
         }, 0);
 
         // Return the list of log elements inside a <pre>
@@ -425,15 +449,31 @@ CloudPebble.TestManager.Interface = (function(API) {
             <div className="testmanager-run">
                 <table>
                     <tbody>
-                    <tr><th>{gettext('Test')}</th><td><Anchor onClick={function() {API.Route.navigate('/test', test.id)}}>{test.name}</Anchor></td></tr>
-                    <tr><th>{gettext('Platform')}</th><td> {run.platform} </td></tr>
-                    <tr><th>{gettext('Session')}</th><td><Anchor onClick={function() {API.Route.navigate('/session', session.id)}}>{datestring}</Anchor></td></tr>
-                    {run_completed && <tr><th>{gettext('Completion date')}</th><td>{run_completed}</td></tr>}
-                    <tr><th>{gettext('Result')}</th><TestResultCell code={run.code} /></tr>
+                    <tr>
+                        <th>{gettext('Test')}</th>
+                        <td><Anchor onClick={function() {API.Route.navigate('/test', test.id)}}>{test.name}</Anchor>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>{gettext('Platform')}</th>
+                        <td> {run.platform} </td>
+                    </tr>
+                    <tr>
+                        <th>{gettext('Session')}</th>
+                        <td><Anchor
+                            onClick={function() {API.Route.navigate('/session', session.id)}}>{datestring}</Anchor></td>
+                    </tr>
+                    {run_completed && <tr>
+                        <th>{gettext('Completion date')}</th>
+                        <td>{run_completed}</td>
+                    </tr>}
+                    <tr>
+                        <th>{gettext('Result')}</th>
+                        <TestResultCell code={run.code}/></tr>
                     </tbody>
                 </table>
                 <hr />
-                <LogScript log={logs} artefacts={run.artefacts} />
+                <LogScript log={logs} artefacts={run.artefacts}/>
                 {!!run.logs && <a href={run.logs} target="_blank">{gettext('Download logs')}</a>}
                 {(!run.logs && !is_live_log) && <span>{gettext('No logs to show')}</span>}
                 {is_live_log && <span>Test in progress</span>}
@@ -465,7 +505,8 @@ CloudPebble.TestManager.Interface = (function(API) {
             });
         },
         render: function() {
-            return (<button onClick={this.onClick} className='btn btn-affirmative' disabled={this.state.batch_waiting ? "disabled" : null}>{gettext('Batch run')}</button>)
+            return (<button onClick={this.onClick} className='btn btn-affirmative'
+                            disabled={this.state.batch_waiting ? "disabled" : null}>{gettext('Batch run')}</button>)
         }
     });
 
@@ -473,7 +514,8 @@ CloudPebble.TestManager.Interface = (function(API) {
      * Button to download all the tests as a zip
      */
     function TestDownloadButton(props) {
-        return (<a href={'/ide/project/'+props.project_id+'/tests/archive'} className='btn testmanager-download-btn'>{gettext('Download tests as zip')}</a>);
+        return (<a href={'/ide/project/'+props.project_id+'/tests/archive'}
+                   className='btn testmanager-download-btn'>{gettext('Download tests as zip')}</a>);
     }
 
     /**
@@ -485,10 +527,10 @@ CloudPebble.TestManager.Interface = (function(API) {
         return (
             <div>
                 {props.tests.length > 0 && (
-                <Well>
-                    <BatchRunButton />
-                    <TestDownloadButton project_id={props.project_id} />
-                </Well>
+                    <Well>
+                        <BatchRunButton />
+                        <TestDownloadButton project_id={props.project_id}/>
+                    </Well>
                 )}
                 <Well>
                     <h2>{gettext('Tests')}</h2>
@@ -505,7 +547,7 @@ CloudPebble.TestManager.Interface = (function(API) {
     /** Error renders a big scary red error Well with an 'X' button for closing */
     function Error(props) {
         return (
-            <Well className="alert alert-error" >
+            <Well className="alert alert-error">
                 <button className="button-close" onClick={props.onClick}>⨉</button>
                 <p>{interpolate(gettext("Error trying to fetch %s: %s"), [props.errorFor, props.text])}</p>
             </Well>
@@ -521,8 +563,8 @@ CloudPebble.TestManager.Interface = (function(API) {
         const route = props.route;
         let page, id, text;
         if (route.length > 1) {
-            page = mapping[route[route.length-2].page];
-            id = route[route.length-2].id;
+            page = mapping[route[route.length - 2].page];
+            id = route[route.length - 2].id;
             text = interpolate(gettext('← Back to %s %s'), [page, id]);
         }
         else {
@@ -548,8 +590,8 @@ CloudPebble.TestManager.Interface = (function(API) {
         const route = props.route;
         let session, test, run, log;
         if (route.length == 0) return null;
-        const page = route[route.length-1].page;
-        const id = route[route.length-1].id;
+        const page = route[route.length - 1].page;
+        const id = route[route.length - 1].id;
         switch (page) {
             case 'session':
                 session = _.findWhere(props.sessions, {id: id});
@@ -574,7 +616,7 @@ CloudPebble.TestManager.Interface = (function(API) {
      */
     function TestManager(props) {
         const route = props.route;
-        const is_log = (route.length>0 && (route[route.length-1].page == 'logs'));
+        const is_log = (route.length > 0 && (route[route.length - 1].page == 'logs'));
         const className = 'testmanager-page-' + (route.length == 0 ? 'dashboard' : 'detail');
 
         // This logic is used to always render test logs across the full screen width.
@@ -585,7 +627,8 @@ CloudPebble.TestManager.Interface = (function(API) {
             <div className={className}>
                 {!!props.error && <Error {...props.error} onClick={props.closeError}/>}
                 <div className={leftclass}>
-                    <Dashboard sessions={props.sessions} tests={props.tests} route={route} project_id={props.project_id}/>
+                    <Dashboard sessions={props.sessions} tests={props.tests} route={route}
+                               project_id={props.project_id}/>
                 </div>
                 <div className={rightclass}>
                     {route.length > 0 &&
@@ -610,7 +653,10 @@ CloudPebble.TestManager.Interface = (function(API) {
             <Well>
                 <div className='monkey-no-tests'>
                     <p>The Test Manager allows lets you browse results and logs for your project's automated tests.</p>
-                    <p><button className="btn btn-small" onClick={createTest}>Create a test</button> to get started</p>
+                    <p>
+                        <button className="btn btn-small" onClick={createTest}>Create a test</button>
+                        to get started
+                    </p>
                 </div>
             </Well>
         )
@@ -627,7 +673,7 @@ CloudPebble.TestManager.Interface = (function(API) {
             // Listen to all stores
             this.listener = _.extend({}, Backbone.Events);
             _.each([API.Route, API.Tests, API.Sessions, API.Runs, API.Logs], (store) => {
-                this.listener.listenTo(store, 'changed', (data) => { this.setState(data)});
+                this.listener.listenTo(store, 'changed', (data) => { this.setState(data) });
                 this.listener.listenTo(store, 'error', (error) => { this.setState({'error': error}) });
             });
         },

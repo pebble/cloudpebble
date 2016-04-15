@@ -4,12 +4,12 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
     /** A simple progress bar*/
     function ProgressView(props) {
         return (
-                <div className="progress progress-striped active">
-                    <div className="bar" style={{width: props.progress+'%'}}></div>
-                </div>
+            <div className="progress progress-striped active">
+                <div className="bar" style={{width: props.progress+'%'}}></div>
+            </div>
         )
     }
-    
+
     /** Render a list of errors */
     function Error(props) {
         const errFor = props.errorFor ? interpolate(gettext(" trying to %s"), [props.errorFor]) : "";
@@ -42,7 +42,7 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
             Screenshots.addUploadedFiles(files, this.props.index, this.props.platform);
         },
         onInputChange: function(event) {
-            this.uploadFiles(event.target.files); 
+            this.uploadFiles(event.target.files);
         },
         onDrop: function(event) {
             this.stopEvent(event);
@@ -75,7 +75,7 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
             const {file, disabled, platform, screenshotsEnabled} = this.props;
             const is_new = (!file ? false : file.is_new);
             const empty = (!file ? true : !file.src);
-            const className = classNames('image-resource-preview', 'platform-'+platform, {
+            const className = classNames('image-resource-preview', 'platform-' + platform, {
                 'screenshot-empty': empty
             });
             const imageClasses = classNames({
@@ -93,22 +93,26 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
 
             if (!empty) {
                 return (
-                <div className={className} {...dragEvents}>
-                    <img src={file.src} className={imageClasses} />
-                    <button className="btn delete-btn" type="button" onClick={this.onClickDelete}> </button>
-                </div>
+                    <div className={className} {...dragEvents}>
+                        <img src={file.src} className={imageClasses}/>
+                        <button className="btn delete-btn" type="button" onClick={this.onClickDelete}></button>
+                    </div>
                 )
             }
             else {
                 return (
                     <div className={classNames(className, imageClasses)} {...dragEvents}>
                         <div {...dragEvents}>
-                            <button className="btn" onClick={this.onClickUpload} type="button" disabled={disabled}>{gettext('Upload file')}</button><br />
-                            <button className="btn" onClick={this.onClickScreenshot} type="button" disabled={screenshotsDisabled}>{gettext('Take Screenshot')}</button>
-                            <input ref="fileInput" className="hide" type="file" multiple onChange={this.onInputChange} disabled={disabled} />
+                            <button className="btn" onClick={this.onClickUpload} type="button"
+                                    disabled={disabled}>{gettext('Upload file')}</button>
+                            <br />
+                            <button className="btn" onClick={this.onClickScreenshot} type="button"
+                                    disabled={screenshotsDisabled}>{gettext('Take Screenshot')}</button>
+                            <input ref="fileInput" className="hide" type="file" multiple onChange={this.onInputChange}
+                                   disabled={disabled}/>
                         </div>
 
-                </div>
+                    </div>
                 )
             }
         }
@@ -133,7 +137,7 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
                        disabled={props.disabled}
                 />
                 {props.changed && (
-                <span className="settings-status-icons">
+                    <span className="settings-status-icons">
                     <span className="monkey-changed icon-edit"> </span>
                 </span>
                 )}
@@ -153,25 +157,30 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
         return (
             <div className={className}>
                 <div className={props.will_delete ? 'will-delete' : null}>
-                {props.platforms.map(function(platform) { return (
-                    <div key={platform} className="monkey-screenshot-container">
-                        {props.progress && _.has(props.progress, platform)
-                            ?
-                            <ProgressView progress={props.progress[platform]}/>
-                            :
-                            <Screenshot
-                                index={props.index}
-                                file={props.files[platform]}
-                                platform={platform}
-                                disabled={props.disabled}
-                                screenshotsEnabled={props.screenshotsEnabled}
-                            />
-                        }
-                    </div>
-                )})}
+                    {props.platforms.map(function(platform) {
+                        return (
+                            <div key={platform} className="monkey-screenshot-container">
+                                {props.progress && _.has(props.progress, platform)
+                                    ?
+                                    <ProgressView progress={props.progress[platform]}/>
+                                    :
+                                    <Screenshot
+                                        index={props.index}
+                                        file={props.files[platform]}
+                                        platform={platform}
+                                        disabled={props.disabled}
+                                        screenshotsEnabled={props.screenshotsEnabled}
+                                    />
+                                }
+                            </div>
+                        )
+                    })}
                 </div>
-                {!props.is_new_set && <ScreenshotTitle will_delete={props.will_delete} name={props.name} index={props.index} changed={props._changed} disabled={props.disabled} /> }
-                {props.will_delete && <div className='monkey-screenshot-will-delete-warning'>{gettext('This screenshot set will be deleted')}</div>}
+                {!props.is_new_set &&
+                <ScreenshotTitle will_delete={props.will_delete} name={props.name} index={props.index}
+                                 changed={props._changed} disabled={props.disabled}/> }
+                {props.will_delete && <div
+                    className='monkey-screenshot-will-delete-warning'>{gettext('This screenshot set will be deleted')}</div>}
             </div>
         )
     }
@@ -187,16 +196,18 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
         return (
             <form className="monkey-form" id="monkey-form" onSubmit={onSubmit}>
                 <div className="monkey-screenshots">
-                    {props.screenshots.map(function(screenshot_set, index) { return (
-                        <ScreenshotSet key={index}
-                                       index={index}
-                                       is_new_set={false}
-                                       {...screenshot_set}
-                                       platforms={props.platforms}
-                                       disabled={props.disabled}
-                                       screenshotsEnabled={props.screenshotsEnabled}
-                                       progress={props.progress[index]}/>
-                        )})}
+                    {props.screenshots.map(function(screenshot_set, index) {
+                        return (
+                            <ScreenshotSet key={index}
+                                           index={index}
+                                           is_new_set={false}
+                                {...screenshot_set}
+                                           platforms={props.platforms}
+                                           disabled={props.disabled}
+                                           screenshotsEnabled={props.screenshotsEnabled}
+                                           progress={props.progress[index]}/>
+                        )
+                    })}
                     <ScreenshotSet index={null}
                                    is_new_set={true}
                                    changed={false}
@@ -236,14 +247,14 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
         },
         render: function() {
             const {screenshots, platforms, disabled, progress, activePebble, loading} = this.props;
-            const stopEvent = function (event) {
+            const stopEvent = function(event) {
                 // We cancel any drop events over the UI so that the user doesn't experience unexpected behaviour of they
                 // accidentally drop an image outside of a screenshot box.
                 event.preventDefault();
                 event.stopPropagation();
             };
-            const onCancel = function () {
-                CloudPebble.Prompts.Confirm(gettext("Reset all changes?"), gettext("This cannot be undone."), function () {
+            const onCancel = function() {
+                CloudPebble.Prompts.Confirm(gettext("Reset all changes?"), gettext("This cannot be undone."), function() {
                     Screenshots.loadScreenshots();
                 });
             };
@@ -256,9 +267,11 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
                     {!!this.props.error && <Error {...this.props.error} />}
 
                     <div className="monkey-platforms">
-                        {this.props.platforms.map((platform) => { return (
-                            <PlatformTitle key={platform} platform={platform}/>
-                        )})}
+                        {this.props.platforms.map((platform) => {
+                            return (
+                                <PlatformTitle key={platform} platform={platform}/>
+                            )
+                        })}
                     </div>
                     <ScreenshotForm screenshots={screenshots}
                                     platforms={platforms}
@@ -267,7 +280,7 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
                                     screenshotsEnabled={activePebble}
                     />
 
-                    {loading && <ProgressView progress={100} />}
+                    {loading && <ProgressView progress={100}/>}
 
                     <div className="monkey-form-buttons">
                         <button className="btn btn-affirmative"
@@ -302,26 +315,32 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
         componentDidMount: function() {
             this.listener = _.extend({}, Backbone.Events);
             // Listen to changes in the available platforms
-            this.listener.listenTo(Platforms, 'changed', (state) => { this.setState(state)});
+            this.listener.listenTo(Platforms, 'changed', (state) => { this.setState(state) });
             // Listen to events which directly enable/disable the form
-            this.listener.listenTo(Screenshots, 'disable', () => { this.setState({disabled: true})});
-            this.listener.listenTo(Screenshots, 'enable', () => { this.setState({disabled: false})});
+            this.listener.listenTo(Screenshots, 'disable', () => { this.setState({disabled: true}) });
+            this.listener.listenTo(Screenshots, 'enable', () => { this.setState({disabled: false}) });
             // Listen to updates in screenshot and error information
             // If we get a 'changed' or 'error' event, we know that loading is done.
-            this.listener.listenTo(Screenshots, 'changed', (screenshots) => { this.setState({
-                screenshots: screenshots,
-                error: null,
-                loading: false
-            })});
-            this.listener.listenTo(Screenshots, 'error', (error) => { this.setState({
-                error: error,
-                loading: false
-            })});
+            this.listener.listenTo(Screenshots, 'changed', (screenshots) => {
+                this.setState({
+                    screenshots: screenshots,
+                    error: null,
+                    loading: false
+                })
+            });
+            this.listener.listenTo(Screenshots, 'error', (error) => {
+                this.setState({
+                    error: error,
+                    loading: false
+                })
+            });
             // Listen to event indicating upload progress or things loading
-            this.listener.listenTo(Screenshots, 'progress', (progress) => { this.setState({progress: progress})});
-            this.listener.listenTo(Screenshots, 'waiting', () => { this.setState({
-                loading: true
-            })});
+            this.listener.listenTo(Screenshots, 'progress', (progress) => { this.setState({progress: progress}) });
+            this.listener.listenTo(Screenshots, 'waiting', () => {
+                this.setState({
+                    loading: true
+                })
+            });
             // Listen to the activePebble
             this.listener.listenTo(SharedPebble, 'status', (pebble, code) => {
                 if (code == 0) {
