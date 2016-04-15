@@ -138,7 +138,7 @@ else:
         'djangobower.finders.BowerFinder',
         'pipeline.finders.PipelineFinder',
     )
-    STATICFILES_STORAGE = 'cloudpebble.storages.GzipManifestPipelineStorage'
+    STATICFILES_STORAGE = 'cloudpebble.storages.CompressedManifestPipelineStorage'
 
 
 BOWER_INSTALLED_APPS = (
@@ -173,7 +173,7 @@ TEMPLATES = [
                 'django.template.context_processors.media',
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
-                'django.core.context_processors.request',
+                'django.template.context_processors.request',
                 'django.contrib.messages.context_processors.messages',
                 "social.apps.django_app.context_processors.backends",
                 "social.apps.django_app.context_processors.login_redirect",
@@ -183,6 +183,7 @@ TEMPLATES = [
 ]
 
 MIDDLEWARE_CLASSES = (
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',

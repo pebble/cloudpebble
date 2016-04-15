@@ -184,7 +184,7 @@ console log
 script
     export PATH="$PATH:/home/vagrant/arm-cs-tools/bin:/home/vagrant/sdk2/bin"
     export DEBUG=yes
-    # The following line is untested after move to Django 1.9.2
+    # The following line is untested after move to Django 1.9
     exec celery worker --autoreload --loglevel=info --no-color
 end script
 
