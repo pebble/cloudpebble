@@ -115,6 +115,11 @@ STATIC_URL = '/static/'
 
 PUBLIC_URL = _environ.get('PUBLIC_URL', 'http://localhost:8000/') # This default is completely useless.
 
+NODE_MODULES_PATH = _environ.get('NODE_MODULES_PATH', os.path.join(os.getcwd(), 'node_modules'))
+
+
+def _node_bin(name):
+    return os.path.join(NODE_MODULES_PATH, '.bin', name)
 
 if DEBUG or TESTING:
     # Additional locations of static files
@@ -156,6 +161,9 @@ BOWER_INSTALLED_APPS = (
     'react#15.0.1',
     'classnames'
 )
+
+BOWER_PATH = _environ.get('BOWER_PATH', _node_bin('bower'))
+
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = _environ.get('SECRET_KEY', 'y_!-!-i!_txo$v5j(@c7m4uk^jyg)l4bf*0yqrztmax)l2027j')
@@ -253,12 +261,14 @@ INSTALLED_APPS = (
     'djangobower',
 )
 
-NODE_MODULES_PATH = _environ.get('NODE_MODULES_PATH')
-BABEL_PATH = _environ.get('BABEL_PATH', os.path.join(NODE_MODULES_PATH, 'babel-cli/bin/babel.js'))
+# Note: due to the way that django-pipeline currently works, babel is executed with a cwd of the file being compiled.
+# This means that we must reference the babel presets by their absolute location.
+# This is arguably a bug and it might be worth making a PR on django-pipeline to fix this (or at least, fixing it in
+# Pebble's fork).
 BABEL_PRESETS = [
     'babel-preset-stage-2',
     'babel-preset-react',
-    'babel-preset-es2015'
+    'babel-preset-es2015',
 ]
 
 
@@ -266,13 +276,13 @@ BABEL_PRESETS = [
 # output source-maps.
 PIPELINE = {
     'COMPILERS': ('pipeline.compilers.es6.ES6Compiler', ),
-    'BABEL_BINARY': BABEL_PATH,
+    'BABEL_BINARY': _node_bin('babel'),
     'BABEL_ARGUMENTS': '--presets {}'.format(",".join(os.path.join(NODE_MODULES_PATH, p) for p in BABEL_PRESETS)),
     'OUTPUT_SOURCEMAPS': True,
     'JS_COMPRESSOR': 'pipeline.compressors.uglifyjs.UglifyJSCompressor',
     'CSS_COMPRESSOR': 'pipeline.compressors.cleancss.CleanCSSCompressor',
-    'CLEANCSS_BINARY': 'cleancss',
-    'UGLIFYJS_BINARY': 'uglifyjs',
+    'CLEANCSS_BINARY': _node_bin('cleancss'),
+    'UGLIFYJS_BINARY': _node_bin('uglifyjs'),
     'VERBOSE': True,
     'STYLESHEETS': {
         'codemirror': {
