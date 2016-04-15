@@ -1,9 +1,5 @@
 CloudPebble.TestManager.Interface = (function(API) {
-    'use strict';
-
-    function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
-
-    var CODES = {
+    const CODES = {
         '-2': gettext('error'),
         '-1': gettext('failed'),
         '0' : gettext('pending'),
@@ -22,22 +18,21 @@ CloudPebble.TestManager.Interface = (function(API) {
      * render a pagination switcher.
      * Classes which use Pagination should define this.pageSize and have a 'getLength()' function.
      */
-    var Pagination = {
+    const Pagination = {
         /**
          * Given a number of pages and current page, generate Pagination indexes
          * @param page
          * @param pageMax
-         * @returns {Array.<T>} an array of numbers and one or two '...' strings
+         * @param delta the number of items to show on each side of the current page
+         * @param minimum_bounds the guaranteed number of items to show at each end
+         * @param dot_coverage the minimum number of dots to represent with a '...'
+         * @returns {Array.<String|Number>} an array of numbers and one or two '...' strings
          */
-        calculatePaging: function(page, pageMax) {
-            var delta = 2; // the number of items to show on each side of the current page
-            var minimum_bounds = 1; // the guaranteed number of items to show at each end
-            var dot_coverage = 2; // the minimum number of dots to represent with a '...'
-
+        calculatePaging: function(page, pageMax, delta=2, minimum_bounds=1, dot_coverage=2) {
             if (pageMax == 1) return [1];
             // 'left' and 'right' represent the indices of the pages to show around the current page.
-            var left = page-delta;
-            var right = page+delta;
+            let left = page-delta;
+            let right = page+delta;
             // If they are close enough to first or last pages, shift them
             if (left <= minimum_bounds + dot_coverage ) {
                 left -= (dot_coverage - 1);
@@ -49,7 +44,7 @@ CloudPebble.TestManager.Interface = (function(API) {
             left = Math.max(left, minimum_bounds+1);
             right = Math.min(right, pageMax-minimum_bounds);
             // Build the list of pages to show
-            var range = _.range(1, minimum_bounds+1).concat(_.range(left, right+1), _.range(pageMax-minimum_bounds+1, pageMax+1));
+            let range = _.range(1, minimum_bounds+1).concat(_.range(left, right+1), _.range(pageMax-minimum_bounds+1, pageMax+1));
             // Add '...'s to fill in the gaps, if necessary
             if (left > dot_coverage + minimum_bounds) range.splice(minimum_bounds, 0, '...l');
             if (right < pageMax - minimum_bounds - dot_coverage + 1) range.splice(range.length-(minimum_bounds), 0, '...r');
@@ -64,26 +59,25 @@ CloudPebble.TestManager.Interface = (function(API) {
         maxPages: function() {return Math.floor((this.getLength()-1)/this.pageSize);},
         page: function(arr) {return arr.slice(this.state.page*this.pageSize, (this.state.page+1)*this.pageSize);},
         renderButton: function(num) {
-            var className = classNames('btn', {
+            const className = classNames('btn', {
                 'selected': num-1 == this.state.page
             });
 
             return (_.isString(num)
-                ? <button key={num} className="btn" disabled="disabled">...</button>
-                : <button key={num} className={className} onClick={function() {this.gotoPage(num-1)}.bind(this)}>{num}</button>
+                ? <button poop={num} key={num} className="btn" disabled="disabled">...</button>
+                : <button poop={num} key={num} className={className} onClick={()=>{this.gotoPage(num-1)}}>{num}</button>
             );
         },
         fillEmpty: function(items) {
-            var num_fillers = this.pageSize - items.length;
-            return items.concat(_.map(Array(num_fillers), function(_, i) {
-                return (<tr key={-i-1} className={"testmanager-table-filler"}></tr>)
+            const num_fillers = this.pageSize - items.length;
+            return items.concat(_.map(new Array(num_fillers), function(_, i) {
+                return (<tr key={-i-1} poop={-i-1} className={"testmanager-table-filler"}></tr>)
             }));
         },
         renderPager: function() {
-            var page = this.state.page;
-            var pageMax = this.maxPages();
+            const pageMax = this.maxPages();
             if (pageMax <= 0) return null;
-            var indices = this.calculatePaging(page+1, pageMax+1);
+            const indices = this.calculatePaging(this.state.page+1, pageMax+1);
             return (
                 <div className="paginator">
                     {indices.map(this.renderButton)}
@@ -96,38 +90,38 @@ CloudPebble.TestManager.Interface = (function(API) {
      * Renders a <div> with class='well'.
      */
     function Well(props) {
-        var other = _objectWithoutProperties(props, ['className', 'children']);
-        var finalClassName = classNames('well', props.className);
-        return <div className={finalClassName} {...other}>{props.children}</div>;
+        let {className, children, ...other} = props;
+        const finalClassName = classNames('well', className);
+        return <div className={finalClassName} {...other}>{children}</div>;
     }
 
     /**
      * The 'Anchor' class is an <a> tag which automatically preventDefaults clicks.
      */
     function Anchor(props) {
-        var other = _objectWithoutProperties(props, ['onClick', 'children']);
-        var clicked = function(event) {
+        const {onClick, children, ...other} = props;
+        const clicked = function(event) {
             event.preventDefault();
-            if (_.isFunction(props.onClick)) {
-                props.onClick();
+            if (_.isFunction(onClick)) {
+                onClick();
             }
             return false;
         };
-        return (<a href='' {...other} onClick={clicked}>{props.children}</a>);
+        return (<a href='' {...other} onClick={clicked}>{children}</a>);
     }
 
     /**
      * Renders a <td> with the colour/content sent to represent a test result
      */
     function TestResultCell(props) {
-        var result_name = CODES[props.code];
-        var classes = "test-run test-"+result_name;
+        const result_name = CODES[props.code];
+        const classes = "test-run test-"+result_name;
         return (<td className={classes}>{result_name}</td>);
     }
 
     function ViewTestSourceLink(props) {
-        var onClick = function() {
-            var file = CloudPebble.Editor.GetAllFiles()[props.name];
+        const onClick = function() {
+            const file = CloudPebble.Editor.GetAllFiles()[props.name];
             CloudPebble.Editor.Open(file);
         };
         return (<Anchor onClick={onClick}>Edit</Anchor>)
@@ -136,21 +130,19 @@ CloudPebble.TestManager.Interface = (function(API) {
     /**
      * TestList allows navigation between each individual tests
      */
-    var TestList = React.createClass({
+    const TestList = React.createClass({
         mixins: [Pagination],
         pageSize: 5,
         getLength: function() {
             return this.props.tests.length;
         },
         render: function() {
-            var props = this.props;
-            var tests = this.page(props.tests).map(function (test) {
-                var onClickTest = function () {
+            let tests = this.page(this.props.tests).map((test) => {
+                const onClickTest = function () {
                     API.Route.navigateAfter('test', test.id, API.Runs.refresh({test: test.id}), true);
                 };
-
-                var className = classNames("clickable", {
-                    selected: (props.selected == test.id)
+                const className = classNames("clickable", {
+                    selected: (this.props.selected == test.id)
                 });
                 return (
                     <tr key={test.id} onClick={onClickTest} className={className}>
@@ -179,8 +171,8 @@ CloudPebble.TestManager.Interface = (function(API) {
         }
     });
 
-    var RunTitle = function(props) {
-        var titleClassName = classNames({
+    const RunTitle = function(props) {
+        const titleClassName = classNames({
             'monkey-run-deleted': (!props.run.test)
         });
         return (<span className={titleClassName}>{props.run.name}</span>)
@@ -189,15 +181,15 @@ CloudPebble.TestManager.Interface = (function(API) {
     /**
      * RunList shows a list of test runs, e.g. for a single test or session
      */
-    var RunList = React.createClass({
+    const RunList = React.createClass({
         mixins: [Pagination],
         pageSize: 18,
         getLength: function() {
             return _.keys(this.props.runs).length;
         },
         renderRow: function(run) {
-            var datestring = CloudPebble.Utils.FormatDatetime(run.date_added);
-            var show_logs = function() {
+            const datestring = CloudPebble.Utils.FormatDatetime(run.date_added);
+            const show_logs = function() {
                 if (run.test) {
                     API.Logs.refresh(run.id);
                     API.Route.navigate('/logs', run.id);
@@ -213,11 +205,11 @@ CloudPebble.TestManager.Interface = (function(API) {
             );
         },
         render: function() {
-            var paged_runs = this.page(this.props.runs);
+            const paged_runs = this.page(this.props.runs);
             if (_.keys(paged_runs).length == 0) {
                 return (<p>{gettext('This test has never been run!')}</p>);
             }
-            var children = _.map(paged_runs, this.renderRow);
+            let children = _.map(paged_runs, this.renderRow);
             children = this.fillEmpty(children);
 
             return (
@@ -238,30 +230,30 @@ CloudPebble.TestManager.Interface = (function(API) {
     });
 
 
-    var SessionListRow = React.createClass({
+    const SessionListRow = React.createClass({
         getInitialState: function() {
             return {flashing: !!this.props.session.is_new};
         },
         componentDidMount: function() {
             if (this.state.flashing) {
-                setTimeout(function() {
+                setTimeout(() => {
                     this.setState({flashing: false});
-                }.bind(this), 1500);
+                }, 1500);
             }
         },
         onClickSession: function() {
-            var id = this.props.session.id;
+            const id = this.props.session.id;
             API.Route.navigateAfter('session', id, API.Runs.refresh({session: id}), true);
             API.Sessions.refresh({id: id});
         },
         render: function() {
-            var session = this.props.session;
-            var datestring = CloudPebble.Utils.FormatDatetime(session.date_added);
-            var rowClassName = classNames("clickable", {
+            const session = this.props.session;
+            const datestring = CloudPebble.Utils.FormatDatetime(session.date_added);
+            const rowClassName = classNames("clickable", {
                 selected: (this.props.selected),
                 flash: (this.state.flashing)
             });
-            var passesClassName = classNames({
+            const passesClassName = classNames({
                 'test-failed': session.fails > 0,
                 'test-passed': session.passes == session.run_count,
                 'test-pending': session.fails == 0 && (session.passes != session.run_count)
@@ -281,16 +273,16 @@ CloudPebble.TestManager.Interface = (function(API) {
     /**
      * SessionList allows navigation through every test job.
      */
-    var SessionList = React.createClass({
+    const SessionList = React.createClass({
         mixins: [Pagination],
         pageSize: 10,
         getLength: function() {
             return this.props.sessions.length;
         },
         render: function() {
-            var sessions = this.page(this.props.sessions).map(function(session) {
-                return (<SessionListRow key={session.id} session={session} selected={this.props.selected == session.id} />);
-            }.bind(this));
+            let sessions = this.page(this.props.sessions).map((session) => {
+                return (<SessionListRow key={session.id} poop={session.id} session={session} selected={this.props.selected == session.id} />);
+            });
             sessions = this.fillEmpty(sessions);
             return (
                 <div>
@@ -312,8 +304,8 @@ CloudPebble.TestManager.Interface = (function(API) {
      * SingleSession shows the info for a particular testing job, and all the tests run for it.
      */
     function SingleSession(session) {
-        var filtered = _.filter(session.runs, function(run) { return run.session_id == session.id });
-        var datestring = CloudPebble.Utils.FormatDatetime(session.date_added);
+        const filtered = _.filter(session.runs, (run) => { return run.session_id == session.id });
+        const datestring = CloudPebble.Utils.FormatDatetime(session.date_added);
         return (
             <div>
                 <table className="infoTable">
@@ -332,7 +324,7 @@ CloudPebble.TestManager.Interface = (function(API) {
      * SingleTest shows the details for a single test, and all times it has been run
      */
     function SingleTest(test) {
-        var filtered = _.filter(test.runs, function(run) {return !_.isUndefined(run.test) && run.test.id == test.id });
+        const filtered = _.filter(test.runs, (run) => {return !_.isUndefined(run.test) && run.test.id == test.id });
         // TODO: 'goto source'
         return (
             <div id="testmanager-test">
@@ -351,7 +343,7 @@ CloudPebble.TestManager.Interface = (function(API) {
     /**
      * A LogArtefact is a link to a resource inside a log script which shows a popover if it is an image
      */
-    var LogArtefact = React.createClass({
+    const LogArtefact = React.createClass({
         url: function() {
             // TODO: consider a way of getting this URL from Django instead of hardcoding it.
             return '/orchestrator/artefacts/' + this.props.link;
@@ -365,7 +357,7 @@ CloudPebble.TestManager.Interface = (function(API) {
                     trigger: 'hover',
                     html: true,
                     placement: 'top',
-                    content: '<img src="'+this.url()+'" />'
+                    content: `<img src="${this.url()}" />`
                 });
             }
         },
@@ -378,19 +370,19 @@ CloudPebble.TestManager.Interface = (function(API) {
      * LogScript renders a pebblesdk test log in react, converting artefact links to actual links.
      */
     function LogScript(props) {
-        var log = props.log;
-        var artefacts = props.artefacts || [];
-        var filename = function(str) {
+        const log = props.log;
+        const artefacts = props.artefacts || [];
+        const filename = function(str) {
             return str.substring(str.lastIndexOf('/') + 1);
         };
 
         // Build up a list of the locations of all artefacts
-        var matches = [];
-        var start = 0;
+        const matches = [];
+        let start = 0;
         do {
             // Log through the log file, find the closest match to the current position
-            var match = artefacts.reduce(function (closest, match, i)  {
-                var pos = log.indexOf(artefacts[i][0], start);
+            const match = artefacts.reduce((closest, match, i) => {
+                const pos = log.indexOf(artefacts[i][0], start);
                 return (pos > closest.pos || pos == -1) ? closest : {
                     pos: pos,
                     found: artefacts[i][0],
@@ -405,8 +397,8 @@ CloudPebble.TestManager.Interface = (function(API) {
         while (start < Infinity);
 
         // Replace each artefact match with a link to the artefact.
-        var pieces = [];
-        matches.reduce(function(pos, match, i) {
+        const pieces = [];
+        matches.reduce((pos, match, i) => {
         	pieces.push(log.slice(pos, match.pos));
         	if (match.replace) {
                 pieces.push(<LogArtefact key={i} name={filename(match.found)} link={filename(match.replace)} />);
@@ -425,13 +417,10 @@ CloudPebble.TestManager.Interface = (function(API) {
      * The TestRun shows the details for a single test run, and its logs
      */
     function TestRun(props) {
-        var run = props.run;
-        var test = props.test;
-        var logs = props.logs;
-        var session = props.session;
-        var datestring = CloudPebble.Utils.FormatDatetime(session.date_added);
-        var is_live_log = (!!logs && !run.logs);
-        var run_completed = run.date_completed ? CloudPebble.Utils.FormatDatetime(run.date_completed) : null;
+        const {run, test, logs, session} = props;
+        const datestring = CloudPebble.Utils.FormatDatetime(session.date_added);
+        const is_live_log = (!!logs && !run.logs);
+        const run_completed = run.date_completed ? CloudPebble.Utils.FormatDatetime(run.date_completed) : null;
         return (
             <div className="testmanager-run">
                 <table>
@@ -465,15 +454,15 @@ CloudPebble.TestManager.Interface = (function(API) {
     /**
      * Renders a button which starts all tests in batch mode when clicked.
      */
-    var BatchRunButton = React.createClass({
+    const BatchRunButton = React.createClass({
         getInitialState: function() {
             return {batch_waiting: false};
         },
         onClick: function() {
             this.setState({batch_waiting: true});
-            API.Sessions.new().finally(function() {
+            API.Sessions.new().finally(() => {
                 this.setState({batch_waiting: false});
-            }.bind(this));
+            });
         },
         render: function() {
             return (<button onClick={this.onClick} className='btn btn-affirmative' disabled={this.state.batch_waiting ? "disabled" : null}>{gettext('Batch run')}</button>)
@@ -491,8 +480,8 @@ CloudPebble.TestManager.Interface = (function(API) {
      * The Dashboard shows the list of all tests and jobs
      */
     function Dashboard(props) {
-        var top_page = props.route[0] ? props.route[0].page : null;
-        var top_id = props.route[0] ? props.route[0].id : null;
+        const top_page = props.route[0] ? props.route[0].page : null;
+        const top_id = props.route[0] ? props.route[0].id : null;
         return (
             <div>
                 {props.tests.length > 0 && (
@@ -524,13 +513,13 @@ CloudPebble.TestManager.Interface = (function(API) {
     }
 
     function BackButton(props) {
-        var mapping = {
+        const mapping = {
             logs: gettext('Run'),
             test: gettext('Test'),
             session: gettext('Session')
         };
-        var route = props.route;
-        var page, id, text;
+        const route = props.route;
+        let page, id, text;
         if (route.length > 1) {
             page = mapping[route[route.length-2].page];
             id = route[route.length-2].id;
@@ -539,7 +528,7 @@ CloudPebble.TestManager.Interface = (function(API) {
         else {
             text = gettext('← Back');
         }
-        var onClick = function() {
+        const onClick = function() {
             API.Route.up()
         };
         return (
@@ -556,11 +545,11 @@ CloudPebble.TestManager.Interface = (function(API) {
      * TestPage renders a different page depending on the current route.
      */
     function TestPage(props) {
-        var route = props.route;
-        var session, test, run, log;
+        const route = props.route;
+        let session, test, run, log;
         if (route.length == 0) return null;
-        var page = route[route.length-1].page;
-        var id = route[route.length-1].id;
+        const page = route[route.length-1].page;
+        const id = route[route.length-1].id;
         switch (page) {
             case 'session':
                 session = _.findWhere(props.sessions, {id: id});
@@ -584,13 +573,13 @@ CloudPebble.TestManager.Interface = (function(API) {
      * "run tests" button and any errors.
      */
     function TestManager(props) {
-        var route = props.route;
-        var is_log = (route.length>0 && (route[route.length-1].page == 'logs'));
-        var className = 'testmanager-page-' + (route.length == 0 ? 'dashboard' : 'detail');
+        const route = props.route;
+        const is_log = (route.length>0 && (route[route.length-1].page == 'logs'));
+        const className = 'testmanager-page-' + (route.length == 0 ? 'dashboard' : 'detail');
 
         // This logic is used to always render test logs across the full screen width.
-        var leftclass = is_log ? 'hide' : 'leftside';
-        var rightclass = is_log ? '' : 'rightside';
+        const leftclass = is_log ? 'hide' : 'leftside';
+        const rightclass = is_log ? '' : 'rightside';
 
         return (
             <div className={className}>
@@ -613,8 +602,8 @@ CloudPebble.TestManager.Interface = (function(API) {
     /**
      * Renders the text and "create a test" button displayed when the user has no tests or test runs.
      */
-    var NoTestsDisplay = function(props) {
-        var createTest = function() {
+    const NoTestsDisplay = function(props) {
+        const createTest = function() {
             CloudPebble.Editor.CreateTest();
         };
         return (
@@ -630,17 +619,17 @@ CloudPebble.TestManager.Interface = (function(API) {
     /**
      * The TestManagerContainer listens to data changes and passes them to the UI.
      */
-    var TestManagerContainer = React.createClass({
+    const TestManagerContainer = React.createClass({
         getInitialState: function() {
             return _.extend({'error': null}, API.Route.initial(), API.Sessions.initial(), API.Tests.initial(), API.Runs.initial());
         },
         componentDidMount: function() {
             // Listen to all stores
             this.listener = _.extend({}, Backbone.Events);
-            _.each([API.Route, API.Tests, API.Sessions, API.Runs, API.Logs], function(store) {
-                this.listener.listenTo(store, 'changed', function(data) { this.setState(data)}.bind(this));
-                this.listener.listenTo(store, 'error', function(error) { this.setState({'error': error}) }.bind(this));
-            }, this);
+            _.each([API.Route, API.Tests, API.Sessions, API.Runs, API.Logs], (store) => {
+                this.listener.listenTo(store, 'changed', (data) => { this.setState(data)});
+                this.listener.listenTo(store, 'error', (error) => { this.setState({'error': error}) });
+            });
         },
         closeError: function() {
             this.setState({'error': null});
@@ -661,7 +650,7 @@ CloudPebble.TestManager.Interface = (function(API) {
 
     return {
         render: function(element, props) {
-            var elm = React.createElement(TestManagerContainer, props);
+            const elm = React.createElement(TestManagerContainer, props);
             ReactDOM.render(elm, element);
         },
         refresh: function() {

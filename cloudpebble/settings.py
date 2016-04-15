@@ -253,18 +253,20 @@ INSTALLED_APPS = (
 )
 
 NODE_MODULES_PATH = _environ.get('NODE_MODULES_PATH')
-NODE_MODULES = {
-    'BABEL': os.path.join(NODE_MODULES_PATH, 'babel-cli/bin/babel.js'),
-    'BABEL-REACT': os.path.join(NODE_MODULES_PATH, 'babel-preset-react'),
-    'BABEL-ES2015': os.path.join(NODE_MODULES_PATH, 'babel-preset-es2015'),
-}
+BABEL_PATH = _environ.get('BABEL_PATH', os.path.join(NODE_MODULES_PATH, 'babel-cli/bin/babel.js'))
+BABEL_PRESETS = [
+    'babel-preset-stage-2',
+    'babel-preset-react',
+    'babel-preset-es2015'
+]
+
 
 # Configuration for django-pipeline, used to concatenate and compress JS and CSS sources and
 # output source-maps.
 PIPELINE = {
     'COMPILERS': ('pipeline.compilers.es6.ES6Compiler', ),
-    'BABEL_BINARY': NODE_MODULES['BABEL'],
-    'BABEL_ARGUMENTS': '--presets {},{}'.format(NODE_MODULES['BABEL-REACT'], NODE_MODULES['BABEL-ES2015']),
+    'BABEL_BINARY': BABEL_PATH,
+    'BABEL_ARGUMENTS': '--presets {}'.format(",".join(os.path.join(NODE_MODULES_PATH, p) for p in BABEL_PRESETS)),
     'OUTPUT_SOURCEMAPS': True,
     'JS_COMPRESSOR': 'pipeline.compressors.uglifyjs.UglifyJSCompressor',
     'CSS_COMPRESSOR': 'pipeline.compressors.cleancss.CleanCSSCompressor',
