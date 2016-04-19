@@ -132,6 +132,7 @@ if DEBUG or TESTING:
     STATICFILES_FINDERS = (
         'django.contrib.staticfiles.finders.FileSystemFinder',
         'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+        'pipeline.finders.CachedFileFinder',
         'pipeline.finders.PipelineFinder',
     )
     STATICFILES_STORAGE = 'pipeline.storage.PipelineStorage'
@@ -141,9 +142,10 @@ else:
         'django.contrib.staticfiles.finders.FileSystemFinder',
         'django.contrib.staticfiles.finders.AppDirectoriesFinder',
         'djangobower.finders.BowerFinder',
+        'pipeline.finders.CachedFileFinder',
         'pipeline.finders.PipelineFinder',
     )
-    STATICFILES_STORAGE = 'cloudpebble.storages.CompressedManifestPipelineStorage'
+    STATICFILES_STORAGE = 'cloudpebble.storage.CompressedManifestPipelineStorage'
 
 
 BOWER_INSTALLED_APPS = (
