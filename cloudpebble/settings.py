@@ -271,6 +271,7 @@ BABEL_PRESETS = [
     'babel-preset-es2015',
 ]
 
+TEST_BENCH_USERS = _environ.get('TEST_BENCH_USERS', 'test@test.test').split(",")
 
 # Configuration for django-pipeline, used to concatenate and compress JS and CSS sources and
 # output source-maps.

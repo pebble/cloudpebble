@@ -49,7 +49,9 @@
                 <ul class="nav-list" id="sidebar">
                     <li class="nav-header project-name">{{ project.name }}</li>
                     <li class="nav-header" id="sidebar-pane-settings"><a href="#">{% trans 'Settings' %}</a></li>
+                    {%  if project.owner.is_testbench_user %}
                     <li class="nav-header" id="sidebar-pane-testmanager"><a href="#">{% trans 'Test Manager' %}</a></li>
+                    {%  endif %}
                     <li class="nav-header sdk3-only" id="sidebar-pane-timeline"><a href="#">Timeline (Preview)</a></li>
                     <li class="nav-header" id="sidebar-pane-compile"><a href="#">{% trans 'Compilation' %}</a></li>
                     <li id="sidebar-pane-github" class="nav-header {%if not project.owner.github%}disabled{%endif%}"><a href="#">GitHub</a></li>
@@ -60,8 +62,10 @@
                     <li class="hide nav-section" id="end-worker-files"></li>
                     <li class="nav-header nav-section not-simplyjs">{% trans 'Resources' %} <button class="btn btn-small" id="sidebar-pane-new-resource">{% trans 'Add new' %}</button></li>
                     <li class="hide not-simplyjs" id="end-resources"></li>
+                    {%  if project.owner.is_testbench_user %}
                     <li class="nav-header nav-section" id="nav-tests">Tests
                         <button class="btn btn-small" id="new-test">{% trans 'Add new' %}</button></li>
+                    {%  endif %}
                     <li class="not-simplyjs" id="end-test-files"></li>
                 </ul>
             </div>
@@ -484,6 +488,7 @@ var USER_ID = {{ project.owner.id }};
 // Create consistency with Python, which will dump in capitalised booleans here.
 var True = true;
 var False = false;
+var TEST_BENCH_ENABLED = {{ project.owner.is_testbench_user }};
 var USER_SETTINGS = {
     theme: "{{ project.owner.settings.theme }}",
     autocomplete: {{ project.owner.settings.autocomplete }},

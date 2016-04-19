@@ -1,5 +1,6 @@
 import os.path
 import urllib
+from functools import wraps
 
 from django.views.decorators.cache import cache_control
 from django.views.decorators.http import last_modified
@@ -7,7 +8,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.db import transaction
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -29,7 +30,9 @@ def _filtered_max(*args):
 
 
 def make_notify_url_builder(request, token=None):
-    return lambda session: request.build_absolute_uri(reverse('ide:notify_test_session', args=[session.project.pk, session.id])) + ("?token=%s" % token if token else "")
+    return lambda session: request.build_absolute_uri(
+        reverse('ide:notify_test_session', args=[session.project.pk, session.id])) + (
+                               "?token=%s" % token if token else "")
 
 
 def serialise_run(run, link_test=True, link_session=True):
@@ -94,12 +97,25 @@ def serialise_session(session, include_runs=False):
     return result
 
 
+def testbench_privilages_required(f):
+    """ Decorator for 404ing any test-bench API requests from unauthorized users. """
+    @wraps(f)
+    def _wrapped(request, *args, **kwargs):
+        if not request.user.is_testbench_user:
+            # As far as non-authorized clients are concerned, this test point should not exist at all.
+            raise Http404
+        return f(request, *args, **kwargs)
+
+    return _wrapped
+
+
 def get_latest_run_date_for_sessions(sessions):
     """ Given a list of sessions, find the latest date_completed of all of their runs
     :param sessions: List or queryset of TestSessions
     """
     try:
-        return TestRun.objects.filter(session__in=sessions).exclude(date_completed__isnull=True).latest("date_completed").date_completed
+        return TestRun.objects.filter(session__in=sessions).exclude(date_completed__isnull=True).latest(
+            "date_completed").date_completed
     except TestRun.DoesNotExist:
         return None
 
@@ -120,6 +136,7 @@ def get_latest_session_date(sessions):
     return _filtered_max(latest_added, latest_completed, latest_run_completed)
 
 
+@testbench_privilages_required
 def get_test_session_latest(request, project_id, session_id):
     """ Get the last-modified date for a get_test_session request """
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
@@ -128,6 +145,7 @@ def get_test_session_latest(request, project_id, session_id):
 
 
 # GET /project/<id>/test_sessions/<session_id>
+@testbench_privilages_required
 @last_modified(get_test_session_latest)
 @cache_control(must_revalidate=True, max_age=1)
 @require_safe
@@ -140,6 +158,7 @@ def get_test_session(request, project_id, session_id):
     return {"data": serialise_session(session)}
 
 
+@testbench_privilages_required
 def get_sessions_for_get_sessions_request(request, project_id):
     """ Get the sessions relevant to a get_sessions request """
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
@@ -150,6 +169,7 @@ def get_sessions_for_get_sessions_request(request, project_id):
     return TestSession.objects.filter(**kwargs)
 
 
+@testbench_privilages_required
 def get_test_run_latest(request, project_id, run_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     run = get_object_or_404(TestRun, pk=run_id, session__project=project)
@@ -157,6 +177,7 @@ def get_test_run_latest(request, project_id, run_id):
 
 
 # GET /project/<id>/test_runs/<run_id>
+@testbench_privilages_required
 @last_modified(get_test_run_latest)
 @cache_control(must_revalidate=True, max_age=1)
 @require_safe
@@ -176,6 +197,7 @@ def get_test_sessions_latest(request, project_id):
 
 
 # GET /project/<id>/test_sessions
+@testbench_privilages_required
 @last_modified(get_test_sessions_latest)
 @cache_control(must_revalidate=True, max_age=1)
 @require_safe
@@ -204,6 +226,7 @@ def get_test_runs_for_get_test_runs_request(project_id, request):
     return runs
 
 
+@testbench_privilages_required
 def get_test_runs_latest(request, project_id):
     """ Get the last-modified date for a get_test_runs request """
     runs = get_test_runs_for_get_test_runs_request(project_id, request)
@@ -216,6 +239,7 @@ def get_test_runs_latest(request, project_id):
 
 
 # GET /project/<id>/test_runs?test=&session=
+@testbench_privilages_required
 @cache_control(must_revalidate=True, max_age=1)
 @last_modified(get_test_runs_latest)
 @require_safe
@@ -227,6 +251,7 @@ def get_test_runs(request, project_id):
     return {"data": [serialise_run(run, link_test=True, link_session=True) for run in runs]}
 
 
+@testbench_privilages_required
 @require_safe
 @login_required
 def get_test_run_log(request, project_id, run_id):
@@ -239,6 +264,7 @@ def get_test_run_log(request, project_id, run_id):
     return HttpResponse(contents, content_type="text/plain")
 
 
+@testbench_privilages_required
 @require_POST
 @login_required
 @json_view
@@ -275,6 +301,7 @@ def run_qemu_test(request, project_id, test_id):
         return BadRequest(str(e))
 
 
+@testbench_privilages_required
 @require_POST
 @csrf_exempt
 @json_view
@@ -334,7 +361,8 @@ def notify_qemu_session(date_completed, session, platform, status, log, uploaded
                 raise ValueError("Screenshots must be PNG files")
             name = os.path.splitext(os.path.basename(posted_file.name))[0]
             screenshot_set, did_create_set = ScreenshotSet.objects.get_or_create(test=test, name=name)
-            screenshot_file, did_create_file = ScreenshotFile.objects.get_or_create(screenshot_set=screenshot_set, platform=platform)
+            screenshot_file, did_create_file = ScreenshotFile.objects.get_or_create(screenshot_set=screenshot_set,
+                                                                                    platform=platform)
             screenshot_file.save()
             screenshot_file.save_file(posted_file, file_size=posted_file.size)
 
@@ -380,6 +408,7 @@ def notify_orchestrator_session(date_completed, session, job_info):
             session.save()
 
 
+@testbench_privilages_required
 @require_safe
 @login_required
 def download_tests(request, project_id):
@@ -392,6 +421,7 @@ def download_tests(request, project_id):
 
 
 # POST /project/<id>/test_sessions
+@testbench_privilages_required
 @require_POST
 @login_required
 @json_view

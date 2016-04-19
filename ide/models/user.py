@@ -2,9 +2,11 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import pgettext_lazy
+from django.conf import settings
 
 from ide.models.meta import IdeModel
 from ide.utils.whatsnew import count_things
+
 
 __author__ = 'katharine'
 
@@ -60,7 +62,7 @@ class UserSettings(IdeModel):
     whats_new = models.PositiveIntegerField(default=count_things)
 
 User.settings = property(lambda self: UserSettings.objects.get_or_create(user=self)[0])
-
+User.is_testbench_user = property(lambda self: self.email in settings.TEST_BENCH_USERS)
 
 class UserGithub(IdeModel):
     user = models.OneToOneField(User, primary_key=True, related_name='github')
