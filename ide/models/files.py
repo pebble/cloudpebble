@@ -1,16 +1,22 @@
 import json
 import os
+import logging
 
+from django.conf import settings
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
+
+import utils.s3 as s3
 from ide.models.meta import IdeModel
 from ide.models.s3file import S3File
 from ide.models.scriptfile import ScriptFile
 
 __author__ = 'katharine'
+
+logger = logging.getLogger(__name__)
 
 
 class ResourceFile(IdeModel):

@@ -1,5 +1,6 @@
 import os.path
 import urllib
+import logging
 from functools import wraps
 
 from django.views.decorators.cache import cache_control
@@ -19,6 +20,8 @@ from ide.models.project import Project
 from utils.bundle import TestBundle, BundleException
 from utils import orchestrator
 from utils.jsonview import json_view, BadRequest
+
+logger = logging.getLogger(__name__)
 
 __author__ = 'joe'
 
@@ -99,6 +102,7 @@ def serialise_session(session, include_runs=False):
 
 def testbench_privilages_required(f):
     """ Decorator for 404ing any test-bench API requests from unauthorized users. """
+
     @wraps(f)
     def _wrapped(request, *args, **kwargs):
         if not request.user.is_testbench_user:
@@ -317,7 +321,7 @@ def notify_test_session(request, project_id, session_id):
     if not token:
         token = request.GET['token']
     if token != settings.QEMU_LAUNCH_AUTH_HEADER:
-        print "Rejecting test result, posted token %s doesn't match %s" % (token, settings.QEMU_LAUNCH_AUTH_HEADER)
+        logging.warn("Rejecting test result, posted token %s doesn't match %s", token, settings.QEMU_LAUNCH_AUTH_HEADER)
         raise PermissionDenied
 
     orch_id = request.POST.get('id', None)

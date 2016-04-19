@@ -5,20 +5,24 @@ import tempfile
 import uuid
 import zipfile
 import json
+import logging
+
 from celery import shared_task
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import SuspiciousOperation
 from django.db import transaction
+
 from ide.utils.project import find_project_root
 from ide.utils.sdk import generate_manifest, generate_wscript_file, generate_jshint_file, dict_to_pretty_json
 from utils.td_helper import send_td_event
-
 from ide.models.files import SourceFile, ResourceFile, ResourceIdentifier, ResourceVariant
 from ide.models.project import Project
 import utils.s3 as s3
 
 __author__ = 'katharine'
+
+logger = logging.getLogger(__name__)
 
 
 def add_project_to_archive(z, project, prefix=''):
@@ -105,7 +109,7 @@ def get_filename_variant(file_name, resource_suffix_map):
     split = file_name_parts[0].split("~")
     tags = split[1:]
     try:
-        ids = [resource_suffix_map['~'+tag] for tag in tags]
+        ids = [resource_suffix_map['~' + tag] for tag in tags]
     except KeyError as key:
         raise ValueError('Unrecognised tag %s' % key)
     root_file_name = split[0] + file_name_parts[1]
@@ -145,7 +149,6 @@ def do_import_archive(project_id, archive, delete_project=False):
                 if len(contents) > 400:
                     raise Exception("Too many files in zip file.")
                 file_list = [x.filename for x in contents]
-
 
                 base_dir = find_project_root(file_list)
                 dir_end = len(base_dir)
@@ -214,7 +217,7 @@ def do_import_archive(project_id, archive, delete_project=False):
                                     raise ValueError("Generic resource filenames cannot contain a tilde (~)")
                                 if file_name not in desired_resources:
                                     desired_resources[root_file_name] = []
-                                print "Desired resource: %s" % root_file_name
+
                                 desired_resources[root_file_name].append(resource)
                                 file_exists_for_root[root_file_name] = False
 
@@ -223,22 +226,22 @@ def do_import_archive(project_id, archive, delete_project=False):
                                 filename = make_valid_filename(zipitem)
                                 if filename is False or not filename.startswith(RES_PATH):
                                     continue
-                                filename = filename[len(RES_PATH)+1:]
+                                filename = filename[len(RES_PATH) + 1:]
                                 try:
-                                    extracted = z.open("%s%s/%s"%(base_dir, RES_PATH, filename))
+                                    extracted = z.open("%s%s/%s" % (base_dir, RES_PATH, filename))
                                 except KeyError:
-                                    print "Failed to open %s" % filename
+                                    logger.debug("Failed to open %s", filename)
                                     continue
 
                                 # Now we know the file exists and is in the resource directory - is it one we want?
                                 tags, root_file_name = get_filename_variant(filename, tag_map)
                                 tags_string = ",".join(str(int(t)) for t in tags)
 
-                                print "Importing file %s with root %s " % (zipitem.filename, root_file_name)
+                                logger.debug("Importing file %s with root %s ", zipitem.filename, root_file_name)
 
                                 if root_file_name in desired_resources:
                                     medias = desired_resources[root_file_name]
-                                    print "Looking for variants of %s" % root_file_name
+                                    logger.debug("Looking for variants of %s", root_file_name)
 
                                     # Because 'kind' and 'is_menu_icons' are properties of ResourceFile in the database,
                                     # we just use the first one.
@@ -254,7 +257,7 @@ def do_import_archive(project_id, archive, delete_project=False):
                                             is_menu_icon=is_menu_icon)
 
                                     # But add a resource variant for every file
-                                    print "Adding variant %s with tags [%s]" % (root_file_name, tags_string)
+                                    logger.debug("Adding variant %s with tags [%s]", root_file_name, tags_string)
                                     actual_file_name = resource['file']
                                     resource_variants[actual_file_name] = ResourceVariant.objects.create(resource_file=resources_files[root_file_name], tags=tags_string)
                                     resource_variants[actual_file_name].save_file(extracted)
