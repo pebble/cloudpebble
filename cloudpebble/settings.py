@@ -112,8 +112,8 @@ if DEBUG or TESTING:
         os.path.join(os.path.dirname(__file__), '..', 'bower_components'),
     )
     STATICFILES_FINDERS = (
-        'pipeline.finders.FileSystemFinder',
-        'pipeline.finders.AppDirectoriesFinder',
+        'django.contrib.staticfiles.finders.FileSystemFinder',
+        'django.contrib.staticfiles.finders.AppDirectoriesFinder',
         'pipeline.finders.PipelineFinder',
     )
     STATICFILES_STORAGE = 'pipeline.storage.PipelineStorage'
