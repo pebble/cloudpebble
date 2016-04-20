@@ -320,6 +320,7 @@ PIPELINE = {
     'COMPILERS': ('pipeline.compilers.es6.ES6Compiler', ),
     'BABEL_BINARY': _node_bin('babel'),
     'BABEL_ARGUMENTS': '--presets {}'.format(",".join(os.path.join(NODE_MODULES_PATH, p) for p in BABEL_PRESETS)),
+    'BABEL_EXTENSION': '.jsx',
     'OUTPUT_SOURCEMAPS': True,
     'JS_COMPRESSOR': 'cloudpebble.compressors.ConcatenatingUglifyJSCompressor',
     'CSS_COMPRESSOR': 'pipeline.compressors.cleancss.CleanCSSCompressor',
@@ -327,7 +328,7 @@ PIPELINE = {
     'UGLIFYJS_BINARY': _node_bin('uglifyjs'),
     'CONCATENATOR_BINARY': _node_bin('source-map-concat'),
     'DISABLE_WRAPPER': True,
-    'VERBOSE': True,
+    'VERBOSE': DEBUG,
     'STYLESHEETS': {
         'codemirror': {
             'source_filenames': (
@@ -386,11 +387,11 @@ PIPELINE = {
             ),
             'output_filename': 'build/ide.js',
         },
-        'es6': {
+        'jsx': {
             'source_filenames': (
-                'ide/js/monkey/*.es6',
+                'ide/js/monkey/*.jsx',
             ),
-            'output_filename': 'build/es6.js',
+            'output_filename': 'build/jsx.js',
         },
         'lib': {
             'source_filenames': (
