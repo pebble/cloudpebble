@@ -305,7 +305,6 @@ def run_qemu_test(request, project_id, test_id):
         return BadRequest(str(e))
 
 
-@testbench_privilages_required
 @require_POST
 @csrf_exempt
 @json_view
