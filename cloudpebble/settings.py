@@ -321,10 +321,12 @@ PIPELINE = {
     'BABEL_BINARY': _node_bin('babel'),
     'BABEL_ARGUMENTS': '--presets {}'.format(",".join(os.path.join(NODE_MODULES_PATH, p) for p in BABEL_PRESETS)),
     'OUTPUT_SOURCEMAPS': True,
-    'JS_COMPRESSOR': 'pipeline.compressors.uglifyjs.UglifyJSCompressor',
+    'JS_COMPRESSOR': 'cloudpebble.compressors.ConcatenatingUglifyJSCompressor',
     'CSS_COMPRESSOR': 'pipeline.compressors.cleancss.CleanCSSCompressor',
     'CLEANCSS_BINARY': _node_bin('cleancss'),
     'UGLIFYJS_BINARY': _node_bin('uglifyjs'),
+    'CONCATENATOR_BINARY': _node_bin('source-map-concat'),
+    'DISABLE_WRAPPER': True,
     'VERBOSE': True,
     'STYLESHEETS': {
         'codemirror': {
@@ -377,10 +379,18 @@ PIPELINE = {
                 'ide/js/ib/ib.js',
                 'ide/js/ib/registry.js',
                 'ide/js/*.js',
-                'ide/js/*/*.js',
-                'ide/js/*/*.es6',
+                'ide/js/ib/*.js',
+                'ide/js/libpebble/*.js',
+                'ide/js/monkey/screenshot_manager.js',
+                'ide/js/monkey/test_manager.js',
             ),
             'output_filename': 'build/ide.js',
+        },
+        'es6': {
+            'source_filenames': (
+                'ide/js/monkey/*.es6',
+            ),
+            'output_filename': 'build/es6.js',
         },
         'lib': {
             'source_filenames': (

@@ -11,6 +11,7 @@
     "babel-preset-stage-2": "~6.5.0",
     "bower": "1.7.9",
     "uglify-js": "2.6.2",
-    "clean-css": "3.4.12"
+    "clean-css": "3.4.12",
+    "source-map-concat-cli": "^1.0.0"
   }
 }
