@@ -84,7 +84,7 @@ CloudPebble.Editor = (function() {
             if(!data.success) {
                 var error = $('<div class="alert alert-error"></div>');
                 error.text(interpolate(gettext("Something went wrong: %s"), [data.error]));
-                CloudPebble.Sidebar.SetActivePane(error, '');
+                CloudPebble.Sidebar.SetActivePane(error, {id: ''});
             } else {
                 var is_js = file.name.substr(-3) == '.js';
                 var source = data.source;
@@ -435,16 +435,26 @@ CloudPebble.Editor = (function() {
                     });
                 };
 
-                CloudPebble.Sidebar.SetActivePane(pane, 'source-' + file.id, function() {
-                    code_mirror.refresh();
-                    _.defer(function() { code_mirror.focus(); });
-                    check_safe();
-                    refresh_ib();
-                }, function() {
-                    if(!was_clean) {
-                        --unsaved_files;
+                CloudPebble.Sidebar.SetActivePane(pane, {
+                    id: 'source-' + file.id,
+                    onRestore: function() {
+                        code_mirror.refresh();
+                        _.defer(function() { code_mirror.focus(); });
+                        check_safe();
+                        refresh_ib();
+                    },
+                    onSuspend: function() {
+                        if (is_fullscreen) {
+                            fullscreen(code_mirror, false);
+                            resume_fullscreen = true;
+                        }
+                    },
+                    onDestroy: function() {
+                        if(!was_clean) {
+                            --unsaved_files;
+                        }
+                        delete open_codemirrors[file.id];
                     }
-                    delete open_codemirrors[file.id];
                 });
 
                 var was_clean = true;
@@ -696,12 +706,6 @@ CloudPebble.Editor = (function() {
                     $('.fullscreen-icon-tooltip').fadeIn(300);
                 },function() {
                     $('.fullscreen-icon-tooltip').fadeOut(300);
-                });
-                $('#main-pane').data('pane-suspend-function', function() {
-                    if (is_fullscreen) {
-                        fullscreen(code_mirror, false);
-                        resume_fullscreen = true;
-                    }
                 });
 
                 $(document).keyup(function(e) {

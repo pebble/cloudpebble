@@ -475,7 +475,10 @@ CloudPebble.Resources = (function() {
                 list_entry.addClass('active');
             }
 
-            CloudPebble.Sidebar.SetActivePane(pane, 'resource-' + resource.id, _.partial(restore_pane, pane));
+            CloudPebble.Sidebar.SetActivePane(pane, {
+                id: 'resource-' + resource.id,
+                onRestore: _.partial(restore_pane, pane)
+            });
             pane.find('#edit-resource-type').val(resource.kind).attr('disabled', 'disabled');
             pane.find('#edit-resource-type').change();
 
@@ -915,7 +918,10 @@ CloudPebble.Resources = (function() {
             });
         });
 
-        CloudPebble.Sidebar.SetActivePane(pane, 'new-resource', _.partial(restore_pane, pane));
+        CloudPebble.Sidebar.SetActivePane(pane, {
+            id: 'new-resource',
+            onRestore: _.partial(restore_pane, pane)
+        });
     };
 
     var resource_created = function(resource) {

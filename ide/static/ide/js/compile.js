@@ -181,7 +181,7 @@ CloudPebble.Compile = (function() {
         }
 
         update_build_history(pane);
-        CloudPebble.Sidebar.SetActivePane(pane, 'compile');
+        CloudPebble.Sidebar.SetActivePane(pane, {id: 'compile'});
         CloudPebble.ProgressBar.Show();
 
         var targetTabs = pane.find('#run-target-tabs');
@@ -615,7 +615,7 @@ CloudPebble.Compile = (function() {
                 mLogHolder.empty();
             }
             _.each(mPreviousDisplayLogs, _.partial(show_log_line, _, true));
-            CloudPebble.Sidebar.SetActivePane(parentPane, undefined, undefined, stop_logs);
+            CloudPebble.Sidebar.SetActivePane(parentPane, {onDestroy: stop_logs});
             CloudPebble.Analytics.addEvent('app_log_view', {virtual: SharedPebble.isVirtual()});
             restore_scroll_position();
         });
