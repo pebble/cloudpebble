@@ -370,7 +370,7 @@ CloudPebble.TestManager = (function() {
             if (!CloudPebble.Sidebar.Restore("testmanager")) {
                 ga('send', 'event', 'project', 'load testmanager');
                 var pane = $('<div></div>').attr('id', '#testmanager-pane-template').toggleClass('testmanager-pane', true);
-                CloudPebble.Sidebar.SetActivePane(pane, 'testmanager');
+                CloudPebble.Sidebar.SetActivePane(pane, {id: 'testmanager'});
                 ui.render(pane.get(0), {project_id: PROJECT_ID});
             }
             return api.Sessions.refresh();

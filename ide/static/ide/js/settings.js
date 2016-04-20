@@ -304,7 +304,7 @@ CloudPebble.Settings = (function() {
 
         live_form.init();
 
-        CloudPebble.Sidebar.SetActivePane(pane, 'settings');
+        CloudPebble.Sidebar.SetActivePane(pane, {id: 'settings'});
     };
 
     var add_resource = function(resource) {

@@ -491,17 +491,29 @@ CloudPebble.Editor = (function() {
                 });
             };
 
-            CloudPebble.Sidebar.SetActivePane(pane, sidebar_id, function() {
-                code_mirror.refresh();
-                _.defer(function() { code_mirror.focus(); });
-                check_safe();
-                refresh_ib();
-            }, function() {
-                if(!was_clean) {
-                    --unsaved_files;
+            CloudPebble.Sidebar.SetActivePane(pane, {
+                id: 'source-' + file.id,
+                onRestore: function() {
+                    code_mirror.refresh();
+                    _.defer(function() { code_mirror.focus(); });
+                    check_safe();
+                    refresh_ib();
+                },
+                onSuspend: function() {
+                    if (is_fullscreen) {
+                        fullscreen(code_mirror, false);
+                        resume_fullscreen = true;
+                    }
+                    CloudPebble.SidePane.RightPane.suspendActivePane();
+                    CloudPebble.SidePane.RightPane.setSize(0);
+                },
+                onDestroy: function() {
+                    if(!was_clean) {
+                        --unsaved_files;
+                    }
+                    if (screenshot_pane) screenshot_pane.destroy();
+                    delete open_codemirrors[file.id];
                 }
-                if (screenshot_pane) screenshot_pane.destroy();
-                delete open_codemirrors[file.id];
             });
 
             if (file_kind == 'monkey') {
@@ -794,14 +806,6 @@ CloudPebble.Editor = (function() {
             },function() {
                 $('.fullscreen-icon-tooltip').fadeOut(300);
             });
-            $('#main-pane').data('pane-suspend-function', function() {
-                if (is_fullscreen) {
-                    fullscreen(code_mirror, false);
-                    resume_fullscreen = true;
-                }
-                CloudPebble.SidePane.RightPane.suspendActivePane();
-                CloudPebble.SidePane.RightPane.setSize(0);
-            });
 
             $(document).keyup(function(e) {
               if (e.keyCode == 27) { fullscreen(code_mirror, false); }   // Esc exits fullscreen mode
@@ -828,7 +832,7 @@ CloudPebble.Editor = (function() {
         }).catch(function(error) {
             var error_box = $('<div class="alert alert-error"></div>');
             error_box.text(interpolate(gettext("Something went wrong: %s"), [error.message]));
-            CloudPebble.Sidebar.SetActivePane(error_box, '');
+            CloudPebble.Sidebar.SetActivePane(error_box, {id: ''});
         }).finally(function() {
             CloudPebble.ProgressBar.Hide();
         });
