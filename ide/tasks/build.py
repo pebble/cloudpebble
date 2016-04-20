@@ -27,10 +27,10 @@ logger = logging.getLogger(__name__)
 
 
 def _set_resource_limits():
-    resource.setrlimit(resource.RLIMIT_CPU, (20, 20))  # 20 seconds of CPU time
-    resource.setrlimit(resource.RLIMIT_NOFILE, (100, 100))  # 100 open files
-    resource.setrlimit(resource.RLIMIT_RSS, (20 * 1024 * 1024, 20 * 1024 * 1024))  # 20 MB of memory
-    resource.setrlimit(resource.RLIMIT_FSIZE, (5 * 1024 * 1024, 5 * 1024 * 1024))  # 5 MB output files.
+    resource.setrlimit(resource.RLIMIT_CPU, (120, 120))  # 120 seconds of CPU time
+    resource.setrlimit(resource.RLIMIT_NOFILE, (500, 500))  # 500 open files
+    resource.setrlimit(resource.RLIMIT_RSS, (30 * 1024 * 1024, 30 * 1024 * 1024))  # 30 MB of memory
+    resource.setrlimit(resource.RLIMIT_FSIZE, (20 * 1024 * 1024, 20 * 1024 * 1024))  # 20 MB output files.
 
 
 def create_source_files(project, base_dir):
