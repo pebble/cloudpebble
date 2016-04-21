@@ -381,8 +381,7 @@ PIPELINE = {
                 'ide/js/ib/registry.js',
                 'ide/js/*.js',
                 'ide/js/ib/*.js',
-                'ide/js/libpebble/*.js',
-                'ide/js/monkey/screenshot_manager.js',
+                'ide/js/libpebble/*.js'
             ),
             'output_filename': 'build/ide.js',
         },
