@@ -880,6 +880,9 @@ CloudPebble.Editor = (function() {
         commands[gettext('Run')] = run;
         CloudPebble.FuzzyPrompt.AddCommands(commands);
 
+        // In development, this ensures that we can quickly see any compilation errors in django-pipeline.
+        // It will do nothing in production.
+        $('#django-pipeline-errors').appendTo('#pane-parent');
     }
 
     function fullscreen(code_mirror, toggle) {
