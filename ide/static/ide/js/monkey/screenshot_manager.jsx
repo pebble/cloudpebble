@@ -117,11 +117,24 @@ CloudPebble.MonkeyScreenshots = (function() {
             const final = _.defaults(options || {}, {
                 name: "",
                 id: null,
-                files: []
+                files: [],
+                _changed: false
             });
+            this._changed = final._changed;
             this.name = final.name;
             this.id = final.id;
             this.files = _.mapObject(final.files, (file) => (file instanceof ScreenshotFile) ? file : new ScreenshotFile(file));
+        }
+
+        hasChangedOrChildrenHaveChanged() {
+            console.log("changed?", this);
+            return this._changed || _.chain(this.files).map((file) => file._changed || file.is_new).any().value();
+        }
+
+        clone() {
+            let clone = _.clone(this);
+            clone.files = _.mapObject(this.files, _.clone);
+            return clone;
         }
     }
 
@@ -293,7 +306,8 @@ CloudPebble.MonkeyScreenshots = (function() {
             }, 500);
             return AjaxAPI.getScreenshots(this.test_id).then((result) => {
                 this.screenshots = result;
-                this.original_screenshots = _.map(result, _.clone);
+                this.original_screenshots = result.map((x) => x.clone());
+                console.log(this.original_screenshots);
                 this.trigger('changed', result);
             }).catch((error) => {
                 this.trigger('error', {message: error.message, errorfor: gettext('get screenshots')});
@@ -304,8 +318,18 @@ CloudPebble.MonkeyScreenshots = (function() {
 
         deleteFile(index, platform) {
             if (this.disabled) return;
-            if (_.isObject(this.screenshots[index].files[platform])) {
-                this.screenshots[index].files[platform] = {is_new: true};
+            let screenshot_set = this.screenshots[index];
+            let screenshot = screenshot_set.files[platform];
+            if (_.isObject(screenshot)) {
+                if (screenshot_set.id == null || !this.original_screenshots[index].files[platform]) {
+                    delete screenshot_set.files[platform];
+                }
+                else {
+                    screenshot_set.files[platform] = {is_new: true};
+                }
+                if (screenshot_set.id == null && _.keys(screenshot_set.files).length == 0) {
+                    delete this.screenshots[index];
+                }
                 this.trigger('changed', this.screenshots);
             }
         }
@@ -318,6 +342,10 @@ CloudPebble.MonkeyScreenshots = (function() {
                 this.screenshots[index]._changed = changed;
                 this.trigger('changed', this.screenshots);
             }
+        }
+
+        isModified() {
+            return _.any(this.screenshots.map((screenshotSet) => screenshotSet.hasChangedOrChildrenHaveChanged()));
         }
 
         save() {
@@ -403,7 +431,7 @@ CloudPebble.MonkeyScreenshots = (function() {
             this.screenshots = new ScreenshotsModel(test_id);
             this.view = null;
 
-            $.when(this.screenshots.loadScreenshots(), this.uiState.updateSupportedPlatforms()).then(() => {
+            Promise.all([this.screenshots.loadScreenshots(), this.uiState.updateSupportedPlatforms()]).then(() => {
                 this.view = CloudPebble.MonkeyScreenshots.Interface(this.screenshots, this.uiState);
                 this.view.render(this.pane.get()[0], {test_id});
             });

@@ -258,7 +258,6 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
                     Screenshots.loadScreenshots();
                 });
             };
-            const buttons_disabled = disabled;
             return (
                 <div onDragOver={stopEvent} onDrop={stopEvent}>
                     <img ref="help" src="/static/ide/img/help.png" className="field-help" data-original-title=""/>
@@ -283,15 +282,12 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
                     {loading && <ProgressView progress={100}/>}
 
                     <div className="monkey-form-buttons">
-                        <button className="btn btn-affirmative"
-                                type="submit"
-                                form="monkey-form"
-                                disabled={buttons_disabled}>{gettext('Save')}
+                        <button className="btn btn-affirmative" type="submit" form="monkey-form"
+                                disabled={disabled || !this.props.changed}>
+                            {gettext('Save')}
                         </button>
-                        <button className="btn btn-cancel"
-                                type="button"
-                                onClick={onCancel}
-                                disabled={buttons_disabled}>{gettext('Reset')}
+                        <button className="btn btn-cancel" type="button" onClick={onCancel} disabled={disabled}>
+                            {gettext('Reset')}
                         </button>
                     </div>
                 </div>
@@ -325,7 +321,8 @@ CloudPebble.MonkeyScreenshots.Interface = (function(Screenshots, Platforms) {
                 this.setState({
                     screenshots: screenshots,
                     error: null,
-                    loading: false
+                    loading: false,
+                    changed: Screenshots.isModified()
                 })
             });
             this.listener.listenTo(Screenshots, 'error', (error) => {

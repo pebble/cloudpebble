@@ -1358,6 +1358,11 @@ button#add-filter {
     font-size: 20px;
 }
 
+.monkey-form-buttons {
+    max-width: 300px;
+    margin: auto;
+}
+
 .monkey-form-buttons button {
     margin-right: 20px;
     margin-bottom: 10px;
