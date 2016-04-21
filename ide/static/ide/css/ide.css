@@ -1530,6 +1530,7 @@ pre.test-script {
         left: 0;
         position: absolute;
         width: 50%;
+        margin-top: 30px;
     }
 
     .leftside .well {
@@ -1541,6 +1542,7 @@ pre.test-script {
         right: 0;
         position: absolute;
         width: 50%;
+        margin-top: 30px;
     }
 
     .rightside .well {

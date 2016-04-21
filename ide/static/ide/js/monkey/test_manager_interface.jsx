@@ -140,7 +140,7 @@ CloudPebble.TestManager.Interface = (function(API) {
         render: function() {
             let tests = this.page(this.props.tests).map((test) => {
                 const onClickTest = function() {
-                    API.Tests.navigate(test.id);
+                    API.Route.navigate('tests', test.id);
                 };
                 const className = classNames("clickable", {
                     selected: (this.props.selected == test.id)
@@ -192,8 +192,6 @@ CloudPebble.TestManager.Interface = (function(API) {
             const datestring = CloudPebble.Utils.FormatDatetime(run.date_added);
             const show_logs = function() {
                 if (run.test) {
-                    // TODO: integrate into new navigation system
-                    API.Logs.refresh(run.id);
                     API.Route.navigate('/logs', run.id);
                 }
             };
@@ -246,7 +244,7 @@ CloudPebble.TestManager.Interface = (function(API) {
             }
         },
         onClickSession: function() {
-            API.Sessions.navigate(this.props.session.id);
+            API.Route.navigate('sessions', this.props.session.id);
         },
         render: function() {
             const session = this.props.session;
@@ -450,7 +448,7 @@ CloudPebble.TestManager.Interface = (function(API) {
                     <tbody>
                     <tr>
                         <th>{gettext('Test')}</th>
-                        <td><Anchor onClick={() => {API.Tests.navigate(test.id, '/')}}>{test.name}</Anchor>
+                        <td><Anchor onClick={() => {API.Route.navigate('/test', test.id)}}>{test.name}</Anchor>
                         </td>
                     </tr>
                     <tr>
@@ -460,7 +458,7 @@ CloudPebble.TestManager.Interface = (function(API) {
                     <tr>
                         <th>{gettext('Session')}</th>
                         <td><Anchor
-                            onClick={() => {API.Sessions.navigate(session.id, '/')}}>{datestring}</Anchor></td>
+                            onClick={() => {API.Route.navigate('/sessions', session.id)}}>{datestring}</Anchor></td>
                     </tr>
                     {run_completed && <tr>
                         <th>{gettext('Completion date')}</th>

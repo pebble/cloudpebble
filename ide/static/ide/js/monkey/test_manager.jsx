@@ -1,4 +1,5 @@
 CloudPebble.TestManager = (function() {
+    const POLLING_PERIOD = 10000;
     let ui, api;
 
     function API(project_id) {
@@ -56,14 +57,16 @@ CloudPebble.TestManager = (function() {
              * This function is called when the object is requested, and should
              * return any other promises which need to be resolved before the request
              * can be considered complete.
+             * @param id the ID of the object for which relevant objects need to be fetched.
              * @returns {Promise}
              */
             get_extra_requests(id) {
                 return Promise.resolve();
             },
             /**
-             * Send a GET request to refresh the store.
-             * @param options GET parameters.
+             * Send a GET request to refresh the store with arbitrary parameters
+             * @param options the GET parameters.
+             * @returns {Promise} Ajax request
              */
             refresh(options) {
                 let url = base_url + this.url;
@@ -90,12 +93,17 @@ CloudPebble.TestManager = (function() {
                     throw error;
                 });
             },
-            navigate(id, prefix) {
-                if (typeof prefix === 'undefined') prefix = '';
-                return Route.navigateAfter(prefix + this.key, id, () => Promise.all([
+
+            /**
+             * Make all the requests necessary to show an item from the sotre with a particular ID.
+             * @param id ID of the object to fetch.
+             * @returns {Promise} A promise composed of multiple promises/requests.
+             */
+            request(id) {
+                return Promise.all([
                     this.refresh(id),
                     this.get_extra_requests(id)
-                ]));
+                ]);
             },
             /**
              * The ordering function should sort the store's data.
@@ -110,6 +118,7 @@ CloudPebble.TestManager = (function() {
                 state[this.key] = this.ordering(_.map(this.state, noop));
                 return state;
             },
+            /** Get the initial state of the store. */
             initial() {
                 return this.getState();
             }
@@ -127,9 +136,7 @@ CloudPebble.TestManager = (function() {
             this.name = "Tests";
             this.ignore_refresh_options = true;
 
-            /**
-             * Update the runs for this test when we navigate to its page
-             */
+            /** Update the runs for this test when we navigate to its page */
             this.get_extra_requests = (id) => Runs.refresh({test: id});
         }
 
@@ -142,9 +149,8 @@ CloudPebble.TestManager = (function() {
             this.url = 'test_sessions';
             this.key = 'sessions';
             this.name = "Sessions";
-            /**
-             * Post a new test session, running all of the tests in the project.
-             */
+
+            /** Post a new test session, running all of the tests in the project. */
             this.new = function() {
                 return Ajax.Ajax(`${base_url}test_sessions/run`, {
                     method: 'POST'
@@ -154,14 +160,14 @@ CloudPebble.TestManager = (function() {
                     this.syncData(session, {});
                 });
             };
-            /**
-             * Update the runs for this session when we navigate to its page
-             */
+
+            /** Update the runs for this session when we navigate to its page */
             this.get_extra_requests = (id) => Runs.refresh({session: id});
-            /**
-             * Sorts sessions by date
-             */
-            this.ordering = (sessions) => _.sortBy(sessions, session => -(new Date(session.date_added)));
+
+            /** Sorts sessions by date */
+            this.ordering = function(sessions) {
+                return _.sortBy(sessions, session => -(new Date(session.date_added)));
+            }
         }
 
         function LogsStore() {
@@ -182,6 +188,7 @@ CloudPebble.TestManager = (function() {
 
                 });
             };
+            this.get_extra_requests = (id) => Runs.refresh({id: id});
             this.subscribe = function(id, session_id, url) {
                 const self = this;
                 const evtSource = new EventSource(url);
@@ -233,10 +240,10 @@ CloudPebble.TestManager = (function() {
                 (options.test && run.test && run.test.id == options.test) ||
                 (options.session && run.session_id == options.session));
             };
-            /**
-             * Sorts test runs by name and date
-             */
-            this.ordering = (runs) => _.chain(runs).sortBy('name').sortBy((run) => -(new Date(run.date_added))).value();
+            /**  Sorts test runs by name and date */
+            this.ordering = function(runs) {
+                return _.chain(runs).sortBy('name').sortBy((run) => -(new Date(run.date_added))).value();
+            }
         }
 
         /**
@@ -251,7 +258,11 @@ CloudPebble.TestManager = (function() {
             const page_already_fetched = {};
             let currently_waiting_for = null;
             let route = [];
+            let interval = null;
+            let polling_request = null;
+            let default_request_function = () => Promise.resolve();
             const history = [[]];
+            const routes_to_stores = {};
 
             /** make a key from a page/id pair */
             const key = (page, id) => `${page}:${id}`;
@@ -266,27 +277,47 @@ CloudPebble.TestManager = (function() {
                 return ret;
             };
 
-            /** Check if a page/id has been loaded before */
-            this.isCached = (page, id) => !!page_already_fetched[key(page, id)];
-
             /** Record that a page/id has been loaded before */
-            const setCached = (page, id) => {
+            function setCached(page, id) {
                 page_already_fetched[key(page, id)] = true;
-            };
+            }
 
             /** Set the current request to (a promise object) and cancel the previous one. */
-            const setCurrentRequest = (page, id) => {
+            function setCurrentRequest(page, id) {
                 currently_waiting_for = [page, id];
+            }
+
+            /** Check if the current request is for a particular page/id combo */
+            function isCurrentRequest(page, id) {
+                return _.isEqual(currently_waiting_for, [page, id]);
+            }
+
+            /** Find the store corresponding to the current page, and ask it to request data for a particular
+             * object ID. */
+            function requestPage(page, id) {
+                const store = routes_to_stores[page.split('/').pop()];
+                if (store) {
+                    return store.request(id);
+                }
+            }
+
+            /** Get the current route as a list of objects */
+            this.getRoute = function() {
+                return {route: route.map(from_key)}
             };
 
-            const isCurrentRequest = (page, id) => _.isEqual(currently_waiting_for, [page, id]);
-
-            this.getRoute = () => ({
-                route: route.map(from_key)
-            });
-
+            /** Emit an event signifying a change to a new route */
             this.triggerCurrent = function() {
                 _.defer(() => {this.trigger('changed', this.getRoute());});
+            };
+
+            /** Check if a page/id has been loaded before */
+            this.isCached = function(page, id) {
+                return !!page_already_fetched[key(page, id)];
+            };
+
+            this.setDefaultRequest = function(requestor) {
+                default_request_function = requestor;
             };
 
             /**
@@ -294,7 +325,7 @@ CloudPebble.TestManager = (function() {
              * @param page name of the page. If is starts with a '/', navigate down one level.
              * @param id ID of object to be shown.
              */
-            this.navigate = function(page, id) {
+            this.switchPage = function(page, id) {
                 let new_route;
                 setCurrentRequest(null);
                 if (page.startsWith('/')) {
@@ -323,15 +354,13 @@ CloudPebble.TestManager = (function() {
              * an error page.
              * @param page Page name
              * @param id Page item ID
-             * @param promise_function A function which returns a promise
              * @returns {*}
              */
-            this.navigateAfter = function(page, id, promise_function) {
-                const self = this;
-                const promise = promise_function();
+            this.navigate = function(page, id) {
+                const promise = requestPage(page, id);
                 // If we've already been the page, don't actually wait for the request
                 if (this.isCached(page, id) || !promise) {
-                    this.navigate(page, id);
+                    this.switchPage(page, id);
                     return Promise.resolve();
                 }
                 else {
@@ -345,7 +374,7 @@ CloudPebble.TestManager = (function() {
                         // the requested page.
                         setCached(page, id);
                         if (isCurrentRequest(page, id)) {
-                            this.navigate(page, id);
+                            this.switchPage(page, id);
                         }
                         // If the current request doesn't match this one, then this request is abandoned.
                     }).finally(() => {
@@ -355,51 +384,80 @@ CloudPebble.TestManager = (function() {
                 }
 
             };
+
+            this.resumePolling = function() {
+                if (interval || polling_request) return;
+                interval = setInterval(() => {
+                    const full_route = this.getRoute().route;
+                    if (full_route.length > 0) {
+                        const page = full_route[full_route.length - 1].page;
+                        const id = full_route[full_route.length - 1].id;
+                        polling_request = requestPage(page, id);
+                    }
+                    else {
+                        polling_request = default_request_function();
+                    }
+                    polling_request.finally(()=> {polling_request = null});
+                }, POLLING_PERIOD);
+            };
+
+            this.pausePolling = function() {
+                if (!interval) return;
+                clearInterval(interval);
+                interval = null;
+            };
+
+            this.registerRoutes = function(routes) {
+                _.each(routes, (store) => {
+                    routes_to_stores[store.key] = store;
+                });
+            };
+
             this.initial = function() {
                 return this.getRoute()
             };
+
             this.refresh = noop;
         }
 
         var Tests = new TestsStore();
         var Sessions = new SessionsStore();
-        var Route = new RouteStore();
         var Runs = new RunsStore();
-        const Logs = new LogsStore();
+        var Logs = new LogsStore();
+        var Route = new RouteStore();
+        Route.registerRoutes([Tests, Sessions, Runs, Logs]);
+        Route.setDefaultRequest(()=>Promise.all([Tests.refresh(), Sessions.refresh()]));
 
         return {Tests, Sessions, Route, Runs, Logs}
     }
 
-    const get_api = () => api ? api : (api = new API(PROJECT_ID));
+    function get_api() {
+        return api ? api : (api = new API(PROJECT_ID));
+    }
 
-    const get_interface = () => ui ? ui : (ui = CloudPebble.TestManager.Interface(get_api()));
+    function get_interface() {
+        return ui ? ui : (ui = CloudPebble.TestManager.Interface(get_api()));
+    }
 
-
-    const on_suspend = () => {
-        console.log("Suspend!");
-    };
-    const on_restore = () => {
-        console.log("Restore!");
-    };
-
-    const show_test_manager_pane = () => {
+    function show_test_manager_pane() {
         const api = get_api();
         const ui = get_interface();
-        return $.when(api.Tests.refresh()).then(() => {
+        return api.Tests.refresh().then(() => {
             CloudPebble.Sidebar.SuspendActive();
             if (!CloudPebble.Sidebar.Restore("testmanager")) {
                 ga('send', 'event', 'project', 'load testmanager');
                 const pane = $('<div></div>').attr('id', '#testmanager-pane-template').toggleClass('testmanager-pane', true);
                 CloudPebble.Sidebar.SetActivePane(pane, {
                     id: 'testmanager',
-                    onSuspend: on_suspend,
-                    onRestore: on_restore
+                    onSuspend: ()=>api.Route.pausePolling(),
+                    onRestore: ()=>api.Route.resumePolling()
                 });
                 ui.render(pane.get(0), {project_id: PROJECT_ID});
+                api.Route.resumePolling();
             }
             return api.Sessions.refresh();
         });
-    };
+    }
 
     return {
         Show() {
@@ -407,17 +465,14 @@ CloudPebble.TestManager = (function() {
         },
         ShowTest(test_id) {
             const api = get_api();
-            return api.Tests.navigate(test_id).then(() => show_test_manager_pane());
+            return api.Route.navigate('tests', test_id).then(show_test_manager_pane);
         },
         ShowLiveTestRun(url, session_id, run_id) {
             const api = get_api();
             api.Logs.subscribe(run_id, session_id, url);
-            return api.Runs.refresh({id: run_id}).then(() => {
-                return show_test_manager_pane();
-            }).then(() => {
-                api.Route.navigate('sessions', session_id);
-                api.Route.navigate('/logs', run_id);
-            });
+            return api.Route.navigate('sessions', session_id)
+                .then(() => api.Route.navigate('/logs', run_id))
+                .then(show_test_manager_pane);
         },
         Init() {
             const commands = {};
