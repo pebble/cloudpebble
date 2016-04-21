@@ -140,7 +140,7 @@ CloudPebble.TestManager.Interface = (function(API) {
         render: function() {
             let tests = this.page(this.props.tests).map((test) => {
                 const onClickTest = function() {
-                    API.Route.navigateAfter('test', test.id, API.Runs.refresh({test: test.id}), true);
+                    API.Tests.navigate(test.id);
                 };
                 const className = classNames("clickable", {
                     selected: (this.props.selected == test.id)
@@ -192,6 +192,7 @@ CloudPebble.TestManager.Interface = (function(API) {
             const datestring = CloudPebble.Utils.FormatDatetime(run.date_added);
             const show_logs = function() {
                 if (run.test) {
+                    // TODO: integrate into new navigation system
                     API.Logs.refresh(run.id);
                     API.Route.navigate('/logs', run.id);
                 }
@@ -245,9 +246,7 @@ CloudPebble.TestManager.Interface = (function(API) {
             }
         },
         onClickSession: function() {
-            const id = this.props.session.id;
-            API.Route.navigateAfter('session', id, API.Runs.refresh({session: id}), true);
-            API.Sessions.refresh({id: id});
+            API.Sessions.navigate(this.props.session.id);
         },
         render: function() {
             const session = this.props.session;
@@ -451,7 +450,7 @@ CloudPebble.TestManager.Interface = (function(API) {
                     <tbody>
                     <tr>
                         <th>{gettext('Test')}</th>
-                        <td><Anchor onClick={function() {API.Route.navigate('/test', test.id)}}>{test.name}</Anchor>
+                        <td><Anchor onClick={() => {API.Tests.navigate(test.id, '/')}}>{test.name}</Anchor>
                         </td>
                     </tr>
                     <tr>
@@ -461,7 +460,7 @@ CloudPebble.TestManager.Interface = (function(API) {
                     <tr>
                         <th>{gettext('Session')}</th>
                         <td><Anchor
-                            onClick={function() {API.Route.navigate('/session', session.id)}}>{datestring}</Anchor></td>
+                            onClick={() => {API.Sessions.navigate(session.id, '/')}}>{datestring}</Anchor></td>
                     </tr>
                     {run_completed && <tr>
                         <th>{gettext('Completion date')}</th>
@@ -557,8 +556,8 @@ CloudPebble.TestManager.Interface = (function(API) {
     function BackButton(props) {
         const mapping = {
             logs: gettext('Run'),
-            test: gettext('Test'),
-            session: gettext('Session')
+            tests: gettext('Test'),
+            sessions: gettext('Session')
         };
         const route = props.route;
         let page, id, text;
@@ -570,14 +569,11 @@ CloudPebble.TestManager.Interface = (function(API) {
         else {
             text = gettext('← Back');
         }
-        const onClick = function() {
-            API.Route.up()
-        };
         return (
             <Anchor
                 id='testmanager-backbutton'
                 className={'testmanager-backbutton-'+route.length}
-                onClick={onClick}>
+                onClick={() => {API.Route.up()}}>
                 {text}
             </Anchor>
         )
@@ -593,10 +589,10 @@ CloudPebble.TestManager.Interface = (function(API) {
         const page = route[route.length - 1].page;
         const id = route[route.length - 1].id;
         switch (page) {
-            case 'session':
+            case 'sessions':
                 session = _.findWhere(props.sessions, {id: id});
                 return (<SingleSession {...session} runs={props.runs}/>);
-            case 'test':
+            case 'tests':
                 test = _.findWhere(props.tests, {id: id});
                 return (<SingleTest {...test} runs={props.runs}/>);
             case 'loading':
@@ -700,7 +696,7 @@ CloudPebble.TestManager.Interface = (function(API) {
             ReactDOM.render(elm, element);
         },
         refresh: function() {
-            _.each(API.Sessions, API.Tests, API.Runs, function(api) {
+            _.each(API.Sessions, API.Tests, API.Runs, (api) => {
                 api.refresh();
             });
         }

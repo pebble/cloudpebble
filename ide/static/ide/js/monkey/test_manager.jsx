@@ -3,7 +3,7 @@ CloudPebble.TestManager = (function() {
 
     function API(project_id) {
         var base_url = '/ide/project/'+project_id+'/';
-        var noop = function(x) {return x};
+        var noop = (x) => x;
         /**
          * A store keeps track of some state which is fetched from the server. Any time this state is changed,
          * it fires a 'changed' event.
@@ -16,15 +16,16 @@ CloudPebble.TestManager = (function() {
             key: 'data',
             /** name of key in the resulting request to fetch data from**/
             server_key: 'data',
+            ignore_refresh_options: false,
 
             /** Trigger a Backbone event asynchronously.
              * @param {string} event name of event
              * @param {object} data object to send
              */
             triggerLater: function(event, data) {
-                _.defer(function() {
+                _.defer(() => {
                     this.trigger(event, data);
-                }.bind(this));
+                });
             },
             /**
              * This function should return true for any object which we would expect to be sent in a GET request
@@ -33,7 +34,7 @@ CloudPebble.TestManager = (function() {
              * of 'refresh' is to fetch all items.
              */
             filter_function: function(options) {
-                return function() { return !!options };
+                return () => !!options;
             },
             /**
              * Given the result of a request, a function which should filter out any objects which might be deleted,
@@ -44,10 +45,21 @@ CloudPebble.TestManager = (function() {
             syncData: function(result, options) {
                 var filter_function = this.filter_function(options);
                 var data = result[this.server_key];
-                if (!_.isArray(data)) {data = [data];}
+                if (!_.isArray(data)) {
+                    data = [data];
+                }
                 this.state = _.pick(this.state, filter_function);
                 _.extend(this.state, _.indexBy(data, 'id'));
                 this.triggerLater('changed', this.getState());
+            },
+            /**
+             * This function is called when the object is requested, and should
+             * return any other promises which need to be resolved before the request
+             * can be considered complete.
+             * @returns {Promise}
+             */
+            get_extra_requests: function(id) {
+                return Promise.resolve();
             },
             /**
              * Send a GET request to refresh the store.
@@ -56,21 +68,34 @@ CloudPebble.TestManager = (function() {
             refresh: function(options) {
                 var url = base_url + this.url;
                 var query = {};
-                options = (_.isNumber(options) ? {id: options} : (options));
+                if (this.ignore_refresh_options) {
+                    options = {};
+                }
+                else {
+                    options = (_.isNumber(options) ? {id: options} : (options));
+                }
                 if (_.isEqual(_.keys(options), ['id'])) {
                     url += '/' + options.id;
                 }
                 else {
                     query = options;
                 }
+
                 return Ajax.Ajax(url, {
                     data: query
-                }).then(function(result) {
+                }).then((result) => {
                     this.syncData(result, options);
-                }.bind(this)).catch(function(error) {
+                }).catch((error) => {
                     this.triggerLater('error', {text: error.message, errorFor: this.name});
                     throw error;
-                }.bind(this));
+                });
+            },
+            navigate: function(id, prefix) {
+                if (typeof prefix === 'undefined') prefix = '';
+                return Route.navigateAfter(prefix+this.key, id, () => Promise.all([
+                    this.refresh(id),
+                    this.get_extra_requests(id)
+                ]));
             },
             /**
              * The ordering function should sort the store's data.
@@ -100,6 +125,14 @@ CloudPebble.TestManager = (function() {
             this.server_key = 'tests';
             this.key = 'tests';
             this.name = "Tests";
+            this.ignore_refresh_options = true;
+
+            /**
+             * Update the runs for this test when we navigate to its page
+             */
+            this.get_extra_requests = function(id) {
+                return Runs.refresh({test: id})
+            };
         }
 
         /**
@@ -117,13 +150,18 @@ CloudPebble.TestManager = (function() {
             this.new = function () {
                 return Ajax.Ajax(base_url + 'test_sessions/run', {
                     method: 'POST'
-                }).then(function (result) {
+                }).then((result) => {
                     var session = {data: [result.data]};
                     session.data[0].is_new = true;
                     this.syncData(session, {});
-                }.bind(this));
+                });
             };
-
+            /**
+             * Update the runs for this session when we navigate to its page
+             */
+            this.get_extra_requests = function(id) {
+                return Runs.refresh({session: id})
+            };
             /**
              * Sorts sessions by date
              */
@@ -268,7 +306,7 @@ CloudPebble.TestManager = (function() {
             };
 
             this.triggerCurrent = function() {
-                _.defer(function() {this.trigger('changed', this.getRoute());}.bind(this));
+                _.defer(() => {this.trigger('changed', this.getRoute());});
             };
 
             /**
@@ -303,38 +341,43 @@ CloudPebble.TestManager = (function() {
              * Navigate to a page/id after a promise is completed.
              * If the page has been navigated to in the past, don't bother waiting. If the request fails, navigate to
              * an error page.
+             * @param page Page name
+             * @param id Page item ID
+             * @param promise_function A function which returns a promise 
+             * @returns {*}
              */
-            this.navigateAfter = function(page, id, deferred) {
+            this.navigateAfter = function(page, id, promise_function) {
                 var self = this;
+                var promise = promise_function();
                 // If we've already been the page, don't actually wait for the request
-                if (this.isCached(page, id) || !deferred) {
+                if (this.isCached(page, id) || !promise) {
                     this.navigate(page, id);
                     return Promise.resolve();
                 }
                 else {
                     // Otherwise, wait for it to finish. In the meantime, show a loading bar if it takes too long.
                     setCurrentRequest(page, id);
-                    var timeout = setTimeout(function() {
-                        self.trigger('changed', {route: [{page: 'loading'}]});
-                    }.bind(this), 300);
-                    return deferred
-                        .then(function() {
-                            // When the request finishes, remember that it's been visited and then navigate to
-                            // the requested page.
-                            setCached(page, id);
-                            if (isCurrentRequest(page, id)) {
-                                this.navigate(page, id);
-                            }
-                            // If the current request doesn't match this one, then this request is abandoned.
-                        }.bind(this))
-                        .finally(function() {
-                            // No matter how the request ends, clear the loading-bar timeout.
-                            clearTimeout(timeout);
-                        });
+                    var timeout = setTimeout(() => {
+                        this.trigger('changed', {route: [{page: 'loading'}]});
+                    }, 300);
+                    return promise.then(() => {
+                        // When the request finishes, remember that it's been visited and then navigate to
+                        // the requested page.
+                        setCached(page, id);
+                        if (isCurrentRequest(page, id)) {
+                            this.navigate(page, id);
+                        }
+                        // If the current request doesn't match this one, then this request is abandoned.
+                    }).finally(() => {
+                        // No matter how the request ends, clear the loading-bar timeout.
+                        clearTimeout(timeout);
+                    });
                 }
 
             };
-            this.initial = function() {return this.getRoute()};
+            this.initial = function() {
+                return this.getRoute()
+            };
             this.refresh = noop;
         }
 
@@ -361,6 +404,28 @@ CloudPebble.TestManager = (function() {
         return (ui ? ui : (ui = CloudPebble.TestManager.Interface(get_api())));
     };
 
+    // function Poller(milliseconds) {
+    //     var interval = null;
+    //     this.start = function() {
+    //         if (interval) return;
+    //         interval = setInterval(function() {
+    //
+    //         }, milliseconds);
+    //     };
+    //     this.stop = function() {
+    //         if (interval) {
+    //             clearInterval(interval);
+    //             interval = null;
+    //         }
+    //     }
+    // }
+
+    var on_suspend = function() {
+        console.log("Suspend!");
+    };
+    var on_restore = function() {
+        console.log("Restore!");
+    };
 
     var show_test_manager_pane = function() {
         var api = get_api();
@@ -370,7 +435,11 @@ CloudPebble.TestManager = (function() {
             if (!CloudPebble.Sidebar.Restore("testmanager")) {
                 ga('send', 'event', 'project', 'load testmanager');
                 var pane = $('<div></div>').attr('id', '#testmanager-pane-template').toggleClass('testmanager-pane', true);
-                CloudPebble.Sidebar.SetActivePane(pane, {id: 'testmanager'});
+                CloudPebble.Sidebar.SetActivePane(pane, {
+                    id: 'testmanager',
+                    onSuspend: on_suspend,
+                    onRestore: on_restore
+                });
                 ui.render(pane.get(0), {project_id: PROJECT_ID});
             }
             return api.Sessions.refresh();
@@ -383,18 +452,15 @@ CloudPebble.TestManager = (function() {
         },
         ShowTest: function(test_id) {
             var api = get_api();
-            return api.Runs.refresh({test: test_id}).then(function() {
-                api.Route.navigate('test', test_id);
-                return show_test_manager_pane();
-            });
+            return api.Tests.navigate(test_id).then(() => show_test_manager_pane());
         },
         ShowLiveTestRun: function(url, session_id, run_id) {
             var api = get_api();
             api.Logs.subscribe(run_id, session_id, url);
-            return api.Runs.refresh({id: run_id}).then(function() {
+            return api.Runs.refresh({id: run_id}).then(() => {
                 return show_test_manager_pane();
             }).then(function() {
-                api.Route.navigate('session', session_id);
+                api.Route.navigate('sessions', session_id);
                 api.Route.navigate('/logs', run_id);
             });
         },
