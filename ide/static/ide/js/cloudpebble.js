@@ -210,6 +210,23 @@ CloudPebble.Utils = {
         }
 
         return new Blob([ia], {type:mimeString});
+    },
+    PollTask: function(task_id) {
+        function poll_task(task_id) {
+            return Ajax.Get('/ide/task/' + task_id).then(function(data) {
+                var state = data.state;
+                if (state.status == 'SUCCESS') {
+                    return state.result;
+                }
+                else if (state.status == 'FAILURE') {
+                    throw new Error(state.result);
+                }
+                else return Promise.delay(1000).then(function() {
+                    return poll_task(task_id);
+                });
+            });
+        }
+        return poll_task(task_id);
     }
 };
 
