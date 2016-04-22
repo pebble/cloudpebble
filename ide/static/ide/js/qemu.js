@@ -305,6 +305,12 @@
                 method: 'POST',
                 url: '/ide/project/'+project_id+'/tests/'+test_id+'/run_qemu',
                 data: data
+            }).then(function(result) {
+                return CloudPebble.PollTask(result.task_id).then(function(task_result) {
+                    console.log("task", task_result);
+                    console.log("test", result);
+                    return result;
+                });
             });
         };
 

@@ -66,6 +66,9 @@ class Project(IdeModel):
     github_hook_uuid = models.CharField(max_length=36, blank=True, null=True)
     github_hook_build = models.BooleanField(default=False)
 
+    def get_last_built_platforms(self):
+        return self.last_build.get_sizes().keys()
+
     def get_last_build(self):
         try:
             return self.builds.order_by('-id')[0]
@@ -83,6 +86,7 @@ class Project(IdeModel):
 
     last_build = property(get_last_build)
     menu_icon = property(get_menu_icon)
+    last_built_platforms = property(get_last_built_platforms)
 
     def __unicode__(self):
         return u"%s" % self.name
@@ -101,7 +105,8 @@ class TemplateProject(Project):
     def copy_into_project(self, project):
         uuid_string = ", ".join(["0x%02X" % ord(b) for b in uuid.uuid4().bytes])
         for resource in self.resources.all():
-            new_resource = ResourceFile.objects.create(project=project, file_name=resource.file_name, kind=resource.kind)
+            new_resource = ResourceFile.objects.create(project=project, file_name=resource.file_name,
+                                                       kind=resource.kind)
             for variant in resource.variants.all():
                 new_variant = ResourceVariant.objects.create(resource_file=new_resource, tags=variant.tags)
                 new_variant.save_string(variant.get_contents())

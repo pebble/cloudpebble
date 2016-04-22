@@ -7,6 +7,7 @@ from django.db import transaction
 from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
+from django.core.urlresolvers import reverse
 from ide.models.scriptfile import ScriptFile
 from ide.models.s3file import S3File
 from ide.models.meta import IdeModel
@@ -35,6 +36,69 @@ class TestSession(IdeModel):
         ('live', _('Live Test'))
     )
     kind = models.CharField(max_length=5, choices=SESSION_KINDS)
+
+    @property
+    def tests(self):
+        return {run.test for run in self.runs.all()}
+
+    @property
+    def platforms(self):
+        return {run.platform for run in self.runs.all()}
+
+    def make_callback_url(self, request, token):
+        """
+        Return a function which will take a test session and return the URL which orchestrator needs to notify
+        CloudPebble that the test is complete
+        :param request: A Django request object
+        :param token: The access token
+        """
+        location = request.build_absolute_uri(reverse('ide:notify_test_session', args=[self.project.pk, self.id]))
+        # TODO: simple concatenation might not be the best thing here
+        return location + ("?token=%s" % token if token else "")
+
+    @staticmethod
+    def setup_session(project, test_ids, platforms, kind):
+        """ Make a test session which has a test run for each platform for each test ID
+        :param project: Project which the session is for
+        :param test_ids: List of test IDs (integers)
+        :param platforms: An iterable of string platform names (e.g. ['basalt', 'chalk'])
+        :param kind: Either 'live' or 'batch'.
+        :return: The newly created session object.
+        """
+        if test_ids is not None:
+            tests = TestFile.objects.filter(project=project, id__in=test_ids)
+        else:
+            tests = project.test_files.all()
+
+        assert kind in dict(TestSession.SESSION_KINDS).keys()
+
+        with transaction.atomic():
+            # Create a test session
+            session = TestSession.objects.create(project=project, kind=kind)
+            session.save()
+            runs = []
+
+            # Then make a test run for every test
+            for platform in platforms:
+                assert platform in [x[0] for x in TestRun.PLATFORM_CHOICES]
+                for test in tests:
+                    run = TestRun.objects.create(session=session, test=test, platform=platform,
+                                                 original_name=test.file_name)
+                    run.save()
+                    runs.append(run)
+        return session
+
+    def fail(self, message="An unknown error occurred", date=None):
+        """ Mark all pending tests as failed.
+        :param message: The log message for the failure
+        :param date: Specify the completion date, defaults to now.
+        """
+        with transaction.atomic():
+            for run in self.runs.filter(code=0):
+                run.code = TestCode.ERROR
+                run.log = message
+                run.date_completed = date if date is not None else now()
+                run.save()
 
     class Meta(IdeModel.Meta):
         ordering = ['-date_added']

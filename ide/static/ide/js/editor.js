@@ -67,8 +67,9 @@ CloudPebble.Editor = (function() {
             CloudPebble.Prompts.Progress.Hide();
             return CloudPebble.TestManager.ShowLiveTestRun(result['subscribe_url'], result['session_id'], result['run_id']);
         }).catch(function (error) {
-            CloudPebble.Prompts.Progress.Update(error.message ? error.message : error);
+            CloudPebble.Prompts.Progress.Update(error.message);
             CloudPebble.Prompts.Progress.Fail();
+            throw error;
         });
     }
 

@@ -1,25 +1,28 @@
-import os.path
-import urllib
 import logging
+import urllib
+import os
 from functools import wraps
 
-from django.views.decorators.cache import cache_control
-from django.views.decorators.http import last_modified
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.views.decorators.cache import cache_control
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import last_modified
 from django.views.decorators.http import require_POST, require_safe
-from django.core.exceptions import PermissionDenied
-from ide.models.monkey import TestSession, TestRun, TestCode, TestLog, ScreenshotSet, ScreenshotFile
+
+from ide.models import ScreenshotSet, ScreenshotFile
+from ide.models.monkey import TestSession, TestRun, TestCode, TestLog
 from ide.models.project import Project
-from utils.bundle import TestBundle, BundleException
+from ide.tasks.monkey import start_qemu_test, start_orchestrator_test, notify_orchestrator_session
 from utils import orchestrator
-from utils.jsonview import json_view, BadRequest
+from utils.bundle import TestBundle
+from utils.jsonview import json_view
 
 logger = logging.getLogger(__name__)
 
@@ -30,12 +33,6 @@ def _filtered_max(*args):
     """ Find the maximum of all arguments, completely ignoring any values of None """
     filtered = [a for a in args if a]
     return max(filtered) if len(filtered) > 0 else None
-
-
-def make_notify_url_builder(request, token=None):
-    return lambda session: request.build_absolute_uri(
-        reverse('ide:notify_test_session', args=[session.project.pk, session.id])) + (
-                               "?token=%s" % token if token else "")
 
 
 def serialise_run(run, link_test=True, link_session=True):
@@ -280,29 +277,25 @@ def run_qemu_test(request, project_id, test_id):
     host = request.POST['host']
     emu = request.POST['emu']
     platform = request.POST['platform']
-
     update = request.POST.get('update', False)
     # Get QEMU server which corresponds to the requested host
     server = next(x for x in set(settings.QEMU_URLS) if host in x)
-    try:
-        bundle = TestBundle(project, [int(test_id)])
-        response, run, session = bundle.run_on_qemu(
-            server=server,
-            token=token,
-            verify=settings.COMPLETION_CERTS,
-            emu=emu,
-            platform=platform,
-            notify_url_builder=make_notify_url_builder(request),
-            update=update
-        )
-        subscribe_url = server + 'qemu/%s/test/subscribe' % urllib.quote_plus(emu)
-        response['run_id'] = run.id
-        response['session_id'] = session.id
-        response['test_id'] = int(test_id)
-        response['subscribe_url'] = subscribe_url
-        return response
-    except BundleException as e:
-        return BadRequest(str(e))
+    subscribe_url = server + 'qemu/%s/test/subscribe' % urllib.quote_plus(emu)
+
+    # Create the session and make the run and callback URL.
+    # This will fail if the session has more than one run
+    session = TestSession.setup_session(project, [test_id], [platform], 'live')
+    run = session.runs.get()
+    callback_url = session.make_callback_url(request, token=token)
+
+    # Start the task in celery
+    task = start_qemu_test.delay(session.id, callback_url, emu, server, token, update)
+    return {
+        'run_id': run.id,
+        'session_id': session.id,
+        'subscribe_url': subscribe_url,
+        'task_id': task.task_id
+    }
 
 
 @require_POST
@@ -325,23 +318,21 @@ def notify_test_session(request, project_id, session_id):
 
     orch_id = request.POST.get('id', None)
 
-    date_completed = timezone.now()
-
-    # Different procedures depending on whether orchestrator or qemu-controller are notifying.
-    # TODO: consider whether either of these functions should be celery tasks
+    # The procedure depends on whether orchestrator or qemu-controller are notifying us.
     if orch_id:
         # GET /api/jobs/<id>
         job_info = orchestrator.get_job_info(orch_id)
-        notify_orchestrator_session(date_completed, session, job_info)
+        notify_orchestrator_session.delay(session.id, job_info)
     else:
         uploaded_files = request.FILES.getlist('uploads[]')
         platform = request.POST.get('uploads_platform', None)
         log = request.POST['log']
         status = request.POST['status']
-        notify_qemu_session(date_completed, session, platform, status, log, uploaded_files)
+        notify_qemu_session(session, platform, status, log, uploaded_files)
 
 
-def notify_qemu_session(date_completed, session, platform, status, log, uploaded_files):
+def notify_qemu_session(session, platform, status, log, uploaded_files):
+    date_completed = timezone.now()
     if status == 'passed':
         result = TestCode.PASSED
     elif status == 'failed':
@@ -370,47 +361,6 @@ def notify_qemu_session(date_completed, session, platform, status, log, uploaded
             screenshot_file.save_file(posted_file, file_size=posted_file.size)
 
 
-def notify_orchestrator_session(date_completed, session, job_info):
-    try:
-        with transaction.atomic():
-            # find each test in "tests"
-            for test_name, test_info in job_info["tests"].iteritems():
-                # extract information from the test info
-                platform = orchestrator.platform_for_device(test_info['devices']['firmware'])
-                log_id = test_info['_id']
-                artefacts = test_info['result']['artifacts']
-                test_return = test_info["result"]["ret"]
-
-                # for each test, download the logs
-                log = orchestrator.get_job_log(log_id)
-                # save the test results and logs in the database
-                # TODO: better assign test result
-                test_result = TestCode.PASSED if int(test_return) == 0 else TestCode.FAILED
-                run = session.runs.get(test__file_name=test_name, platform=platform)
-                run.code = test_result
-                run.log = log
-                run.artefacts = artefacts
-                run.date_completed = date_completed
-                run.save()
-    except Exception as e:
-        # If anything goes wrong, mark all pending runs for the session as errors
-        with transaction.atomic():
-            for run in session.runs.filter(code=0):
-                run.code = TestCode.ERROR
-                run.log = str(e)
-                run.date_completed = date_completed
-                run.save()
-        raise e
-    finally:
-        # If the session has no pending runs, it is complete.
-        # Select for update here is used to prevent a race condition which could occur
-        # if multiple notifications happen simultaneously
-        pending_run_count = session.runs.select_for_update().filter(code=0)
-        if pending_run_count > 0:
-            session.date_completed = date_completed
-            session.save()
-
-
 @testbench_privilages_required
 @require_safe
 @login_required
@@ -432,11 +382,13 @@ def post_test_session(request, project_id):
     # TODO: run as celery task?
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     test_ids = [int(test) for test in request.POST.get('tests', "").split(",") if test] or None
-    try:
-        bundle = TestBundle(project, test_ids=test_ids)
-        session = bundle.run_on_orchestrator(make_notify_url_builder(request, settings.QEMU_LAUNCH_AUTH_HEADER))
-        return {"data": serialise_session(session, include_runs=True)}
-    except BundleException as e:
-        raise BadRequest(str(e))
+    session = TestSession.setup_session(project, test_ids, project.last_built_platforms, 'batch')
+    callback_url = session.make_callback_url(request, settings.QEMU_LAUNCH_AUTH_HEADER)
+
+    task = start_orchestrator_test.delay(session.id, callback_url)
+    return {
+        "session": serialise_session(session, include_runs=True),
+        "task_id": task.id
+    }
 
 # TODO: Analytics

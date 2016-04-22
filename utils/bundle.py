@@ -5,12 +5,15 @@ import tempfile
 import urllib
 import zipfile
 import requests
+import logging
+
 
 from django.conf import settings
 from django.db import transaction
-from ide.models.monkey import TestRun, TestSession, TestFile
 from utils import orchestrator
 
+
+logger = logging.getLogger(__name__)
 
 def _zip_directory(input_dir, output_zip):
     """ Zip up a directory and preserve symlinks and empty directories
@@ -56,67 +59,51 @@ class BundleException(Exception):
 
 
 class TestBundle(object):
-    def __init__(self, project, test_ids=None):
-        if test_ids is not None:
-            self.tests = TestFile.objects.filter(project=project, id__in=test_ids)
-        else:
-            self.tests = project.test_files.all()
-        self.project = project
+    def __init__(self, session, callback_url):
+        self.session = session
+        self.callback_url = callback_url
 
-    def run_on_orchestrator(self, notify_url_builder):
-        # Send the bundle to orchestrator
-        try:
-            platforms = self.project.get_last_build().get_sizes().keys()
-        except AttributeError as e:
-            if not settings.STRICT_TEST_BUNDLES:
-                platforms = ['basalt']
-            else:
-                raise e
-
+    def run_on_orchestrator(self):
         with self.open(include_pbw=True) as f:
             bundle_url = orchestrator.upload_test(f)
 
         with transaction.atomic():
             # Set up the test session
-            session, runs = self.setup_test_session(kind='batch', platforms=platforms)
+            # session, runs = self.setup_test_session(kind='batch', platforms=platforms)
 
-            for platform in platforms:
-                orch_name = "Project %s, Job %s for %s" % (self.project.pk, session.id, platform.capitalize())
-                orchestrator.submit_test(bundle_url, platform=platform, job_name=orch_name, notify_url=notify_url_builder(session))
-        return session
+            for platform in self.session.platforms:
+                orch_name = "Project %s, Job %s for %s" % (self.session.project.pk, self.session.id, platform.capitalize())
+                orchestrator.submit_test(bundle_url, platform=platform, job_name=orch_name, notify_url=self.callback_url)
 
-    def run_on_qemu(self, server, token, verify, emu, platform, notify_url_builder, update):
+    def run_on_qemu(self, server, token, verify, emu, update):
         # If the request fails, the test session/runs will not be created
-        assert len(self.tests) == 1
+        assert len(self.session.tests) == 1
 
-        with transaction.atomic():
-            session, runs = self.setup_test_session(kind='live', platforms=[platform])
-            # TODO: Since we know we're communicating with localhost things, build_absolute_uri may not be appropriate.
-            callback_url = notify_url_builder(session)
-            post_url = server + 'qemu/%s/test' % urllib.quote_plus(emu)
-            print "Posting to %s" % post_url
-            data = {'token': token, 'notify': callback_url}
-            if update:
-                data['update'] = 'update'
-            with self.open(include_pbw=True) as stream:
-                result = requests.post(post_url,
-                                       data=data,
-                                       verify=verify,
-                                       files=[('archive', ('archive.zip', stream))])
+        # TODO: Since we know we're communicating with localhost things, build_absolute_uri may not be appropriate.
+        post_url = server + 'qemu/%s/test' % urllib.quote_plus(emu)
+        logger.debug("Posting live QEMU test to %s", post_url)
+        data = {'token': token, 'notify': self.callback_url}
+        if update:
+            data['update'] = 'update'
+        with self.open(include_pbw=True) as stream:
+            result = requests.post(post_url,
+                                   data=data,
+                                   verify=verify,
+                                   files=[('archive', ('archive.zip', stream))])
 
-            # TODO: Consider doing something to get more meaningful error messages
-            result.raise_for_status()
-            return result.json(), runs[0], session
+        # TODO: Consider doing something to get more meaningful error messages
+        result.raise_for_status()
+        return result.json()
 
     def write_to_file(self, filename, include_pbw=True, frame_tests=True):
         temp_dir = tempfile.mkdtemp()
         archive_dir = os.path.join(temp_dir, 'tests')
         os.mkdir(archive_dir)
         try:
-            latest_build = self.project.get_last_build()
+            latest_build = self.session.project.last_build
             if settings.STRICT_TEST_BUNDLES and include_pbw and not latest_build:
                 raise BundleException("Cannot test a project with no builds")
-            for test in self.tests:
+            for test in self.session.tests:
                 test_folder = os.path.join(archive_dir, test.file_name)
                 os.mkdir(test_folder)
                 test.copy_test_to_path(os.path.join(test_folder, test.file_name + '.monkey'), frame_test=frame_tests)
@@ -126,26 +113,6 @@ class TestBundle(object):
             _zip_directory(archive_dir, filename)
         finally:
             shutil.rmtree(temp_dir)
-
-    def setup_test_session(self, kind, platforms):
-        assert kind in dict(TestSession.SESSION_KINDS).keys()
-
-        with transaction.atomic():
-            # Create a test session
-            session = TestSession.objects.create(project=self.project, kind=kind)
-            session.save()
-            runs = []
-
-            # Then make a test run for every test
-            for platform in platforms:
-                assert platform in [x[0] for x in TestRun.PLATFORM_CHOICES]
-                for test in self.tests:
-                    run = TestRun.objects.create(session=session, test=test, platform=platform, original_name=test.file_name)
-                    run.save()
-                    runs.append(run)
-
-        # Return the session and its runs
-        return session, runs
 
     @contextlib.contextmanager
     def open(self, include_pbw=False, frame_tests=True):
