@@ -181,6 +181,23 @@ CloudPebble.Utils = {
         var t = Math.round(Math.abs(Date.parse(s2.replace(' ','T')) - Date.parse(s1.replace(' ','T'))) / 1000);
         var n = t.toFixed(0);
         return interpolate(ngettext("%s second", "%s seconds", n), [n]);
+    },
+    PollTask: function(task_id) {
+        function poll_task(task_id) {
+            return Ajax.Get('/ide/task/' + task_id).then(function(data) {
+                var state = data.state;
+                if (state.status == 'SUCCESS') {
+                    return state.result;
+                }
+                else if (state.status == 'FAILURE') {
+                    throw new Error(state.result);
+                }
+                else return Promise.delay(1000).then(function() {
+                    return poll_task(task_id);
+                });
+            });
+        }
+        return poll_task(task_id);
     }
 };
 
