@@ -155,7 +155,7 @@ CloudPebble.TestManager = (function() {
                 return Ajax.Ajax(`${base_url}test_sessions/run`, {
                     method: 'POST'
                 }).then((result) => {
-                    return CloudPebble.Utils.PollTask(result.task_id).then(() => {
+                    return Ajax.PollTask(result.task_id).then(() => {
                         result.session.is_new = true;
                         this.syncData({data: [result.session]}, {});
                     });

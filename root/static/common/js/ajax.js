@@ -88,6 +88,56 @@ Ajax = (function() {
         Get: function () {
             return success_wrapper.get.apply(success_wrapper, arguments);
         },
+        /** Poll a celery task. The promise resolves when the task succeeds, or is rejected if the task
+         * fails or some other error occurs during polling.
+         *
+         * @param task_id ID of the celery task to poll
+         * @param {Object} [options={}] dictionary of polling options
+         * @param {Number} [options.milliseconds=1000] duration to wait between polls
+         * @param {Function} [options.on_bad_request=null]
+         *     If set, this function is called if the poll request itself fails. This is distinct from the
+         *     task itself failing
+         * @param {Number} [options.max_bad_requests=5]
+         *     The maximum number of times that the on_bad_request function will be called before
+         *     aborting the polling.
+         * @returns {Promise}
+         */
+        PollTask: function PollTask(task_id, options) {
+            var opts = _.defaults(options || {}, {
+                milliseconds: 1000,
+                on_bad_request: null,
+                max_bad_requests: 5
+            });
+            var warning_count = 0;
+            function poll_task(task_id) {
+                return Ajax.Get('/ide/task/' + task_id).then(function(data) {
+                    if (data.state.status == 'SUCCESS') {
+                        return data.state.result;
+                    }
+                    else if (data.state.status == 'FAILURE') {
+                        var err = new Error(data.state.result);
+                        err.task_id = task_id;
+                        throw err;
+                    }
+                    else return Promise.delay(opts.milliseconds).then(function() {
+                        return poll_task(task_id);
+                    });
+                }).catch(function(error) {
+                    // If a 'warning' function is specified, call it in one of two cases
+                    // 1. The GET request itself fails
+                    // 2. The GET request succeeded but the server returns success=False.
+                    if (!error.task_id && _.isFunction(opts.on_bad_request) && warning_count < opts.max_bad_requests) {
+                        warning_count += 1;
+                        opts.on_bad_request(error);
+                        return poll_task(task_id);
+                    }
+                    else {
+                        throw error;
+                    }
+                });
+            }
+            return poll_task(task_id);
+        },
         Wrapper: Wrapper
     }
 })();

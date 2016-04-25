@@ -591,7 +591,7 @@ CloudPebble.Compile = (function() {
     };
 
     var show_app_logs = function(kind) {
-        SharedPebble.getPebble(kind).done(function(pebble) {
+        SharedPebble.getPebble(kind).then(function(pebble) {
             pebble.on('close', function() {
                 if(mLogHolder)
                     mLogHolder.append($('<span>').addClass('log-error').text(gettext("Disconnected from phone.") + "\n"));
@@ -630,7 +630,7 @@ CloudPebble.Compile = (function() {
         var modal = $('#phone-screenshot-display').clone();
         var finished = false;
 
-        SharedPebble.getPebble(kind).done(function(pebble) {
+        SharedPebble.getPebble(kind).then(function(pebble) {
             var report_error = function(message) {
                 modal.find('.modal-body > p').text(message);
                 modal.find('.dismiss-btn').removeClass('hide');

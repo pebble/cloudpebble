@@ -228,7 +228,7 @@
                 return;
             }
             e.preventDefault();
-            SharedPebble.getPebble().done(function(pebble) {
+            SharedPebble.getPebble().then(function(pebble) {
                 pebble.emu_press_button(button, true);
             });
         }
@@ -239,7 +239,7 @@
                 return;
             }
             e.preventDefault();
-            SharedPebble.getPebble().done(function(pebble) {
+            SharedPebble.getPebble().then(function(pebble) {
                 pebble.emu_press_button(button, false)
             });
         }
@@ -251,7 +251,7 @@
             }
             e.preventDefault();
             var direction = e.shiftKey ? -1 : 1;
-            SharedPebble.getPebble().done(function(pebble) {
+            SharedPebble.getPebble().then(function(pebble) {
                 pebble.emu_tap(axis, direction);
             });
         }
@@ -338,7 +338,7 @@
                 console.error("unknown button " + button);
                 return;
             }
-            SharedPebble.getPebble().done(function(pebble){
+            SharedPebble.getPebble().then(function(pebble){
                 pebble.emu_press_button(buttonMap[button], down);
             })
         };

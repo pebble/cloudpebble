@@ -57,7 +57,7 @@ CloudPebble.Emulator = new (function() {
     function doAppConfig(e) {
         e.preventDefault();
         if(SharedPebble.isVirtual()) {
-            SharedPebble.getPebble(ConnectionType.Qemu).done(function(pebble) {
+            SharedPebble.getPebble(ConnectionType.Qemu).then(function(pebble) {
                 pebble.request_config_page();
             });
         }
@@ -91,11 +91,13 @@ CloudPebble.Emulator = new (function() {
         e.preventDefault();
         var prompt = $('#qemu-sensor-prompt').modal('show');
         var token_holder = prompt.find('.cpbl-token').text('…');
-        SharedPebble.getEmulator(ConnectionType.Qemu).done(function(emulator) {
-            $.post('/ide/emulator/' + emulator.getUUID() + '/mobile_token', {token: emulator.getToken(), url: emulator.getWebsocketURL()})
-                .done(function(result) {
-                    token_holder.text(result.token);
-                })
+        SharedPebble.getEmulator(ConnectionType.Qemu).then(function(emulator) {
+            return Ajax.Post('/ide/emulator/' + emulator.getUUID() + '/mobile_token', {
+                token: emulator.getToken(),
+                url: emulator.getWebsocketURL()
+            })
+        }).then(function(result) {
+            token_holder.text(result.token);
         });
         self.element.popover('hide');
     }

@@ -137,49 +137,29 @@ CloudPebble.GitHub = (function() {
         });
 
         var poll_commit_status = function(task_id) {
-            return Ajax.Get('/ide/task/' + task_id).then(function(data) {
-                var state = data.state;
-                if(state.status == 'SUCCESS' || state.status == 'FAILURE') {
-                    $('#github-commit-prompt').find('.progress').addClass('hide');
-                    $('#github-commit-prompt').modal('hide');
-                    if(state.status == 'SUCCESS') {
-                        if(state.result)
-                            show_alert('success', "Made new commit.");
-                        else
-                            show_alert('success', "Nothing to commit.");
-                    } else {
-                        show_alert('error', 'Error: ' + state.result);
-                    }
-                } else {
-                    return Promise.delay(1000).then(function() {
-                        return poll_commit_status(task_id);
-                    });
-                }
+            return Ajax.PollTask(task_id).finally(function() {
+                $('#github-commit-prompt').find('.progress').addClass('hide');
+                $('#github-commit-prompt').modal('hide');
+            }).then(function(result) {
+                show_alert('success', result ? "Made new commit." : "Nothing to commit.");
+                return result;
+            }).catch(function(error) {
+                show_alert('error', 'Error: ' + error.message);
+                throw error;
             });
         };
 
         var poll_pull_status = function(task_id) {
-            return Ajax.Get('/ide/task/' + task_id).then(function(data) {
-                var state = data.state;
-                if(state.status == 'SUCCESS' || state.status == 'FAILURE') {
-                    if(state.status == 'SUCCESS') {
-                        if(state.result) {
-                            show_alert('success', gettext("Pulled successfully."));
-                            alert(gettext("Pull completed successfully."));
-                            // *NASTY HACK: Make sure it doesn't think we have unsaved files, thereby
-                            // preventing page reload.
-                            CloudPebble.Editor.GetUnsavedFiles = function() { return 0; };
-                            window.location.reload(true);
-                        } else {
-                            show_alert('success', gettext("Pull completed: Nothing to pull."));
-                        }
-                    } else {
-                        show_alert('error', interpolate(gettext('Error: %s'), [state.result]));
-                    }
+            return Ajax.PollTask(task_id).then(function(result) {
+                if(result) {
+                    show_alert('success', gettext("Pulled successfully."));
+                    alert(gettext("Pull completed successfully."));
+                    // *NASTY HACK: Make sure it doesn't think we have unsaved files, thereby
+                    // preventing page reload.
+                    CloudPebble.Editor.GetUnsavedFiles = function() { return 0; };
+                    window.location.reload(true);
                 } else {
-                    return Promise.delay(1000).then(function() {
-                        return poll_pull_status(task_id);
-                    });
+                    show_alert('success', gettext("Pull completed: Nothing to pull."));
                 }
             });
         };
@@ -218,7 +198,7 @@ CloudPebble.GitHub = (function() {
             Ajax.Post('/ide/project/' + PROJECT_ID + '/github/pull').then(function(data) {
                 return poll_pull_status(data.task_id);
             }).catch(function(error) {
-                show_alert('error', interpolate(gettext("Pull failed: %s"), [error]));
+                show_alert('error', interpolate(gettext("Pull failed: %s"), [error.message]));
             }).finally(function() {
                 enable_all();
                 prompt.modal('hide');
