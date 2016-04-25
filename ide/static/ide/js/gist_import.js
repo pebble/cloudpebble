@@ -15,22 +15,9 @@ $(function() {
 
     var run_import = function(gist_id) {
         return Ajax.Post('/ide/import/gist', {gist_id: gist_id}).then(function(data) {
-            return handle_import_progress(data.task_id);
+            return Ajax.PollTask(data.task_id, {milliseconds: 500});
+        }).then(function(result) {
+            return 'ide/project/' + result;
         });
-    };
-
-    var handle_import_progress = function(task_id) {
-        var check = function() {
-            return Ajax.Get('/ide/task/' + task_id).then(function(data) {
-                if(data.state.status == 'SUCCESS') {
-                    return '/ide/project/' + data.state.result;
-                } else if(data.state.status == 'FAILURE') {
-                    throw new Error(data.state.result);
-                } else {
-                    return Promise.delay(500).then(check);
-                }
-            });
-        };
-        return Promise.delay(500).then(check);
     };
 });

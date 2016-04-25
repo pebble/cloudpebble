@@ -60,21 +60,6 @@ $(function() {
         $('#import-prompt').find('.nav > li').removeClass('disabled').find('a').attr('data-toggle', 'tab');
     };
 
-    var handle_import_progress = function(task_id) {
-        var check = function() {
-            return Ajax.Get('/ide/task/' + task_id).then(function(data) {
-                if(data.state.status == 'SUCCESS') {
-                    return true;
-                } else if(data.state.status == 'FAILURE') {
-                    throw new Error(interpolate(gettext("Error: %s"), [data.state.result]));
-                } else {
-                    return Promise.delay(1000).then(check)
-                }
-            });
-        };
-        return Promise.delay(1000).then(check)
-    };
-
     var import_archive = function(active_set) {
         var name = active_set.find('#import-zip-name').val();
         if(name.replace(/\s/g, '') === '') {
@@ -105,7 +90,7 @@ $(function() {
             processData: false,
             contentType: false,
             dataType: 'json'
-        }));
+        }), active_set);
         ga('send', 'event', 'project', 'import', 'zip');
     };
 
@@ -113,7 +98,7 @@ $(function() {
         var project_id;
         promise.then(function(data) {
             project_id = data.project_id;
-            return handle_import_progress(data.task_id)
+            return Ajax.PollTask(data.task_id)
         }).then(function() {
             window.location.href = '/ide/project/' + project_id;
         }).catch(function(error) {
@@ -142,7 +127,12 @@ $(function() {
         }
         disable_import_controls();
         active_set.find('.progress').removeClass('hide');
-        do_import(Ajax.Post('/ide/import/github', {name: name, repo: url, branch: branch, add_remote: add_remote}));
+        do_import(Ajax.Post('/ide/import/github', {
+            name: name,
+            repo: url,
+            branch: branch,
+            add_remote: add_remote
+        }), active_set);
         ga('send', 'event', 'project', 'import', 'github');
     };
 

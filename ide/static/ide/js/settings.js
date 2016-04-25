@@ -188,25 +188,14 @@ CloudPebble.Settings = (function() {
                 .find('.progress')
                 .addClass('progress-striped')
                 .removeClass('progress-success progress-danger progress-warning');
+            function show_warning() {
+                dialog.find('.progress').addClass('progress-warning');
+            }
             return Ajax.Post('/ide/project/' + PROJECT_ID + '/export', {}).then(function(data) {
-                var task_id = data.task_id;
-                var check_update = function() {
-                    return Ajax.Get('/ide/task/' + task_id).then(function(data) {
-                        if(data.state.status == 'SUCCESS') {
-                            dialog.find('.progress').removeClass('progress-striped').addClass('progress-success');
-                            dialog.find('.download-btn').attr('href', data.state.result).show();
-                        } else if(data.state.status == 'FAILURE') {
-                            dialog.find('.progress').removeClass('progress-striped').addClass('progress-danger');
-                        } else {
-                            return Promise.delay(1000).then(check_update)
-                        }
-                    }).catch(function(error) {
-                        if (error.status) throw error;
-                        dialog.find('.progress').addClass('progress-warning');
-                        return Promise.delay(1000).then(check_update)
-                    });
-                };
-                return Promise.delay(1000).then(check_update);
+                return Ajax.PollTask(data.task_id, {on_bad_request: show_warning});
+            }).then(function(result) {
+                dialog.find('.progress').removeClass('progress-striped').addClass('progress-success');
+                dialog.find('.download-btn').attr('href', result).show();
             }).catch(function() {
                 dialog.find('.progress').removeClass('progress-striped').addClass('progress-danger');
             }).finally(function() {

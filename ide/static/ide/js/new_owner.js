@@ -18,30 +18,18 @@
             .siblings('.progress')
             .addClass('progress-striped')
             .removeClass('progress-success progress-danger progress-warning');
+        function show_warning() {
+            dialog.find('.progress').addClass('progress-warning');
+            dialog.find('p').text("This isn't going too well…");
+        }
         Ajax.Post('/ide/transition/export', {}).then(function(data) {
-            var task_id = data.task_id;
-            var check_update = function() {
-                return Ajax.Get('/ide/task/' + task_id).then(function(data) {
-                    if(data.state.status == 'SUCCESS') {
-                        dialog.find('.progress').removeClass('progress-striped').addClass('progress-success');
-                        dialog.find('p').html("<a href='" + data.state.result + "' class='btn btn-primary'>Download</a>");
-                    } else if(data.state.status == 'FAILURE') {
-                        dialog.find('.progress').removeClass('progress-striped').addClass('progress-danger');
-                        dialog.find('p').addClass('text-error').text("Failed. " + data.state.result);
-                    } else {
-                        return Promise.delay(1000).then(check_update);
-                    }
-                }).catch(function() {
-                    dialog.find('.progress').addClass('progress-warning');
-                    dialog.find('p').text("This isn't going too well…");
-                    return Promise.delay(1000).then(check_update);
-                });
-            };
-
-            return Promise.delay(1000).then(check_update);
+            return CloudPebble.PollTask(data.task_id, {on_bad_request: show_warning});
+        }).then(function(result) {
+            dialog.find('.progress').removeClass('progress-striped').addClass('progress-success');
+            dialog.find('p').html("<a href='" + result + "' class='btn btn-primary'>Download</a>");
         }).catch(function(error) {
             dialog.find('.progress').removeClass('progress-striped').addClass('progress-danger');
-            dialog.find('p').addClass('text-error').text("Something went wrong! This is odd; there's no failure mode here.");
+            dialog.find('p').addClass('text-error').text("Failed. " + error.message);
         });
     }
 
