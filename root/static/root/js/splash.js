@@ -26,10 +26,10 @@ $(function() {
         Ajax.Post('/accounts/api/login', {
             username: $('#legacy-username').val(),
             password: $('#legacy-password').val()
-        }).done(function() {
+        }).then(function() {
             location.href = '/ide/';
-        }).fail(function(error) {
-            alert(error.toString());
+        }).catch(function(error) {
+            alert(error);
         }).finally(function() {
             $('#legacy-login').find('.btn').removeAttr('disabled');
         });

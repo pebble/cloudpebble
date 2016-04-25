@@ -81,7 +81,7 @@ CloudPebble.CrashChecker = function(app_uuid) {
     this.find_source_lines = function(process, version, pointers, callback) {
         var platform = Pebble.version_to_platform(version);
         if(!cache_lookup(process, platform)) {
-            get_debug_json(platform, process).done(function(data) {
+            get_debug_json(platform, process).then(function(data) {
                 mSymbolCache[platform + '/' + process] = data;
                 self.find_source_lines(process, version, pointers, callback);
             });
