@@ -1,8 +1,9 @@
 import boto
 from boto.s3.key import Key
-from boto.s3.connection import OrdinaryCallingFormat
+from boto.s3.connection import OrdinaryCallingFormat, NoHostProvided
 from django.conf import settings
 import urllib
+
 
 def _ensure_bucket_exists(s3, bucket):
     try:
@@ -14,7 +15,17 @@ def _ensure_bucket_exists(s3, bucket):
 
 if settings.AWS_ENABLED:
     if settings.AWS_S3_FAKE_S3 is None:
-        _s3 = boto.connect_s3(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+        # The host must be manually specified in Python 2.7.9+ due to
+        # https://github.com/boto/boto/issues/2836 this bug in boto with .s in
+        # bucket names.
+        host = settings.AWS_S3_HOST if settings.AWS_S3_HOST else NoHostProvided
+
+        _s3 = boto.connect_s3(
+            settings.AWS_ACCESS_KEY_ID,
+            settings.AWS_SECRET_ACCESS_KEY,
+            host=host,
+            calling_format=OrdinaryCallingFormat()
+        )
     else:
         host, port = (settings.AWS_S3_FAKE_S3.split(':', 2) + [80])[:2]
         port = int(port)
