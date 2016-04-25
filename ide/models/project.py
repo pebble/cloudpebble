@@ -67,7 +67,10 @@ class Project(IdeModel):
     github_hook_build = models.BooleanField(default=False)
 
     def get_last_built_platforms(self):
-        return self.last_build.get_sizes().keys()
+        try:
+            return self.last_build.get_sizes().keys()
+        except AttributeError:
+            return []
 
     def get_last_build(self):
         try:

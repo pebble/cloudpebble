@@ -4,7 +4,9 @@ from collections import Counter
 import mock
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.test import override_settings
+from django.db import transaction
+from ide.models.build import BuildResult, BuildSize
+from ide.models.project import Project
 
 from ide.utils.cloudpebble_test import CloudpebbleTestCase
 
@@ -21,12 +23,16 @@ class TestsTests(CloudpebbleTestCase):
 
     def setUp(self):
         self.login()
+        with transaction.atomic():
+            project = Project.objects.get(id=self.project_id)
+            build = BuildResult(project=project)
+            build.save()
+            sizes = BuildSize(platform='basalt', build=build)
+            sizes.save()
 
-    @override_settings(STRICT_TEST_BUNDLES=False)
-    @mock.patch('utils.bundle.orchestrator')
-    def add_and_run_tests(self, orchestrator, names=None, run_all=True):
-        orchestrator.upload_test.return_value = 'bundle_url'
-        orchestrator.submit_test.return_value.json.return_value = {"job_id": "a_job_id"}
+    @mock.patch('ide.api.monkey.tasks')
+    def add_and_run_tests(self, task_mock, names=None, run_all=True):
+        task_mock.start_orchestrator_test.delay.return_value.id = 1
 
         url = reverse('ide:create_test_file', args=[self.project_id])
         # Insert some tests
@@ -36,11 +42,13 @@ class TestsTests(CloudpebbleTestCase):
         # Start a test session
         url = reverse('ide:post_test_session', args=[self.project_id])
         if run_all:
-            result = json.loads(self.client.post(url).content)['data']
+            result = json.loads(self.client.post(url).content)
         else:
             data = {'tests': ",".join(str(t) for t in tests.keys())}
             result = self.client.post(url, data).content
-            result = json.loads(result)['data']
+            result = json.loads(result)
+
+        result = result['session']
 
         # Check that the server returns a session containing all the tests we added
         run_tests = {run['test']['id']: run['test'] for run in result['runs']}
@@ -113,7 +121,9 @@ class TestsTests(CloudpebbleTestCase):
     def test_list_tests(self):
         # Make a collection of test files
         post_url = reverse('ide:create_test_file', args=[self.project_id])
-        ids = sorted([int(json.loads(self.client.post(post_url, {"name": "mytest" + str(x)}).content)['file']['id']) for x in range(5)])
+        ids = sorted(
+            [int(json.loads(self.client.post(post_url, {"name": "mytest" + str(x)}).content)['file']['id']) for x in
+             range(5)])
 
         # Get the list test files
         url = reverse('ide:get_test_list', args=[self.project_id])

@@ -16,10 +16,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import last_modified
 from django.views.decorators.http import require_POST, require_safe
 
+import ide.tasks.monkey as tasks
 from ide.models import ScreenshotSet, ScreenshotFile
 from ide.models.monkey import TestSession, TestRun, TestCode, TestLog
 from ide.models.project import Project
-from ide.tasks.monkey import start_qemu_test, start_orchestrator_test, notify_orchestrator_session
 from utils import orchestrator
 from utils.bundle import TestBundle
 from utils.jsonview import json_view
@@ -289,7 +289,7 @@ def run_qemu_test(request, project_id, test_id):
     callback_url = session.make_callback_url(request, token=token)
 
     # Start the task in celery
-    task = start_qemu_test.delay(session.id, callback_url, emu, server, token, update)
+    task = tasks.start_qemu_test.delay(session.id, callback_url, emu, server, token, update)
     return {
         'run_id': run.id,
         'session_id': session.id,
@@ -322,7 +322,7 @@ def notify_test_session(request, project_id, session_id):
     if orch_id:
         # GET /api/jobs/<id>
         job_info = orchestrator.get_job_info(orch_id)
-        notify_orchestrator_session.delay(session.id, job_info)
+        tasks.notify_orchestrator_session.delay(session.id, job_info)
     else:
         uploaded_files = request.FILES.getlist('uploads[]')
         platform = request.POST.get('uploads_platform', None)
@@ -382,10 +382,11 @@ def post_test_session(request, project_id):
     # TODO: run as celery task?
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     test_ids = [int(test) for test in request.POST.get('tests', "").split(",") if test] or None
-    session = TestSession.setup_session(project, test_ids, project.last_built_platforms, 'batch')
+    platforms = project.last_built_platforms
+    session = TestSession.setup_session(project, test_ids, platforms, 'batch')
     callback_url = session.make_callback_url(request, settings.QEMU_LAUNCH_AUTH_HEADER)
 
-    task = start_orchestrator_test.delay(session.id, callback_url)
+    task = tasks.start_orchestrator_test.delay(session.id, callback_url)
     return {
         "session": serialise_session(session, include_runs=True),
         "task_id": task.id

@@ -7,13 +7,12 @@ import zipfile
 import requests
 import logging
 
-
 from django.conf import settings
 from django.db import transaction
 from utils import orchestrator
 
-
 logger = logging.getLogger(__name__)
+
 
 def _zip_directory(input_dir, output_zip):
     """ Zip up a directory and preserve symlinks and empty directories
@@ -72,8 +71,17 @@ class TestBundle(object):
             # session, runs = self.setup_test_session(kind='batch', platforms=platforms)
 
             for platform in self.session.platforms:
-                orch_name = "Project %s, Job %s for %s" % (self.session.project.pk, self.session.id, platform.capitalize())
-                orchestrator.submit_test(bundle_url, platform=platform, job_name=orch_name, notify_url=self.callback_url)
+                orch_name = "Project {project}, Job {job} for {platform}".format(
+                    project=self.session.project.pk,
+                    platform=self.session.id,
+                    job=platform.capitalize()
+                )
+                orchestrator.submit_test(
+                    bundle_url,
+                    platform=platform,
+                    job_name=orch_name,
+                    notify_url=self.callback_url
+                )
 
     def run_on_qemu(self, server, token, verify, emu, update):
         # If the request fails, the test session/runs will not be created
