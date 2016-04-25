@@ -109,7 +109,7 @@ class TestBundle(object):
         os.mkdir(archive_dir)
         try:
             latest_build = self.session.project.last_build
-            if settings.STRICT_TEST_BUNDLES and include_pbw and not latest_build:
+            if include_pbw and not latest_build:
                 raise BundleException("Cannot test a project with no builds")
             for test in self.session.tests:
                 test_folder = os.path.join(archive_dir, test.file_name)
