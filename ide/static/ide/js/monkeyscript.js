@@ -20,6 +20,9 @@ CloudPebble.MonkeyScript = (function () {
     function pushSpace(state, nextkind) {
         nextState(state, 'space', nextkind);
     }
+    function pushSpaceOrComment(state, nextKind) {
+        nextState(state, 'space_or_comment', nextKind)
+    }
 
     function resetState(state) {
         state.kind = 'keyword';
@@ -84,6 +87,16 @@ CloudPebble.MonkeyScript = (function () {
                             return result('keyword', KEYWORDS);
                         }
                     }
+                    if (state.kind == 'space_or_comment') {
+                        // The user may finish with a comment (and perhaps no arguments)
+                        if (stream.match(/\s*(#.*)?$/)) {
+                            resetState(state);
+                            return result('comment');
+                        }
+                        else {
+                            pushSpace(state, state.nextkind)
+                        }
+                    }
                     if (state.kind == 'space') {
                         // Match a single space
                         if (!stream.match(/ /)) {
@@ -125,7 +138,7 @@ CloudPebble.MonkeyScript = (function () {
                                 resetState(state);
                             } else {
                                 state.command = command;
-                                pushSpace(state, 'argument');
+                                pushSpaceOrComment(state, 'argument');
                             }
                             return result('variable');
                         }
@@ -142,11 +155,6 @@ CloudPebble.MonkeyScript = (function () {
                         }
                     }
                     if (state.kind == 'argument') {
-                        // The user may finish with a comment (and perhaps no arguments)
-                        if (stream.match(/\s*#.*/)) {
-                            resetState(state);
-                            return result('comment');
-                        }
                         // Or there may be no arguments at all
                         if (stream.eol()) {
                             resetState(state);
@@ -160,7 +168,6 @@ CloudPebble.MonkeyScript = (function () {
                             quote = quote[0];
                             // Match a right quote after some arbitrary text.
                             arg = stream.match(new RegExp("((\\\\"+ quote + "|[^" + quote + "])*)(" + quote + ")?"));
-                            console.log(arg);
                             another = (!!arg && arg[3]);
                             content = (!!arg ? arg[1] : null);
                         }
@@ -185,7 +192,7 @@ CloudPebble.MonkeyScript = (function () {
                         }
                         if (another) {
                             // If there's no reason not to have more arguments, do so
-                            pushSpace(state, 'argument');
+                            pushSpaceOrComment(state, 'argument');
                         }
                         else {
                             stream.skipToEnd();
