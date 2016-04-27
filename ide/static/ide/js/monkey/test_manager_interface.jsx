@@ -448,7 +448,7 @@ CloudPebble.TestManager.Interface = (function(API) {
                     <tbody>
                     <tr>
                         <th>{gettext('Test')}</th>
-                        <td><Anchor onClick={() => {API.Route.navigate('/test', test.id)}}>{test.name}</Anchor>
+                        <td><Anchor onClick={() => {API.Route.navigate('/tests', test.id)}}>{test.name}</Anchor>
                         </td>
                     </tr>
                     <tr>
@@ -531,11 +531,11 @@ CloudPebble.TestManager.Interface = (function(API) {
                 )}
                 <Well>
                     <h2>{gettext('Tests')}</h2>
-                    <TestList tests={props.tests} selected={top_page == 'test' ? top_id: null}/>
+                    <TestList tests={props.tests} selected={top_page == 'tests' ? top_id: null}/>
                 </Well>
                 <Well>
                     <h2>{gettext('Jobs')}</h2>
-                    <SessionList sessions={props.sessions} selected={top_page == 'session' ? top_id: null}/>
+                    <SessionList sessions={props.sessions} selected={top_page == 'sessions' ? top_id: null}/>
                 </Well>
             </div>
         );

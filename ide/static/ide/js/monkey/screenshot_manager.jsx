@@ -127,7 +127,6 @@ CloudPebble.MonkeyScreenshots = (function() {
         }
 
         hasChangedOrChildrenHaveChanged() {
-            console.log("changed?", this);
             return this._changed || _.chain(this.files).map((file) => file._changed || file.is_new).any().value();
         }
 
@@ -307,7 +306,6 @@ CloudPebble.MonkeyScreenshots = (function() {
             return AjaxAPI.getScreenshots(this.test_id).then((result) => {
                 this.screenshots = result;
                 this.original_screenshots = result.map((x) => x.clone());
-                console.log(this.original_screenshots);
                 this.trigger('changed', result);
             }).catch((error) => {
                 this.trigger('error', {message: error.message, errorfor: gettext('get screenshots')});
