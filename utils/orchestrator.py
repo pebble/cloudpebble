@@ -57,7 +57,7 @@ def submit_test(bundle_url, platform, job_name=None, notify_url=None, requestor=
         data['name'] = job_name
     # Submit the orchestrator job request
     submit_url = "%s/api/jobs/submit" % settings.ORCHESTRATOR_URL
-    result = requests.post(submit_url, json=data)
+    result = requests.post(submit_url, json=data, cert=settings.PBLTEST_CERT_LOCATION)
     result.raise_for_status()
     return result
 
@@ -69,7 +69,7 @@ def upload_test(f, filename="test_archive.test"):
     :return: URL to download the file from orchestrator
     """
     upload_api = "%s/api/upload" % settings.ORCHESTRATOR_URL
-    result = requests.post(upload_api, files=[("file", (filename, f))])
+    result = requests.post(upload_api, files=[("file", (filename, f))], cert=settings.PBLTEST_CERT_LOCATION)
     result.raise_for_status()
     return "%s/api/download/test_bundle/%s" % (settings.ORCHESTRATOR_URL, result.json()['filename'])
 
@@ -80,7 +80,7 @@ def get_job_info(job_id):
     :return: Dictionary of test result information
     """
     info_api = "%s/api/jobs/%s" % (settings.ORCHESTRATOR_URL, job_id)
-    result = requests.get(info_api)
+    result = requests.get(info_api, cert=settings.PBLTEST_CERT_LOCATION)
     result.raise_for_status()
     return result.json()
 
@@ -91,4 +91,4 @@ def get_job_log(task_id):
     :return: String containing the log
     """
     log_url = '%s/tasks/%s/output' % (settings.ORCHESTRATOR_URL, task_id)
-    return requests.get(log_url).text
+    return requests.get(log_url, cert=settings.PBLTEST_CERT_LOCATION).text

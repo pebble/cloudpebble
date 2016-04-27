@@ -475,7 +475,6 @@ GITHUB_HOOK_TEMPLATE = _environ.get('GITHUB_HOOK', 'http://example.com/ide/proje
 
 SDK2_PEBBLE_WAF = _environ.get('SDK2_PEBBLE_WAF', '/sdk2/pebble/waf')
 SDK3_PEBBLE_WAF = _environ.get('SDK3_PEBBLE_WAF', '/sdk3/pebble/waf')
-
 ARM_CS_TOOLS = _environ.get('ARM_CS_TOOLS', '/arm-cs-tools/bin/')
 
 TD_URL = _environ.get('TD_URL', None)
@@ -501,13 +500,23 @@ LIBPEBBLE_PROXY = _environ.get('LIBPEBBLE_PROXY', None)
 YCM_URLS = _environ.get('YCM_URLS', 'http://localhost:8002/').split(',')
 COMPLETION_CERTS = _environ.get('COMPLETION_CERTS', os.getcwd() + '/completion-certs.crt')
 
+# If the key for pbltest.io is stored in the environment, read it into a local file.
+# The key will be deleted from the environment later.
+PBLTEST_CERT_LOCATION = _environ.get('PBLTEST_CERT_LOCATION', None)
+_cert = _environ.get('PBLTEST_CERT', None)
+if not PBLTEST_CERT_LOCATION and _cert:
+    PBLTEST_CERT_LOCATION = os.path.join(os.getcwd(), 'pbltest-cert.pem')
+    with open(PBLTEST_CERT_LOCATION, 'w') as f:
+        f.write(_cert)
+
+
 QEMU_URLS = _environ.get('QEMU_URLS', 'http://qemu/').split(',')
 QEMU_LAUNCH_AUTH_HEADER = _environ.get('QEMU_LAUNCH_AUTH_HEADER', 'secret')
 QEMU_LAUNCH_TIMEOUT = int(_environ.get('QEMU_LAUNCH_TIMEOUT', 20))
 
 PHONE_SHORTURL = _environ.get('PHONE_SHORTURL', 'cpbl.io')
 
-ORCHESTRATOR_URL = _environ.get('ORCHESTRATOR_URL', 'http://orchestrator.hq.getpebble.com')
+ORCHESTRATOR_URL = _environ.get('ORCHESTRATOR_URL', 'https://pbltest.io')
 
 
 # import local settings

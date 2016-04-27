@@ -10,7 +10,7 @@ from utils.bundle import TestBundle
 
 
 # TODO: is acks_late needed for any of these?
-@shared_task(ignore_result=True)
+@shared_task
 def start_qemu_test(session_id, callback_url, emu, server, token, update):
     session = TestSession.objects.get(id=session_id)
     try:
@@ -27,7 +27,7 @@ def start_qemu_test(session_id, callback_url, emu, server, token, update):
         raise
 
 
-@shared_task(ignore_result=True)
+@shared_task
 def start_orchestrator_test(session_id, callback_url):
     session = TestSession.objects.get(id=session_id)
     try:
@@ -38,7 +38,7 @@ def start_orchestrator_test(session_id, callback_url):
         raise
 
 
-@shared_task(ignore_result=True)
+@shared_task
 def notify_orchestrator_session(session_id, job_info):
     session = TestSession.objects.get(id=session_id)
     date_completed = timezone.now()

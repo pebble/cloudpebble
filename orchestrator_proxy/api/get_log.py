@@ -13,6 +13,6 @@ def get_log(request, uuid):
     if not check_token(request.GET.get('token', None)):
         return HttpResponse(status=401)
     task_id = lookup_uuid(uuid)
-    result = requests.get("{}/tasks/{}/output".format(settings.ORCHESTRATOR_URL, task_id))
+    result = requests.get("{}/tasks/{}/output".format(settings.ORCHESTRATOR_URL, task_id, cert=settings.PBLTEST_CERT_LOCATION))
     result.raise_for_status()
     return HttpResponse(result.iter_content(100), content_type=result.headers['content-type'])

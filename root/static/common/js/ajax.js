@@ -129,7 +129,9 @@ Ajax = (function() {
                     if (!error.task_id && _.isFunction(opts.on_bad_request) && warning_count < opts.max_bad_requests) {
                         warning_count += 1;
                         opts.on_bad_request(error);
-                        return poll_task(task_id);
+                        return Promise.delay(opts.milliseconds).then(function() {
+                            return poll_task(task_id);
+                        });
                     }
                     else {
                         throw error;

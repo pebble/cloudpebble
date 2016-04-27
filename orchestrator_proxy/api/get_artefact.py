@@ -9,6 +9,6 @@ from django.http import HttpResponse
 def get_artefact(request, filename):
     """ This API call proxies test artefact downloads to Orchestrator. """
 
-    result = requests.get("%s/api/download/media/%s" % (settings.ORCHESTRATOR_URL, filename))
+    result = requests.get("%s/api/download/media/%s" % (settings.ORCHESTRATOR_URL, filename), cert=settings.PBLTEST_CERT_LOCATION)
     result.raise_for_status()
     return HttpResponse(result.iter_content(100), content_type=result.headers['content-type'])
