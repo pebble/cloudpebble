@@ -286,7 +286,7 @@ def do_import_archive(project_id, archive, delete_project=False):
                         elif filename.startswith(SRC_DIR):
                             if (not filename.startswith('.')) and (filename.endswith('.c') or filename.endswith('.h') or filename.endswith('.js')):
                                 base_filename = filename[len(SRC_DIR):]
-                                if project.app_modern_multi_js and filename.endswith('.js') and filename.startswith('js/'):
+                                if project.app_modern_multi_js and base_filename.endswith('.js') and base_filename.startswith('js/'):
                                     base_filename = base_filename[len('js/'):]
                                 source = SourceFile.objects.create(project=project, file_name=base_filename)
                                 with z.open(entry.filename) as f:
