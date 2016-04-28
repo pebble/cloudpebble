@@ -1,6 +1,7 @@
 *.pyc
 *.mo
 *.bak
+*.pem
 user_data/
 dev.db
 .DS_Store
