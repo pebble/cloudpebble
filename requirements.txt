@@ -31,3 +31,22 @@ newrelic
 freetype-py==1.0
 sh==1.08
 pypng==0.0.17
+
+# Additional requirements
+anyjson==0.3.3
+billiard==3.3.0.23
+django-celery==3.1.17
+docopt==0.4.0
+greenlet==0.4.9
+httplib2==0.9.2
+kombu==3.0.35
+oauthlib==1.0.3
+pyasn1==0.1.7
+pyasn1-modules==0.0.5
+PyGithub==1.14.2
+python-openid==2.2.5
+pytz==2016.3
+requests-oauthlib==0.6.1
+rsa==3.1.4
+six==1.10.0
+static3==0.6.1
