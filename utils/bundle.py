@@ -58,11 +58,23 @@ class BundleException(Exception):
 
 
 class TestBundle(object):
-    def __init__(self, session, callback_url):
-        self.session = session
-        self.callback_url = callback_url
+    def __init__(self, session=None, project=None):
+        if session and not project:
+            self.tests = session.tests
+            self.project = session.project
+            self.session_id = session.id
+            self.platforms = session.platforms
+        elif project and not session:
+            self.tests = project.test_files.all()
+            self.project = project
+            self.session_id = None
+            self.platforms = None
+        else:
+            raise Exception("TestBundle must receive either a session or a project")
 
-    def run_on_orchestrator(self):
+    def run_on_orchestrator(self, callback_url):
+        assert self.platforms and self.session_id, "Missing platforms or session ID."
+
         with self.open(include_pbw=True) as f:
             bundle_url = orchestrator.upload_test(f)
 
@@ -70,27 +82,27 @@ class TestBundle(object):
             # Set up the test session
             # session, runs = self.setup_test_session(kind='batch', platforms=platforms)
 
-            for platform in self.session.platforms:
+            for platform in self.platforms:
                 orch_name = "Project {project}, Job {job} for {platform}".format(
-                    project=self.session.project.pk,
-                    platform=self.session.id,
+                    project=self.project.pk,
+                    platform=self.session_id,
                     job=platform.capitalize()
                 )
                 orchestrator.submit_test(
                     bundle_url,
                     platform=platform,
                     job_name=orch_name,
-                    notify_url=self.callback_url
+                    notify_url=callback_url
                 )
 
-    def run_on_qemu(self, server, token, verify, emu, update):
+    def run_on_qemu(self, callback_url, server, token, verify, emu, update):
         # If the request fails, the test session/runs will not be created
-        assert len(self.session.tests) == 1
+        assert len(self.tests) == 1
 
         # TODO: Since we know we're communicating with localhost things, build_absolute_uri may not be appropriate.
         post_url = server + 'qemu/%s/test' % urllib.quote_plus(emu)
         logger.debug("Posting live QEMU test to %s", post_url)
-        data = {'token': token, 'notify': self.callback_url}
+        data = {'token': token, 'notify': callback_url}
         if update:
             data['update'] = 'update'
         with self.open(include_pbw=True) as stream:
@@ -108,10 +120,10 @@ class TestBundle(object):
         archive_dir = os.path.join(temp_dir, 'tests')
         os.mkdir(archive_dir)
         try:
-            latest_build = self.session.project.last_build
+            latest_build = self.project.last_build
             if include_pbw and not latest_build:
                 raise BundleException("Cannot test a project with no builds")
-            for test in self.session.tests:
+            for test in self.tests:
                 test_folder = os.path.join(archive_dir, test.file_name)
                 os.mkdir(test_folder)
                 test.copy_test_to_path(os.path.join(test_folder, test.file_name + '.monkey'), frame_test=frame_tests)

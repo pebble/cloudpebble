@@ -17,7 +17,7 @@ from django.views.decorators.http import last_modified
 from django.views.decorators.http import require_POST, require_safe
 
 import ide.tasks.monkey as tasks
-from ide.models import ScreenshotSet, ScreenshotFile
+from ide.models import ScreenshotSet, ScreenshotFile, TestFile
 from ide.models.monkey import TestSession, TestRun, TestCode, TestLog
 from ide.models.project import Project
 from utils import orchestrator
@@ -367,7 +367,6 @@ def notify_qemu_session(session, platform, status, log, uploaded_files):
 def download_tests(request, project_id):
     """ Download all the tests for a project as a ZIP file. """
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
-    test_ids = [int(test) for test in request.GET.get('tests', "").split(",") if test] or None
 
     with TestBundle(project, test_ids).open(frame_tests=False) as f:
         return HttpResponse(f.read(), content_type='application/zip')

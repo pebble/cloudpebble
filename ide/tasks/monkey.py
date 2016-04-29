@@ -14,8 +14,9 @@ from utils.bundle import TestBundle
 def start_qemu_test(session_id, callback_url, emu, server, token, update):
     session = TestSession.objects.get(id=session_id)
     try:
-        bundle = TestBundle(session, callback_url)
+        bundle = TestBundle(session=session)
         bundle.run_on_qemu(
+            callback_url=callback_url,
             server=server,
             token=token,
             verify=settings.COMPLETION_CERTS,
@@ -31,8 +32,8 @@ def start_qemu_test(session_id, callback_url, emu, server, token, update):
 def start_orchestrator_test(session_id, callback_url):
     session = TestSession.objects.get(id=session_id)
     try:
-        bundle = TestBundle(session, callback_url)
-        bundle.run_on_orchestrator()
+        bundle = TestBundle(session=session)
+        bundle.run_on_orchestrator(callback_url)
     except Exception as e:
         session.fail(message=str(e))
         raise

@@ -70,8 +70,6 @@ test {test_name} {{
     do wait 2
 
 {content}
-
-    do remove_app "{app_name}"
 }}
 """
     return test_template.format(

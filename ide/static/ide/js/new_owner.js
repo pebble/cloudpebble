@@ -23,7 +23,7 @@
             dialog.find('p').text("This isn't going too well…");
         }
         Ajax.Post('/ide/transition/export', {}).then(function(data) {
-            return CloudPebble.PollTask(data.task_id, {on_bad_request: show_warning});
+            return Ajax.PollTask(data.task_id, {on_bad_request: show_warning});
         }).then(function(result) {
             dialog.find('.progress').removeClass('progress-striped').addClass('progress-success');
             dialog.find('p').html("<a href='" + result + "' class='btn btn-primary'>Download</a>");

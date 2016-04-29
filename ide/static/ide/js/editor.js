@@ -45,7 +45,9 @@ CloudPebble.Editor = (function() {
             update: false,
             platform: CloudPebble.Compile.GetPlatformForInstall()
         });
-        var platform_name = ConnectionPlatformNames[options.platform];
+        var platform = options.platform | ConnectionType.Qemu;
+        var platform_name = ConnectionPlatformNames[platform];
+
         CloudPebble.Prompts.Progress.Show("Testing", "Starting test");
         CloudPebble.Compile.GetPlatformsCompiledFor().then(function(platforms) {
             if (platforms.length == 0) {
@@ -59,7 +61,9 @@ CloudPebble.Editor = (function() {
             // Wait for a second if we needed to disconnect before starting again.
             return (did_close ? Promise.delay(1000) : null);
         }).then(function () {
-            return SharedPebble.getEmulator(options.platform);
+            return SharedPebble.getPebble(platform);
+        }).then(function() {
+            return SharedPebble.getEmulator(platform);
         }).then(function (emulator) {
             CloudPebble.Prompts.Progress.Update(gettext("Starting test"));
             return emulator.runTest(PROJECT_ID, test_id, platform_name, options.update);
