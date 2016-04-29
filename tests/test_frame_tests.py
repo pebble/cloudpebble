@@ -19,14 +19,17 @@ setup {
 test test {
     context bigboard
 
-    # Load the app
+    # Uninstall the app if it exists
+    do macro remove_app_if_installed "1234"
+
+    # (Re)install the app
     do install_app app.pbw
     do launch_app "MyApp"
     do wait 2
 
-    do set_time 1470000000
+    do macro constrain_execution
 
-    do remove_app "MyApp"
+    do set_time 1470000000
 }
 """
 
@@ -40,7 +43,7 @@ class TestFilterDict(TestCase):
         bundle = BytesIO()
         pbw = BytesIO()
         with ZipFile(pbw, mode='w') as pbw_zip:
-            pbw_zip.writestr('appinfo.json', json.dumps({'shortName': 'MyApp'}))
+            pbw_zip.writestr('appinfo.json', json.dumps({'shortName': 'MyApp', 'uuid': '1234'}))
         pbw.seek(0)
         with ZipFile(bundle, mode='w') as bundle_zip:
             bundle_zip.writestr("app.pbw", pbw.read())
@@ -51,7 +54,7 @@ class TestFilterDict(TestCase):
     def test_frame_test_file(self):
         """ Test that test file framing produces the expected output """
         f = BytesIO("do set_time 1470000000")
-        output = frame_test_file(f, test_name="test", app_name="MyApp")
+        output = frame_test_file(f, test_name="test", app_name="MyApp", uuid="1234")
         self.assertEqual(output, EXPECTED_TEST_FILE)
 
     def test_frame_tests_in_bundle(self):

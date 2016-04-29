@@ -56,10 +56,6 @@ CloudPebble.Editor = (function() {
             if (!_.contains(platforms, platform_name)) {
                 throw new Error(gettext("Project not compiled for ")+platform_name);
             }
-            return SharedPebble.disconnect(true);
-        }).then(function(did_close) {
-            // Wait for a second if we needed to disconnect before starting again.
-            return (did_close ? Promise.delay(1000) : null);
         }).then(function () {
             return SharedPebble.getPebble(platform);
         }).then(function() {

@@ -198,7 +198,7 @@ class TestFile(ScriptFile):
         self.copy_to_path(path)
         if frame_test:
             with open(path, 'r+') as f:
-                full_test = frame_test_file(f, self.file_name, self.project.app_short_name)
+                full_test = frame_test_file(f, self.file_name, self.project.app_short_name, self.project.app_uuid)
             with open(path, 'w') as f:
                 f.write(full_test)
 

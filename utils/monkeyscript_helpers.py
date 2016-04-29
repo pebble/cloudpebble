@@ -33,17 +33,19 @@ def frame_tests_in_bundle(infile, outfile):
                 app_data = zip_in.read(app)
                 # Open up the PBW to read the name of the app, to use in the test script
                 with zipfile.ZipFile(StringIO(app_data), 'r') as zip_pbw:
-                    app_short_name = json.loads(zip_pbw.read('appinfo.json'))['shortName']
+                    appinfo = json.loads(zip_pbw.read('appinfo.json'))
+                    app_short_name = appinfo['shortName']
+                    uuid = appinfo['uuid']
                 zip_out.writestr(app, app_data)
                 test_name, test_entry = tests[path]
                 with zip_in.open(test_entry) as script_file:
-                    framed = frame_test_file(script_file, test_name, app_short_name)
+                    framed = frame_test_file(script_file, test_name, app_short_name, uuid)
                 zip_out.writestr(test_entry, framed)
             else:
                 raise ValueError('Test bundle includes a test file without an accompanying PBW')
 
 
-def frame_test_file(test_file, test_name, app_name):
+def frame_test_file(test_file, test_name, app_name, uuid):
     """ Add framing to a test file
     :param test_file: An open file-like object containing a test script
     :param test_name: Name of the test (the filename without extension or path)
@@ -64,10 +66,15 @@ setup {{
 test {test_name} {{
     context bigboard
 
-    # Load the app
+    # Uninstall the app if it exists
+    do macro remove_app_if_installed "{uuid}"
+
+    # (Re)install the app
     do install_app app.pbw
     do launch_app "{app_name}"
     do wait 2
+
+    do macro constrain_execution
 
 {content}
 }}
@@ -75,5 +82,6 @@ test {test_name} {{
     return test_template.format(
         test_name=test_name,
         app_name=app_name,
+        uuid=uuid,
         content="".join('    %s' % l for l in test_file.readlines())
     )

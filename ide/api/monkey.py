@@ -367,8 +367,7 @@ def notify_qemu_session(session, platform, status, log, uploaded_files):
 def download_tests(request, project_id):
     """ Download all the tests for a project as a ZIP file. """
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
-
-    with TestBundle(project, test_ids).open(frame_tests=False) as f:
+    with TestBundle(project=project).open(frame_tests=settings.DEBUG) as f:
         return HttpResponse(f.read(), content_type='application/zip')
 
 
