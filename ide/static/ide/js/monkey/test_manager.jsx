@@ -45,13 +45,15 @@ CloudPebble.TestManager = (function() {
              */
             syncData(result, options) {
                 const filter_function = this.filter_function(options);
-                let data = result[this.server_key];
+                const data = result[this.server_key];
+                let data_list = data;
                 if (!_.isArray(data)) {
-                    data = [data];
+                    data_list = [data];
                 }
                 this.state = _.pick(this.state, filter_function);
-                _.extend(this.state, _.indexBy(data, 'id'));
+                _.extend(this.state, _.indexBy(data_list, 'id'));
                 this.triggerLater('changed', this.getState());
+                return data;
             },
             /**
              * This function is called when the object is requested, and should
@@ -87,7 +89,7 @@ CloudPebble.TestManager = (function() {
                 return Ajax.Ajax(url, {
                     data: query
                 }).then((result) => {
-                    this.syncData(result, options);
+                    return this.syncData(result, options);
                 }).catch((error) => {
                     this.triggerLater('error', {text: error.message, errorFor: this.name});
                     throw error;
@@ -175,6 +177,8 @@ CloudPebble.TestManager = (function() {
             this.url = 'test_logs';
             this.key = 'logs';
             this.state = {};
+            this.subscriptions = {};
+
             this.refresh = function(id) {
                 const self = this;
                 const url = `${base_url}${this.url}/${id}`;
@@ -182,40 +186,56 @@ CloudPebble.TestManager = (function() {
                     self.state[id] = {text: data, id};
                     self.triggerLater('changed', self.getState());
                 }).catch((error) => {
-                    if (error.status == 400) {
-                        return null;
+                    if (error.status == 404) {
+                        if (!this.subscriptions[id]) {
+                            return Runs.refresh({id: id}).then((run) => {
+                                if (run.code == 0 && run.subscribe_url) {
+                                    return this.subscribe(run.id, run.session_id, run.subscribe_url);
+                                }
+                            });
+                        }
                     }
-
+                    else {
+                        throw error;
+                    }
                 });
             };
             this.get_extra_requests = (id) => Runs.refresh({id: id});
             this.subscribe = function(id, session_id, url) {
-                const self = this;
-                const evtSource = new EventSource(url);
-                let done = false;
-                self.state[id] = {text: '', id};
+                if (this.subscriptions[id]) return true;
+                return new Promise((resolve, reject) => {
+                    const evtSource = new EventSource(url);
+                    let done = false;
+                    this.state[id] = {text: '', id};
 
-                const onClose = () => {
-                    if (!done) {
-                        done = true;
-                        setTimeout(() => {
-                            Runs.refresh({id});
-                            Tests.refresh();
-                            Sessions.refresh({id: session_id});
-                        }, 1000);
-                    }
-                };
-                evtSource.addEventListener('log', (e) => {
-                    self.state[id].text += `${e.data}\n`;
-                    self.triggerLater('changed', self.getState());
+                    const onClose = () => {
+                        delete this.subscriptions[id];
+                        if (!done) {
+                            done = true;
+                            setTimeout(() => {
+                                Runs.refresh({id});
+                                Tests.refresh();
+                                Sessions.refresh({id: session_id});
+                            }, 1000);
+                        }
+                    };
+                    evtSource.addEventListener('log', (e) => {
+                        this.state[id].text += `${e.data}\n`;
+                        this.triggerLater('changed', this.getState());
+                    });
+                    evtSource.addEventListener('done', () => {
+                        evtSource.close();
+                        onClose();
+                    });
+                    evtSource.onopen = () => {
+                        this.subscriptions[id] = true;
+                        resolve();
+                    };
+                    evtSource.onerror = () => {
+                        onClose();
+                        reject();
+                    };
                 });
-                evtSource.addEventListener('done', () => {
-                    evtSource.close();
-                    onClose();
-                });
-                evtSource.onerror = () => {
-                    onClose();
-                }
             }
         }
 

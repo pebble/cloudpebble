@@ -23,6 +23,7 @@ from ide.models.project import Project
 from utils import orchestrator
 from utils.bundle import TestBundle
 from utils.jsonview import json_view
+from utils.redis_helper import redis_client
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +36,7 @@ def _filtered_max(*args):
     return max(filtered) if len(filtered) > 0 else None
 
 
-def serialise_run(run, link_test=True, link_session=True):
+def serialise_run(run, link_test=True, link_session=True, include_subscribe_url=False):
     """ Prepare a TestRun for representation in JSON
 
     :param run: TestRun to represent
@@ -65,6 +66,10 @@ def serialise_run(run, link_test=True, link_session=True):
     result['date_added'] = str(run.session.date_added)
     if run.date_completed is not None:
         result['date_completed'] = str(run.date_completed)
+    if include_subscribe_url and run.code == TestCode.PENDING:
+        url = redis_client.get('qemu_subscribe_url_for_run_{}'.format(run.id))
+        if url:
+            result['subscribe_url'] = url
     return result
 
 
@@ -188,7 +193,7 @@ def get_test_run(request, project_id, run_id):
     """ Fetch a single test run """
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     run = get_object_or_404(TestRun, pk=run_id, session__project=project)
-    return {"data": serialise_run(run)}
+    return {"data": serialise_run(run, include_subscribe_url=True)}
 
 
 def get_test_sessions_latest(request, project_id):
@@ -290,6 +295,10 @@ def run_qemu_test(request, project_id, test_id):
 
     # Start the task in celery
     task = tasks.start_qemu_test.delay(session.id, callback_url, emu, server, token, update)
+
+    # Record the subscribe URL in redis so it can be fetched after a page reload
+    redis_client.set('qemu_subscribe_url_for_run_{}'.format(run.id), subscribe_url, ex=1200)
+
     return {
         'run_id': run.id,
         'session_id': session.id,
