@@ -7,10 +7,10 @@ CloudPebble.TestManager.Interface = (function(API) {
     };
 
     function SessionKindLabel(props) {
-        return (<div>{(props.long ?
+        return (<span>{(props.long ?
             (props.kind == 'live' ? gettext('Run in CloudPebble') : gettext('Batch run')) :
             (props.kind == 'live' ? gettext('Live') : gettext('Batch')))
-        }</div>)
+        }</span>)
     }
 
     /**
@@ -190,6 +190,7 @@ CloudPebble.TestManager.Interface = (function(API) {
         },
         renderRow: function(run) {
             const datestring = CloudPebble.Utils.FormatDatetime(run.date_added);
+            const {session, test} = this.props;
             const show_logs = function() {
                 if (run.test) {
                     API.Route.navigate('/logs', run.id);
@@ -197,15 +198,16 @@ CloudPebble.TestManager.Interface = (function(API) {
             };
             return (
                 <tr key={run.id} className="clickable" onClick={show_logs}>
-                    {!this.props.test && <td><RunTitle run={run}/></td>}
-                    {!this.props.session && <td>{datestring}</td>}
+                    {!test && <td><RunTitle run={run}/></td>}
+                    {!session && <td>{datestring}</td>}
                     <TestResultCell code={run.code}/>
                     <td>{run.platform}</td>
                 </tr>
             );
         },
         render: function() {
-            const paged_runs = this.page(this.props.runs);
+            const {runs, session, test} = this.props;
+            const paged_runs = this.page(runs);
             if (_.keys(paged_runs).length == 0) {
                 return (<p>{gettext('This test has never been run!')}</p>);
             }
@@ -217,8 +219,8 @@ CloudPebble.TestManager.Interface = (function(API) {
                     <table className="table" id="testmanager-run-table">
                         <thead>
                         <tr>
-                            {this.props.test ? null : <th>{gettext('Name')}</th>}
-                            {this.props.session ? null : <th>{gettext('Date')}</th>}
+                            {test ? null : <th>{gettext('Name')}</th>}
+                            {session ? null : <th>{gettext('Date')}</th>}
                             <th>{gettext('Status')}</th>
                             <th>{gettext('Platform')}</th>
                         </tr>
@@ -444,21 +446,26 @@ CloudPebble.TestManager.Interface = (function(API) {
         const run_completed = run.date_completed ? CloudPebble.Utils.FormatDatetime(run.date_completed) : null;
         return (
             <div className="testmanager-run">
-                <table>
+                <table className="infoTable">
                     <tbody>
                     <tr>
                         <th>{gettext('Test')}</th>
-                        <td><Anchor onClick={() => {API.Route.navigate('/tests', test.id)}}>{test.name}</Anchor>
+                        <td>
+                            <Anchor onClick={() => {API.Route.navigate('/tests', test.id)}}>{test.name}</Anchor>
+                            <span> on {run.platform}</span>
                         </td>
                     </tr>
                     <tr>
-                        <th>{gettext('Platform')}</th>
-                        <td> {run.platform} </td>
+                        <th>{gettext('Test Kind')}</th>
+                        <td>
+                            <SessionKindLabel long={true} kind={session.kind} />
+                        </td>
                     </tr>
                     <tr>
-                        <th>{gettext('Session')}</th>
-                        <td><Anchor
-                            onClick={() => {API.Route.navigate('/sessions', session.id)}}>{datestring}</Anchor></td>
+                        <th>{gettext('Start Date')}</th>
+                        <td>
+                            <Anchor onClick={() => {API.Route.navigate('/sessions', session.id)}}>{datestring}</Anchor>
+                        </td>
                     </tr>
                     {run_completed && <tr>
                         <th>{gettext('Completion date')}</th>
