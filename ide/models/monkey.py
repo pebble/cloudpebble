@@ -276,7 +276,7 @@ class ScreenshotFile(S3File):
 
     def save_file(self, stream, file_size=0):
         with BytesIO() as buff:
-            uncorrect(stream, buff, format='png')
+            uncorrect(stream, buff)
             buff.seek(0)
             data = buff.read()
             super(ScreenshotFile, self).save_string(data)

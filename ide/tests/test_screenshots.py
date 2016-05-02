@@ -1,8 +1,9 @@
 import json
+from itertools import chain
 from cStringIO import StringIO
 
 import mock
-from PIL import Image
+import png
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
@@ -102,11 +103,11 @@ class ScreenshotsTests(CloudpebbleTestCase):
         id = result[0]['files']['aplite']['id']
         contents = ScreenshotFile.objects.get(pk=id).get_contents()
         buff = StringIO(contents)
-        img1 = Image.open(buff)
-        img1.load()
-        img2 = Image.open(UNCORRECTED_PATH)
-        img2.load()
-        self.assertSequenceEqual(list(img1.getdata()), list(img2.getdata()))
+        img1 = png.Reader(buff)
+        data1 = img1.read()[2]
+        img2 = png.Reader(UNCORRECTED_PATH)
+        data2 = img2.read()[2]
+        self.assertSequenceEqual(list(chain.from_iterable(data1)), list(chain.from_iterable(data2)))
 
     def test_delete_test(self):
         """ Test that we can't get screenshots which were just deleted """

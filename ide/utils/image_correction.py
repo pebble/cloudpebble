@@ -1,5 +1,8 @@
-from PIL import Image
-from itertools import product, chain
+import itertools
+import shutil
+
+import png
+
 
 def _get_mapping(correct=False):
     mapping = {
@@ -73,35 +76,52 @@ def _get_mapping(correct=False):
     return mapping
 
 
-def _is_corrected(im, pixels):
-    pixel_list = [(pixel[0], pixel[1], pixel[2]) for pixel in (pixels[c] for c in product(*(range(x) for x in im.size)))]
+def _to_pixels(data, n=4):
+    return [list(itertools.izip_longest(*[iter(row)] * n)) for row in data]
+
+
+def _is_corrected(pixels):
     mapping = _get_mapping(correct=False)
     uncorrected = set(mapping.values())
     corrected = set(mapping.keys())
-    if all(p in corrected for p in pixel_list):
-        return True
-    if all(p in uncorrected for p in pixel_list):
-        return False
-    return None
+    is_corrected = is_uncorrected = True
+    for row in pixels:
+        for p in row:
+            no_alpha = (p[0], p[1], p[2])
+            if no_alpha not in corrected:
+                is_corrected = False
+            if no_alpha not in uncorrected:
+                is_uncorrected = False
+            if not is_corrected and not is_uncorrected:
+                return None
+    return is_corrected
 
 
-def _convert(file_from, file_out, correct=None, format=None):
-    im = Image.open(file_from)
-    pix = im.load()
-    corrected = _is_corrected(im, pix)
+def _convert(file_from, file_out, correct=None):
+    im = png.Reader(file_from)
+    w, h, data, info = im.read()
+    if info['bitdepth'] != 8 or info['planes'] < 3 or info['greyscale']:
+        raise ValueError(_("Invalid PNG format for screenshot"))
+    n = info['planes']
+    pixels = _to_pixels(data, n)
+    corrected = _is_corrected(pixels)
     if corrected == correct:
-        im.save(file_out, format=format)
+        shutil.copy(file_from, file_out)
     else:
+        output_pixels = []
         mapping = _get_mapping(correct=correct)
-        for x in range(im.size[0]):
-            for y in range(im.size[1]):
-                try:
-                    mapped = tuple(chain(mapping[pix[x, y][:3]], [pix[x, y][3]]))
-                except KeyError:
-                    continue
-                pix[x, y] = mapped
-        im.save(file_out, format=format)
+        for row in pixels:
+            out_row = []
+            for p in row:
+                rgb = p[:3]
+                mapped = mapping.get(rgb, rgb)
+                out_row += mapped
+                if n == 4:
+                    out_row.append(p[3])
+            output_pixels.append(out_row)
+        writer = png.Writer(w, h, bitdepth=8, alpha=True, greyscale=False)
+        writer.write(file_out, output_pixels)
 
 
-def uncorrect(file_from, file_out, format=None):
-    return _convert(file_from, file_out, correct=False, format=format)
+def uncorrect(file_from, file_out):
+    return _convert(file_from, file_out, correct=False)

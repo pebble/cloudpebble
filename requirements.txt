@@ -7,7 +7,6 @@ flup==1.0.3.dev-20110405
 psycopg2==2.6.1
 South==1.0.2
 qrcode==4.0.4
-Pillow==2.9.0
 pygithub==1.26.0
 python-social-auth==0.2.16
 redis==2.10.5
