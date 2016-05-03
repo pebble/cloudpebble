@@ -22,10 +22,10 @@ django-bower==5.0.4
 mailchimp==2.0.9
 
 # These are used for Heroku hosting setup.
-dj-static
-gunicorn
-dj-database-url
-newrelic
+dj-static==0.0.6
+gunicorn==19.3.0
+dj-database-url==0.3.0
+newrelic==2.50.0.39
 
 # These are in the SDK requirements.txt and included here to save on Heroku deploy time.
 freetype-py==1.0
