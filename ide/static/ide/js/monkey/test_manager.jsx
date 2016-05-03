@@ -4,7 +4,6 @@ CloudPebble.TestManager = (function() {
 
     function API(project_id) {
         const base_url = `/ide/project/${project_id}/`;
-        const noop = (x) => x;
         /**
          * A store keeps track of some state which is fetched from the server. Any time this state is changed,
          * it fires a 'changed' event.
@@ -126,14 +125,16 @@ CloudPebble.TestManager = (function() {
             /**
              * The ordering function should sort the store's data.
              */
-            ordering: noop,
+            ordering(data) {
+                return data;
+            },
             /**
              * Convert this object's state dictionary to a sorted data array.
              * @returns {{string: Array}} object with a single K:V pair containing the sorted data list
              */
             getState() {
                 const state = {};
-                state[this.key] = this.ordering(_.map(this.state, noop));
+                state[this.key] = this.ordering(_.map(this.state, (x)=>x));
                 return state;
             },
             /** Get the initial state of the store. */
@@ -181,7 +182,8 @@ CloudPebble.TestManager = (function() {
 
             /** Ensure that we don't send useless requests for completed test sessions */
             this.requestRequired = function(id) {
-                const session = (_.find(this.state, {id: id}));
+                const session = _.find(this.state, {id: id});
+                if (!session) return true;
                 // If we have not fetched all runs for this session
                 const got_all_runs = (_.filter(Runs.state, {session_id: id}).length == session.run_count);
                 // or the session is still pending
@@ -203,6 +205,7 @@ CloudPebble.TestManager = (function() {
             _.extend(this, Store);
             this.url = 'test_logs';
             this.key = 'logs';
+            this.name = 'Logs';
             this.state = {};
             this.subscriptions = {};
 
@@ -217,27 +220,21 @@ CloudPebble.TestManager = (function() {
             this.refresh = function(id) {
                 const self = this;
                 const url = `${base_url}${this.url}/${id}`;
-                return Ajax.Ajax(url).then((data) => {
-                    self.state[id] = {text: data, id};
-                    self.triggerLater('changed', self.getState());
-                }).catch((error) => {
-                    // If there is no log for the test and no subscription, it may be a running live test.
-                    // If it is, subscribe to its log output stream.
-                    if (error.status == 404) {
-                        if (!this.subscriptions[id]) {
-                            return Runs.refresh({id: id}).then((run) => {
-                                if (run.code == 0 && run.subscribe_url) {
-                                    return this.subscribe(run.id, run.session_id, run.subscribe_url);
-                                }
-                            });
+
+                return Runs.refresh({id: id}).then((run)=> {
+                    if (run.code == 0) {
+                        if (!this.subscriptions[id] && run.subscribe_url) {
+                            return this.subscribe(run.id, run.session_id, run.subscribe_url);
                         }
                     }
                     else {
-                        throw error;
+                        return Ajax.Ajax(url).then((data)=> {
+                            self.state[id] = {text: data, id};
+                            self.triggerLater('changed', self.getState());
+                        });
                     }
                 });
             };
-            this.get_extra_requests = (id) => Runs.refresh({id: id});
             this.subscribe = function(id, session_id, url) {
                 if (this.subscriptions[id]) return true;
                 return new Promise((resolve, reject) => {
@@ -324,7 +321,6 @@ CloudPebble.TestManager = (function() {
             let interval = null;
             let polling_request = null;
             let default_request_function = () => Promise.resolve();
-            const history = [[]];
             const routes_to_stores = {};
 
             /** make a key from a page/id pair */
@@ -399,7 +395,6 @@ CloudPebble.TestManager = (function() {
                 }
                 route = new_route;
                 setCached(page, id);
-                history.push(route);
                 this.triggerCurrent();
             };
 
@@ -407,8 +402,7 @@ CloudPebble.TestManager = (function() {
             this.up = function() {
                 setCurrentRequest(null);
                 route.pop();
-                history.push(route);
-                this.triggerCurrent();
+                return this.poll().then(()=>this.triggerCurrent());
             };
 
             /**
@@ -489,7 +483,8 @@ CloudPebble.TestManager = (function() {
                 return this.getRoute()
             };
 
-            this.refresh = noop;
+            /** There is no concept of refresh for the store. */
+            this.refresh = ()=>{};
         }
 
         var Tests = new TestsStore();
