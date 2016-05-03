@@ -8,8 +8,9 @@ import sys
 _environ = os.environ
 
 DEBUG = _environ.get('DEBUG', '') != ''
-
+VERBOSE = DEBUG or (_environ.get('VERBOSE', '') != '')
 TESTING = 'test' in sys.argv
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 ADMINS = (
@@ -291,7 +292,7 @@ LOGGING = {
         },
         'ide': {
             'handlers': ['console'],
-            'level': 'DEBUG' if DEBUG else 'INFO',
+            'level': 'DEBUG' if VERBOSE else 'INFO',
             'propagate': True
         },
         '': {
