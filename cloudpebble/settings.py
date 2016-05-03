@@ -7,6 +7,7 @@ import dj_database_url
 _environ = os.environ
 
 DEBUG = _environ.get('DEBUG', '') != ''
+VERBOSE = DEBUG or (_environ.get('VERBOSE', '') != '')
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -259,7 +260,7 @@ LOGGING = {
         },
         'ide': {
             'handlers': ['console'],
-            'level': 'DEBUG' if DEBUG else 'INFO',
+            'level': 'DEBUG' if VERBOSE else 'INFO',
             'propagate': True
         },
         '': {
