@@ -97,15 +97,31 @@ CloudPebble.TestManager = (function() {
             },
 
             /**
+             * This function should return false if all data needed to display the object referenced by the ID
+             * (for example, a test session and all of its test runs) are in a state which should never change
+             * (e.g. none are pending).
+             * @param id ID of the object to evaluate
+             * @returns {boolean} True if new GET requests may return different information.
+             */
+            requestRequired(id) {
+                return true;
+            },
+
+            /**
              * Make all the requests necessary to show an item from the sotre with a particular ID.
              * @param id ID of the object to fetch.
              * @returns {Promise} A promise composed of multiple promises/requests.
              */
             request(id) {
-                return Promise.all([
-                    this.refresh(id),
-                    this.get_extra_requests(id)
-                ]);
+                if (this.requestRequired(id)) {
+                    return Promise.all([
+                        this.refresh(id),
+                        this.get_extra_requests(id)
+                    ]);
+                }
+                else {
+                    return Promise.resolve();
+                }
             },
             /**
              * The ordering function should sort the store's data.
@@ -163,6 +179,17 @@ CloudPebble.TestManager = (function() {
                 });
             };
 
+            /** Ensure that we don't send useless requests for completed test sessions */
+            this.requestRequired = function(id) {
+                const session = (_.find(this.state, {id: id}));
+                // If we have not fetched all runs for this session
+                const got_all_runs = (_.filter(Runs.state, {session_id: id}).length == session.run_count);
+                // or the session is still pending
+                const is_pending = (session.status == 0);
+                // then we need to send new GET requests for it.
+                return is_pending || !got_all_runs;
+            };
+
             /** Update the runs for this session when we navigate to its page */
             this.get_extra_requests = (id) => Runs.refresh({session: id});
 
@@ -179,6 +206,14 @@ CloudPebble.TestManager = (function() {
             this.state = {};
             this.subscriptions = {};
 
+            /** A request is required if this or RunStore do not have information on the run, or if there is an active
+             * live log subscription for the run, or if its state is PENDING.
+             */
+            this.requestRequired = function(id) {
+                const run = _.find(Runs.state, {id: id});
+                return (!run || !this.state[id] || run.code == 0 || this.subscriptions[id]);
+            };
+
             this.refresh = function(id) {
                 const self = this;
                 const url = `${base_url}${this.url}/${id}`;
@@ -186,6 +221,8 @@ CloudPebble.TestManager = (function() {
                     self.state[id] = {text: data, id};
                     self.triggerLater('changed', self.getState());
                 }).catch((error) => {
+                    // If there is no log for the test and no subscription, it may be a running live test.
+                    // If it is, subscribe to its log output stream.
                     if (error.status == 404) {
                         if (!this.subscriptions[id]) {
                             return Runs.refresh({id: id}).then((run) => {
@@ -249,6 +286,12 @@ CloudPebble.TestManager = (function() {
             this.key = 'runs';
             this.name = "Runs";
             this.logs = {};
+
+            this.requestRequired = function(id) {
+                const run = Runs.find({id: id});
+                return (!run || run.code == 0);
+            };
+
             /**
              * Filters out runs with selected IDs or sessions, before fetching them again
              */
@@ -405,19 +448,28 @@ CloudPebble.TestManager = (function() {
 
             };
 
+            this.poll = function() {
+                const full_route = this.getRoute().route;
+                let request;
+                if (full_route.length > 0) {
+                    // If we're in a sub-page, get the data which that page needs
+                    const page = full_route[full_route.length - 1].page;
+                    const id = full_route[full_route.length - 1].id;
+                    request = requestPage(page, id);
+                }
+                else {
+                    // Otherwise fetch whatever is needed for the dashboard.
+                    request = default_request_function();
+                }
+                polling_request = request;
+                request.finally(()=> {polling_request = null});
+                return request;
+            };
+
             this.resumePolling = function() {
                 if (interval || polling_request) return;
                 interval = setInterval(() => {
-                    const full_route = this.getRoute().route;
-                    if (full_route.length > 0) {
-                        const page = full_route[full_route.length - 1].page;
-                        const id = full_route[full_route.length - 1].id;
-                        polling_request = requestPage(page, id);
-                    }
-                    else {
-                        polling_request = default_request_function();
-                    }
-                    polling_request.finally(()=> {polling_request = null});
+                    this.poll();
                 }, POLLING_PERIOD);
             };
 
@@ -462,7 +514,7 @@ CloudPebble.TestManager = (function() {
     function show_test_manager_pane() {
         const api = get_api();
         const ui = get_interface();
-        return api.Tests.refresh().then(() => {
+        return api.Route.poll().then(() => {
             CloudPebble.Sidebar.SuspendActive();
             if (!CloudPebble.Sidebar.Restore("testmanager")) {
                 ga('send', 'event', 'project', 'load testmanager');
@@ -475,7 +527,6 @@ CloudPebble.TestManager = (function() {
                 ui.render(pane.get(0), {project_id: PROJECT_ID});
                 api.Route.resumePolling();
             }
-            return api.Sessions.refresh();
         });
     }
 
