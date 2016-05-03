@@ -29,14 +29,14 @@ class ScreenshotsTests(CloudpebbleTestCase):
         url = reverse('ide:create_test_file', args=[self.project_id])
         return json.loads(self.client.post(url, {"name": "mytest"}).content)['file']['id']
 
-    def make_upload(self, name="file.png"):
-        with open(CORRECTED_PATH, 'rb') as f:
+    def make_upload(self, upload_path=CORRECTED_PATH, name="file.png"):
+        with open(upload_path, 'rb') as f:
             content = f.read()
             return SimpleUploadedFile(name, content, content_type="image/png")
 
-    def upload_screenshots(self, test_id):
-        file1 = self.make_upload()
-        file2 = self.make_upload()
+    def upload_screenshots(self, test_id, path1=CORRECTED_PATH, path2=CORRECTED_PATH):
+        file1 = self.make_upload(path1)
+        file2 = self.make_upload(path2)
 
         # Make a screenshot with two files
         screenshots = [{
@@ -94,12 +94,9 @@ class ScreenshotsTests(CloudpebbleTestCase):
         result3 = json.loads(self.client.get(url).content)["screenshots"]
         check(result3)
 
-    def test_show_screenshot(self):
-        """ Test that uploaded screenshots are correctly 'uncorrected' by the server """
-        # Test that the URL that the server gives us for a screenshot is a valid
-        # URL which leads to a PNG file which has been uncorrected.
+    def screenshot_correction_test(self, upload_path):
         test_id = self.make_test()
-        data, result = self.upload_screenshots(test_id)
+        data, result = self.upload_screenshots(test_id, upload_path, upload_path)
         id = result[0]['files']['aplite']['id']
         contents = ScreenshotFile.objects.get(pk=id).get_contents()
         buff = StringIO(contents)
@@ -108,6 +105,18 @@ class ScreenshotsTests(CloudpebbleTestCase):
         img2 = png.Reader(UNCORRECTED_PATH)
         data2 = img2.read()[2]
         self.assertSequenceEqual(list(chain.from_iterable(data1)), list(chain.from_iterable(data2)))
+
+    def test_show_uncorrected_screenshot(self):
+        """ Test that uploaded 'correct' screenshots are uncorrected by the server """
+        # Test that the URL that the server gives us for a screenshot is a valid
+        # URL which leads to a PNG file which has been uncorrected.
+        self.screenshot_correction_test(CORRECTED_PATH)
+
+    def test_show_unmodified_screenshot(self):
+        """ Test that uploaded 'uncorrected' screenshots are unchanged by the server """
+        # Test that the URL that the server gives us for a screenshot is a valid
+        # URL which leads to a PNG file which has been uncorrected.
+        self.screenshot_correction_test(UNCORRECTED_PATH)
 
     def test_delete_test(self):
         """ Test that we can't get screenshots which were just deleted """

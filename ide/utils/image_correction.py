@@ -106,7 +106,8 @@ def _convert(file_from, file_out, correct=None):
     pixels = _to_pixels(data, n)
     corrected = _is_corrected(pixels)
     if corrected == correct:
-        shutil.copy(file_from, file_out)
+        file_from.seek(0)
+        file_out.write(file_from.read())
     else:
         output_pixels = []
         mapping = _get_mapping(correct=correct)
