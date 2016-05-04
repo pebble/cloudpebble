@@ -107,8 +107,8 @@ CloudPebble.Editor = (function() {
         // See if we already had it open.
         CloudPebble.Sidebar.SuspendActive();
         if(CloudPebble.Sidebar.Restore(sidebar_id)) {
-            if (file.target != 'test' || !CloudPebble.SidePane.RightPane.restorePane('monkey-screenshots', file.id)) {
-                CloudPebble.SidePane.RightPane.setSize('0');
+            if (file.target != 'test' || !CloudPebble.SidePane.restorePane('monkey-screenshots', file.id)) {
+                CloudPebble.SidePane.setSize(0);
             }
             if (resume_fullscreen) {
                 fullscreen(open_codemirrors[file.id], true);
@@ -505,8 +505,8 @@ CloudPebble.Editor = (function() {
                         fullscreen(code_mirror, false);
                         resume_fullscreen = true;
                     }
-                    CloudPebble.SidePane.RightPane.suspendActivePane();
-                    CloudPebble.SidePane.RightPane.setSize(0);
+                    CloudPebble.SidePane.suspendActivePane();
+                    CloudPebble.SidePane.setSize(0);
                 },
                 onDestroy: function() {
                     if(!was_clean) {
@@ -519,7 +519,7 @@ CloudPebble.Editor = (function() {
 
             if (file_kind == 'monkey') {
                 screenshot_pane = new CloudPebble.MonkeyScreenshots.ScreenshotPane(file.id);
-                CloudPebble.SidePane.RightPane.addPane(screenshot_pane.getPane(), 'monkey-screenshots', file.id);
+                CloudPebble.SidePane.addPane(screenshot_pane.getPane(), 'monkey-screenshots', file.id);
                 code_mirror.screenshot_pane = screenshot_pane;
             }
 
@@ -834,6 +834,7 @@ CloudPebble.Editor = (function() {
             var error_box = $('<div class="alert alert-error"></div>');
             error_box.text(interpolate(gettext("Something went wrong: %s"), [error.message]));
             CloudPebble.Sidebar.SetActivePane(error_box, {id: ''});
+            throw error;
         }).finally(function() {
             CloudPebble.ProgressBar.Hide();
         });

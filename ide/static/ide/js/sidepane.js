@@ -1,26 +1,22 @@
 CloudPebble.SidePane = (function() {
-    var vertical = 1;
-    var horizontal = 2;
-
     /**
      * A pane container
-     * @param orientation either CloudPebble.SidePane.Horizontal or CloudPebble.SidePane.Vertical
+     * @param {String} container CSS selector for the side pane's element
+     * @param {String} main_pane CSS selector for the primary pane's element
      * @constructor
      */
-    function SidePane(orientation) {
-        var self = this;
+    function SidePane(container, main_pane) {
         var active_pane;
         var suspended_panes = {};
         var active_kind;
         var active_id;
-        var container;
-        var main_pane;
 
         _.extend(this, Backbone.Events);
 
         var get_suspended_pane = function(kind, id) {
             return suspended_panes[kind+'-'+id];
         };
+
         var set_suspended_pane = function(kind, id, pane) {
             active_pane = null;
             active_id = null;
@@ -32,10 +28,23 @@ CloudPebble.SidePane = (function() {
             });
         };
 
-        this.getSuspendedPanes = function() {
-            return suspended_panes;
+        /**
+         * Compute the correct min-size for #parent-pane given a desired panel size and current orientation.
+         * The size takes into account the min-width/min-height of the main pane.
+         *
+         * @param {Number} panel_size Desired side panel size
+         * @returns {Number} new min width or height for #$parent-pane
+         */
+        var compute_outer_size = function(panel_size) {
+            return panel_size + parseInt($(main_pane).css('min-width'), 10);
         };
 
+        /**
+         * Attach a new pane to the sidebar.
+         * @param {jQuery} pane Element to attach
+         * @param {String} kind String name for the kind of pane
+         * @param {Number} id Numeric ID for the pane
+         */
         this.attachPane = function(pane, kind, id) {
             $(container).append(pane);
             active_kind = kind;
@@ -45,6 +54,9 @@ CloudPebble.SidePane = (function() {
             pane.trigger('attached');
         };
 
+        /**
+         * Suspend the currently active pane. Causes it to fire a "detached" event.
+         */
         this.suspendActivePane = function() {
             if (active_pane) {
                 active_pane.detach();
@@ -53,6 +65,12 @@ CloudPebble.SidePane = (function() {
             }
         };
 
+        /**
+         * Restore a previously suspended pane
+         * @param kind String name for the kind of pane
+         * @param id Numeric ID for the pane
+         * @returns {jQuery|Boolean} The restored pane, or false if the pane was not found
+         */
         this.restorePane = function(kind, id) {
             if (active_kind == kind && active_id == id) {
                 return active_pane;
@@ -72,57 +90,44 @@ CloudPebble.SidePane = (function() {
             }
         };
 
+        /**
+         * Suspend the currently active pane, and attach a new pane.
+         * @param pane
+         * @param kind
+         * @param id
+         */
         this.addPane = function(pane, kind, id) {
-            var self = this;
             this.suspendActivePane();
             this.attachPane(pane, kind, id);
             pane.on('resize', function(event, size) {
-                self.setSize(size);
-            });
+                this.setSize(size);
+            }.bind(this));
         };
 
+        /**
+         * Set the size of the sidepane container.
+         * @param {Number} size desired size
+         */
         this.setSize = function(size) {
-            if (orientation === vertical) {
-                $(container).css({width: size});
-                $(main_pane).css({right: size});
-            }
-            else if (orientation === horizontal) {
-                $(container).css({height: size});
-                $(main_pane).css({bottom: size});
-            }
-            else {
-                throw "Invalid orientation";
-            }
-            $(container).trigger('resize', [size]);
-            $(main_pane).trigger('resize', [size]);
+            var size_str = (size == 0 ? "0" : size+"px");
+            var outer_size_str = compute_outer_size(size)+"px";
+            $(container).css({width: size_str});
+            $(main_pane).css({right: size_str});
+            $(container).parent().css({"min-width": outer_size_str});
+            $(container).trigger('resize', [size_str]);
+            $(main_pane).trigger('resize', [size_str]);
         };
 
-        this.init = function(set_container, page_main_pane) {
-            container = set_container;
-            main_pane = page_main_pane;
-
-            $(container).on('destroy', ':first-child', function(event) {
-                if ($(event.target).is(active_pane)) {
-                    // The user is destroying the active pane
-                    self.suspendActivePane();
-                    self.setSize(0);
-                }
-                destroy_suspended_pane($(event.target));
-            });
-        };
-
+        $(container).on('destroy', ':first-child', function(event) {
+            if ($(event.target).is(active_pane)) {
+                // The user is destroying the active pane
+                this.suspendActivePane();
+                this.setSize(0);
+            }
+            destroy_suspended_pane($(event.target));
+        }.bind(this));
+        this.setSize(0);
     }
-
-    return {
-        Orientations: {
-            Vertical: vertical,
-            Horizontal: horizontal
-        },
-        SidePane: SidePane,
-        RightPane: new SidePane(vertical),
-        Init: function() {
-            CloudPebble.SidePane.RightPane.init('#right-pane', '#main-pane');
-            CloudPebble.SidePane.RightPane.setSize('0');
-        }
-    }
+    
+    return new SidePane('#right-pane', '#main-pane');
 })();

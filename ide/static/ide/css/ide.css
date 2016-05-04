@@ -118,6 +118,8 @@ ul.nav-pills {
     left: 0;
     right: 0;
     overflow: auto;
+    min-width: 200px;
+    min-height: 200px;
 }
 
 /* Sidebar */
@@ -1269,11 +1271,7 @@ button#add-filter {
     bottom: 0;
     position: absolute;
     border-left: #444 3px solid;
-    /*transition:width 300ms ease-in-out, height 300ms ease-in-out;*/
 }
-/*#main-pane {*/
-    /*transition: right 300ms ease-in-out, height 300ms ease-in-out;*/
-/*}*/
 
 .monkey-pane {
     padding: 10px;

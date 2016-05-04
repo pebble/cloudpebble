@@ -373,7 +373,7 @@ CloudPebble.MonkeyScreenshots = (function() {
             this.supported_platforms = ['aplite', 'basalt', 'chalk'];
             this.single = false;
             // Set the initial size of the side pane.
-            $(pane).width(this.getSize());
+            $(pane).width(this.getSize()+'px');
             _.extend(this, Backbone.Events);
         }
 
@@ -388,7 +388,7 @@ CloudPebble.MonkeyScreenshots = (function() {
                 platforms
             });
             // When the user clicks a platform title, this causes the SidePane to resize appropriately.
-            $(this.pane).innerWidth(this.getSize());
+            $(this.pane).innerWidth(this.getSize()+'px');
             this.pane.trigger('resize', this.getSize());
         }
 
@@ -410,7 +410,7 @@ CloudPebble.MonkeyScreenshots = (function() {
 
         getSize() {
             const platforms = (this.single ? [this.single] : this.supported_platforms);
-            return `${30 + platforms.length * 200}px`;
+            return 30 + platforms.length * 200;
         }
     }
 
