@@ -10,10 +10,23 @@ CloudPebble.FuzzyPrompt = (function() {
     var selection_was_made;
     var opened = false;
     var prompt_kind = null;
-    var COMMANDS_ENABLED = true;
 
     // While manual is false, always highlight the first item
     var manual = false;
+
+    /** A FuzzyPrompt Item.
+     *
+     * @param opts Item parameters;
+     * @constructor
+     */
+    var Item = function(opts) {
+        this.name = opts.name;
+        this.callback = opts.callback;
+        this.object = opts.object;
+        this.id = opts.id;
+        this.menu_item = opts.menu_item;
+        this.rank = opts.rank
+    };
 
     var init = function() {
         if (!initialised) {
@@ -33,17 +46,17 @@ CloudPebble.FuzzyPrompt = (function() {
             prompt = $('#fuzzy-prompt');
             results = $('#fuzzy-results');
 
-            var modifier =  /Mac/.test(navigator.platform) ? 'metaKey' : 'ctrlKey';
+            var modifier = /Mac/.test(navigator.platform) ? 'metaKey' : 'ctrlKey';
 
             // Register ctrl-p and ctrl-shift-p
             $(document).keydown(function(e) {
                 if ((e[modifier]) && e.keyCode == 80) {
                     e.preventDefault();
-                    if (COMMANDS_ENABLED && e.shiftKey) {
+                    if (e.shiftKey) {
                         input.attr('placeholder', gettext("Enter Command"));
                         show_prompt('commands');
                     }
-                    if (!e.shiftKey) {
+                    else if (!e.shiftKey) {
                         input.attr('placeholder', gettext("Search Files"));
                         show_prompt('files');
                     }
@@ -123,7 +136,7 @@ CloudPebble.FuzzyPrompt = (function() {
     var move = function(jump) {
         var selected = item_list[selected_id];
         var children = results.children();
-        var new_rank = Math.max(Math.min(selected.rank + jump, children.length-1), 0);
+        var new_rank = Math.max(Math.min(selected.rank + jump, children.length - 1), 0);
         var new_selection = _.where(item_list, {rank: new_rank})[0];
         manual = true;
         highlight_item(new_selection);
@@ -176,7 +189,7 @@ CloudPebble.FuzzyPrompt = (function() {
         _.each(sources, function(source) {
             if (source.kind == kind) {
                 _.each(source.list_func(), function (object, name) {
-                    name = (object.name ? object.name: name);
+                    name = (!_.isFunction(object) && object.name ? object.name : name);
                     var menu_item = $("<div></div>");
                     menu_item.text(name).appendTo(results);
                     // Set up the menu item handler
@@ -187,14 +200,14 @@ CloudPebble.FuzzyPrompt = (function() {
                         });
                     })();
 
-                    item_list.push({
+                    item_list.push(new Item({
                         name: name,
                         callback: source.callback,
                         object: object,
                         id: id,
                         menu_item: menu_item,
                         rank: id
-                    });
+                    }));
                     id++;
                 });
             }
@@ -205,8 +218,10 @@ CloudPebble.FuzzyPrompt = (function() {
         highlight_item(_.findWhere(item_list, {name: default_item}) || item_list[0]);
     };
 
-    // Highlight an item in the suggestions list.
-    // if enter is hit, the highlighted item gets selected.
+    /** Highlight an item in the suggestions list. If enter is hit, the highlighted item gets selected.
+     *
+     * @param {Item} item An item object.
+     */
     var highlight_item = function(item) {
         if (_.isObject(item)) {
             highlight_item_by_id(item.id);
@@ -259,31 +274,40 @@ CloudPebble.FuzzyPrompt = (function() {
     };
 
     return {
-        // Let fuzzy-prompt know the name of the currently opened file
-        // to use as a default when nothing has been typed.
+        /** Let fuzzy-prompt know the name of the currently open file/location to use as a default
+         * when nothing has been typed.
+         *
+         * @param {string} item_name The name of the command to default to.
+         */
         SetCurrentItemName: function(item_name) {
             if (!opened) {
                 default_item = item_name;
             }
         },
+        /** Show the fuzzy prompt. */
         Show: function() {
             show_prompt();
         },
-        /* Add a data source.
-            kind: 'files' or 'commands'
-            item_getter: a function which should return a dict of items with string name keys
-            select_callback: a function to call when one of these items is selected
+        /** Add a data source.
+         *
+         * @param {string} kind 'files' or 'commands'
+         * @param {Function} item_getter A function which should return a dict of items with string name keys
+         * @param {Function} select_callback A function to call when one of these items is selected
          */
         AddDataSource: function(kind, item_getter, select_callback) {
             sources.push({list_func: item_getter, callback: select_callback, kind: kind});
         },
-        /* Add a set of commands
-            commands: a dict of names->functions
+        /** Add a set of commands
+         *
+         * @param {Object.<string, Function>} commands A dictionary of names->functions
          */
         AddCommands: function(commands) {
             add_commands(commands);
         },
-        /* Add a new set of commands, replacing any identically named commands */
+        /** Add a new set of commands, replacing any identically named commands
+         *
+         * @param {Object.<string, Function>} commands A dictionary of names->functions
+         */
         ReplaceCommands: function(commands) {
             // For each new command, look through the data source for
             // commands with the same name. If we find any, replace their functions
@@ -309,12 +333,6 @@ CloudPebble.FuzzyPrompt = (function() {
             // At the end, we add any commands in the set which were new and note replacements.
             var filtered = _.omit(commands, all_replaced);
             add_commands(filtered);
-        },
-        DeleteCommands: function(names) {
-            _.each(sources, function(source) {
-                var new_list = _.omit(source.list_func(), names);
-                source.list_func = function() {return new_list; };
-            });
         },
         Init: function() {
             init();
