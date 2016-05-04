@@ -19,7 +19,7 @@ fake_s3 = FakeS3()
 
 
 @mock.patch('ide.models.files.s3', fake_s3)
-class TestsSource(CloudpebbleTestCase):
+class TestSource(CloudpebbleTestCase):
     """Tests for the Tests models"""
 
     def setUp(self):
@@ -102,7 +102,6 @@ class TestsSource(CloudpebbleTestCase):
         loaded = self.load_file(info['id'])
         self.assertEqual(new_content, loaded['source'])
 
-
     def test_create_with_invalid_target_throws_error(self):
         """ Test that attempting to create a file with an invalid target throws an error """
         with self.assertRaises(ValidationError):
@@ -136,5 +135,5 @@ class TestsSource(CloudpebbleTestCase):
         name2 = "name2.c"
         info = self.create_file(name1)
         loaded = self.load_file(info['id'])
-        self.rename_file(info['id'], int(loaded['modified']-5000), name1, name2, success=False)
+        self.rename_file(info['id'], int(loaded['modified'] - 5000), name1, name2, success=False)
         self.assertIn(name1, self.get_source_names())
