@@ -484,7 +484,7 @@ CloudPebble.TestManager = (function() {
             };
 
             /** There is no concept of refresh for the store. */
-            this.refresh = ()=>{};
+            this.refresh = ()=> {};
         }
 
         var Tests = new TestsStore();
@@ -541,8 +541,7 @@ CloudPebble.TestManager = (function() {
                 .then(show_test_manager_pane);
         },
         Init() {
-            const commands = {};
-            commands[gettext('Test Manager')] = CloudPebble.TestManager.Show;
+            const commands = {[gettext('Test Manager')]: CloudPebble.TestManager.Show};
             CloudPebble.FuzzyPrompt.AddCommands(commands);
         }
     }
