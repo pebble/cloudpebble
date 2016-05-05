@@ -304,6 +304,10 @@ CloudPebble.Editor = (function() {
                                 require: true,
                                 ajax: true
                             });
+                        } else if (CloudPebble.ProjectInfo.app_modern_multi_js) {
+                            _.extend(jshint_globals, {
+                                require: true
+                            });
                         }
 
                         var success = JSHINT(code_mirror.getValue(), {
