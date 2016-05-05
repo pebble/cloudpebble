@@ -306,7 +306,9 @@ CloudPebble.Editor = (function() {
                             });
                         } else if (CloudPebble.ProjectInfo.app_modern_multi_js) {
                             _.extend(jshint_globals, {
-                                require: true
+                                require: true,
+                                exports: true,
+                                module: true
                             });
                         }
 
