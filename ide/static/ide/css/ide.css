@@ -17,6 +17,10 @@ strong {
     color: white;
 }
 
+#shortcut-prompt table {
+    width: 100%;
+}
+
 .project-container {
     position: absolute;
     top: 50px;
