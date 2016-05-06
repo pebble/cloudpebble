@@ -49,17 +49,20 @@ CloudPebble.FuzzyPrompt = (function() {
             var modifier = /Mac/.test(navigator.platform) ? 'metaKey' : 'ctrlKey';
 
             // Register ctrl-p and ctrl-shift-p
-            $(document).keydown(function(e) {
-                if ((e[modifier]) && e.keyCode == 80) {
-                    e.preventDefault();
-                    if (e.shiftKey) {
-                        input.attr('placeholder', gettext("Enter Command"));
-                        show_prompt('commands');
-                    }
-                    else if (!e.shiftKey) {
+            CloudPebble.GlobalShortcuts.SetShortcutHandlers({
+                'PlatformCmd-P': {
+                    func: function () {
                         input.attr('placeholder', gettext("Search Files"));
                         show_prompt('files');
-                    }
+                    },
+                    name: gettext("Find File")
+                },
+                'Shift-PlatformCmd-P': {
+                    func: function () {
+                        input.attr('placeholder', gettext("Enter Command"));
+                        show_prompt('commands');
+                    },
+                    name: gettext("Find Action")
                 }
             });
 

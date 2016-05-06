@@ -97,7 +97,7 @@ CloudPebble.Editor = (function() {
                 settings.extraKeys = {'Ctrl-Space': 'autocomplete'};
             }
             if(!is_js && USER_SETTINGS.autocomplete !== 0) {
-                settings.extraKeys['Tab'] = function() {
+                settings.extraKeys['Tab'] = function selectNextArgument() {
                     var marks = code_mirror.getAllMarks();
                     var cursor = code_mirror.getCursor();
                     var closest = null;
@@ -130,7 +130,7 @@ CloudPebble.Editor = (function() {
             if(USER_SETTINGS.use_spaces) {
                 var spaces = Array(settings.indentUnit + 1).join(' ');
                 var oldTab = settings.extraKeys['Tab'];
-                settings.extraKeys['Tab'] = function(cm) {
+                settings.extraKeys['Tab'] = function indentMoreOrSelectNextArgument(cm) {
                     // If we already overrode tab, check that one.
                     if(oldTab) {
                         if(oldTab(cm) !== CodeMirror.Pass) {
@@ -180,10 +180,10 @@ CloudPebble.Editor = (function() {
                     return CodeMirror.Pass;
                 };
             }
-            settings.extraKeys['Cmd-/'] = function(cm) {
+            settings.extraKeys['Cmd-/'] = function toggleComment(cm) {
                 CodeMirror.commands.toggleComment(cm);
             };
-            settings.extraKeys['Ctrl-/']  = function(cm) {
+            settings.extraKeys['Ctrl-/']  = function toggleComment(cm) {
                 CodeMirror.commands.toggleComment(cm);
             };
             if(is_js) {
@@ -227,10 +227,9 @@ CloudPebble.Editor = (function() {
 
             var help_shortcut = /Mac/.test(navigator.platform) ? 'Shift-Cmd-Ctrl-/' : 'Shift-Ctrl-Alt-/';
 
-            settings.extraKeys[help_shortcut] = function(cm) {
+            settings.extraKeys[help_shortcut] = function lookupFunction(cm) {
                 var pos = cm.cursorCoords();
                 var token = code_mirror.getTokenAt(cm.getCursor());
-
                 create_popover(cm, token.string, pos.left, pos.top);
             };
 
@@ -733,7 +732,7 @@ CloudPebble.Editor = (function() {
             cm.showHint({hint: CloudPebble.Editor.Autocomplete.complete, completeSingle: false});
         };
         CodeMirror.commands.save = function(cm) {
-            cm.cloudpebble_save().catch(alert);;
+            cm.cloudpebble_save().catch(alert);
         };
         CodeMirror.commands.saveAll = function(cm) {
             save_all().catch(alert);
