@@ -477,11 +477,12 @@ def generate_pebblejs_manifest_dict(project, resources):
             "watchface": project.app_is_watchface,
             'hiddenApp': project.app_is_hidden
         },
-        "targetPlatforms": ["aplite", "basalt"],
         "appKeys": {},
         "resources": generate_pebblejs_resource_dict(resources),
         "projectType": "pebblejs",
         "sdkVersion": "3",
     }
+    if project.app_platforms:
+        manifest["targetPlatforms"] = project.app_platform_list
 
     return manifest

@@ -12,10 +12,10 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import SuspiciousOperation
 from django.db import transaction
-
 from ide.utils.project import find_project_root
 from ide.utils.sdk import generate_manifest, generate_wscript_file, generate_jshint_file, dict_to_pretty_json
 from utils.td_helper import send_td_event
+
 from ide.models.files import SourceFile, ResourceFile, ResourceIdentifier, ResourceVariant
 from ide.models.project import Project
 import utils.s3 as s3
@@ -166,130 +166,114 @@ def do_import_archive(project_id, archive, delete_project=False):
                         raise Exception("Excessively large compressed file.")
                     return entry_filename
 
-                # Now iterate over the things we found
+                # Now iterate over the things we found, filter out invalid files and look for the manifest.
+                filtered_contents = []
+                manifest_entry = None
+                for entry in contents:
+                    filename = make_valid_filename(entry)
+                    if not filename:
+                        continue
+                    if filename == MANIFEST:
+                        manifest_entry = entry
+                    else:
+                        filtered_contents.append((filename, entry))
+                if not manifest_entry:
+                    # If this ever happens, find_project_root() is broken.
+                    raise Exception(_("No manifest file found"))
+
                 with transaction.atomic():
-                    for entry in contents:
-                        filename = make_valid_filename(entry)
-                        if not filename:
-                            continue
+                    # We have a resource map! We can now try importing things from it.
+                    with z.open(manifest_entry) as f:
+                        m = json.loads(f.read())
 
-                        if filename == MANIFEST:
-                            # We have a resource map! We can now try importing things from it.
-                            with z.open(entry) as f:
-                                m = json.loads(f.read())
+                    project.app_uuid = m['uuid']
+                    project.app_short_name = m['shortName']
+                    project.app_long_name = m['longName']
+                    project.app_company_name = m['companyName']
+                    project.app_version_label = m['versionLabel']
+                    project.sdk_version = m.get('sdkVersion', '2')
+                    project.app_is_watchface = m.get('watchapp', {}).get('watchface', False)
+                    project.app_is_hidden = m.get('watchapp', {}).get('hiddenApp', False)
+                    project.app_is_shown_on_communication = m.get('watchapp', {}).get('onlyShownOnCommunication', False)
+                    project.app_capabilities = ','.join(m.get('capabilities', []))
+                    project.app_modern_multi_js = m.get('enableMultiJS', False)
+                    if 'targetPlatforms' in m:
+                        project.app_platforms = ','.join(m['targetPlatforms'])
+                    project.app_keys = dict_to_pretty_json(m.get('appKeys', {}))
+                    project.project_type = m.get('projectType', 'native')
+                    if project.project_type not in [x[0] for x in Project.PROJECT_TYPES]:
+                        raise Exception("Illegal project type %s" % project.project_type)
+                    media_map = m['resources']['media']
 
-                            project.app_uuid = m['uuid']
-                            project.app_short_name = m['shortName']
-                            project.app_long_name = m['longName']
-                            project.app_company_name = m['companyName']
-                            project.app_version_label = m['versionLabel']
-                            project.sdk_version = m.get('sdkVersion', '2')
-                            project.app_is_watchface = m.get('watchapp', {}).get('watchface', False)
-                            project.app_is_hidden = m.get('watchapp', {}).get('hiddenApp', False)
-                            project.app_is_shown_on_communication = m.get('watchapp', {}).get('onlyShownOnCommunication', False)
-                            project.app_capabilities = ','.join(m.get('capabilities', []))
-                            project.app_modern_multi_js = m.get('enableMultiJS', False)
-                            if 'targetPlatforms' in m:
-                                project.app_platforms = ','.join(m['targetPlatforms'])
-                            project.app_keys = dict_to_pretty_json(m.get('appKeys', {}))
-                            project.project_type = m.get('projectType', 'native')
-                            if project.project_type not in [x[0] for x in Project.PROJECT_TYPES]:
-                                raise Exception("Illegal project type %s" % project.project_type)
-                            media_map = m['resources']['media']
+                    tag_map = {v: k for k, v in ResourceVariant.VARIANT_STRINGS.iteritems() if v}
 
-                            tag_map = {v: k for k, v in ResourceVariant.VARIANT_STRINGS.iteritems() if v}
+                    desired_resources = {}
+                    resources_files = {}
+                    resource_variants = {}
+                    file_exists_for_root = {}
 
-                            desired_resources = {}
-                            resources_files = {}
-                            resource_variants = {}
-                            file_exists_for_root = {}
+                    # Go through the media map and look for resources
+                    for resource in media_map:
+                        file_name = resource['file']
+                        identifier = resource['name']
+                        # Pebble.js and simply.js both have some internal resources that we don't import.
+                        if project.project_type in {'pebblejs', 'simplyjs'}:
+                            if identifier in {'MONO_FONT_14', 'IMAGE_MENU_ICON', 'IMAGE_LOGO_SPLASH', 'IMAGE_TILE_SPLASH'}:
+                                continue
+                        tags, root_file_name = get_filename_variant(file_name, tag_map)
+                        if (len(tags) != 0):
+                            raise ValueError("Generic resource filenames cannot contain a tilde (~)")
+                        if file_name not in desired_resources:
+                            desired_resources[root_file_name] = []
 
-                            # Go through the media map and look for resources
-                            for resource in media_map:
-                                file_name = resource['file']
-                                identifier = resource['name']
-                                # Pebble.js and simply.js both have some internal resources that we don't import.
-                                if project.project_type in {'pebblejs', 'simplyjs'}:
-                                    if identifier in {'MONO_FONT_14', 'IMAGE_MENU_ICON', 'IMAGE_LOGO_SPLASH', 'IMAGE_TILE_SPLASH'}:
-                                        continue
-                                tags, root_file_name = get_filename_variant(file_name, tag_map)
-                                if (len(tags) != 0):
-                                    raise ValueError("Generic resource filenames cannot contain a tilde (~)")
-                                if file_name not in desired_resources:
-                                    desired_resources[root_file_name] = []
+                        desired_resources[root_file_name].append(resource)
+                        file_exists_for_root[root_file_name] = False
 
-                                desired_resources[root_file_name].append(resource)
-                                file_exists_for_root[root_file_name] = False
+                    # Go through the zip file process all resource and source files.
+                    for filename, entry in filtered_contents:
+                        if filename.startswith(RES_PATH):
+                            base_filename = filename[len(RES_PATH) + 1:]
+                            # Let's just try opening the file
+                            try:
+                                extracted = z.open("%s%s/%s" % (base_dir, RES_PATH, base_filename))
+                            except KeyError:
+                                logging.debug("Failed to open %s", base_filename)
+                                continue
 
-                            for zipitem in contents:
-                                # Let's just try opening the file
-                                filename = make_valid_filename(zipitem)
-                                if filename is False or not filename.startswith(RES_PATH):
-                                    continue
-                                filename = filename[len(RES_PATH) + 1:]
-                                try:
-                                    extracted = z.open("%s%s/%s" % (base_dir, RES_PATH, filename))
-                                except KeyError:
-                                    logger.debug("Failed to open %s", filename)
-                                    continue
+                            # Now we know the file exists and is in the resource directory - is it the one we want?
+                            tags, root_file_name = get_filename_variant(base_filename, tag_map)
+                            tags_string = ",".join(str(int(t)) for t in tags)
 
-                                # Now we know the file exists and is in the resource directory - is it one we want?
-                                tags, root_file_name = get_filename_variant(filename, tag_map)
-                                tags_string = ",".join(str(int(t)) for t in tags)
+                            logging.debug("Importing file %s with root %s ", entry.filename, root_file_name)
 
-                                logger.debug("Importing file %s with root %s ", zipitem.filename, root_file_name)
+                            if root_file_name in desired_resources:
+                                medias = desired_resources[root_file_name]
+                                logging.debug("Looking for variants of %s", root_file_name)
 
-                                if root_file_name in desired_resources:
-                                    medias = desired_resources[root_file_name]
-                                    logger.debug("Looking for variants of %s", root_file_name)
+                                # Because 'kind' and 'is_menu_icons' are properties of ResourceFile in the database,
+                                # we just use the first one.
+                                resource = medias[0]
+                                # Make only one resource file per base resource.
+                                if root_file_name not in resources_files:
+                                    kind = resource['type']
+                                    is_menu_icon = resource.get('menuIcon', False)
+                                    resources_files[root_file_name] = ResourceFile.objects.create(
+                                        project=project,
+                                        file_name=os.path.basename(root_file_name),
+                                        kind=kind,
+                                        is_menu_icon=is_menu_icon)
 
-                                    # Because 'kind' and 'is_menu_icons' are properties of ResourceFile in the database,
-                                    # we just use the first one.
-                                    resource = medias[0]
-                                    # Make only one resource file per base resource.
-                                    if root_file_name not in resources_files:
-                                        kind = resource['type']
-                                        is_menu_icon = resource.get('menuIcon', False)
-                                        resources_files[root_file_name] = ResourceFile.objects.create(
-                                            project=project,
-                                            file_name=os.path.basename(root_file_name),
-                                            kind=kind,
-                                            is_menu_icon=is_menu_icon)
-
-                                    # But add a resource variant for every file
-                                    logger.debug("Adding variant %s with tags [%s]", root_file_name, tags_string)
-                                    actual_file_name = resource['file']
-                                    resource_variants[actual_file_name] = ResourceVariant.objects.create(resource_file=resources_files[root_file_name], tags=tags_string)
-                                    resource_variants[actual_file_name].save_file(extracted)
-                                    file_exists_for_root[root_file_name] = True
-
-                            # Now add all the resource identifiers
-                            for root_file_name in desired_resources:
-                                for resource in desired_resources[root_file_name]:
-                                    target_platforms = json.dumps(resource['targetPlatforms']) if 'targetPlatforms' in resource else None
-                                    ResourceIdentifier.objects.create(
-                                        resource_file=resources_files[root_file_name],
-                                        resource_id=resource['name'],
-                                        target_platforms=target_platforms,
-                                        # Font options
-                                        character_regex=resource.get('characterRegex', None),
-                                        tracking=resource.get('trackingAdjust', None),
-                                        compatibility=resource.get('compatibility', None),
-                                        # Bitmap options
-                                        memory_format=resource.get('memoryFormat', None),
-                                        storage_format=resource.get('storageFormat', None),
-                                        space_optimisation=resource.get('spaceOptimization', None)
-                                    )
-
-                            # Check that at least one variant of each specified resource exists.
-                            for root_file_name, loaded in file_exists_for_root.iteritems():
-                                if not loaded:
-                                    raise KeyError("No file was found to satisfy the manifest filename: {}".format(root_file_name))
+                                # But add a resource variant for every file
+                                logger.debug("Adding variant %s with tags [%s]", root_file_name, tags_string)
+                                actual_file_name = resource['file']
+                                resource_variants[actual_file_name] = ResourceVariant.objects.create(resource_file=resources_files[root_file_name], tags=tags_string)
+                                resource_variants[actual_file_name].save_file(extracted)
+                                file_exists_for_root[root_file_name] = True
 
                         elif filename.startswith(SRC_DIR):
                             if (not filename.startswith('.')) and (filename.endswith('.c') or filename.endswith('.h') or filename.endswith('.js')):
                                 base_filename = filename[len(SRC_DIR):]
-                                if project.app_modern_multi_js and filename.endswith('.js') and filename.startswith('js/'):
+                                if project.app_modern_multi_js and base_filename.endswith('.js') and base_filename.startswith('js/'):
                                     base_filename = base_filename[len('js/'):]
                                 source = SourceFile.objects.create(project=project, file_name=base_filename)
                                 with z.open(entry.filename) as f:
@@ -300,6 +284,30 @@ def do_import_archive(project_id, archive, delete_project=False):
                                 source = SourceFile.objects.create(project=project, file_name=base_filename, target='worker')
                                 with z.open(entry.filename) as f:
                                     source.save_file(f.read().decode('utf-8'))
+
+                    # Now add all the resource identifiers
+                    for root_file_name in desired_resources:
+                        for resource in desired_resources[root_file_name]:
+                            target_platforms = json.dumps(resource['targetPlatforms']) if 'targetPlatforms' in resource else None
+                            ResourceIdentifier.objects.create(
+                                resource_file=resources_files[root_file_name],
+                                resource_id=resource['name'],
+                                target_platforms=target_platforms,
+                                # Font options
+                                character_regex=resource.get('characterRegex', None),
+                                tracking=resource.get('trackingAdjust', None),
+                                compatibility=resource.get('compatibility', None),
+                                # Bitmap options
+                                memory_format=resource.get('memoryFormat', None),
+                                storage_format=resource.get('storageFormat', None),
+                                space_optimisation=resource.get('spaceOptimization', None)
+                            )
+
+                    # Check that at least one variant of each specified resource exists.
+                    for root_file_name, loaded in file_exists_for_root.iteritems():
+                        if not loaded:
+                            raise KeyError("No file was found to satisfy the manifest filename: {}".format(root_file_name))
+
                     project.save()
                     send_td_event('cloudpebble_zip_import_succeeded', project=project)
 
