@@ -44,7 +44,6 @@ kombu==3.0.35
 oauthlib==1.0.3
 pyasn1==0.1.7
 pyasn1-modules==0.0.5
-PyGithub==1.14.2
 python-openid==2.2.5
 pytz==2016.3
 requests-oauthlib==0.6.1
