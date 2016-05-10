@@ -278,6 +278,11 @@ LOGGING = {
             'level': 'DEBUG' if VERBOSE else 'INFO',
             'propagate': True
         },
+        'root': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True
+        },
         '': {
             'handlers': ['console'],
             'level': 'WARNING',
