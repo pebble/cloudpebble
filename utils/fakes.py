@@ -20,6 +20,10 @@ class FakeS3(object):
         self.dict = {}
         self.last_key = None
 
+    def reset(self):
+        self.dict = {}
+        self.last_key = None
+
     def read_file(self, bucket_name, path):
         return self.dict[(bucket_name, path)]
 

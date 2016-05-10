@@ -1,7 +1,8 @@
 import json
 import re
 from django.utils.translation import ugettext as _
-from ide.models.files import ResourceFile, ResourceIdentifier
+from django.conf import settings
+from ide.utils.project import APPINFO_MANIFEST, PACKAGE_MANIFEST
 
 __author__ = 'katharine'
 
@@ -253,6 +254,13 @@ def generate_jshint_file(project):
 """
 
 
+def manifest_name_for_project(project):
+    if settings.NPM_MANIFEST_SUPPORT and project.project_type == 'native' and project.sdk_version == '3':
+        return PACKAGE_MANIFEST
+    else:
+        return APPINFO_MANIFEST
+
+
 def generate_manifest(project, resources):
     if project.project_type == 'native':
         if project.sdk_version == '2':
@@ -273,6 +281,10 @@ def generate_v2_manifest(project, resources):
 
 def generate_v3_manifest(project, resources):
     return dict_to_pretty_json(generate_v3_manifest_dict(project, resources))
+
+
+def generate_package_manifest(project, resources):
+    return dict_to_pretty_json(generate_package_manifest_dict(project, resources))
 
 
 def generate_v2_manifest_dict(project, resources):
@@ -298,15 +310,47 @@ def generate_v2_manifest_dict(project, resources):
 
 
 def generate_v3_manifest_dict(project, resources):
-    # Just extend the v2 one.
-    manifest = generate_v2_manifest_dict(project, resources)
-    manifest['enableMultiJS'] = project.app_modern_multi_js
+    if settings.NPM_MANIFEST_SUPPORT:
+        return generate_package_manifest_dict(project, resources)
+    else:
+        # Just extend the v2 one.
+        manifest = generate_v2_manifest_dict(project, resources)
+        manifest['enableMultiJS'] = project.app_modern_multi_js
+        if project.app_platforms:
+            manifest['targetPlatforms'] = project.app_platform_list
+        if project.app_is_hidden:
+            manifest['watchapp']['hiddenApp'] = project.app_is_hidden
+        manifest['sdkVersion'] = "3"
+        del manifest['versionCode']
+        return manifest
+
+
+def generate_package_manifest_dict(project, resources):
+    # TODO: unsure if sdkVersion or projectType should be hardcoded
+    manifest = {
+        'name': project.app_short_name,
+        'author': project.app_company_name,
+        'version': project.app_version_label,
+        'keywords': project.keywords,
+        'dependencies': project.get_dependencies(),
+        'pebble': {
+            'displayName': project.app_long_name,
+            'uuid': str(project.app_uuid),
+            'sdkVersion': project.sdk_version,
+            'enableMultiJS': project.app_modern_multi_js,
+            'watchapp': {
+                'watchface': project.app_is_watchface
+            },
+            'appKeys': json.loads(project.app_keys),
+            'resources': generate_resource_dict(project, resources),
+            'capabilities': project.app_capabilities.split(','),
+            'projectType': project.project_type
+        }
+    }
     if project.app_platforms:
-        manifest['targetPlatforms'] = project.app_platform_list
+        manifest['pebble']['targetPlatforms'] = project.app_platform_list
     if project.app_is_hidden:
-        manifest['watchapp']['hiddenApp'] = project.app_is_hidden
-    manifest['sdkVersion'] = "3"
-    del manifest['versionCode']
+        manifest['pebble']['watchapp']['hiddenApp'] = project.app_is_hidden
     return manifest
 
 

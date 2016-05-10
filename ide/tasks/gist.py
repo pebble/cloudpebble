@@ -29,7 +29,22 @@ def import_gist(user_id, gist_id):
 
     project_type = 'native'
 
-    if 'appinfo.json' in files:
+    if 'package.json' in files:
+        package = json.loads(files['package.json'].content)
+        settings = {
+            'longName': package['pebble']['name'],
+            'shortName': package['name'],
+            'companyName': package['author'],
+            'versionLabel': package['version']
+        }
+        settings.update(package['pebble'])
+        # TODO: Check this logic
+        if 'projectType' in settings:
+            project_type = settings['projectType']
+        elif len(files) == 2 and 'app.js' in files:
+            project_type = 'pebblejs'
+
+    elif 'appinfo.json' in files:
         settings = json.loads(files['appinfo.json'].content)
         if 'projectType' in settings:
             project_type = settings['projectType']
@@ -38,6 +53,7 @@ def import_gist(user_id, gist_id):
                 project_type = 'simplyjs'
             elif 'app.js' in files:
                 project_type = 'pebblejs'
+
     else:
         settings = {}
         if len(files) == 1:

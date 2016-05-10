@@ -1,14 +1,13 @@
-import shutil
 import uuid
+import json
 
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import ugettext as _
 
 from ide.models.files import ResourceFile, ResourceIdentifier, SourceFile, ResourceVariant
-from ide.utils import generate_half_uuid
-
 from ide.models.meta import IdeModel
+from ide.utils import generate_half_uuid
 
 __author__ = 'katharine'
 
@@ -45,6 +44,7 @@ class Project(IdeModel):
     app_jshint = models.BooleanField(default=True)
     app_platforms = models.TextField(max_length=255, blank=True, null=True)
     app_modern_multi_js = models.BooleanField(default=True)
+    app_keywords = models.TextField(default='[]')
 
     app_capability_list = property(lambda self: self.app_capabilities.split(','))
     app_platform_list = property(lambda self: self.app_platforms.split(',') if self.app_platforms else [])
@@ -65,6 +65,17 @@ class Project(IdeModel):
     github_last_commit = models.CharField(max_length=40, blank=True, null=True)
     github_hook_uuid = models.CharField(max_length=36, blank=True, null=True)
     github_hook_build = models.BooleanField(default=False)
+
+    @property
+    def keywords(self):
+        return json.loads(self.app_keywords)
+
+    @keywords.setter
+    def keywords(self, value):
+        self.app_keywords = json.dumps(value)
+
+    def get_dependencies(self):
+        return {d.name: d.version for d in self.dependencies.all()}
 
     def get_last_build(self):
         try:
