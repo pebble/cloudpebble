@@ -7,12 +7,6 @@ from django.utils.datastructures import MultiValueDictKeyError
 from ide.utils.cloudpebble_test import CloudpebbleTestCase
 from utils.fakes import FakeS3
 
-try:
-    from django.test import override_settings
-except ImportError:
-    # TODO: Remove Django 1.6 compatibility after move to Django 1.9
-    from django.test.utils import override_settings
-
 __author__ = 'joe'
 
 fake_s3 = FakeS3()

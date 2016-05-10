@@ -18,12 +18,14 @@ class FakeS3(object):
     """ Essentially just a dictionary where the keys are tuples of (bucket_name, path) """
     def __init__(self):
         self.dict = {}
+        self.last_key = None
 
     def read_file(self, bucket_name, path):
         return self.dict[(bucket_name, path)]
 
     def save_file(self, bucket_name, path, value, **kwargs):
         self.dict[(bucket_name, path)] = value
+        self.last_key = (bucket_name, path)
 
     def delete_file(self, bucket_name, path):
         del self.dict[(bucket_name, path)]
