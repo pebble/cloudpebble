@@ -8,6 +8,7 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 
+
 def _ensure_bucket_exists(s3, bucket):
     try:
         s3.create_bucket(bucket)
@@ -33,6 +34,7 @@ class BucketHolder(object):
                 # https://github.com/boto/boto/issues/2836 this bug in boto with .s in
                 # bucket names.
                 host = settings.AWS_S3_HOST if settings.AWS_S3_HOST else NoHostProvided
+
                 self.s3 = boto.connect_s3(
                     settings.AWS_ACCESS_KEY_ID,
                     settings.AWS_SECRET_ACCESS_KEY,
