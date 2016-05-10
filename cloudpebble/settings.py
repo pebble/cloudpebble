@@ -1,12 +1,15 @@
 # encoding: utf-8
 # Django settings for cloudpebble project.
 
+import sys
 import os
 import socket
 import dj_database_url
+
 _environ = os.environ
 
 DEBUG = _environ.get('DEBUG', '') != ''
+TESTING = 'test' in sys.argv
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
