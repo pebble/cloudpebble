@@ -1,15 +1,16 @@
 # encoding: utf-8
 # Django settings for cloudpebble project.
 
+import sys
 import os
 import socket
 import dj_database_url
-import sys
+
 _environ = os.environ
 
 DEBUG = _environ.get('DEBUG', '') != ''
-VERBOSE = DEBUG or (_environ.get('VERBOSE', '') != '')
 TESTING = 'test' in sys.argv
+VERBOSE = DEBUG or (_environ.get('VERBOSE', '') != '')
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -22,7 +23,6 @@ DEFAULT_FROM_EMAIL = _environ.get('FROM_EMAIL', 'CloudPebble <cloudpebble@exampl
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-MANAGERS = ADMINS
 
 if 'TRAVIS' in _environ:
     DATABASES = {
