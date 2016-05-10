@@ -57,6 +57,8 @@ class BucketHolder(object):
             self.buckets = None
 
     def __getitem__(self, item):
+        if settings.TESTING:
+            raise Exception("S3 not mocked in test!")
         if not self.configured:
             self.configure()
         return self.buckets[item]
