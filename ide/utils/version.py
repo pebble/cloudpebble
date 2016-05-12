@@ -1,6 +1,9 @@
 import re
 
+# Match major[.minor], where major and minor are numbers between 0 and 255 with no leading 0s
 SDK_VERSION_REGEX = r"^(0|[1-9]\d?|1\d{2}|2[0-4]\d|25[0-5])(\.(0|[1-9]\d?|1\d{2}|2[0-4]\d|25[0-5]))?$"
+
+# Match major.minor.0, where major and minor are numbers between 0 and 255 with no leading 0s
 SEMVER_REGEX = r"^(0|[1-9]\d?|1\d{2}|2[0-4]\d|25[0-5])\.(0|[1-9]\d?|1\d{2}|2[0-4]\d|25[0-5])\.0$"
 
 

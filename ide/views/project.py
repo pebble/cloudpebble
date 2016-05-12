@@ -11,7 +11,7 @@ from ide.models.project import Project
 from ide.tasks.git import hooked_commit
 from ide.utils import generate_half_uuid
 from utils.td_helper import send_td_event
-
+from ide.utils.version import SDK_VERSION_REGEX
 __author__ = 'katharine'
 
 
@@ -47,7 +47,8 @@ def view_project(request, project_id):
         'libpebble_proxy': json.dumps(settings.LIBPEBBLE_PROXY),
         'token': token,
         'phone_shorturl': settings.PHONE_SHORTURL,
-        'supported_platforms': supported_platforms
+        'supported_platforms': supported_platforms,
+        'version_regex': SDK_VERSION_REGEX
     })
 
 
