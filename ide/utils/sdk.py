@@ -330,7 +330,7 @@ def generate_package_manifest_dict(project, resources):
     manifest = {
         'name': project.app_short_name,
         'author': project.app_company_name,
-        'version': project.app_version_label,
+        'version': project.semver,
         'keywords': project.keywords,
         'dependencies': project.get_dependencies(),
         'pebble': {
@@ -341,7 +341,7 @@ def generate_package_manifest_dict(project, resources):
             'watchapp': {
                 'watchface': project.app_is_watchface
             },
-            'appKeys': json.loads(project.app_keys),
+            'messageKeys': json.loads(project.app_keys),
             'resources': generate_resource_dict(project, resources),
             'capabilities': project.app_capabilities.split(','),
             'projectType': project.project_type

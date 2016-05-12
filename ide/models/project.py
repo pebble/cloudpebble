@@ -4,12 +4,21 @@ import json
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import ugettext as _
+from django.core.exceptions import ValidationError
 
 from ide.models.files import ResourceFile, ResourceIdentifier, SourceFile, ResourceVariant
 from ide.models.meta import IdeModel
 from ide.utils import generate_half_uuid
+from ide.utils.version import version_to_semver, semver_to_version, parse_sdk_version
 
 __author__ = 'katharine'
+
+
+def version_validator(value):
+    try:
+        parse_sdk_version(value)
+    except ValueError:
+        raise ValidationError(_("Invalid version string. Versions should be major[.minor]."))
 
 
 class Project(IdeModel):
@@ -35,7 +44,7 @@ class Project(IdeModel):
     app_company_name = models.CharField(max_length=100, blank=True, null=True)
     app_short_name = models.CharField(max_length=100, blank=True, null=True)
     app_long_name = models.CharField(max_length=100, blank=True, null=True)
-    app_version_label = models.CharField(max_length=40, blank=True, null=True, default='1.0')
+    app_version_label = models.CharField(max_length=40, blank=True, null=True, default='1.0', validators=[version_validator])
     app_is_watchface = models.BooleanField(default=False)
     app_is_hidden = models.BooleanField(default=False)
     app_is_shown_on_communication = models.BooleanField(default=False)
@@ -91,6 +100,19 @@ class Project(IdeModel):
 
     def has_platform(self, platform):
         return self.app_platforms is None or platform in self.app_platform_list
+
+    @property
+    def semver(self):
+        return version_to_semver(self.app_version_label)
+
+    @semver.setter
+    def semver(self, value):
+        self.app_version_label = semver_to_version(value)
+
+    def clean(self):
+        if isinstance(json.loads(self.app_keys), list) and self.sdk_version == "2":
+            raise ValidationError(_("SDK2 appKeys must be an object, not a list."))
+
 
     last_build = property(get_last_build)
     menu_icon = property(get_menu_icon)

@@ -10,7 +10,7 @@ import logging
 from celery import task
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.core.exceptions import SuspiciousOperation
+from django.core.exceptions import SuspiciousOperation, ValidationError
 from django.db import transaction
 from ide.utils.project import find_project_root_and_manifest, InvalidProjectArchiveException, MANIFEST_KINDS, PACKAGE_MANIFEST, APPINFO_MANIFEST, BaseProjectItem
 from ide.utils.sdk import generate_manifest, generate_wscript_file, generate_jshint_file, dict_to_pretty_json, manifest_name_for_project
@@ -202,11 +202,15 @@ def do_import_archive(project_id, archive, delete_project=False):
                         project.app_long_name = m['longName']
                         project.app_company_name = m['companyName']
                         project.app_version_label = m['versionLabel']
+                        project.app_keys = dict_to_pretty_json(m.get('appKeys', {}))
+                        project.sdk_version = m.get('sdkVersion', '2')
                     elif manifest_kind == PACKAGE_MANIFEST:
                         project.app_short_name = m['name']
                         project.app_company_name = m['author']
-                        project.app_version_label = m['version']
+                        project.semver = m['version']
                         project.app_long_name = m['pebble']['displayName']
+                        project.app_keys = dict_to_pretty_json(m['pebble'].get('messageKeys', []))
+                        project.sdk_version = m['pebble'].get('sdkVersion', '3')
                         for name, version in m.get('dependencies', {}).iteritems():
                             dep = Dependency.objects.create(project=project, name=name, version=version)
                             dep.full_clean()
@@ -215,7 +219,6 @@ def do_import_archive(project_id, archive, delete_project=False):
                         m = m['pebble']
 
                     project.app_uuid = m['uuid']
-                    project.sdk_version = m.get('sdkVersion', '2')
                     project.app_is_watchface = m.get('watchapp', {}).get('watchface', False)
                     project.app_is_hidden = m.get('watchapp', {}).get('hiddenApp', False)
                     project.app_is_shown_on_communication = m.get('watchapp', {}).get('onlyShownOnCommunication', False)
@@ -223,9 +226,10 @@ def do_import_archive(project_id, archive, delete_project=False):
                     project.app_modern_multi_js = m.get('enableMultiJS', False)
                     if 'targetPlatforms' in m:
                         project.app_platforms = ','.join(m['targetPlatforms'])
-                    project.app_keys = dict_to_pretty_json(m.get('appKeys', {}))
+
                     project.project_type = m.get('projectType', 'native')
                     project.full_clean()
+
                     media_map = m['resources']['media']
 
                     tag_map = {v: k for k, v in ResourceVariant.VARIANT_STRINGS.iteritems() if v}

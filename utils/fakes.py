@@ -27,6 +27,9 @@ class FakeS3(object):
     def read_file(self, bucket_name, path):
         return self.dict[(bucket_name, path)]
 
+    def read_last_file(self):
+        return self.dict[self.last_key]
+
     def save_file(self, bucket_name, path, value, **kwargs):
         self.dict[(bucket_name, path)] = value
         self.last_key = (bucket_name, path)
