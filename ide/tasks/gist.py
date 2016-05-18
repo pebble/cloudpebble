@@ -31,14 +31,23 @@ def import_gist(user_id, gist_id):
 
     if 'package.json' in files:
         package = json.loads(files['package.json'].content)
-        settings = {
-            'longName': package['pebble']['name'],
-            'shortName': package['name'],
-            'companyName': package['author'],
-            'versionLabel': package['version']
-        }
-        settings.update(package['pebble'])
-        # TODO: Check this logic
+        settings = {}
+        if 'name' in package:
+            settings['shortName'] = package['name']
+        if 'author' in package:
+            settings['companyName'] = package['author']
+        if 'version' in package:
+            settings['versionLabel'] = package['version']
+        if 'pebble' in package:
+            if 'displayName' in package['pebble']:
+                settings['longName'] = package['pebble']['displayName']
+            settings.update(package['pebble'])
+
+        settings['appKeys'] = settings.get('messageKeys', [])
+        if not 'sdkVersion' in settings:
+            settings['sdkVersion'] = '3'
+        if not 'enableMultiJS' in settings:
+            settings['enableMultiJS'] = True
         if 'projectType' in settings:
             project_type = settings['projectType']
         elif len(files) == 2 and 'app.js' in files:

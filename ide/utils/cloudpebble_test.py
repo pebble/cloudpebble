@@ -9,6 +9,7 @@ from django.test import TestCase
 from django.conf import settings
 from django.test.client import Client
 from django.test.utils import setup_test_environment
+from ide.models.user import User
 
 try:
     from django.test import override_settings
@@ -26,6 +27,7 @@ class CloudpebbleTestCase(TestCase):
         self.client = Client()
         self.client.post('/accounts/register', {'username': 'test', 'email': 'test@test.test', 'password1': 'test', 'password2': 'test'})
         login_result = self.client.login(username='test', password='test')
+        self.user_id = next(user.id for user in User.objects.all())
         self.assertTrue(login_result)
         create_data = {'name': 'test', 'template': 0, 'type': 'native', 'sdk': 3}
         if project_options:
