@@ -2,7 +2,7 @@ import json
 import re
 from django.utils.translation import ugettext as _
 from django.conf import settings
-from ide.utils.project import APPINFO_MANIFEST, PACKAGE_MANIFEST
+from ide.utils.project import APPINFO_MANIFEST, PACKAGE_MANIFEST, InvalidProjectArchiveException
 
 __author__ = 'katharine'
 
@@ -530,3 +530,54 @@ def generate_pebblejs_manifest_dict(project, resources):
         manifest["targetPlatforms"] = project.app_platform_list
 
     return manifest
+
+
+def load_manifest_dict(manifest, manifest_kind):
+    """ Load data from a manifest dictionary
+    :param manifest: a dictionary of settings
+    :param manifest_kind: 'package.json' or 'appinfo.json'
+    :return: a tuple of (models.Project options dictionary, the media map, the dependencies dictionary)
+    """
+    project = {}
+    dependencies = {}
+    if manifest_kind == APPINFO_MANIFEST:
+        project['app_short_name'] = manifest['shortName']
+        project['app_long_name'] = manifest['longName']
+        project['app_company_name'] = manifest['companyName']
+        project['app_version_label'] = manifest['versionLabel']
+        project['app_keys'] = dict_to_pretty_json(manifest.get('appKeys', {}))
+        project['sdk_version'] = manifest.get('sdkVersion', '2')
+
+    elif manifest_kind == PACKAGE_MANIFEST:
+        project['app_short_name'] = manifest['name']
+        project['app_company_name'] = manifest['author']
+        project['semver'] = manifest['version']
+        project['app_long_name'] = manifest['pebble']['displayName']
+        if settings.NPM_MANIFEST_SUPPORT:
+            project['app_keys'] = dict_to_pretty_json(manifest['pebble'].get('messageKeys', []))
+        else:
+            project['app_keys'] = dict_to_pretty_json(manifest['pebble'].get('messageKeys', {}))
+            if isinstance(json.loads(project['app_keys']), list):
+                raise InvalidProjectArchiveException("Auto-assigned (array) messageKeys are not yet supported.")
+
+        project['sdk_version'] = manifest['pebble'].get('sdkVersion', '3')
+        project['keywords'] = manifest.get('keywords', [])
+        dependencies = manifest.get('dependencies', {})
+        manifest = manifest['pebble']
+    else:
+        raise InvalidProjectArchiveException(_('Invalid manifest kind: %s') % manifest_kind[-12:])
+
+    project['app_uuid'] = manifest['uuid']
+    project['app_is_watchface'] = manifest.get('watchapp', {}).get('watchface', False)
+    project['app_is_hidden'] = manifest.get('watchapp', {}).get('hiddenApp', False)
+    project['app_is_shown_on_communication'] = manifest.get('watchapp', {}).get('onlyShownOnCommunication', False)
+    project['app_capabilities'] = ','.join(manifest.get('capabilities', []))
+    project['app_modern_multi_js'] = manifest.get('enableMultiJS', False)
+    if 'targetPlatforms' in manifest:
+        project['app_platforms'] = ','.join(manifest['targetPlatforms'])
+    if 'resources' in project and 'media' in project['resources']:
+        media_map = project['resources']['media']
+    else:
+        media_map = {}
+    project['project_type'] = manifest.get('projectType', 'native')
+    return project, media_map, dependencies

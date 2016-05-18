@@ -1,26 +1,25 @@
+import json
+import logging
 import os
 import re
 import shutil
 import tempfile
 import uuid
 import zipfile
-import json
-import logging
 
 from celery import task
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.core.exceptions import SuspiciousOperation, ValidationError
+from django.core.exceptions import SuspiciousOperation
 from django.db import transaction
-from ide.utils.project import find_project_root_and_manifest, InvalidProjectArchiveException, MANIFEST_KINDS, PACKAGE_MANIFEST, APPINFO_MANIFEST, BaseProjectItem
-from ide.utils.sdk import generate_manifest, generate_wscript_file, generate_jshint_file, dict_to_pretty_json, manifest_name_for_project
-from utils.td_helper import send_td_event
-
-from ide.models.files import SourceFile, ResourceFile, ResourceIdentifier, ResourceVariant
-from ide.models.project import Project
-from ide.models.dependency import Dependency
 
 import utils.s3 as s3
+from ide.models.dependency import Dependency
+from ide.models.files import SourceFile, ResourceFile, ResourceIdentifier, ResourceVariant
+from ide.models.project import Project
+from ide.utils.project import find_project_root_and_manifest, InvalidProjectArchiveException, MANIFEST_KINDS, BaseProjectItem
+from ide.utils.sdk import generate_manifest, generate_wscript_file, generate_jshint_file, manifest_name_for_project, load_manifest_dict
+from utils.td_helper import send_td_event
 
 __author__ = 'katharine'
 
@@ -196,47 +195,16 @@ def do_import_archive(project_id, archive, delete_project=False):
 
                 with transaction.atomic():
                     # We have a resource map! We can now try importing things from it.
-                    m = manifest_dict
-                    if manifest_kind == APPINFO_MANIFEST:
-                        project.app_short_name = m['shortName']
-                        project.app_long_name = m['longName']
-                        project.app_company_name = m['companyName']
-                        project.app_version_label = m['versionLabel']
-                        project.app_keys = dict_to_pretty_json(m.get('appKeys', {}))
-                        project.sdk_version = m.get('sdkVersion', '2')
-                    elif manifest_kind == PACKAGE_MANIFEST:
-                        project.app_short_name = m['name']
-                        project.app_company_name = m['author']
-                        project.semver = m['version']
-                        project.app_long_name = m['pebble']['displayName']
-                        if settings.NPM_MANIFEST_SUPPORT:
-                            project.app_keys = dict_to_pretty_json(m['pebble'].get('messageKeys', []))
-                        else:
-                            project.app_keys = dict_to_pretty_json(m['pebble'].get('messageKeys', {}))
-                            if isinstance(json.loads(project.app_keys), list):
-                                raise InvalidProjectArchiveException("Auto-assigned (array) messageKeys are not yet supported.")
+                    project_options, media_map, dependencies = load_manifest_dict(manifest_dict, manifest_kind)
 
-                        project.sdk_version = m['pebble'].get('sdkVersion', '3')
-                        for name, version in m.get('dependencies', {}).iteritems():
-                            dep = Dependency.objects.create(project=project, name=name, version=version)
-                            dep.full_clean()
-                            dep.save()
-                        project.keywords = m.get('keywords', [])
-                        m = m['pebble']
-
-                    project.app_uuid = m['uuid']
-                    project.app_is_watchface = m.get('watchapp', {}).get('watchface', False)
-                    project.app_is_hidden = m.get('watchapp', {}).get('hiddenApp', False)
-                    project.app_is_shown_on_communication = m.get('watchapp', {}).get('onlyShownOnCommunication', False)
-                    project.app_capabilities = ','.join(m.get('capabilities', []))
-                    project.app_modern_multi_js = m.get('enableMultiJS', False)
-                    if 'targetPlatforms' in m:
-                        project.app_platforms = ','.join(m['targetPlatforms'])
-
-                    project.project_type = m.get('projectType', 'native')
+                    for k, v in project_options.iteritems():
+                        setattr(project, k, v)
                     project.full_clean()
 
-                    media_map = m['resources']['media']
+                    for name, version in dependencies.iteritems():
+                        dep = Dependency.objects.create(project=project, name=name, version=version)
+                        dep.full_clean()
+                        dep.save()
 
                     tag_map = {v: k for k, v in ResourceVariant.VARIANT_STRINGS.iteritems() if v}
 
