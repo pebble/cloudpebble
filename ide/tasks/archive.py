@@ -209,7 +209,13 @@ def do_import_archive(project_id, archive, delete_project=False):
                         project.app_company_name = m['author']
                         project.semver = m['version']
                         project.app_long_name = m['pebble']['displayName']
-                        project.app_keys = dict_to_pretty_json(m['pebble'].get('messageKeys', []))
+                        if settings.NPM_MANIFEST_SUPPORT:
+                            project.app_keys = dict_to_pretty_json(m['pebble'].get('messageKeys', []))
+                        else:
+                            project.app_keys = dict_to_pretty_json(m['pebble'].get('messageKeys', {}))
+                            if isinstance(json.loads(project.app_keys), list):
+                                raise InvalidProjectArchiveException("Auto-assigned (array) messageKeys are not yet supported.")
+
                         project.sdk_version = m['pebble'].get('sdkVersion', '3')
                         for name, version in m.get('dependencies', {}).iteritems():
                             dep = Dependency.objects.create(project=project, name=name, version=version)

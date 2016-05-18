@@ -2,6 +2,10 @@ CloudPebble.Settings = (function() {
     var settings_template = null;
     var shared_pane = null;
 
+    function app_uses_array_appkeys() {
+        return _.isArray(CloudPebble.ProjectInfo.app_keys);
+    }
+
     var show_settings_pane = function() {
         CloudPebble.Sidebar.SuspendActive();
         if(CloudPebble.Sidebar.Restore("settings")) {
@@ -37,7 +41,7 @@ CloudPebble.Settings = (function() {
             var version_label = pane.find('#settings-version-label').val();
             var app_uuid = pane.find('#settings-uuid').val();
             var app_is_watchface = pane.find('#settings-app-is-watchface').val();
-            var app_keys = {};
+            var app_key_array_style = pane.find('#settings-message-key-kind').val() == "1";
             var app_jshint = pane.find('#settings-app-jshint').prop("checked") ? 1 : 0;
             var app_modern_multi_js = pane.find('#settings-modern-multi-js').val();
             var menu_icon = pane.find('#settings-menu-image').val();
@@ -45,6 +49,8 @@ CloudPebble.Settings = (function() {
             var build_basalt = pane.find('#settings-build-basalt:visible').prop('checked');
             var build_chalk = pane.find('#settings-build-chalk:visible').prop('checked');
 
+            var app_keys = (app_key_array_style ? [] : {});
+            
             var app_is_hidden = 0;
             var app_is_shown_on_communication = 0;
             if(pane.find('#settings-app-visibility').val() == 'hidden') {
@@ -111,17 +117,33 @@ CloudPebble.Settings = (function() {
             }
             var app_platforms = target_platforms.join(',');
 
+            var failure = null;
             pane.find(".appkey").each(function() {
                 var name = $(this).find('.appkey-name').val();
-                var id = $(this).find('.appkey-id').val();
+                var id = parseInt($(this).find('.appkey-id').val(), 10);
 
                 if(name.replace(/\s/g, '') == '') {
                     // Skip blank keys.
                     return;
                 }
-
-                app_keys[name] = parseInt(id);
+                if (app_key_array_style) {
+                    if (!name.match(/^[a-zA-Z_][_a-zA-Z\d]*$/)) {
+                        failure = defer.reject(gettext("Message key names must be valid C identifiers"))
+                    }
+                    if (id < 1) {
+                        failure = defer.reject(gettext("Message key names must have lengths greater than 0."))
+                    }
+                    if (failure) return false;
+                    if (id > 1) {
+                        name+="["+id+"]";
+                    }
+                    app_keys.push(name);
+                }
+                else {
+                    app_keys[name] = id;
+                }
             });
+            if (failure) return failure;
 
             saved_settings['sdk_version'] = sdk_version;
             saved_settings['app_short_name'] = short_name;
@@ -149,6 +171,7 @@ CloudPebble.Settings = (function() {
                 CloudPebble.ProjectInfo.app_long_name = long_name;
                 CloudPebble.ProjectInfo.app_version_label = version_label;
                 CloudPebble.ProjectInfo.app_is_watchface = app_is_watchface;
+                CloudPebble.ProjectInfo.app_keys = app_keys;
                 CloudPebble.ProjectInfo.app_is_hidden = app_is_hidden;
                 CloudPebble.ProjectInfo.app_is_shown_on_communication = app_is_shown_on_communication;
                 CloudPebble.ProjectInfo.app_capabilities = app_capabilities;
@@ -220,6 +243,7 @@ CloudPebble.Settings = (function() {
                 '<td><input class="appkey-id" type="number" value="0" /></td>' +
                 '<td><button class="btn remove-appkey disabled">–</button></td>' +
                 '</tr>');
+            new_appkey.find('.appkey-id').val(app_uses_array_appkeys() ? "1" : "0");
 
             new_appkey.find('.appkey-name').on('change', add_appkey_field);
 
@@ -233,6 +257,40 @@ CloudPebble.Settings = (function() {
         pane.find('.remove-appkey').not('.disabled').click(function() {
             $(this).closest('.appkey').remove();
             live_form.save($('#settings-app-keys'));
+        });
+
+        function configure_appkey_table(is_array_kind) {
+            var id_title, help_text;
+            if (is_array_kind) {
+                id_title = gettext("Key Array Length");
+                help_text = gettext("A list of appMessage keys to assign for the app. Arrays with length greater than one will have a block of contiguous keys reserved after the key assigned to the given name.");
+            }
+            else {
+                id_title = gettext("Key ID");
+                help_text = gettext("A mapping from strings to integers used by PebbleKit JS.");
+            }
+            $('#settings-app-keys thead th:nth-child(2)').text(id_title);
+            $('#settings-app-keys + .help-block').text(help_text);
+        }
+
+
+        pane.find('#settings-message-key-kind').change(function() {
+            var is_array_kind = $(this).val() == '1';
+            var was_array_kind = app_uses_array_appkeys();
+            if (is_array_kind == was_array_kind) return;
+            if (is_array_kind) {
+                // Convert key IDs key lengths, which all default to 1
+                $('.appkey-id').val('1');
+                configure_appkey_table(true);
+            }
+            else {
+                $('.appkey').each(function(k) {
+                    var name = $(this).find('.appkey-name').val().trim();
+                    var val = (name == "" ? 0 : k);
+                    $(this).find('.appkey-id').val(val);
+                });
+                configure_appkey_table(false);
+            }
         });
 
         var sdk_version_change_confirmed = false;
@@ -306,6 +364,8 @@ CloudPebble.Settings = (function() {
         live_form.init();
 
         CloudPebble.Sidebar.SetActivePane(pane, 'settings');
+
+        configure_appkey_table(app_uses_array_appkeys());
     };
 
     var add_resource = function(resource) {

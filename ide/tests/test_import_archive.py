@@ -3,8 +3,8 @@ import mock
 
 from django.core.exceptions import ValidationError
 
-from ide.tasks.archive import do_import_archive
-from ide.utils.cloudpebble_test import CloudpebbleTestCase, make_package, make_appinfo, build_bundle
+from ide.tasks.archive import do_import_archive, InvalidProjectArchiveException
+from ide.utils.cloudpebble_test import CloudpebbleTestCase, make_package, make_appinfo, build_bundle, override_settings
 from ide.models.project import Project
 from utils.fakes import FakeS3
 
@@ -100,4 +100,14 @@ class TestImportProject(CloudpebbleTestCase):
             'appinfo.json': make_appinfo(options={'appKeys': [], 'sdkVersion': '2'})
         })
         with self.assertRaises(ValidationError):
+            do_import_archive(self.project_id, bundle)
+
+    @override_settings(NPM_MANIFEST_SUPPORT='')
+    def test_throws_if_importing_array_appkeys_without_npm_manifest_support(self):
+        """ Throw when trying to import a project with auto-assigned messageKeys before NPM manifest support is fully enabled """
+        bundle = build_bundle({
+            'src/main.c': '',
+            'package.json': make_package(pebble_options={'messageKeys': []})
+        })
+        with self.assertRaises(InvalidProjectArchiveException):
             do_import_archive(self.project_id, bundle)

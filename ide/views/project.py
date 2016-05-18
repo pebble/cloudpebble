@@ -1,4 +1,5 @@
 import json
+import re
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
@@ -31,7 +32,18 @@ def view_project(request, project_id):
     if project.app_version_label is None:
         project.app_version_label = '1.0'
     send_td_event('cloudpebble_open_project', request=request, project=project)
-    app_keys = sorted(json.loads(project.app_keys).iteritems(), key=lambda x: x[1])
+    app_keys = json.loads(project.app_keys)
+    if isinstance(app_keys, dict):
+        app_keys = sorted(app_keys.iteritems(), key=lambda x: x[1])
+    else:
+        def parse_appkey(appkey):
+            parsed = re.match(r'^([^\[\]]+)(?:\[(\d+)\])?$', appkey)
+            if not parsed:
+                raise Exception("OH SHIT %s" % appkey)
+            print
+            return parsed.group(1), parsed.group(2) or 1
+
+        app_keys = [parse_appkey(x) for x in app_keys]
     supported_platforms = ["aplite", "basalt"]
     if project.project_type != 'pebblejs' and project.sdk_version != '2':
         supported_platforms.append("chalk")
@@ -48,7 +60,8 @@ def view_project(request, project_id):
         'token': token,
         'phone_shorturl': settings.PHONE_SHORTURL,
         'supported_platforms': supported_platforms,
-        'version_regex': SDK_VERSION_REGEX
+        'version_regex': SDK_VERSION_REGEX,
+        'npm_manifest_support_enabled': settings.NPM_MANIFEST_SUPPORT
     })
 
 

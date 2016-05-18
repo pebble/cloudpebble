@@ -86,6 +86,10 @@ class Project(IdeModel):
     def get_dependencies(self):
         return {d.name: d.version for d in self.dependencies.all()}
 
+    @property
+    def uses_array_message_keys(self):
+        return isinstance(json.loads(self.app_keys), list)
+
     def get_last_build(self):
         try:
             return self.builds.order_by('-id')[0]

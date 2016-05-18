@@ -6,6 +6,7 @@ from io import BytesIO
 
 from ide.utils.sdk import dict_to_pretty_json
 from django.test import TestCase
+from django.conf import settings
 from django.test.client import Client
 from django.test.utils import setup_test_environment
 
@@ -78,7 +79,7 @@ def make_package(package_options=None, pebble_options=None, no_pebble=False):
         "keywords": [],
         "name": "test",
         "pebble": {
-            "messageKeys": {},
+            "messageKeys": ([] if settings.NPM_MANIFEST_SUPPORT else {}),
             "capabilities": [
                 ""
             ],

@@ -39,6 +39,7 @@ def project_info(request, project_id):
         'app_version_label': project.app_version_label,
         'app_is_watchface': project.app_is_watchface,
         'app_is_hidden': project.app_is_hidden,
+        'app_keys': json.loads(project.app_keys),
         'app_is_shown_on_communication': project.app_is_shown_on_communication,
         'app_capabilities': project.app_capabilities,
         'app_jshint': project.app_jshint,
@@ -184,6 +185,9 @@ def create_project(request):
             elif project_type == 'pebblejs':
                 f = SourceFile.objects.create(project=project, file_name="app.js")
                 f.save_file(open('{}/src/js/app.js'.format(settings.PEBBLEJS_ROOT)).read())
+            if settings.NPM_MANIFEST_SUPPORT and sdk_version != '2':
+                project.app_keys = '[]'
+            project.save()
     except IntegrityError as e:
         raise BadRequest(str(e))
     else:
