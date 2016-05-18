@@ -291,6 +291,11 @@ LOGGING = {
     }
 }
 
+if TESTING:
+    # Many tests make deliberately broken requests. If this line is not present,
+    # the log output during tests gets flooded with 'expected' exceptions.
+    LOGGING['loggers']['django.request'] = {'level': 'CRITICAL'}
+
 REDIS_URL = _environ.get('REDIS_URL', None) or _environ.get('REDISCLOUD_URL', 'redis://redis:6379')
 
 BROKER_URL = REDIS_URL + '/1'

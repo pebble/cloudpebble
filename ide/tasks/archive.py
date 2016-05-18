@@ -200,11 +200,7 @@ def do_import_archive(project_id, archive, delete_project=False):
                     for k, v in project_options.iteritems():
                         setattr(project, k, v)
                     project.full_clean()
-
-                    for name, version in dependencies.iteritems():
-                        dep = Dependency.objects.create(project=project, name=name, version=version)
-                        dep.full_clean()
-                        dep.save()
+                    project.set_dependencies(dependencies)
 
                     tag_map = {v: k for k, v in ResourceVariant.VARIANT_STRINGS.iteritems() if v}
 

@@ -6,7 +6,6 @@ from django.utils.translation import ugettext as _
 
 __author__ = 'katharine'
 
-logger = logging.getLogger(__name__)
 
 PACKAGE_MANIFEST = 'package.json'
 APPINFO_MANIFEST = 'appinfo.json'
@@ -43,7 +42,6 @@ def find_project_root_and_manifest(project_items):
 
     for item in project_items:
         base_dir = item.path
-        logger.debug("base_dir: %s", base_dir)
 
         # Check if the file is one of the kinds of manifest file
         for name in MANIFEST_KINDS:
@@ -59,7 +57,6 @@ def find_project_root_and_manifest(project_items):
 
         # The base dir is the location of the manifest file without the manifest filename.
         base_dir = base_dir[:dir_end]
-        logger.debug("base_dir: %s", base_dir)
 
         # Now check that there is a a source directory containing at least one source file.
         for source_item in project_items:
