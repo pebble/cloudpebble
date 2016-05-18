@@ -532,7 +532,7 @@ def generate_pebblejs_manifest_dict(project, resources):
     return manifest
 
 
-def load_manifest_dict(manifest, manifest_kind):
+def load_manifest_dict(manifest, manifest_kind, default_project_type='native'):
     """ Load data from a manifest dictionary
     :param manifest: a dictionary of settings
     :param manifest_kind: 'package.json' or 'appinfo.json'
@@ -547,6 +547,7 @@ def load_manifest_dict(manifest, manifest_kind):
         project['app_version_label'] = manifest['versionLabel']
         project['app_keys'] = dict_to_pretty_json(manifest.get('appKeys', {}))
         project['sdk_version'] = manifest.get('sdkVersion', '2')
+        project['app_modern_multi_js'] = manifest.get('enableMultiJS', False)
 
     elif manifest_kind == PACKAGE_MANIFEST:
         project['app_short_name'] = manifest['name']
@@ -559,11 +560,11 @@ def load_manifest_dict(manifest, manifest_kind):
             project['app_keys'] = dict_to_pretty_json(manifest['pebble'].get('messageKeys', {}))
             if isinstance(json.loads(project['app_keys']), list):
                 raise InvalidProjectArchiveException("Auto-assigned (array) messageKeys are not yet supported.")
-
-        project['sdk_version'] = manifest['pebble'].get('sdkVersion', '3')
         project['keywords'] = manifest.get('keywords', [])
         dependencies = manifest.get('dependencies', {})
         manifest = manifest['pebble']
+        project['app_modern_multi_js'] = manifest.get('enableMultiJS', True)
+        project['sdk_version'] = manifest.get('sdkVersion', '3')
     else:
         raise InvalidProjectArchiveException(_('Invalid manifest kind: %s') % manifest_kind[-12:])
 
@@ -572,12 +573,12 @@ def load_manifest_dict(manifest, manifest_kind):
     project['app_is_hidden'] = manifest.get('watchapp', {}).get('hiddenApp', False)
     project['app_is_shown_on_communication'] = manifest.get('watchapp', {}).get('onlyShownOnCommunication', False)
     project['app_capabilities'] = ','.join(manifest.get('capabilities', []))
-    project['app_modern_multi_js'] = manifest.get('enableMultiJS', False)
+
     if 'targetPlatforms' in manifest:
         project['app_platforms'] = ','.join(manifest['targetPlatforms'])
     if 'resources' in project and 'media' in project['resources']:
         media_map = project['resources']['media']
     else:
         media_map = {}
-    project['project_type'] = manifest.get('projectType', 'native')
+    project['project_type'] = manifest.get('projectType', default_project_type)
     return project, media_map, dependencies

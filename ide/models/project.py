@@ -2,11 +2,12 @@ import uuid
 import json
 
 from django.contrib.auth.models import User
-from django.db import models
+from django.db import models, transaction
 from django.utils.translation import ugettext as _
 from django.core.exceptions import ValidationError
 
 from ide.models.files import ResourceFile, ResourceIdentifier, SourceFile, ResourceVariant
+from ide.models.dependency import Dependency
 from ide.models.meta import IdeModel
 from ide.utils import generate_half_uuid
 from ide.utils.version import version_to_semver, semver_to_version, parse_sdk_version
@@ -74,6 +75,14 @@ class Project(IdeModel):
     github_last_commit = models.CharField(max_length=40, blank=True, null=True)
     github_hook_uuid = models.CharField(max_length=36, blank=True, null=True)
     github_hook_build = models.BooleanField(default=False)
+
+    def set_dependencies(self, dependencies):
+        with transaction.atomic():
+            Dependency.objects.filter(project=self).delete()
+            for name, version in dependencies.iteritems():
+                dep = Dependency.objects.create(project=self, name=name, version=version)
+                dep.full_clean()
+                dep.save()
 
     @property
     def keywords(self):
