@@ -23,7 +23,7 @@ def git_auth_check(f):
         except BadCredentialsException:
             # Bad credentials; remove the user's auth data.
             try:
-                logger.warn("Bad credentials; revoking user's github tokens.")
+                logger.warning("Bad credentials; revoking user's github tokens.")
                 github = user.github
                 github.delete()
             except:

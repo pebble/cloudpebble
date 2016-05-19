@@ -189,7 +189,7 @@ def run_compile(build_result):
                                              env=environ)
         except subprocess.CalledProcessError as e:
             output = e.output
-            logger.warn("Build command failed with error:\n%s\n", output)
+            logger.warning("Build command failed with error:\n%s\n", output)
             success = False
         except Exception as e:
             success = False
@@ -199,7 +199,7 @@ def run_compile(build_result):
             temp_file = os.path.join(base_dir, 'build', '%s.pbw' % os.path.basename(base_dir))
             if not os.path.exists(temp_file):
                 success = False
-                logger.warn("Success was a lie.")
+                logger.warning("Success was a lie.")
         finally:
             build_end_time = now()
             os.chdir(cwd)
@@ -216,7 +216,7 @@ def run_compile(build_result):
                         store_size_info(project, build_result, 'chalk', z)
 
                 except Exception as e:
-                    logger.warn("Couldn't extract filesizes: %s", e)
+                    logger.warning("Couldn't extract filesizes: %s", e)
 
                 # Try pulling out debug information.
                 if project.sdk_version == '2':

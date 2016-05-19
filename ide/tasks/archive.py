@@ -237,18 +237,18 @@ def do_import_archive(project_id, archive, delete_project=False):
                             try:
                                 extracted = z.open("%s%s/%s" % (base_dir, RES_PATH, base_filename))
                             except KeyError:
-                                logging.debug("Failed to open %s", base_filename)
+                                logger.debug("Failed to open %s", base_filename)
                                 continue
 
                             # Now we know the file exists and is in the resource directory - is it the one we want?
                             tags, root_file_name = get_filename_variant(base_filename, tag_map)
                             tags_string = ",".join(str(int(t)) for t in tags)
 
-                            logging.debug("Importing file %s with root %s ", entry.filename, root_file_name)
+                            logger.debug("Importing file %s with root %s ", entry.filename, root_file_name)
 
                             if root_file_name in desired_resources:
                                 medias = desired_resources[root_file_name]
-                                logging.debug("Looking for variants of %s", root_file_name)
+                                logger.debug("Looking for variants of %s", root_file_name)
 
                                 # Because 'kind' and 'is_menu_icons' are properties of ResourceFile in the database,
                                 # we just use the first one.
