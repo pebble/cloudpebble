@@ -101,7 +101,7 @@ def delete_file(sender, instance, **kwargs):
             try:
                 s3.delete_file(sender.bucket_name, instance.s3_path)
             except:
-                logging.exception("Failed to deleted S3 file")
+                logger.exception("Failed to deleted S3 file")
         else:
             try:
                 os.unlink(instance.local_filename)

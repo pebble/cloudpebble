@@ -77,7 +77,7 @@ def launch_emulator(request):
             redis_client.set(redis_key, json.dumps(response))
             return response
         except requests.HTTPError as e:
-            logger.warn("Got HTTP error from QEMU launch. Content:\n%s", e.response.text)
+            logger.warning("Got HTTP error from QEMU launch. Content:\n%s", e.response.text)
         except (requests.RequestException, ValueError) as e:
             logger.error("Error launching qemu: %s", e)
         raise InternalServerError(_("Unable to create emulator instance."))
