@@ -161,7 +161,7 @@ def github_push(user, commit_message, repo_name, project):
 
     if manifest_item:
         their_manifest_dict = json.loads(manifest_item.read())
-        their_res_dict = their_manifest_dict['resources']
+        their_res_dict = their_manifest_dict.get('resources', their_manifest_dict['pebble']['resources'])
         # If the manifest needs a new path (e.g. it is now package.json), delete the old one
         if manifest_item.path != remote_manifest_path:
             del next_tree[manifest_item.path]
@@ -170,7 +170,7 @@ def github_push(user, commit_message, repo_name, project):
         their_res_dict = {'media': []}
 
     our_manifest_dict = generate_manifest_dict(project, resources)
-    our_res_dict = our_manifest_dict['resources']
+    our_res_dict = our_manifest_dict.get('resources', our_manifest_dict['pebble']['resources'])
 
     if our_res_dict != their_res_dict:
         logger.debug("Resources mismatch.")
@@ -273,7 +273,10 @@ def github_pull(user, project):
     paths_notags = {get_root_path(x) for x in paths}
 
     # First try finding the resource map so we don't fail out part-done later.
-    root, manifest_item = find_project_root_and_manifest([GitProjectItem(repo, x) for x in tree.tree])
+    try:
+        root, manifest_item = find_project_root_and_manifest([GitProjectItem(repo, x) for x in tree.tree])
+    except ValueError as e:
+        raise ValueError("In manifest file: %s" % str(e))
     resource_root = root + 'resources/'
     manifest = json.loads(manifest_item.read())
 

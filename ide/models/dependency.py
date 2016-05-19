@@ -4,7 +4,7 @@ from ide.models.meta import IdeModel
 from django.utils.translation import ugettext_lazy as _
 
 
-def validate_version(value):
+def validate_dependency_version(value):
     if value.strip().lower().startswith("file:"):
         raise ValidationError(_("Local path dependencies are not allowed"))
 
@@ -12,7 +12,7 @@ def validate_version(value):
 class Dependency(IdeModel):
     project = models.ForeignKey('Project', related_name='dependencies')
     name = models.CharField(max_length=100)
-    version = models.CharField(max_length=100, validators=[validate_version])
+    version = models.CharField(max_length=100, validators=[validate_dependency_version])
 
     class Meta(IdeModel.Meta):
         unique_together = (('project', 'name'),)
