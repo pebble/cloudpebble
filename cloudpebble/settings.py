@@ -1,13 +1,16 @@
 # encoding: utf-8
 # Django settings for cloudpebble project.
 
+import sys
 import os
 import socket
 import dj_database_url
+
 _environ = os.environ
 
 DEBUG = _environ.get('DEBUG', '') != ''
 VERBOSE = DEBUG or (_environ.get('VERBOSE', '') != '')
+TESTING = 'test' in sys.argv
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -20,7 +23,18 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 MANAGERS = ADMINS
 
-if 'DATABASE_URL' not in _environ:
+if 'TRAVIS' in _environ:
+    DATABASES = {
+        'default': {
+            'ENGINE':   'django.db.backends.postgresql_psycopg2',
+            'NAME':     'travisci',
+            'USER':     'postgres',
+            'PASSWORD': '',
+            'HOST':     'localhost',
+            'PORT':     '',
+        }
+    }
+elif 'DATABASE_URL' not in _environ:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -320,6 +334,7 @@ AWS_SECRET_ACCESS_KEY = _environ.get('AWS_SECRET_ACCESS_KEY', None)
 AWS_S3_SOURCE_BUCKET = _environ.get('AWS_S3_SOURCE_BUCKET', 'source.cloudpebble.net')
 AWS_S3_BUILDS_BUCKET = _environ.get('AWS_S3_BUILDS_BUCKET', 'builds.cloudpebble.net')
 AWS_S3_EXPORT_BUCKET = _environ.get('AWS_S3_EXPORT_BUCKET', 'export.cloudpebble.net')
+AWS_S3_HOST = _environ.get('AWS_S3_HOST', None)
 AWS_S3_FAKE_S3 = _environ.get('AWS_S3_FAKE_S3', None)
 
 TYPOGRAPHY_CSS = _environ.get('TYPOGRAPHY_CSS', None)
