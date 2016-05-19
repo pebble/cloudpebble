@@ -3,6 +3,8 @@ import mailchimp
 
 from django.conf import settings
 
+logger = logging.getLogger(__name__)
+
 mailchimp_default_list_id = settings.MAILCHIMP_LIST_ID
 
 
@@ -10,12 +12,12 @@ def add_user(user, mailing_list_id=None):
     try:
         mailchimp_api = mailchimp.Mailchimp(apikey=settings.MAILCHIMP_API_KEY)
     except mailchimp.Error:
-        logging.error("Missing or invalid MAILCHIMP_API_KEY")
+        logger.error("Missing or invalid MAILCHIMP_API_KEY")
         return
 
     list_id = mailing_list_id or mailchimp_default_list_id
     if list_id is None:
-        logging.error("Missing MAILCHIMP_LIST_ID")
+        logger.error("Missing MAILCHIMP_LIST_ID")
         return
 
     try:
@@ -24,10 +26,10 @@ def add_user(user, mailing_list_id=None):
                                                  double_optin=False,
                                                  update_existing=False,
                                                  replace_interests=False)
-        logging.debug("{} was successfully subscribed to list {}".format(response['email'], list_id))
+        logger.debug("{} was successfully subscribed to list {}".format(response['email'], list_id))
     except mailchimp.ListDoesNotExistError:
-        logging.error("List {} does not exist".format(list_id))
+        logger.error("List {} does not exist".format(list_id))
     except mailchimp.ListAlreadySubscribedError:
-        logging.info("User already subscribed to list {}".format(list_id))
+        logger.info("User already subscribed to list {}".format(list_id))
     except mailchimp.Error as e:
-        logging.error("An error occurred: {} - {}".format(e.__class__, e))
+        logger.error("An error occurred: {} - {}".format(e.__class__, e))

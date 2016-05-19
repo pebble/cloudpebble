@@ -2,11 +2,14 @@ import base64
 import urllib2
 import json
 import os
+import logging
+
 from celery import shared_task
 from django.conf import settings
 from django.utils.timezone import now
 from github.GithubObject import NotSet
 from github import Github, GithubException, InputGitTreeElement
+
 from ide.git import git_auth_check, get_github
 from ide.models.build import BuildResult
 from ide.models.project import Project
@@ -17,6 +20,8 @@ from ide.utils.sdk import generate_manifest_dict, generate_manifest, generate_ws
 from utils.td_helper import send_td_event
 
 __author__ = 'katharine'
+
+logger = logging.getLogger(__name__)
 
 
 @shared_task(acks_late=True)
@@ -108,13 +113,13 @@ def github_push(user, commit_message, repo_name, project):
             has_changed = True
             next_tree[repo_path] = InputGitTreeElement(path=repo_path, mode='100644', type='blob',
                                                        content=source.get_contents())
-            print "New file: %s" % repo_path
+            logger.debug("New file: %s", repo_path)
         else:
             sha = next_tree[repo_path]._InputGitTreeElement__sha
             our_content = source.get_contents()
             expected_sha = git_sha(our_content)
             if expected_sha != sha:
-                print "Updated file: %s" % repo_path
+                logger.debug("Updated file: %s", repo_path)
                 next_tree[repo_path]._InputGitTreeElement__sha = NotSet
                 next_tree[repo_path]._InputGitTreeElement__content = our_content
                 has_changed = True
@@ -129,16 +134,16 @@ def github_push(user, commit_message, repo_name, project):
             if repo_path in next_tree:
                 content = variant.get_contents()
                 if git_sha(content) != next_tree[repo_path]._InputGitTreeElement__sha:
-                    print "Changed resource: %s" % repo_path
+                    logger.debug("Changed resource: %s", repo_path)
                     has_changed = True
                     blob = repo.create_git_blob(base64.b64encode(content), 'base64')
-                    print "Created blob %s" % blob.sha
+                    logger.debug("Created blob %s", blob.sha)
                     next_tree[repo_path]._InputGitTreeElement__sha = blob.sha
             else:
-                print "New resource: %s" % repo_path
+                logger.debug("New resource: %s", repo_path)
                 has_changed = True
                 blob = repo.create_git_blob(base64.b64encode(variant.get_contents()), 'base64')
-                print "Created blob %s" % blob.sha
+                logger.debug("Created blob %s", blob.sha)
                 next_tree[repo_path] = InputGitTreeElement(path=repo_path, mode='100644', type='blob', sha=blob.sha)
 
     # Manage deleted files
@@ -147,7 +152,7 @@ def github_push(user, commit_message, repo_name, project):
             continue
         if path not in expected_paths:
             del next_tree[path]
-            print "Deleted file: %s" % path
+            logger.debug("Deleted file: %s", path)
             has_changed = True
 
     # Compare the resource dicts
@@ -166,14 +171,14 @@ def github_push(user, commit_message, repo_name, project):
     our_res_dict = our_manifest_dict['resources']
 
     if our_res_dict != their_res_dict:
-        print "Resources mismatch."
+        logger.debug("Resources mismatch.")
         has_changed = True
         # Try removing things that we've deleted, if any
         to_remove = set(x['file'] for x in their_res_dict['media']) - set(x['file'] for x in our_res_dict['media'])
         for path in to_remove:
             repo_path = resource_root + path
             if repo_path in next_tree:
-                print "Deleted resource: %s" % repo_path
+                logger.debug("Deleted resource: %s", repo_path)
                 del next_tree[repo_path]
 
     # This one is separate because there's more than just the resource map changing.
@@ -193,22 +198,22 @@ def github_push(user, commit_message, repo_name, project):
 
     # Commit the new tree.
     if has_changed:
-        print "Has changed; committing"
+        logger.debug("Has changed; committing")
         # GitHub seems to choke if we pass the raw directory nodes off to it,
         # so we delete those.
         for x in next_tree.keys():
             if next_tree[x]._InputGitTreeElement__mode == '040000':
                 del next_tree[x]
-                print "removing subtree node %s" % x
+                logger.debug("removing subtree node %s", x)
 
-        print [x._InputGitTreeElement__mode for x in next_tree.values()]
+        logger.debug([x._InputGitTreeElement__mode for x in next_tree.values()])
         git_tree = repo.create_git_tree(next_tree.values())
-        print "Created tree %s" % git_tree.sha
+        logger.debug("Created tree %s", git_tree.sha)
         git_commit = repo.create_git_commit(commit_message, git_tree, [commit])
-        print "Created commit %s" % git_commit.sha
+        logger.debug("Created commit %s", git_commit.sha)
         git_ref = repo.get_git_ref('heads/%s' % (project.github_branch or repo.master_branch))
         git_ref.edit(git_commit.sha)
-        print "Updated ref %s" % git_ref.ref
+        logger.debug("Updated ref %s", git_ref.ref)
         project.github_last_commit = git_commit.sha
         project.github_last_sync = now()
         project.save()
@@ -270,7 +275,7 @@ def github_pull(user, project):
     for resource in media:
         path = resource_root + resource['file']
         if project_type == 'pebblejs' and resource['name'] in {
-                'MONO_FONT_14', 'IMAGE_MENU_ICON', 'IMAGE_LOGO_SPLASH', 'IMAGE_TILE_SPLASH'}:
+            'MONO_FONT_14', 'IMAGE_MENU_ICON', 'IMAGE_LOGO_SPLASH', 'IMAGE_TILE_SPLASH'}:
             continue
         if path not in paths_notags:
             raise Exception("Resource %s not found in repo." % path)
@@ -315,7 +320,7 @@ def do_github_pull(project_id):
 def hooked_commit(project_id, target_commit):
     project = Project.objects.select_related('owner__github').get(pk=project_id)
     did_something = False
-    print "Comparing %s versus %s" % (project.github_last_commit, target_commit)
+    logger.debug("Comparing %s versus %s", project.github_last_commit, target_commit)
     if project.github_last_commit != target_commit:
         github_pull(project.owner, project)
         did_something = True

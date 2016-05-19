@@ -1,8 +1,12 @@
+import logging
+
 import boto
 from boto.s3.key import Key
 from boto.s3.connection import OrdinaryCallingFormat, NoHostProvided
 from django.conf import settings
-import urllib
+
+logger = logging.getLogger(__name__)
+
 
 
 def _ensure_bucket_exists(s3, bucket):
@@ -11,7 +15,8 @@ def _ensure_bucket_exists(s3, bucket):
     except boto.exception.S3ResponseError:
         pass
     else:
-        print "Created bucket %s" % bucket
+        logger.info("Created bucket %s" % bucket)
+
 
 
 class BucketHolder(object):
