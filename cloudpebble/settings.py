@@ -9,9 +9,8 @@ import dj_database_url
 _environ = os.environ
 
 DEBUG = _environ.get('DEBUG', '') != ''
-TESTING = 'test' in sys.argv
 VERBOSE = DEBUG or (_environ.get('VERBOSE', '') != '')
-
+TESTING = 'test' in sys.argv
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 ADMINS = (
@@ -264,45 +263,6 @@ INSTALLED_APPS = (
     'djangobower',
 )
 
-# This logging config prints:
-# INFO logs from django
-# INFO or DEBUG logs from 'ide', depending on whether DEBUG=True
-# all WARNING logs from any sources
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
-            'datefmt': "%d/%b/%Y %H:%M:%S"
-        },
-    },
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose'
-        }
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': True
-        },
-        'ide': {
-            'handlers': ['console'],
-            'level': 'DEBUG' if VERBOSE else 'INFO',
-            'propagate': True
-        },
-        '': {
-            'handlers': ['console'],
-            'level': 'WARNING',
-            'propagate': False
-        }
-    }
-}
-
 # Note: due to the way that django-pipeline currently works, babel is executed with a cwd of the file being compiled.
 # This means that we must reference the babel presets by their absolute location.
 # This is arguably a bug and it might be worth making a PR on django-pipeline to fix this (or at least, fixing it in
@@ -439,9 +399,44 @@ PIPELINE = {
     }
 }
 
-# This logging configuring ensures that debug messages are logged even when DEBUG=False
-# It replaces the previous and non-functional configuration which attempted to send
-# mail to administrators.
+# This logging config prints:
+# INFO logs from django
+# INFO or DEBUG logs from 'ide', depending on whether DEBUG=True
+# all WARNING logs from any sources
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt': "%d/%b/%Y %H:%M:%S"
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True
+        },
+        'ide': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if VERBOSE else 'INFO',
+            'propagate': True
+        },
+        '': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False
+        }
+    }
+}
 
 REDIS_URL = _environ.get('REDIS_URL', None) or _environ.get('REDISCLOUD_URL', 'redis://redis:6379')
 
