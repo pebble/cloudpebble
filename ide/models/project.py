@@ -1,3 +1,4 @@
+import re
 import uuid
 import json
 
@@ -98,6 +99,19 @@ class Project(IdeModel):
     @property
     def uses_array_message_keys(self):
         return isinstance(json.loads(self.app_keys), list)
+
+    def get_parsed_appkeys(self):
+        app_keys = json.loads(self.app_keys)
+        if isinstance(app_keys, dict):
+            return sorted(app_keys.iteritems(), key=lambda x: x[1])
+        else:
+            parsed_keys = []
+            for appkey in app_keys:
+                parsed = re.match(r'^([a-zA-Z_][_a-zA-Z\d]+)(?:\[(\d+)\])?$', appkey)
+                if not parsed:
+                    raise ValueError("Bad Appkey %s" % appkey)
+                parsed_keys.append((parsed.group(1), parsed.group(2) or 1))
+            return parsed_keys
 
     def get_last_build(self):
         try:

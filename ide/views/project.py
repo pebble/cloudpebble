@@ -31,23 +31,12 @@ def view_project(request, project_id):
         project.app_long_name = project.app_short_name
     if project.app_version_label is None:
         project.app_version_label = '1.0'
-    send_td_event('cloudpebble_open_project', request=request, project=project)
-    app_keys = json.loads(project.app_keys)
-    if isinstance(app_keys, dict):
-        app_keys = sorted(app_keys.iteritems(), key=lambda x: x[1])
-    else:
-        def parse_appkey(appkey):
-            parsed = re.match(r'^([^\[\]]+)(?:\[(\d+)\])?$', appkey)
-            if not parsed:
-                raise Exception("OH SHIT %s" % appkey)
-            print
-            return parsed.group(1), parsed.group(2) or 1
-
-        app_keys = [parse_appkey(x) for x in app_keys]
+    app_keys = project.get_parsed_appkeys()
     supported_platforms = ["aplite", "basalt"]
     if project.project_type != 'pebblejs' and project.sdk_version != '2':
         supported_platforms.append("chalk")
 
+    send_td_event('cloudpebble_open_project', request=request, project=project)
     try:
         token = request.user.social_auth.get(provider='pebble').extra_data['access_token']
     except:

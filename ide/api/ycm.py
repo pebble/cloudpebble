@@ -18,17 +18,8 @@ __author__ = 'katharine'
 logger = logging.getLogger(__name__)
 
 
-@login_required
-@require_POST
-@json_view
-def init_autocomplete(request, project_id):
-    project = get_object_or_404(Project, pk=project_id, owner=request.user)
-    source_files = project.source_files.all()
+def make_resource_ids_file(project):
     resource_files = project.resources.all()
-    file_contents = {}
-    for f in source_files:
-        file_contents[f.project_path] = f.get_contents()
-
     resource_ids = []
     count = 1
     for f in resource_files:
@@ -42,7 +33,28 @@ def init_autocomplete(request, project_id):
             else:
                 resource_ids.append('#define RESOURCE_ID_%s %d' % (identifier.resource_id, count))
                 count += 1
-    file_contents['build/src/resource_ids.auto.h'] = '\n'.join(resource_ids) + "\n"
+    resource_ids_file = '\n'.join(resource_ids) + "\n"
+    return resource_ids_file
+
+
+def make_appmessage_keys_file(project):
+    data = sorted(k for k, v in project.get_parsed_appkeys())
+    return "#pragma once\n#include <stdint.h>\n\n" + "".join("extern uint32_t MESSAGE_KEY_{};\n".format(k) for k in data)
+
+
+@login_required
+@require_POST
+@json_view
+def init_autocomplete(request, project_id):
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    source_files = project.source_files.all()
+
+    file_contents = {}
+    for f in source_files:
+        file_contents[f.project_path] = f.get_contents()
+
+    file_contents['build/src/resource_ids.auto.h'] = make_resource_ids_file(project)
+    file_contents['build/src/message_keys.auto.h'] = make_appmessage_keys_file(project)
 
     request = {
         'files': file_contents,

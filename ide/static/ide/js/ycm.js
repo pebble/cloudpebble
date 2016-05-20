@@ -244,6 +244,20 @@ CloudPebble.YCM = new (function() {
         });
     };
 
+    this.updateAppkeys = function(app_key_names) {
+        if (!mInitialised) {
+            return;
+        }
+        var file = "#pragma once\n#include <stdint.h>\n\n";
+        file += _.map(app_key_names, function(name) {
+            return "extern uint32_t MESSAGE_KEY_"+name+";\n"
+        }).join("");
+        ws_send('create', {
+            filename: 'build/src/message_keys.auto.h',
+            content: file
+        });
+    };
+
     this.request = function(endpoint, editor, cursor) {
         var init_step = Promise.resolve();
         if (mFailed) {

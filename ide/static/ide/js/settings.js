@@ -50,6 +50,7 @@ CloudPebble.Settings = (function() {
             var build_chalk = pane.find('#settings-build-chalk:visible').prop('checked');
 
             var app_keys = (app_key_array_style ? [] : {});
+            var app_key_names = [];
             
             var app_is_hidden = 0;
             var app_is_shown_on_communication = 0;
@@ -142,6 +143,7 @@ CloudPebble.Settings = (function() {
                 else {
                     app_keys[name] = id;
                 }
+                app_key_names.push(name);
             });
             if (failure) return failure;
 
@@ -183,6 +185,11 @@ CloudPebble.Settings = (function() {
                 $('#settings-sdk-version option[value=2]').prop('disabled', CloudPebble.ProjectInfo.sdk_version != '2');
                 $('.project-name').text(name);
                 window.document.title = "CloudPebble – " + name;
+
+                if (CloudPebble.Ready) {
+                    app_key_names.sort();
+                    CloudPebble.YCM.updateAppkeys(app_key_names);
+                }
             }).catch(function(e) {
                 throw new Error(interpolate("Failed to save project settings. (%s) %s", [e.status, e.message]));
             });
