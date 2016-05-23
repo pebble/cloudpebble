@@ -670,13 +670,33 @@ table.build-results tr.pending .build-state {
     display: table-row;
 }
 
-/*.image-resource-preview > div > * {*/
-    /*display: table-cell;*/
-/*}*/
-
 .resource-actions .btn {
     margin-right: 20px;
     width: 188px;
+}
+
+
+/* Dependancies pane */
+
+.dependencies-pane .well {
+    margin: 30px;
+    padding-left: 60px;
+    padding-right: 60px;
+    width: 650px;
+}
+
+.package-suggestion {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    height: 1em;
+    overflow: hidden;
+}
+
+.package-suggestion span.package-suggestion-name {
+    font-weight: bold;
+}
+.package-suggestion span.package-suggestion-name::after {
+    content: ' - ';
 }
 
 /* UI Editor pane */
@@ -1108,7 +1128,7 @@ button#add-filter {
     margin-right: 15px;
 }
 
-.text-wrap {
+.resource-pane .text-wrap {
     margin-left: 170px;
 }
 .text-wrap.disabled {
