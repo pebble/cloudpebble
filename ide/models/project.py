@@ -107,7 +107,7 @@ class Project(IdeModel):
         else:
             parsed_keys = []
             for appkey in app_keys:
-                parsed = re.match(r'^([a-zA-Z_][_a-zA-Z\d]+)(?:\[(\d+)\])?$', appkey)
+                parsed = re.match(r'^([a-zA-Z_][_a-zA-Z\d]*)(?:\[(\d+)\])?$', appkey)
                 if not parsed:
                     raise ValueError("Bad Appkey %s" % appkey)
                 parsed_keys.append((parsed.group(1), parsed.group(2) or 1))

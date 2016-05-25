@@ -199,6 +199,8 @@ CloudPebble.Settings = (function() {
         var live_form = make_live_settings_form({
             save_function: save,
             error_function: display_error,
+            label_selector: '.control-group label, button.kv-remove',
+            group_selector: '.control-group, tr',
             form: pane.find('form')
         });
 
@@ -247,12 +249,13 @@ CloudPebble.Settings = (function() {
             tbody_id: 'appkeys',
             data: CloudPebble.ProjectInfo.parsed_app_keys
         });
+
         appkey_table_elm.on('rowDeleted', function() {
-            live_form.save(appkey_table_elm)
+            live_form.save(appkey_table_elm.find('tr.kv-row:last-child'));
         });
 
-        appkey_table_elm.on('rowAdded', function(e, row) {
-            live_form.addElement($(row));
+        appkey_table_elm.on('rowAdded', function(e, info) {
+            live_form.addElement($(info.element));
         });
 
         function configure_appkey_table(is_array_kind) {
@@ -271,7 +274,7 @@ CloudPebble.Settings = (function() {
             appkey_table.setDefaultValue(default_value);
             appkey_table_elm.next('.help-block').text(help_text);
         }
-        
+
         function reset_appkey_table_values(to_array_kind) {
             var was_array_kind = app_uses_array_appkeys();
             if (to_array_kind == was_array_kind) return;

@@ -10,14 +10,15 @@
  * @param options.default_value The initial value for new rows
  * @constructor
  */
-CloudPebble.KVTable = function(table_elm, options) {
+CloudPebble.KVTable = function (table_elm, options) {
 
     var opts = _.defaults(options || {}, {
         key_name: 'Key',
         value_name: 'Value',
         value_type: 'text',
         data: [],
-        placeholder: gettext('New Entry'),
+        key_placeholder: gettext('New Entry'),
+        value_placeholder: '',
         default_value: null
     });
 
@@ -36,11 +37,19 @@ CloudPebble.KVTable = function(table_elm, options) {
      * @returns {jQuery} A <tr> containing two input elements and a delete button
      */
     function render_row(key, value) {
-        value = key ? value : opts.default_value;
-        var placeholder = key ? null : opts.placeholder;
-        return $('<tr>').append([
-            $('<td>').append($('<input>').val(key).addClass('kv-key').attr('type', 'text').attr('placeholder', placeholder)),
-            $('<td>').append($('<input>').val(value).addClass('kv-value').attr('type', opts.value_type)),
+        return $('<tr>').addClass('kv-row').append([
+            $('<td>').append(
+                $('<input>')
+                    .val(key)
+                    .addClass('kv-key')
+                    .attr('type', 'text')
+                    .attr('placeholder', key ? null : opts.key_placeholder)),
+            $('<td>').append(
+                $('<input>')
+                    .val(key ? value : opts.default_value)
+                    .addClass('kv-value')
+                    .attr('type', opts.value_type)
+                    .attr('placeholder', key ? null : opts.value_placeholder)),
             $('<td>').append($('<button>').text('-').addClass("btn kv-remove"))
         ]);
     }
@@ -51,7 +60,7 @@ CloudPebble.KVTable = function(table_elm, options) {
      * @returns {jQuery} a tbody with rows for the data and an extra empty row
      */
     function render_body(data) {
-        return $('<tbody>').append(_.map(data, function(tuple) {
+        return $('<tbody>').append(_.map(data, function (tuple) {
             return render_row(tuple[0], tuple[1]);
         })).append(render_row());
     }
@@ -67,7 +76,7 @@ CloudPebble.KVTable = function(table_elm, options) {
         table.append(body);
 
         // If the user enters a new key in the last row, add another row
-        body.on('change', 'tr:last-child .kv-key', function() {
+        body.on('change', 'tr:last-child input', function () {
             addField();
         });
 
@@ -76,6 +85,7 @@ CloudPebble.KVTable = function(table_elm, options) {
             $(this).closest('tr').remove();
             table.trigger('rowDeleted');
         });
+        table.addClass('kv-table');
     }
 
     /** Add an empty row and promote the current last-row to a real K-V item.
@@ -87,7 +97,10 @@ CloudPebble.KVTable = function(table_elm, options) {
             .closest('button').removeClass('disabled');
         var row = render_row();
         body.append(row);
-        table.trigger('rowAdded', row);
+        table.trigger('rowAdded', {
+            element: row,
+            key: null
+        });
     }
 
     /**
@@ -95,7 +108,7 @@ CloudPebble.KVTable = function(table_elm, options) {
      * currently existing last row
      * @param new_default
      */
-    this.setDefaultValue = function setDefaultValue(new_default) {
+    this.setDefaultValue = function (new_default) {
         opts.default_value = new_default;
         body.find('tr:last-child input.kv-value').val(new_default)
     };
@@ -104,7 +117,7 @@ CloudPebble.KVTable = function(table_elm, options) {
      * Change the text of the key column's header
      * @param new_title
      */
-    this.setKeyName = function setKeyName(new_title) {
+    this.setKeyName = function (new_title) {
         opts.key_name = new_title;
         th_key.text(new_title);
     };
@@ -113,7 +126,7 @@ CloudPebble.KVTable = function(table_elm, options) {
      * Change the text of the value column's header
      * @param new_title
      */
-    this.setValueName = function setValueName(new_title) {
+    this.setValueName = function (new_title) {
         opts.value_name = new_title;
         th_value.text(new_title)
     };
@@ -124,8 +137,8 @@ CloudPebble.KVTable = function(table_elm, options) {
      * the row's name, value and row index. The callback should return a new value for that row.
      * @param callback Value for each row or function which computes the new value.
      */
-    this.mapValues = function mapValues(callback) {
-        body.find('tr').each(function(i) {
+    this.mapValues = function (callback) {
+        body.find('tr').each(function (i) {
             var name = $(this).find('input.kv-key').val();
             var old_value = $(this).find('input.kv-value').val();
             var new_value = (_.isFunction(callback) ? callback(name, old_value, i) : callback);
@@ -137,8 +150,8 @@ CloudPebble.KVTable = function(table_elm, options) {
      * Get the table's values
      * @returns {Array} An array of [key, value] tuples.
      */
-    this.getValues = function getValues() {
-        return body.find('tr:not(:last-child)').map(function() {
+    this.getValues = function () {
+        return body.find('tr:not(:last-child)').map(function () {
             return [[
                 $(this).find('input.kv-key').val(),
                 $(this).find('input.kv-value').val()
@@ -147,7 +160,12 @@ CloudPebble.KVTable = function(table_elm, options) {
     };
 
     this.addValue = function addValue(name, value) {
-        render_row(name, value).insertBefore(body.find('tr:last-child'));
+        var row = render_row(name, value).insertBefore(body.find('tr:last-child'));
+        table.trigger('rowAdded', {
+            element: row,
+            key: name,
+            value: value
+        });
     };
 
     render();

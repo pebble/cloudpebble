@@ -462,18 +462,18 @@ ul.nav-pills {
     width: 360px;
 }
 
-.kv-key {
+table.kv-table .kv-key {
     width: 200px;
     font-family: Menlo, 'Deja Vu Sans Mono', monospace;
     border-radius: 5px;
 }
 
-.kv-value {
+table.kv-table .kv-value {
     width: 100px;
     border-radius: 5px;
 }
 
-.kv-remove {
+table.kv-table .kv-remove {
     width: 50px;
     font-weight: bold;
 }
@@ -679,13 +679,13 @@ table.build-results tr.pending .build-state {
     margin: 30px;
     padding-left: 60px;
     padding-right: 60px;
-    width: 650px;
+    width: 590px;
 }
 
 .package-suggestion {
     text-overflow: ellipsis;
     white-space: nowrap;
-    height: 1em;
+    height: 1.2em;
     overflow: hidden;
     display: block;
 }

@@ -1,9 +1,25 @@
+/**
+ *
+ * @param options Customisation options.
+ * @param options.form The form element to automatically save
+ * @param options.save_function {Function} A function returning a promise called when the form needs to be saved
+ * @param options.error_function {Function} A function to be called if saving fails.
+ * @param options.on_save_function {Function|null} An optional function called when the form is successfully saved
+ * @param options.on_change_function {Function|null} An optional function called when any form elements are changed
+ * @param options.control_selector {string} A selector string which should select all auto-saving controls
+ * @param options.changeable_control_selector {string} A selector which should specifically select any controls
+ *      which may be in a state of 'changed but unsaved' (e.g. text boxes)
+ * @param options.label_selector {string} Select elements which should have form icons inserted after them.
+ * @param options.group_selector {string} This should select elements which group inputs and labels together.
+ * @returns {{clearIcons: self.clearIcons, addElement: self.addElement, init: self.init, save: self.save}}
+ */
 function make_live_settings_form(options) {
     // Set up default options for the live settings form
     var opts = _.defaults(options || {}, {
         save_function: null,
         form: null,
         error_function: console.log,
+        on_save_function: null,
         on_change_function: null,
         control_selector: 'input, select, textarea',
         changeable_control_selector: "input[type!='number'], textarea",
@@ -13,71 +29,77 @@ function make_live_settings_form(options) {
     if (!_.isFunction(opts.save_function)
         || (!_.isObject(opts.form))
         || (!_.isFunction(opts.error_function))
-        || (!!opts.on_change_function && !_.isFunction(opts.on_change_function))) {
+        || (!!opts.on_change_function && !_.isFunction(opts.on_change_function))
+        || (!!opts.on_save_function && !_.isFunction(opts.on_save_function))) {
         throw new Error("Invalid arguments to make_live_settings_form");
     }
+    opts.form = $(opts.form);
 
-    var save = function(element, event) {
+    function save(element, event) {
         // After the form is saved, flash the 'tick' icon on success or keep a 'changed' icon on error.
-        var promise = opts.save_function(event);
+        function on_save_error(error) {
+            opts.error_function(error);
+            if (element) show_changed_icon(element);
+        }
+        try {
+            var promise = Promise.resolve(opts.save_function(event));
+        }
+        catch (error) {
+            on_save_error(error);
+            return;
+        }
 
         if (promise) {
-            promise.then(function () {
+            Promise.resolve(promise).then(function (result) {
+                if (result && result.incomplete) return;
                 clear_changed_icons();
                 if (element) flash_tick_icon(element);
-            }).catch(function (error) {
-                opts.error_function(error);
-                if (element) show_changed_icon(element);
+                if (_.isFunction(opts.on_save_function)) {
+                    opts.on_save_function()
+                }
+            }).catch(function(error) {
+                on_save_error(error);
             });
         }
-    };
+    }
 
-    var clear_changed_icons = function() {
-        // Replace all visible changed icons with a one-second 'tick'
+    /** Replace all visible changed icons with a one-second 'tick' */
+    function clear_changed_icons() {
         opts.form.find('.setting-changed:visible').siblings('.setting-saved').show().delay(1000).hide('fast');
         opts.form.find('.setting-changed').hide();
-    };
+    }
 
-    var flash_tick_icon = function(element) {
-        // Show the 'tick' icon for an element for one second
-        element.parents(opts.group_selector).find('.setting-saved').show().delay(1000).hide('fast');
-    };
+    /** Show the 'tick' icon for an element for one second */
+    function flash_tick_icon(element) {
+        element.closest(opts.group_selector).find('.setting-saved').show().delay(1000).hide('fast');
+    }
 
-    var show_changed_icon = function(element) {
-        // Show the 'changed' icon for an element
-        element.parents(opts.group_selector).find('.setting-changed').show('fast');
+    /** Show the 'changed' icon for an element */
+    function show_changed_icon(element) {
+        element.closest(opts.group_selector).find('.setting-changed').show('fast');
         if (_.isFunction(opts.on_change_function)) {
             opts.on_change_function(element);
         }
-    };
+    }
 
-    var hookup_elements = function(elements) {
-        // Set up a hook for any changed form elements
-        elements.on("change", opts.control_selector, function(e) {
-            if (_.isFunction(opts.on_change_function)) {
-                opts.on_change_function(this);
-            }
-            save($(this), e);
-        });
-
-        // While typing in text forms, show the changed icon
-        elements.on('input', opts.changeable_control_selector, function(e) {
-            show_changed_icon($(this), e);
-        });
-    };
-
-    var init = function() {
-        // Add status icons to every form element
+    /** Set up a hook for any changed form elements */
+    function hookup_elements(elements, changed) {
         $("<span class='settings-status-icons'>" +
             "<span class='icon-ok setting-saved'></span>" +
             "<span class='icon-edit setting-changed'></span>" +
             "</span>")
-            .insertAfter(opts.form.find(opts.label_selector))
+            .insertAfter(elements.find(opts.label_selector))
             .children().hide();
 
+        if (changed) {
+            show_changed_icon(elements.find(opts.control_selector));
+        }
+    }
 
+    /** Add status icons to every form element */
+    function init() {
         // When a form-reset button is clicked, submit the form instantly
-        $(opts.form).bind("reset", function() {
+        opts.form.bind("reset", function() {
             var values = {};
             // Keep track of the previous values of all form elements
             opts.form.find(opts.control_selector).each(function() {
@@ -107,16 +129,28 @@ function make_live_settings_form(options) {
 
         });
 
-        hookup_elements(opts.form);
-    };
+        // Set up the save-on-change hook
+        opts.form.on("change", opts.control_selector, function(e) {
+            if (_.isFunction(opts.on_change_function)) {
+                opts.on_change_function(this);
+            }
+            save($(this), e);
+        });
+
+        // While typing in text forms, show the changed icon
+        opts.form.on('input', opts.changeable_control_selector, function() {
+            show_changed_icon($(this));
+        });
+
+        hookup_elements(opts.form, false);
+    }
 
     var self = {
         clearIcons: function() {
-            console.log("Clearing icons!");
             clear_changed_icons();
         },
-        addElement: function(elements) {
-            hookup_elements(elements);
+        addElement: function(elements, changed) {
+            hookup_elements(elements, changed);
         },
         init: function() {
             init();
