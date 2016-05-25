@@ -167,27 +167,6 @@
                     <label class="control-label" for="settings-app-keys">{% trans "PebbleKit JS Message Keys" %}</label>
                     <div class="controls">
                         <table id="settings-app-keys">
-                            <thead>
-                                <tr>
-                                    <th>{% trans "Key Name" %}</th>
-                                    <th>{% trans "Key ID" %}</th>
-                                    <th>&nbsp;</th>
-                                </tr>
-                            </thead>
-                            <tbody id="appkeys">
-                                {% for key, id in app_keys %}
-                                <tr class="appkey">
-                                    <td><input class="appkey-name" value="{{key}}" type="text" /></td>
-                                    <td><input class="appkey-id" value="{{id}}" type="number" /></td>
-                                    <td><button class="btn remove-appkey">–</button></td>
-                                </tr>
-                                {% endfor %}
-                                <tr class="appkey">
-                                    <td><input class="appkey-name" type="text" placeholder="{% trans "New Entry" %}" /></td>
-                                    <td><input class="appkey-id" type="number" value="0" /></td>
-                                    <td><button class="btn remove-appkey disabled">–</button></td>
-                                </tr>
-                            </tbody>
                         </table>
                         <div class="help-block">
                             {% trans "A mapping from strings to integers used by PebbleKit JS." %}

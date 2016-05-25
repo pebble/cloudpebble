@@ -119,9 +119,10 @@ CloudPebble.Settings = (function() {
             var app_platforms = target_platforms.join(',');
 
             var failure = null;
-            pane.find(".appkey").each(function() {
-                var name = $(this).find('.appkey-name').val();
-                var id = parseInt($(this).find('.appkey-id').val(), 10);
+            var appkey_data = appkey_table.getValues();
+            _.each(appkey_data, function(tuple) {
+                var name = tuple[0];
+                var id = parseInt(tuple[1], 10);
 
                 if(name.replace(/\s/g, '') == '') {
                     // Skip blank keys.
@@ -236,68 +237,53 @@ CloudPebble.Settings = (function() {
 
         pane.find('#project-export-zip').click(export_project);
 
-        var add_appkey_field = function() {
-            $(this).off('change', add_appkey_field);
 
-            var entry = $(this).closest('.appkey');
-            entry.find('.remove-appkey').removeClass('disabled').click(function() {
-                entry.remove();
-                live_form.save($('#settings-app-keys'));
-            });
+        var appkey_table_elm = pane.find('#settings-app-keys');
+        var appkey_table = new CloudPebble.KVTable(appkey_table_elm, {
+            key_name: 'Key Name',
+            value_name: 'Key ID',
+            value_type: 'number',
+            default_value: 1,
+            tbody_id: 'appkeys',
+            data: CloudPebble.ProjectInfo.parsed_app_keys
+        });
+        appkey_table_elm.on('rowDeleted', function() {
+            live_form.save(appkey_table_elm)
+        });
 
-            var new_appkey = $('<tr class="appkey">' +
-                '<td><input class="appkey-name" type="text" placeholder="' + gettext("New Entry") + '" /></td>' +
-                '<td><input class="appkey-id" type="number" value="0" /></td>' +
-                '<td><button class="btn remove-appkey disabled">–</button></td>' +
-                '</tr>');
-            new_appkey.find('.appkey-id').val(app_uses_array_appkeys() ? "1" : "0");
-
-            new_appkey.find('.appkey-name').on('change', add_appkey_field);
-
-            pane.find('#appkeys').append(new_appkey);
-
-            live_form.addElement(new_appkey);
-        };
-
-        pane.find('.appkey:last').on('change', add_appkey_field);
-
-        pane.find('.remove-appkey').not('.disabled').click(function() {
-            $(this).closest('.appkey').remove();
-            live_form.save($('#settings-app-keys'));
+        appkey_table_elm.on('rowAdded', function(e, row) {
+            live_form.addElement($(row));
         });
 
         function configure_appkey_table(is_array_kind) {
-            var id_title, help_text;
+            var id_title, help_text, default_value;
             if (is_array_kind) {
                 id_title = gettext("Key Array Length");
                 help_text = gettext("A list of appMessage keys to assign for the app. Arrays with length greater than one will have a block of contiguous keys reserved after the key assigned to the given name.");
+                default_value = '1';
             }
             else {
                 id_title = gettext("Key ID");
                 help_text = gettext("A mapping from strings to integers used by PebbleKit JS.");
+                default_value = '0';
             }
-            $('#settings-app-keys thead th:nth-child(2)').text(id_title);
-            $('#settings-app-keys + .help-block').text(help_text);
+            appkey_table.setValueName(id_title);
+            appkey_table.setDefaultValue(default_value);
+            appkey_table_elm.next('.help-block').text(help_text);
         }
-
+        
+        function reset_appkey_table_values(to_array_kind) {
+            var was_array_kind = app_uses_array_appkeys();
+            if (to_array_kind == was_array_kind) return;
+            appkey_table.mapValues(to_array_kind ? 1 : function(k, v, i) {
+                return !!k.trim() ? i : 0;
+            });
+        }
 
         pane.find('#settings-message-key-kind').change(function() {
             var is_array_kind = $(this).val() == '1';
-            var was_array_kind = app_uses_array_appkeys();
-            if (is_array_kind == was_array_kind) return;
-            if (is_array_kind) {
-                // Convert key IDs key lengths, which all default to 1
-                $('.appkey-id').val('1');
-                configure_appkey_table(true);
-            }
-            else {
-                $('.appkey').each(function(k) {
-                    var name = $(this).find('.appkey-name').val().trim();
-                    var val = (name == "" ? 0 : k);
-                    $(this).find('.appkey-id').val(val);
-                });
-                configure_appkey_table(false);
-            }
+            reset_appkey_table_values(is_array_kind);
+            configure_appkey_table(is_array_kind);
         });
 
         var sdk_version_change_confirmed = false;

@@ -462,22 +462,19 @@ ul.nav-pills {
     width: 360px;
 }
 
-#settings-app-keys input[type=text] {
+.kv-key {
     width: 200px;
     font-family: Menlo, 'Deja Vu Sans Mono', monospace;
     border-radius: 5px;
 }
 
-#settings-app-keys input[type=number] {
+.kv-value {
     width: 100px;
     border-radius: 5px;
 }
 
-#settings-app-keys button {
+.kv-remove {
     width: 50px;
-}
-
-.remove-appkey {
     font-weight: bold;
 }
 
@@ -690,6 +687,7 @@ table.build-results tr.pending .build-state {
     white-space: nowrap;
     height: 1em;
     overflow: hidden;
+    display: block;
 }
 
 .package-suggestion span.package-suggestion-name {
@@ -762,7 +760,7 @@ table.build-results tr.pending .build-state {
   z-index: 10001; /* Needs to be higher than the z-index of .CodeMirror.FullScreen */
 }
 
-.edit-resource-regex, .appkey-name, .appkey-id {
+.edit-resource-regex, .kv-key, .kv-value {
   font-family: Menlo, 'Deja Vu Sans Mono', monospace;
 }
 
