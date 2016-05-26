@@ -10,8 +10,8 @@ CloudPebble.Dependencies = (function() {
         var version_prefix = '^';
         var textarea_element = form_element.find('textarea');
         var version_cache = {};
-        // Configure a textext entry to autocomplete package names by searching node-modules.com
 
+        // Configure a textext entry to autocomplete package names by searching node-modules.com
         // ajax: {crossDomain: true} is required to prevent CORS errors.
         var textext = textarea_element.textext({
             plugins: 'focus prompt ajax autocomplete',
@@ -23,9 +23,9 @@ CloudPebble.Dependencies = (function() {
                 cache: true
             },
             autocomplete: {
-                render: function (element) {
+                render: function(element) {
                     // This renders suggestions as the package name in bold, followed by the description
-                    var elm = $('<span></span>').addClass('package-suggestion').click(function () {
+                    var elm = $('<span></span>').addClass('package-suggestion').click(function() {
                         $(this).parent().click();
                     });
                     $('<span></span>').text(element.name).addClass('package-suggestion-name').appendTo(elm);
@@ -35,37 +35,50 @@ CloudPebble.Dependencies = (function() {
             },
             ext: {
                 itemManager: {
-                    itemToString: function (item) {
+                    itemToString: function(item) {
                         return item.name;
                     },
-                    stringtoItem: function (string) {
+                    stringtoItem: function(string) {
                         return {name: string}
                     }
                 },
                 ajax: {
-                    onComplete: function (data, query) {
+                    onComplete: function(data, query) {
                         // This intercepts the Ajax search results callback in order to
                         // keep a cache of which modules are at which versions.
                         // When the user selects a package, we can use this cache to look up
                         // the package's version number.
-                        _.extend(version_cache, _.object(_.map(data, function (o) {
+                        _.extend(version_cache, _.object(_.map(data, function(o) {
                             return [o.name, o.version];
                         })));
-                        $.fn.textext.TextExtAjax.prototype.onComplete.apply(this, [data, query]);
+
+                        // We also re-do the sorting. The data is sorted separately by name,
+                        // then description, then author, and the sorted results are shown
+                        // in that order.
+                        var searched = ['name', 'description', 'author'].map(function(key) {
+                            return (new Fuse(data, {keys: [key]})).search(query);
+                        });
+                        var exact = _.find(data, {name: query});
+                        var full_list = _.flatten((exact ? [exact] : []).concat(searched).concat(data));
+                        var sorted = _.uniq(full_list, false, function(item) {
+                            return item.name;
+                        });
+
+                        $.fn.textext.TextExtAjax.prototype.onComplete.apply(this, [sorted, query]);
                     }
                 }
             }
         }).textext()[0];
 
         textext.on({
-            'enterKeyDown': function (e) {
+            'enterKeyDown': function(e) {
                 if (!textext.autocomplete().isDropdownVisible()) {
                     form_element.submit();
                 }
             }
         });
 
-        form_element.submit(function (e) {
+        form_element.submit(function(e) {
             e.preventDefault();
             var val = textext.input().val().trim();
             if (!val) return;
@@ -74,7 +87,7 @@ CloudPebble.Dependencies = (function() {
             // directly and check the version there. If it is not there either, the callback is called
             // with version = null.
             if (version) {
-                on_submit(val, version_prefix+version);
+                on_submit(val, version_prefix + version);
             }
             else {
                 var url = "http://node-modules.com/package/" + encodeURI(val) + ".json";
@@ -82,9 +95,9 @@ CloudPebble.Dependencies = (function() {
                     url: url,
                     crossDomain: true,
                     dataType: 'json'
-                }).then(function (data) {
-                    on_submit(val, data.version ? version_prefix+data.version : null);
-                }).fail(function () {
+                }).then(function(data) {
+                    on_submit(val, data.version ? version_prefix + data.version : null);
+                }).fail(function() {
                     on_submit(val, null);
                 });
             }
@@ -107,7 +120,9 @@ CloudPebble.Dependencies = (function() {
     function save(values) {
         var dependencies = {};
         // Don't save yet if there are any incomplete values
-        if (_.some(_.flatten(values), function(x) {return !x.trim()})) {
+        if (_.some(_.flatten(values), function(x) {
+                return !x.trim()
+            })) {
             return {incomplete: true};
         }
         // Error if there are duplicate keys
@@ -117,10 +132,13 @@ CloudPebble.Dependencies = (function() {
             }
             dependencies[tuple[0]] = tuple[1];
         });
-        return Ajax.Post('/ide/project/' + PROJECT_ID + '/save_dependencies', {'dependencies': JSON.stringify(dependencies)});
+        return Ajax.Post('/ide/project/' + PROJECT_ID + '/save_dependencies', {
+            'dependencies': JSON.stringify(dependencies)
+        });
 
     }
 
+    /**/
 
     function setup_dependencies_pane(pane) {
         var npm_search_form = pane.find('#dependencies-search-form');
@@ -148,10 +166,7 @@ CloudPebble.Dependencies = (function() {
                 error_function: display_error,
                 form: pane.find('#dependencies-form'),
                 label_selector: 'button',
-                group_selector: 'tr',
-                on_change_function: function(elm) {
-                    return $(elm).parents('tr').find('input').filter(function(){return !$(this).val()}).length == 0;
-                }
+                group_selector: 'tr'
             });
 
             kv_table = setup_dependencies_table(dependencies_table);
@@ -175,7 +190,7 @@ CloudPebble.Dependencies = (function() {
 
     function show_dependencies_pane() {
         CloudPebble.Sidebar.SuspendActive();
-        if(CloudPebble.Sidebar.Restore("dependencies")) {
+        if (CloudPebble.Sidebar.Restore("dependencies")) {
             return;
         }
         ga('send', 'event', 'project', 'load dependencies');
