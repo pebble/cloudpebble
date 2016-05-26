@@ -75,7 +75,7 @@ CloudPebble.Settings = (function() {
             app_capabilities = app_capabilities.join(',');
 
             if(name.replace(/\s/g, '') === '') {
-                return Promise.reject(new Error(gettext("You must specify a project name")));
+                throw new Error(gettext("You must specify a project name"));
             }
 
             var saved_settings = {
@@ -83,27 +83,27 @@ CloudPebble.Settings = (function() {
             };
 
             if(short_name.replace(/\s/g, '') == '') {
-                return Promise.reject(new Error(gettext("You must specify a short name.")));
+                throw new Error(gettext("You must specify a short name."));
             }
             if(long_name.replace(/\s/g, '') == '') {
-                return Promise.reject(new Error(gettext("You must specify a long name.")));
+                throw new Error(gettext("You must specify a long name."));
             }
             if(company_name.replace(/\s/g, '') == '') {
-                return Promise.reject(new Error(gettext("You must specify a company name.")));
+                throw new Error(gettext("You must specify a company name."));
             }
             // This is not an appropriate use of a regex, but we have to have it for the HTML5 pattern attribute anyway,
             // so we may as well reuse the effort here.
             // It validates that the format matches x[.y] with x, y in [0, 255].
             if(!version_label.match(VERSION_REGEX)) {
-                return Promise.reject(new Error(gettext("You must specify a valid version number.")));
+                throw new Error(gettext("You must specify a valid version number."));
             }
             if(!app_uuid.match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}/)) {
-                return Promise.reject(new Error(gettext("You must specify a valid UUID (of the form 00000000-0000-0000-0000-000000000000)")));
+                throw new Error(gettext("You must specify a valid UUID (of the form 00000000-0000-0000-0000-000000000000)"));
             }
 
 
             if(sdk_version == '3' && !(build_aplite || build_basalt || build_chalk)) {
-                return Promise.reject(new Error("You must build your app for at least one platform."));
+                throw new Error(gettext("You must build your app for at least one platform."));
             }
 
             var target_platforms = [];
@@ -117,8 +117,7 @@ CloudPebble.Settings = (function() {
                 target_platforms.push('chalk');
             }
             var app_platforms = target_platforms.join(',');
-
-            var failure = null;
+            
             var appkey_data = appkey_table.getValues();
             _.each(appkey_data, function(tuple) {
                 var name = tuple[0];
@@ -130,12 +129,11 @@ CloudPebble.Settings = (function() {
                 }
                 if (app_key_array_style) {
                     if (!name.match(/^[a-zA-Z_][_a-zA-Z\d]*$/)) {
-                        failure = defer.reject(gettext("Message key names must be valid C identifiers"))
+                        throw new Error("Message key names must be valid C identifiers");
                     }
                     if (id < 1) {
-                        failure = defer.reject(gettext("Message key names must have lengths greater than 0."))
+                        throw new Error("Message key names must have lengths greater than 0.");
                     }
-                    if (failure) return false;
                     if (id > 1) {
                         name+="["+id+"]";
                     }
@@ -146,7 +144,7 @@ CloudPebble.Settings = (function() {
                 }
                 app_key_names.push(name);
             });
-            if (failure) return failure;
+
 
             saved_settings['sdk_version'] = sdk_version;
             saved_settings['app_short_name'] = short_name;

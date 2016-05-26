@@ -35,31 +35,32 @@ function make_live_settings_form(options) {
     }
     opts.form = $(opts.form);
 
+    /** Trigger the form save callback
+     *
+     * @param element A jquery object containing elements to show tick icons for.
+     * @param event Event object to be passed to the save callback
+     */
     function save(element, event) {
         // After the form is saved, flash the 'tick' icon on success or keep a 'changed' icon on error.
         function on_save_error(error) {
             opts.error_function(error);
             if (element) show_changed_icon(element);
         }
-        try {
-            var promise = Promise.resolve(opts.save_function(event));
-        }
-        catch (error) {
-            on_save_error(error);
-            return;
-        }
 
-        if (promise) {
-            Promise.resolve(promise).then(function (result) {
+        try {
+            return Promise.resolve(opts.save_function(event)).then(function (result) {
                 if (result && result.incomplete) return;
                 clear_changed_icons();
                 if (element) flash_tick_icon(element);
                 if (_.isFunction(opts.on_save_function)) {
                     opts.on_save_function()
                 }
-            }).catch(function(error) {
+            }).catch(function (error) {
                 on_save_error(error);
             });
+        }
+        catch (error) {
+            on_save_error(error);
         }
     }
 
@@ -82,8 +83,12 @@ function make_live_settings_form(options) {
         }
     }
 
-    /** Set up a hook for any changed form elements */
-    function hookup_elements(elements, changed) {
+    /** Add status icons to to all matched form groups inside an element  
+     * @param elements An element (e.g. table row or form) which contains form groups
+     * to add to the autosave system.
+     * @param changed if true, also show the changed icon for all new form groups
+     */
+    function add_status_icons(elements, changed) {
         $("<span class='settings-status-icons'>" +
             "<span class='icon-ok setting-saved'></span>" +
             "<span class='icon-edit setting-changed'></span>" +
@@ -96,7 +101,7 @@ function make_live_settings_form(options) {
         }
     }
 
-    /** Add status icons to every form element */
+    /** Set up the live form's event hooks and add status icons for all form groups */
     function init() {
         // When a form-reset button is clicked, submit the form instantly
         opts.form.bind("reset", function() {
@@ -142,24 +147,21 @@ function make_live_settings_form(options) {
             show_changed_icon($(this));
         });
 
-        hookup_elements(opts.form, false);
+        add_status_icons(opts.form, false);
     }
 
-    var self = {
+    return {
         clearIcons: function() {
             clear_changed_icons();
         },
         addElement: function(elements, changed) {
-            hookup_elements(elements, changed);
+            add_status_icons(elements, changed);
         },
         init: function() {
             init();
-            return self;
         },
         save: function(element) {
             save(element);
         }
     };
-
-    return self;
 }
