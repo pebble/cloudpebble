@@ -367,6 +367,7 @@ input[type=checkbox]:checked {
 
 input[type=checkbox]:disabled {
     cursor: default;
+    opacity: 0.3;
 }
 
 /* Form popover thing */

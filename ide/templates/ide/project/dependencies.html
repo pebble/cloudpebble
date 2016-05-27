@@ -12,5 +12,31 @@
         <form id="dependencies-form">
             <table id="dependencies-table"></table>
         </form>
+        <br><br>
+        <button class="btn" id="dependencies-lookup" style="width: initial;">{% trans 'Look up latest versions' %}
+        </button>
+    </div>
+    <div class="well settings-pane">
+        <h3>Searchbox Options</h3>
+        <div class="form-horizontal">
+            <div class="control-group">
+                <label class="control-label" for="dependency-option-use-cache">Cache</label>
+                <div class="controls">
+                    <input type="checkbox" id="dependency-option-use-cache" checked>
+                    <span class="help-block">
+                        Enable showing results from the module cache
+                    </span>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="dependency-option-immediate-results">Immediate</label>
+                <div class="controls">
+                    <input type="checkbox" id="dependency-option-immediate-results">
+                    <span class="help-block">
+                        Show suggestions from the module cache before the new HTTP request returns
+                    </span>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

@@ -246,15 +246,11 @@ CloudPebble.Settings = (function() {
             default_value: 1,
             tbody_id: 'appkeys',
             data: CloudPebble.ProjectInfo.parsed_app_keys
-        });
-
-        appkey_table_elm.on('rowDeleted', function() {
+        }).on('rowDeleted', function() {
             live_form.save(appkey_table_elm.find('tr.kv-row:last-child'));
-        });
-
-        appkey_table_elm.on('rowAdded', function(e, info) {
+        }).on('rowAdded', function(e, info) {
             live_form.addElement($(info.element));
-        });
+        }).init();
 
         function configure_appkey_table(is_array_kind) {
             var id_title, help_text, default_value;
