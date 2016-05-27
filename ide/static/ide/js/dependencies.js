@@ -282,11 +282,6 @@ CloudPebble.Dependencies = (function() {
             // Save the table when a row is added
             live_form.addElement($(info.element), !!info.key);
             live_form.save($(info.element));
-        }).on('rowRendered', function(row) {
-            // Add extra columns to each row, for displaying the latest version
-            $('<td></td>').addClass('latest-version').appendTo(row);
-        }).on('headRendered', function(row) {
-            $('<th>').appendTo(row);
         }).init();
     }
 
@@ -309,16 +304,6 @@ CloudPebble.Dependencies = (function() {
             'dependencies': JSON.stringify(dependencies)
         });
 
-    }
-
-    function lookup_all_dependencies(tuples) {
-        return Promise.map(tuples, function(tuple) {
-            return cache.lookup_module(tuple[0]).then(function(result) {
-                return [result._id, result.version];
-            }).catch(function() {
-                return [tuple[0], null];
-            });
-        });
     }
 
     function setup_search_test_options(pane, search_form) {
@@ -349,7 +334,6 @@ CloudPebble.Dependencies = (function() {
     function setup_dependencies_pane(pane) {
         var npm_search_form = pane.find('#dependencies-search-form');
         var dependencies_table = pane.find('#dependencies-table');
-        var dependencies_lookup = pane.find('#dependencies-lookup');
 
         var kv_table;
 
@@ -383,15 +367,6 @@ CloudPebble.Dependencies = (function() {
                 search_form.input().val('');
                 search_form.hiddenInput().val('');
                 kv_table.addValue(name, version);
-            });
-
-            dependencies_lookup.click(function() {
-                lookup_all_dependencies(kv_table.getValues()).then(function(results) {
-                    dependencies_table.find('tr:not(:last-child) .latest-version').each(function(i) {
-                        var version = results[i][1];
-                        $(this).text(version ? gettext('Latest version: ') + version : gettext('Module not found'));
-                    });
-                });
             });
 
             setup_search_test_options(pane, search_form);
