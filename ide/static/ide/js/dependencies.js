@@ -1,8 +1,11 @@
 CloudPebble.Dependencies = (function() {
     var dependencies_template = null;
 
+    // TODO: Once these are decided, they should be deleted and refactored out
     var SUGGEST_CACHED = true;
     var IMMEDIATE_RESULTS = false;
+    var SMALLEST_FIRST = true;
+    var SHOW_SPINNER = true;
 
     function ModuleCache() {
         this.cache = {};
@@ -73,6 +76,11 @@ CloudPebble.Dependencies = (function() {
             })
         }
 
+        /** Sort comparison function for items which sorts by shortest-name-first if the scores are identical. */
+        function sort_fn(a, b) {
+            return (a.score === b.score) ? a.item.name.length - b.item.name.length : a.score - b.score;
+        }
+
         /** Search/filter/sort a list of package objects by text.
          *
          * Searches are done for name, description and then author and the results
@@ -84,7 +92,11 @@ CloudPebble.Dependencies = (function() {
          */
         function filter_results(data, query) {
             return _.flatten(['name', 'description', 'author'].map(function(key) {
-                return (new Fuse(data, {keys: [key]})).search(query);
+                var options = {
+                    keys: [key]
+                };
+                if (SMALLEST_FIRST) options.sortFn = sort_fn;
+                return (new Fuse(data, options)).search(query);
             }));
         }
 
@@ -104,7 +116,9 @@ CloudPebble.Dependencies = (function() {
         /** This renders suggestions as the package name in bold, followed by the description */
         function render_suggestion(item) {
             var elm = $('<span></span>').addClass('package-suggestion').click(function() {
-                $(this).parent().click();
+                $(this).closest('.text-suggestion').click();
+            }).mouseover(function() {
+                $(this).closest('.text-suggestion').mouseover();
             });
             $('<span></span>').text(item.name).addClass('package-suggestion-name').appendTo(elm);
             $('<span></span>').text(item.description).appendTo(elm);
@@ -121,29 +135,51 @@ CloudPebble.Dependencies = (function() {
                 url: 'http://node-modules.com/search.json',
                 dataType: 'json',
                 crossDomain: true,
-                cache: true
+                cache: true,
+                loading: {delay: 1000}
             },
             autocomplete: {
                 render: render_suggestion
             },
             ext: {
+                core: {
+                },
                 itemManager: {
                     itemToString: function(item) {
                         return item.name;
                     },
                     stringtoItem: function(string) {
-                        return {name: string}
+                        return {name: string};
+                    },
+                    compareItems: function(item1, item2) {
+                        if (!item1 || !item2) return 0;
+                        return item1.name == item2.name;
+                    },
+                    itemContains: function(item, needle) {
+                        return item.name.includes(needle);
                     },
                     filter: function(list, query) {
                         return dedupe_results(filter_results(list, query));
                     }
                 },
-                // This extention modifies textext so that it only keeps track of the selected item if you have
+                // This extension modifies textext so that it only keeps track of the selected item if you have
                 // manually navigated the suggestion list.
                 autocomplete: {
+                    getSuggestions: function() {
+                        // Just hide the suggestions of the user clears the input box.
+                        var val = this.val();
+                        if (!val.trim()) {
+                            this._previousInputValue = val;
+                            this.hideDropdown();
+                        }
+                        else {
+                            $.fn.textext.TextExtAutocomplete.prototype.getSuggestions.apply(this, arguments);
+                        }
+                    },
                     onShowDropdown: function(e, renderCallback) {
+                        // Re-select the first item if the user hasn't pressed the up or down keys
                         $.fn.textext.TextExtAutocomplete.prototype.onShowDropdown.apply(this, arguments);
-                        if (!this.manual_control){
+                        if (!this.manual_control) {
                             this.selectFirst();
                         }
                     },
@@ -155,6 +191,8 @@ CloudPebble.Dependencies = (function() {
                         this.scrollSuggestionIntoView(target);
                     },
                     hideDropdown: function() {
+                        // this.manual_control keeps track of whether the user pressed the up or down keys since
+                        // the last time the dropdown was hidden.
                         this.manual_control = false;
                         $.fn.textext.TextExtAutocomplete.prototype.hideDropdown.apply(this, arguments);
                     },
@@ -169,23 +207,37 @@ CloudPebble.Dependencies = (function() {
                 },
                 ajax: {
                     onComplete: function(data, query) {
-                        // This intercepts the Ajax search results in order to update the package version cache and
-                        // sort the results in a more 'autocomplete' type way.
+                        // Update the package cache with the new data
+                        var suggestions;
                         cache.update_modules(data);
-                        var fetched = sort_results(data, query);
-                        if (SUGGEST_CACHED) {
-                            var cached = filter_results(cache.get_list(), query);
-                            var combined = dedupe_results(_.flatten([fetched, cached]));
-                            var suggestions = sort_results(combined, query);
-                            $.fn.textext.TextExtAjax.prototype.onComplete.apply(this, [suggestions, query]);
+                        spinner.addClass('hide');
+                        // Sort the suggestions based on text similarity
+                        if (!query) {
+                            suggestions = [];
+                        }
+                        else if (SUGGEST_CACHED) {
+                            suggestions = dedupe_results(filter_results(cache.get_list(), query));
                         }
                         else {
-                            $.fn.textext.TextExtAjax.prototype.onComplete.apply(this, [fetched, query]);
+                            suggestions = sort_results(data, query);
                         }
+                        $.fn.textext.TextExtAjax.prototype.onComplete.apply(this, [suggestions, query]);
+                    },
+                    load: function(query) {
+                        if (SHOW_SPINNER) {
+                            spinner.removeClass('hide');
+                        }
+                        return $.fn.textext.TextExtAjax.prototype.load.apply(this, arguments);
                     }
                 }
             }
         }).textext()[0];
+
+        var spinner = $('<img>')
+            .attr('src', "/static/ide/img/spinner.gif")
+            .css({position: 'absolute', right: '20px' ,top: 'calc(50% - 8px)'})
+            .addClass('hide');
+        textarea_element.closest(".text-wrap").append(spinner);
 
         cache.on('update', function() {
             if (IMMEDIATE_RESULTS) {
@@ -269,6 +321,31 @@ CloudPebble.Dependencies = (function() {
         });
     }
 
+    function setup_search_test_options(pane, search_form) {
+
+        pane.find('#dependency-option-use-cache').change(function() {
+            SUGGEST_CACHED = $(this).is(':checked');
+            $('#dependency-option-immediate-results').attr('disabled', !$(this).is(':checked'));
+            if (!SUGGEST_CACHED) {
+                IMMEDIATE_RESULTS = false;
+                search_form._opts.suggestions = [];
+            }
+        });
+
+        pane.find('#dependency-option-immediate-results').change(function() {
+            IMMEDIATE_RESULTS = $(this).is(':checked');
+            search_form._opts.suggestions = IMMEDIATE_RESULTS ? cache.get_list() : [];
+        });
+
+        pane.find('#dependency-option-smallest-first').change(function() {
+            SMALLEST_FIRST = $(this).is(':checked');
+        });
+
+        pane.find('#dependency-option-show-spinner').change(function() {
+            SHOW_SPINNER = $(this).is(':checked');
+        });
+    }
+
     function setup_dependencies_pane(pane) {
         var npm_search_form = pane.find('#dependencies-search-form');
         var dependencies_table = pane.find('#dependencies-table');
@@ -312,24 +389,12 @@ CloudPebble.Dependencies = (function() {
                 lookup_all_dependencies(kv_table.getValues()).then(function(results) {
                     dependencies_table.find('tr:not(:last-child) .latest-version').each(function(i) {
                         var version = results[i][1];
-                        $(this).text(version ? gettext('Latest version: ')+version : gettext('Module not found'));
+                        $(this).text(version ? gettext('Latest version: ') + version : gettext('Module not found'));
                     });
                 });
             });
 
-            $('#dependency-option-use-cache').change(function() {
-                SUGGEST_CACHED = $(this).is(':checked');
-                $('#dependency-option-immediate-results').attr('disabled', !$(this).is(':checked'));
-                if (!SUGGEST_CACHED) {
-                    IMMEDIATE_RESULTS = false;
-                    search_form._opts.suggestions = [];
-                }
-            });
-
-            $('#dependency-option-immediate-results').change(function() {
-                IMMEDIATE_RESULTS = $(this).is(':checked');
-                search_form._opts.suggestions = IMMEDIATE_RESULTS ? cache.get_list() : [];
-            });
+            setup_search_test_options(pane, search_form);
 
             live_form.init();
         });

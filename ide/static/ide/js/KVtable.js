@@ -52,7 +52,7 @@ CloudPebble.KVTable = function(table_elm, options) {
                     .addClass('kv-value')
                     .attr('type', opts.value_type)
                     .attr('placeholder', key ? null : opts.value_placeholder)),
-            $('<td>').append($('<button>').text('-').addClass("btn kv-remove"))
+            $('<td>').append($('<button>').text('-').addClass("btn kv-remove").prop('disabled', !key))
         ]);
         self.trigger('rowRendered', row);
         return row;
@@ -103,9 +103,9 @@ CloudPebble.KVTable = function(table_elm, options) {
      * Triggers a 'rowAdded' event on the elemnt, with the new empty row as an argument.
      */
     function addField() {
-        body.find('tr:last-child .kv-key')
-            .attr('placeholder', null)
-            .closest('button').removeClass('disabled');
+        var lastRow = body.find('tr:last-child');
+        lastRow.find('.kv-key').attr('placeholder', null);
+        lastRow.find('button').prop('disabled', false);
         var row = render_row();
         body.append(row);
         self.trigger('rowAdded', {

@@ -478,6 +478,10 @@ table.kv-table .kv-remove {
     font-weight: bold;
 }
 
+.kv-remove:disabled {
+    background-color: white !important;
+}
+
 .settings-pane .form-actions {
     padding-left: 25px;
     padding-right: 25px;
