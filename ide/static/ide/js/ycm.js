@@ -252,7 +252,7 @@ CloudPebble.YCM = new (function() {
         file += _.map(app_key_names, function(name) {
             return "extern uint32_t MESSAGE_KEY_"+name+";\n"
         }).join("");
-        ws_send('create', {
+        return ws_send('create', {
             filename: 'build/src/message_keys.auto.h',
             content: file
         });

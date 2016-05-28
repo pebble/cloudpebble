@@ -189,6 +189,7 @@ CloudPebble.Settings = (function() {
                     app_key_names.sort();
                     CloudPebble.YCM.updateAppkeys(app_key_names);
                 }
+                return null;
             }).catch(function(e) {
                 throw new Error(interpolate("Failed to save project settings. (%s) %s", [e.status, e.message]));
             });
@@ -248,7 +249,7 @@ CloudPebble.Settings = (function() {
             data: CloudPebble.ProjectInfo.parsed_app_keys
         }).on('rowDeleted', function() {
             live_form.save(appkey_table_elm.find('tr.kv-row:last-child'));
-        }).on('rowAdded', function(e, info) {
+        }).on('rowAdded', function(info) {
             live_form.addElement($(info.element));
         }).init();
 

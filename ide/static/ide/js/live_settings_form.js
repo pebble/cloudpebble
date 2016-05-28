@@ -11,7 +11,6 @@
  *      which may be in a state of 'changed but unsaved' (e.g. text boxes)
  * @param options.label_selector {string} Select elements which should have form icons inserted after them.
  * @param options.group_selector {string} This should select elements which group inputs and labels together.
- * @returns {{clearIcons: self.clearIcons, addElement: self.addElement, init: self.init, save: self.save}}
  */
 function make_live_settings_form(options) {
     // Set up default options for the live settings form
