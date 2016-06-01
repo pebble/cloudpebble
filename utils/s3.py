@@ -8,7 +8,6 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 
-
 def _ensure_bucket_exists(s3, bucket):
     try:
         s3.create_bucket(bucket)
@@ -16,7 +15,6 @@ def _ensure_bucket_exists(s3, bucket):
         pass
     else:
         logger.info("Created bucket %s" % bucket)
-
 
 
 class BucketHolder(object):
@@ -118,7 +116,8 @@ def save_file(bucket_name, path, value, public=False, content_type='application/
 
 
 @_requires_aws
-def upload_file(bucket_name, dest_path, src_path, public=False, content_type='application/octet-stream', download_filename=None):
+def upload_file(bucket_name, dest_path, src_path, public=False, content_type='application/octet-stream',
+                download_filename=None):
     bucket = _buckets[bucket_name]
     key = Key(bucket)
     key.key = dest_path

@@ -1,17 +1,17 @@
 Django==1.6.2
 django-registration==1.0
 amqp==1.4.4
-celery==3.1.10
-django_celery==3.1.10
+celery==3.1.23
+django-celery==3.1.17
 flup==1.0.3.dev-20110405
 psycopg2==2.4.5
-South==0.8.4
+South==1.0.2
 qrcode==4.0.4
 Pillow==2.9.0
 pygithub==1.14.2
 python-social-auth==0.1.23
-redis==2.9.1
-boto==2.27.0
+redis==2.10.5
+boto==2.39.0
 gevent==1.1
 psycogreen==1.0
 requests==2.7.0
@@ -32,18 +32,19 @@ freetype-py==1.0
 sh==1.08
 pypng==0.0.17
 
-# Additional dependencies
-kombu==3.0.26
-mercurial==3.3.3
-oauthlib==0.7.2
-Padding==0.4
+# Additional requirements
+anyjson==0.3.3
+billiard==3.3.0.23
+docopt==0.4.0
+greenlet==0.4.9
+httplib2==0.9.2
+kombu==3.0.35
+oauthlib==1.0.3
 pyasn1==0.1.7
 pyasn1-modules==0.0.5
-pycrypto==2.6.1
 python-openid==2.2.5
-pytz==2015.2
-requests-oauthlib==0.4.2
+pytz==2016.3
+requests-oauthlib==0.6.1
 rsa==3.1.4
 six==1.10.0
-static3==0.5.1
-zope.interface==4.1.2
+static3==0.6.1
