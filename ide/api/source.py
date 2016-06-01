@@ -96,7 +96,7 @@ def rename_source_file(request, project_id, file_id):
                 'kind': 'source'
             }
         }, request=request, project=project)
-        raise Exception(_("Could not rename, file has been renamed already."))
+        raise BadRequest(_("Could not rename, file has been renamed already."))
     if source_file.was_modified_since(int(request.POST['modified'])):
         send_td_event('cloudpebble_rename_abort_unsafe', data={
             'data': {
@@ -105,7 +105,7 @@ def rename_source_file(request, project_id, file_id):
                 'modified': time.mktime(source_file.last_modified.utctimetuple()),
             }
         }, request=request, project=project)
-        raise Exception(_("Could not rename, file has been modified since last save."))
+        raise BadRequest(_("Could not rename, file has been modified since last save."))
     source_file.file_name = request.POST['new_name']
     source_file.save()
 
