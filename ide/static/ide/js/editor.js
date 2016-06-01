@@ -252,9 +252,6 @@ CloudPebble.Editor = (function() {
                     });
                     warning_lines = [];
 
-                    // And now bail.
-                    if(!CloudPebble.ProjectInfo.app_jshint) return;
-
                     var jshint_globals = {
                         Pebble: true,
                         console: true,
@@ -285,7 +282,14 @@ CloudPebble.Editor = (function() {
                             require: true,
                             ajax: true
                         });
+                    } else if (CloudPebble.ProjectInfo.app_modern_multi_js) {
+                        _.extend(jshint_globals, {
+                            require: true,
+                            exports: true,
+                            module: true
+                        });
                     }
+
 
                     var success = JSHINT(code_mirror.getValue(), {
                         freeze: true,

@@ -1,17 +1,22 @@
 __author__ = 'katharine'
 
 import json
+import requests
+import random
+import urlparse
+import string
+import logging
+
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
 from django.utils.translation import ugettext as _
-import requests
-import random
-import urlparse
-import string
+
 from utils.redis_helper import redis_client
 from utils.jsonview import json_view, InternalServerError
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -38,12 +43,13 @@ def launch_emulator(request):
             response.raise_for_status()
             response = response.json()
         except (requests.RequestException, ValueError) as e:
-            print "couldn't fetch old instance: %s" % e
+            logger.info("couldn't fetch old instance: %s", e)
         else:
             if response.get('alive', False):
                 return qemu_instance
             else:
-                print "old instance is dead."
+                logger.info("old instance is dead.")
+
 
     token = _generate_token()
     servers = set(settings.QEMU_URLS)
@@ -72,10 +78,10 @@ def launch_emulator(request):
             redis_client.set(redis_key, json.dumps(response))
             return response
         except requests.HTTPError as e:
-            print e.response.text
+            logger.warning("Got HTTP error from QEMU launch. Content:\n%s", e.response.text)
         except (requests.RequestException, ValueError) as e:
-            print e
-    raise InternalServerError(_("Unable to create emulator instance."))
+            logger.error("Error launching qemu: %s", e)
+        raise InternalServerError(_("Unable to create emulator instance."))
 
 
 @login_required

@@ -1,8 +1,9 @@
 import os
 import shutil
-import traceback
 import datetime
 import json
+import logging
+
 from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_delete
@@ -10,11 +11,13 @@ from django.dispatch import receiver
 from django.utils.timezone import now
 from django.core.validators import RegexValidator, ValidationError
 from django.utils.translation import ugettext_lazy as _
-import utils.s3 as s3
 
+import utils.s3 as s3
 from ide.models.meta import IdeModel
 
 __author__ = 'katharine'
+
+logger = logging.getLogger(__name__)
 
 
 class ResourceFile(IdeModel):
@@ -354,7 +357,7 @@ def delete_file(sender, instance, **kwargs):
             try:
                 s3.delete_file('source', instance.s3_path)
             except:
-                traceback.print_exc()
+                logger.exception("Failed to delete S3 file")
         else:
             try:
                 os.unlink(instance.local_filename)
