@@ -95,10 +95,8 @@ CloudPebble.Settings = (function() {
             }
 
 
-            if(sdk_version == '3') {
-                if (!build_aplite && !build_basalt && !build_chalk) {
-                    return defer.reject(gettext("You must build your app for at least one platform."));
-                }
+            if(sdk_version == '3' && !(build_aplite || build_basalt || build_chalk)) {
+                return defer.reject(gettext("You must build your app for at least one platform."));
             }
 
             var target_platforms = [];
@@ -158,6 +156,8 @@ CloudPebble.Settings = (function() {
                     CloudPebble.ProjectInfo.app_platforms = app_platforms;
                     CloudPebble.ProjectInfo.sdk_version = sdk_version;
                     CloudPebble.ProjectInfo.app_modern_multi_js = app_modern_multi_js;
+
+                    $('#settings-sdk-version option[value=2]').prop('disabled', CloudPebble.ProjectInfo.sdk_version != '2');
                     $('.project-name').text(name);
                     window.document.title = "CloudPebble – " + name;
                     defer.resolve();
@@ -256,12 +256,23 @@ CloudPebble.Settings = (function() {
             live_form.save($('#settings-app-keys'));
         });
 
-        pane.find('#settings-sdk-version').change(function() {
+        var sdk_version_change_confirmed = false;
+        pane.find('#settings-sdk-version').change(function(e) {
+            // When switching away from SDK 2, show a confirmation prompt to indicate that the change is irreversible.
             var sdk = $(this).val();
-            if(sdk == '3') {
-                pane.find('.sdk3-only').show();
-            } else {
-                pane.find('.sdk3-only').hide();
+            if (CloudPebble.ProjectInfo.sdk_version == '2' && sdk != '2' && !sdk_version_change_confirmed) {
+                e.stopPropagation();
+                $(this).val('2');
+                var message = gettext("Are you sure you want to upgrade this project to SDK 3? THIS CANNOT BE UNDONE.");
+                CloudPebble.Prompts.Confirm(gettext("UPGRADE SDK"), message, function() {
+                    sdk_version_change_confirmed = true;
+                    if(sdk == '3') {
+                        pane.find('.sdk3-only').show();
+                    } else {
+                        pane.find('.sdk3-only').hide();
+                    }
+                    $(this).val(sdk).change();
+                }.bind(this));
             }
         });
 
