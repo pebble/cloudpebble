@@ -1,0 +1,13 @@
+language: python
+python: "2.7"
+sudo: false
+services:
+  - rabbitmq
+  - postgresql
+before_script:
+  - psql -c "CREATE DATABASE travisci;" -U postgres
+install:
+  - pip install -r requirements.txt
+script: python manage.py test
+env:
+  - AWS_ENABLED=yes
