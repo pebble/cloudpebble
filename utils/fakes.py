@@ -31,9 +31,7 @@ class FakeS3(object):
         del self.dict[(bucket_name, path)]
 
     def read_file_to_filesystem(self, bucket_name, path, destination):
-        with open(destination, 'w') as f:
-            f.write(self.read_file(bucket_name, path))
+        raise NotImplementedError("S3 Filesystem operations are not allowed during tests")
 
     def upload_file(self, bucket_name, path, src_path, **kwargs):
-        with open(src_path, 'r') as f:
-            self.save_file(bucket_name, path, f.read())
+        raise NotImplementedError("S3 Filesystem operations are not allowed during tests")
