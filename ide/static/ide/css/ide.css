@@ -701,6 +701,15 @@ table.build-results tr.pending .build-state {
     content: ' - ';
 }
 
+#dependencies-form .kv-key {
+    width: 240px;
+}
+
+#dependencies-form .kv-value {
+    width: 240px;
+}
+
+
 /* UI Editor pane */
 
 .ui-pane {

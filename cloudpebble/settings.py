@@ -11,6 +11,7 @@ _environ = os.environ
 DEBUG = _environ.get('DEBUG', '') != ''
 VERBOSE = DEBUG or (_environ.get('VERBOSE', '') != '')
 TESTING = 'test' in sys.argv
+TRAVIS = 'TRAVIS' in _environ and os.environ["TRAVIS"] == "true"
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -23,7 +24,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 MANAGERS = ADMINS
 
-if 'TRAVIS' in _environ:
+if TRAVIS:
     DATABASES = {
         'default': {
             'ENGINE':   'django.db.backends.postgresql_psycopg2',

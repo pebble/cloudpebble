@@ -300,10 +300,12 @@ CloudPebble.Dependencies = (function() {
             }
             dependencies[tuple[0]] = tuple[1];
         });
+
+        CloudPebble.YCM.updateDependencies(_.object(values));
+
         return Ajax.Post('/ide/project/' + PROJECT_ID + '/save_dependencies', {
             'dependencies': JSON.stringify(dependencies)
         });
-
     }
 
     function setup_search_test_options(pane, search_form) {

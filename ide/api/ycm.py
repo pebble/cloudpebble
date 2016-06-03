@@ -12,7 +12,6 @@ from urlparse import urlparse
 from ide.models.project import Project
 from utils.jsonview import json_view
 
-
 __author__ = 'katharine'
 
 logger = logging.getLogger(__name__)
@@ -60,6 +59,7 @@ def init_autocomplete(request, project_id):
         'files': file_contents,
         'platforms': request.POST.get('platforms', 'aplite').split(','),
         'sdk': request.POST.get('sdk', '2'),
+        'dependencies': project.get_dependencies()
     }
     # Let's go!
     return _spin_up_server(request)
@@ -90,4 +90,3 @@ def _spin_up_server(request):
         logger.warning("Server %s failed; trying another.", server)
     # If we get out of here, something went wrong.
     raise Exception(_('No Servers'))
-

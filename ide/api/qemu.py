@@ -50,7 +50,6 @@ def launch_emulator(request):
             else:
                 logger.info("old instance is dead.")
 
-
     token = _generate_token()
     servers = set(settings.QEMU_URLS)
     while len(servers) > 0:

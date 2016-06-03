@@ -2,13 +2,11 @@
 import mock
 from collections import namedtuple
 import json
-from django.core.exceptions import ValidationError
 
-from ide.tasks.archive import do_import_archive, InvalidProjectArchiveException
-from ide.utils.cloudpebble_test import CloudpebbleTestCase, make_package, make_appinfo, build_bundle, override_settings
+from ide.utils.cloudpebble_test import CloudpebbleTestCase
 from ide.models import Project, User
-from utils.fakes import FakeS3
 from ide.tasks.gist import import_gist
+from utils.fakes import FakeS3
 
 __author__ = 'joe'
 

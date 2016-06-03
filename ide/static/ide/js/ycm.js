@@ -244,6 +244,15 @@ CloudPebble.YCM = new (function() {
         });
     };
 
+    this.updateDependencies = function(dependencies) {
+        if(!mInitialised) {
+            return;
+        }
+        ws_send('dependencies', {
+            'dependencies': dependencies
+        })
+    };
+
     this.updateAppkeys = function(app_key_names) {
         if (!mInitialised) {
             return;

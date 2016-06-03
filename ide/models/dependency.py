@@ -1,11 +1,18 @@
+import re
+
 from django.db import models
+from django.conf import settings
 from django.core.exceptions import ValidationError
-from ide.models.meta import IdeModel
 from django.utils.translation import ugettext_lazy as _
+
+from ide.models.meta import IdeModel
 
 
 def validate_dependency_version(value):
-    if value.strip().lower().startswith("file:"):
+    if hasattr(settings, 'LOCAL_DEPENDENCY_OVERRIDE'):
+        return
+    # Disallow paths as versions
+    if re.match(r'^file:|(\.*|~)/', value):
         raise ValidationError(_("Local path dependencies are not allowed"))
 
 

@@ -84,14 +84,22 @@ class TestImportProject(CloudpebbleTestCase):
 
     def test_throws_with_local_file_dependencies(self):
         """ Throw if any dependencies reference local files """
-        bundle = build_bundle({
-            'src/main.c': '',
-            'package.json': make_package(package_options={
-                'dependencies': {'some_package': 'file:../security/breach'}
+        bad_versions = [
+            'file:security/breach',
+            '/security/breach',
+            './security/breach',
+            '../security/breach',
+            '~/security/breach'
+        ]
+        for version in bad_versions:
+            bundle = build_bundle({
+                'src/main.c': '',
+                'package.json': make_package(package_options={
+                    'dependencies': {'some_package': version}
+                })
             })
-        })
-        with self.assertRaises(ValidationError):
-            do_import_archive(self.project_id, bundle)
+            with self.assertRaises(ValidationError):
+                do_import_archive(self.project_id, bundle)
 
     def test_throws_if_sdk2_project_has_array_appkeys(self):
         """ Throw when trying to import an sdk 2 project with array appkeys """

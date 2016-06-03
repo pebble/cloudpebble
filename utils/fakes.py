@@ -43,10 +43,13 @@ class FakeS3(object):
         del self.dict[(bucket_name, path)]
 
     def read_file_to_filesystem(self, bucket_name, path, destination):
-        raise NotImplementedError("FakeS3 local-filesystem write operations are not allowed.")
+        if not os.path.abspath(destination).startswith(tempfile.gettempdir()):
+            raise ValueError("FakeS3 local-filesystem operations may only access temporary directories.")
+        with open(destination, 'w') as f:
+            f.write(self.read_file(bucket_name, path))
 
     def upload_file(self, bucket_name, path, src_path, **kwargs):
         if not os.path.abspath(src_path).startswith(tempfile.gettempdir()):
-            raise ValueError("FakeS3 local-filesystem read operations may only read from temporary directories.")
+            raise ValueError("FakeS3 local-filesystem operations may only access temporary directories.")
         with open(src_path, 'r') as f:
             self.save_file(bucket_name, path, f.read())
