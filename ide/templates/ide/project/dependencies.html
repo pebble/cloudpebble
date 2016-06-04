@@ -1,7 +1,7 @@
 {% load i18n %}
 <!-- Compilation pane -->
 <div id="dependencies-pane-template" class="hide dependencies-pane">
-    <div class="well alert alert-error fixed-well hide"></div>
+    <div class="well alert alert-error hide"></div>
     <div class="well">
         <h3>{% trans 'Dependencies' %}</h3>
         <form id="dependencies-search-form">
@@ -13,7 +13,13 @@
             <table id="dependencies-table"></table>
         </form>
     </div>
-    <div class="well settings-pane">
+    <div class="well dependencies-progress hide">
+        <p>Please wait, configuring dependencies...</p>
+        <div class="progress progress-striped active">
+            <div class="bar" style="width: 100%;"></div>
+        </div>
+    </div>
+    <div class="well settings-pane hide">
         <h3>Searchbox Options</h3>
         <div class="form-horizontal">
             <div class="control-group">

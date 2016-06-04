@@ -1,7 +1,7 @@
 CloudPebble.Dependencies = (function() {
     var dependencies_template = null;
 
-    // TODO: Once these are decided, they should be deleted and refactored out
+    // TODO: Once values for these are decided, they should be deleted and refactored out
     var SUGGEST_CACHED = true;
     var IMMEDIATE_RESULTS = false;
     var SMALLEST_FIRST = true;
@@ -285,7 +285,8 @@ CloudPebble.Dependencies = (function() {
         }).init();
     }
 
-    function save(values) {
+    /** Save the dependencies and update YCM */
+    function save_dependencies(values) {
         var dependencies = {};
         // Don't save yet if there are any incomplete values
         if (_.some(_.flatten(values), function(x) {
@@ -301,15 +302,90 @@ CloudPebble.Dependencies = (function() {
             dependencies[tuple[0]] = tuple[1];
         });
 
-        CloudPebble.YCM.updateDependencies(_.object(values));
-
         return Ajax.Post('/ide/project/' + PROJECT_ID + '/save_dependencies', {
             'dependencies': JSON.stringify(dependencies)
+        }).then(function() {
+            return CloudPebble.YCM.updateDependencies(_.object(values));
+        })
+    }
+
+    //
+    // function ProgressBar(element) {
+    //
+    // }
+    //
+    // function show_if_slow(element, promise) {
+    //     var showing = false;
+    //     var ok_to_hide = false;
+    //     var hide_timeout;
+    //     var show_timeout = setTimeout(function() {
+    //         element.removeClass('hide');
+    //         showing = true;
+    //         hide_timeout = setTimeout(function() {
+    //
+    //         }, 800);
+    //     }, 2000);
+    //
+    //     return promise.finally(function() {
+    //         clearTimeout(timeout);
+    //         if (showing) {
+    //
+    //         }
+    //     })
+    // }
+
+    function setup_dependencies_pane(pane) {
+        var npm_search_form = pane.find('#dependencies-search-form');
+        var dependencies_table = pane.find('#dependencies-table');
+
+        var kv_table;
+
+        function display_error(error) {
+            pane.find('.alert-error').removeClass('hide').text(error);
+        }
+
+        function hide_error() {
+            pane.find('.alert-error').addClass('hide');
+        }
+
+        function save_form() {
+            return save_dependencies(kv_table.getValues())
+        }
+
+        // setTimeout is required due to a limitation/bug in the textext library.
+        setTimeout(function() {
+            var live_form = make_live_settings_form({
+                save_function: save_form,
+                on_save: hide_error,
+                error_function: display_error,
+                on_progress_started: function() {
+                    pane.find('.dependencies-progress').removeClass('hide');
+                },
+                on_progress_complete: function() {
+                    pane.find('.dependencies-progress').addClass('hide');
+                },
+                form: pane.find('#dependencies-form'),
+                label_selector: 'tr button',
+                group_selector: 'tr'
+            });
+
+            kv_table = setup_dependencies_table(dependencies_table, live_form);
+
+            var search_form = setup_npm_search_form(npm_search_form, function(name, version) {
+                // When a user enters a value in the search form, add it to the table and clear the search.
+                search_form.input().val('');
+                search_form.hiddenInput().val('');
+                kv_table.addValue(name, version);
+            });
+
+            setup_search_test_options(pane, search_form);
+
+            live_form.init();
         });
     }
 
+    /** This sets up the hidden search options pane. */
     function setup_search_test_options(pane, search_form) {
-
         pane.find('#dependency-option-use-cache').change(function() {
             SUGGEST_CACHED = $(this).is(':checked');
             $('#dependency-option-immediate-results').attr('disabled', !$(this).is(':checked'));
@@ -330,50 +406,6 @@ CloudPebble.Dependencies = (function() {
 
         pane.find('#dependency-option-show-spinner').change(function() {
             SHOW_SPINNER = $(this).is(':checked');
-        });
-    }
-
-    function setup_dependencies_pane(pane) {
-        var npm_search_form = pane.find('#dependencies-search-form');
-        var dependencies_table = pane.find('#dependencies-table');
-
-        var kv_table;
-
-        function display_error(error) {
-            pane.find('.alert-error').removeClass('hide').text(error);
-        }
-
-        function hide_error() {
-            pane.find('.alert-error').addClass('hide');
-        }
-
-        function save_form() {
-            return save(kv_table.getValues());
-        }
-
-        // setTimeout is required due to a limitation/bug in the textext library.
-        setTimeout(function() {
-            var live_form = make_live_settings_form({
-                save_function: save_form,
-                on_save_function: hide_error,
-                error_function: display_error,
-                form: pane.find('#dependencies-form'),
-                label_selector: 'tr button',
-                group_selector: 'tr'
-            });
-
-            kv_table = setup_dependencies_table(dependencies_table, live_form);
-
-            var search_form = setup_npm_search_form(npm_search_form, function(name, version) {
-                // When a user enters a value in the search form, add it to the table and clear the search.
-                search_form.input().val('');
-                search_form.hiddenInput().val('');
-                kv_table.addValue(name, version);
-            });
-
-            setup_search_test_options(pane, search_form);
-
-            live_form.init();
         });
     }
 

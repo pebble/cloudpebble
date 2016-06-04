@@ -17,30 +17,6 @@ __author__ = 'katharine'
 logger = logging.getLogger(__name__)
 
 
-def make_resource_ids_file(project):
-    resource_files = project.resources.all()
-    resource_ids = []
-    count = 1
-    for f in resource_files:
-        for identifier in f.identifiers.all():
-            if f.kind == 'png-trans':
-                resource_ids.extend([
-                    '#define RESOURCE_ID_%s_BLACK %d' % (identifier.resource_id, count),
-                    '#define RESOURCE_ID_%s_WHITE %d' % (identifier.resource_id, count + 1)
-                ])
-                count += 2
-            else:
-                resource_ids.append('#define RESOURCE_ID_%s %d' % (identifier.resource_id, count))
-                count += 1
-    resource_ids_file = '\n'.join(resource_ids) + "\n"
-    return resource_ids_file
-
-
-def make_appmessage_keys_file(project):
-    data = sorted(k for k, v in project.get_parsed_appkeys())
-    return "#pragma once\n#include <stdint.h>\n\n" + "".join("extern uint32_t MESSAGE_KEY_{};\n".format(k) for k in data)
-
-
 @login_required
 @require_POST
 @json_view
@@ -52,13 +28,16 @@ def init_autocomplete(request, project_id):
     for f in source_files:
         file_contents[f.project_path] = f.get_contents()
 
-    file_contents['build/src/resource_ids.auto.h'] = make_resource_ids_file(project)
-    file_contents['build/src/message_keys.auto.h'] = make_appmessage_keys_file(project)
+    identifiers = [(f.kind, i.resource_id) for f in project.resources.all() for i in f.identifiers.all()]
+
+    appkey_names = [k for k, v in project.get_parsed_appkeys()]
 
     request = {
         'files': file_contents,
         'platforms': request.POST.get('platforms', 'aplite').split(','),
         'sdk': request.POST.get('sdk', '2'),
+        'messagekeys': appkey_names,
+        'resources': identifiers,
         'dependencies': project.get_dependencies()
     }
     # Let's go!

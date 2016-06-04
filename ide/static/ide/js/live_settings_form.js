@@ -4,8 +4,8 @@
  * @param options.form The form element to automatically save
  * @param options.save_function {Function} A function returning a promise called when the form needs to be saved
  * @param options.error_function {Function} A function to be called if saving fails.
- * @param options.on_save_function {Function|null} An optional function called when the form is successfully saved
- * @param options.on_change_function {Function|null} An optional function called when any form elements are changed
+ * @param options.on_save {Function|null} An optional function called when the form is successfully saved
+ * @param options.on_change {Function|null} An optional function called when any form elements are changed
  * @param options.control_selector {string} A selector string which should select all auto-saving controls
  * @param options.changeable_control_selector {string} A selector which should specifically select any controls
  *      which may be in a state of 'changed but unsaved' (e.g. text boxes)
@@ -18,8 +18,10 @@ function make_live_settings_form(options) {
         save_function: null,
         form: null,
         error_function: console.log,
-        on_save_function: null,
-        on_change_function: null,
+        on_save: null,
+        on_change: null,
+        on_progress_started: null,
+        on_progress_complete: null,
         control_selector: 'input, select, textarea',
         changeable_control_selector: "input[type!='number'], textarea",
         label_selector: '.control-group label',
@@ -28,13 +30,29 @@ function make_live_settings_form(options) {
     if (!_.isFunction(opts.save_function)
         || (!_.isObject(opts.form))
         || (!_.isFunction(opts.error_function))
-        || (!!opts.on_change_function && !_.isFunction(opts.on_change_function))
-        || (!!opts.on_save_function && !_.isFunction(opts.on_save_function))) {
+        || (!!opts.on_change && !_.isFunction(opts.on_change))
+        || (!!opts.on_save && !_.isFunction(opts.on_save))) {
         throw new Error("Invalid arguments to make_live_settings_form");
     }
     opts.form = $(opts.form);
 
-    /** Trigger the form save callback
+
+
+    var current_request = null;
+    var waiting = 0;
+    var did_start_progress = false;
+    function start_progress() {
+        setTimeout(function() {
+            if (current_request != null) {
+                did_start_progress = true;
+                if (_.isFunction(opts.on_progress_started)) {
+                    opts.on_progress_started();
+                }
+            }
+        }, 1000);
+    }
+
+    /** Trigger the form save callback, or queue a save after the current one.
      *
      * @param element A jquery object containing elements to show tick icons for.
      * @param event Event object to be passed to the save callback
@@ -46,21 +64,43 @@ function make_live_settings_form(options) {
             if (element) show_changed_icon(element);
         }
 
-        try {
-            return Promise.resolve(opts.save_function(event)).then(function (result) {
-                if (result && result.incomplete) return;
-                clear_changed_icons();
-                if (element) flash_tick_icon(element);
-                if (_.isFunction(opts.on_save_function)) {
-                    opts.on_save_function()
-                }
-            }).catch(function (error) {
-                on_save_error(error);
+        // If a save is already in progress, queue up another one.
+        if (current_request) {
+            waiting += 1;
+            return current_request.finally(function() {
+                save(element, event);
             });
+        }
+        else {
+            start_progress();
+        }
+        try {
+            var save_result = Promise.resolve(opts.save_function(event));
         }
         catch (error) {
             on_save_error(error);
+            return;
         }
+
+        current_request = save_result.then(function (result) {
+            if (result && result.incomplete) return;
+            clear_changed_icons();
+            if (element) flash_tick_icon(element);
+            if (_.isFunction(opts.on_save)) {
+                opts.on_save()
+            }
+        }).catch(function (error) {
+            on_save_error(error);
+        }).finally(function() {
+            current_request = null;
+            if (waiting > 0) {
+                waiting -= 1;
+            } else if (waiting == 0 && did_start_progress && _.isFunction(opts.on_progress_complete)) {
+                opts.on_progress_complete();
+            }
+        });
+        return current_request;
+
     }
 
     /** Replace all visible changed icons with a one-second 'tick' */
@@ -77,8 +117,8 @@ function make_live_settings_form(options) {
     /** Show the 'changed' icon for an element */
     function show_changed_icon(element) {
         element.closest(opts.group_selector).find('.setting-changed').show('fast');
-        if (_.isFunction(opts.on_change_function)) {
-            opts.on_change_function(element);
+        if (_.isFunction(opts.on_change)) {
+            opts.on_change(element);
         }
     }
 
@@ -135,8 +175,8 @@ function make_live_settings_form(options) {
 
         // Set up the save-on-change hook
         opts.form.on("change", opts.control_selector, function(e) {
-            if (_.isFunction(opts.on_change_function)) {
-                opts.on_change_function(this);
+            if (_.isFunction(opts.on_change)) {
+                opts.on_change(this);
             }
             save($(this), e);
         });

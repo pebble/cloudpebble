@@ -702,11 +702,17 @@ table.build-results tr.pending .build-state {
 }
 
 #dependencies-form .kv-key {
-    width: 240px;
+    width: 225px;
 }
 
 #dependencies-form .kv-value {
     width: 240px;
+}
+
+.dependencies-progress p {
+    text-align: center;
+    font-size: large;
+    color: white;
 }
 
 
