@@ -1,4 +1,5 @@
-""" These tests check basic operation of ide.tasks.archive.do_import_archive """
+""" These tests check that the gist import logic works correctly """
+
 import mock
 from collections import namedtuple
 import json
@@ -65,7 +66,7 @@ class TestImportProject(CloudpebbleTestCase):
         self.assertEqual(project.project_type, 'native')
 
     def test_simplyjs_gists(self):
-        """ Check that a gists with only simply.js import as simplyjs projects"""
+        """ Check that a gist with only simply.js imports as simplyjs projects"""
         project = self.runTest({
             'simply.js': 'content',
             'appinfo.json': '{}'
@@ -75,7 +76,7 @@ class TestImportProject(CloudpebbleTestCase):
         self.assertEqual(project.project_type, 'simplyjs')
 
     def test_pebblejs_gists(self):
-        """ Check that a gists with only app.js import as pebblejs projects"""
+        """ Check that a gist with only app.js imports as pebblejs projects"""
         project = self.runTest({
             'app.js': 'content',
             'appinfo.json': '{}'

@@ -17,18 +17,24 @@ class InvalidProjectArchiveException(Exception):
 
 
 class BaseProjectItem():
+    """ A ProjectItem simply represents an item in a project archive which has a path
+    and can be read. With custom implementations for BaseProjectItem, find_project_root_and_manifest
+    is able to work identically on zip archives, git repos and automated tests """
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def read(self):
+        """ This function should return the contents of the file/item as a string. """
         return None
 
     @abc.abstractproperty
     def path(self):
+        """ This property should return the path to the item in the project. """
         return None
 
 
 def is_manifest(kind, contents):
+    """ A potentially valid manifest is a package.json file with a "pebble" object, or an appinfo.json file. """
     if kind == PACKAGE_MANIFEST:
         return 'pebble' in json.loads(contents)
     elif kind == APPINFO_MANIFEST:
@@ -38,6 +44,10 @@ def is_manifest(kind, contents):
 
 
 def find_project_root_and_manifest(project_items):
+    """ Given the contents of an archive, find a valid Pebble project.
+    :param project_items: A list of BaseProjectItems
+    :return: A tuple of (path_to_project, manifest BaseProjectItem)
+    """
     SRC_DIR = 'src/'
 
     for item in project_items:

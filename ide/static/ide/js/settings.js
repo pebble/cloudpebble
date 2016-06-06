@@ -181,12 +181,11 @@ CloudPebble.Settings = (function() {
                 CloudPebble.ProjectInfo.sdk_version = sdk_version;
                 CloudPebble.ProjectInfo.app_modern_multi_js = app_modern_multi_js;
 
-                $('#settings-sdk-version option[value=2]').prop('disabled', CloudPebble.ProjectInfo.sdk_version != '2');
+                pane.find('#settings-sdk-version option[value=2]').prop('disabled', CloudPebble.ProjectInfo.sdk_version != '2');
                 $('.project-name').text(name);
                 window.document.title = "CloudPebble – " + name;
 
                 if (CloudPebble.Ready) {
-                    app_key_names.sort();
                     CloudPebble.YCM.updateAppkeys(app_key_names);
                 }
                 return null;

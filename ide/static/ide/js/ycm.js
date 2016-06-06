@@ -236,7 +236,7 @@ CloudPebble.YCM = new (function() {
         if (!mInitialised) {
             return;
         }
-        return ws_send('messagekeys', app_key_names);
+        return ws_send('messagekeys', {'messagekeys': app_key_names});
     };
 
     this.updateDependencies = function(dependencies) {

@@ -1,4 +1,4 @@
-""" These tests check that  sdk.generate_manifest outputs what it should do in various conditions. """
+""" These tests check that sdk.generate_manifest outputs what it should do under various conditions. """
 
 import json
 from ide.utils.sdk import generate_manifest
@@ -42,21 +42,22 @@ class TestNPMStyleManifestGeneration(ManifestTester):
         self.project = Project.objects.get(pk=self.project_id)
 
     def test_package_manifest(self):
+        """ Check that the manifest create for a project is functionally identical to a generated sample manifest. """
         manifest = generate_manifest(self.project, [])
         self.check_package_manifest(manifest)
 
     def test_package_manifest_with_dependencies(self):
+        """ Check that dependencies are represented in the package.json file. """
         deps = {
             'some_package': '1.2.3',
             'another': '^4.2.0'
         }
-        for name, version in deps.iteritems():
-            Dependency.objects.create(project=self.project, name=name, version=version).save()
-
+        self.project.set_dependencies(deps)
         manifest = generate_manifest(self.project, [])
         self.check_package_manifest(manifest, package_options={'dependencies': deps})
 
     def test_package_manifest_with_keywords(self):
+        """ Check that saved keywords are present in the package.json file """
         self.maxDiff = None
         keywords = ["pebbles...", "are?!", "~{cool}~"]
         self.project.keywords = keywords
@@ -73,5 +74,6 @@ class TestSDK3ManifestGeneration(ManifestTester):
         self.project = Project.objects.get(pk=self.project_id)
 
     def test_package_manifest(self):
+        """ Check that the appinfo.json file generated from a project is functionally identical to a generated sample manifest. """
         manifest = generate_manifest(self.project, [])
         self.check_appinfo_manifest(manifest)

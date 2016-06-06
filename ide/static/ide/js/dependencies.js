@@ -207,10 +207,14 @@ CloudPebble.Dependencies = (function() {
                 },
                 ajax: {
                     onComplete: function(data, query) {
-                        // Update the package cache with the new data
                         var suggestions;
-                        cache.update_modules(data);
+
+                        // Hide the search box loading spinner
                         spinner.addClass('hide');
+
+                        // Update the package cache with the new data
+                        cache.update_modules(data);
+
                         // Sort the suggestions based on text similarity
                         if (!query) {
                             suggestions = [];
@@ -224,6 +228,7 @@ CloudPebble.Dependencies = (function() {
                         $.fn.textext.TextExtAjax.prototype.onComplete.apply(this, [suggestions, query]);
                     },
                     load: function(query) {
+                        // Show the spinner when the search box starts a request
                         if (SHOW_SPINNER) {
                             spinner.removeClass('hide');
                         }
@@ -254,6 +259,8 @@ CloudPebble.Dependencies = (function() {
         });
 
         form_element.submit(function(e) {
+            // When the user submits the form, enter the package into the table.
+            // If we have the package's version number cached or we can fetch it, then add that too.
             e.preventDefault();
             var val = textext.input().val().trim();
             if (!val) return;
@@ -267,6 +274,7 @@ CloudPebble.Dependencies = (function() {
         return textext;
     }
 
+    /** Set up the dependencies KVTable so that it links to the live form system. */
     function setup_dependencies_table(table, live_form) {
         return new CloudPebble.KVTable(table, {
             key_name: gettext('Package Name'),
@@ -309,31 +317,7 @@ CloudPebble.Dependencies = (function() {
         })
     }
 
-    //
-    // function ProgressBar(element) {
-    //
-    // }
-    //
-    // function show_if_slow(element, promise) {
-    //     var showing = false;
-    //     var ok_to_hide = false;
-    //     var hide_timeout;
-    //     var show_timeout = setTimeout(function() {
-    //         element.removeClass('hide');
-    //         showing = true;
-    //         hide_timeout = setTimeout(function() {
-    //
-    //         }, 800);
-    //     }, 2000);
-    //
-    //     return promise.finally(function() {
-    //         clearTimeout(timeout);
-    //         if (showing) {
-    //
-    //         }
-    //     })
-    // }
-
+    /** Set up function for the entire pane */
     function setup_dependencies_pane(pane) {
         var npm_search_form = pane.find('#dependencies-search-form');
         var dependencies_table = pane.find('#dependencies-table');

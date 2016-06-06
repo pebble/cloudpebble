@@ -326,7 +326,6 @@ def generate_v3_manifest_dict(project, resources):
 
 
 def generate_package_manifest_dict(project, resources):
-    # TODO: unsure if sdkVersion or projectType should be hardcoded
     manifest = {
         'name': project.app_short_name,
         'author': project.app_company_name,

@@ -6,6 +6,9 @@
  * @param options.error_function {Function} A function to be called if saving fails.
  * @param options.on_save {Function|null} An optional function called when the form is successfully saved
  * @param options.on_change {Function|null} An optional function called when any form elements are changed
+ * @param options.on_progress_started {Function|null} An optional function called when the form should show a loading spinner
+ * @param options.on_progress_complete {Function|null} An optional function called when the form should hide its loading spinner.
+ * @param options.progress_timeout {Number} Milliseconds to wait before showing the loading spinner.
  * @param options.control_selector {string} A selector string which should select all auto-saving controls
  * @param options.changeable_control_selector {string} A selector which should specifically select any controls
  *      which may be in a state of 'changed but unsaved' (e.g. text boxes)
@@ -22,6 +25,7 @@ function make_live_settings_form(options) {
         on_change: null,
         on_progress_started: null,
         on_progress_complete: null,
+        progress_timeout: 1000,
         control_selector: 'input, select, textarea',
         changeable_control_selector: "input[type!='number'], textarea",
         label_selector: '.control-group label',
@@ -38,18 +42,38 @@ function make_live_settings_form(options) {
 
 
 
-    var current_request = null;
-    var waiting = 0;
+    // The start_progress/finish_progress logic allows forms to add a progress bar/spinner/etc which appears
+    // if saving is taking a while.
+    var saving = false;
+    var next_save = null;
     var did_start_progress = false;
+    var progress_timeout = null;
+    /**  Called when saving begins. Calls on_progress_started after opts.progress_timeout milliseconds */
     function start_progress() {
-        setTimeout(function() {
-            if (current_request != null) {
+        progress_timeout = setTimeout(function() {
+            progress_timeout = null;
+            if (saving) {
                 did_start_progress = true;
                 if (_.isFunction(opts.on_progress_started)) {
                     opts.on_progress_started();
                 }
             }
-        }, 1000);
+        }, opts.progress_timeout);
+    }
+
+    /** Called when all saving is done.
+     * Clears the timeout which shows the progress bar if it exists, and hide the progress bar if it exists
+     */
+    function finish_progress() {
+        if (progress_timeout) {
+            clearTimeout(progress_timeout);
+            progress_timeout = null;
+        }
+        if (did_start_progress) {
+            if (_.isFunction(opts.on_progress_complete)) {
+                opts.on_progress_complete();
+            }
+        }
     }
 
     /** Trigger the form save callback, or queue a save after the current one.
@@ -65,25 +89,30 @@ function make_live_settings_form(options) {
         }
 
         // If a save is already in progress, queue up another one.
-        if (current_request) {
-            waiting += 1;
-            return current_request.finally(function() {
-                save(element, event);
-            });
+        if (saving) {
+            next_save = function() {
+                return save(element, event);
+            };
+            return;
         }
-        else {
-            start_progress();
-        }
+
+        // The save function itself may throw an error before doing anything asynchronous. In this case we need to catch it.
         try {
             var save_result = Promise.resolve(opts.save_function(event));
         }
         catch (error) {
             on_save_error(error);
+            finish_progress();
             return;
         }
 
-        current_request = save_result.then(function (result) {
+        start_progress();
+        saving = true;
+
+        return save_result.then(function (result) {
+            // Allow save functions to declare that the form is incomplete. Used in KV-Tables to enforce filling in whole rows.
             if (result && result.incomplete) return;
+
             clear_changed_icons();
             if (element) flash_tick_icon(element);
             if (_.isFunction(opts.on_save)) {
@@ -92,14 +121,16 @@ function make_live_settings_form(options) {
         }).catch(function (error) {
             on_save_error(error);
         }).finally(function() {
-            current_request = null;
-            if (waiting > 0) {
-                waiting -= 1;
-            } else if (waiting == 0 && did_start_progress && _.isFunction(opts.on_progress_complete)) {
-                opts.on_progress_complete();
+            saving = false;
+            if (next_save) {
+                var next = next_save;
+                next_save = null;
+                return next();
+            }
+            else {
+                finish_progress();
             }
         });
-        return current_request;
 
     }
 

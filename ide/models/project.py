@@ -78,6 +78,9 @@ class Project(IdeModel):
     github_hook_build = models.BooleanField(default=False)
 
     def set_dependencies(self, dependencies):
+        """ Set the project's dependencies from a dictionary.
+        :param dependencies: A dictionary of dependency->version
+        """
         with transaction.atomic():
             Dependency.objects.filter(project=self).delete()
             for name, version in dependencies.iteritems():
@@ -87,13 +90,18 @@ class Project(IdeModel):
 
     @property
     def keywords(self):
+        """ Get the project's keywords as a list of strings """
         return json.loads(self.app_keywords)
 
     @keywords.setter
     def keywords(self, value):
+        """ Set the project's keywords from a list of strings """
         self.app_keywords = json.dumps(value)
 
     def get_dependencies(self):
+        """ Get the project's dependencies as a dictionary
+        :return: A dictinoary of dependency->version
+        """
         return {d.name: d.version for d in self.dependencies.all()}
 
     @property
@@ -101,6 +109,9 @@ class Project(IdeModel):
         return isinstance(json.loads(self.app_keys), list)
 
     def get_parsed_appkeys(self):
+        """ Get the project's app keys, or raise an error of any are invalid.
+        :return: A list of (appkey, value) tuples, where value is either a length or a size, depending on the kind of appkey.
+        """
         app_keys = json.loads(self.app_keys)
         if isinstance(app_keys, dict):
             return sorted(app_keys.iteritems(), key=lambda x: x[1])
@@ -130,10 +141,12 @@ class Project(IdeModel):
 
     @property
     def semver(self):
+        """ Get the app's version label formatted as a semver """
         return version_to_semver(self.app_version_label)
 
     @semver.setter
     def semver(self, value):
+        """ Set the app's version label from a semver string"""
         self.app_version_label = semver_to_version(value)
 
     def clean(self):
