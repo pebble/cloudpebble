@@ -422,7 +422,7 @@ CloudPebble.Editor = (function() {
                         }
                     }
                 }).catch(function(error) {
-                    alert(gettext("Failed to reload file. ") + error);
+                    alert(gettext(interpolate("Failed to reload file. %s", [error])));
                 });
             };
 
@@ -506,7 +506,7 @@ CloudPebble.Editor = (function() {
                             prompt.dismiss();
                             code_mirror.focus();
                         }).catch(function(error) {
-                            prompt.error(gettext("Failed to rename file. ") + error.message);
+                            prompt.error(gettext(interpolate("Failed to rename file. %s", [error.message])));
                         });
                     },
                     pattern)
@@ -638,10 +638,10 @@ CloudPebble.Editor = (function() {
                     }
                     else if (run_platform == ConnectionType.Qemu) {
                         // If the emulator is already running, ask it directly what platform it's using
-                        run_platform_name = SharedPebble.getPlatformName() + gettext(" Emulator");
+                        run_platform_name = interpolate("%s Emulator", [SharedPebble.getPlatformName()]);
                     }
                     else {
-                        run_platform_name = ConnectionPlatformNames[run_platform] + gettext(" Emulator");
+                        run_platform_name = interpolate("%s Emulator", [ConnectionPlatformNames[run_platform]]);
                     }
                     tooltip.append(interpolate("<div><strong>%s: </strong>%s</div>", [gettext("Run on"), capitalise_first_letter(run_platform_name)]));
 

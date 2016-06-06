@@ -87,8 +87,7 @@ CloudPebble.Compile = (function() {
                 } else {
                     update_last_build(pane, null);
                 }
-                pane.find('#' +
-                    'run-build-table').html('');
+                pane.find('#run-build-table').html('');
                 $.each(data.builds, function (index, value) {
                     pane.find('#run-build-table').append(build_history_row(value));
                 });

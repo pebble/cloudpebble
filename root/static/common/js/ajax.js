@@ -1,4 +1,11 @@
 Ajax = (function() {
+    /** Print a Python traceback into the console, if it exists. */
+    function handle_traceback(tb) {
+        if (tb) {
+            console.log(tb);
+        }
+    }
+    
     /**
      * Make a Deferred wrapper
      * @param {string} success_key The name of the key in the JSON result object which must have a truthy
@@ -24,12 +31,6 @@ Ajax = (function() {
          */
         this.wrap = function (deferred) {
             return new Promise(function (resolve, reject) {
-                function handle_traceback(tb) {
-                    // Print a Python traceback into the console, if it exists.
-                    if (tb) {
-                        console.log(tb);
-                    }
-                }
                 deferred.then(function (data) {
                     if (_.isObject(data) && !!success_key && !data[success_key]) {
                         handle_traceback(data.traceback);
@@ -38,26 +39,20 @@ Ajax = (function() {
                     else {
                         resolve(data);
                     }
-                }).fail(function (jqXHR, textStatus, errorThrown) {
-                    if (textStatus == 'abort') {
-                        resolve();
-                    }
+                }).fail(function (jqXHR, failKind, errorStatusText) {
                     var message;
                     if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.error) {
                         message = jqXHR.responseJSON.error;
                         handle_traceback(jqXHR.responseJSON.traceback);
                     }
                     else {
-                        message = errorThrown;
+                        message = errorStatusText;
                     }
                     var error = new Error(message);
                     if (jqXHR) {
                         error.jqXHR = jqXHR;
                         error.status = jqXHR.status;
-                        error.statusText = jqXHR.statusText;
                     }
-                    error.errorThrown = errorThrown;
-                    error.textStatus = textStatus;
                     reject(error);
                 })
             });
