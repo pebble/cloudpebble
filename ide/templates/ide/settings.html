@@ -99,19 +99,11 @@
         });
 
         var save = function() {
-            var defer = $.Deferred();
-            $.ajax({
+            return Ajax.Ajax({
                 type: "POST",
                 url: "settings",
-                data: $("#user-settings-form").serialize(), // serializes the form's elements.
-                success: function(data) {
-                    defer.resolve();
-                },
-                error: function(e) {
-                    defer.reject(interpolate(gettext("Error: %s"), [error]));
-                }
+                data: $("#user-settings-form").serialize() // serializes the form's elements.
             });
-            return defer.promise();
         };
 
         make_live_settings_form({

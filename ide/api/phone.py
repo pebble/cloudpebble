@@ -7,12 +7,13 @@ from django.views.decorators.http import require_safe, require_POST
 from django.utils.translation import ugettext as _
 
 import requests
-from ide.api import json_failure, json_response
 from utils.redis_helper import redis_client
+from utils.jsonview import json_view, BadRequest
 
 
 @login_required
 @require_safe
+@json_view
 def list_phones(request):
     user_key = request.user.social_auth.get(provider='pebble').extra_data['access_token']
 
@@ -22,14 +23,18 @@ def list_phones(request):
         params={'client_id': settings.SOCIAL_AUTH_PEBBLE_KEY})
 
     if response.status_code != 200:
-        return json_failure(response.reason)
+        if 400 <= response.status_code < 500:
+            raise BadRequest(response.reason)
+        else:
+            raise Exception(response.reason)
     else:
         devices = response.json()['devices']
-        return json_response({'devices': devices})
+        return {'devices': devices}
 
 
 @login_required
 @require_POST
+@json_view
 def ping_phone(request):
     user_id = request.user.social_auth.get(provider='pebble').uid
     device = request.POST['device']
@@ -50,22 +55,23 @@ def ping_phone(request):
         }
     )
 
-    return json_response({'token': check_token})
+    return {'token': check_token}
 
 
 @login_required
 @require_safe
+@json_view
 def check_phone(request, request_id):
     ip = redis_client.get('phone-ip-{0}'.format(request_id))
     if ip is None:
-        return json_response({'pending': True})
+        return {'pending': True}
     else:
-        return json_response({'pending': False, 'response': json.loads(ip)})
+        return {'pending': False, 'response': json.loads(ip)}
 
 
 @require_POST
 @csrf_exempt
+@json_view
 def update_phone(request):
     data = json.loads(request.body)
     redis_client.set('phone-ip-{0}'.format(data['token']), request.body, ex=120)
-    return json_response({})

@@ -38,19 +38,16 @@ $(function() {
             return;
         }
         $('#create-project').find('input button select').attr('disabled', 'disabled');
-        $.post('/ide/project/create', {
-                name: value,
-                template: $('#project-template').val(),
-                type: $('#project-type').val(),
-                sdk: $('#project-sdk-version').val()
-            }, function(data) {
-                if(!data.success) {
-                    $('#project-prompt-errors').removeClass('hide').text(data.error);
-                } else {
-                    window.location.href = "/ide/project/" + data.id;
-                }
-            }
-        );
+        Ajax.Post('/ide/project/create', {
+            name: value,
+            template: $('#project-template').val(),
+            type: $('#project-type').val(),
+            sdk: $('#project-sdk-version').val()
+        }).then(function(data) {
+            window.location.href = "/ide/project/" + data.id;
+        }).catch(function(error) {
+            $('#project-prompt-errors').removeClass('hide').text(error.toString());
+        });
     });
 
     var disable_import_controls = function() {
@@ -61,25 +58,6 @@ $(function() {
     var enable_import_controls = function() {
         $('#import-prompt').find('input, button').removeAttr('disabled');
         $('#import-prompt').find('.nav > li').removeClass('disabled').find('a').attr('data-toggle', 'tab');
-    };
-
-    var handle_import_progress = function(active_set, task_id, project_id) {
-        var check = function() {
-            $.getJSON('/ide/task/' + task_id, function(data) {
-                if(data.state.status == 'SUCCESS') {
-                    window.location.href = '/ide/project/' + project_id;
-                    return;
-                } else if(data.state.status == 'FAILURE') {
-                    active_set.find('.errors').removeClass('hide').text(interpolate(gettext("Error: %s"), [data.state.result]));
-                    enable_import_controls();
-                    active_set.find('.progress').addClass('hide');
-                    return;
-                } else {
-                    setTimeout(check, 1000);
-                }
-            });
-        };
-        setTimeout(check, 1000);
     };
 
     var import_archive = function(active_set) {
@@ -105,25 +83,30 @@ $(function() {
         form_data.append('archive', file);
         active_set.find('.progress').removeClass('hide');
 
-        $.ajax({
+        do_import(Ajax.Ajax({
             url: '/ide/import/zip',
             type: "POST",
             data: form_data,
             processData: false,
             contentType: false,
-            dataType: 'json',
-            success: function(data) {
-                if(data.success) {
-                    handle_import_progress(active_set, data.task_id, data.project_id);
-                } else {
-                    active_set.find('.errors').removeClass('hide').text(data.error);
-                    enable_import_controls();
-                    active_set.find('.progress').addClass('hide');
-                }
-            }
-        });
+            dataType: 'json'
+        }), active_set);
         ga('send', 'event', 'project', 'import', 'zip');
     };
+
+    function do_import(promise, active_set) {
+        var project_id;
+        promise.then(function(data) {
+            project_id = data.project_id;
+            return Ajax.PollTask(data.task_id)
+        }).then(function() {
+            window.location.href = '/ide/project/' + project_id;
+        }).catch(function(error) {
+            active_set.find('.errors').removeClass('hide').text(error.toString());
+            enable_import_controls();
+            active_set.find('.progress').addClass('hide');
+        });
+    }
 
     var import_github = function(active_set) {
         var name = active_set.find('#import-github-name').val();
@@ -144,15 +127,12 @@ $(function() {
         }
         disable_import_controls();
         active_set.find('.progress').removeClass('hide');
-        $.post('/ide/import/github', {name: name, repo: url, branch: branch, add_remote: add_remote}, function(data) {
-            if(data.success) {
-                handle_import_progress(active_set, data.task_id, data.project_id);
-            } else {
-                active_set.find('.errors').removeClass('hide').text(data.error);
-                enable_import_controls();
-                active_set.find('.progress').addClass('hide');
-            }
-        });
+        do_import(Ajax.Post('/ide/import/github', {
+            name: name,
+            repo: url,
+            branch: branch,
+            add_remote: add_remote
+        }), active_set);
         ga('send', 'event', 'project', 'import', 'github');
     };
 

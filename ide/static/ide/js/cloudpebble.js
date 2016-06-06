@@ -21,15 +21,13 @@ CloudPebble.ProgressBar = (function() {
 
 CloudPebble.ProjectInfo = {};
 
+
+
 CloudPebble.Init = function() {
     jquery_csrf_setup();
 
     // Load in project data.
-    $.getJSON('/ide/project/' + PROJECT_ID + '/info', function(data) {
-        if(!data.success) {
-            alert("Something went wrong:\n" + data.error);
-            return;
-        }
+    Ajax.Get('/ide/project/' + PROJECT_ID + '/info').then(function(data) {
         CloudPebble.ProjectInfo = data;
 
         CloudPebble.Compile.Init();
@@ -40,7 +38,6 @@ CloudPebble.Init = function() {
         CloudPebble.GitHub.Init();
         CloudPebble.Documentation.Init();
         CloudPebble.FuzzyPrompt.Init();
-
         CloudPebble.ProgressBar.Hide();
 
         // Add source files.
@@ -59,6 +56,9 @@ CloudPebble.Init = function() {
         if(CloudPebble.ProjectInfo.sdk_version != '3') {
             $('.sdk3-only').hide();
         }
+        return null;
+    }).catch(function(err) {
+        alert("Something went wrong:\n" + err.message);
     });
 
     window.addEventListener('beforeunload', function(e) {

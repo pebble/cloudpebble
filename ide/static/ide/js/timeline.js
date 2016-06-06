@@ -54,7 +54,7 @@ CloudPebble.Timeline = new (function() {
         }
         setStatus(true, '');
         SharedPebble.getPebble(ConnectionType.QemuBasalt)
-            .done(function(pebble) {
+            .then(function(pebble) {
                 pebble.once('timeline:result', handleTimelineResult);
                 pebble.emu_send_pin(content);
             });
@@ -65,7 +65,7 @@ CloudPebble.Timeline = new (function() {
         var content = mEditor.getValue();
         var id = JSON.parse(content)['id'];
         SharedPebble.getPebble(ConnectionType.QemuBasalt)
-            .done(function(pebble) {
+            .then(function(pebble) {
                 pebble.once('timeline:result', handleTimelineResult);
                 pebble.emu_delete_pin(id);
             });
