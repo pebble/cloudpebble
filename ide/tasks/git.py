@@ -15,8 +15,8 @@ from ide.models.build import BuildResult
 from ide.models.project import Project
 from ide.tasks import do_import_archive, run_compile
 from ide.utils.git import git_sha, git_blob
-from ide.utils.project import find_project_root
-from ide.utils.sdk import generate_manifest_dict, generate_manifest, generate_wscript_file
+from ide.utils.project import find_project_root_and_manifest, BaseProjectItem, InvalidProjectArchiveException
+from ide.utils.sdk import generate_manifest_dict, generate_manifest, generate_wscript_file, manifest_name_for_project
 from utils.td_helper import send_td_event
 
 __author__ = 'katharine'
@@ -78,14 +78,14 @@ def github_push(user, commit_message, repo_name, project):
     commit = repo.get_git_commit(branch.commit.sha)
     tree = repo.get_git_tree(commit.tree.sha, recursive=True)
 
-    paths = [x.path for x in tree.tree]
-
     next_tree = {x.path: InputGitTreeElement(path=x.path, mode=x.mode, type=x.type, sha=x.sha) for x in tree.tree}
 
     try:
-        root = find_project_root(paths)
-    except:
+        root, manifest_item = find_project_root_and_manifest([GitProjectItem(repo, x) for x in tree.tree])
+    except InvalidProjectArchiveException:
         root = ''
+        manifest_item = None
+
     expected_paths = set()
 
     def update_expected_paths(new_path):
@@ -156,19 +156,21 @@ def github_push(user, commit_message, repo_name, project):
             has_changed = True
 
     # Compare the resource dicts
-    remote_manifest_path = root + 'appinfo.json'
+    remote_manifest_path = root + manifest_name_for_project(project)
     remote_wscript_path = root + 'wscript'
 
-    remote_manifest_sha = next_tree[remote_manifest_path]._InputGitTreeElement__sha if remote_manifest_path in next_tree else None
-    if remote_manifest_sha is not None:
-        their_manifest_dict = json.loads(git_blob(repo, remote_manifest_sha))
-        their_res_dict = their_manifest_dict['resources']
+    if manifest_item:
+        their_manifest_dict = json.loads(manifest_item.read())
+        their_res_dict = their_manifest_dict.get('resources', their_manifest_dict['pebble']['resources'])
+        # If the manifest needs a new path (e.g. it is now package.json), delete the old one
+        if manifest_item.path != remote_manifest_path:
+            del next_tree[manifest_item.path]
     else:
         their_manifest_dict = {}
         their_res_dict = {'media': []}
 
     our_manifest_dict = generate_manifest_dict(project, resources)
-    our_res_dict = our_manifest_dict['resources']
+    our_res_dict = our_manifest_dict.get('resources', our_manifest_dict['pebble']['resources'])
 
     if our_res_dict != their_res_dict:
         logger.debug("Resources mismatch.")
@@ -233,6 +235,19 @@ def get_root_path(path):
     return path.split('~', 1)[0] + extension
 
 
+class GitProjectItem(BaseProjectItem):
+    def __init__(self, repo, tree_item):
+        self.repo = repo
+        self.git_item = tree_item
+
+    def read(self):
+        return git_blob(self.repo, self.git_item.sha)
+
+    @property
+    def path(self):
+        return self.git_item.path
+
+
 @git_auth_check
 def github_pull(user, project):
     g = get_github(user)
@@ -256,20 +271,16 @@ def github_pull(user, project):
 
     paths = {x.path: x for x in tree.tree}
     paths_notags = {get_root_path(x) for x in paths}
-    root = find_project_root(paths)
 
     # First try finding the resource map so we don't fail out part-done later.
-    # TODO: transaction support for file contents would be nice...
-
+    try:
+        root, manifest_item = find_project_root_and_manifest([GitProjectItem(repo, x) for x in tree.tree])
+    except ValueError as e:
+        raise ValueError("In manifest file: %s" % str(e))
     resource_root = root + 'resources/'
-    manifest_path = root + 'appinfo.json'
-    if manifest_path in paths:
-        manifest_sha = paths[manifest_path].sha
-        manifest = json.loads(git_blob(repo, manifest_sha))
-        media = manifest.get('resources', {}).get('media', [])
-    else:
-        raise Exception("appinfo.json not found")
+    manifest = json.loads(manifest_item.read())
 
+    media = manifest.get('resources', {}).get('media', [])
     project_type = manifest.get('projectType', 'native')
 
     for resource in media:
@@ -285,6 +296,7 @@ def github_pull(user, project):
     u = urllib2.urlopen(zip_url)
 
     # And wipe the project!
+    # TODO: transaction support for file contents would be nice...
     project.source_files.all().delete()
     project.resources.all().delete()
 

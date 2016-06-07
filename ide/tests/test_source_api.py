@@ -11,7 +11,7 @@ fake_s3 = FakeS3()
 
 
 @mock.patch('ide.models.s3file.s3', fake_s3)
-class TestsSource(CloudpebbleTestCase):
+class TestSource(CloudpebbleTestCase):
     """Tests for the Tests models"""
 
     def setUp(self):

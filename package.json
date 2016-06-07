@@ -13,5 +13,6 @@
     "uglify-js": "2.6.2",
     "clean-css": "3.4.12",
     "source-map-concat-cli": "^1.0.0"
-  }
+  },
+  "engines": {"node": "6.2.1"}
 }

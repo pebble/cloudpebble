@@ -307,10 +307,10 @@ h2.section-heading {
     font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     color: white;
     font-size: large;
-    line-height: 40px;
+    line-height: 30px;
     text-align: right;
     width: 130px;
-    padding-right: 20px;
+    padding: 5px 20px 15px 0;
 }
 
 .form-horizontal .control-group label.long-form-label {
@@ -372,6 +372,7 @@ input[type=checkbox]:checked {
 
 input[type=checkbox]:disabled {
     cursor: default;
+    opacity: 0.3;
 }
 
 /* Form popover thing */

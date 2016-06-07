@@ -11,7 +11,7 @@ from django.core.handlers.base import BaseHandler
 from django.conf import settings
 from django.core.signals import got_request_exception
 from django.utils.translation import ugettext as _
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 
 JSON = 'application/json'
 logger = logging.getLogger('django.request')
@@ -84,6 +84,11 @@ def json_view(*args, **kwargs):
                 return http.HttpResponseForbidden(json.dumps(_make_error(str(e))), content_type=JSON)
             except BadRequest as e:
                 return http.HttpResponseBadRequest(json.dumps(_make_error(str(e))), content_type=JSON)
+            except ValidationError as e:
+                # Validation errors are raised for errors such as invalid file names.
+                # We return HTTP 400s in these cases, and send back a comma separated string of errors.
+                # (although generally there will only be one error)
+                return http.HttpResponseBadRequest(json.dumps(_make_error(", ".join(e.messages))), content_type=JSON)
             except Exception as e:
                 data = _make_error(_('An error has occurred'))
                 if settings.DEBUG or isinstance(e, InternalServerError):

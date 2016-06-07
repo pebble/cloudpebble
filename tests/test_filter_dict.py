@@ -102,3 +102,9 @@ class TestFilterDict(TestCase):
             'c': True,
         }
         self.assertDictEqual(filter_dict(before, spec), after)
+
+    def test_rename(self):
+        before = {'a': 'thing'}
+        after = {'b': 'thing'}
+        spec = {'a': 'b'}
+        self.assertDictEqual(filter_dict(before, spec), after)

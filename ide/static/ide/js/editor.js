@@ -322,9 +322,6 @@ CloudPebble.Editor = (function() {
                     });
                     warning_lines = [];
 
-                    // And now bail.
-                    if(!CloudPebble.ProjectInfo.app_jshint) return;
-
                     var jshint_globals = {
                         Pebble: true,
                         console: true,
@@ -494,7 +491,7 @@ CloudPebble.Editor = (function() {
                         }
                     }
                 }).catch(function(error) {
-                    alert(gettext("Failed to reload file. ") + error);
+                    alert(gettext(interpolate("Failed to reload file. %s", [error])));
                 });
             };
 
@@ -599,14 +596,12 @@ CloudPebble.Editor = (function() {
                         if (value.match(regexp) === null) {
                             prompt.error(gettext("Invalid filename"));
                         }
-                        else {
-                            rename_file(file, value).then(function () {
-                                prompt.dismiss();
-                                code_mirror.focus();
-                            }).catch(function (error) {
-                                prompt.error(gettext("Failed to rename file. ") + error.message);
-                            });
-                        }
+                        rename_file(file, value).then(function() {
+                            prompt.dismiss();
+                            code_mirror.focus();
+                        }).catch(function(error) {
+                            prompt.error(gettext(interpolate("Failed to rename file. %s", [error.message])));
+                        });
                     },
                     pattern)
             };
@@ -743,32 +738,33 @@ CloudPebble.Editor = (function() {
             run_btn.popover({
                 trigger: 'hover',
                 content: function() {
-                    var capitalise_first_letter = function(str) {
-                        return str.charAt(0).toUpperCase() + str.slice(1);
-                    };
-                    if (file.target !== 'test') {
-                        var tooltip = $('<div>');
-                        var build_platforms = CloudPebble.ProjectInfo.app_platforms;
-                        if (build_platforms) {
-                            var build_platform_names = _.map(build_platforms.split(','), capitalise_first_letter).join(', ');
-                            tooltip.append($(interpolate("<div><strong>%s: </strong>%s</div>", [gettext("Build for"), build_platform_names])));
-                        }
-                        var run_platform = CloudPebble.Compile.GetPlatformForInstall();
-                        var run_platform_name;
-                        if (run_platform == ConnectionType.Phone) {
-                            run_platform_name = gettext("Phone");
-                        }
-                        else if (run_platform == ConnectionType.Qemu) {
-                            // If the emulator is already running, ask it directly what platform it's using
-                            run_platform_name = SharedPebble.getPlatformName() + gettext(" Emulator");
-                        }
-                        else {
-                            run_platform_name = ConnectionPlatformNames[run_platform] + gettext(" Emulator");
-                        }
-                        tooltip.append(interpolate("<div><strong>%s: </strong>%s</div>", [gettext("Run on"), capitalise_first_letter(run_platform_name)]));
-                    } else {
+                    if (file.target === 'test') {
                         return gettext("Run this test now and watch it run in the emulator.");
                     }
+
+                    function capitalise_first_letter(str) {
+                        return str.charAt(0).toUpperCase() + str.slice(1);
+                    }
+
+                    var tooltip = $('<div>');
+                    var build_platforms = CloudPebble.ProjectInfo.app_platforms;
+                    if (build_platforms) {
+                        var build_platform_names = _.map(build_platforms.split(','), capitalise_first_letter).join(', ');
+                        tooltip.append($(interpolate("<div><strong>%s: </strong>%s</div>", [gettext("Build for"), build_platform_names])));
+                    }
+                    var run_platform = CloudPebble.Compile.GetPlatformForInstall();
+                    var run_platform_name;
+                    if (run_platform == ConnectionType.Phone) {
+                        run_platform_name = gettext("Phone");
+                    }
+                    else if (run_platform == ConnectionType.Qemu) {
+                        // If the emulator is already running, ask it directly what platform it's using
+                        run_platform_name = interpolate("%s Emulator", [SharedPebble.getPlatformName()]);
+                    }
+                    else {
+                        run_platform_name = interpolate("%s Emulator", [ConnectionPlatformNames[run_platform]]);
+                    }
+                    tooltip.append(interpolate("<div><strong>%s: </strong>%s</div>", [gettext("Run on"), capitalise_first_letter(run_platform_name)]));
 
                     return tooltip;
                 },

@@ -165,6 +165,7 @@ CloudPebble.Sidebar = (function() {
         Init: function() {
             $('#sidebar-pane-new-resource').click(CloudPebble.Resources.Create);
             $('#sidebar-pane-compile > a').click(CloudPebble.Compile.Show);
+            $('#sidebar-pane-dependencies > a').click(CloudPebble.Dependencies.Show);
             $('#sidebar-pane-settings > a').click(CloudPebble.Settings.Show);
             $('#sidebar-pane-testmanager > a').click(CloudPebble.TestManager.Show);
             $('#sidebar-pane-github > a').click(CloudPebble.GitHub.Show);

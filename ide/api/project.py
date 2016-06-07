@@ -1,12 +1,13 @@
-import os
 import re
-import tempfile
+import json
 import time
+
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db import transaction, IntegrityError
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_safe, require_POST
+
 from ide.models.build import BuildResult
 from ide.models.project import Project, TemplateProject
 from ide.models.files import SourceFile, ResourceFile
@@ -41,9 +42,12 @@ def project_info(request, project_id):
         'app_version_label': project.app_version_label,
         'app_is_watchface': project.app_is_watchface,
         'app_is_hidden': project.app_is_hidden,
+        'app_keys': json.loads(project.app_keys),
+        'parsed_app_keys': project.get_parsed_appkeys(),
         'app_is_shown_on_communication': project.app_is_shown_on_communication,
         'app_capabilities': project.app_capabilities,
         'app_jshint': project.app_jshint,
+        'app_dependencies': project.get_dependencies(),
         'sdk_version': project.sdk_version,
         'app_platforms': project.app_platforms,
         'app_modern_multi_js': project.app_modern_multi_js,
@@ -61,13 +65,13 @@ def project_info(request, project_id):
                              'lastModified': time.mktime(f.last_modified.utctimetuple())
                          } for f in source_files],
         'resources': [{
-            'id': x.id,
-            'file_name': x.file_name,
-            'kind': x.kind,
-            'identifiers': [y.resource_id for y in x.identifiers.all()],
-            'extra': {y.resource_id: y.get_options_dict(with_id=False) for y in x.identifiers.all()},
-            'variants': [y.get_tags() for y in x.variants.all()],
-        } for x in resources],
+                          'id': x.id,
+                          'file_name': x.file_name,
+                          'kind': x.kind,
+                          'identifiers': [y.resource_id for y in x.identifiers.all()],
+                          'extra': {y.resource_id: y.get_options_dict(with_id=False) for y in x.identifiers.all()},
+                          'variants': [y.get_tags() for y in x.variants.all()],
+                      } for x in resources],
         'github': {
             'repo': "github.com/%s" % project.github_repo if project.github_repo is not None else None,
             'branch': project.github_branch if project.github_branch is not None else None,
@@ -192,6 +196,9 @@ def create_project(request):
             elif project_type == 'pebblejs':
                 f = SourceFile.objects.create(project=project, file_name="app.js")
                 f.save_text(open('{}/src/js/app.js'.format(settings.PEBBLEJS_ROOT)).read())
+            if settings.NPM_MANIFEST_SUPPORT and sdk_version != '2':
+                project.app_keys = '[]'
+            project.save()
     except IntegrityError as e:
         raise BadRequest(str(e))
     else:
@@ -208,6 +215,7 @@ def save_project_settings(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     try:
         with transaction.atomic():
+
             project.name = request.POST['name']
             project.app_uuid = request.POST['app_uuid']
             project.app_company_name = request.POST['app_company_name']
@@ -241,6 +249,19 @@ def save_project_settings(request, project_id):
             project.save()
     except IntegrityError as e:
         return BadRequest(str(e))
+    else:
+        send_td_event('cloudpebble_save_project_settings', request=request, project=project)
+
+
+@require_POST
+@login_required
+@json_view
+def save_project_dependencies(request, project_id):
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    try:
+        project.set_dependencies(json.loads(request.POST['dependencies']))
+    except (IntegrityError, ValueError) as e:
+        raise BadRequest(str(e))
     else:
         send_td_event('cloudpebble_save_project_settings', request=request, project=project)
 

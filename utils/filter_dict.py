@@ -29,6 +29,7 @@ def filter_dict(dictionary, spec):
     :param dictionary: Object to filter
     :param spec: Specification of keys to filter. The structure of the spec dictionary defines the structure of the output dictionary.
         - Any keys in the spec with a value of "True" represent a value which is copied over
+        - Any keys in the spec which are strings will rename the key to the string
         - For any keys in the spec with callable values, the output value is mapped by the function
         - For any keys in the spec with dictionary values, the dictionary represents the spec of a sub-dictionary
         - If a key itself is True, it is a wildcard for all keys
@@ -72,5 +73,7 @@ def _transform_value(out, key, dictionary, spec_value, strict):
         out[result[0]] = result[1]
     elif isinstance(spec_value, collections.Mapping):
         out[key] = _filter_dict(v, spec_value, strict=strict)
+    elif isinstance(spec_value, basestring):
+        out[spec_value] = v
     else:
         raise ValueError('Invalid filter spec value')

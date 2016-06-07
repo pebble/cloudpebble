@@ -1,16 +1,26 @@
-import shutil
+import re
 import uuid
+import json
 
 from django.contrib.auth.models import User
-from django.db import models
+from django.db import models, transaction
 from django.utils.translation import ugettext as _
+from django.core.exceptions import ValidationError
 
 from ide.models.files import ResourceFile, ResourceIdentifier, SourceFile, ResourceVariant
-from ide.utils import generate_half_uuid
-
+from ide.models.dependency import Dependency
 from ide.models.meta import IdeModel
+from ide.utils import generate_half_uuid
+from ide.utils.version import version_to_semver, semver_to_version, parse_sdk_version
 
 __author__ = 'katharine'
+
+
+def version_validator(value):
+    try:
+        parse_sdk_version(value)
+    except ValueError:
+        raise ValidationError(_("Invalid version string. Versions should be major[.minor]."))
 
 
 class Project(IdeModel):
@@ -36,7 +46,7 @@ class Project(IdeModel):
     app_company_name = models.CharField(max_length=100, blank=True, null=True)
     app_short_name = models.CharField(max_length=100, blank=True, null=True)
     app_long_name = models.CharField(max_length=100, blank=True, null=True)
-    app_version_label = models.CharField(max_length=40, blank=True, null=True, default='1.0')
+    app_version_label = models.CharField(max_length=40, blank=True, null=True, default='1.0', validators=[version_validator])
     app_is_watchface = models.BooleanField(default=False)
     app_is_hidden = models.BooleanField(default=False)
     app_is_shown_on_communication = models.BooleanField(default=False)
@@ -45,6 +55,7 @@ class Project(IdeModel):
     app_jshint = models.BooleanField(default=True)
     app_platforms = models.TextField(max_length=255, blank=True, null=True)
     app_modern_multi_js = models.BooleanField(default=True)
+    app_keywords = models.TextField(default='[]')
 
     app_capability_list = property(lambda self: self.app_capabilities.split(','))
     app_platform_list = property(lambda self: self.app_platforms.split(',') if self.app_platforms else [])
@@ -66,11 +77,59 @@ class Project(IdeModel):
     github_hook_uuid = models.CharField(max_length=36, blank=True, null=True)
     github_hook_build = models.BooleanField(default=False)
 
+
     def get_last_built_platforms(self):
         try:
             return self.last_build.get_sizes().keys()
         except AttributeError:
             return []
+
+    def set_dependencies(self, dependencies):
+        """ Set the project's dependencies from a dictionary.
+        :param dependencies: A dictionary of dependency->version
+        """
+        with transaction.atomic():
+            Dependency.objects.filter(project=self).delete()
+            for name, version in dependencies.iteritems():
+                dep = Dependency.objects.create(project=self, name=name, version=version)
+                dep.full_clean()
+                dep.save()
+
+    @property
+    def keywords(self):
+        """ Get the project's keywords as a list of strings """
+        return json.loads(self.app_keywords)
+
+    @keywords.setter
+    def keywords(self, value):
+        """ Set the project's keywords from a list of strings """
+        self.app_keywords = json.dumps(value)
+
+    def get_dependencies(self):
+        """ Get the project's dependencies as a dictionary
+        :return: A dictinoary of dependency->version
+        """
+        return {d.name: d.version for d in self.dependencies.all()}
+
+    @property
+    def uses_array_message_keys(self):
+        return isinstance(json.loads(self.app_keys), list)
+
+    def get_parsed_appkeys(self):
+        """ Get the project's app keys, or raise an error of any are invalid.
+        :return: A list of (appkey, value) tuples, where value is either a length or a size, depending on the kind of appkey.
+        """
+        app_keys = json.loads(self.app_keys)
+        if isinstance(app_keys, dict):
+            return sorted(app_keys.iteritems(), key=lambda x: x[1])
+        else:
+            parsed_keys = []
+            for appkey in app_keys:
+                parsed = re.match(r'^([a-zA-Z_][_a-zA-Z\d]*)(?:\[(\d+)\])?$', appkey)
+                if not parsed:
+                    raise ValueError("Bad Appkey %s" % appkey)
+                parsed_keys.append((parsed.group(1), parsed.group(2) or 1))
+            return parsed_keys
 
     def get_last_build(self):
         try:
@@ -86,6 +145,21 @@ class Project(IdeModel):
 
     def has_platform(self, platform):
         return self.app_platforms is None or platform in self.app_platform_list
+
+    @property
+    def semver(self):
+        """ Get the app's version label formatted as a semver """
+        return version_to_semver(self.app_version_label)
+
+    @semver.setter
+    def semver(self, value):
+        """ Set the app's version label from a semver string"""
+        self.app_version_label = semver_to_version(value)
+
+    def clean(self):
+        if isinstance(json.loads(self.app_keys), list) and self.sdk_version == "2":
+            raise ValidationError(_("SDK2 appKeys must be an object, not a list."))
+
 
     last_build = property(get_last_build)
     menu_icon = property(get_menu_icon)

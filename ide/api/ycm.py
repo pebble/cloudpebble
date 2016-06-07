@@ -2,8 +2,8 @@ import json
 import logging
 import random
 from urlparse import urlparse
-
 import requests
+
 from django.utils.translation import ugettext as _
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -24,30 +24,22 @@ logger = logging.getLogger(__name__)
 def init_autocomplete(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     source_files = project.source_files.all()
-    resource_files = project.resources.all()
+
     file_contents = {}
     for f in source_files:
         file_contents[f.project_path] = f.get_contents()
 
-    resource_ids = []
-    count = 1
-    for f in resource_files:
-        for identifier in f.identifiers.all():
-            if f.kind == 'png-trans':
-                resource_ids.extend([
-                    '#define RESOURCE_ID_%s_BLACK %d' % (identifier.resource_id, count),
-                    '#define RESOURCE_ID_%s_WHITE %d' % (identifier.resource_id, count + 1)
-                ])
-                count += 2
-            else:
-                resource_ids.append('#define RESOURCE_ID_%s %d' % (identifier.resource_id, count))
-                count += 1
-    file_contents['build/src/resource_ids.auto.h'] = '\n'.join(resource_ids) + "\n"
+    identifiers = [(f.kind, i.resource_id) for f in project.resources.all() for i in f.identifiers.all()]
+
+    appkey_names = [k for k, v in project.get_parsed_appkeys()]
 
     request = {
         'files': file_contents,
         'platforms': request.POST.get('platforms', 'aplite').split(','),
         'sdk': request.POST.get('sdk', '2'),
+        'messagekeys': appkey_names,
+        'resources': identifiers,
+        'dependencies': project.get_dependencies()
     }
     # Let's go!
     return _spin_up_server(request)
@@ -78,4 +70,3 @@ def _spin_up_server(request):
         logger.warning("Server %s failed; trying another.", server)
     # If we get out of here, something went wrong.
     raise Exception(_('No Servers'))
-

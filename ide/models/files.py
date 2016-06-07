@@ -2,14 +2,13 @@ import json
 import os
 import logging
 
-from django.conf import settings
-from django.core.validators import RegexValidator
+
 from django.db import models
 from django.utils.timezone import now
 from django.utils.translation import ugettext as _
+from django.core.validators import RegexValidator, ValidationError
+from django.utils.translation import ugettext_lazy as _
 
-
-import utils.s3 as s3
 from ide.models.meta import IdeModel
 from ide.models.s3file import S3File
 from ide.models.scriptfile import ScriptFile
@@ -30,7 +29,7 @@ class ResourceFile(IdeModel):
         ('pbi', _('1-bit Pebble image')),
     )
 
-    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_(). -]+$")])
+    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_(). -]+$", message=_("Invalid filename."))])
     kind = models.CharField(max_length=9, choices=RESOURCE_KINDS)
     is_menu_icon = models.BooleanField(default=False)
 
@@ -42,7 +41,7 @@ class ResourceFile(IdeModel):
 
     def rename(self, new_name):
         if os.path.splitext(self.file_name)[1] != os.path.splitext(new_name)[1]:
-            raise Exception("Cannot change file type when renaming resource")
+            raise ValidationError(_("Cannot change file type when renaming resource"))
         self.file_name = new_name
 
     def get_default_variant(self):
@@ -56,7 +55,7 @@ class ResourceFile(IdeModel):
         for variant in self.variants.all():
             abs_target = "%s/%s%s%s" % (path, filename_parts[0], variant.get_tags_string(), filename_parts[1])
             if not abs_target.startswith(path):
-                raise Exception("Suspicious filename: %s" % self.file_name)
+                raise Exception(_("Suspicious filename: %s") % self.file_name)
             variant.copy_to_path(abs_target)
 
     def save(self, *args, **kwargs):
@@ -159,10 +158,10 @@ class ResourceVariant(S3File):
         name_parts = os.path.splitext(self.path)
         suffix = self.get_tags_string()
         if not name_parts[0].endswith(suffix):
-            raise Exception("No root path found for resource variant %s" % self.path)
-        root_path = name_parts[0][:len(name_parts[0])-len(suffix)] + name_parts[1]
+            raise Exception(_("No root path found for resource variant %s") % self.path)
+        root_path = name_parts[0][:len(name_parts[0]) - len(suffix)] + name_parts[1]
         if "~" in root_path:
-            raise ValueError("Filenames are not allowed to contain the tilde (~) character, except for specifying tags")
+            raise ValueError(_("Filenames are not allowed to contain the tilde (~) character, except for specifying tags"))
         return root_path
 
     path = property(get_path)
@@ -231,7 +230,7 @@ class ResourceIdentifier(IdeModel):
 
 class SourceFile(ScriptFile):
     project = models.ForeignKey('Project', related_name='source_files')
-    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_.-]+\.(c|h|js)$")])
+    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_.-]+\.(c|h|js)$", message=_("Invalid filename."))])
     folder = 'sources'
 
     TARGETS = (

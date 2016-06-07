@@ -753,7 +753,7 @@ CloudPebble.Resources = (function() {
                 save_function: function() {
                     return null;
                 },
-                on_change_function: function() {
+                on_change: function() {
                     CloudPebble.Sidebar.SetIcon('resource-'+resource.id, 'edit');
                 }
             }).init();
@@ -949,15 +949,6 @@ CloudPebble.Resources = (function() {
         },
         Create: function() {
             create_new_resource();
-        },
-        GetResourceIDs: function() {
-            var names = [];
-            $.each(project_resources, function(index, value) {
-                $.each(value.identifiers, function(index, id) {
-                    names.push("RESOURCE_ID_" + id);
-                });
-            });
-            return names;
         },
         GetBitmaps: function() {
             return _.filter(project_resources, function(item) { return /^(png|pbi|bitmap)/.test(item.kind); });

@@ -36,6 +36,7 @@ CloudPebble.Init = function() {
         CloudPebble.Sidebar.Init();
         CloudPebble.Settings.Init();
         CloudPebble.GitHub.Init();
+        CloudPebble.Dependencies.Init();
         CloudPebble.Documentation.Init();
         CloudPebble.FuzzyPrompt.Init();
         CloudPebble.TestManager.Init();

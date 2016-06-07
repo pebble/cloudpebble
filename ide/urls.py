@@ -4,7 +4,7 @@ from ide.api import proxy_keen, check_task, get_shortlink, heartbeat
 from ide.api.git import github_push, github_pull, set_project_repo, create_project_repo
 from ide.api.phone import ping_phone, check_phone, list_phones, update_phone
 from ide.api.project import project_info, compile_project, last_build, build_history, build_log, create_project, \
-    save_project_settings, delete_project, begin_export, import_zip, import_github, do_import_gist
+    save_project_settings, save_project_dependencies, delete_project, begin_export, import_zip, import_github, do_import_gist
 from ide.api.resource import create_resource, resource_info, delete_resource, update_resource, show_resource, \
     delete_variant
 from ide.api.source import create_source_file, create_test_file, load_source_file, source_file_is_safe, \
@@ -15,6 +15,7 @@ from ide.api.monkey import get_test_session, get_test_sessions, get_test_run, ge
 from ide.api.user import transition_accept, transition_export, transition_delete, whats_new
 from ide.api.ycm import init_autocomplete
 from ide.api.qemu import launch_emulator, generate_phone_token, handle_phone_token
+from ide.api.npm import npm_search, npm_info
 from ide.views.index import index
 from ide.views.project import view_project, github_hook, build_status, import_gist, qemu_config, enter_phone_token
 from ide.views.settings import settings_page, start_github_auth, remove_github_auth, complete_github_auth
@@ -27,6 +28,7 @@ urlpatterns = [
     url(r'^project/(?P<project_id>\d+)$', view_project, name='project'),
     url(r'^project/(?P<project_id>\d+)/info', project_info, name='project_info'),
     url(r'^project/(?P<project_id>\d+)/save_settings', save_project_settings, name='save_project_settings'),
+    url(r'^project/(?P<project_id>\d+)/save_dependencies', save_project_dependencies, name='save_project_dependencies'),
     url(r'^project/(?P<project_id>\d+)/delete', delete_project, name='delete_project'),
     url(r'^project/(?P<project_id>\d+)/create_source_file', create_source_file, name='create_source_file'),
     url(r'^project/(?P<project_id>\d+)/create_test_file', create_test_file, name='create_test_file'),
@@ -84,6 +86,8 @@ urlpatterns = [
     url(r'^transition/accept', transition_accept, name='transition_accept'),
     url(r'^transition/export', transition_export, name='transition_export'),
     url(r'^transition/delete', transition_delete, name='transition_delete'),
+    url(r'^packages/search', npm_search, name='package_search'),
+    url(r'^packages/info', npm_info, name='package_info'),
     url(r'^ping_phone$', ping_phone),
     url(r'^check_phone/(?P<request_id>[0-9a-f-]+)$', check_phone),
     url(r'^update_phone$', update_phone),

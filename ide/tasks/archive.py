@@ -1,11 +1,11 @@
+import json
+import logging
 import os
 import re
 import shutil
 import tempfile
 import uuid
 import zipfile
-import json
-import logging
 
 from celery import shared_task
 from django.conf import settings
@@ -13,11 +13,11 @@ from django.contrib.auth.models import User
 from django.core.exceptions import SuspiciousOperation
 from django.db import transaction
 
-from ide.utils.project import find_project_root
-from ide.utils.sdk import generate_manifest, generate_wscript_file, generate_jshint_file, dict_to_pretty_json
-from utils.td_helper import send_td_event
 from ide.models.files import SourceFile, ResourceFile, ResourceIdentifier, ResourceVariant
 from ide.models.project import Project
+from ide.utils.project import find_project_root_and_manifest, InvalidProjectArchiveException, MANIFEST_KINDS, BaseProjectItem
+from ide.utils.sdk import generate_manifest, generate_wscript_file, generate_jshint_file, manifest_name_for_project, load_manifest_dict
+from utils.td_helper import send_td_event
 import utils.s3 as s3
 
 __author__ = 'katharine'
@@ -46,7 +46,8 @@ def add_project_to_archive(z, project, prefix=''):
             z.writestr('%s/%s/%s' % (prefix, res_path, variant.path), variant.get_contents())
 
     manifest = generate_manifest(project, resources)
-    z.writestr('%s/appinfo.json' % prefix, manifest)
+    manifest_name = manifest_name_for_project(project)
+    z.writestr('%s/%s' % (prefix, manifest_name), manifest)
     if project.project_type == 'native':
         # This file is always the same, but needed to build.
         z.writestr('%s/wscript' % prefix, generate_wscript_file(project, for_export=True))
@@ -121,6 +122,20 @@ def make_filename_variant(file_name, variant):
     return file_name_parts[0] + variant + file_name_parts[1]
 
 
+class ArchiveProjectItem(BaseProjectItem):
+    def __init__(self, zip_file, entry):
+        self.entry = entry
+        self.zip_file = zip_file
+
+    def read(self):
+        with self.zip_file.open(self.entry) as f:
+            return f.read()
+
+    @property
+    def path(self):
+        return self.entry.filename
+
+
 @shared_task(acks_late=True)
 def do_import_archive(project_id, archive, delete_project=False):
     project = Project.objects.get(pk=project_id)
@@ -141,16 +156,15 @@ def do_import_archive(project_id, archive, delete_project=False):
                 #   - This is taken to be the project directory.
                 # - Import every file in 'src/' with the extension .c or .h as a source file
                 # - Parse resource_map.json and import files it references
-                MANIFEST = 'appinfo.json'
                 SRC_DIR = 'src/'
                 WORKER_SRC_DIR = 'worker_src/'
                 RES_PATH = 'resources'
 
                 if len(contents) > 400:
-                    raise Exception("Too many files in zip file.")
-                file_list = [x.filename for x in contents]
+                    raise InvalidProjectArchiveException("Too many files in zip file.")
 
-                base_dir = find_project_root(file_list)
+                archive_items = [ArchiveProjectItem(z, x) for x in contents]
+                base_dir, manifest_item = find_project_root_and_manifest(archive_items)
                 dir_end = len(base_dir)
 
                 def make_valid_filename(zip_entry):
@@ -163,47 +177,29 @@ def do_import_archive(project_id, archive, delete_project=False):
                     if not os.path.normpath('/SENTINEL_DO_NOT_ACTUALLY_USE_THIS_NAME/%s' % entry_filename).startswith('/SENTINEL_DO_NOT_ACTUALLY_USE_THIS_NAME/'):
                         raise SuspiciousOperation("Invalid zip file contents.")
                     if zip_entry.file_size > 5242880:  # 5 MB
-                        raise Exception("Excessively large compressed file.")
+                        raise InvalidProjectArchiveException("Excessively large compressed file.")
                     return entry_filename
+
+                manifest_kind = make_valid_filename(manifest_item.entry)
+                manifest_dict = json.loads(manifest_item.read())
 
                 # Now iterate over the things we found, filter out invalid files and look for the manifest.
                 filtered_contents = []
-                manifest_entry = None
                 for entry in contents:
                     filename = make_valid_filename(entry)
-                    if not filename:
+                    if not filename or filename in MANIFEST_KINDS:
                         continue
-                    if filename == MANIFEST:
-                        manifest_entry = entry
                     else:
                         filtered_contents.append((filename, entry))
-                if not manifest_entry:
-                    # If this ever happens, find_project_root() is broken.
-                    raise Exception(_("No manifest file found"))
 
                 with transaction.atomic():
                     # We have a resource map! We can now try importing things from it.
-                    with z.open(manifest_entry) as f:
-                        m = json.loads(f.read())
+                    project_options, media_map, dependencies = load_manifest_dict(manifest_dict, manifest_kind)
 
-                    project.app_uuid = m['uuid']
-                    project.app_short_name = m['shortName']
-                    project.app_long_name = m['longName']
-                    project.app_company_name = m['companyName']
-                    project.app_version_label = m['versionLabel']
-                    project.sdk_version = m.get('sdkVersion', '2')
-                    project.app_is_watchface = m.get('watchapp', {}).get('watchface', False)
-                    project.app_is_hidden = m.get('watchapp', {}).get('hiddenApp', False)
-                    project.app_is_shown_on_communication = m.get('watchapp', {}).get('onlyShownOnCommunication', False)
-                    project.app_capabilities = ','.join(m.get('capabilities', []))
-                    project.app_modern_multi_js = m.get('enableMultiJS', False)
-                    if 'targetPlatforms' in m:
-                        project.app_platforms = ','.join(m['targetPlatforms'])
-                    project.app_keys = dict_to_pretty_json(m.get('appKeys', {}))
-                    project.project_type = m.get('projectType', 'native')
-                    if project.project_type not in [x[0] for x in Project.PROJECT_TYPES]:
-                        raise Exception("Illegal project type %s" % project.project_type)
-                    media_map = m['resources']['media']
+                    for k, v in project_options.iteritems():
+                        setattr(project, k, v)
+                    project.full_clean()
+                    project.set_dependencies(dependencies)
 
                     tag_map = {v: k for k, v in ResourceVariant.VARIANT_STRINGS.iteritems() if v}
 
@@ -308,6 +304,7 @@ def do_import_archive(project_id, archive, delete_project=False):
                         if not loaded:
                             raise KeyError("No file was found to satisfy the manifest filename: {}".format(root_file_name))
 
+                    project.full_clean()
                     project.save()
                     send_td_event('cloudpebble_zip_import_succeeded', project=project)
 
@@ -321,11 +318,7 @@ def do_import_archive(project_id, archive, delete_project=False):
                 pass
         send_td_event('cloudpebble_zip_import_failed', data={
             'data': {
-                'reason': e.message
+                'reason': str(e)
             }
         }, user=project.owner)
         raise
-
-
-class NoProjectFoundError(Exception):
-    pass
