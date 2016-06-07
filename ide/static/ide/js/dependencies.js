@@ -396,7 +396,7 @@ CloudPebble.Dependencies = (function() {
 
         setup_dependencies_pane(dependencies_template);
 
-        CloudPebble.Sidebar.SetActivePane(dependencies_template, 'dependencies');
+        CloudPebble.Sidebar.SetActivePane(dependencies_template, {id: 'dependencies'});
     }
 
 
