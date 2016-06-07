@@ -7,10 +7,6 @@ from ide.models import Project, Dependency
 
 
 class ManifestTester(CloudpebbleTestCase):
-    def setUp(self):
-        self.login()
-        self.project = Project.objects.get(pk=self.project_id)
-
     def check_package_manifest(self, manifest, package_options=None, pebble_options=None):
         """ Check that a generated manifest file looks like a manually assembled manifest file
         :param manifest: Manifest to check
@@ -63,6 +59,12 @@ class TestNPMStyleManifestGeneration(ManifestTester):
         self.project.keywords = keywords
         manifest = generate_manifest(self.project, [])
         self.check_package_manifest(manifest, package_options={'keywords': keywords})
+
+    def test_manifest_short_name(self):
+        """ Check that app_short_name is mangled into a valid npm package name """
+        self.project.app_short_name = "_CAPITALS_and...dots-and  -  spaces ! "
+        manifest = generate_manifest(self.project, [])
+        self.check_package_manifest(manifest, package_options={'name': 'capitals_and...dots-and-spaces'})
 
 
 @override_settings(NPM_MANIFEST_SUPPORT='')
