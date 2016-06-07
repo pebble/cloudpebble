@@ -36,13 +36,9 @@ CloudPebble.Dependencies = (function() {
             return Promise.resolve(cached);
         }
         else {
-            return (new Ajax.Wrapper('version')).ajax({
-                url: "http://node-modules.com/package/" + encodeURI(name) + ".json",
-                crossDomain: true,
-                dataType: 'json'
-            }).then(function(result) {
-                this.update_modules([result]);
-                return result;
+            return Ajax.Get("/ide/packages/info", {q: name}).then(function(result) {
+                this.update_modules([result['package']]);
+                return result['package'];
             }.bind(this));
         }
     };
@@ -126,15 +122,13 @@ CloudPebble.Dependencies = (function() {
         }
 
         // Configure a textext entry to autocomplete package names by searching node-modules.com
-        // ajax: {crossDomain: true} is required to prevent CORS errors.
         var textext = textarea_element.textext({
             plugins: 'focus prompt autocomplete suggestions ajax',
             prompt: gettext('Search NPM...'),
             suggestions: [],
             ajax: {
-                url: 'http://node-modules.com/search.json',
+                url: '/ide/packages/search',
                 dataType: 'json',
-                crossDomain: true,
                 cache: true,
                 loading: {delay: 1000}
             },
@@ -213,7 +207,7 @@ CloudPebble.Dependencies = (function() {
                         spinner.addClass('hide');
 
                         // Update the package cache with the new data
-                        cache.update_modules(data);
+                        cache.update_modules(data['packages']);
 
                         // Sort the suggestions based on text similarity
                         if (!query) {
@@ -223,7 +217,7 @@ CloudPebble.Dependencies = (function() {
                             suggestions = dedupe_results(filter_results(cache.get_list(), query));
                         }
                         else {
-                            suggestions = sort_results(data, query);
+                            suggestions = sort_results(data['packages'], query);
                         }
                         $.fn.textext.TextExtAjax.prototype.onComplete.apply(this, [suggestions, query]);
                     },
