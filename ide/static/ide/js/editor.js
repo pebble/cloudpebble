@@ -515,6 +515,7 @@ CloudPebble.Editor = (function() {
                     if(!was_clean) {
                         --unsaved_files;
                     }
+
                     if (screenshot_pane) screenshot_pane.destroy();
                     delete open_codemirrors[file.id];
                 }

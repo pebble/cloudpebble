@@ -356,7 +356,6 @@ CloudPebble.Settings = (function() {
         CloudPebble.Sidebar.SetActivePane(pane, {id: 'settings'});
 
         configure_appkey_table(app_uses_array_appkeys());
-
     };
 
     var add_resource = function(resource) {
