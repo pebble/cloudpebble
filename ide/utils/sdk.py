@@ -575,8 +575,8 @@ def load_manifest_dict(manifest, manifest_kind, default_project_type='native'):
 
     if 'targetPlatforms' in manifest:
         project['app_platforms'] = ','.join(manifest['targetPlatforms'])
-    if 'resources' in project and 'media' in project['resources']:
-        media_map = project['resources']['media']
+    if 'resources' in manifest and 'media' in manifest['resources']:
+        media_map = manifest['resources']['media']
     else:
         media_map = {}
     project['project_type'] = manifest.get('projectType', default_project_type)

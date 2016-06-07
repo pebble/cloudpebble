@@ -12,6 +12,16 @@ __author__ = 'joe'
 
 fake_s3 = FakeS3()
 
+RESOURCE_SPEC = {
+    'resources': {
+        'media': [{
+            'file': 'images/blah.png',
+            'name': 'IMAGE_BLAH',
+            'type': 'bitmap'
+        }]
+    }
+}
+
 
 @mock.patch('ide.models.files.s3', fake_s3)
 class TestImportProject(CloudpebbleTestCase):
@@ -81,6 +91,28 @@ class TestImportProject(CloudpebbleTestCase):
         do_import_archive(self.project_id, bundle)
         project = Project.objects.get(pk=self.project_id)
         self.assertEqual(set(keywords), set(project.keywords))
+
+    def test_import_appinfo_with_resources(self):
+        """ Check that a resource can be imported in an appinfo.json project """
+        bundle = build_bundle({
+            'src/main.c': '',
+            'resources/images/blah.png': 'contents!',
+            'appinfo.json': make_appinfo(options=RESOURCE_SPEC)
+        })
+        do_import_archive(self.project_id, bundle)
+        project = Project.objects.get(pk=self.project_id)
+        self.assertEqual(project.resources.get().variants.get().get_contents(), 'contents!')
+
+    def test_import_package_with_resources(self):
+        """ Check that a resource can be imported in an package.json project """
+        bundle = build_bundle({
+            'src/main.c': '',
+            'resources/images/blah.png': 'contents!',
+            'package.json': make_package(pebble_options=RESOURCE_SPEC)
+        })
+        do_import_archive(self.project_id, bundle)
+        project = Project.objects.get(pk=self.project_id)
+        self.assertEqual(project.resources.get().variants.get().get_contents(), 'contents!')
 
     def test_throws_with_local_file_dependencies(self):
         """ Throw if any dependencies reference local files """
