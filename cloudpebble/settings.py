@@ -11,6 +11,7 @@ _environ = os.environ
 DEBUG = _environ.get('DEBUG', '') != ''
 VERBOSE = DEBUG or (_environ.get('VERBOSE', '') != '')
 TESTING = 'test' in sys.argv
+TRAVIS = 'TRAVIS' in _environ and os.environ["TRAVIS"] == "true"
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -23,7 +24,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 MANAGERS = ADMINS
 
-if 'TRAVIS' in _environ:
+if TRAVIS:
     DATABASES = {
         'default': {
             'ENGINE':   'django.db.backends.postgresql_psycopg2',
@@ -144,7 +145,7 @@ STATICFILES_FINDERS = (
 )
 
 BOWER_INSTALLED_APPS = (
-    'https://github.com/krisk/Fuse.git#2c1560d763',
+    'https://github.com/krisk/Fuse.git#2ec2f2c40059e135cabf2b01c8c3f96f808b8809',
     'jquery#~2.1.3',
     'underscore',
     'backbone',
@@ -278,6 +279,11 @@ LOGGING = {
             'level': 'DEBUG' if VERBOSE else 'INFO',
             'propagate': True
         },
+        'root': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True
+        },
         '': {
             'handlers': ['console'],
             'level': 'WARNING',
@@ -285,6 +291,11 @@ LOGGING = {
         }
     }
 }
+
+if TESTING:
+    # Many tests make deliberately broken requests. If this line is not present,
+    # the log output during tests gets flooded with 'expected' exceptions.
+    LOGGING['loggers']['django.request'] = {'level': 'CRITICAL'}
 
 REDIS_URL = _environ.get('REDIS_URL', None) or _environ.get('REDISCLOUD_URL', 'redis://redis:6379')
 
@@ -319,6 +330,9 @@ GITHUB_HOOK_TEMPLATE = _environ.get('GITHUB_HOOK', 'http://example.com/ide/proje
 
 SDK2_PEBBLE_WAF = _environ.get('SDK2_PEBBLE_WAF', '/sdk2/pebble/waf')
 SDK3_PEBBLE_WAF = _environ.get('SDK3_PEBBLE_WAF', '/sdk3/pebble/waf')
+
+NPM_MANIFEST_SUPPORT = _environ.get('NPM_MANIFEST_SUPPORT', '') != ''
+NPM_BINARY = _environ.get('NPM_BINARY', 'npm')
 
 ARM_CS_TOOLS = _environ.get('ARM_CS_TOOLS', '/arm-cs-tools/bin/')
 

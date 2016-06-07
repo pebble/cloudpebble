@@ -223,25 +223,29 @@ CloudPebble.YCM = new (function() {
         if(!mInitialised) {
             return;
         }
-        var defines = [];
-        var counter = 1;
+        var tuples = [];
         _.each(resources, function(resource) {
-            if(resource.kind != 'png-trans') {
-                defines = defines.concat(_.map(resource.identifiers, function(id) {
-                    return '#define RESOURCE_ID_' + id + ' ' + (counter++);
-                }));
-            } else {
-                _.each(resource.identifiers, function(id) {
-                    defines.push('#define RESOURCE_ID_' + id + '_BLACK ' + (counter++));
-                    defines.push('#define RESOURCE_ID_' + id + '_WHITE ' + (counter++));
-                })
-            }
+            _.each(resource.identifiers, function(id) {
+                tuples.push([resource.kind, id]);
+            })
         });
-        defines.push("");
-        ws_send('create', {
-            filename: 'build/src/resource_ids.auto.h',
-            content: defines.join("\n")
-        });
+        return ws_send('resources', {'resources': tuples});
+    };
+
+    this.updateAppkeys = function(app_key_names) {
+        if (!mInitialised) {
+            return;
+        }
+        return ws_send('messagekeys', {'messagekeys': app_key_names});
+    };
+
+    this.updateDependencies = function(dependencies) {
+        if(!mInitialised) {
+            return;
+        }
+        return ws_send('dependencies', {
+            'dependencies': dependencies
+        })
     };
 
     this.request = function(endpoint, editor, cursor) {
