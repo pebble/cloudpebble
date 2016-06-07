@@ -1,6 +1,6 @@
 import shutil
 import os
-import traceback
+import logging
 
 from django.utils.translation import ugettext as _
 from django.conf import settings
@@ -10,6 +10,8 @@ from django.dispatch import receiver
 
 import utils.s3 as s3
 from ide.models.meta import IdeModel
+
+logger = logging.getLogger(__name__)
 
 
 class S3File(IdeModel):
@@ -99,7 +101,7 @@ def delete_file(sender, instance, **kwargs):
             try:
                 s3.delete_file(sender.bucket_name, instance.s3_path)
             except:
-                traceback.print_exc()
+                logger.exception("Failed to delete S3 file")
         else:
             try:
                 os.unlink(instance.local_filename)

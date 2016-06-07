@@ -23,18 +23,14 @@ $(function() {
         e.preventDefault();
         $('#legacy-login').find('.btn').attr('disabled', 'disabled');
 
-        $.post('/accounts/api/login', {
+        Ajax.Post('/accounts/api/login', {
             username: $('#legacy-username').val(),
             password: $('#legacy-password').val()
-        }).done(function(result) {
-            if(result.success) {
-                location.href = '/ide/';
-            } else {
-                alert(result.error);
-            }
-        }).fail(function() {
-            alert("HTTP request failed.");
-        }).always(function() {
+        }).then(function() {
+            location.href = '/ide/';
+        }).catch(function(error) {
+            alert(error);
+        }).finally(function() {
             $('#legacy-login').find('.btn').removeAttr('disabled');
         });
     });

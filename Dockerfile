@@ -1,4 +1,4 @@
-FROM python:2.7.8
+FROM python:2.7.11
 MAINTAINER Katharine Berry <katharine@pebble.com>
 
 ENV NPM_CONFIG_LOGLEVEL=info NODE_VERSION=4.2.3 DJANGO_VERSION=1.6
@@ -25,8 +25,7 @@ RUN curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-
   && tar -xzf "node-v$NODE_VERSION-linux-x64.tar.gz" -C /usr/local --strip-components=1 \
   && rm "node-v$NODE_VERSION-linux-x64.tar.gz" SHASUMS256.txt.asc
 
-# Upgrade pip
-RUN pip install --upgrade pip
+RUN npm install npm -g
 
 # Django stuff
 
@@ -57,7 +56,7 @@ RUN mkdir /sdk2 && \
   tar --strip-components=1 -xj -C /sdk2
 
 ENV SDK_THREE_CHANNEL=release
-ENV SDK_THREE_VERSION=3.11
+ENV SDK_THREE_VERSION=3.12
 
 # Install SDK 3
 RUN mkdir /sdk3 && \

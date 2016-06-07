@@ -1,12 +1,17 @@
 # encoding: utf-8
 # Django settings for cloudpebble project.
 
+import sys
 import os
 import socket
 import dj_database_url
+
 _environ = os.environ
 
 DEBUG = _environ.get('DEBUG', '') != ''
+VERBOSE = DEBUG or (_environ.get('VERBOSE', '') != '')
+TESTING = 'test' in sys.argv
+TRAVIS = 'TRAVIS' in _environ and os.environ["TRAVIS"] == "true"
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -19,7 +24,18 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 MANAGERS = ADMINS
 
-if 'DATABASE_URL' not in _environ:
+if TRAVIS:
+    DATABASES = {
+        'default': {
+            'ENGINE':   'django.db.backends.postgresql_psycopg2',
+            'NAME':     'travisci',
+            'USER':     'postgres',
+            'PASSWORD': '',
+            'HOST':     'localhost',
+            'PORT':     '',
+        }
+    }
+elif 'DATABASE_URL' not in _environ:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -129,7 +145,7 @@ STATICFILES_FINDERS = (
 )
 
 BOWER_INSTALLED_APPS = (
-    'https://github.com/krisk/Fuse.git#2c1560d763',
+    'https://github.com/krisk/Fuse.git#2ec2f2c40059e135cabf2b01c8c3f96f808b8809',
     'jquery#~2.1.3',
     'underscore',
     'backbone',
@@ -138,6 +154,7 @@ BOWER_INSTALLED_APPS = (
     'html.sortable#~0.3.1',
     'alexgorbatchev/jquery-textext',
     'codemirror#4.2.0',
+    'bluebird#3.3.4',
     'kanaka/noVNC',
 )
 
@@ -231,34 +248,54 @@ INSTALLED_APPS = (
     'djangobower',
 )
 
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error when DEBUG=False.
-# See http://docs.djangoproject.com/en/dev/topics/logging for
-# more details on how to customize your logging configuration.
+# This logging config prints:
+# INFO logs from django
+# INFO or DEBUG logs from 'ide', depending on whether DEBUG=True
+# all WARNING logs from any sources
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse'
-        }
+    'formatters': {
+        'verbose': {
+            'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt': "%d/%b/%Y %H:%M:%S"
+        },
     },
     'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
         }
     },
     'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': True,
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True
         },
+        'ide': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if VERBOSE else 'INFO',
+            'propagate': True
+        },
+        'root': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True
+        },
+        '': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False
+        }
     }
 }
+
+if TESTING:
+    # Many tests make deliberately broken requests. If this line is not present,
+    # the log output during tests gets flooded with 'expected' exceptions.
+    LOGGING['loggers']['django.request'] = {'level': 'CRITICAL'}
 
 REDIS_URL = _environ.get('REDIS_URL', None) or _environ.get('REDISCLOUD_URL', 'redis://redis:6379')
 
@@ -294,6 +331,9 @@ GITHUB_HOOK_TEMPLATE = _environ.get('GITHUB_HOOK', 'http://example.com/ide/proje
 SDK2_PEBBLE_WAF = _environ.get('SDK2_PEBBLE_WAF', '/sdk2/pebble/waf')
 SDK3_PEBBLE_WAF = _environ.get('SDK3_PEBBLE_WAF', '/sdk3/pebble/waf')
 
+NPM_MANIFEST_SUPPORT = _environ.get('NPM_MANIFEST_SUPPORT', '') != ''
+NPM_BINARY = _environ.get('NPM_BINARY', 'npm')
+
 ARM_CS_TOOLS = _environ.get('ARM_CS_TOOLS', '/arm-cs-tools/bin/')
 
 TD_URL = _environ.get('TD_URL', None)
@@ -309,6 +349,7 @@ AWS_SECRET_ACCESS_KEY = _environ.get('AWS_SECRET_ACCESS_KEY', None)
 AWS_S3_SOURCE_BUCKET = _environ.get('AWS_S3_SOURCE_BUCKET', 'source.cloudpebble.net')
 AWS_S3_BUILDS_BUCKET = _environ.get('AWS_S3_BUILDS_BUCKET', 'builds.cloudpebble.net')
 AWS_S3_EXPORT_BUCKET = _environ.get('AWS_S3_EXPORT_BUCKET', 'export.cloudpebble.net')
+AWS_S3_HOST = _environ.get('AWS_S3_HOST', None)
 AWS_S3_FAKE_S3 = _environ.get('AWS_S3_FAKE_S3', None)
 
 TYPOGRAPHY_CSS = _environ.get('TYPOGRAPHY_CSS', None)

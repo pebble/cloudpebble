@@ -14,7 +14,7 @@
                 <label class="control-label" for="settings-sdk-version">{% trans "SDK Version" %}</label>
                 <div class="controls">
                     <select id="settings-sdk-version">
-                        <option value="2" {% if project.sdk_version == '2' %}selected{% endif %}>{% trans 'SDK 2 (Pebble, Pebble Steel)' %}</option>
+                        <option value="2" {% if project.sdk_version == '2' %}selected{% else %}disabled{% endif %}>{% trans 'SDK 2 (Pebble, Pebble Steel)' %}</option>
                         <option value="3" {% if project.sdk_version == '3' %}selected{% endif %}>{% trans 'SDK 3 (Pebble Time)' %}</option>
                     </select>
                     <span class="help-block">You should reload the page after changing and saving this setting.</span>
@@ -43,7 +43,7 @@
                     </span>
                 </div>
             </div>
-            <div class="control-group native-only sdk3-only" >
+            <div class="control-group" >
                 {# Translators: "Chalk" is a platform name and should be left untranslated. #}
                 <label class="control-label" for="settings-build-chalk">{% trans 'Build Chalk' %}</label>
                 <div class="controls">
@@ -120,7 +120,7 @@
                     <label class="control-label" for="settings-version-label">{% trans "Version label" %}</label>
                     <div class="controls">
                         <input type="text" id="settings-version-label" placeholder="0.1" value="{{project.app_version_label}}"
-                                pattern="^(\d{1,2}|1\d{2}|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d{2}|2[0-4]\d|25[0-5]))?$">
+                                pattern={{version_regex}}>
                         <span class="help-block">
                             {% trans "App version. Takes the format major[.minor], where major and minor are between 0 and 255." %}
                         </span>
@@ -152,37 +152,29 @@
                 </div>
             </div>
             <div class="well">
+                {% if npm_manifest_support_enabled %}
+                <div class="control-group native-only sdk3-only">
+                    <label class="control-label" for="settings-message-key-kind">{% trans 'Message key assignment kind' %}</label>
+                    <div class="controls">
+                        <select id="settings-message-key-kind">
+                            <option value="1" {% if project.uses_array_message_keys %}selected{% endif%}>{% trans 'Automatic assignment' %}</option>
+                            <option value="0" {% if not project.uses_array_message_keys %}selected{% endif%}>{% trans 'Manual assignment (deprecated)' %}</option>
+                        </select>
+                    </div>
+                </div>
+                {% endif %}
                 <div class="control-group native-only">
                     <label class="control-label" for="settings-app-keys">{% trans "PebbleKit JS Message Keys" %}</label>
                     <div class="controls">
                         <table id="settings-app-keys">
-                            <thead>
-                                <tr>
-                                    <th>{% trans "Key Name" %}</th>
-                                    <th>{% trans "Key ID" %}</th>
-                                    <th>&nbsp;</th>
-                                </tr>
-                            </thead>
-                            <tbody id="appkeys">
-                                {% for key, id in app_keys %}
-                                <tr class="appkey">
-                                    <td><input class="appkey-name" value="{{key}}" type="text" /></td>
-                                    <td><input class="appkey-id" value="{{id}}" type="number" /></td>
-                                    <td><button class="btn remove-appkey">–</button></td>
-                                </tr>
-                                {% endfor %}
-                                <tr class="appkey">
-                                    <td><input class="appkey-name" type="text" placeholder="{% trans "New Entry" %}" /></td>
-                                    <td><input class="appkey-id" type="number" value="0" /></td>
-                                    <td><button class="btn remove-appkey disabled">–</button></td>
-                                </tr>
-                            </tbody>
                         </table>
                         <div class="help-block">
                             {% trans "A mapping from strings to integers used by PebbleKit JS." %}
                         </div>
                     </div>
                 </div>
+            </div>
+            <div class="well">
                 <div class="control-group native-only">
                     <label class="control-label" for="settings-app-jshint">{% trans "Check Javascript" context "checkbox label" %}</label>
                     <div class="controls">

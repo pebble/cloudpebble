@@ -1,13 +1,17 @@
-from ide.models.user import UserGithub
-from django.utils.translation import ugettext as _
-
-from github import Github, BadCredentialsException, UnknownObjectException
-from github.NamedUser import NamedUser
-from django.conf import settings
 import base64
 import json
 import urllib2
 import re
+import logging
+
+from github import Github, BadCredentialsException, UnknownObjectException
+from github.NamedUser import NamedUser
+from django.utils.translation import ugettext as _
+from django.conf import settings
+
+from ide.models.user import UserGithub
+
+logger = logging.getLogger(__name__)
 
 
 def git_auth_check(f):
@@ -19,12 +23,13 @@ def git_auth_check(f):
         except BadCredentialsException:
             # Bad credentials; remove the user's auth data.
             try:
-                print "Bad credentials; revoking user's github tokens."
+                logger.warning("Bad credentials; revoking user's github tokens.")
                 github = user.github
                 github.delete()
             except:
                 pass
             raise
+
     return g
 
 

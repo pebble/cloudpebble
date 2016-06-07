@@ -1,0 +1,63 @@
+{% load i18n %}
+<!-- Compilation pane -->
+<div id="dependencies-pane-template" class="hide dependencies-pane">
+    <div class="well alert alert-error hide"></div>
+    <div class="well">
+        <h3>{% trans 'Dependencies' %}</h3>
+        <form id="dependencies-search-form">
+            <textarea id="dependencies-search" rows="1" cols="50"></textarea>
+        </form>
+
+        <br><br>
+        <form id="dependencies-form">
+            <table id="dependencies-table"></table>
+        </form>
+    </div>
+    <div class="well dependencies-progress hide">
+        <p>Please wait, configuring dependencies...</p>
+        <div class="progress progress-striped active">
+            <div class="bar" style="width: 100%;"></div>
+        </div>
+    </div>
+    <div class="well settings-pane hide">
+        <h3>Searchbox Options</h3>
+        <div class="form-horizontal">
+            <div class="control-group">
+                <label class="control-label" for="dependency-option-smallest-first">Smallest First</label>
+                <div class="controls">
+                    <input type="checkbox" id="dependency-option-smallest-first" checked>
+                    <span class="help-block">
+                        If suggestions have equal scores, sort by smallest-first
+                    </span>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="dependency-option-show-spinner">Show spinner</label>
+                <div class="controls">
+                    <input type="checkbox" id="dependency-option-show-spinner" checked>
+                    <span class="help-block">
+                        Show a spinner during HTTP search requests
+                    </span>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="dependency-option-use-cache">Cache</label>
+                <div class="controls">
+                    <input type="checkbox" id="dependency-option-use-cache" checked>
+                    <span class="help-block">
+                        Enable showing results from the module cache
+                    </span>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="dependency-option-immediate-results">Immediate</label>
+                <div class="controls">
+                    <input type="checkbox" id="dependency-option-immediate-results">
+                    <span class="help-block">
+                        Show suggestions from the module cache before the new HTTP request returns
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
