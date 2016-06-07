@@ -66,7 +66,7 @@
                     <li class="nav-header sdk3-only" id="sidebar-pane-timeline"><a href="#">Timeline (Preview)</a></li>
                     <li class="nav-header" id="sidebar-pane-compile"><a href="#">{% trans 'Compilation' %}</a></li>
                     {% if npm_manifest_support_enabled %}
-                        <li class="nav-header" id="sidebar-pane-dependencies"><a href="#">{% trans 'Dependencies' %}</a></li>
+                        <li class="nav-header sdk3-only" id="sidebar-pane-dependencies"><a href="#">{% trans 'Dependencies' %}</a></li>
                     {% endif %}
                     <li id="sidebar-pane-github" class="nav-header {%if not project.owner.github%}disabled{%endif%}"><a href="#">GitHub</a></li>
                     <li class="nav-header nav-section" id="source-files"><span>{% trans 'Source files' %}</span>
