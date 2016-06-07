@@ -1,8 +1,12 @@
 CloudPebble = CloudPebble || {};
 
-// This is a drop-in replacement for $.ajax
-// TODO: is this overkill? It seems to work, and means that very few changes to other code are required.
-// TODO: If we do keep this, (a) stick it in another file, (b) make sure it's robust
+/**
+ * EventedWebSocket is a promise-based websocket interface. It sends JSON messages
+ * and adds an integer '_id' attribute to all messages, which is used to connect
+ * responses to requests.
+ * @param {string} host URL of websocket to connect to
+ * @constructor
+ */
 var EventedWebSocket = function(host) {
     var self = this;
     var mSocket = null;
@@ -10,67 +14,74 @@ var EventedWebSocket = function(host) {
 
     _.extend(this, Backbone.Events);
 
-    this.getSocket = function() {
-        return mSocket;
-    };
-
+    /** Connect to a host, returning a promise which is resolved on successful connection.
+     * @returns {Promise}
+     */
     this.connect = function() {
-        mSocket = new WebSocket(host);
-        mSocket.onerror = function(e) { self.trigger('error', e); };
-        mSocket.onclose = handle_socket_close;
-        mSocket.onmessage = handle_socket_message;
-        mSocket.onopen = function() { self.trigger('open'); };
-    };
+        return new Promise(function(resolve, reject) {
+            mSocket = new WebSocket(host);
+            mSocket.onerror = function(e) {
+                self.trigger('error', e);
+                reject(e);
+            };
+            var close_listener = mSocket.addEventListener("close", function(error) {
+                self.trigger('close', error);
+                ids = {};
+                mSocket.removeEventListener("close", close_listener);
+                mSocket = null;
+            }, false);
 
-    this.close = function() {
-        mSocket.close();
-        mSocket = null;
-    };
-
-    this.send = function(data) {
-        var d = $.Deferred();
-        // Find the first free ID
-        var id = 0;
-        while(id in ids) id++;
-
-        // Register the promise
-        ids[id] = d;
-        data._id = id;
-        // Send the data
-        var text = JSON.stringify(data);
-        mSocket.send(text);
-
-        return d.promise();
-    };
-
-    this.isOpen = function() {
-        return (mSocket.readyState == WebSocket.OPEN);
-    };
-
-
-    var handle_socket_close = function(e) {
-        self.trigger('close', e);
-        mSocket = null;
-        _.each(ids, function(promise, key) {
-            promise.reject({'error': 'closed'})
+            mSocket.onopen = function() {
+                self.trigger('open');
+                resolve();
+            };
         });
-        ids = {};
-    };
 
-    var handle_socket_message = function(e) {
-        var data = JSON.parse(e.data);
-        var id = data._id;
-        if (id in ids) {
-            // Trigger the promise
-            var promise = ids[id];
-            delete ids[id];
-            if (!data['success']) {
-                promise.reject(data);
-            }
-            else {
-                promise.resolve(data);
-            }
-        }
+    };
+    
+    /** Send an object (as JSON). The returned promise will be resolved or rejected
+     * depending on the value of the 'success' key in the response.
+     * @param {object} data
+     * @returns {Promise}
+     */
+    this.send = function(data) {
+        var socket = mSocket;
+        return new Promise(function(resolve, reject) {
+            var on_message, on_close, remove_listeners;
+            var id = 0;
+            // Take the first free ID
+            while(id in ids) id++;
+            ids[id] = true;
+            data._id = id;
+
+            remove_listeners = function() {
+                socket.removeEventListener("message", on_message);
+                socket.removeEventListener("close", on_close);
+            };
+            on_message = function(e) {
+                // Deal with the message if it a response to the one we sent.
+                var data = JSON.parse(e.data);
+                var m_id = data._id;
+                if (m_id == id) {
+                    remove_listeners();
+                    delete ids[id];
+                    if (!data.success) {
+                        reject(new Error(data.error));
+                    }
+                    else {
+                        resolve(data);
+                    }
+                }
+            };
+            on_close = function() {
+                // If the socket closes, reject all open promises.
+                reject(new Error(gettext("Socket closed.")));
+            };
+            socket.addEventListener("message", on_message, false);
+            socket.addEventListener("close", on_close, false);
+            // Send the data as a JSON encoded string
+            socket.send(JSON.stringify(data));
+        });
     };
 };
 
@@ -86,9 +97,10 @@ CloudPebble.YCM = new (function() {
     var mSocket = null;
     var mUUID = null;
     var mPingTimer = null;
+    var mInitPromise = null;
 
     function pingServer() {
-        ws_send('ping',{}).always(function() {
+        ws_send('ping',{}).finally(function() {
             mPingTimer = _.delay(pingServer, PING_INTERVAL);
         });
     }
@@ -111,7 +123,7 @@ CloudPebble.YCM = new (function() {
             ws_send('create', {
                     filename: editor.file_path,
                     content: editor.getValue()
-            }).done(function() {
+            }).then(function() {
                 if(--pending == 0) {
                     console.log('restart done.');
                     $('.prepare-autocomplete').hide();
@@ -119,7 +131,7 @@ CloudPebble.YCM = new (function() {
                     mInitialised = true;
                     mRestarting = false;
                 }
-            }).fail(function() {
+            }).catch(function() {
                 mFailed = true;
                 $('.prepare-autocomplete').text(gettext("Code completion resync failed."));
             });
@@ -128,7 +140,7 @@ CloudPebble.YCM = new (function() {
 
     this.initialise = function() {
         if(mInitialised || mIsInitialising || mFailed) {
-            return;
+            return mInitPromise;
         }
         mIsInitialising = true;
         var platforms = (CloudPebble.ProjectInfo.app_platforms || 'aplite,basalt');
@@ -136,42 +148,38 @@ CloudPebble.YCM = new (function() {
             platforms = 'aplite';
         }
         var sdk_version = CloudPebble.ProjectInfo.sdk_version;
-        $.post('/ide/project/' + PROJECT_ID + '/autocomplete/init', {platforms: platforms, sdk: sdk_version})
-            .done(function(data) {
-                if(data.success) {
-                    mUUID = data.uuid;
-                    mURL = data.server + 'ycm/' + data.uuid + '/ws';
-                    mSocket = new EventedWebSocket(mURL);
-                    mSocket.on('open', function() {
-                        if(mRestarting) {
-                            sendBuffers();
-                        } else {
-                            mInitialised = true;
-                            mPingTimer = _.delay(pingServer, PING_INTERVAL);
-                            $('.prepare-autocomplete').hide();
-                            $('.footer-credits').show();
-                        }
-                    });
+        mInitPromise = Ajax.Post('/ide/project/' + PROJECT_ID + '/autocomplete/init', {platforms: platforms, sdk: sdk_version})
+            .then(function(data) {
+                mUUID = data.uuid;
+                mURL = data.server + 'ycm/' + data.uuid + '/ws';
+                mSocket = new EventedWebSocket(mURL);
 
-                    mSocket.on('close error', function() {
-                        setTimeout(function() {self.restart();}, 1000);
-                    });
+                mSocket.on('close error', function() {
+                    setTimeout(function() {self.restart();}, 1000);
+                });
 
-                    mSocket.connect();
+                return mSocket.connect();
+            }).then(function() {
+                if(mRestarting) {
+                    sendBuffers();
                 } else {
-                    mFailed = true;
-                    $('.prepare-autocomplete').text(gettext("Code completion unavailable."));
+                    mInitialised = true;
+                    mPingTimer = _.delay(pingServer, PING_INTERVAL);
+                    $('.prepare-autocomplete').hide();
+                    $('.footer-credits').show();
                 }
-            })
-            .fail(function() {
+            }).catch(function(e) {
                 mFailed = true;
                 $('.prepare-autocomplete').text(gettext("Code completion unavailable."));
+                throw e;
             });
+        return mInitPromise;
+
     };
 
     this.restart = function() {
         if(mRestarting) {
-            return;
+            return mInitPromise ? mInitPromise : Promise.reject(new Error("Failed to restart"));
         }
         clearTimeout(mPingTimer);
         mPingTimer = null;
@@ -184,7 +192,7 @@ CloudPebble.YCM = new (function() {
         mUUID = null;
         $('.prepare-autocomplete').text(gettext("Code completion lost; retrying...")).show();
         $('.footer-credits').hide();
-        this.initialise();
+        return this.initialise();
     };
 
     this.getUUID = function() {
@@ -192,83 +200,76 @@ CloudPebble.YCM = new (function() {
     };
 
     this.deleteFile = function(file) {
-        var promise = $.Deferred();
         if(!mInitialised) {
-            promise.reject();
-            return promise.promise();
+            // We resolve here (and in createFile) because YCM not working isn't actually a problem.
+            return Promise.resolve();
         }
-        ws_send('delete', {
-                filename: ((file.target == 'worker') ? 'worker_src/' : 'src/') + file.name
-        }).done(function() {
-            promise.resolve();
-        }).fail(function() {
-            promise.reject();
+        return ws_send('delete', {
+            filename: ((file.target == 'worker') ? 'worker_src/' : 'src/') + file.name
         });
-        return promise.promise();
     };
 
     this.createFile = function(file, content) {
-        var promise = $.Deferred();
         if(!mInitialised) {
-            promise.reject();
-            return promise.promise();
+            return Promise.resolve();
         }
-        ws_send('create', {
-                filename: ((file.target == 'worker') ? 'worker_src/' : 'src/') + file.name,
-                content: content || ''
-        }).done(function() {
-            promise.resolve();
-        }).fail(function() {
-            promise.reject();
+        return ws_send('create', {
+            filename: ((file.target == 'worker') ? 'worker_src/' : 'src/') + file.name,
+            content: content || ''
         });
-        return promise.promise();
     };
 
     this.updateResources = function(resources) {
         if(!mInitialised) {
             return;
         }
-        var defines = [];
-        var counter = 1;
+        var tuples = [];
         _.each(resources, function(resource) {
-            if(resource.kind != 'png-trans') {
-                defines = defines.concat(_.map(resource.identifiers, function(id) {
-                    return '#define RESOURCE_ID_' + id + ' ' + (counter++);
-                }));
-            } else {
-                _.each(resource.identifiers, function(id) {
-                    defines.push('#define RESOURCE_ID_' + id + '_BLACK ' + (counter++));
-                    defines.push('#define RESOURCE_ID_' + id + '_WHITE ' + (counter++));
-                })
-            }
+            _.each(resource.identifiers, function(id) {
+                tuples.push([resource.kind, id]);
+            })
         });
-        defines.push("");
-        ws_send('create',{
-                filename: 'build/src/resource_ids.auto.h',
-                content: defines.join("\n")
-        });
+        return ws_send('resources', {'resources': tuples});
+    };
+
+    this.updateAppkeys = function(app_key_names) {
+        if (!mInitialised) {
+            return;
+        }
+        return ws_send('messagekeys', {'messagekeys': app_key_names});
+    };
+
+    this.updateDependencies = function(dependencies) {
+        if(!mInitialised) {
+            return;
+        }
+        return ws_send('dependencies', {
+            'dependencies': dependencies
+        })
     };
 
     this.request = function(endpoint, editor, cursor) {
-        var promise = $.Deferred();
-        if(!mInitialised) {
-            promise.reject();
-            return promise.promise();
+        var init_step = Promise.resolve();
+        if (mFailed) {
+            var err = new Error("YCM not functioning");
+            err.noYCM = true;
+            return Promise.reject(err);
         }
-
+        else if (!mInitialised) {
+            init_step = this.initialise();
+        }
         cursor = cursor || editor.getCursor();
         var these_patches = editor.patch_list;
         editor.patch_list = [];
-        ws_send(endpoint, {
-            file: editor.file_path,
-            line: cursor.line,
-            ch: cursor.ch,
-            patches: these_patches
-        }).done(function(data) {
-            promise.resolve(data['data']);
-        }).fail(function(error) {
-            promise.reject();
+        return init_step.then(function() {
+            return ws_send(endpoint, {
+                file: editor.file_path,
+                line: cursor.line,
+                ch: cursor.ch,
+                patches: these_patches
+            })
+        }).then(function(data) {
+            return data['data'];
         });
-        return promise.promise();
     };
 })();

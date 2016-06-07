@@ -64,25 +64,16 @@ CloudPebble.CrashChecker = function(app_uuid) {
 
     function get_debug_json(platform, process) {
         function go(urls) {
-            var deferred = $.Deferred();
             if (urls.length == 0) {
-                deferred.reject();
-                return deferred.promise();
+                return Promise.reject(new Error());
             }
             var url = urls[0];
-            $.ajax({
+            return Ajax.Ajax({
                 url: mBuildDir + url,
                 dataType: 'json'
-            }).done(function(data) {
-                deferred.resolve(data);
-            }).fail(function() {
-                go(urls.slice(1)).done(function(data) {
-                    deferred.resolve(data);
-                }).fail(function() {
-                    deferred.fail();
-                });
+            }).catch(function() {
+                return go(urls.slice(1));
             });
-            return deferred.promise();
         }
         return go(platform_mappings[process][platform]);
     }
@@ -90,7 +81,7 @@ CloudPebble.CrashChecker = function(app_uuid) {
     this.find_source_lines = function(process, version, pointers, callback) {
         var platform = Pebble.version_to_platform(version);
         if(!cache_lookup(process, platform)) {
-            get_debug_json(platform, process).done(function(data) {
+            get_debug_json(platform, process).then(function(data) {
                 mSymbolCache[platform + '/' + process] = data;
                 self.find_source_lines(process, version, pointers, callback);
             });

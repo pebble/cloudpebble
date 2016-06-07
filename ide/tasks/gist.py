@@ -1,15 +1,18 @@
 import json
 
-from celery import task
 import github
-
+from celery import task
 from django.db import transaction
+from django.conf import settings
+
 from ide.models.user import User
 from ide.models.project import Project
+from ide.utils.sdk import load_manifest_dict
 from ide.models.files import SourceFile, ResourceFile, ResourceIdentifier, ResourceVariant
-from ide.utils.sdk import dict_to_pretty_json
+from ide.utils.project import APPINFO_MANIFEST, PACKAGE_MANIFEST
 from ide.utils import generate_half_uuid
 from utils.td_helper import send_td_event
+from collections import defaultdict
 import urllib2
 
 
@@ -29,43 +32,62 @@ def import_gist(user_id, gist_id):
 
     project_type = 'native'
 
-    if 'appinfo.json' in files:
-        settings = json.loads(files['appinfo.json'].content)
-        if 'projectType' in settings:
-            project_type = settings['projectType']
-        elif len(files) == 2:
-            if 'simply.js' in files:
-                project_type = 'simplyjs'
-            elif 'app.js' in files:
-                project_type = 'pebblejs'
-    else:
-        settings = {}
-        if len(files) == 1:
-            if 'simply.js' in files:
-                project_type = 'simplyjs'
-            elif 'app.js' in files:
-                project_type = 'pebblejs'
-
-    project_settings = {
-        'name': settings.get('longName', default_name),
-        'owner': user,
-        'app_uuid':  generate_half_uuid(),
-        'app_short_name': settings.get('shortName', default_name),
-        'app_long_name': settings.get('longName', default_name),
-        'app_company_name': settings.get('companyName', user.username),
-        'app_version_label': settings.get('versionLabel', '1.0'),
-        'app_is_watchface': settings.get('watchapp', {}).get('watchface', False),
-        'app_is_hidden': settings.get('watchapp', {}).get('hiddenApp', False),
-        'app_is_shown_on_communication': settings.get('watchapp', {}).get('onlyShownOnCommunication', False),
-        'app_capabilities': ','.join(settings.get('capabilities', [])),
-        'app_keys': dict_to_pretty_json(settings.get('appKeys', {})),
-        'app_modern_multi_js': settings.get('enableMultiJS', False),
-        'project_type': project_type,
-        'sdk_version': settings.get('sdkVersion', '2'),
+    default_settings = {
+        'name': default_name,
+        'app_short_name': default_name,
+        'app_long_name': default_name,
+        'app_company_name': user.username,
+        'app_version_label': '1.0',
+        'app_is_watchface': False,
+        'app_is_hidden': False,
+        'app_is_shown_on_communication': False,
+        'app_capabilities': '[]',
+        'app_keys': '{}',
+        'project_type': 'native',
+        'app_modern_multi_js': False,
+        'sdk_version': '2'
     }
+    if len(files) == 1 or ((APPINFO_MANIFEST in files or PACKAGE_MANIFEST in files) and len(files) == 2):
+        if 'simply.js' in files:
+            default_settings['project_type'] = 'simplyjs'
+        elif 'app.js' in files:
+            default_settings['project_type'] = 'pebblejs'
+
+    media = []
+
+    # Using defaultdict we can load project settings from a manifest dict which
+    # has values that default to None. This way, we can delegate
+    if PACKAGE_MANIFEST in files:
+        content = json.loads(files[PACKAGE_MANIFEST].content)
+        package = defaultdict(lambda: None)
+        package.update(content)
+        package['pebble'] = defaultdict(lambda: None)
+        package['pebble'].update(content.get('pebble', {}))
+        manifest_settings, media, dependencies = load_manifest_dict(package, PACKAGE_MANIFEST, default_project_type=None)
+        if settings.NPM_MANIFEST_SUPPORT:
+            default_settings['app_keys'] = '[]'
+    elif APPINFO_MANIFEST in files:
+        content = json.loads(files['appinfo.json'].content)
+        package = defaultdict(lambda: None)
+        package.update(content)
+        manifest_settings, media, dependencies = load_manifest_dict(package, APPINFO_MANIFEST, default_project_type=None)
+    else:
+        manifest_settings = {}
+        dependencies = {}
+
+    fixed_settings = {
+        'owner': user,
+        'app_uuid': generate_half_uuid()
+    }
+
+    project_settings = {}
+    project_settings.update(default_settings)
+    project_settings.update({k: v for k, v in manifest_settings.iteritems() if v is not None})
+    project_settings.update(fixed_settings)
 
     with transaction.atomic():
         project = Project.objects.create(**project_settings)
+        project.set_dependencies(dependencies)
 
         if project_type != 'simplyjs':
             for filename in gist.files:
@@ -78,7 +100,6 @@ def import_gist(user_id, gist_id):
                     source_file = SourceFile.objects.create(project=project, file_name=cp_filename)
                     source_file.save_file(gist.files[filename].content)
 
-            media = settings.get('resources', {}).get('media', [])
             resources = {}
             for resource in media:
                 kind = resource['type']

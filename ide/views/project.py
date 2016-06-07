@@ -1,4 +1,5 @@
 import json
+import re
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
@@ -11,7 +12,7 @@ from ide.models.project import Project
 from ide.tasks.git import hooked_commit
 from ide.utils import generate_half_uuid
 from utils.td_helper import send_td_event
-
+from ide.utils.version import SDK_VERSION_REGEX
 __author__ = 'katharine'
 
 
@@ -30,12 +31,12 @@ def view_project(request, project_id):
         project.app_long_name = project.app_short_name
     if project.app_version_label is None:
         project.app_version_label = '1.0'
-    send_td_event('cloudpebble_open_project', request=request, project=project)
-    app_keys = sorted(json.loads(project.app_keys).iteritems(), key=lambda x: x[1])
+    app_keys = project.get_parsed_appkeys()
     supported_platforms = ["aplite", "basalt"]
     if project.project_type != 'pebblejs' and project.sdk_version != '2':
         supported_platforms.append("chalk")
 
+    send_td_event('cloudpebble_open_project', request=request, project=project)
     try:
         token = request.user.social_auth.get(provider='pebble').extra_data['access_token']
     except:
@@ -47,7 +48,9 @@ def view_project(request, project_id):
         'libpebble_proxy': json.dumps(settings.LIBPEBBLE_PROXY),
         'token': token,
         'phone_shorturl': settings.PHONE_SHORTURL,
-        'supported_platforms': supported_platforms
+        'supported_platforms': supported_platforms,
+        'version_regex': SDK_VERSION_REGEX,
+        'npm_manifest_support_enabled': settings.NPM_MANIFEST_SUPPORT
     })
 
 

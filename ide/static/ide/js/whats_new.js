@@ -1,7 +1,7 @@
 $(function() {
     var mWhatsNewElement = $('#whats-new');
 
-    $.getJSON('/ide/whats_new', function(data) {
+    $.getJSON('/ide/whats_new').then(function(data) {
         var new_things = data.new;
         if(new_things.length > 0) {
             var holder = $('<div>');

@@ -1,49 +1,44 @@
 import json
+import logging
+import random
+
+import requests
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_exempt
 from urlparse import urlparse
 
-from ide.api import json_response, json_failure
 from ide.models.project import Project
-import requests
-import random
-
+from utils.jsonview import json_view
 
 __author__ = 'katharine'
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
 @require_POST
+@json_view
 def init_autocomplete(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     source_files = project.source_files.all()
-    resource_files = project.resources.all()
+
     file_contents = {}
     for f in source_files:
         file_contents[f.project_path] = f.get_contents()
 
-    resource_ids = []
-    count = 1
-    for f in resource_files:
-        for identifier in f.identifiers.all():
-            if f.kind == 'png-trans':
-                resource_ids.extend([
-                    '#define RESOURCE_ID_%s_BLACK %d' % (identifier.resource_id, count),
-                    '#define RESOURCE_ID_%s_WHITE %d' % (identifier.resource_id, count+1)
-                ])
-                count += 2
-            else:
-                resource_ids.append('#define RESOURCE_ID_%s %d' % (identifier.resource_id, count))
-                count += 1
-    file_contents['build/src/resource_ids.auto.h'] = '\n'.join(resource_ids) + "\n"
+    identifiers = [(f.kind, i.resource_id) for f in project.resources.all() for i in f.identifiers.all()]
+
+    appkey_names = [k for k, v in project.get_parsed_appkeys()]
 
     request = {
         'files': file_contents,
         'platforms': request.POST.get('platforms', 'aplite').split(','),
         'sdk': request.POST.get('sdk', '2'),
+        'messagekeys': appkey_names,
+        'resources': identifiers,
+        'dependencies': project.get_dependencies()
     }
     # Let's go!
     return _spin_up_server(request)
@@ -66,11 +61,11 @@ def _spin_up_server(request):
                     secure = response['secure']
                     scheme = "wss" if secure else "ws"
                     ws_server = urlparse(server)._replace(scheme=scheme).geturl()
-                    return json_response({'uuid': response['uuid'], 'server': ws_server, 'secure': secure})
+                    return {'uuid': response['uuid'], 'server': ws_server, 'secure': secure}
 
         except (requests.RequestException, ValueError):
             import traceback
             traceback.print_exc()
-        print "Server %s failed; trying another." % server
+        logger.warning("Server %s failed; trying another.", server)
     # If we get out of here, something went wrong.
-    return json_failure({'success': False, 'error': 'No servers'})
+    raise Exception(_('No Servers'))

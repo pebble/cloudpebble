@@ -2,6 +2,10 @@ CloudPebble.Settings = (function() {
     var settings_template = null;
     var shared_pane = null;
 
+    function app_uses_array_appkeys() {
+        return _.isArray(CloudPebble.ProjectInfo.app_keys);
+    }
+
     var show_settings_pane = function() {
         CloudPebble.Sidebar.SuspendActive();
         if(CloudPebble.Sidebar.Restore("settings")) {
@@ -28,7 +32,7 @@ CloudPebble.Settings = (function() {
         pane.find('form').submit(function(e) {e.preventDefault();});
 
         var save = function() {
-            var defer = $.Deferred();
+
             var name = pane.find('#settings-name').val();
             var sdk_version = pane.find('#settings-sdk-version').val();
             var short_name = pane.find('#settings-short-name').val();
@@ -37,7 +41,7 @@ CloudPebble.Settings = (function() {
             var version_label = pane.find('#settings-version-label').val();
             var app_uuid = pane.find('#settings-uuid').val();
             var app_is_watchface = pane.find('#settings-app-is-watchface').val();
-            var app_keys = {};
+            var app_key_array_style = pane.find('#settings-message-key-kind').val() == "1";
             var app_jshint = pane.find('#settings-app-jshint').prop("checked") ? 1 : 0;
             var app_modern_multi_js = pane.find('#settings-modern-multi-js').val();
             var menu_icon = pane.find('#settings-menu-image').val();
@@ -45,6 +49,9 @@ CloudPebble.Settings = (function() {
             var build_basalt = pane.find('#settings-build-basalt:visible').prop('checked');
             var build_chalk = pane.find('#settings-build-chalk:visible').prop('checked');
 
+            var app_keys = (app_key_array_style ? [] : {});
+            var app_key_names = [];
+            
             var app_is_hidden = 0;
             var app_is_shown_on_communication = 0;
             if(pane.find('#settings-app-visibility').val() == 'hidden') {
@@ -68,7 +75,7 @@ CloudPebble.Settings = (function() {
             app_capabilities = app_capabilities.join(',');
 
             if(name.replace(/\s/g, '') === '') {
-                return defer.reject(gettext("You must specify a project name"));
+                throw new Error(gettext("You must specify a project name"));
             }
 
             var saved_settings = {
@@ -76,29 +83,27 @@ CloudPebble.Settings = (function() {
             };
 
             if(short_name.replace(/\s/g, '') == '') {
-                return defer.reject(gettext("You must specify a short name."));
+                throw new Error(gettext("You must specify a short name."));
             }
             if(long_name.replace(/\s/g, '') == '') {
-                return defer.reject(gettext("You must specify a long name."));
+                throw new Error(gettext("You must specify a long name."));
             }
             if(company_name.replace(/\s/g, '') == '') {
-                return defer.reject(gettext("You must specify a company name."));
+                throw new Error(gettext("You must specify a company name."));
             }
             // This is not an appropriate use of a regex, but we have to have it for the HTML5 pattern attribute anyway,
             // so we may as well reuse the effort here.
             // It validates that the format matches x[.y] with x, y in [0, 255].
-            if(!version_label.match(/^(\d{1,2}|1\d{2}|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d{2}|2[0-4]\d|25[0-5]))?$/)) {
-                return defer.reject(gettext("You must specify a valid version number."));
+            if(!version_label.match(VERSION_REGEX)) {
+                throw new Error(gettext("You must specify a valid version number."));
             }
             if(!app_uuid.match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}/)) {
-                return defer.reject(gettext("You must specify a valid UUID (of the form 00000000-0000-0000-0000-000000000000)"));
+                throw new Error(gettext("You must specify a valid UUID (of the form 00000000-0000-0000-0000-000000000000)"));
             }
 
 
-            if(sdk_version == '3') {
-                if (!build_aplite && !build_basalt && !build_chalk) {
-                    return defer.reject(gettext("You must build your app for at least one platform."));
-                }
+            if(sdk_version == '3' && !(build_aplite || build_basalt || build_chalk)) {
+                throw new Error(gettext("You must build your app for at least one platform."));
             }
 
             var target_platforms = [];
@@ -112,18 +117,34 @@ CloudPebble.Settings = (function() {
                 target_platforms.push('chalk');
             }
             var app_platforms = target_platforms.join(',');
-
-            pane.find(".appkey").each(function() {
-                var name = $(this).find('.appkey-name').val();
-                var id = $(this).find('.appkey-id').val();
+            
+            var appkey_data = appkey_table.getValues();
+            _.each(appkey_data, function(tuple) {
+                var name = tuple[0];
+                var id = parseInt(tuple[1], 10);
 
                 if(name.replace(/\s/g, '') == '') {
                     // Skip blank keys.
                     return;
                 }
-
-                app_keys[name] = parseInt(id);
+                if (app_key_array_style) {
+                    if (!name.match(/^[a-zA-Z_][_a-zA-Z\d]*$/)) {
+                        throw new Error("Message key names must be valid C identifiers");
+                    }
+                    if (id < 1) {
+                        throw new Error("Message key names must have lengths greater than 0.");
+                    }
+                    if (id > 1) {
+                        name+="["+id+"]";
+                    }
+                    app_keys.push(name);
+                }
+                else {
+                    app_keys[name] = id;
+                }
+                app_key_names.push(name);
             });
+
 
             saved_settings['sdk_version'] = sdk_version;
             saved_settings['app_short_name'] = short_name;
@@ -141,127 +162,144 @@ CloudPebble.Settings = (function() {
             saved_settings['app_platforms'] = app_platforms;
             saved_settings['app_modern_multi_js'] = app_modern_multi_js;
 
-            $.post('/ide/project/' + PROJECT_ID + '/save_settings', saved_settings, function(data) {
+            return Ajax.Post('/ide/project/' + PROJECT_ID + '/save_settings', saved_settings).then(function() {
                 pane.find('.alert').removeClass("alert-success alert-error").addClass("hide");
-                if(data.success) {
-                    CloudPebble.ProjectInfo.name = name;
-                    CloudPebble.ProjectInfo.app_uuid = app_uuid;
-                    CloudPebble.ProjectInfo.app_company_name = company_name;
-                    CloudPebble.ProjectInfo.app_short_name = short_name;
-                    CloudPebble.ProjectInfo.app_long_name = long_name;
-                    CloudPebble.ProjectInfo.app_version_label = version_label;
-                    CloudPebble.ProjectInfo.app_is_watchface = app_is_watchface;
-                    CloudPebble.ProjectInfo.app_is_hidden = app_is_hidden;
-                    CloudPebble.ProjectInfo.app_is_shown_on_communication = app_is_shown_on_communication;
-                    CloudPebble.ProjectInfo.app_capabilities = app_capabilities;
-                    CloudPebble.ProjectInfo.app_jshint = app_jshint;
-                    CloudPebble.ProjectInfo.app_platforms = app_platforms;
-                    CloudPebble.ProjectInfo.sdk_version = sdk_version;
-                    CloudPebble.ProjectInfo.app_modern_multi_js = app_modern_multi_js;
-                    $('.project-name').text(name);
-                    window.document.title = "CloudPebble – " + name;
-                    defer.resolve();
-                } else {
-                    defer.reject(interpolate(gettext("Error: %s"), [error]));
-                }
-            }).fail(function(e) {
-                defer.reject(interpolate("Failed to save project settings. (%s) %s", [e.status, e.statusText]));
-            });
 
-            ga('send', 'event', 'project', 'save settings');
-            return defer.promise();
+                CloudPebble.ProjectInfo.name = name;
+                CloudPebble.ProjectInfo.app_uuid = app_uuid;
+                CloudPebble.ProjectInfo.app_company_name = company_name;
+                CloudPebble.ProjectInfo.app_short_name = short_name;
+                CloudPebble.ProjectInfo.app_long_name = long_name;
+                CloudPebble.ProjectInfo.app_version_label = version_label;
+                CloudPebble.ProjectInfo.app_is_watchface = app_is_watchface;
+                CloudPebble.ProjectInfo.app_keys = app_keys;
+                CloudPebble.ProjectInfo.app_is_hidden = app_is_hidden;
+                CloudPebble.ProjectInfo.app_is_shown_on_communication = app_is_shown_on_communication;
+                CloudPebble.ProjectInfo.app_capabilities = app_capabilities;
+                CloudPebble.ProjectInfo.app_jshint = app_jshint;
+                CloudPebble.ProjectInfo.app_platforms = app_platforms;
+                CloudPebble.ProjectInfo.sdk_version = sdk_version;
+                CloudPebble.ProjectInfo.app_modern_multi_js = app_modern_multi_js;
+
+                pane.find('#settings-sdk-version option[value=2]').prop('disabled', CloudPebble.ProjectInfo.sdk_version != '2');
+                $('.project-name').text(name);
+                window.document.title = "CloudPebble – " + name;
+
+                if (CloudPebble.Ready) {
+                    CloudPebble.YCM.updateAppkeys(app_key_names);
+                }
+                return null;
+            }).catch(function(e) {
+                throw new Error(interpolate("Failed to save project settings. (%s) %s", [e.status, e.message]));
+            });
         };
 
         var live_form = make_live_settings_form({
             save_function: save,
             error_function: display_error,
+            label_selector: '.control-group label, button.kv-remove',
+            group_selector: '.control-group, tr',
             form: pane.find('form')
         });
 
         pane.find('#project-delete').click(function() {
             CloudPebble.Prompts.Confirm(gettext("Delete Project"), gettext("Are you sure you want to delete this project? THIS CANNOT BE UNDONE."), function() {
-                $.post('/ide/project/' + PROJECT_ID + '/delete', {confirm: true}, function(data) {
-                    if(data.success) {
-                        window.location.href = "/ide/";
-                    } else {
-                        display_error(interpolate(gettext("Error: %s"), [data.error]));
-                    }
+                Ajax.Post('/ide/project/' + PROJECT_ID + '/delete', {confirm: true}).then(function() {
+                    window.location.href = "/ide/";
+                }).catch(function(error) {
+                    display_error(interpolate(gettext("Error: %s"), [error]));
                 });
                 ga('send', 'event', 'project', 'delete');
             });
         });
 
-        pane.find('#project-export-zip').click(function() {
+        function export_project() {
             var dialog = $('#export-progress');
             dialog
                 .modal('show')
                 .find('.progress')
                 .addClass('progress-striped')
                 .removeClass('progress-success progress-danger progress-warning');
-            $.post('/ide/project/' + PROJECT_ID + '/export', {}, function(data) {
-                if(!data.success) {
-                    dialog.find('.progress').removeClass('progress-striped').addClass('progress-danger');
-                    return;
-                }
-                var task_id = data.task_id;
-                var check_update = function() {
-                    $.getJSON('/ide/task/' + task_id, function(data) {
-                        if(!data.success) {
-                            dialog.find('.progress').addClass('progress-warning');
-                            setTimeout(check_update, 1000);
-                        } else {
-                            if(data.state.status == 'SUCCESS') {
-                                dialog.find('.progress').removeClass('progress-striped').addClass('progress-success');
-                                dialog.find('.download-btn').attr('href', data.state.result).show();
-                            } else if(data.state.status == 'FAILURE') {
-                                dialog.find('.progress').removeClass('progress-striped').addClass('progress-danger');
-                            } else {
-                                setTimeout(check_update, 1000);
-                            }
-                        }
-                    });
-                };
-                setTimeout(check_update, 1000);
+            function show_warning() {
+                dialog.find('.progress').addClass('progress-warning');
+            }
+            return Ajax.Post('/ide/project/' + PROJECT_ID + '/export', {}).then(function(data) {
+                return Ajax.PollTask(data.task_id, {on_bad_request: show_warning});
+            }).then(function(result) {
+                dialog.find('.progress').removeClass('progress-striped').addClass('progress-success');
+                dialog.find('.download-btn').attr('href', result).show();
+            }).catch(function() {
+                dialog.find('.progress').removeClass('progress-striped').addClass('progress-danger');
+            }).finally(function() {
+                ga('send', 'event', 'project', 'export', 'zip');
             });
+        }
 
-            ga('send', 'event', 'project', 'export', 'zip');
+        pane.find('#project-export-zip').click(export_project);
+
+
+        var appkey_table_elm = pane.find('#settings-app-keys');
+        var appkey_table = new CloudPebble.KVTable(appkey_table_elm, {
+            key_name: 'Key Name',
+            value_name: 'Key ID',
+            value_type: 'number',
+            default_value: 1,
+            tbody_id: 'appkeys',
+            data: CloudPebble.ProjectInfo.parsed_app_keys
+        }).on('rowDeleted', function() {
+            live_form.save(appkey_table_elm.find('tr.kv-row:last-child'));
+        }).on('rowAdded', function(info) {
+            live_form.addElement($(info.element));
+        }).init();
+
+        function configure_appkey_table(is_array_kind) {
+            var id_title, help_text, default_value;
+            if (is_array_kind) {
+                id_title = gettext("Key Array Length");
+                help_text = gettext("A list of appMessage keys to assign for the app. Arrays with length greater than one will have a block of contiguous keys reserved after the key assigned to the given name.");
+                default_value = '1';
+            }
+            else {
+                id_title = gettext("Key ID");
+                help_text = gettext("A mapping from strings to integers used by PebbleKit JS.");
+                default_value = '0';
+            }
+            appkey_table.setValueName(id_title);
+            appkey_table.setDefaultValue(default_value);
+            appkey_table_elm.next('.help-block').text(help_text);
+        }
+
+        function reset_appkey_table_values(to_array_kind) {
+            var was_array_kind = app_uses_array_appkeys();
+            if (to_array_kind == was_array_kind) return;
+            appkey_table.mapValues(to_array_kind ? 1 : function(k, v, i) {
+                return !!k.trim() ? i : 0;
+            });
+        }
+
+        pane.find('#settings-message-key-kind').change(function() {
+            var is_array_kind = $(this).val() == '1';
+            reset_appkey_table_values(is_array_kind);
+            configure_appkey_table(is_array_kind);
         });
 
-        var add_appkey_field = function() {
-            $(this).off('change', add_appkey_field);
-
-            var entry = $(this).closest('.appkey');
-            entry.find('.remove-appkey').removeClass('disabled').click(function() {
-                entry.remove();
-                live_form.save($('#settings-app-keys'));
-            });
-
-            var new_appkey = $('<tr class="appkey">' +
-                '<td><input class="appkey-name" type="text" placeholder="' + gettext("New Entry") + '" /></td>' +
-                '<td><input class="appkey-id" type="number" value="0" /></td>' +
-                '<td><button class="btn remove-appkey disabled">–</button></td>' +
-                '</tr>');
-
-            new_appkey.find('.appkey-name').on('change', add_appkey_field);
-
-            pane.find('#appkeys').append(new_appkey);
-
-            live_form.addElement(new_appkey);
-        };
-
-        pane.find('.appkey:last').on('change', add_appkey_field);
-
-        pane.find('.remove-appkey').not('.disabled').click(function() {
-            $(this).closest('.appkey').remove();
-            live_form.save($('#settings-app-keys'));
-        });
-
-        pane.find('#settings-sdk-version').change(function() {
+        var sdk_version_change_confirmed = false;
+        pane.find('#settings-sdk-version').change(function(e) {
+            // When switching away from SDK 2, show a confirmation prompt to indicate that the change is irreversible.
             var sdk = $(this).val();
-            if(sdk == '3') {
-                pane.find('.sdk3-only').show();
-            } else {
-                pane.find('.sdk3-only').hide();
+            if (CloudPebble.ProjectInfo.sdk_version == '2' && sdk != '2' && !sdk_version_change_confirmed) {
+                e.stopPropagation();
+                $(this).val('2');
+                var message = gettext("Are you sure you want to upgrade this project to SDK 3? THIS CANNOT BE UNDONE.");
+                CloudPebble.Prompts.Confirm(gettext("UPGRADE SDK"), message, function() {
+                    sdk_version_change_confirmed = true;
+                    if(sdk == '3') {
+                        pane.find('.sdk3-only').show();
+                    } else {
+                        pane.find('.sdk3-only').hide();
+                    }
+                    $(this).val(sdk).change();
+                }.bind(this));
             }
         });
 
@@ -299,9 +337,11 @@ CloudPebble.Settings = (function() {
 
         $('#settings-js-migration-rename-button').click(function() {
             var file = $('#settings-js-new-entry-point').find(':selected').data('file');
-            CloudPebble.Editor.RenameFile(file, 'app.js').done(function() {
+            CloudPebble.Editor.RenameFile(file, 'app.js').then(function() {
                 $('#settings-js-migration-prompt').modal('hide');
                 $('#settings-modern-multi-js').val('1').change();
+            }).catch(function(error) {
+                alert(error);
             });
         });
 
@@ -314,6 +354,8 @@ CloudPebble.Settings = (function() {
         live_form.init();
 
         CloudPebble.Sidebar.SetActivePane(pane, {id: 'settings'});
+
+        configure_appkey_table(app_uses_array_appkeys());
     };
 
     var add_resource = function(resource) {

@@ -15,7 +15,7 @@
         var mHost = null;
         var mRFB = null;
         var mSecure = false;
-        var mPendingDeferred = null;
+        var mPendingPromise = null;
         var mConnected = false;
         var mSplashURL = null;
         var mGrabbedKeyboard = false;
@@ -27,35 +27,23 @@
         _.extend(this, Backbone.Events);
 
         function spawn() {
-            var deferred = $.Deferred();
             console.log(mPlatform);
             // First verify that this is actually plausible.
             if (!window.WebSocket) {
-                deferred.reject("You need a browser that supports websockets.");
-                return deferred.promise();
+                return Promise.reject(new Error(gettext("You need a browser that supports websockets.")));
             }
             var tz_offset = -(new Date()).getTimezoneOffset(); // Negative because JS does timezones backwards.
-            $.post('/ide/emulator/launch', {platform: mPlatform, token: USER_SETTINGS.token, tz_offset: tz_offset})
-                .done(function (data) {
+            return Ajax.Post('/ide/emulator/launch', {platform: mPlatform, token: USER_SETTINGS.token, tz_offset: tz_offset})
+                .then(function (data) {
                     console.log(data);
-                    if (data.success) {
-                        mHost = data.host;
-                        mVNCPort = data.vnc_ws_port;
-                        mWSPort = data.ws_port;
-                        mSecure = data.secure;
-                        mInstanceID = data.uuid;
-                        mToken = data.token;
-                        mAPIPort = data.api_port;
-                        deferred.resolve();
-                    } else {
-                        deferred.reject(data.error); // for some reason this doesn't make it to its handler.
-                    }
-                })
-                .fail(function () {
-                    console.log(':(');
-                    deferred.reject("Something went wrong.");
+                    mHost = data.host;
+                    mVNCPort = data.vnc_ws_port;
+                    mWSPort = data.ws_port;
+                    mSecure = data.secure;
+                    mInstanceID = data.uuid;
+                    mToken = data.token;
+                    mAPIPort = data.api_port;
                 });
-            return deferred.promise();
         }
 
         function buildURL(endpoint) {
@@ -63,11 +51,11 @@
         }
 
         function sendPing() {
-            $.post(buildURL('ping'))
-                .done(function() {
+            (new Ajax.Wrapper('alive')).post(buildURL('ping'))
+                .then(function() {
                     console.log('qemu ping!');
                 })
-                .fail(function() {
+                .catch(function() {
                     console.log('ping failed.');
                     self.disconnect();
                 });
@@ -82,47 +70,55 @@
             mRFB.sendKey(XK_Shift_L);
         }
 
+        var killPromise = null;
         function killEmulator() {
-            return $.post(buildURL('kill'));
+            if (!killPromise) {
+                killPromise = (new Ajax.Wrapper('status')).post(buildURL('kill')).finally(function() {
+                    killPromise = null;
+                });
+            }
+            return killPromise;
         }
 
-        function handleStateUpdate(rfb, state, oldstate, msg) {
-            if(mPendingDeferred) {
-                if(state == 'normal') {
-                    mRFB.get_keyboard().ungrab();
-                    mPingTimer = setInterval(sendPing, 100000);
-                    setTimeout(function() {
-                        mPendingDeferred.resolve();
-                        mPendingDeferred = null;
-                    }, 2000);
-                    self.trigger('connected');
-                    mKickInterval = setInterval(kickRFB, 2000); // By doing this we make sure it keeps updating.
-                } else if(state == 'failed' || state == 'fatal') {
-                    mPendingDeferred.reject();
-                    mPendingDeferred = null;
+        function updateStateHandler(resolve, reject) {
+            return function (rfb, state, oldstate, msg) {
+                if (mPendingPromise) {
+                    if (state == 'normal') {
+                        mRFB.get_keyboard().ungrab();
+                        mPingTimer = setInterval(sendPing, 100000);
+                        setTimeout(function () {
+                            resolve();
+                            mPendingPromise = null;
+                        }, 2000);
+                        self.trigger('connected');
+                        mKickInterval = setInterval(kickRFB, 2000); // By doing this we make sure it keeps updating.
+                    } else if (state == 'failed' || state == 'fatal') {
+                        reject();
+                        mPendingPromise = null;
+                    }
                 }
-            }
-            if(state == 'normal') {
-                mConnected = true;
-                switch(mPlatform) {
-                    case 'aplite':
-                        mRFB.get_display().resize(144, 168);
-                        break;
-                    case 'basalt':
-                        mRFB.get_display().resize(148, 172);
-                        break;
-                    case 'chalk':
-                        mRFB.get_display().resize(180, 180);
-                        break;
+                if (state == 'normal') {
+                    mConnected = true;
+                    switch (mPlatform) {
+                        case 'aplite':
+                            mRFB.get_display().resize(144, 168);
+                            break;
+                        case 'basalt':
+                            mRFB.get_display().resize(148, 172);
+                            break;
+                        case 'chalk':
+                            mRFB.get_display().resize(180, 180);
+                            break;
+                    }
                 }
-            }
-            if(mConnected && state == 'disconnected') {
-                mConnected = false;
-                killEmulator();
-                clearInterval(mKickInterval);
-                clearInterval(mPingTimer);
-                self.trigger('disconnected');
+                if (mConnected && state == 'disconnected') {
+                    mConnected = false;
+                    killEmulator();
+                    clearInterval(mKickInterval);
+                    clearInterval(mPingTimer);
+                    self.trigger('disconnected');
 
+                }
             }
         }
 
@@ -149,39 +145,40 @@
 
         function startVNC() {
             mCanvas.on('click', handleCanvasClick);
-            loadScripts(function() {
+            return loadScripts().then(function() {
                 Util.init_logging('warn');
-                mRFB = new RFB({
-                    target: mCanvas[0],
-                    encrypt: mSecure,
-                    true_color: true, // Ideally this would be false, but qemu doesn't support that.
-                    local_cursor: false,
-                    shared: true,
-                    view_only: false,
-                    onUpdateState: handleStateUpdate
+                return new Promise(function(resolve, reject) {
+                    mRFB = new RFB({
+                        target: mCanvas[0],
+                        encrypt: mSecure,
+                        true_color: true, // Ideally this would be false, but qemu doesn't support that.
+                        local_cursor: false,
+                        shared: true,
+                        view_only: false,
+                        onUpdateState: updateStateHandler(resolve, reject)
+                    });
+                    window.rfb = mRFB;
+                    mRFB.get_display()._logo = {
+                        width: URL_BOOT_IMG[mPlatform].size[0],
+                        height: URL_BOOT_IMG[mPlatform].size[1],
+                        data: URL_BOOT_IMG[mPlatform].url
+                    };
+                    mRFB.get_display().clear();
+                    mRFB.connect(mHost, mAPIPort, mToken.substr(0, 8), 'qemu/' + mInstanceID + '/ws/vnc');
                 });
-                window.rfb = mRFB;
-                mRFB.get_display()._logo = {
-                    width: URL_BOOT_IMG[mPlatform].size[0],
-                    height: URL_BOOT_IMG[mPlatform].size[1],
-                    data: URL_BOOT_IMG[mPlatform].url
-                };
-                mRFB.get_display().clear();
-                mRFB.connect(mHost, mAPIPort, mToken.substr(0, 8), 'qemu/' + mInstanceID + '/ws/vnc');
             });
         }
 
-        function loadScripts(done) {
-            if(!sLoadedScripts) {
+        function loadScripts() {
+            if (sLoadedScripts) return Promise.resolve();
+            return new Promise(function(resolve, reject) {
                 console.log("loading vnc client...");
                 Util.load_scripts(URL_VNC_INCLUDES);
                 window.onscriptsload = function() {
                     console.log("vnc ready");
-                    done();
+                    resolve();
                 }
-            } else {
-                done();
-            }
+            });
         }
 
         function showLaunchSplash() {
@@ -231,7 +228,7 @@
                 return;
             }
             e.preventDefault();
-            SharedPebble.getPebble().done(function(pebble) {
+            SharedPebble.getPebble().then(function(pebble) {
                 pebble.emu_press_button(button, true);
             });
         }
@@ -242,7 +239,7 @@
                 return;
             }
             e.preventDefault();
-            SharedPebble.getPebble().done(function(pebble) {
+            SharedPebble.getPebble().then(function(pebble) {
                 pebble.emu_press_button(button, false)
             });
         }
@@ -254,33 +251,30 @@
             }
             e.preventDefault();
             var direction = e.shiftKey ? -1 : 1;
-            SharedPebble.getPebble().done(function(pebble) {
+            SharedPebble.getPebble().then(function(pebble) {
                 pebble.emu_tap(axis, direction);
             });
         }
 
         this.connect = function() {
             if(mConnected) {
-                var deferred = $.Deferred();
-                deferred.resolve();
-                return deferred.promise();
+                return Promise.resolve();
             }
-            if(mPendingDeferred) {
-                return deferred.promise();
+            if(mPendingPromise) {
+                return mPendingPromise;
             }
             showLaunchSplash();
-            mPendingDeferred = $.Deferred();
-            spawn()
-                .done(function() {
+            var promise = spawn()
+                .then(function() {
                     CloudPebble.Analytics.addEvent('qemu_launched', {success: true});
-                    startVNC();
+                    return startVNC();
                 })
-                .fail(function(reason) {
-                    CloudPebble.Analytics.addEvent('qemu_launched', {success: false, reason: reason});
-                    mPendingDeferred.reject(reason);
+                .catch(function(error) {
+                    CloudPebble.Analytics.addEvent('qemu_launched', {success: false, reason: error.message});
+                    throw error;
                 });
-
-            return mPendingDeferred.promise();
+            mPendingPromise = promise;
+            return promise;
         };
 
         this.disconnect = function() {
@@ -288,11 +282,11 @@
                 return;
             }
             mRFB.disconnect();
-            killEmulator()
-                .done(function() {
+            return killEmulator()
+                .then(function() {
                     console.log('killed emulator.');
                 })
-                .fail(function() {
+                .catch(function() {
                     console.warn('failed to kill emulator.');
                 });
         };
@@ -321,7 +315,7 @@
                 console.error("unknown button " + button);
                 return;
             }
-            SharedPebble.getPebble().done(function(pebble){
+            SharedPebble.getPebble().then(function(pebble){
                 pebble.emu_press_button(buttonMap[button], down);
             })
         };
