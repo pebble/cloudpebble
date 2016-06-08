@@ -325,9 +325,21 @@ def generate_v3_manifest_dict(project, resources):
         return manifest
 
 
+def make_valid_package_manifest_name(short_name):
+    """ Turn an app_short_name into a valid NPM package name. """
+    name = short_name.lower()
+    # Remove any invalid characters from the end
+    name = re.sub(r'[^a-z0-9._]+$', '', name)
+    # Any strings of invalid characters in the middle are converted to dashes
+    name = re.sub(r'[^a-z0-9._]+', '-', name)
+    # The name cannot start with [ ._] or end with spaces.
+    name = name.lstrip(' ._').rstrip()
+    return name
+
+
 def generate_package_manifest_dict(project, resources):
     manifest = {
-        'name': project.app_short_name,
+        'name': make_valid_package_manifest_name(project.app_short_name),
         'author': project.app_company_name,
         'version': project.semver,
         'keywords': project.keywords,
