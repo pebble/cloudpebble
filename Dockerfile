@@ -1,7 +1,7 @@
 FROM python:2.7.11
 MAINTAINER Katharine Berry <katharine@pebble.com>
 
-ENV NPM_CONFIG_LOGLEVEL=info NODE_VERSION=4.2.3 DJANGO_VERSION=1.9.5
+ENV NPM_CONFIG_LOGLEVEL=info NODE_VERSION=4.2.3 DJANGO_VERSION=1.9.7
 
 # Node stuff.
 
@@ -40,7 +40,11 @@ EXPOSE 8000
 
 # CloudPebble stuff
 RUN npm install -g bower && echo '{"allow_root": true}' > ~/.bowerrc
-RUN npm install -g uglify-js clean-css
+
+ADD package.json /tmp/package.json
+RUN cd /tmp && npm install
+RUN mkdir -p /opt/npm && cp -a /tmp/node_modules /opt/npm/
+ENV NODE_MODULES_PATH /opt/npm/node_modules
 
 # Grab the toolchain
 RUN curl -o /tmp/arm-cs-tools.tar https://cloudpebble-vagrant.s3.amazonaws.com/arm-cs-tools-stripped.tar && \
@@ -57,7 +61,7 @@ RUN mkdir /sdk2 && \
   tar --strip-components=1 -xj -C /sdk2
 
 ENV SDK_THREE_CHANNEL=release
-ENV SDK_THREE_VERSION=3.12
+ENV SDK_THREE_VERSION=3.13
 
 # Install SDK 3
 RUN mkdir /sdk3 && \

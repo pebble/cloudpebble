@@ -3,6 +3,8 @@ import logging
 import random
 
 import requests
+
+from django.utils.translation import ugettext as _
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404

@@ -24,16 +24,15 @@ DEFAULT_FROM_EMAIL = _environ.get('FROM_EMAIL', 'CloudPebble <cloudpebble@exampl
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-
 if TRAVIS:
     DATABASES = {
         'default': {
-            'ENGINE':   'django.db.backends.postgresql_psycopg2',
-            'NAME':     'travisci',
-            'USER':     'postgres',
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'travisci',
+            'USER': 'postgres',
             'PASSWORD': '',
-            'HOST':     'localhost',
-            'PORT':     '',
+            'HOST': 'localhost',
+            'PORT': '',
         }
     }
 elif 'DATABASE_URL' not in _environ:
@@ -115,7 +114,13 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Example: "http://example.com/static/", "http://static.example.com/"
 STATIC_URL = '/static/'
 
-PUBLIC_URL = _environ.get('PUBLIC_URL', 'http://localhost:8000/') # This default is completely useless.
+PUBLIC_URL = _environ.get('PUBLIC_URL', 'http://localhost:8000/')  # This default is completely useless.
+
+NODE_MODULES_PATH = _environ.get('NODE_MODULES_PATH', os.path.join(os.getcwd(), 'node_modules'))
+
+
+def _node_bin(name):
+    return os.path.join(NODE_MODULES_PATH, '.bin', name)
 
 
 if DEBUG or TESTING:
@@ -143,7 +148,6 @@ else:
         'pipeline.finders.PipelineFinder',
     )
     STATICFILES_STORAGE = 'cloudpebble.storage.CompressedManifestPipelineStorage'
-
 
 BOWER_INSTALLED_APPS = (
     'https://github.com/krisk/Fuse.git#2ec2f2c40059e135cabf2b01c8c3f96f808b8809',
@@ -258,10 +262,12 @@ INSTALLED_APPS = (
 # output source-maps.
 PIPELINE = {
     'OUTPUT_SOURCEMAPS': True,
-    'JS_COMPRESSOR': 'pipeline.compressors.uglifyjs.UglifyJSCompressor',
+    'JS_COMPRESSOR': 'cloudpebble.compressors.ConcatenatingUglifyJSCompressor',
     'CSS_COMPRESSOR': 'pipeline.compressors.cleancss.CleanCSSCompressor',
-    'CLEANCSS_BINARY': 'cleancss',
-    'UGLIFYJS_BINARY': 'uglifyjs',
+    'CLEANCSS_BINARY': _node_bin('cleancss'),
+    'UGLIFYJS_BINARY': _node_bin('uglifyjs'),
+    'CONCATENATOR_BINARY': _node_bin('source-map-concat'),
+    'DISABLE_WRAPPER': True,
     'VERBOSE': True,
     'STYLESHEETS': {
         'codemirror': {
@@ -354,10 +360,11 @@ PIPELINE = {
             'source_filenames': (
                 'jquery/dist/jquery.min.js',
                 'common/js/modal.js',
+                'bluebird/js/browser/bluebird.js',
                 'underscore/underscore-min.js',
                 'backbone/backbone-min.js',
                 'common/js/whats_new.js',
-                'bluebird/js/browser/bluebird.js'
+                'common/js/ajax.js'
             ),
             'output_filename': 'build/base.js',
         }
