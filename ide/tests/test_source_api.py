@@ -34,7 +34,7 @@ class TestSource(CloudpebbleTestCase):
         if success:
             self.assertEqual(result['file']['name'], name)
             self.assertEqual(result['file']['target'], target if target else 'app')
-        return result['file']
+        return result['file'] if 'file' in result else result
 
     def load_file(self, id, success=True):
         """ Load a source file's content """
@@ -98,21 +98,15 @@ class TestSource(CloudpebbleTestCase):
 
     def test_create_with_invalid_target_throws_error(self):
         """ Test that attempting to create a file with an invalid target throws an error """
-        with self.assertRaises(ValidationError):
-            self.create_file(target='invalid')
+        self.create_file(target='invalid', success=False)
 
     def test_create_with_invalid_names_throws_error(self):
         """ Check that attempts to create files with invalid names throw errors """
-        with self.assertRaises(MultiValueDictKeyError):
-            self.create_file(name=None)
-        with self.assertRaises(ValidationError):
-            self.create_file("no_extension")
-        with self.assertRaises(ValidationError):
-            self.create_file("bad_extension.html")
-        with self.assertRaises(ValidationError):
-            self.create_file(".c")
-        with self.assertRaises(ValidationError):
-            self.create_file("`unsafe characters`.c")
+        self.create_file("no_extension", success=False)
+        self.create_file("no_extension", success=False)
+        self.create_file("bad_extension.html", success=False)
+        self.create_file(".c", success=False)
+        self.create_file("`unsafe characters`.c", success=False)
 
     def test_rename(self):
         """ Check that files can be renamed """

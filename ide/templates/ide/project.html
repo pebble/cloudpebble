@@ -51,6 +51,9 @@
                     <li class="nav-header" id="sidebar-pane-settings"><a href="#">{% trans 'Settings' %}</a></li>
                     <li class="nav-header sdk3-only" id="sidebar-pane-timeline"><a href="#">Timeline (Preview)</a></li>
                     <li class="nav-header" id="sidebar-pane-compile"><a href="#">{% trans 'Compilation' %}</a></li>
+                    {% if npm_manifest_support_enabled %}
+                        <li class="nav-header sdk3-only" id="sidebar-pane-dependencies"><a href="#">{% trans 'Dependencies' %}</a></li>
+                    {% endif %}
                     <li id="sidebar-pane-github" class="nav-header {%if not project.owner.github%}disabled{%endif%}"><a href="#">GitHub</a></li>
                     <li class="nav-header nav-section" id="source-files"><span>{% trans 'Source files' %}</span>
                         <button class="btn btn-small" id="new-source-file">{% trans 'Add new' %}</button></li>
@@ -113,6 +116,7 @@
 {% include "ide/project/github.html" %}
 {% include "ide/project/ui-editor.html" %}
 {% include "ide/project/timeline.html" %}
+{% include "ide/project/dependencies.html" %}
 {% endblock %}
 
 {% block modals %}
@@ -462,6 +466,7 @@ var USER_SETTINGS = {
 };
 var DOC_JSON = "{% static 'ide/documentation.json' %}";
 var LIBPEBBLE_PROXY = {{ libpebble_proxy | safe }};
+var VERSION_REGEX = "{{version_regex|escapejs}}";
 </script>
 
 <script src="/ide/jsi18n/"></script>

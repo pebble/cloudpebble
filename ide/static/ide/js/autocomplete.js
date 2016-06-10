@@ -154,7 +154,7 @@ CloudPebble.Editor.Autocomplete = new (function() {
         mRunning = true;
 
         CloudPebble.YCM.request('completions', editor)
-            .done(function(data) {
+            .then(function(data) {
                 var completions = _.map(data.completions, function(item) {
                     if(item.kind == 'FUNCTION' || (item.kind == 'MACRO' && item.detailed_info.indexOf('(') > 0)) {
                         var params = item.detailed_info.substr(item.detailed_info.indexOf('(') + 1);
@@ -185,7 +185,10 @@ CloudPebble.Editor.Autocomplete = new (function() {
                 CodeMirror.on(result, 'close', hideSummary);
                 CodeMirror.on(result, 'pick', _.partial(didPick, result));
                 finishCompletion(result);
-            }).always(function() {
+            }).catch(function(e) {
+                // Discard "ycm is generally broken" errors
+                if (!e.noYCM) throw e;
+            }).finally(function() {
                 mRunning = false;
                 run_last();
             });

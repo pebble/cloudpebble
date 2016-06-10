@@ -1,14 +1,14 @@
 import json
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_safe
-from ide.api import json_failure, json_response
 from ide.models.project import Project
 from ide.models.files import ResourceFile, ResourceIdentifier, ResourceVariant
 from utils.td_helper import send_td_event
+from utils.jsonview import json_view, BadRequest
 import utils.s3 as s3
 
 __author__ = 'katharine'
@@ -36,6 +36,7 @@ def decode_resource_id_options(request):
 
 @require_POST
 @login_required
+@json_view
 def create_resource(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     kind = request.POST['kind']
@@ -55,31 +56,31 @@ def create_resource(request, project_id):
                 variant.save_file(posted_file, posted_file.size)
 
             rf.save()
+    except IntegrityError as e:
+        raise BadRequest(e)
 
-    except Exception as e:
-        return json_failure(str(e))
-    else:
-        send_td_event('cloudpebble_create_file', data={
-            'data': {
-                'filename': file_name,
-                'kind': 'resource',
-                'resource-kind': kind
-            }
-        }, request=request, project=project)
+    send_td_event('cloudpebble_create_file', data={
+        'data': {
+            'filename': file_name,
+            'kind': 'resource',
+            'resource-kind': kind
+        }
+    }, request=request, project=project)
 
-        return json_response({"file": {
-            "id": rf.id,
-            "kind": rf.kind,
-            "file_name": rf.file_name,
-            "resource_ids": [x.get_options_dict(with_id=True) for x in resources],
-            "identifiers": [x.resource_id for x in resources],
-            "variants": [x.get_tags() for x in rf.variants.all()],
-            "extra": {y.resource_id: y.get_options_dict(with_id=False) for y in rf.identifiers.all()}
-        }})
+    return {"file": {
+        "id": rf.id,
+        "kind": rf.kind,
+        "file_name": rf.file_name,
+        "resource_ids": [x.get_options_dict(with_id=True) for x in resources],
+        "identifiers": [x.resource_id for x in resources],
+        "variants": [x.get_tags() for x in rf.variants.all()],
+        "extra": {y.resource_id: y.get_options_dict(with_id=False) for y in rf.identifiers.all()}
+    }}
 
 
 @require_safe
 @login_required
+@json_view
 def resource_info(request, project_id, resource_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     resource = get_object_or_404(ResourceFile, pk=resource_id)
@@ -93,7 +94,7 @@ def resource_info(request, project_id, resource_id):
         }
     }, request=request, project=project)
 
-    return json_response({
+    return {
         'resource': {
             'resource_ids': [x.get_options_dict(with_id=True) for x in resources],
             'id': resource.id,
@@ -102,32 +103,29 @@ def resource_info(request, project_id, resource_id):
             "variants": [x.get_tags() for x in resource.variants.all()],
             "extra": {y.resource_id: y.get_options_dict(with_id=False) for y in resource.identifiers.all()}
         }
-    })
+    }
 
 
 @require_POST
 @login_required
+@json_view
 def delete_resource(request, project_id, resource_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     resource = get_object_or_404(ResourceFile, pk=resource_id, project=project)
-    try:
-        resource.delete()
-    except Exception as e:
-        return json_failure(str(e))
-    else:
-        send_td_event('cloudpebble_delete_file', data={
-            'data': {
-                'filename': resource.file_name,
-                'kind': 'resource',
-                'resource-kind': resource.kind
-            }
-        }, request=request, project=project)
 
+    resource.delete()
+    send_td_event('cloudpebble_delete_file', data={
+        'data': {
+            'filename': resource.file_name,
+            'kind': 'resource',
+            'resource-kind': resource.kind
+        }
+    }, request=request, project=project)
 
-        return json_response({})
 
 @require_POST
 @login_required
+@json_view
 def delete_variant(request, project_id, resource_id, variant):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     resource = get_object_or_404(ResourceFile, pk=resource_id, project=project)
@@ -136,28 +134,27 @@ def delete_variant(request, project_id, resource_id, variant):
     variant_to_delete = resource.variants.get(tags=variant)
 
     if resource.variants.count() == 1:
-        return json_failure("You cannot delete the last remaining variant of a resource.")
-    try:
-        variant_to_delete.delete()
-    except Exception as e:
-        return json_failure(str(e))
-    else:
-        send_td_event('cloudpebble_delete_variant', data={
-            'data': {
-                'filename': resource.file_name,
-                'kind': 'resource',
-                'resource-kind': resource.kind,
-                'variant': variant
-            }
-        }, request=request, project=project)
+        raise BadRequest(_("You cannot delete the last remaining variant of a resource."))
 
-        return json_response({'resource': {
-            'variants': [x.get_tags() for x in resource.variants.all()]
-        }})
+    variant_to_delete.delete()
+
+    send_td_event('cloudpebble_delete_variant', data={
+        'data': {
+            'filename': resource.file_name,
+            'kind': 'resource',
+            'resource-kind': resource.kind,
+            'variant': variant
+        }
+    }, request=request, project=project)
+
+    return {'resource': {
+        'variants': [x.get_tags() for x in resource.variants.all()]
+    }}
 
 
 @require_POST
 @login_required
+@json_view
 def update_resource(request, project_id, resource_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     resource = get_object_or_404(ResourceFile, pk=resource_id, project=project)
@@ -202,25 +199,25 @@ def update_resource(request, project_id, resource_id):
 
             resource.save()
 
-    except Exception as e:
-        return json_failure(str(e))
-    else:
-        send_td_event('cloudpebble_save_file', data={
-            'data': {
-                'filename': resource.file_name,
-                'kind': 'source'
-            }
-        }, request=request, project=project)
+    except IntegrityError as e:
+        raise BadRequest(str(e))
 
-        return json_response({"file": {
-            "id": resource.id,
-            "kind": resource.kind,
-            "file_name": resource.file_name,
-            "resource_ids": [x.get_options_dict(with_id=True) for x in resources],
-            "identifiers": [x.resource_id for x in resources],
-            "variants": [x.get_tags() for x in resource.variants.all()],
-            "extra": {y.resource_id: y.get_options_dict(with_id=False) for y in resource.identifiers.all()}
-        }})
+    send_td_event('cloudpebble_save_file', data={
+        'data': {
+            'filename': resource.file_name,
+            'kind': 'source'
+        }
+    }, request=request, project=project)
+
+    return {"file": {
+        "id": resource.id,
+        "kind": resource.kind,
+        "file_name": resource.file_name,
+        "resource_ids": [x.get_options_dict(with_id=True) for x in resources],
+        "identifiers": [x.resource_id for x in resources],
+        "variants": [x.get_tags() for x in resource.variants.all()],
+        "extra": {y.resource_id: y.get_options_dict(with_id=False) for y in resource.identifiers.all()}
+    }}
 
 
 @require_safe

@@ -8,7 +8,6 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 
-
 def _ensure_bucket_exists(s3, bucket):
     try:
         s3.create_bucket(bucket)
@@ -16,7 +15,6 @@ def _ensure_bucket_exists(s3, bucket):
         pass
     else:
         logger.info("Created bucket %s" % bucket)
-
 
 
 class BucketHolder(object):

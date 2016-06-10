@@ -1,7 +1,8 @@
 import json
 import re
 from django.utils.translation import ugettext as _
-from ide.models.files import ResourceFile, ResourceIdentifier
+from django.conf import settings
+from ide.utils.project import APPINFO_MANIFEST, PACKAGE_MANIFEST, InvalidProjectArchiveException
 
 __author__ = 'katharine'
 
@@ -253,6 +254,13 @@ def generate_jshint_file(project):
 """
 
 
+def manifest_name_for_project(project):
+    if settings.NPM_MANIFEST_SUPPORT and project.project_type == 'native' and project.sdk_version == '3':
+        return PACKAGE_MANIFEST
+    else:
+        return APPINFO_MANIFEST
+
+
 def generate_manifest(project, resources):
     if project.project_type == 'native':
         if project.sdk_version == '2':
@@ -273,6 +281,10 @@ def generate_v2_manifest(project, resources):
 
 def generate_v3_manifest(project, resources):
     return dict_to_pretty_json(generate_v3_manifest_dict(project, resources))
+
+
+def generate_package_manifest(project, resources):
+    return dict_to_pretty_json(generate_package_manifest_dict(project, resources))
 
 
 def generate_v2_manifest_dict(project, resources):
@@ -298,15 +310,58 @@ def generate_v2_manifest_dict(project, resources):
 
 
 def generate_v3_manifest_dict(project, resources):
-    # Just extend the v2 one.
-    manifest = generate_v2_manifest_dict(project, resources)
-    manifest['enableMultiJS'] = project.app_modern_multi_js
+    if settings.NPM_MANIFEST_SUPPORT:
+        return generate_package_manifest_dict(project, resources)
+    else:
+        # Just extend the v2 one.
+        manifest = generate_v2_manifest_dict(project, resources)
+        manifest['enableMultiJS'] = project.app_modern_multi_js
+        if project.app_platforms:
+            manifest['targetPlatforms'] = project.app_platform_list
+        if project.app_is_hidden:
+            manifest['watchapp']['hiddenApp'] = project.app_is_hidden
+        manifest['sdkVersion'] = "3"
+        del manifest['versionCode']
+        return manifest
+
+
+def make_valid_package_manifest_name(short_name):
+    """ Turn an app_short_name into a valid NPM package name. """
+    name = short_name.lower()
+    # Remove any invalid characters from the end
+    name = re.sub(r'[^a-z0-9._]+$', '', name)
+    # Any strings of invalid characters in the middle are converted to dashes
+    name = re.sub(r'[^a-z0-9._]+', '-', name)
+    # The name cannot start with [ ._] or end with spaces.
+    name = name.lstrip(' ._').rstrip()
+    return name
+
+
+def generate_package_manifest_dict(project, resources):
+    manifest = {
+        'name': make_valid_package_manifest_name(project.app_short_name),
+        'author': project.app_company_name,
+        'version': project.semver,
+        'keywords': project.keywords,
+        'dependencies': project.get_dependencies(),
+        'pebble': {
+            'displayName': project.app_long_name,
+            'uuid': str(project.app_uuid),
+            'sdkVersion': project.sdk_version,
+            'enableMultiJS': project.app_modern_multi_js,
+            'watchapp': {
+                'watchface': project.app_is_watchface
+            },
+            'messageKeys': json.loads(project.app_keys),
+            'resources': generate_resource_dict(project, resources),
+            'capabilities': project.app_capabilities.split(','),
+            'projectType': project.project_type
+        }
+    }
     if project.app_platforms:
-        manifest['targetPlatforms'] = project.app_platform_list
+        manifest['pebble']['targetPlatforms'] = project.app_platform_list
     if project.app_is_hidden:
-        manifest['watchapp']['hiddenApp'] = project.app_is_hidden
-    manifest['sdkVersion'] = "3"
-    del manifest['versionCode']
+        manifest['pebble']['watchapp']['hiddenApp'] = project.app_is_hidden
     return manifest
 
 
@@ -486,3 +541,55 @@ def generate_pebblejs_manifest_dict(project, resources):
         manifest["targetPlatforms"] = project.app_platform_list
 
     return manifest
+
+
+def load_manifest_dict(manifest, manifest_kind, default_project_type='native'):
+    """ Load data from a manifest dictionary
+    :param manifest: a dictionary of settings
+    :param manifest_kind: 'package.json' or 'appinfo.json'
+    :return: a tuple of (models.Project options dictionary, the media map, the dependencies dictionary)
+    """
+    project = {}
+    dependencies = {}
+    if manifest_kind == APPINFO_MANIFEST:
+        project['app_short_name'] = manifest['shortName']
+        project['app_long_name'] = manifest['longName']
+        project['app_company_name'] = manifest['companyName']
+        project['app_version_label'] = manifest['versionLabel']
+        project['app_keys'] = dict_to_pretty_json(manifest.get('appKeys', {}))
+        project['sdk_version'] = manifest.get('sdkVersion', '2')
+        project['app_modern_multi_js'] = manifest.get('enableMultiJS', False)
+
+    elif manifest_kind == PACKAGE_MANIFEST:
+        project['app_short_name'] = manifest['name']
+        project['app_company_name'] = manifest['author']
+        project['semver'] = manifest['version']
+        project['app_long_name'] = manifest['pebble']['displayName']
+        if settings.NPM_MANIFEST_SUPPORT:
+            project['app_keys'] = dict_to_pretty_json(manifest['pebble'].get('messageKeys', []))
+        else:
+            project['app_keys'] = dict_to_pretty_json(manifest['pebble'].get('messageKeys', {}))
+            if isinstance(json.loads(project['app_keys']), list):
+                raise InvalidProjectArchiveException("Auto-assigned (array) messageKeys are not yet supported.")
+        project['keywords'] = manifest.get('keywords', [])
+        dependencies = manifest.get('dependencies', {})
+        manifest = manifest['pebble']
+        project['app_modern_multi_js'] = manifest.get('enableMultiJS', True)
+        project['sdk_version'] = manifest.get('sdkVersion', '3')
+    else:
+        raise InvalidProjectArchiveException(_('Invalid manifest kind: %s') % manifest_kind[-12:])
+
+    project['app_uuid'] = manifest['uuid']
+    project['app_is_watchface'] = manifest.get('watchapp', {}).get('watchface', False)
+    project['app_is_hidden'] = manifest.get('watchapp', {}).get('hiddenApp', False)
+    project['app_is_shown_on_communication'] = manifest.get('watchapp', {}).get('onlyShownOnCommunication', False)
+    project['app_capabilities'] = ','.join(manifest.get('capabilities', []))
+
+    if 'targetPlatforms' in manifest:
+        project['app_platforms'] = ','.join(manifest['targetPlatforms'])
+    if 'resources' in manifest and 'media' in manifest['resources']:
+        media_map = manifest['resources']['media']
+    else:
+        media_map = {}
+    project['project_type'] = manifest.get('projectType', default_project_type)
+    return project, media_map, dependencies

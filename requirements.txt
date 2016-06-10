@@ -36,7 +36,6 @@ pypng==0.0.17
 # Additional requirements
 anyjson==0.3.3
 billiard==3.3.0.23
-django-celery==3.1.17
 docopt==0.4.0
 greenlet==0.4.9
 httplib2==0.9.2
