@@ -24,23 +24,9 @@ class ExportTester(CloudpebbleTestCase):
         self.assertSetEqual(filenames, expected_filenames)
 
 
-@override_settings(NPM_MANIFEST_SUPPORT='')
 @mock.patch('ide.tasks.archive.s3', fake_s3)
 @mock.patch('ide.models.s3file.s3', fake_s3)
-class TestExportWithoutNPMSupport(ExportTester):
-    def test_export_sdk_3_project(self):
-        """ With package.json support off, check that SDK3 projects are exported with appinfo.json files """
-        self.run_test({'test/src/main.c', 'test/appinfo.json', 'test/wscript', 'test/jshintrc'})
-
-    def test_export_sdk_2_project(self):
-        """ Check that SDK2 projects are exported with appinfo.json files """
-        self.run_test({'test/src/main.c', 'test/appinfo.json', 'test/wscript', 'test/jshintrc'}, {'sdk': '2'})
-
-
-@override_settings(NPM_MANIFEST_SUPPORT='yes')
-@mock.patch('ide.tasks.archive.s3', fake_s3)
-@mock.patch('ide.models.s3file.s3', fake_s3)
-class TestExportWithNPMSupport(ExportTester):
+class TestExport(ExportTester):
     def test_export_sdk_3_project(self):
         """ With package.json support off, check that SDK3 projects are exported with package.json files """
         self.run_test({'test/src/main.c', 'test/package.json', 'test/wscript', 'test/jshintrc'})

@@ -49,8 +49,7 @@ def view_project(request, project_id):
         'token': token,
         'phone_shorturl': settings.PHONE_SHORTURL,
         'supported_platforms': supported_platforms,
-        'version_regex': SDK_VERSION_REGEX,
-        'npm_manifest_support_enabled': settings.NPM_MANIFEST_SUPPORT
+        'version_regex': SDK_VERSION_REGEX
     })
 
 

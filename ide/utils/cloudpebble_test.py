@@ -81,7 +81,7 @@ def make_package(package_options=None, pebble_options=None, no_pebble=False):
         "keywords": [],
         "name": "test",
         "pebble": {
-            "messageKeys": ([] if settings.NPM_MANIFEST_SUPPORT else {}),
+            "messageKeys": [],
             "capabilities": [
                 ""
             ],
