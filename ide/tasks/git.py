@@ -161,7 +161,7 @@ def github_push(user, commit_message, repo_name, project):
 
     if manifest_item:
         their_manifest_dict = json.loads(manifest_item.read())
-        their_res_dict = their_manifest_dict.get('resources', their_manifest_dict['pebble']['resources'])
+        their_res_dict = their_manifest_dict.get('resources', their_manifest_dict.get('pebble', their_manifest_dict).get('resources', {'media': []}))
         # If the manifest needs a new path (e.g. it is now package.json), delete the old one
         if manifest_item.path != remote_manifest_path:
             del next_tree[manifest_item.path]
@@ -170,7 +170,7 @@ def github_push(user, commit_message, repo_name, project):
         their_res_dict = {'media': []}
 
     our_manifest_dict = generate_manifest_dict(project, resources)
-    our_res_dict = our_manifest_dict.get('resources', our_manifest_dict['pebble']['resources'])
+    our_res_dict = our_manifest_dict.get('resources', our_manifest_dict.get('pebble', our_manifest_dict).get('resources', {'media': []}))
 
     if our_res_dict != their_res_dict:
         logger.debug("Resources mismatch.")
