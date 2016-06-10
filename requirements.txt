@@ -1,9 +1,8 @@
-Django==1.9.5
+Django==1.9.7
 django-registration==2.0.4
 -e git://github.com/pebble/django-pipeline.git@2cbcb6f939b50e674106336984e7e8550c2fc39d#egg=pipeline
 amqp==1.4.9
 celery==3.1.23
-django-celery==3.1.17
 flup==1.0.3.dev-20110405
 psycopg2==2.6.1
 South==1.0.2

@@ -116,8 +116,7 @@ def save_file(bucket_name, path, value, public=False, content_type='application/
 
 
 @_requires_aws
-def upload_file(bucket_name, dest_path, src_path, public=False, content_type='application/octet-stream',
-                download_filename=None):
+def upload_file(bucket_name, dest_path, src_path, public=False, content_type='application/octet-stream', download_filename=None):
     bucket = _buckets[bucket_name]
     key = Key(bucket)
     key.key = dest_path

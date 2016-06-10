@@ -16,8 +16,6 @@ from ide.utils import generate_half_uuid
 from utils.td_helper import send_td_event
 
 
-
-
 @shared_task(acks_late=True)
 def import_gist(user_id, gist_id):
     user = User.objects.get(pk=user_id)

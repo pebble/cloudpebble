@@ -24,16 +24,15 @@ DEFAULT_FROM_EMAIL = _environ.get('FROM_EMAIL', 'CloudPebble <cloudpebble@exampl
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-
 if TRAVIS:
     DATABASES = {
         'default': {
-            'ENGINE':   'django.db.backends.postgresql_psycopg2',
-            'NAME':     'travisci',
-            'USER':     'postgres',
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'travisci',
+            'USER': 'postgres',
             'PASSWORD': '',
-            'HOST':     'localhost',
-            'PORT':     '',
+            'HOST': 'localhost',
+            'PORT': '',
         }
     }
 elif 'DATABASE_URL' not in _environ:
@@ -115,13 +114,14 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Example: "http://example.com/static/", "http://static.example.com/"
 STATIC_URL = '/static/'
 
-PUBLIC_URL = _environ.get('PUBLIC_URL', 'http://localhost:8000/') # This default is completely useless.
+PUBLIC_URL = _environ.get('PUBLIC_URL', 'http://localhost:8000/')  # This default is completely useless.
 
 NODE_MODULES_PATH = _environ.get('NODE_MODULES_PATH', os.path.join(os.getcwd(), 'node_modules'))
 
 
 def _node_bin(name):
     return os.path.join(NODE_MODULES_PATH, '.bin', name)
+
 
 if DEBUG or TESTING:
     # Additional locations of static files
@@ -149,7 +149,6 @@ else:
     )
     STATICFILES_STORAGE = 'cloudpebble.storage.CompressedManifestPipelineStorage'
 
-
 BOWER_INSTALLED_APPS = (
     'https://github.com/krisk/Fuse.git#2ec2f2c40059e135cabf2b01c8c3f96f808b8809',
     'jquery#~2.1.3',
@@ -167,7 +166,6 @@ BOWER_INSTALLED_APPS = (
 )
 
 BOWER_PATH = _environ.get('BOWER_PATH', _node_bin('bower'))
-
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = _environ.get('SECRET_KEY', 'y_!-!-i!_txo$v5j(@c7m4uk^jyg)l4bf*0yqrztmax)l2027j')
@@ -280,7 +278,7 @@ TEST_BENCH_USERS = _environ.get('TEST_BENCH_USERS', 'test@test.test').split(",")
 # Configuration for django-pipeline, used to concatenate and compress JS and CSS sources and
 # output source-maps.
 PIPELINE = {
-    'COMPILERS': ('pipeline.compilers.es6.ES6Compiler', ),
+    'COMPILERS': ('pipeline.compilers.es6.ES6Compiler',),
     'BABEL_BINARY': _node_bin('babel'),
     'BABEL_ARGUMENTS': '--presets {}'.format(",".join(os.path.join(NODE_MODULES_PATH, p) for p in BABEL_PRESETS)),
     'BABEL_EXTENSION': '.jsx',
@@ -521,7 +519,6 @@ if not PBLTEST_CERT_LOCATION and _cert:
     with open(PBLTEST_CERT_LOCATION, 'w') as f:
         f.write(_cert)
 
-
 QEMU_URLS = _environ.get('QEMU_URLS', 'http://qemu/').split(',')
 QEMU_LAUNCH_AUTH_HEADER = _environ.get('QEMU_LAUNCH_AUTH_HEADER', 'secret')
 QEMU_LAUNCH_TIMEOUT = int(_environ.get('QEMU_LAUNCH_TIMEOUT', 20))
@@ -529,7 +526,6 @@ QEMU_LAUNCH_TIMEOUT = int(_environ.get('QEMU_LAUNCH_TIMEOUT', 20))
 PHONE_SHORTURL = _environ.get('PHONE_SHORTURL', 'cpbl.io')
 
 ORCHESTRATOR_URL = _environ.get('ORCHESTRATOR_URL', 'https://pbltest.io')
-
 
 # import local settings
 try:
