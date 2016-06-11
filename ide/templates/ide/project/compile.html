@@ -57,7 +57,13 @@
         <hr>
         <div class="build-buttons">
             <button class="btn btn-affirmative" id="compilation-run-build-button">{% trans 'Run build' %}</button>
-            <a id="last-compilation-pbw" href="#" class="btn hide">{% trans 'Get PBW' %}</a>
+            <a id="last-compilation-pbw" href="#" class="btn hide">
+                {% if project.project_type == 'package'%}
+                    {% trans 'Get Package' %}
+                {% else %}
+                    {% trans 'Get PBW' %}
+                {% endif %}
+            </a>
             <a id="last-compilation-log" class="btn hide" href="#">{% trans 'Build log' %}</a>
         </div>
     </div>

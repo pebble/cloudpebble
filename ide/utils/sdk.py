@@ -69,6 +69,73 @@ def build(ctx):
     return wscript.replace('{{jshint}}', 'True' if jshint and not for_export else 'False')
 
 
+def generate_wscript_file_package(project, for_export):
+    jshint = project.app_jshint
+    wscript = """
+#
+# This file is the default set of rules to compile a Pebble project.
+#
+# Feel free to customize this to your needs.
+#
+import os
+import shutil
+import waflib
+
+try:
+    from sh import CommandNotFound, jshint, cat, ErrorReturnCode_2
+    hint = jshint
+except (ImportError, CommandNotFound):
+    hint = None
+
+top = '.'
+out = 'build'
+
+
+def distclean(ctx):
+    if os.path.exists('dist.zip'):
+        os.remove('dist.zip')
+    if os.path.exists('dist'):
+        shutil.rmtree('dist')
+    waflib.Scripting.distclean(ctx)
+
+
+def options(ctx):
+    ctx.load('pebble_sdk_lib')
+
+
+def configure(ctx):
+    ctx.load('pebble_sdk_lib')
+
+
+def build(ctx):
+    if {{jshint}} and hint is not None:
+        try:
+            hint([node.abspath() for node in ctx.path.ant_glob("src/**/*.js")], _tty_out=False) # no tty because there are none in the cloudpebble sandbox.
+        except ErrorReturnCode_2 as e:
+            ctx.fatal("\\nJavaScript linting failed (you can disable this in Project Settings):\\n" + e.stdout)
+
+    ctx.load('pebble_sdk_lib')
+
+    cached_env = ctx.env
+    for platform in ctx.env.TARGET_PLATFORMS:
+        ctx.env = ctx.all_envs[platform]
+        ctx.set_group(ctx.env.PLATFORM_NAME)
+        lib_name = '{}/{}'.format(ctx.env.BUILD_DIR, ctx.env.PROJECT_INFO['name'])
+        ctx.pbl_build(source=ctx.path.ant_glob('src/c/**/*.c'), target=lib_name, bin_type='lib')
+    ctx.env = cached_env
+
+    ctx.set_group('bundle')
+    ctx.pbl_bundle(includes=ctx.path.ant_glob('include/**/*.h'),
+                   js=ctx.path.ant_glob(['src/js/**/*.js', 'src/js/**/*.json']),
+                   bin_type='lib')
+
+    if ctx.cmd == 'clean':
+        for n in ctx.path.ant_glob(['dist/**/*', 'dist.zip'], quiet=True):
+            n.delete()
+"""
+    return wscript.replace('{{jshint}}', 'True' if jshint and not for_export else 'False')
+
+
 def generate_wscript_file_sdk3(project, for_export):
     jshint = project.app_jshint
     if not project.app_modern_multi_js:
@@ -182,6 +249,8 @@ def build(ctx):
 
 
 def generate_wscript_file(project, for_export=False):
+    if project.project_type == 'package':
+        return generate_wscript_file_package(project, for_export)
     if project.sdk_version == '2':
         return generate_wscript_file_sdk2(project, for_export)
     elif project.sdk_version == '3':
@@ -254,14 +323,14 @@ def generate_jshint_file(project):
 
 
 def manifest_name_for_project(project):
-    if project.project_type == 'native' and project.sdk_version == '3':
+    if project.is_native_or_package and project.sdk_version == '3':
         return PACKAGE_MANIFEST
     else:
         return APPINFO_MANIFEST
 
 
 def generate_manifest(project, resources):
-    if project.project_type == 'native':
+    if project.is_native_or_package:
         if project.sdk_version == '2':
             return generate_v2_manifest(project, resources)
         else:
@@ -327,7 +396,6 @@ def generate_v3_manifest_dict(project, resources):
             'displayName': project.app_long_name,
             'uuid': str(project.app_uuid),
             'sdkVersion': project.sdk_version,
-            'enableMultiJS': project.app_modern_multi_js,
             'watchapp': {
                 'watchface': project.app_is_watchface
             },
@@ -337,15 +405,20 @@ def generate_v3_manifest_dict(project, resources):
             'projectType': project.project_type
         }
     }
+
+    if project.project_type == 'package':
+        manifest['files'] = ['dist.zip']
+    else:
+        manifest['pebble']['enableMultiJS'] = project.app_modern_multi_js
+        if project.app_is_hidden:
+            manifest['pebble']['watchapp']['hiddenApp'] = project.app_is_hidden
     if project.app_platforms:
         manifest['pebble']['targetPlatforms'] = project.app_platform_list
-    if project.app_is_hidden:
-        manifest['pebble']['watchapp']['hiddenApp'] = project.app_is_hidden
     return manifest
 
 
 def generate_manifest_dict(project, resources):
-    if project.project_type == 'native':
+    if project.is_native_or_package:
         if project.sdk_version == '2':
             return generate_v2_manifest_dict(project, resources)
         else:
@@ -367,7 +440,7 @@ def dict_to_pretty_json(d):
 
 
 def generate_resource_dict(project, resources):
-    if project.project_type == 'native':
+    if project.is_native_or_package:
         return generate_native_resource_dict(project, resources)
     elif project.project_type == 'simplyjs':
         return generate_simplyjs_resource_dict()
@@ -379,7 +452,6 @@ def generate_resource_dict(project, resources):
 
 def generate_native_resource_dict(project, resources):
     resource_map = {'media': []}
-
     for resource in resources:
         for resource_id in resource.get_identifiers():
             d = {

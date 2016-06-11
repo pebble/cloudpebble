@@ -54,6 +54,7 @@ def project_info(request, project_id):
                              'name': f.file_name,
                              'id': f.id,
                              'target': f.target,
+                             'public': f.public,
                              'lastModified': time.mktime(f.last_modified.utctimetuple())
                          } for f in source_files],
         'resources': [{
@@ -71,7 +72,8 @@ def project_info(request, project_id):
             'last_commit': project.github_last_commit,
             'auto_build': project.github_hook_build,
             'auto_pull': project.github_hook_uuid is not None
-        }
+        },
+        'supported_platforms': project.supported_platforms
     }
 
 
@@ -101,7 +103,7 @@ def last_build(request, project_id):
             'started': str(build.started),
             'finished': str(build.finished) if build.finished else None,
             'id': build.id,
-            'pbw': build.pbw_url,
+            'download': build.package_url if project.project_type == 'package' else build.pbw_url,
             'log': build.build_log_url,
             'build_dir': build.get_url(),
             'sizes': build.get_sizes(),
@@ -127,7 +129,7 @@ def build_history(request, project_id):
             'started': str(build.started),
             'finished': str(build.finished) if build.finished else None,
             'id': build.id,
-            'pbw': build.pbw_url,
+            'download': build.package_url if project.project_type == 'package' else build.pbw_url,
             'log': build.build_log_url,
             'build_dir': build.get_url(),
             'sizes': build.get_sizes()
@@ -190,6 +192,7 @@ def create_project(request):
                 f.save_text(open('{}/src/js/app.js'.format(settings.PEBBLEJS_ROOT)).read())
             if sdk_version != '2':
                 project.app_keys = '[]'
+            project.full_clean()
             project.save()
     except IntegrityError as e:
         raise BadRequest(str(e))

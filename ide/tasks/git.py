@@ -107,6 +107,13 @@ def github_push(user, commit_message, repo_name, project):
                 repo_path = worker_src_root + source.file_name
             elif project.app_modern_multi_js and source.file_name.endswith('.js'):
                 repo_path = src_root + 'js/' + source.file_name
+        elif project.project_type == 'package':
+            if source.public:
+                repo_path = root + 'include/' + source.file_name
+            elif source.file_name.endswith('.js'):
+                repo_path = src_root + 'js/' + source.file_name
+            else:
+                repo_path = src_root + 'c/' + source.file_name
 
         update_expected_paths(repo_path)
         if repo_path not in next_tree:
@@ -126,7 +133,11 @@ def github_push(user, commit_message, repo_name, project):
 
     # Now try handling resource files.
     resources = project.resources.all()
-    resource_root = root + 'resources/'
+    if project.project_type == 'package':
+        resource_root = root + 'src/resources/'
+    else:
+        resource_root = root + 'resources/'
+
     for res in resources:
         for variant in res.variants.all():
             repo_path = resource_root + variant.path

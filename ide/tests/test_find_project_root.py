@@ -71,7 +71,7 @@ class TestFindProjectRoot(TestCase):
     def test_find_valid_project_alongside_invalid_project(self):
         """ Find a valid project which is later in the file list than an invalid project """
         self.run_test([
-            "invalid/package.json",
+            "invalid/appinfo.json",
             "valid/package.json",
             "invalid/src/",
             "valid/src/",

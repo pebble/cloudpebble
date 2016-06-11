@@ -19,6 +19,9 @@ CloudPebble.Settings = (function() {
         if(CloudPebble.ProjectInfo.type != 'native') {
             pane.find('.native-only').hide();
         }
+        if(!(CloudPebble.ProjectInfo.type == 'native' || CloudPebble.ProjectInfo.type == 'package')) {
+            pane.find('.native-or-package').hide();
+        }
         if(CloudPebble.ProjectInfo.sdk_version != '3') {
             pane.find('.sdk3-only').hide();
         }

@@ -36,6 +36,21 @@ int main(void) {
 }
 """
 
+LIBRARY_C = """
+#include <pebble.h>
+#include "lib.h"
+
+const char * world(void) {
+    return "World!";
+}
+"""
+
+LIBRARY_H = """
+#pragma once
+
+const char * world(void);
+"""
+
 
 @skipIf(settings.TRAVIS, "Travis cannot run build tests")
 @mock.patch('ide.models.s3file.s3', fake_s3)
@@ -61,16 +76,23 @@ class TestCompile(CloudpebbleTestCase):
     def test_native_SDK2_project(self):
         """ Check that an SDK 3 project (with package.json support off) builds successfully """
         self.make_project({'sdk': '2'})
-        self.add_file("main.c", SIMPLE_MAIN)
+        SourceFile.objects.create(project=self.project, file_name="main.c", target="app").save_file(SIMPLE_MAIN)
         self.compile()
         self.check_success(num_platforms=1)
 
     def test_native_SDK3_project(self):
         """ Check that an SDK 3 project (with package.json support on) builds successfully """
         self.make_project()
-        self.add_file("main.c", SIMPLE_MAIN)
+        SourceFile.objects.create(project=self.project, file_name="main.c", target="app").save_file(SIMPLE_MAIN)
         self.compile()
         self.check_success()
+
+    def test_package(self):
+        self.make_project({'type': 'package'})
+        SourceFile.objects.create(project=self.project, file_name="lib.c", target="app").save_file(LIBRARY_C)
+        SourceFile.objects.create(project=self.project, file_name="lib.h", target="app", public=True).save_file(LIBRARY_H)
+        self.compile()
+        self.assertEqual(self.build_result.state, BuildResult.STATE_SUCCEEDED)
 
     @override_settings(LOCAL_DEPENDENCY_OVERRIDE=True)
     def test_project_with_dependencies(self):
@@ -83,7 +105,7 @@ class TestCompile(CloudpebbleTestCase):
             lib_path = os.path.join(tempdir, 'libname')
 
             # Include the library in the code and package.json
-            self.add_file("main.c", DEPENDENCY_MAIN)
+            SourceFile.objects.create(project=self.project, file_name="main.c", target="app").save_file(DEPENDENCY_MAIN)
             self.project.set_dependencies({
                 'libname': lib_path
             })

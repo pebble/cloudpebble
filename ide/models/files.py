@@ -226,6 +226,7 @@ class ResourceIdentifier(IdeModel):
 class SourceFile(TextFile):
     project = models.ForeignKey('Project', related_name='source_files')
     file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_.-]+\.(c|h|js)$", message=_("Invalid filename."))])
+    public = models.BooleanField(default=False)
     folder = 'sources'
 
     TARGETS = (

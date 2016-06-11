@@ -37,18 +37,28 @@ def add_project_to_archive(z, project, prefix=''):
                 src_dir = 'worker_src'
             elif project.app_modern_multi_js and source.file_name.endswith('.js'):
                 src_dir = 'src/js'
+        elif project.project_type == 'package':
+            if source.public:
+                src_dir = 'include'
+            elif source.file_name.endswith('.js'):
+                src_dir = 'src/js'
+            else:
+                src_dir = 'src/c'
 
         z.writestr('%s/%s/%s' % (prefix, src_dir, source.file_name), source.get_contents())
 
     for resource in resources:
-        res_path = 'resources'
+        if project.project_type == 'package':
+            res_path = 'src/resources'
+        else:
+            res_path = 'resources'
         for variant in resource.variants.all():
             z.writestr('%s/%s/%s' % (prefix, res_path, variant.path), variant.get_contents())
 
     manifest = generate_manifest(project, resources)
     manifest_name = manifest_name_for_project(project)
     z.writestr('%s/%s' % (prefix, manifest_name), manifest)
-    if project.project_type == 'native':
+    if project.is_native_or_package:
         # This file is always the same, but needed to build.
         z.writestr('%s/wscript' % prefix, generate_wscript_file(project, for_export=True))
         z.writestr('%s/jshintrc' % prefix, generate_jshint_file(project))
@@ -136,6 +146,10 @@ class ArchiveProjectItem(BaseProjectItem):
         return self.entry.filename
 
 
+def ends_with_any(s, options):
+    return any(s.endswith(end) for end in options)
+
+
 @task(acks_late=True)
 def do_import_archive(project_id, archive, delete_project=False):
     project = Project.objects.get(pk=project_id)
@@ -158,7 +172,7 @@ def do_import_archive(project_id, archive, delete_project=False):
                 # - Parse resource_map.json and import files it references
                 SRC_DIR = 'src/'
                 WORKER_SRC_DIR = 'worker_src/'
-                RES_PATH = 'resources'
+                INCLUDE_SRC_DIR = 'include/'
 
                 if len(contents) > 400:
                     raise InvalidProjectArchiveException("Too many files in zip file.")
@@ -200,6 +214,8 @@ def do_import_archive(project_id, archive, delete_project=False):
                         setattr(project, k, v)
                     project.full_clean()
                     project.set_dependencies(dependencies)
+
+                    RES_PATH = 'src/resources' if project.project_type == 'package' else 'resources'
 
                     tag_map = {v: k for k, v in ResourceVariant.VARIANT_STRINGS.iteritems() if v}
 
@@ -267,15 +283,27 @@ def do_import_archive(project_id, archive, delete_project=False):
                                 file_exists_for_root[root_file_name] = True
 
                         elif filename.startswith(SRC_DIR):
-                            if (not filename.startswith('.')) and (filename.endswith('.c') or filename.endswith('.h') or filename.endswith('.js')):
+                            if (not filename.startswith('.')) and (ends_with_any(filename, ['.c', '.h', '.js'])):
                                 base_filename = filename[len(SRC_DIR):]
                                 if project.app_modern_multi_js and base_filename.endswith('.js') and base_filename.startswith('js/'):
                                     base_filename = base_filename[len('js/'):]
+                                elif project.project_type == 'package' and ends_with_any(base_filename, ['.c', '.h']):
+                                    if not base_filename.startswith('c/'):
+                                        raise InvalidProjectArchiveException("C Source files in project archives must be in 'c' folder")
+                                    base_filename = base_filename[len('c/'):]
                                 source = SourceFile.objects.create(project=project, file_name=base_filename)
                                 with z.open(entry.filename) as f:
                                     source.save_text(f.read().decode('utf-8'))
+                        elif filename.startswith(INCLUDE_SRC_DIR) and project.project_type == 'package':
+                            if not filename.startswith('.') and filename.endswith('.h'):
+                                base_filename = filename[len(INCLUDE_SRC_DIR):]
+                                source = SourceFile.objects.create(project=project, file_name=base_filename, public=True)
+                                with z.open(entry.filename) as f:
+                                    source.save_text(f.read().decode('utf-8'))
                         elif filename.startswith(WORKER_SRC_DIR):
-                            if (not filename.startswith('.')) and (filename.endswith('.c') or filename.endswith('.h') or filename.endswith('.js')):
+                            if (not filename.startswith('.')) and (ends_with_any(filename, ['.c', '.h', '.js'])):
+                                if project.project_type == 'package':
+                                    raise InvalidProjectArchiveException("Packages cannot have workers")
                                 base_filename = filename[len(WORKER_SRC_DIR):]
                                 source = SourceFile.objects.create(project=project, file_name=base_filename, target='worker')
                                 with z.open(entry.filename) as f:

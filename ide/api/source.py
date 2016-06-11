@@ -23,8 +23,10 @@ def create_source_file(request, project_id):
     try:
         f = SourceFile.objects.create(project=project,
                                       file_name=request.POST['name'],
-                                      target=request.POST.get('target', 'app'))
+                                      target=request.POST.get('target', 'app'),
+                                      public=request.POST.get('public', False) == 'true')
         f.save_text(request.POST.get('content', ''))
+
     except IntegrityError as e:
         raise BadRequest(str(e))
 
@@ -33,10 +35,11 @@ def create_source_file(request, project_id):
             'filename': request.POST['name'],
             'kind': 'source',
             'target': f.target,
+            'public': f.public
         }
     }, request=request, project=project)
 
-    return {"file": {"id": f.id, "name": f.file_name, "target": f.target}}
+    return {"file": {"id": f.id, "name": f.file_name, "target": f.target, "public": f.public}}
 
 
 @require_safe

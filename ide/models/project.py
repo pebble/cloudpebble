@@ -32,6 +32,7 @@ class Project(IdeModel):
         ('native', _('Pebble C SDK')),
         ('simplyjs', _('Simply.js')),
         ('pebblejs', _('Pebble.js (beta)')),
+        ('package', _('Pebble Package')),
     )
     project_type = models.CharField(max_length=10, choices=PROJECT_TYPES, default='native')
 
@@ -149,10 +150,29 @@ class Project(IdeModel):
         """ Set the app's version label from a semver string"""
         self.app_version_label = semver_to_version(value)
 
-    def clean(self):
-        if isinstance(json.loads(self.app_keys), list) and self.sdk_version == "2":
-            raise ValidationError(_("SDK2 appKeys must be an object, not a list."))
+    @property
+    def supported_platforms(self):
+        supported_platforms = ["aplite", "basalt"]
+        if self.sdk_version != '2':
+            supported_platforms.append("chalk")
+        return supported_platforms
 
+    @property
+    def is_native_or_package(self):
+        return self.project_type in {'native', 'package'}
+
+    def clean(self):
+        is_sdk_2 = self.sdk_version == "2"
+        is_package = self.project_type == 'package'
+        if is_sdk_2 and self.uses_array_message_keys:
+            raise ValidationError(_("SDK2 appKeys must be an object, not a list."))
+        if is_package:
+            if is_sdk_2:
+                raise ValidationError(_("Packages are not available for SDK 2"))
+            if not self.uses_array_message_keys:
+                raise ValidationError(_("Packages must use array based appmessage keys"))
+            if not self.app_modern_multi_js:
+                raise ValidationError(_("Packages must use CommonJS-style JS Handling."))
 
     last_build = property(get_last_build)
     menu_icon = property(get_menu_icon)

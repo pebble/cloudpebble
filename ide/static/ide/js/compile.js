@@ -8,7 +8,6 @@ CloudPebble.Compile = (function() {
         3: {english: gettext("Succeeded"), cls: "success", label: 'success'}
     };
 
-    var mPendingCallbacks = [];
     var mRunningBuild = false;
     var mLastScrollTop = 'bottom';
     var mLastBuild = null;
@@ -18,7 +17,13 @@ CloudPebble.Compile = (function() {
         tr.append($('<td class="build-id">' + (build.id === null ? '?' : build.id) + '</td>'));
         tr.append($('<td class="build-date">' + CloudPebble.Utils.FormatDatetime(build.started) + '</td>'));
         tr.append($('<td class="build-state">' + COMPILE_SUCCESS_STATES[build.state].english + '</td>'));
-        tr.append($('<td class="build-pbw">' + (build.state == 3 ? ('<a href="'+build.pbw+'" class="btn btn-small">' + gettext("pbw") + '</a>') : ' ') + '</td>'));
+        var pbw_badge = $('<td class="build-pbw">').appendTo(tr);
+        if (build.state == 3) {
+            pbw_badge.append($('<a class="btn btn-small">')
+                .attr('href', build.download)
+                .text(CloudPebble.ProjectProperties.is_runnable ? gettext("pbw") : gettext("tar.gz")));
+        }
+
         // Build log thingy.
         var td = $('<td class="build-log">');
         if(build.state > 1) {
@@ -183,6 +188,9 @@ CloudPebble.Compile = (function() {
         if(CloudPebble.Sidebar.Restore("compile")) {
             return;
         }
+        if (!CloudPebble.ProjectProperties.is_runnable) {
+            pane.find('#last-compilation').remove();
+        }
 
         update_build_history(pane);
         CloudPebble.Sidebar.SetActivePane(pane, 'compile');
@@ -250,7 +258,7 @@ CloudPebble.Compile = (function() {
                 });
                 pane.find('#compilation-run-build-button').removeAttr('disabled');
                 if(build.state == 3) {
-                    pane.find('#last-compilation-pbw').removeClass('hide').attr('href', build.pbw);
+                    pane.find('#last-compilation-pbw').removeClass('hide').attr('href', build.download);
                     pane.find("#run-on-phone").removeClass('hide');
                     if(build.sizes) {
                         if(build.sizes.aplite) {
@@ -536,7 +544,7 @@ CloudPebble.Compile = (function() {
                                 virtual: SharedPebble.isVirtual()
                             });
                         }, 30000);
-                        pebble.install_app(mLastBuild.pbw);
+                        pebble.install_app(mLastBuild.download);
                         var expectedBytes = (size.binary + size.worker + size.resources);
                         pebble.on('install:progress', function(bytes) {
                             clearTimeout(install_timer);

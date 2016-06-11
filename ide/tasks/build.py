@@ -14,9 +14,9 @@ from django.utils.timezone import now
 
 import apptools.addr2lines
 from ide.utils.sdk import generate_wscript_file, generate_jshint_file, generate_manifest_dict, \
-    generate_simplyjs_manifest_dict, generate_pebblejs_manifest_dict, manifest_name_for_project
+    generate_simplyjs_manifest_dict, generate_pebblejs_manifest_dict, manifest_name_for_project, \
+    make_valid_package_manifest_name
 from utils.td_helper import send_td_event
-
 from ide.models.build import BuildResult, BuildSize
 from ide.models.files import SourceFile, ResourceFile, ResourceVariant
 from ide.utils.prepreprocessor import process_file as check_preprocessor_directives
@@ -28,10 +28,10 @@ logger = logging.getLogger(__name__)
 
 
 def _set_resource_limits():
-    resource.setrlimit(resource.RLIMIT_CPU, (120, 120)) # 120 seconds of CPU time
-    resource.setrlimit(resource.RLIMIT_NOFILE, (500, 500)) # 500 open files
-    resource.setrlimit(resource.RLIMIT_RSS, (30 * 1024 * 1024, 30 * 1024 * 1024)) # 30 MB of memory
-    resource.setrlimit(resource.RLIMIT_FSIZE, (20 * 1024 * 1024, 20 * 1024 * 1024)) # 20 MB output files.
+    resource.setrlimit(resource.RLIMIT_CPU, (120, 120))  # 120 seconds of CPU time
+    resource.setrlimit(resource.RLIMIT_NOFILE, (500, 500))  # 500 open files
+    resource.setrlimit(resource.RLIMIT_RSS, (30 * 1024 * 1024, 30 * 1024 * 1024))  # 30 MB of memory
+    resource.setrlimit(resource.RLIMIT_FSIZE, (20 * 1024 * 1024, 20 * 1024 * 1024))  # 20 MB output files.
 
 
 def create_source_files(project, base_dir):
@@ -60,6 +60,13 @@ def create_source_files(project, base_dir):
                 target_dir = worker_dir
             elif f.file_name.endswith('.js'):
                 target_dir = os.path.join(target_dir, 'js')
+        elif project.project_type == 'package':
+            if f.public:
+                target_dir = os.path.join(base_dir, 'include')
+            elif f.file_name.endswith('.js'):
+                target_dir = os.path.join(target_dir, 'js')
+            else:
+                target_dir = os.path.join(target_dir, 'c')
 
         abs_target = os.path.abspath(os.path.join(target_dir, f.file_name))
         if not abs_target.startswith(target_dir):
@@ -115,15 +122,18 @@ def run_compile(build_result):
     # Assemble the project somewhere
     base_dir = tempfile.mkdtemp(dir=os.path.join(settings.CHROOT_ROOT, 'tmp') if settings.CHROOT_ROOT else None)
 
+    os.mkdir(base_dir)
+
     manifest_filename = manifest_name_for_project(project)
     try:
         # Resources
-        resource_root = 'resources'
+        resource_root = 'src/resources' if project.project_type == 'package' else 'resources'
+
         os.makedirs(os.path.join(base_dir, resource_root, 'images'))
         os.makedirs(os.path.join(base_dir, resource_root, 'fonts'))
         os.makedirs(os.path.join(base_dir, resource_root, 'data'))
 
-        if project.project_type == 'native':
+        if project.is_native_or_package:
             # Source code
             create_source_files(project, base_dir)
 
@@ -132,7 +142,6 @@ def run_compile(build_result):
 
             for f in resources:
                 target_dir = os.path.abspath(os.path.join(base_dir, resource_root, ResourceFile.DIR_MAP[f.kind]))
-                abs_target = os.path.abspath(os.path.join(target_dir, f.file_name))
                 f.copy_all_variants_to_dir(target_dir)
 
             # Reconstitute the SDK
@@ -197,7 +206,7 @@ def run_compile(build_result):
                 command = [settings.SDK3_PEBBLE_WAF, "configure", "build"]
             else:
                 raise Exception("invalid sdk version.")
-
+            logger.info("RUNNING COMMAND `%s`", " ".join(command))
             output += subprocess.check_output(command, stderr=subprocess.STDOUT, preexec_fn=_set_resource_limits,
                                               env=environ)
         except subprocess.CalledProcessError as e:
@@ -210,7 +219,10 @@ def run_compile(build_result):
             output = str(e)
         else:
             success = True
-            temp_file = os.path.join(base_dir, 'build', '%s.pbw' % os.path.basename(base_dir))
+            if project.project_type == 'package':
+                temp_file = os.path.join(base_dir, 'dist.zip')
+            else:
+                temp_file = os.path.join(base_dir, 'build', '%s.pbw' % os.path.basename(base_dir))
             if not os.path.exists(temp_file):
                 success = False
                 logger.warning("Success was a lie.")
@@ -220,31 +232,35 @@ def run_compile(build_result):
 
             if success:
                 # Try reading file sizes out of it first.
-                try:
-                    s = os.stat(temp_file)
-                    build_result.total_size = s.st_size
-                    # Now peek into the zip to see the component parts
-                    with zipfile.ZipFile(temp_file, 'r') as z:
-                        store_size_info(project, build_result, 'aplite', z)
-                        store_size_info(project, build_result, 'basalt', z)
-                        store_size_info(project, build_result, 'chalk', z)
+                if project.project_type != 'package':
+                    try:
+                        # Now peek into the zip to see the component parts
+                        with zipfile.ZipFile(temp_file, 'r') as z:
+                            store_size_info(project, build_result, 'aplite', z)
+                            store_size_info(project, build_result, 'basalt', z)
+                            store_size_info(project, build_result, 'chalk', z)
 
-                except Exception as e:
-                    logger.warning("Couldn't extract filesizes: %s", e)
+                    except Exception as e:
+                        logger.warning("Couldn't extract filesizes: %s", e)
 
-                # Try pulling out debug information.
-                if project.sdk_version == '2':
-                    save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, 'aplite', os.path.join(base_dir, 'build', 'pebble-app.elf'))
-                    save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, 'aplite', os.path.join(base_dir, 'build', 'pebble-worker.elf'))
+                    # Try pulling out debug information.
+
+                    if project.sdk_version == '2':
+                        save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, 'aplite', os.path.join(base_dir, 'build', 'pebble-app.elf'))
+                        save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, 'aplite', os.path.join(base_dir, 'build', 'pebble-worker.elf'))
+                    else:
+                        save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, 'aplite', os.path.join(base_dir, 'build', 'aplite/pebble-app.elf'))
+                        save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, 'aplite', os.path.join(base_dir, 'build', 'aplite/pebble-worker.elf'))
+                        save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, 'basalt', os.path.join(base_dir, 'build', 'basalt/pebble-app.elf'))
+                        save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, 'basalt', os.path.join(base_dir, 'build', 'basalt/pebble-worker.elf'))
+                        save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, 'chalk', os.path.join(base_dir, 'build', 'chalk/pebble-app.elf'))
+                        save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, 'chalk', os.path.join(base_dir, 'build', 'chalk/pebble-worker.elf'))
+                    build_result.save_pbw(temp_file)
                 else:
-                    save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, 'aplite', os.path.join(base_dir, 'build', 'aplite/pebble-app.elf'))
-                    save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, 'aplite', os.path.join(base_dir, 'build', 'aplite/pebble-worker.elf'))
-                    save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, 'basalt', os.path.join(base_dir, 'build', 'basalt/pebble-app.elf'))
-                    save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, 'basalt', os.path.join(base_dir, 'build', 'basalt/pebble-worker.elf'))
-                    save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, 'chalk', os.path.join(base_dir, 'build', 'chalk/pebble-app.elf'))
-                    save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, 'chalk', os.path.join(base_dir, 'build', 'chalk/pebble-worker.elf'))
+                    # tar.gz up the entire built project directory as the build result.
+                    archive = shutil.make_archive("package", 'gztar', base_dir)
+                    build_result.save_package(archive)
 
-                build_result.save_pbw(temp_file)
             build_result.save_build_log(output or 'Failed to get output')
             build_result.state = BuildResult.STATE_SUCCEEDED if success else BuildResult.STATE_FAILED
             build_result.finished = now()

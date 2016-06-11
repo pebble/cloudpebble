@@ -5,10 +5,11 @@ $(function() {
     });
     $('#project-type').change(function() {
         var val = $(this).val();
+        // TODO Packages - maybe still show templates? (and sdk version?)
         if(val != 'native') {
             $('#project-template').val(0);
             $('#template-holder').hide();
-            if (val == 'pebblejs') {
+            if (val == 'pebblejs' || val == 'package') {
                 $('#project-sdk-version').val('3');
             } else {
                 $('#project-sdk-version').val('2');
@@ -24,8 +25,10 @@ $(function() {
         if(val == '3') {
             $('#project-type').find('[value=simplyjs]').attr('disabled', 'disabled');
             $('#project-type').find('[value=pebblejs]').removeAttr('disabled');
+            $('#project-type').find('[value=package]').removeAttr('disabled');
         } else {
             $('#project-type').find('[value=simplyjs]').removeAttr('disabled');
+            $('#project-type').find('[value=package]').attr('disabled', 'disabled');
             $('#project-type').find('[value=pebblejs]').attr('disabled', 'disabled');
         }
     });

@@ -70,7 +70,12 @@ def find_project_root_and_manifest(project_items):
         # The base dir is the location of the manifest file without the manifest filename.
         base_dir = base_dir[:dir_end]
 
-        # Now check that there is a a source directory containing at least one source file.
+        # If we found a valid package.json, just return.
+        if name == PACKAGE_MANIFEST:
+            return base_dir, manifest_item
+
+        # Otherwise if it's an appinfo.json, check that there is a a source directory containing
+        # at least one source file.
         for source_item in project_items:
             source_dir = source_item.path
             if source_dir[:dir_end] != base_dir:

@@ -141,3 +141,48 @@ class TestImportProject(CloudpebbleTestCase):
         })
         with self.assertRaises(ValidationError):
             do_import_archive(self.project_id, bundle)
+
+
+@mock.patch('ide.models.files.s3', fake_s3)
+class TestImportLibrary(CloudpebbleTestCase):
+    def setUp(self):
+        self.login({'type': 'package'})
+
+    def test_import_basic_library(self):
+        """ Try importing a basic library """
+        bundle = build_bundle({
+            'include/my-lib.h': '',
+            'package.json': make_package(pebble_options={'projectType': 'package'}),
+            'src/c/my-lib.c': '',
+            'src/c/my-priv.h': '',
+        })
+        do_import_archive(self.project_id, bundle)
+        project = Project.objects.get(pk=self.project_id)
+        files = {f.file_name: f for f in project.source_files.all()}
+        self.assertSetEqual(set(files.keys()), {'my-lib.h', 'my-lib.c', 'my-priv.h'})
+        self.assertEqual(files['my-lib.h'].public, True)
+        self.assertEqual(files['my-lib.c'].public, False)
+        self.assertEqual(files['my-priv.h'].public, False)
+
+    def test_import_library_with_resources(self):
+        """ Try importing a basic library """
+        bundle = build_bundle({
+            'package.json': make_package(pebble_options={
+                'projectType': 'package',
+                'resources': {'media': [{
+                    'type': 'bitmap',
+                    'name': 'MY_RES1',
+                    'file': 'res1.png'
+                }, {
+                    'type': 'bitmap',
+                    'name': 'MY_RES2',
+                    'file': 'res2.png'
+                }]}
+            }),
+            'src/resources/res1.png': '',
+            'src/resources/res2.png': '',
+
+        })
+        do_import_archive(self.project_id, bundle)
+        project = Project.objects.get(pk=self.project_id)
+        self.assertSetEqual({f.file_name for f in project.resources.all()}, {'res1.png', 'res2.png'})

@@ -19,9 +19,20 @@ CloudPebble.ProgressBar = (function() {
     };
 })();
 
+// TODO: Think of a better name for this
+CloudPebble.ProjectProperties = {};
+Object.defineProperty(CloudPebble.ProjectProperties, 'js_only', {
+    get: function() {
+        return !(CloudPebble.ProjectInfo.type == 'native' || CloudPebble.ProjectInfo.type == 'package');
+    }
+});
+Object.defineProperty(CloudPebble.ProjectProperties, 'is_runnable', {
+    get: function() {
+        return CloudPebble.ProjectInfo.type != 'package';
+    }
+});
+
 CloudPebble.ProjectInfo = {};
-
-
 
 CloudPebble.Init = function() {
     jquery_csrf_setup();
@@ -125,7 +136,7 @@ CloudPebble.Prompts = {
     Progress: {
         Show: function(title, text, hide_callback) {
             var modal = $('#generic-progress').modal('show');
-            modal.find('.progress').removeClass('progress-danger').addClass('progress-striped');
+            modal.find('.progress').removeClass('progress-danger progress-success').addClass('progress-striped');
             modal.find('h3').text(title);
             modal.find('p').text(text || '');
             if(hide_callback) {
@@ -134,6 +145,10 @@ CloudPebble.Prompts = {
                     hide_callback();
                 });
             }
+        },
+        Success: function() {
+            var modal = $('#generic-progress').modal('show');
+            modal.find('.progress').addClass('progress-success').removeClass('progress-striped');
         },
         Fail: function() {
             var modal = $('#generic-progress').modal('show');

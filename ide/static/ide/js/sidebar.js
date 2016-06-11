@@ -1,7 +1,6 @@
 CloudPebble.Sidebar = (function() {
 
     var suspended_panes = {};
-    var mProjectType = 'native';
 
     var suspend_active_pane = function() {
         var pane_id = $('#main-pane').data('pane-id');
@@ -123,6 +122,10 @@ CloudPebble.Sidebar = (function() {
                 end = $('#end-worker-files');
                 $('#worker-files').show();
                 $('#source-files').find('span:first').text(gettext("App source"));
+            }
+            if (file.public) {
+                end = $('#end-public-header-files');
+                $('#public-header-files').show();
             }
             var link = $('<a href="#" id="sidebar-link-'+file.id+'"></a>');
             link.text(file.name + ' ');

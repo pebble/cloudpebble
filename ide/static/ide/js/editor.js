@@ -21,7 +21,13 @@ CloudPebble.Editor = (function() {
         }).then(function (success) {
             CloudPebble.Prompts.Progress.Hide();
             if(success) {
-                return CloudPebble.Compile.DoInstall();
+                if (CloudPebble.ProjectProperties.is_runnable) {
+                    return CloudPebble.Compile.DoInstall();
+                }
+                else {
+                    CloudPebble.Prompts.Progress.Update(gettext('Package built successfully.'));
+                    CloudPebble.Prompts.Progress.Success();
+                }
             } else {
                 CloudPebble.Compile.Show();
             }
@@ -754,7 +760,12 @@ CloudPebble.Editor = (function() {
             }
         });
         var commands = {};
-        commands[gettext('Run')] = run;
+        if (CloudPebble.ProjectProperties.is_runnable) {
+            commands[gettext('Run')] = run;
+        } else {
+            commands[gettext('Build')] = run;
+        }
+        
         CloudPebble.FuzzyPrompt.AddCommands(commands);
 
     }
@@ -915,8 +926,8 @@ CloudPebble.Editor = (function() {
                 }
             }
         });
-        // If this isn't a native project, only JS files should exist.
-        if(CloudPebble.ProjectInfo.type != 'native') {
+        // If this isn't a native project or package, only JS files should exist.
+        if(CloudPebble.ProjectProperties.js_only) {
             prompt.find('#new-file-type').val('js').change().parents('.control-group').hide();
         }
 
@@ -962,6 +973,30 @@ CloudPebble.Editor = (function() {
                             error.text(err.toString()).show();
                         });
                     }
+                })();
+            } else if (kind == 'include') {
+                (function() {
+                    var name = prompt.find('#new-include-file-name').val();
+                    if (!(/.+\.h$/.test(name))) {
+                        error.text(gettext("Source files must end in .c or .h")).show();
+                    } else if(project_source_files[name]) {
+                        // TODO: Packages - in theory an include file should be able to share the same name as a source file.
+                        // TODO: The change wouldn't be huge, but still might not be worth it.
+                        error.text(interpolate(gettext("A file called '%s' already exists."), [name])).show();
+                    } else {
+                        create_remote_file({
+                            name: name,
+                            content: "#include <pebble.h>\n\n",
+                            target: 'app',
+                            public: true
+                        }).then(function(data) {
+                            prompt.modal('hide');
+                            return edit_source_file(data.file);
+                        }).catch(function(err) {
+                            error.text(err.toString()).show()
+                        })
+                    }
+
                 })();
             } else if(kind == 'js') {
                 (function() {

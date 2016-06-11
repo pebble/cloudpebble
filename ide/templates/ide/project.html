@@ -74,6 +74,8 @@
                     <li class="not-simplyjs" id="end-source-files"></li>
                     <li class="hide native-only nav-header nav-section" id="worker-files">{% trans 'Worker source' %}</li>
                     <li class="hide nav-section" id="end-worker-files"></li>
+                    <li class="hide nav-header nav-section" id="public-header-files"><span>{% trans 'Public headers' %}</span>
+                    <li class="hide nav-section" id="end-public-header-files"></li>
                     <li class="nav-header nav-section not-simplyjs">{% trans 'Resources' %} <button class="btn btn-small" id="sidebar-pane-new-resource">{% trans 'Add new' %}</button></li>
                     <li class="hide not-simplyjs" id="end-resources"></li>
                 </ul>
@@ -149,8 +151,17 @@
                     <select id="new-file-type">
                         <option value="c" selected>{% trans 'C file' %}</option>
                         <option value="js">{% trans 'JavaScript file' %}</option>
+                        <option value="include">{% trans 'Public header file' %}</option>
                         <option value="layout">{% trans 'Window Layout' %}</option>
                     </select>
+                </div>
+            </div>
+            <div class="include-file-options file-group hide">
+                <div class="control-group">
+                    <label class="control-label" for="new-include-file-name">{% trans 'Include Name' %}</label>
+                    <div class="controls">
+                        <input type="text" id="new-include-file-name" pattern="[a-zA-Z0-9_-]+\.h$">
+                    </div>
                 </div>
             </div>
             <div class="c-file-options file-group">
