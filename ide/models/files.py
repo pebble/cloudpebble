@@ -102,6 +102,7 @@ class ResourceVariant(IdeModel):
     VARIANT_APLITE = 5
     VARIANT_BASALT = 6
     VARIANT_CHALK = 7
+    VARIANT_DIORITE = 8
 
     VARIANT_STRINGS = {
         VARIANT_MONOCHROME: '~bw',
@@ -110,7 +111,8 @@ class ResourceVariant(IdeModel):
         VARIANT_ROUND: '~round',
         VARIANT_APLITE: '~aplite',
         VARIANT_BASALT: '~basalt',
-        VARIANT_CHALK: '~chalk'
+        VARIANT_CHALK: '~chalk',
+        VARIANT_DIORITE: '~diorite'
     }
 
     TAGS_DEFAULT = ""

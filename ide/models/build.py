@@ -29,6 +29,7 @@ class BuildResult(IdeModel):
         'aplite': ('debug_info.json', 'worker_debug_info.json'),
         'basalt': ('basalt_debug_info.json', 'basalt_worker_debug_info.json'),
         'chalk': ('chalk_debug_info.json', 'chalk_worker_debug_info.json'),
+        'diorite': ('diorite_debug_info.json', 'diorite_worker_debug_info.json'), # TODO: Diorite - check this
     }
     DEBUG_APP = 0
     DEBUG_WORKER = 1

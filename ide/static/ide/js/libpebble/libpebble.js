@@ -936,7 +936,9 @@ Pebble.version_to_platform = function(version) {
         0xFE: 'aplite',
         0xFD: 'basalt',
         0xFC: 'basalt',
-        0xFB: 'chalk'
+        0xFB: 'chalk',
+        0xFA: 'diorite'
     };
+    // TODO: Diorite - I have no idea how to add diorite
     return mapping[version.running.platform_version];
 };

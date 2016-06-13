@@ -231,6 +231,7 @@ def run_compile(build_result):
                         store_size_info(project, build_result, 'aplite', z)
                         store_size_info(project, build_result, 'basalt', z)
                         store_size_info(project, build_result, 'chalk', z)
+                        store_size_info(project, build_result, 'diorite', z)
 
                 except Exception as e:
                     logger.warning("Couldn't extract filesizes: %s", e)
@@ -240,12 +241,9 @@ def run_compile(build_result):
                     save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, 'aplite', os.path.join(base_dir, 'build', 'pebble-app.elf'))
                     save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, 'aplite', os.path.join(base_dir, 'build', 'pebble-worker.elf'))
                 else:
-                    save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, 'aplite', os.path.join(base_dir, 'build', 'aplite/pebble-app.elf'))
-                    save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, 'aplite', os.path.join(base_dir, 'build', 'aplite/pebble-worker.elf'))
-                    save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, 'basalt', os.path.join(base_dir, 'build', 'basalt/pebble-app.elf'))
-                    save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, 'basalt', os.path.join(base_dir, 'build', 'basalt/pebble-worker.elf'))
-                    save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, 'chalk', os.path.join(base_dir, 'build', 'chalk/pebble-app.elf'))
-                    save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, 'chalk', os.path.join(base_dir, 'build', 'chalk/pebble-worker.elf'))
+                    for platform in ['aplite', 'basalt', 'chalk', 'diorite']:
+                        save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, platform, os.path.join(base_dir, 'build', '%s/pebble-app.elf' % platform))
+                        save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, platform, os.path.join(base_dir, 'build', '%s/pebble-worker.elf' % platform))
 
                 build_result.save_pbw(temp_file)
             build_result.save_build_log(output or 'Failed to get output')

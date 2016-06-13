@@ -567,15 +567,17 @@ var URL_VNC_INCLUDES = ["{% static 'noVNC/include/base64.js' %}",
 var URL_BOOT_IMG = {
     aplite: {url: "{% static 'ide/img/boot-aplite.png' %}", size: [144, 168]},
     basalt: {url: "{% static 'ide/img/boot-basalt.png' %}", size: [144, 168]},
-    chalk: {url: "{% static 'ide/img/boot-chalk.png' %}", size: [180, 180]}
+    chalk: {url: "{% static 'ide/img/boot-chalk.png' %}", size: [180, 180]},
+    diorite: {url: "{% static 'ide/img/boot-aplite.png' %}", size: [144, 168]}
 };
+// TODO: Diorite - update image if needed
 CloudPebble.Init();
 </script>
 
 
 <script src="{% static 'jquery-textext/src/js/textext.core.js' %}" type="text/javascript" charset="utf-8"></script>
 <script src="{% static 'jquery-textext/src/js/textext.plugin.tags.js' %}" type="text/javascript" charset="utf-8"></script>
-<script src="{% static 'jquery-textext/src/js/textext.plugin.autocomplete.js' %}" type="text/javascript" charset="utf-8"></script>
+<script src="{% static 'jquery-textext/src/js/textext.giplugin.autocomplete.js' %}" type="text/javascript" charset="utf-8"></script>
 <script src="{% static 'jquery-textext/src/js/textext.plugin.suggestions.js' %}" type="text/javascript" charset="utf-8"></script>
 <script src="{% static 'jquery-textext/src/js/textext.plugin.filter.js' %}" type="text/javascript" charset="utf-8"></script>
 <script src="{% static 'jquery-textext/src/js/textext.plugin.focus.js' %}" type="text/javascript" charset="utf-8"></script>

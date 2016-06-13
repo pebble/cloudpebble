@@ -137,6 +137,7 @@
 
         <div class="well image-platform-preview hide sdk3-only">
             <h4>{% trans 'Preview per platform' %}</h4>
+            <p class="help-block">{% trans "Given the tags for each variant, this shows the final version selected for each platform." %}</p>
             <div class="pane-boxes pane-3-boxes ">
                 {% for platform in supported_platforms %}
                 <div id="resource-image-preview-for-{{ platform }}">
@@ -146,7 +147,7 @@
                 </div>
                 {% endfor %}
             </div>
-            <p class="help-block">{% trans "Given the tags for each variant, this shows the final version selected for each platform." %}</p>
+            <div style="clear: both;"></div>
         </div>
 
         <div id="edit-resource-previews">
