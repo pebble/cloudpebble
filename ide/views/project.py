@@ -32,11 +32,6 @@ def view_project(request, project_id):
     if project.app_version_label is None:
         project.app_version_label = '1.0'
     app_keys = project.get_parsed_appkeys()
-    supported_platforms = ["aplite"]
-    if project.sdk_version != '2':
-        supported_platforms.extend(["basalt", "chalk"])
-        if project.project_type != 'pebblejs':
-            supported_platforms.append("diorite")
 
     send_td_event('cloudpebble_open_project', request=request, project=project)
     try:
@@ -50,7 +45,7 @@ def view_project(request, project_id):
         'libpebble_proxy': json.dumps(settings.LIBPEBBLE_PROXY),
         'token': token,
         'phone_shorturl': settings.PHONE_SHORTURL,
-        'supported_platforms': supported_platforms,
+        'supported_platforms': project.supported_platforms,
         'version_regex': SDK_VERSION_REGEX,
         'npm_manifest_support_enabled': settings.NPM_MANIFEST_SUPPORT
     })

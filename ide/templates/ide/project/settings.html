@@ -53,11 +53,11 @@
                     </span>
                 </div>
             </div>
-            <div class="control-group" >
+            <div class="control-group native-only" >
                 {# Translators: "Diorite" is a platform name and should be left untranslated. #}
                 <label class="control-label" for="settings-build-diorite">{% trans 'Build Diorite' %}</label>
                 <div class="controls">
-                    <input type="checkbox" id="settings-build-diorite" {% if not project.app_platforms or 'diorite' in project.app_platform_list %}checked{% endif %}>
+                    <input type="checkbox" id="settings-build-diorite" {% if project.app_platforms and 'diorite' in project.app_platform_list %}checked{% endif %}>
                     <span class="help-block">
                         {% trans "If enabled, your app will be built to run on Pebble 2 watches." %}
                     </span>
@@ -161,9 +161,9 @@
                         </span>
                 </div>
             </div>
-            <div class="well">
+            <div class="well native-only">
                 {% if npm_manifest_support_enabled %}
-                <div class="control-group native-only sdk3-only">
+                <div class="control-group sdk3-only">
                     <label class="control-label" for="settings-message-key-kind">{% trans 'Message key assignment kind' %}</label>
                     <div class="controls">
                         <select id="settings-message-key-kind">
@@ -173,7 +173,7 @@
                     </div>
                 </div>
                 {% endif %}
-                <div class="control-group native-only">
+                <div class="control-group">
                     <label class="control-label" for="settings-app-keys">{% trans "PebbleKit JS Message Keys" %}</label>
                     <div class="controls">
                         <table id="settings-app-keys">

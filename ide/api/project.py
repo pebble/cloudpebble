@@ -71,7 +71,8 @@ def project_info(request, project_id):
             'last_commit': project.github_last_commit,
             'auto_build': project.github_hook_build,
             'auto_pull': project.github_hook_uuid is not None
-        }
+        },
+        'supported_platforms': project.supported_platforms
     }
 
 

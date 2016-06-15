@@ -149,6 +149,16 @@ class Project(IdeModel):
         """ Set the app's version label from a semver string"""
         self.app_version_label = semver_to_version(value)
 
+    @property
+    def supported_platforms(self):
+        supported_platforms = ["aplite"]
+        if self.sdk_version != '2':
+            supported_platforms.extend(["basalt", "chalk"])
+            if self.project_type != 'pebblejs':
+                supported_platforms.append("diorite")
+        return supported_platforms
+
+
     def clean(self):
         if isinstance(json.loads(self.app_keys), list) and self.sdk_version == "2":
             raise ValidationError(_("SDK2 appKeys must be an object, not a list."))

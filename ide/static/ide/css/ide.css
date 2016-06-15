@@ -1156,9 +1156,8 @@ button#add-filter {
     width: 450px;
     height: 37px;
 }
-
-.edit-resource-target-options > div {
-    float: left;
+.pane-boxes.pane-3-boxes div:nth-child(3n+1) {
+    clear: both;
 }
 .edit-resource-target-options:after {
     clear: both;

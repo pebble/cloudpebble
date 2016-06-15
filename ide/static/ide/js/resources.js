@@ -923,9 +923,11 @@ CloudPebble.Resources = (function() {
         // Set up the resource editing template.
         resource_template = $('#resource-pane-template');
         resource_template.remove();
-        if (CloudPebble.ProjectInfo.type != 'native') {
-            delete PLATFORMS['chalk'];
-        }
+        _.each(_.keys(PLATFORMS), function(platform_name) {
+            if (!_.contains(CloudPebble.ProjectInfo.supported_platforms, platform_name)) {
+                delete PLATFORMS[platform_name];
+            }
+        });
         CloudPebble.FuzzyPrompt.AddDataSource('files', function() {
             return project_resources;
         }, function (resource, querystring) {
