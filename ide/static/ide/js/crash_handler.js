@@ -53,7 +53,7 @@ CloudPebble.CrashChecker = function(app_uuid) {
             aplite: ['debug_info.json'],
             basalt: ['basalt_debug_info.json', 'debug_info.json'],
             chalk: ['chalk_debug_info.json', 'debug_info.json'],
-            diorite: ['diorite_debug_info.json', 'debug_info.json'] // TODO: Diorite - is this correct?
+            diorite: ['diorite_debug_info.json', 'debug_info.json']
         },
         worker: {
             unknown: ['worker_debug_info.json'],

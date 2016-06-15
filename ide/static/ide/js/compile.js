@@ -762,7 +762,6 @@ CloudPebble.Compile = (function() {
                 } else {
                     if(CloudPebble.ProjectInfo.sdk_version == '3') {
                         if (!CloudPebble.ProjectInfo.app_platforms) {
-                            // TODO: Diorite - still keep basalt default?
                             return ConnectionType.QemuBasalt;
                         }
                         if (CloudPebble.ProjectInfo.app_platforms.indexOf('chalk') > -1) {

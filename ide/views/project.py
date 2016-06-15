@@ -35,7 +35,7 @@ def view_project(request, project_id):
     supported_platforms = ["aplite"]
     if project.sdk_version != '2':
         supported_platforms.extend(["basalt", "chalk"])
-        if project.sdk_version != '2':
+        if project.project_type != 'pebblejs':
             supported_platforms.append("diorite")
 
     send_td_event('cloudpebble_open_project', request=request, project=project)
