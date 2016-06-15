@@ -56,7 +56,7 @@
         </div>
         <div>
             <div class="well">
-                <div class="control-group not-simplyjs">
+                <div class="control-group not-simplyjs not-package">
                     <label class="control-label" for="settings-app-is-watchface">{% trans 'App kind' %}</label>
                     <div class="controls">
                         <select id="settings-app-is-watchface">
@@ -65,7 +65,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="control-group not-simplyjs">
+                <div class="control-group not-simplyjs not-package">
                     <label class="control-label" for="settings-app-visibility">{% trans 'App Visibility' %}</label>
                     <div class="controls">
                         <select id="settings-app-visibility">
@@ -78,6 +78,17 @@
                         </span>
                     </div>
                 </div>
+                {% if project.project_type == 'package' %}
+                <div class="control-group">
+                    <label class="control-label" for="settings-short-name">{% trans 'Package Name' %}</label>
+                    <div class="controls">
+                        <input type="text" id="settings-short-name" placeholder="{% trans 'Demo Package' context "sample package name" %}" value="{{project.app_short_name}}">
+                        <span class="help-block">
+                            {% trans "Package name. This will be the name of the package when published in NPM." %}
+                        </span>
+                    </div>
+                </div>
+                {% else %}
                 <div class="control-group">
                     <label class="control-label" for="settings-short-name">{% trans 'Short App Name' %}</label>
                     <div class="controls">
@@ -87,7 +98,8 @@
                         </span>
                     </div>
                 </div>
-                <div class="control-group">
+                {% endif %}
+                <div class="control-group not-package">
                     <label class="control-label" for="settings-long-name">{% trans 'Long App Name' %}</label>
                     <div class="controls">
                         <input type="text" id="settings-long-name" placeholder="{% trans 'Demo App' context "sample app name" %}" value="{{project.app_long_name}}">
@@ -96,7 +108,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="control-group not-simplyjs">
+                <div class="control-group not-simplyjs not-package">
                     <label class="control-label" for="settings-menu-image">{% trans 'Menu image' %}</label>
                     <div class="controls">
                         <select id="settings-menu-image">

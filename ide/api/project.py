@@ -30,7 +30,6 @@ def project_info(request, project_id):
     resources = ResourceFile.objects.filter(project=project).order_by('file_name')
     return {
         'type': project.project_type,
-        'success': True,
         'name': project.name,
         'last_modified': str(project.last_modified),
         'app_uuid': project.app_uuid or '',
@@ -45,7 +44,8 @@ def project_info(request, project_id):
         'app_is_shown_on_communication': project.app_is_shown_on_communication,
         'app_capabilities': project.app_capabilities,
         'app_jshint': project.app_jshint,
-        'app_dependencies': project.get_dependencies(),
+        'app_dependencies': project.get_dependencies(include_interdependencies=False),
+        'interdependencies': [p.id for p in project.project_dependencies.all()],
         'sdk_version': project.sdk_version,
         'app_platforms': project.app_platforms,
         'app_modern_multi_js': project.app_modern_multi_js,
@@ -255,11 +255,12 @@ def save_project_dependencies(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     try:
         project.set_dependencies(json.loads(request.POST['dependencies']))
+        project.set_interdependencies(json.loads(request.POST['interdependencies']))
+        return {'dependencies': project.get_dependencies()}
     except (IntegrityError, ValueError) as e:
         raise BadRequest(str(e))
     else:
         send_td_event('cloudpebble_save_project_settings', request=request, project=project)
-
 
 @require_POST
 @login_required
@@ -279,6 +280,44 @@ def begin_export(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     result = create_archive.delay(project.id)
     return {'task_id': result.task_id}
+
+
+@login_required
+@require_safe
+@json_view
+def get_projects(request):
+    filters = {
+        'owner': request.user
+    }
+    exclusions = {}
+    parent_project = None
+    if request.GET.get('libraries', None):
+        filters['project_type'] = 'package'
+        parent_project = get_object_or_404(Project, pk=request.GET['libraries'], owner=request.user)
+        parent_project_dependencies = parent_project.project_dependencies.all()
+        exclusions['pk'] = request.GET['libraries']
+
+    projects = Project.objects.filter(**filters).exclude(**exclusions)
+
+    def process_project(project):
+        data = {
+            'name': project.name,
+            'package_name': project.npm_name,
+            'id': project.id,
+            'app_version_label': project.app_version_label,
+            'latest_successful_build': None
+        }
+        try:
+            data['latest_successful_build'] = str(BuildResult.objects.filter(project=project, state=BuildResult.STATE_SUCCEEDED).latest('id').finished)
+        except BuildResult.DoesNotExist:
+            pass
+        if parent_project:
+            data['depended_on'] = project in parent_project_dependencies
+        return data
+
+    return {
+        'projects': [process_project(project) for project in projects]
+    }
 
 
 @login_required

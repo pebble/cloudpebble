@@ -256,11 +256,8 @@ def do_import_archive(project_id, archive, delete_project=False):
                             tags, root_file_name = get_filename_variant(base_filename, tag_map)
                             tags_string = ",".join(str(int(t)) for t in tags)
 
-                            logger.debug("Importing file %s with root %s ", entry.filename, root_file_name)
-
                             if root_file_name in desired_resources:
                                 medias = desired_resources[root_file_name]
-                                logger.debug("Looking for variants of %s", root_file_name)
 
                                 # Because 'kind' and 'is_menu_icons' are properties of ResourceFile in the database,
                                 # we just use the first one.
@@ -276,7 +273,6 @@ def do_import_archive(project_id, archive, delete_project=False):
                                         is_menu_icon=is_menu_icon)
 
                                 # But add a resource variant for every file
-                                logger.debug("Adding variant %s with tags [%s]", root_file_name, tags_string)
                                 actual_file_name = resource['file']
                                 resource_variants[actual_file_name] = ResourceVariant.objects.create(resource_file=resources_files[root_file_name], tags=tags_string)
                                 resource_variants[actual_file_name].save_file(extracted)

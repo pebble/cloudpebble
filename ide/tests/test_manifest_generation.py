@@ -3,7 +3,7 @@
 import json
 from ide.utils.sdk import generate_manifest
 from ide.utils.cloudpebble_test import CloudpebbleTestCase, make_package, make_appinfo, override_settings
-from ide.models import Project, Dependency
+from ide.models import Project, Dependency, BuildResult
 
 
 class ManifestTester(CloudpebbleTestCase):
@@ -64,3 +64,14 @@ class TestNPMStyleManifestGeneration(ManifestTester):
         self.project.app_short_name = "_CAPITALS_and...dots-and  -  spaces ! "
         manifest = generate_manifest(self.project, [])
         self.check_package_manifest(manifest, package_options={'name': 'capitals_and...dots-and-spaces'})
+
+    def test_inter_project_dependencies(self):
+        """ Check that inter-project dependencies are represented in the manifest """
+        package = Project.objects.create(project_type='package', app_short_name='mylib', owner_id=self.user_id)
+        build = BuildResult.objects.create(project=package, state=BuildResult.STATE_SUCCEEDED)
+        self.project.project_dependencies.add(package)
+        deps = {
+            'mylib': build.package_url
+        }
+        manifest = generate_manifest(self.project, [])
+        self.check_package_manifest(manifest, package_options={'dependencies': deps})

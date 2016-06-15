@@ -373,27 +373,14 @@ def generate_v2_manifest_dict(project, resources):
     return manifest
 
 
-def make_valid_package_manifest_name(short_name):
-    """ Turn an app_short_name into a valid NPM package name. """
-    name = short_name.lower()
-    # Remove any invalid characters from the end
-    name = re.sub(r'[^a-z0-9._]+$', '', name)
-    # Any strings of invalid characters in the middle are converted to dashes
-    name = re.sub(r'[^a-z0-9._]+', '-', name)
-    # The name cannot start with [ ._] or end with spaces.
-    name = name.lstrip(' ._').rstrip()
-    return name
-
-
 def generate_v3_manifest_dict(project, resources):
     manifest = {
-        'name': make_valid_package_manifest_name(project.app_short_name),
+        'name': project.npm_name,
         'author': project.app_company_name,
         'version': project.semver,
         'keywords': project.keywords,
         'dependencies': project.get_dependencies(),
         'pebble': {
-            'displayName': project.app_long_name,
             'uuid': str(project.app_uuid),
             'sdkVersion': project.sdk_version,
             'watchapp': {
@@ -401,15 +388,16 @@ def generate_v3_manifest_dict(project, resources):
             },
             'messageKeys': json.loads(project.app_keys),
             'resources': generate_resource_dict(project, resources),
-            'capabilities': project.app_capabilities.split(','),
             'projectType': project.project_type
         }
     }
-
+    if project.app_capabilities:
+        manifest['pebble']['capabilities'] = project.app_capabilities.split(',')
     if project.project_type == 'package':
         manifest['files'] = ['dist.zip']
     else:
         manifest['pebble']['enableMultiJS'] = project.app_modern_multi_js
+        manifest['pebble']['displayName'] = project.app_long_name
         if project.app_is_hidden:
             manifest['pebble']['watchapp']['hiddenApp'] = project.app_is_hidden
     if project.app_platforms:
@@ -615,7 +603,7 @@ def load_manifest_dict(manifest, manifest_kind, default_project_type='native'):
         project['app_short_name'] = manifest['name']
         project['app_company_name'] = manifest['author']
         project['semver'] = manifest['version']
-        project['app_long_name'] = manifest['pebble']['displayName']
+        project['app_long_name'] = manifest['pebble'].get('displayName', None)
         project['app_keys'] = dict_to_pretty_json(manifest['pebble'].get('messageKeys', []))
         project['keywords'] = manifest.get('keywords', [])
         dependencies = manifest.get('dependencies', {})

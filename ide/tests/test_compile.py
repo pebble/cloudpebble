@@ -1,11 +1,11 @@
-""" These tests check that project builds work. They are *not* run on Travis. """
+""" These are integration tests which check that project builds work. They are *not* run on Travis. """
 
 import mock
 import shutil
 import os
 from zipfile import ZipFile
 import tempfile
-
+from django.test import LiveServerTestCase
 from ide.utils.cloudpebble_test import CloudpebbleTestCase, override_settings
 from ide.models import Project, SourceFile, BuildResult
 from utils.fakes import FakeS3
@@ -38,7 +38,7 @@ int main(void) {
 
 LIBRARY_C = """
 #include <pebble.h>
-#include "lib.h"
+#include "whatever.h"
 
 const char * world(void) {
     return "World!";
@@ -52,11 +52,7 @@ const char * world(void);
 """
 
 
-@skipIf(settings.TRAVIS, "Travis cannot run build tests")
-@mock.patch('ide.models.s3file.s3', fake_s3)
-@mock.patch('ide.models.build.s3', fake_s3)
-class TestCompile(CloudpebbleTestCase):
-
+class CompileTester(CloudpebbleTestCase):
     def make_project(self, options=None):
         self.login(project_options=options)
         self.project = Project.objects.get(pk=self.project_id)
@@ -71,8 +67,13 @@ class TestCompile(CloudpebbleTestCase):
 
     def check_success(self, num_platforms=3):
         self.assertEqual(self.build_result.state, BuildResult.STATE_SUCCEEDED)
-        self.assertSequenceEqual([size.binary_size > 0 for size in self.build_result.sizes.all()], [True]*num_platforms)
+        self.assertSequenceEqual([size.binary_size > 0 for size in self.build_result.sizes.all()], [True] * num_platforms)
 
+
+@skipIf(settings.TRAVIS, "Travis cannot run build tests")
+@mock.patch('ide.models.files.s3', fake_s3)
+@mock.patch('ide.models.build.s3', fake_s3)
+class TestCompile(CompileTester):
     def test_native_SDK2_project(self):
         """ Check that an SDK 3 project (with package.json support off) builds successfully """
         self.make_project({'sdk': '2'})
@@ -87,12 +88,7 @@ class TestCompile(CloudpebbleTestCase):
         self.compile()
         self.check_success()
 
-    def test_package(self):
-        self.make_project({'type': 'package'})
-        SourceFile.objects.create(project=self.project, file_name="lib.c", target="app").save_file(LIBRARY_C)
-        SourceFile.objects.create(project=self.project, file_name="lib.h", target="app", public=True).save_file(LIBRARY_H)
-        self.compile()
-        self.assertEqual(self.build_result.state, BuildResult.STATE_SUCCEEDED)
+        # self.check_package_manifest(manifest, package_options={'dependencies': deps})
 
     @override_settings(LOCAL_DEPENDENCY_OVERRIDE=True)
     def test_project_with_dependencies(self):
@@ -115,3 +111,25 @@ class TestCompile(CloudpebbleTestCase):
             self.check_success()
         finally:
             shutil.rmtree(tempdir)
+
+
+@skipIf(settings.TRAVIS, "Travis cannot run build tests")
+@override_settings(TESTING=False)  # This fully enables S3. This is OK since the tests are not run on Travis.
+class TestCompileLive(LiveServerTestCase, CompileTester):
+    """ In order to run this test, we need to run a full webserver with S3 access so that npm
+    can download the interdependency """
+
+    def test_project_with_interdependencies(self):
+        """ Check that (a) we can build packages, (b) we can build projects which depend on them. """
+        self.make_project()
+        # Build the package
+        package = Project.objects.create(sdk_version='3', project_type='package', app_short_name='libname', owner_id=self.user_id)
+        SourceFile.objects.create(project=package, file_name="whatever.c", target="app").save_file(LIBRARY_C)
+        SourceFile.objects.create(project=package, file_name="whatever.h", target="app", public=True).save_file(LIBRARY_H)
+        package_build_result = BuildResult.objects.create(project=package)
+        run_compile(package_build_result.id)
+        # Set up the project which depends on the package
+        self.project.project_dependencies.add(package)
+        self.add_file("main.c", DEPENDENCY_MAIN)
+        self.compile()
+        self.check_success()

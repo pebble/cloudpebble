@@ -38,6 +38,7 @@ def is_manifest(kind, contents):
     if kind == PACKAGE_MANIFEST:
         return 'pebble' in json.loads(contents)
     elif kind == APPINFO_MANIFEST:
+        json.loads(contents)
         return True
     else:
         return False
@@ -49,7 +50,7 @@ def find_project_root_and_manifest(project_items):
     :return: A tuple of (path_to_project, manifest BaseProjectItem)
     """
     SRC_DIR = 'src/'
-
+    invalid_package_path = None
     for item in project_items:
         base_dir = item.path
 
@@ -60,9 +61,13 @@ def find_project_root_and_manifest(project_items):
                 continue
             # Ensure that the file is actually a manifest file
             if dir_end + len(name) == len(base_dir):
-                if is_manifest(name, item.read()):
-                    manifest_item = item
-                    break
+                content = item.read()
+                try:
+                    if is_manifest(name, content):
+                        manifest_item = item
+                        break
+                except ValueError as e:
+                    invalid_package_path = item.path
         else:
             # If the file is not a manifest file, continue looking for the manfiest.
             continue
@@ -89,4 +94,9 @@ def find_project_root_and_manifest(project_items):
             # If there was no source directory with a source file, keep looking for manifest files.
             continue
         return base_dir, manifest_item
-    raise InvalidProjectArchiveException(_("No project root found."))
+
+    # If we didn't find a valid project but we did find a broken manifest file, complain about it specifically.
+    if invalid_package_path:
+        raise InvalidProjectArchiveException(_("The file %s does not contain a valid JSON object." % invalid_package_path))
+    else:
+        raise InvalidProjectArchiveException(_("No valid project root found."))

@@ -19,6 +19,9 @@ CloudPebble.Settings = (function() {
         if(CloudPebble.ProjectInfo.type != 'native') {
             pane.find('.native-only').hide();
         }
+        if (CloudPebble.ProjectInfo.type == 'package') {
+            pane.find('.not-package').hide();
+        }
         if(!(CloudPebble.ProjectInfo.type == 'native' || CloudPebble.ProjectInfo.type == 'package')) {
             pane.find('.native-or-package').hide();
         }
@@ -88,9 +91,13 @@ CloudPebble.Settings = (function() {
             if(short_name.replace(/\s/g, '') == '') {
                 throw new Error(gettext("You must specify a short name."));
             }
-            if(long_name.replace(/\s/g, '') == '') {
-                throw new Error(gettext("You must specify a long name."));
+
+            if (CloudPebble.ProjectProperties.is_runnable) {
+                if(long_name.replace(/\s/g, '') == '') {
+                    throw new Error(gettext("You must specify a poop name."));
+                }
             }
+
             if(company_name.replace(/\s/g, '') == '') {
                 throw new Error(gettext("You must specify a company name."));
             }

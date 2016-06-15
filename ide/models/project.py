@@ -78,6 +78,8 @@ class Project(IdeModel):
     github_hook_uuid = models.CharField(max_length=36, blank=True, null=True)
     github_hook_build = models.BooleanField(default=False)
 
+    project_dependencies = models.ManyToManyField("Project")
+
     def set_dependencies(self, dependencies):
         """ Set the project's dependencies from a dictionary.
         :param dependencies: A dictionary of dependency->version
@@ -89,6 +91,25 @@ class Project(IdeModel):
                 dep.full_clean()
                 dep.save()
 
+    def set_interdependencies(self, interdependences):
+        with transaction.atomic():
+            self.project_dependencies.clear()
+            for id in interdependences:
+                project = Project.objects.get(pk=int(id), owner=self.owner, project_type='package')
+                self.project_dependencies.add(project)
+
+    @property
+    def npm_name(self):
+        """ Get the project's app_short_name as a valid NPM package name. """
+        name = self.app_short_name.lower()
+        # Remove any invalid characters from the end
+        name = re.sub(r'[^a-z0-9._]+$', '', name)
+        # Any strings of invalid characters in the middle are converted to dashes
+        name = re.sub(r'[^a-z0-9._]+', '-', name)
+        # The name cannot start with [ ._] or end with spaces.
+        name = name.lstrip(' ._').rstrip()
+        return name
+
     @property
     def keywords(self):
         """ Get the project's keywords as a list of strings """
@@ -99,11 +120,15 @@ class Project(IdeModel):
         """ Set the project's keywords from a list of strings """
         self.app_keywords = json.dumps(value)
 
-    def get_dependencies(self):
+    def get_dependencies(self, include_interdependencies=True):
         """ Get the project's dependencies as a dictionary
         :return: A dictinoary of dependency->version
         """
-        return {d.name: d.version for d in self.dependencies.all()}
+        dependencies = {d.name: d.version for d in self.dependencies.all()}
+        if include_interdependencies:
+            for project in self.project_dependencies.all():
+                dependencies[project.npm_name] = project.last_build.package_url
+        return dependencies
 
     @property
     def uses_array_message_keys(self):

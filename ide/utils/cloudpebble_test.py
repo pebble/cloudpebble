@@ -82,9 +82,6 @@ def make_package(package_options=None, pebble_options=None, no_pebble=False):
         "name": "test",
         "pebble": {
             "messageKeys": [],
-            "capabilities": [
-                ""
-            ],
             "displayName": "test",
             "enableMultiJS": True,
             "projectType": "native",

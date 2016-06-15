@@ -201,6 +201,18 @@ CloudPebble.Compile = (function() {
             var target = localStorage['activeTarget'];
             targetTabs.find('a[data-run-target=' + target + ']').tab('show');
         }
+        pane.find('#last-compilation-pbw').click(function() {
+            if (CloudPebble.ProjectInfo.type == 'package' && CloudPebble.ProjectInfo.interdependencies.length > 0) {
+                var href = $(this).attr('href');
+                var warning_text = gettext("This package project depends on other CloudPebble packages. " +
+                    "Do not publish it until you have changed the dependencies to refer to publically available packages.");
+                CloudPebble.Prompts.ConfirmLink("EXPORT PACKAGE", warning_text, href);
+                return false;
+            }
+            else {
+                return true;
+            }
+        });
         if(CloudPebble.ProjectInfo.sdk_version != '3') {
             pane.find('#install-in-qemu-basalt-btn #install-in-qemu-chalk-btn').hide();
         } else {

@@ -120,6 +120,7 @@ function make_live_settings_form(options) {
             }
         }).catch(function (error) {
             on_save_error(error);
+            throw error;
         }).finally(function() {
             saving = false;
             if (next_save) {
@@ -206,6 +207,7 @@ function make_live_settings_form(options) {
 
         // Set up the save-on-change hook
         opts.form.on("change", opts.control_selector, function(e) {
+            show_changed_icon($(this));
             if (_.isFunction(opts.on_change)) {
                 opts.on_change(this);
             }

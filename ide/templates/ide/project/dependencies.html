@@ -2,11 +2,28 @@
 <!-- Compilation pane -->
 <div id="dependencies-pane-template" class="hide dependencies-pane">
     <div class="well alert alert-error hide"></div>
+    <div class="well" id="cloudpebble-dependencies">
+        <h3>{% trans 'CloudPebble project dependencies' %}</h3>
+        <form id="cloudpebble-dependencies-form">
+            <table class="table hide checkbox-table" id="cloudpebble-dependencies-table">
+                <thead><tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th>Version</th>
+                    <th>Last built</th>
+                    <th></th>
+                </tr></thead>
+                <tbody></tbody>
+            </table>
+        </form>
+        <p class="hide" id="cloudpebble-dependencies-no-packages">{% trans 'You do not have any package projects in CloudPebble.' %}</p>
+    </div>
     <div class="well">
-        <h3>{% trans 'Dependencies' %}</h3>
+        <h3>{% trans 'NPM Dependencies' %}</h3>
         <form id="dependencies-search-form">
             <textarea id="dependencies-search" rows="1" cols="50"></textarea>
         </form>
+        <p class="help-block">{% trans 'Try searching for the keyword "pebble-package" to get a list of all published Pebble packages' %}</p>
 
         <br><br>
         <form id="dependencies-form">
@@ -19,6 +36,8 @@
             <div class="bar" style="width: 100%;"></div>
         </div>
     </div>
+
+
     <div class="well settings-pane hide">
         <h3>Searchbox Options</h3>
         <div class="form-horizontal">

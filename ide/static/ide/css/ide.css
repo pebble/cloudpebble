@@ -686,6 +686,11 @@ table.build-results tr.pending .build-state {
     width: 590px;
 }
 
+.dependencies-pane .help-block {
+    width: initial;
+    margin: initial;
+}
+
 .package-suggestion {
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -713,6 +718,11 @@ table.build-results tr.pending .build-state {
     text-align: center;
     font-size: large;
     color: white;
+}
+
+.checkbox-table td:last-child {
+    width: 30px;
+    padding-bottom: 20px;
 }
 
 

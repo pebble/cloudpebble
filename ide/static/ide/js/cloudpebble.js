@@ -124,13 +124,30 @@ CloudPebble.Prompts = {
         $('#modal-text-confirm-button').unbind('click').click(submit);
         $('#modal-text-input form').unbind('submit').submit(submit);
     },
-    Confirm: function(title, prompt, callback) {
+    Confirm: function(title, prompt, callback, hide_callback) {
         $('#modal-warning-prompt-title').text(title);
         $('#modal-warning-prompt-warning').text(prompt);
-        $('#modal-warning-prompt').modal();
+        var modal = $('#modal-warning-prompt').modal();
         $('#modal-warning-prompt-button').unbind('click').click(function() {
             $('#modal-warning-prompt').modal('hide');
             callback();
+        });
+        if(hide_callback) {
+            modal.on('hide', function() {
+                modal.off('hide');
+                hide_callback();
+            });
+        }
+    },
+    ConfirmLink: function(title, prompt, url) {
+        $('#modal-confirm-link-prompt-title').text(title);
+        $('#modal-confirm-link-prompt-warning').text(prompt);
+        var modal = $('#modal-confirm-link-prompt').modal();
+        $('#modal-confirm-link-prompt-button').attr('href', url).unbind('click').click(function() {
+            modal.modal('hide');
+        });
+        modal.on('hide', function() {
+            modal.off('hide');
         });
     },
     Progress: {

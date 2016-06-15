@@ -23,3 +23,4 @@ class Dependency(IdeModel):
 
     class Meta(IdeModel.Meta):
         unique_together = (('project', 'name'),)
+

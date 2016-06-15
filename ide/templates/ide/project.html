@@ -171,7 +171,7 @@
                         <input type="text" id="new-c-file-name" pattern="[a-zA-Z0-9_-]+\.(c|h)$">
                     </div>
                 </div>
-                <div class="control-group">
+                <div class="control-group native-only">
                     <label class="control-label" for="new-c-target">{% trans 'Target' context "compilation target" %}</label>
                     <div class="controls">
                         <select id="new-c-target">
@@ -389,6 +389,19 @@
     <div class="modal-footer">
         <button class="btn" data-dismiss="modal">{% trans 'Cancel' %}</button>
         <button class="btn btn-danger" id="modal-warning-prompt-button">{% trans 'Continue' %}</button>
+    </div>
+</div>
+<!-- Modal link confirmation prompt -->
+<div id="modal-confirm-link-prompt" class="modal hide fade" tabindex="-1" role="dialog">
+    <div class="modal-header">
+        <h3 id="modal-confirm-link-prompt-title">Modal header</h3>
+    </div>
+    <div class="modal-body">
+        <p id="modal-confirm-link-prompt-warning">Modal warning</p>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">{% trans 'Cancel' %}</button>
+        <a class="btn btn-danger" id="modal-confirm-link-prompt-button">{% trans 'Continue' %}</a>
     </div>
 </div>
 <div id="export-progress" class="modal hide fade" tabindex="-1" role="dialog">

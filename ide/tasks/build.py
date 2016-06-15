@@ -14,8 +14,7 @@ from django.utils.timezone import now
 
 import apptools.addr2lines
 from ide.utils.sdk import generate_wscript_file, generate_jshint_file, generate_manifest_dict, \
-    generate_simplyjs_manifest_dict, generate_pebblejs_manifest_dict, manifest_name_for_project, \
-    make_valid_package_manifest_name
+    generate_simplyjs_manifest_dict, generate_pebblejs_manifest_dict, manifest_name_for_project
 from utils.td_helper import send_td_event
 from ide.models.build import BuildResult, BuildSize
 from ide.models.files import SourceFile, ResourceFile, ResourceVariant
@@ -122,8 +121,6 @@ def run_compile(build_result):
     # Assemble the project somewhere
     base_dir = tempfile.mkdtemp(dir=os.path.join(settings.CHROOT_ROOT, 'tmp') if settings.CHROOT_ROOT else None)
 
-    os.mkdir(base_dir)
-
     manifest_filename = manifest_name_for_project(project)
     try:
         # Resources
@@ -206,7 +203,6 @@ def run_compile(build_result):
                 command = [settings.SDK3_PEBBLE_WAF, "configure", "build"]
             else:
                 raise Exception("invalid sdk version.")
-            logger.info("RUNNING COMMAND `%s`", " ".join(command))
             output += subprocess.check_output(command, stderr=subprocess.STDOUT, preexec_fn=_set_resource_limits,
                                               env=environ)
         except subprocess.CalledProcessError as e:
@@ -258,7 +254,7 @@ def run_compile(build_result):
                     build_result.save_pbw(temp_file)
                 else:
                     # tar.gz up the entire built project directory as the build result.
-                    archive = shutil.make_archive("package", 'gztar', base_dir)
+                    archive = shutil.make_archive(os.path.join(base_dir, "package"), 'gztar', base_dir)
                     build_result.save_package(archive)
 
             build_result.save_build_log(output or 'Failed to get output')
