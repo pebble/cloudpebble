@@ -43,7 +43,6 @@ NEW_THINGS = [
      "We have converted all your png and pbi resources to the new 'bitmap' format. Read more <a href='https://developer.getpebble.com/blog/2015/12/02/Bitmap-Resources/'> on our blog</a>."],
     ["Pebble.js can now build Chalk apps for Pebble Time Round. You can enable this in the settings of your pebble.js project."],
     ["We now have support for using packages, enabling easier code sharing! Check out <a href='https://developer.pebble.com/blog/2016/06/07/pebble-packages/'>our blog post</a>."],
-    ["CloudPebble has been updated to support Diorite!"],  # TODO: finish this message
 ]
 
 
