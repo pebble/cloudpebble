@@ -14,8 +14,8 @@
                 <label class="control-label" for="settings-sdk-version">{% trans "SDK Version" %}</label>
                 <div class="controls">
                     <select id="settings-sdk-version">
-                        <option value="2" {% if project.sdk_version == '2' %}selected{% else %}disabled{% endif %}>{% trans 'SDK 2 (Pebble, Pebble Steel)' %}</option>
-                        <option value="3" {% if project.sdk_version == '3' %}selected{% endif %}>{% trans 'SDK 3 (Pebble Time)' %}</option>
+                        <option value="2" {% if project.sdk_version == '2' %}selected{% else %}disabled{% endif %}>{% trans 'SDK 2 (obsolete)' %}</option>
+                        <option value="3" {% if project.sdk_version == '3' %}selected{% endif %}>{% trans 'SDK 4' %}</option>
                     </select>
                     <span class="help-block">You should reload the page after changing and saving this setting.</span>
                 </div>

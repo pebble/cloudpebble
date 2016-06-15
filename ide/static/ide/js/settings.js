@@ -294,7 +294,7 @@ CloudPebble.Settings = (function() {
             if (CloudPebble.ProjectInfo.sdk_version == '2' && sdk != '2' && !sdk_version_change_confirmed) {
                 e.stopPropagation();
                 $(this).val('2');
-                var message = gettext("Are you sure you want to upgrade this project to SDK 3? THIS CANNOT BE UNDONE.");
+                var message = gettext("Are you sure you want to upgrade this project to SDK 4? THIS CANNOT BE UNDONE.");
                 CloudPebble.Prompts.Confirm(gettext("UPGRADE SDK"), message, function() {
                     sdk_version_change_confirmed = true;
                     if(sdk == '3') {

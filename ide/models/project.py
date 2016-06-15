@@ -36,8 +36,8 @@ class Project(IdeModel):
     project_type = models.CharField(max_length=10, choices=PROJECT_TYPES, default='native')
 
     SDK_VERSIONS = (
-        ('2', _('SDK 2 (Pebble, Pebble Steel)')),
-        ('3', _('SDK 3 beta (Pebble Time)')),
+        ('2', _('SDK 2 (obsolete)')),
+        ('3', _('SDK 4 beta')),
     )
     sdk_version = models.CharField(max_length=6, choices=SDK_VERSIONS, default='2')
 
