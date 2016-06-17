@@ -217,6 +217,9 @@ CloudPebble.Editor.Autocomplete = new (function() {
             if (!token || (token.string.replace(/[^a-z0-9_]/gi, '').length < 1 && token.string != '.' && token.string != '->')) {
                 return;
             }
+            if (token.type == "comment") {
+                return;
+            }
         } catch (e) {
             return;
         }
