@@ -691,6 +691,12 @@ table.build-results tr.pending .build-state {
     margin: initial;
 }
 
+#dependencies-headers th.dependencies-headers-version {
+    /* version column of headers table */
+    min-width: 5em;
+}
+
+
 .package-suggestion {
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1323,4 +1329,18 @@ label .text-icon {
 
 .text-core .text-wrap .text-tags .text-tag .text-button .text-label {
   line-height: 30px;
+}
+
+.spinner {
+    position: absolute;
+    right: 20px;
+    width: 16px;
+    height: 16px;
+}
+
+.spinner-dark {
+    background-image: url("/static/ide/img/darkspinner.gif");
+}
+.spinner-light {
+    background-image: url("/static/ide/img/spinner.gif");
 }

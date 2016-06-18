@@ -2,6 +2,7 @@ CloudPebble.Dependencies = (function() {
     var dependencies_template = null;
     var kv_table;
     var cloudpebble_dependencies_form;
+    var headers;
 
     // TODO: Once values for these are decided, they should be deleted and refactored out
     var SUGGEST_CACHED = true;
@@ -251,10 +252,9 @@ CloudPebble.Dependencies = (function() {
             }
         }).textext()[0];
 
-        var spinner = $('<img>')
-            .attr('src', "/static/ide/img/spinner.gif")
-            .css({position: 'absolute', right: '20px', top: 'calc(50% - 8px)'})
-            .addClass('hide');
+        var spinner = $('<div>')
+            .css({top: 'calc(50% - 8px)'})
+            .addClass('hide spinner spinner-light');
         textarea_element.closest(".text-wrap").append(spinner);
 
         cache.on('update', function() {
@@ -306,6 +306,42 @@ CloudPebble.Dependencies = (function() {
         }).init();
     }
 
+    function select_element(element) {
+        var range, selection;
+        if (document.body.createTextRange) {
+            range = document.body.createTextRange();
+            range.moveToElementText(element);
+            range.select();
+        } else if (window.getSelection) {
+            selection = window.getSelection();
+            range = document.createRange();
+            range.selectNodeContents(element);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    }
+
+    function update_header_list(library_data) {
+        var pane = $('#dependencies-headers');
+        if (_.size(library_data) == 0) {
+            pane.addClass('hide');
+        }
+        else {
+            var libraries = _.chain(library_data).map(function(library, name) {
+                library.name = name
+                return library;
+            }).sortBy('name').map(function(library) {
+                return $('<tr>')
+                    .append($('<td>').text(library.name))
+                    .append($('<td>').text(library.version))
+                    .append($('<td>').append(_.map(library.headers, function(header) {
+                        return $('<div>').append($('<a href="#">').text(interpolate('#include <%s>', [header])));
+                    })));
+            }).value();
+            pane.removeClass('hide');
+            pane.find('tbody').empty().append(libraries);
+        }
+    }
 
     /** Save the dependencies and update YCM */
     function save_dependencies(npm_values, interdependencies) {
@@ -330,6 +366,10 @@ CloudPebble.Dependencies = (function() {
         }).then(function(result) {
             CloudPebble.ProjectInfo.interdependencies = interdependencies;
             return CloudPebble.YCM.updateDependencies(result.dependencies);
+        }).then(function(result) {
+            if (result) {
+                update_header_list(result.data.libraries)
+            }
         });
     }
 
@@ -362,19 +402,24 @@ CloudPebble.Dependencies = (function() {
         ]);
     }
 
-    function setup_cloudpebble_dependencies_table(cloudpebble_dependencies_pane, alerts) {
-        var table = cloudpebble_dependencies_pane.find('table');
-        var table_body = table.find('tbody');
-        var no_packages = cloudpebble_dependencies_pane.find('#cloudpebble-dependencies-no-packages');
-        cloudpebble_dependencies_form = cloudpebble_dependencies_pane.find('form');
-        var live_form = make_live_settings_form({
+    function make_live_form(options) {
+        return make_live_settings_form(_.extend({
             save_function: save_forms,
             on_save: alerts.hide_error,
             error_function: alerts.show_error,
             on_progress_started: alerts.show_progress,
             on_progress_complete: alerts.hide_progress,
+            group_selector: 'tr'
+        }, options))
+    }
+
+    function setup_cloudpebble_dependencies_table(cloudpebble_dependencies_pane) {
+        var table = cloudpebble_dependencies_pane.find('table');
+        var table_body = table.find('tbody');
+        var no_packages = cloudpebble_dependencies_pane.find('#cloudpebble-dependencies-no-packages');
+        cloudpebble_dependencies_form = cloudpebble_dependencies_pane.find('form');
+        var live_form = make_live_form({
             form: cloudpebble_dependencies_form,
-            group_selector: 'tr',
             label_selector: 'td:last-child span'
         });
 
@@ -399,7 +444,7 @@ CloudPebble.Dependencies = (function() {
     }
 
     /** Set up function for the entire pane */
-    function setup_npm_dependencies_pane(pane, alerts) {
+    function setup_npm_dependencies_pane(pane) {
         var npm_search_form = pane.find('#dependencies-search-form');
         var dependencies_table = pane.find('#dependencies-table');
 
@@ -407,15 +452,9 @@ CloudPebble.Dependencies = (function() {
 
         // setTimeout is required due to a limitation/bug in the textext library.
         setTimeout(function() {
-            var live_form = make_live_settings_form({
-                save_function: save_forms,
-                on_save: alerts.hide_error,
-                error_function: alerts.show_error,
-                on_progress_started: alerts.show_progress,
-                on_progress_complete: alerts.hide_progress,
+            var live_form = make_live_form({
                 form: pane.find('#dependencies-form'),
                 label_selector: 'tr button',
-                group_selector: 'tr'
             });
 
             kv_table = setup_dependencies_table(dependencies_table, live_form);
@@ -433,22 +472,25 @@ CloudPebble.Dependencies = (function() {
         });
     }
 
-    function setup_alerts(pane) {
-        return {
-            show_error: function display_error(error) {
-                pane.find('.alert-error').removeClass('hide').text(error);
-            },
-            hide_error: function hide_error() {
-                pane.find('.alert-error').addClass('hide');
-            },
-            show_progress: function show_progress() {
-                pane.find('.dependencies-progress').removeClass('hide');
-            },
-            hide_progress: function hide_progress() {
-                pane.find('.dependencies-progress').addClass('hide');
-            }
+    var alerts = new (function Alerts() {
+        var pane;
+        this.show_error = function show_error(error) {
+            pane.find('.alert-error').removeClass('hide').text(error);
+        };
+        this.hide_error = function hide_error() {
+            pane.find('.alert-error').addClass('hide');
+        };
+        this.show_progress = function show_progress() {
+            $('#sidebar-pane-dependencies .spinner').removeClass('hide');
+        };
+        this.hide_progress = function hide_progress() {
+            $('#sidebar-pane-dependencies .spinner').addClass('hide');
+        };
+        this.init = function(set_pane) {
+            pane = set_pane;
         }
-    }
+    });
+
 
     /** This sets up the hidden search options pane. */
     function setup_search_test_options(pane, search_form) {
@@ -475,15 +517,33 @@ CloudPebble.Dependencies = (function() {
         });
     }
 
+    function setup_headers_pane(pane, alerts) {
+        pane.on('click', 'tbody a', function() {
+            select_element(this);
+        });
+        pane.find('#dependencies-refresh').click(function() {
+            make_live_form().save();
+        });
+        CloudPebble.YCM.initialise().then(function(data) {
+            if (data.npm_error) {
+                alerts.show_error(data.npm_error);
+            }
+            else {
+                update_header_list(data.libraries);
+            }
+        });
+
+    }
+
     /** Save both dependency forms */
     function save_forms() {
         return save_dependencies(kv_table.getValues(), _.pluck(cloudpebble_dependencies_form.serializeArray(), 'name'))
     }
 
     function setup_dependencies_pane(pane) {
-        var alerts = setup_alerts(pane);
-        setup_npm_dependencies_pane(dependencies_template, alerts);
-        setup_cloudpebble_dependencies_table(dependencies_template.find('#cloudpebble-dependencies'), alerts);
+        setup_npm_dependencies_pane(dependencies_template);
+        setup_cloudpebble_dependencies_table(dependencies_template.find('#cloudpebble-dependencies'));
+        setup_headers_pane(pane.find('#dependencies-headers'));
     }
 
     function show_dependencies_pane() {
@@ -506,6 +566,11 @@ CloudPebble.Dependencies = (function() {
             commands[gettext("Dependencies")] = CloudPebble.Dependencies.Show;
             CloudPebble.FuzzyPrompt.AddCommands(commands);
             dependencies_template = $('#dependencies-pane-template').remove().removeClass('hide');
+            alerts.init(dependencies_template);
+            alerts.show_progress();
+            CloudPebble.YCM.initialise().finally(function() {
+                alerts.hide_progress();
+            });
         }
     };
 })();

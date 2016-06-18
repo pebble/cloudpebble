@@ -148,8 +148,10 @@ CloudPebble.YCM = new (function() {
             platforms = 'aplite';
         }
         var sdk_version = CloudPebble.ProjectInfo.sdk_version;
+        var spinup_data;
         mInitPromise = Ajax.Post('/ide/project/' + PROJECT_ID + '/autocomplete/init', {platforms: platforms, sdk: sdk_version})
             .then(function(data) {
+                spinup_data = data;
                 mUUID = data.uuid;
                 mURL = data.server + 'ycm/' + data.uuid + '/ws';
                 mSocket = new EventedWebSocket(mURL);
@@ -157,7 +159,6 @@ CloudPebble.YCM = new (function() {
                 mSocket.on('close error', function() {
                     setTimeout(function() {self.restart();}, 1000);
                 });
-
                 return mSocket.connect();
             }).then(function() {
                 if(mRestarting) {
@@ -168,6 +169,7 @@ CloudPebble.YCM = new (function() {
                     $('.prepare-autocomplete').hide();
                     $('.footer-credits').show();
                 }
+                return spinup_data;
             }).catch(function(e) {
                 mFailed = true;
                 $('.prepare-autocomplete').text(gettext("Code completion unavailable."));
@@ -241,7 +243,11 @@ CloudPebble.YCM = new (function() {
 
     this.updateDependencies = function(dependencies) {
         if(!mInitialised) {
-            return;
+            if (mInitPromise) {
+                return mInitPromise.then(function() {
+                    return this.updateDependencies(dependencies);
+                }.bind(this));
+            }
         }
         return ws_send('dependencies', {
             'dependencies': dependencies

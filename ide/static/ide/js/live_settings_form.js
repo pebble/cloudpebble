@@ -25,14 +25,13 @@ function make_live_settings_form(options) {
         on_change: null,
         on_progress_started: null,
         on_progress_complete: null,
-        progress_timeout: 1000,
+        progress_timeout: 300,
         control_selector: 'input, select, textarea',
         changeable_control_selector: "input[type!='number'], textarea",
         label_selector: '.control-group label',
         group_selector: '.control-group'
     });
     if (!_.isFunction(opts.save_function)
-        || (!_.isObject(opts.form))
         || (!_.isFunction(opts.error_function))
         || (!!opts.on_change && !_.isFunction(opts.on_change))
         || (!!opts.on_save && !_.isFunction(opts.on_save))) {
@@ -174,6 +173,9 @@ function make_live_settings_form(options) {
 
     /** Set up the live form's event hooks and add status icons for all form groups */
     function init() {
+        if (!_.isObject(opts.form)) {
+            throw new Error("No form selector specified");
+        }
         // When a form-reset button is clicked, submit the form instantly
         opts.form.bind("reset", function() {
             var values = {};
