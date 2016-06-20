@@ -103,3 +103,12 @@ class TestFindProjectRoot(TestCase):
             "src/main.c",
             "appinfo.json"
         ], "", "appinfo.json")
+
+    def test_PR_317(self):
+        """ PR 317 fixes a bug where find_project_root would fail with 11 character filenames """
+        self.run_test([
+            "MAINTAINERS",
+            "package.json",
+            "src/"
+            "src/main.c",
+        ], "", "package.json")
