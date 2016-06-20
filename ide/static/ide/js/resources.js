@@ -25,8 +25,8 @@ CloudPebble.Resources = (function() {
     var PLATFORMS = {
         aplite: [TAG_APLITE, TAG_MONOCHROME, TAG_RECT],
         basalt: [TAG_BASALT, TAG_COLOUR, TAG_RECT],
-        chalk: [TAG_CHALK, TAG_MONOCHROME, TAG_ROUND],
-        diorite: [TAG_DIORITE, TAG_COLOUR, TAG_RECT]
+        chalk: [TAG_CHALK, TAG_COLOUR, TAG_ROUND],
+        diorite: [TAG_DIORITE, TAG_MONOCHROME, TAG_RECT]
     };
 
     /**
