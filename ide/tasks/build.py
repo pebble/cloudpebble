@@ -163,9 +163,6 @@ def run_compile(build_result):
                 if f.kind not in ('png', 'bitmap'):
                     continue
                 target_dir = os.path.abspath(os.path.join(base_dir, resource_root, ResourceFile.DIR_MAP[f.kind]))
-                abs_target = os.path.abspath(os.path.join(target_dir, f.file_name))
-                if not abs_target.startswith(target_dir):
-                    raise Exception("Suspicious filename: %s" % f.file_name)
                 f.copy_all_variants_to_dir(target_dir)
 
             open(os.path.join(base_dir, manifest_filename), 'w').write(json.dumps(manifest_dict))
