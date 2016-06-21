@@ -9,9 +9,9 @@ CloudPebble.Editor.Autocomplete = new (function() {
         cm.off('beforeSelectionChange', mSelectionCallback);
         var text = cm.getRange(selection.anchor, selection.head);
         var old_text = cm.getRange(old_selection.from, old_selection.to);
-        if(old_text == expected_text) {
+        if (old_text == expected_text) {
             createMark(cm, old_selection.from, old_selection.to);
-        } else if((text[0] == "'" && text[text.length-1] == "'") || (text[0] == '"' && text[text.length-1] == '"')) {
+        } else if ((text[0] == "'" && text[text.length - 1] == "'") || (text[0] == '"' && text[text.length - 1] == '"')) {
             selection.anchor.ch += 1;
             selection.head.ch -= 1;
         }
@@ -54,13 +54,13 @@ CloudPebble.Editor.Autocomplete = new (function() {
         var first_pos = null;
         var first_mark = null;
         $.each(completion.params, function(index, value) {
-            var p = [{line: data.from.line, ch:start}, {line: data.from.line, ch:start + value.length}];
+            var p = [{line: data.from.line, ch: start}, {line: data.from.line, ch: start + value.length}];
             var mark = createMark(cm, p[0], p[1]);
-            if(first_pos === null) first_pos = p;
-            if(first_mark === null) first_mark = mark;
+            if (first_pos === null) first_pos = p;
+            if (first_mark === null) first_mark = mark;
             start += value.length + 2;
         });
-        if(first_pos === null) {
+        if (first_pos === null) {
             cm.setSelection({ch: orig_start, line: data.from.line});
         } else {
             first_mark.clear();
@@ -71,11 +71,11 @@ CloudPebble.Editor.Autocomplete = new (function() {
     var renderCompletion = function(elt, data, completion) {
         var type = completion.ret;
         var elem = $('<span>');
-        if(type) {
+        if (type) {
             elem.append($('<span class="muted">').append(document.createTextNode(type + ' ')));
         }
         elem.append(document.createTextNode(completion.name));
-        if(completion.params) {
+        if (completion.params) {
             elem.append($('<span class="muted">').append('(' + completion.params.join(', ') + ')'));
         }
         elt.appendChild(elem[0]);
@@ -92,16 +92,16 @@ CloudPebble.Editor.Autocomplete = new (function() {
     var mCurrentSummaryElement = null;
     var mWaiting = null;
     var renderSummary = function(completion, element) {
-        if(!mCurrentSummaryElement) return;
+        if (!mCurrentSummaryElement) return;
         var docs = CloudPebble.Documentation.Lookup(completion.name || completion.text);
-        if(docs && docs.description) {
+        if (docs && docs.description) {
             mCurrentSummaryElement.html(docs.description.replace(/[.;](\s)[\s\S]*/, '.')).show();
         } else {
             mCurrentSummaryElement.empty().hide();
         }
     };
     var showSummary = function(hints) {
-        if(mCurrentSummaryElement) {
+        if (mCurrentSummaryElement) {
             mCurrentSummaryElement.remove();
         }
         var summary = $('<div>');
@@ -116,7 +116,7 @@ CloudPebble.Editor.Autocomplete = new (function() {
         clearTimeout(mWaiting);
     };
     var hideSummary = function() {
-        if(!mCurrentSummaryElement) {
+        if (!mCurrentSummaryElement) {
             return;
         }
         mCurrentSummaryElement.remove();
@@ -134,7 +134,7 @@ CloudPebble.Editor.Autocomplete = new (function() {
     var mLastAutocompleteToken = null;
     var mLastAutocompletePos = null;
     var run_last = _.debounce(function() {
-        if(mLastInvocation) {
+        if (mLastInvocation) {
             console.log("running trailing completion.");
             self.complete.apply(self, mLastInvocation);
         }
@@ -198,15 +198,15 @@ CloudPebble.Editor.Autocomplete = new (function() {
         var cursor = editor.getCursor();
         try {
             var token = editor.getTokenAt(cursor);
-            if(token.string == mLastAutocompleteToken
+            if (token.string == mLastAutocompleteToken
                 && token.start == mLastAutocompletePos.ch
                 && cursor.line == mLastAutocompletePos.line) {
                 return;
             }
-            if(!token || (token.string.replace(/[^a-z0-9_]/gi, '').length < 1 && token.string != '.' && token.string != '->')) {
+            if (!token || (token.string.replace(/[^a-z0-9_]/gi, '').length < 1 && token.string != '.' && token.string != '->')) {
                 return;
             }
-        } catch(e) {
+        } catch (e) {
             return;
         }
         mRunning = true;
