@@ -81,6 +81,14 @@ CloudPebble.Editor.Autocomplete = new (function() {
         elt.appendChild(elem[0]);
     };
 
+    function renderHeaderCompletion(elt, data, completion) {
+        $(elt).append([
+            $('<span class="muted">').text('#include ' + completion.quotes[0]),
+            $('<span>').text(completion.name),
+            $('<span class="muted">').text(completion.quotes[1])
+        ])
+    }
+
     var mCurrentSummaryElement = null;
     var mWaiting = null;
     var renderSummary = function(completion, element) {
@@ -131,8 +139,58 @@ CloudPebble.Editor.Autocomplete = new (function() {
             self.complete.apply(self, mLastInvocation);
         }
     }, 50);
+
+    function collect_header_files() {
+        var local = _.map(_.keys(CloudPebble.Editor.GetAllFiles()).sort(), function(name) {
+            return {
+                name: name,
+                local: true
+            }
+        });
+        var lib = _.map(CloudPebble.Dependencies.GetHeaderFileNames().sort(), function(name) {
+            return {
+                name: name,
+                local: false
+            }
+        });
+        return _.filter(local.concat(lib), function(item) {
+            return item.name.indexOf('.h', item.length - 2) !== -1;
+        }).concat({name: 'pebble.h', local: false});
+    }
+
+    function search_header_files(command, editor) {
+        var query = editor.getTokenAt(editor.getCursor()).string;
+        var completions = Promise.resolve({});
+        var match;
+        if (match = query.match(/^\s*#include\s+(["<])?([^>"]*)$/i)) {
+            var files = collect_header_files();
+            if (match[2].trim()) {
+                var fuse = new Fuse(files, {
+                    keys: ["name"]
+                });
+                files = fuse.search(match[2]);
+            }
+
+            var header_completions = _.map(files, function(file) {
+                var quotes = file.local ? '""' : '<>';
+                var include_text = interpolate('#include %s%s%s', [quotes[0], file.name, quotes[1]]);
+                return {
+                    kind: 'INCLUDE',
+                    insertion_text: include_text,
+                    name: file.name,
+                    quotes: quotes
+                }
+            });
+            completions = Promise.resolve({
+                completions: header_completions,
+                start_column: 0
+            });
+        }
+        return completions;
+    }
+
     this.complete = function(editor, finishCompletion, options) {
-        if(mRunning) {
+        if (mRunning) {
             mLastInvocation = [editor, finishCompletion, options];
             return;
         }
@@ -152,46 +210,59 @@ CloudPebble.Editor.Autocomplete = new (function() {
             return;
         }
         mRunning = true;
+        var request_function;
+        if (token.type === 'meta') {
+            request_function = search_header_files
+        }
+        else {
+            request_function = CloudPebble.YCM.request;
+        }
 
-        CloudPebble.YCM.request('completions', editor)
-            .then(function(data) {
-                var completions = _.map(data.completions, function(item) {
-                    if(item.kind == 'FUNCTION' || (item.kind == 'MACRO' && item.detailed_info.indexOf('(') > 0)) {
-                        var params = item.detailed_info.substr(item.detailed_info.indexOf('(') + 1);
-                        if (params[0] == ')') {
-                            params = [];
-                        } else {
-                            params = params.substring(1, params.length - 2).split(', ');
-                        }
-                        return {
-                            text: item.insertion_text + '(' + params.join(', ') + ')',
-                            params: params,
-                            ret: item.extra_menu_info,
-                            name: item.insertion_text,
-                            hint: expandCompletion,
-                            render: renderCompletion
-                        }
+        request_function('completions', editor).then(function(data) {
+            var completions = _.map(data.completions, function(item) {
+                if (item.kind == 'FUNCTION' || (item.kind == 'MACRO' && item.detailed_info.indexOf('(') > 0)) {
+                    var params = item.detailed_info.substr(item.detailed_info.indexOf('(') + 1);
+                    if (params[0] == ')') {
+                        params = [];
                     } else {
-                        return {text: item.insertion_text};
+                        params = params.substring(1, params.length - 2).split(', ');
                     }
-                });
-                var result = {
-                    list: completions,
-                    from: Pos(cursor.line, data.start_column - 1),
-                    to: Pos(cursor.line, cursor.ch)
-                };
-                CodeMirror.on(result, 'shown', showSummary);
-                CodeMirror.on(result, 'select', renderSummary);
-                CodeMirror.on(result, 'close', hideSummary);
-                CodeMirror.on(result, 'pick', _.partial(didPick, result));
-                finishCompletion(result);
-            }).catch(function(e) {
-                // Discard "ycm is generally broken" errors
-                if (!e.noYCM) throw e;
-            }).finally(function() {
-                mRunning = false;
-                run_last();
+                    return {
+                        text: item.insertion_text + '(' + params.join(', ') + ')',
+                        params: params,
+                        ret: item.extra_menu_info,
+                        name: item.insertion_text,
+                        hint: expandCompletion,
+                        render: renderCompletion
+                    }
+                } else if (item.kind == 'INCLUDE') {
+                    return {
+                        text: item.insertion_text,
+                        name: item.name,
+                        quotes: item.quotes,
+                        render: renderHeaderCompletion
+                    }
+                } else {
+                    return {text: item.insertion_text};
+                }
             });
+            var result = {
+                list: completions,
+                from: Pos(cursor.line, data.start_column - 1),
+                to: Pos(cursor.line, cursor.ch)
+            };
+            CodeMirror.on(result, 'shown', showSummary);
+            CodeMirror.on(result, 'select', renderSummary);
+            CodeMirror.on(result, 'close', hideSummary);
+            CodeMirror.on(result, 'pick', _.partial(didPick, result));
+            finishCompletion(result);
+        }).catch(function(e) {
+            // Discard "ycm is generally broken" errors
+            if (!e.noYCM) throw e;
+        }).finally(function() {
+            mRunning = false;
+            run_last();
+        });
     };
     this.complete.async = true;
 

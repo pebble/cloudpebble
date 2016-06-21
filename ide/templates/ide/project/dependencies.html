@@ -32,6 +32,9 @@
             </table>
         </form>
         <p class="hide" id="cloudpebble-dependencies-no-packages">{% trans 'You do not have any package projects in CloudPebble.' %}</p>
+        <hr>
+        <button data-content="{% trans 'Refresh the list of projects to show any new package projects you have created.' %}"
+            class="btn btn-primary" id="cloudpebble-dependencies-refresh"> {% trans 'Refresh' %}</button>
     </div>
 
     <div class="well hide" id="dependencies-headers">
@@ -48,7 +51,8 @@
             </tbody>
         </table>
         <hr>
-        <button class="btn btn-primary" id="dependencies-refresh">Refresh</button>
+        <button data-content="{% trans 'Update the list of headers to reflect changes in any packages.' %}"
+                class="btn btn-primary" id="dependencies-refresh">Refresh</button>
     </div>
 
     <div class="well settings-pane hide">

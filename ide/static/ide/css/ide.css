@@ -691,6 +691,13 @@ table.build-results tr.pending .build-state {
     margin: initial;
 }
 
+.dependencies-header-name {
+    color: #d0d0d0;
+}
+.dependencies-header a:hover .dependencies-header-name {
+    color: inherit;
+}
+
 #dependencies-headers th.dependencies-headers-version {
     /* version column of headers table */
     min-width: 5em;

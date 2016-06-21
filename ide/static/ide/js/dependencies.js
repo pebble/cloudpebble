@@ -2,7 +2,7 @@ CloudPebble.Dependencies = (function() {
     var dependencies_template = null;
     var kv_table;
     var cloudpebble_dependencies_form;
-    var headers;
+    var headers = [];
 
     // TODO: Once values for these are decided, they should be deleted and refactored out
     var SUGGEST_CACHED = true;
@@ -321,7 +321,16 @@ CloudPebble.Dependencies = (function() {
         }
     }
 
-    function update_header_list(library_data) {
+
+    function render_header(name) {
+        return $('<div class="dependencies-header">').append($('<a href="#">').append([
+            $('<span>').text('#include <'),
+            $('<span class="dependencies-header-name">').text(name),
+            $('<span>').text('>')
+        ]));
+    }
+
+    function update_header_list_ui(library_data) {
         var pane = $('#dependencies-headers');
         if (_.size(library_data) == 0) {
             pane.addClass('hide');
@@ -334,13 +343,20 @@ CloudPebble.Dependencies = (function() {
                 return $('<tr>')
                     .append($('<td>').text(library.name))
                     .append($('<td>').text(library.version))
-                    .append($('<td>').append(_.map(library.headers, function(header) {
-                        return $('<div>').append($('<a href="#">').text(interpolate('#include <%s>', [header])));
-                    })));
+                    .append($('<td>').append(_.map(library.headers, render_header)));
             }).value();
             pane.removeClass('hide');
             pane.find('tbody').empty().append(libraries);
         }
+    }
+
+    function update_header_file_list(library_data) {
+        headers = _.flatten(_.pluck(library_data, 'headers'));
+    }
+
+    function update_header_list(library_data) {
+        update_header_list_ui(library_data);
+        update_header_file_list(library_data);
     }
 
     /** Save the dependencies and update YCM */
@@ -413,34 +429,50 @@ CloudPebble.Dependencies = (function() {
         }, options))
     }
 
-    function setup_cloudpebble_dependencies_table(cloudpebble_dependencies_pane) {
-        var table = cloudpebble_dependencies_pane.find('table');
+    /** Set up the interdependencies UI. */
+    function setup_cloudpebble_dependencies_table(pane) {
+        var table = pane.find('table');
         var table_body = table.find('tbody');
-        var no_packages = cloudpebble_dependencies_pane.find('#cloudpebble-dependencies-no-packages');
-        cloudpebble_dependencies_form = cloudpebble_dependencies_pane.find('form');
+        var no_packages = pane.find('#cloudpebble-dependencies-no-packages');
+        var refresh_btn = pane.find('#cloudpebble-dependencies-refresh');
+        cloudpebble_dependencies_form = pane.find('form');
         var live_form = make_live_form({
             form: cloudpebble_dependencies_form,
             label_selector: 'td:last-child span'
         });
-
         live_form.init();
-        get_projects().then(function(projects) {
-            if (projects.length > 0) {
-                table.removeClass('hide');
-                no_packages.addClass('hide');
-                table_body.empty();
-                table_body.append(_.map(projects, function(project) {
-                    var element = render_cloudpebble_dependency(project);
-                    live_form.addElement(element);
-                    return element;
-                }));
-            }
-            else {
-                table.addClass('hide');
-                no_packages.removeClass('hide');
-            }
-
+        function refresh() {
+            return get_projects().then(function(projects) {
+                if (projects.length > 0) {
+                    table.removeClass('hide');
+                    no_packages.addClass('hide');
+                    table_body.empty();
+                    table_body.append(_.map(projects, function(project) {
+                        var element = render_cloudpebble_dependency(project);
+                        live_form.addElement(element);
+                        return element;
+                    }));
+                }
+                else {
+                    table.addClass('hide');
+                    no_packages.removeClass('hide');
+                }
+            });
+        }
+        refresh_btn.click(function() {
+            refresh_btn.prop('disabled', true);
+            refresh().finally(function() {
+                refresh_btn.prop('disabled', false);
+            })
+        }).popover({
+            trigger: "hover",
+            html: true,
+            placement: 'right',
+            animation: false,
+            delay: {show: 250},
+            container: 'body'
         });
+        refresh();
     }
 
     /** Set up function for the entire pane */
@@ -472,6 +504,7 @@ CloudPebble.Dependencies = (function() {
         });
     }
 
+    /** This singleton manages the error box and loading indicator. */
     var alerts = new (function Alerts() {
         var pane;
         this.show_error = function show_error(error) {
@@ -517,13 +550,25 @@ CloudPebble.Dependencies = (function() {
         });
     }
 
+    /** This sets up the list of headers */
     function setup_headers_pane(pane, alerts) {
+        // Select an entire header when it is clicked.
         pane.on('click', 'tbody a', function() {
             select_element(this);
         });
+        // The headers refresh button is a lie since really it just saves the dependencies forms when you click it.
+        // However, this has the effect of updating the autocompletions/headers if any of the libraries have changed (e.g. after a new version is published/compiled).
         pane.find('#dependencies-refresh').click(function() {
             make_live_form().save();
+        }).popover({
+            trigger: "hover",
+            html: true,
+            placement: 'right',
+            animation: false,
+            delay: {show: 250},
+            container: 'body'
         });
+        // If YCM is already initialised or in the process of initialising, this will just resolve with the initialisation promise's data.
         CloudPebble.YCM.initialise().then(function(data) {
             if (data.npm_error) {
                 alerts.show_error(data.npm_error);
@@ -540,6 +585,7 @@ CloudPebble.Dependencies = (function() {
         return save_dependencies(kv_table.getValues(), _.pluck(cloudpebble_dependencies_form.serializeArray(), 'name'))
     }
 
+    /** Set up all UI elements */
     function setup_dependencies_pane(pane) {
         setup_npm_dependencies_pane(dependencies_template);
         setup_cloudpebble_dependencies_table(dependencies_template.find('#cloudpebble-dependencies'));
@@ -567,10 +613,18 @@ CloudPebble.Dependencies = (function() {
             CloudPebble.FuzzyPrompt.AddCommands(commands);
             dependencies_template = $('#dependencies-pane-template').remove().removeClass('hide');
             alerts.init(dependencies_template);
+
             alerts.show_progress();
-            CloudPebble.YCM.initialise().finally(function() {
+            CloudPebble.YCM.initialise().then(function(data) {
+                if (data.libraries) {
+                    update_header_file_list(data.libraries)
+                }
+            }).finally(function() {
                 alerts.hide_progress();
             });
+        },
+        GetHeaderFileNames: function() {
+            return headers;
         }
     };
 })();
