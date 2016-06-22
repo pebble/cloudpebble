@@ -9,7 +9,7 @@ from django.core.validators import RegexValidator, ValidationError
 from django.utils.translation import ugettext_lazy as _
 
 from ide.models.s3file import S3File
-from ide.models.scriptfile import ScriptFile
+from ide.models.textfile import TextFile
 from ide.models.meta import IdeModel
 
 __author__ = 'katharine'
@@ -223,7 +223,7 @@ class ResourceIdentifier(IdeModel):
         super(ResourceIdentifier, self).save(*args, **kwargs)
 
 
-class SourceFile(ScriptFile):
+class SourceFile(TextFile):
     project = models.ForeignKey('Project', related_name='source_files')
     file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_.-]+\.(c|h|js)$", message=_("Invalid filename."))])
     folder = 'sources'
