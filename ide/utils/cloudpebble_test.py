@@ -56,7 +56,7 @@ def make_appinfo(options=None):
         },
         "sdkVersion": "3",
         "shortName": "test",
-        "uuid": "666x6666-x66x-66x6-x666-666666666666",
+        "uuid": "123e4567-e89b-42d3-a456-426655440000",
         "versionLabel": "1.0",
         "watchapp": {
             "watchface": False
@@ -92,7 +92,7 @@ def make_package(package_options=None, pebble_options=None, no_pebble=False):
                 "media": []
             },
             "sdkVersion": "3",
-            "uuid": '666x6666-x66x-66x6-x666-666666666666',
+            "uuid": '123e4567-e89b-42d3-a456-426655440000',
             "watchapp": {
                 "watchface": False
             }

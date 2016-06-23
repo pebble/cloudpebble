@@ -303,7 +303,6 @@ def do_import_archive(project_id, archive, delete_project=False):
                     for root_file_name, loaded in file_exists_for_root.iteritems():
                         if not loaded:
                             raise KeyError("No file was found to satisfy the manifest filename: {}".format(root_file_name))
-                    project.full_clean()
                     project.save()
                     send_td_event('cloudpebble_zip_import_succeeded', project=project)
 
