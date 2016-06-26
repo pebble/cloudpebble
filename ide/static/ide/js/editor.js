@@ -366,7 +366,7 @@ CloudPebble.Editor = (function() {
             if (file_kind == 'c') {
                 var clang_lines = [];
                 var sChecking = false;
-                var throttled_check = _.debounce(function() {
+                var debounced_check = _.debounce(function() {
                     if(sChecking) return;
                     sChecking = true;
                     CloudPebble.YCM.request('errors', code_mirror)
@@ -410,8 +410,8 @@ CloudPebble.Editor = (function() {
                             sChecking = false;
                         });
                 }, 2000);
-                code_mirror.on('change', throttled_check);
-                throttled_check();
+                code_mirror.on('change', debounced_check);
+                debounced_check();
 
                 code_mirror.on('mousedown', function(cm, e) {
                     if(e.ctrlKey || e.metaKey) {
