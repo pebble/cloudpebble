@@ -2,8 +2,6 @@ import json
 
 import mock
 from django.core.urlresolvers import reverse
-from django.core.exceptions import ValidationError
-from django.utils.datastructures import MultiValueDictKeyError
 from ide.utils.cloudpebble_test import CloudpebbleTestCase
 from utils.fakes import FakeS3
 
@@ -12,7 +10,7 @@ __author__ = 'joe'
 fake_s3 = FakeS3()
 
 
-@mock.patch('ide.models.files.s3', fake_s3)
+@mock.patch('ide.models.s3file.s3', fake_s3)
 class TestSource(CloudpebbleTestCase):
     """Tests for the Tests models"""
 

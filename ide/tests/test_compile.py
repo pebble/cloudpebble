@@ -38,7 +38,7 @@ int main(void) {
 
 
 @skipIf(settings.TRAVIS, "Travis cannot run build tests")
-@mock.patch('ide.models.files.s3', fake_s3)
+@mock.patch('ide.models.s3file.s3', fake_s3)
 @mock.patch('ide.models.build.s3', fake_s3)
 class TestCompile(CloudpebbleTestCase):
 
@@ -48,7 +48,7 @@ class TestCompile(CloudpebbleTestCase):
         self.build_result = BuildResult.objects.create(project=self.project)
 
     def add_file(self, name, contents):
-        SourceFile.objects.create(project=self.project, file_name=name, target="app").save_file(contents)
+        SourceFile.objects.create(project=self.project, file_name=name, target="app").save_text(contents)
 
     def compile(self):
         run_compile(self.build_result.id)
