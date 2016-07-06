@@ -10,10 +10,10 @@ class RegexHolder(object):
         'semver': r'^(0|[1-9]\d?|1\d{2}|2[0-4]\d|25[0-5])\.(0|[1-9]\d?|1\d{2}|2[0-4]\d|25[0-5])\.0$',
 
         # Match a string of letters and numbers separated with underscores but not starting with a digit
-        'c_identifier': r'^([a-zA-Z_][_a-zA-Z\d]*)$',
+        'c_identifier': r'^\w+$',
 
         # Match a C identifier optionally followed by an [array index]
-        'c_identifier_with_index': r'^([a-zA-Z_][_a-zA-Z\d]*)(?:\[(\d+)\])?$',
+        'c_identifier_with_index': r'^(\w+)(?:\[(\d+)\])?$',
 
         # Match a UUID4
         'uuid': r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
