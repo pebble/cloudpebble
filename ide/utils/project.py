@@ -56,6 +56,8 @@ def find_project_root_and_manifest(project_items):
         # Check if the file is one of the kinds of manifest file
         for name in MANIFEST_KINDS:
             dir_end = base_dir.rfind(name)
+            if dir_end == -1:
+                continue
             # Ensure that the file is actually a manifest file
             if dir_end + len(name) == len(base_dir):
                 if is_manifest(name, item.read()):

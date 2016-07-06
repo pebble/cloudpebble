@@ -17,7 +17,7 @@ $(function() {
         return Ajax.Post('/ide/import/gist', {gist_id: gist_id}).then(function(data) {
             return Ajax.PollTask(data.task_id, {milliseconds: 500});
         }).then(function(result) {
-            return 'ide/project/' + result;
+            return '/ide/project/' + result;
         });
     };
 });

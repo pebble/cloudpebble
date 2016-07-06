@@ -6,8 +6,8 @@ from django.db import models
 from ide.models.s3file import S3File
 
 
-class ScriptFile(S3File):
-    """ ScriptFiles add support to TextFiles for last-modified timestamps and code folding """
+class TextFile(S3File):
+    """ TextFile adds support to S3File for last-modified timestamps and code folding """
     last_modified = models.DateTimeField(blank=True, null=True, auto_now=True)
     folded_lines = models.TextField(default="[]")
     _create_local_if_not_exists = True
@@ -30,7 +30,7 @@ class ScriptFile(S3File):
         if self.project:
             self.project.last_modified = now()
             self.project.save()
-        super(ScriptFile, self).save(*args, **kwargs)
+        super(TextFile, self).save(*args, **kwargs)
 
     class Meta(S3File.Meta):
         abstract = True

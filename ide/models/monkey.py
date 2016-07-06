@@ -8,7 +8,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
 from django.core.urlresolvers import reverse
-from ide.models.scriptfile import ScriptFile
+from ide.models.textfile import TextFile
 from ide.models.s3file import S3File
 from ide.models.meta import IdeModel
 from ide.utils.image_correction import uncorrect
@@ -184,7 +184,7 @@ class TestRun(IdeModel):
         ordering = ['original_name', '-session__date_added']
 
 
-class TestFile(ScriptFile):
+class TestFile(TextFile):
     file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_-]+$")])
     project = models.ForeignKey('Project', related_name='test_files')
     folder = 'tests/scripts'
@@ -216,7 +216,7 @@ class TestFile(ScriptFile):
     def get_screenshot_sets(self):
         return ScreenshotSet.objects.filter(test=self)
 
-    class Meta(ScriptFile.Meta):
+    class Meta(TextFile.Meta):
         unique_together = (('project', 'file_name'),)
         ordering = ['file_name']
 

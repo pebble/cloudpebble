@@ -263,7 +263,7 @@ def do_import_archive(project_id, archive, delete_project=False):
                                 logger.debug("Adding variant %s with tags [%s]", root_file_name, tags_string)
                                 actual_file_name = resource['file']
                                 resource_variants[actual_file_name] = ResourceVariant.objects.create(resource_file=resources_files[root_file_name], tags=tags_string)
-                                resource_variants[actual_file_name].save_text(extracted)
+                                resource_variants[actual_file_name].save_file(extracted)
                                 file_exists_for_root[root_file_name] = True
 
                         elif filename.startswith(SRC_DIR):

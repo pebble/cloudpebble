@@ -2,7 +2,6 @@ import json
 import os
 import logging
 
-
 from django.db import models
 from django.utils.timezone import now
 from django.utils.translation import ugettext as _
@@ -11,7 +10,8 @@ from django.utils.translation import ugettext_lazy as _
 
 from ide.models.meta import IdeModel
 from ide.models.s3file import S3File
-from ide.models.scriptfile import ScriptFile
+from ide.models.textfile import TextFile
+from ide.models.meta import IdeModel
 
 __author__ = 'katharine'
 
@@ -228,7 +228,7 @@ class ResourceIdentifier(IdeModel):
         super(ResourceIdentifier, self).save(*args, **kwargs)
 
 
-class SourceFile(ScriptFile):
+class SourceFile(TextFile):
     project = models.ForeignKey('Project', related_name='source_files')
     file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_.-]+\.(c|h|js)$", message=_("Invalid filename."))])
     folder = 'sources'
@@ -246,5 +246,5 @@ class SourceFile(ScriptFile):
         else:
             return 'worker_src/%s' % self.file_name
 
-    class Meta(ScriptFile.Meta):
+    class Meta(TextFile.Meta):
         unique_together = (('project', 'file_name'),)
