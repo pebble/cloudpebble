@@ -14,7 +14,6 @@ from django.core.exceptions import SuspiciousOperation
 from django.db import transaction
 
 import utils.s3 as s3
-from ide.models.dependency import Dependency
 from ide.models.files import SourceFile, ResourceFile, ResourceIdentifier, ResourceVariant
 from ide.models.project import Project
 from ide.utils.project import find_project_root_and_manifest, InvalidProjectArchiveException, MANIFEST_KINDS, BaseProjectItem
@@ -274,13 +273,13 @@ def do_import_archive(project_id, archive, delete_project=False):
                                     base_filename = base_filename[len('js/'):]
                                 source = SourceFile.objects.create(project=project, file_name=base_filename)
                                 with z.open(entry.filename) as f:
-                                    source.save_file(f.read().decode('utf-8'))
+                                    source.save_text(f.read().decode('utf-8'))
                         elif filename.startswith(WORKER_SRC_DIR):
                             if (not filename.startswith('.')) and (filename.endswith('.c') or filename.endswith('.h') or filename.endswith('.js')):
                                 base_filename = filename[len(WORKER_SRC_DIR):]
                                 source = SourceFile.objects.create(project=project, file_name=base_filename, target='worker')
                                 with z.open(entry.filename) as f:
-                                    source.save_file(f.read().decode('utf-8'))
+                                    source.save_text(f.read().decode('utf-8'))
 
                     # Now add all the resource identifiers
                     for root_file_name in desired_resources:
