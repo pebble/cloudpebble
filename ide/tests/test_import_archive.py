@@ -143,7 +143,7 @@ class TestImportProject(CloudpebbleTestCase):
             do_import_archive(self.project_id, bundle)
 
 
-@mock.patch('ide.models.files.s3', fake_s3)
+@mock.patch('ide.models.s3file.s3', fake_s3)
 class TestImportLibrary(CloudpebbleTestCase):
     def setUp(self):
         self.login({'type': 'package'})

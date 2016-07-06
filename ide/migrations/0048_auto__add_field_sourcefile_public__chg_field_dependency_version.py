@@ -14,9 +14,27 @@ class Migration(SchemaMigration):
                       keep_default=False)
 
 
+        # Changing field 'Dependency.version'
+        db.alter_column(u'ide_dependency', 'version', self.gf('django.db.models.fields.CharField')(max_length=2000))
+        # Adding M2M table for field project_dependencies on 'Project'
+        m2m_table_name = db.shorten_name(u'ide_project_project_dependencies')
+        db.create_table(m2m_table_name, (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('from_project', models.ForeignKey(orm['ide.project'], null=False)),
+            ('to_project', models.ForeignKey(orm['ide.project'], null=False))
+        ))
+        db.create_unique(m2m_table_name, ['from_project_id', 'to_project_id'])
+
+
     def backwards(self, orm):
         # Deleting field 'SourceFile.public'
         db.delete_column(u'ide_sourcefile', 'public')
+
+
+        # Changing field 'Dependency.version'
+        db.alter_column(u'ide_dependency', 'version', self.gf('django.db.models.fields.CharField')(max_length=100))
+        # Removing M2M table for field project_dependencies on 'Project'
+        db.delete_table(db.shorten_name(u'ide_project_project_dependencies'))
 
 
     models = {
@@ -63,7 +81,7 @@ class Migration(SchemaMigration):
             'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'builds'", 'to': "orm['ide.Project']"}),
             'started': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'db_index': 'True', 'blank': 'True'}),
             'state': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
-            'uuid': ('django.db.models.fields.CharField', [], {'default': "'7842cb49-0d1e-4db6-aec1-44affb1b3978'", 'max_length': '36'})
+            'uuid': ('django.db.models.fields.CharField', [], {'default': "'5c50cc8e-096d-4c6d-8891-29b07ef4735b'", 'max_length': '36'})
         },
         'ide.buildsize': {
             'Meta': {'object_name': 'BuildSize'},
@@ -80,7 +98,7 @@ class Migration(SchemaMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'dependencies'", 'to': "orm['ide.Project']"}),
-            'version': ('django.db.models.fields.CharField', [], {'max_length': '100'})
+            'version': ('django.db.models.fields.CharField', [], {'max_length': '2000'})
         },
         'ide.project': {
             'Meta': {'object_name': 'Project'},
@@ -96,7 +114,7 @@ class Migration(SchemaMigration):
             'app_modern_multi_js': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'app_platforms': ('django.db.models.fields.TextField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'app_short_name': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'app_uuid': ('django.db.models.fields.CharField', [], {'default': "'6e4043b7-e259-4699-9a4a-707711b8486d'", 'max_length': '36', 'null': 'True', 'blank': 'True'}),
+            'app_uuid': ('django.db.models.fields.CharField', [], {'default': "'73d080ab-f967-4769-a2b8-566c5284faac'", 'max_length': '36', 'null': 'True', 'blank': 'True'}),
             'app_version_label': ('django.db.models.fields.CharField', [], {'default': "'1.0'", 'max_length': '40', 'null': 'True', 'blank': 'True'}),
             'github_branch': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'github_hook_build': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
@@ -109,6 +127,7 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
             'optimisation': ('django.db.models.fields.CharField', [], {'default': "'s'", 'max_length': '1'}),
             'owner': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"}),
+            'project_dependencies': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['ide.Project']", 'symmetrical': 'False'}),
             'project_type': ('django.db.models.fields.CharField', [], {'default': "'native'", 'max_length': '10'}),
             'sdk_version': ('django.db.models.fields.CharField', [], {'default': "'2'", 'max_length': '6'})
         },

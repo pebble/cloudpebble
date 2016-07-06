@@ -71,20 +71,20 @@ class CompileTester(CloudpebbleTestCase):
 
 
 @skipIf(settings.TRAVIS, "Travis cannot run build tests")
-@mock.patch('ide.models.files.s3', fake_s3)
+@mock.patch('ide.models.s3file.s3', fake_s3)
 @mock.patch('ide.models.build.s3', fake_s3)
 class TestCompile(CompileTester):
     def test_native_SDK2_project(self):
         """ Check that an SDK 3 project (with package.json support off) builds successfully """
         self.make_project({'sdk': '2'})
-        SourceFile.objects.create(project=self.project, file_name="main.c", target="app").save_file(SIMPLE_MAIN)
+        SourceFile.objects.create(project=self.project, file_name="main.c", target="app").save_text(SIMPLE_MAIN)
         self.compile()
         self.check_success(num_platforms=1)
 
     def test_native_SDK3_project(self):
         """ Check that an SDK 3 project (with package.json support on) builds successfully """
         self.make_project()
-        SourceFile.objects.create(project=self.project, file_name="main.c", target="app").save_file(SIMPLE_MAIN)
+        SourceFile.objects.create(project=self.project, file_name="main.c", target="app").save_text(SIMPLE_MAIN)
         self.compile()
         self.check_success()
 
@@ -101,7 +101,7 @@ class TestCompile(CompileTester):
             lib_path = os.path.join(tempdir, 'libname')
 
             # Include the library in the code and package.json
-            SourceFile.objects.create(project=self.project, file_name="main.c", target="app").save_file(DEPENDENCY_MAIN)
+            SourceFile.objects.create(project=self.project, file_name="main.c", target="app").save_text(DEPENDENCY_MAIN)
             self.project.set_dependencies({
                 'libname': lib_path
             })
@@ -124,8 +124,8 @@ class TestCompileLive(LiveServerTestCase, CompileTester):
         self.make_project()
         # Build the package
         package = Project.objects.create(sdk_version='3', project_type='package', app_short_name='libname', owner_id=self.user_id)
-        SourceFile.objects.create(project=package, file_name="whatever.c", target="app").save_file(LIBRARY_C)
-        SourceFile.objects.create(project=package, file_name="whatever.h", target="app", public=True).save_file(LIBRARY_H)
+        SourceFile.objects.create(project=package, file_name="whatever.c", target="app").save_text(LIBRARY_C)
+        SourceFile.objects.create(project=package, file_name="whatever.h", target="app", public=True).save_text(LIBRARY_H)
         package_build_result = BuildResult.objects.create(project=package)
         run_compile(package_build_result.id)
         # Set up the project which depends on the package

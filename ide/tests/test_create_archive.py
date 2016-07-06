@@ -39,11 +39,11 @@ class TestExport(ExportTester):
     def test_export_package(self):
         """ Check that packages are exported with the correct file structure """
         self.create_project({'type': 'package'})
-        SourceFile.objects.create(project=self.project, file_name="main.h", target="app").save_file('file_contents')
-        SourceFile.objects.create(project=self.project, file_name="header.h", public=True).save_file('header_contents')
-        SourceFile.objects.create(project=self.project, file_name="app.js").save_file('js_contents')
+        SourceFile.objects.create(project=self.project, file_name="main.h", target="app").save_text('file_contents')
+        SourceFile.objects.create(project=self.project, file_name="header.h", public=True).save_text('header_contents')
+        SourceFile.objects.create(project=self.project, file_name="app.js").save_text('js_contents')
         resource = ResourceFile.objects.create(project=self.project, file_name="cat.png", kind="bitmap")
-        ResourceVariant.objects.create(resource_file=resource, tags=ResourceVariant.TAGS_DEFAULT).save_string('png_content')
+        ResourceVariant.objects.create(resource_file=resource, tags=ResourceVariant.TAGS_DEFAULT).save_text('png_content')
         ResourceIdentifier.objects.create(resource_file=resource, resource_id='RESOURCE')
 
         self.run_test({
