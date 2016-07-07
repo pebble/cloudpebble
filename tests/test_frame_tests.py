@@ -24,7 +24,7 @@ test test {
 
     # (Re)install the app
     do install_app app.pbw
-    do launch_app "MyApp"
+    do launch_app "myapp"
     do wait 2
 
     do macro constrain_execution

@@ -49,7 +49,9 @@ CloudPebble.Editor = (function() {
         var platform_name = ConnectionPlatformNames[platform];
 
         CloudPebble.Prompts.Progress.Show("Testing", "Starting test");
-        CloudPebble.Compile.GetPlatformsCompiledFor().then(function(platforms) {
+        CloudPebble.Editor.SaveAll().then(function() {
+            return CloudPebble.Compile.GetPlatformsCompiledFor();
+        }).then(function(platforms) {
             if (platforms.length == 0) {
                 throw new Error(gettext("Project must be compiled before testing"))
             }
@@ -64,8 +66,9 @@ CloudPebble.Editor = (function() {
             CloudPebble.Prompts.Progress.Update(gettext("Starting test"));
             return emulator.runTest(PROJECT_ID, test_id, platform_name, options.update);
         }).then(function (result) {
-            CloudPebble.Prompts.Progress.Hide();
             return CloudPebble.TestManager.ShowLiveTestRun(result['subscribe_url'], result['session_id'], result['run_id']);
+        }).then(function(){
+            CloudPebble.Prompts.Progress.Hide();
         }).catch(function (error) {
             CloudPebble.Prompts.Progress.Update(error.message);
             CloudPebble.Prompts.Progress.Fail();

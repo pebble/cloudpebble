@@ -81,7 +81,7 @@ test {test_name} {{
 """
     return test_template.format(
         test_name=test_name,
-        app_name=app_name,
+        app_name=app_name.lower(),
         uuid=uuid,
         content="".join('    %s' % l for l in test_file.readlines())
     )

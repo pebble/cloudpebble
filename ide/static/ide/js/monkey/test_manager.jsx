@@ -535,8 +535,8 @@ CloudPebble.TestManager = (function() {
         },
         ShowLiveTestRun(url, session_id, run_id) {
             const api = get_api();
-            api.Logs.subscribe(run_id, session_id, url);
-            return api.Route.navigate('sessions', session_id)
+            return api.Tests.refresh()
+                .then(() => api.Route.navigate('sessions', session_id))
                 .then(() => api.Route.navigate('/logs', run_id))
                 .then(show_test_manager_pane);
         },
