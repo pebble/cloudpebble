@@ -112,3 +112,12 @@ class TestFindProjectRoot(TestCase):
             "src/"
             "src/main.c",
         ], "", "package.json")
+
+    def test_find_most_shallow_project(self):
+        """ Check that the most shallow possible valid-looking project is chosen. """
+        self.run_test([
+            "build/appinfo.json",
+            "build/src/main.c",
+            "package.json",
+            "src/main.c",
+        ], "", "package.json")

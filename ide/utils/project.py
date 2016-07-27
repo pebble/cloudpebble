@@ -1,6 +1,6 @@
-import logging
 import abc
 import json
+import os.path
 
 from django.utils.translation import ugettext as _
 
@@ -50,7 +50,9 @@ def find_project_root_and_manifest(project_items):
     """
     SRC_DIR = 'src/'
 
-    for item in project_items:
+    # Sort the paths by the number of path separators they have,
+    sorted_items = sorted(project_items, key=lambda x: os.path.normpath(x.path).count('/'))
+    for i, item in enumerate(sorted_items):
         base_dir = item.path
 
         # Check if the file is one of the kinds of manifest file
@@ -70,8 +72,8 @@ def find_project_root_and_manifest(project_items):
         # The base dir is the location of the manifest file without the manifest filename.
         base_dir = base_dir[:dir_end]
 
-        # Now check that there is a a source directory containing at least one source file.
-        for source_item in project_items:
+        # Now check the rest of the items for a source directory containing at least one source file.
+        for source_item in sorted_items[i+1:]:
             source_dir = source_item.path
             if source_dir[:dir_end] != base_dir:
                 continue
