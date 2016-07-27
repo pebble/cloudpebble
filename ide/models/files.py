@@ -237,6 +237,7 @@ class SourceFile(TextFile):
         ('pkjs', _('PebbleKit JS')),
         ('worker', _('Worker')),
         ('public', _('Public Header File')),
+        ('common', _('Shared JS')),
     )
     target = models.CharField(max_length=10, choices=TARGETS, default='app')
 
@@ -252,6 +253,11 @@ class SourceFile(TextFile):
         },
         'simplyjs': {
             'app': 'src'
+        },
+        'rocky': {
+            'app': os.path.join('src', 'rocky'),
+            'pkjs': os.path.join('src', 'pkjs'),
+            'common': os.path.join('src', 'common')
         },
         'package': {
             'app': os.path.join('src', 'c'),
@@ -271,7 +277,7 @@ class SourceFile(TextFile):
                 break
         else:
             raise ValueError(_("Unacceptable file path for this project [%s]") % path)
-        if file_target in ('pkjs', 'common') or project_type in ('pebblejs', 'simplyjs'):
+        if file_target in ('pkjs', 'common') or project_type in ('pebblejs', 'simplyjs', 'rocky'):
             expected_exts = ('.js', '.json')
         else:
             expected_exts = ('.c', '.h')

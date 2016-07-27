@@ -103,7 +103,8 @@ CloudPebble.Sidebar = (function() {
             native: ['app', 'pkjs'],
             pebblejs: ['app'],
             simplyjs: ['app'],
-            'package': ['app', 'pkjs', 'public']
+            'package': ['app', 'pkjs', 'public'],
+            rocky: ['app', 'pkjs', 'common']
 
         };
         _.each(default_sections_for_project_types[type], get_source_section)
@@ -194,6 +195,12 @@ CloudPebble.Sidebar = (function() {
             }
             if (type == 'pebblejs') {
                 $('.not-pebblejs').hide();
+            }
+            if(type == 'rocky') {
+                $('.not-rocky').hide();
+            }
+            else {
+                $('.rocky-only').hide();
             }
         }
     };

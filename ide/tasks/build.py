@@ -1,21 +1,20 @@
+import logging
 import os
+import resource
 import shutil
 import subprocess
 import tempfile
 import zipfile
-import resource
-import logging
 
 from celery import task
-
 from django.conf import settings
 from django.utils.timezone import now
 
 import apptools.addr2lines
-from utils.td_helper import send_td_event
 from ide.models.build import BuildResult, BuildSize
 from ide.models.dependency import validate_dependency_version
-from ide.utils.sdk import assemble_project
+from ide.utils.sdk.project_assembly import assemble_project
+from utils.td_helper import send_td_event
 
 __author__ = 'katharine'
 

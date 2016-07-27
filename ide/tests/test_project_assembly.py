@@ -1,4 +1,7 @@
-""" These are integration tests which check that project builds work. They are *not* run on Travis. """
+"""
+These tests check that ide.utils.sdk.project_assembly produces archives containing all expected files.
+Although there is overlap with test_create_archive, this function is only used by the build task.
+"""
 
 import mock
 import tempfile
@@ -41,13 +44,10 @@ class TestAssemble(ProjectTester):
             'package.json': True,
             'src': {
                 'main.c': True,
-                'app.js': True,
-                'c': {
-                    'lib.c': True
-                },
-                'js': {
-                    'pebblekit': {'app.js': True}
-                },
+                'c': {'lib.c': True},
+                'rocky': {'index.js': True},
+                'pkjs': {'app.js': True},
+                'common': {'shared.js': True},
                 'resources': {
                     'fonts': {},
                     'images': {},
@@ -74,7 +74,6 @@ class TestAssemble(ProjectTester):
             'include': False,
             'src': {
                 'main.c': True,
-                'app.js': False
             },
             True: True
         }
@@ -122,4 +121,13 @@ class TestAssemble(ProjectTester):
             self.add_file('lib.c')
             self.add_file('lib.h', target='public')
         expected = self.make_expected_sdk3_project(include=True, src={'c': True, 'resources': True}, resources=False)
+        self.assertDictEqual(self.tree, expected)
+
+    def test_rockyjs(self):
+        """ Check that an SDK 3 project with a worker looks correct """
+        with self.get_tree(type='rocky'):
+            self.add_file('index.js', target='app')
+            self.add_file('app.js', target='pkjs')
+            self.add_file('shared.js', target='common')
+        expected = self.make_expected_sdk3_project(src={'pkjs': True, 'rocky': True, 'common': True}, resources=False)
         self.assertDictEqual(self.tree, expected)

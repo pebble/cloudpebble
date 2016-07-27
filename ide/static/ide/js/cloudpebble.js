@@ -22,10 +22,11 @@ CloudPebble.ProgressBar = (function() {
 /** Define calculated properties based on the project type. */
 CloudPebble.ProjectProperties = (function() {
     var spec = {
-        'js_only': ['simplyjs', 'pebblejs'],
-        'is_runnable': ['native', 'pebblejs', 'simplyjs'],
+        'js_only': ['simplyjs', 'pebblejs', 'rocky'],
+        'is_runnable': ['native', 'pebblejs', 'simplyjs', 'rocky'],
         'supports_message_keys': ['native', 'package'],
-        'supports_jslint': ['native', 'package', 'pebblejs']
+        'supports_sdk2': ['native', 'simplyjs', 'pebblejs'],
+        'supports_jslint': ['native', 'package', 'pebblejs', 'rocky']
     };
     var obj = {
         Init: function() {
@@ -43,7 +44,8 @@ CloudPebble.TargetNames =   {
     'app': gettext("App Source"),
     'public': gettext("Public headers"),
     'pkjs': gettext("PebbleKit JS"),
-    'worker': gettext("Worker source")
+    'worker': gettext("Worker source"),
+    'common': gettext("Shared JavaScript")
 };
 
 CloudPebble.ProjectInfo = {};

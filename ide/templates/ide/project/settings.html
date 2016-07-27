@@ -10,6 +10,12 @@
                     <input type="text" id="settings-name">
                 </div>
             </div>
+            <div class="control-group">
+                <label class="control-label">{% trans 'Project type' %}</label>
+                <div class="static">
+                    {{project.get_project_type_display}}
+                </div>
+            </div>
             <div class="sdk-version native-only control-group">
                 <label class="control-label" for="settings-sdk-version">{% trans "SDK Version" %}</label>
                 <div class="controls">
@@ -22,7 +28,7 @@
             </div>
         </div>
         <div class="well sdk3-only">
-            <div class="control-group">
+            <div class="control-group supports-sdk2">
                 {# Translators: "Aplite" is a platform name and should be left untranslated. #}
                 <label class="control-label" for="settings-build-aplite">{% trans 'Build Aplite' %}</label>
                 <div class="controls">
@@ -53,7 +59,7 @@
                     </span>
                 </div>
             </div>
-            <div class="control-group native-only" >
+            <div class="control-group sdk3-only not-pebblejs">
                 {# Translators: "Diorite" is a platform name and should be left untranslated. #}
                 <label class="control-label" for="settings-build-diorite">{% trans 'Build Diorite' %}</label>
                 <div class="controls">
@@ -173,8 +179,8 @@
                         </span>
                 </div>
             </div>
-            <div class="well native-or-package">
-                <div class="control-group sdk3-only">
+            <div class="well supports-message-keys">
+                <div class="control-group not-rocky sdk3-only">
                     <label class="control-label" for="settings-message-key-kind">{% trans 'Message key assignment kind' %}</label>
                     <div class="controls">
                         <select id="settings-message-key-kind">

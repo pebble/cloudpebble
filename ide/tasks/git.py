@@ -272,7 +272,7 @@ def github_pull(user, project):
         root, manifest_item = find_project_root_and_manifest([GitProjectItem(repo, x) for x in tree.tree])
     except ValueError as e:
         raise ValueError("In manifest file: %s" % str(e))
-    resource_root = root + 'resources/'
+    resource_root = root + project.resources_path + '/'
     manifest = json.loads(manifest_item.read())
 
     media = manifest.get('resources', {}).get('media', [])

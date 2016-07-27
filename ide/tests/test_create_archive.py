@@ -1,4 +1,7 @@
-""" These tests check that ide.tasks.archive.create_archive produces archives containing all expected files. """
+"""
+These tests check that ide.tasks.archive.create_archive produces archives containing all expected files.
+ Although there is overlap with test_project_assembly, this function is only used for exporting projects to users.
+"""
 import mock
 
 from ide.tasks.archive import create_archive

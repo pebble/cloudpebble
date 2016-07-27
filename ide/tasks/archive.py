@@ -18,7 +18,6 @@ from ide.models.files import SourceFile, ResourceFile, ResourceIdentifier, Resou
 from ide.models.project import Project
 from ide.utils.project import find_project_root_and_manifest, InvalidProjectArchiveException, MANIFEST_KINDS, BaseProjectItem
 from ide.utils.sdk import generate_manifest, generate_wscript_file, generate_jshint_file, manifest_name_for_project, load_manifest_dict
-
 from utils.td_helper import send_td_event
 
 __author__ = 'katharine'
@@ -261,7 +260,6 @@ def do_import_archive(project_id, archive, delete_project=False):
                                 resource_variants[actual_file_name] = ResourceVariant.objects.create(resource_file=resources_files[root_file_name], tags=tags_string)
                                 resource_variants[actual_file_name].save_file(extracted)
                                 file_exists_for_root[root_file_name] = True
-
                         else:
                             try:
                                 base_filename, target = SourceFile.get_details_for_path(project.project_type, filename)

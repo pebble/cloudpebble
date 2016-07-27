@@ -4,7 +4,7 @@ import shutil
 
 from django.conf import settings
 
-from ide.models import SourceFile, ResourceFile
+from ide.models import ResourceFile
 from ide.utils.prepreprocessor import process_file as check_preprocessor_directives
 from manifest import manifest_name_for_project, generate_manifest_dict
 from ide.utils.sdk import generate_wscript_file, generate_jshint_file
@@ -29,7 +29,7 @@ def assemble_source_files(project, base_dir):
 
 def assemble_simplyjs_sources(project, base_dir, build_result):
     """ Concatenate all JS files in the project into one file and add it to the project directory """
-    source_files = SourceFile.objects.filter(project=project)
+    source_files = project.source_files.all()
     shutil.rmtree(base_dir)
     shutil.copytree(settings.SIMPLYJS_ROOT, base_dir)
 
@@ -64,13 +64,14 @@ def assemble_resources(resource_path, resources, type_restrictions=None):
 
 def assemble_project(project, base_dir, build_result=None):
     """ Copy all files necessary to build a project into a directory. """
-    resources = ResourceFile.objects.filter(project=project)
+    resources = project.resources.all()
 
     if project.is_standard_project_type:
         # Write out the sources, resources, and wscript and jshint file
         assemble_source_files(project, base_dir)
-        assemble_resource_directories(project, base_dir)
-        assemble_resources(project.resources_path, resources)
+        if project.project_type != 'rocky':
+            assemble_resource_directories(project, base_dir)
+            assemble_resources(project.resources_path, resources)
         with open(os.path.join(base_dir, 'wscript'), 'w') as wscript:
             wscript.write(generate_wscript_file(project))
         with open(os.path.join(base_dir, 'pebble-jshintrc'), 'w') as jshint:

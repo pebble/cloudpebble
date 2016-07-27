@@ -166,6 +166,20 @@ class TestImportArchive(CloudpebbleTestCase):
         project = Project.objects.get(pk=self.project_id)
         self.assertEqual(project.source_files.filter(file_name='test.json').count(), 1)
 
+    def test_import_rocky(self):
+        """ Check that json files are correctly imported """
+        bundle = build_bundle({
+            'src/rocky/index.js': '',
+            'src/common/lib.js': '',
+            'src/pkjs/app.js': '',
+            'package.json': make_package(pebble_options={'projectType': 'rocky'})
+        })
+        do_import_archive(self.project_id, bundle)
+        project = Project.objects.get(pk=self.project_id)
+        self.assertEqual(project.source_files.filter(file_name='index.js', target='app').count(), 1)
+        self.assertEqual(project.source_files.filter(file_name='lib.js', target='common').count(), 1)
+        self.assertEqual(project.source_files.filter(file_name='app.js', target='pkjs').count(), 1)
+
 
 @mock.patch('ide.models.s3file.s3', fake_s3)
 class TestImportLibrary(CloudpebbleTestCase):
