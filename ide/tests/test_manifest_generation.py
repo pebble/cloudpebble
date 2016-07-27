@@ -67,7 +67,7 @@ class TestNPMStyleManifestGeneration(ManifestTester):
 
     def test_inter_project_dependencies(self):
         """ Check that inter-project dependencies are represented in the manifest """
-        package = Project.objects.create(project_type='package', app_short_name='mylib', owner_id=self.user_id)
+        package = Project.objects.create(name='mypackage', sdk_version='3', app_keys='[]', project_type='package', app_short_name='mylib', owner_id=self.user_id)
         build = BuildResult.objects.create(project=package, state=BuildResult.STATE_SUCCEEDED)
         self.project.project_dependencies.add(package)
         deps = {

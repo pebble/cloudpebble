@@ -90,7 +90,7 @@ def import_gist(user_id, gist_id):
 
         if project_type != 'simplyjs':
             for filename in gist.files:
-                if (project_type == 'native' and filename.endswith('.c') or filename.endswith('.h')) or filename.endswith('.js'):
+                if project_type == 'native' and filename.endswith(('.c', '.h', '.js', '.json')):
                     # Because gists can't have subdirectories.
                     if filename == 'pebble-js-app.js':
                         cp_filename = 'js/pebble-js-app.js'

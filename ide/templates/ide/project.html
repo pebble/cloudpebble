@@ -152,8 +152,9 @@
                 <div class="controls">
                     <select id="new-file-type">
                         <option value="c" selected>{% trans 'C file' %}</option>
-                        <option value="js">{% trans 'JavaScript file' %}</option>
                         <option value="include">{% trans 'Public header file' %}</option>
+                        <option value="js">{% trans 'JavaScript file' %}</option>
+                        <option value="json">{% trans 'JSON file' %}</option>
                         <option value="layout">{% trans 'Window Layout' %}</option>
                     </select>
                 </div>
@@ -187,6 +188,14 @@
                     <label class="control-label" for="new-c-generate-h">{% trans 'Create header' %}</label>
                     <div class="controls">
                         <input type="checkbox" id="new-c-generate-h">
+                    </div>
+                </div>
+            </div>
+            <div class="json-file-options file-group hide">
+                <div class="control-group">
+                    <label class="control-label" for="new-json-file-name">{% trans 'Filename' %}</label>
+                    <div class="controls">
+                        <input type="text" id="new-json-file-name" pattern="[a-zA-Z0-9_-]+\.json$">
                     </div>
                 </div>
             </div>
@@ -506,7 +515,8 @@ var USER_SETTINGS = {
 };
 var DOC_JSON = "{% static 'ide/documentation.json' %}";
 var LIBPEBBLE_PROXY = {{ libpebble_proxy | safe }};
-var VERSION_REGEX = "{{version_regex|escapejs}}";
+var REGEXES = _.mapObject(JSON.parse('{{regexes_json|escapejs}}'), function(v) { return new RegExp(v)});
+
 </script>
 <script src="{% static 'CodeMirror/lib/codemirror.js' %}"></script>
 <script src="{% static 'CodeMirror/addon/dialog/dialog.js' %}"></script>
@@ -527,6 +537,7 @@ var VERSION_REGEX = "{{version_regex|escapejs}}";
 <script src="{% static 'CodeMirror/keymap/vim.js' %}"></script>
 <script src="{% static 'ide/external/uuid.js' %}"></script>
 <script src="/ide/jsi18n/"></script>
+<script src="{% static 'ide/js/json_parse.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/csrf.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/cloudpebble.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/sidebar.js' %}" type="text/javascript"></script>

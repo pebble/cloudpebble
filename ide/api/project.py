@@ -165,9 +165,10 @@ def create_project(request):
         template_id = int(template_id)
     project_type = request.POST.get('type', 'native')
     template_name = None
-    sdk_version = request.POST.get('sdk', 2)
+    sdk_version = str(request.POST.get('sdk', '2'))
     try:
         with transaction.atomic():
+            app_keys = '{}' if sdk_version == '2' else '[]'
             project = Project.objects.create(
                 name=name,
                 owner=request.user,
@@ -179,6 +180,7 @@ def create_project(request):
                 app_capabilities='',
                 project_type=project_type,
                 sdk_version=sdk_version,
+                app_keys=app_keys
             )
             if template_id is not None and template_id != 0:
                 template = TemplateProject.objects.get(pk=template_id)
@@ -190,8 +192,6 @@ def create_project(request):
             elif project_type == 'pebblejs':
                 f = SourceFile.objects.create(project=project, file_name="app.js")
                 f.save_text(open('{}/src/js/app.js'.format(settings.PEBBLEJS_ROOT)).read())
-            if sdk_version != '2':
-                project.app_keys = '[]'
             project.full_clean()
             project.save()
     except IntegrityError as e:

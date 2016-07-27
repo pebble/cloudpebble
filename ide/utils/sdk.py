@@ -237,12 +237,12 @@ def build(ctx):
         if build_worker:
             worker_elf = '{}/pebble-worker.elf'.format(ctx.env.BUILD_DIR)
             binaries.append({'platform': p, 'app_elf': app_elf, 'worker_elf': worker_elf})
-            ctx.pbl_worker(source=ctx.path.ant_glob('worker_src/**/*.c'), target=worker_elf)
+            ctx.pbl_worker(source=ctx.path.ant_glob(['worker_src/**/*.c', 'src/js/**/*.json']), target=worker_elf)
         else:
             binaries.append({'platform': p, 'app_elf': app_elf})
 
     ctx.set_group('bundle')
-    ctx.pbl_bundle(binaries=binaries, js=ctx.path.ant_glob('src/js/**/*.js'), js_entry_file='src/js/app.js')
+    ctx.pbl_bundle(binaries=binaries, js=ctx.path.ant_glob(['src/js/**/*.js', 'src/js/**/*.json']), js_entry_file='src/js/app.js')
 """
 
     return wscript.replace('{{jshint}}', 'True' if jshint and not for_export else 'False')

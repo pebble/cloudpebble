@@ -1,10 +1,6 @@
 import re
 
-# Match major[.minor], where major and minor are numbers between 0 and 255 with no leading 0s
-SDK_VERSION_REGEX = r"^(0|[1-9]\d?|1\d{2}|2[0-4]\d|25[0-5])(\.(0|[1-9]\d?|1\d{2}|2[0-4]\d|25[0-5]))?$"
-
-# Match major.minor.0, where major and minor are numbers between 0 and 255 with no leading 0s
-SEMVER_REGEX = r"^(0|[1-9]\d?|1\d{2}|2[0-4]\d|25[0-5])\.(0|[1-9]\d?|1\d{2}|2[0-4]\d|25[0-5])\.0$"
+from ide.utils.regexes import regexes
 
 
 def parse_sdk_version(version):
@@ -12,7 +8,7 @@ def parse_sdk_version(version):
     :param version: should be "major[.minor]"
     :return: (major, minor)
     """
-    parsed = re.match(SDK_VERSION_REGEX, version)
+    parsed = re.match(regexes.SDK_VERSION, version)
     if not parsed:
         raise ValueError("Invalid version {}".format(version))
     major = parsed.group(1)
@@ -33,7 +29,7 @@ def parse_semver(semver):
     :param semver: should be "major.minor.0"
     :return: (major, minor)
     """
-    parsed = re.match(SEMVER_REGEX, semver)
+    parsed = re.match(regexes.SEMVER, semver)
     if not parsed:
         raise ValueError("Invalid semver {}".format(semver))
     return parsed.group(1), parsed.group(2)

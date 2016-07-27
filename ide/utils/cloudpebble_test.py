@@ -29,7 +29,7 @@ class CloudpebbleTestCase(TestCase):
         login_result = self.client.login(username='test', password='test')
         self.user_id = next(user.id for user in User.objects.all())
         self.assertTrue(login_result)
-        create_data = {'name': 'test', 'template': 0, 'type': 'native', 'sdk': 3}
+        create_data = {'name': 'test', 'template': 0, 'type': 'native', 'sdk': '3'}
         if project_options:
             create_data.update(project_options)
         new_project = json.loads(self.client.post('/ide/project/create', create_data).content)
@@ -56,7 +56,7 @@ def make_appinfo(options=None):
         },
         "sdkVersion": "3",
         "shortName": "test",
-        "uuid": "666x6666-x66x-66x6-x666-666666666666",
+        "uuid": "123e4567-e89b-42d3-a456-426655440000",
         "versionLabel": "1.0",
         "watchapp": {
             "watchface": False
@@ -89,7 +89,7 @@ def make_package(package_options=None, pebble_options=None, no_pebble=False):
                 "media": []
             },
             "sdkVersion": "3",
-            "uuid": '666x6666-x66x-66x6-x666-666666666666',
+            "uuid": '123e4567-e89b-42d3-a456-426655440000',
             "watchapp": {
                 "watchface": False
             }

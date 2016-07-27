@@ -10,18 +10,19 @@ fake_s3 = FakeS3()
 
 
 class ExportTester(CloudpebbleTestCase):
-    def create_project(self, options=None):
+    def create_project(self, options=None, files=None):
         fake_s3.reset()
         self.login(options)
         self.project = Project.objects.get(pk=self.project_id)
-        SourceFile.objects.create(project=self.project, file_name="main.c", target="app").save_text('file_contents')
+        for name in (files if files else {'main.c'}):
+            SourceFile.objects.create(project=self.project, file_name=name, target="app").save_text('file_contents')
 
     def run_test(self, expected_filenames):
         create_archive(self.project_id)
         data = read_bundle(fake_s3.read_last_file())
         filenames = set(data.keys())
-        self.assertSetEqual(filenames, expected_filenames | {'test/wscript', 'test/jshintrc'})
-
+        expected_filenames = expected_filenames | {'test/wscript', 'test/jshintrc'}
+        self.assertSetEqual(filenames, expected_filenames)
 
 @mock.patch('ide.tasks.archive.s3', fake_s3)
 @mock.patch('ide.models.s3file.s3', fake_s3)
@@ -54,3 +55,8 @@ class TestExport(ExportTester):
             'test/package.json',
             'test/src/resources/images/cat.png'
         })
+
+    def test_export_json(self):
+        """ Check that json files are correctly exported """
+        self.create_project(files={'main.c', 'test.json'})
+        self.run_test({'test/src/main.c', 'test/package.json', 'test/src/test.json'})
