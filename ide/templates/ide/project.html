@@ -65,7 +65,7 @@
                     <li class="nav-header" id="sidebar-pane-settings"><a href="#">{% trans 'Settings' %}</a></li>
                     <li class="nav-header sdk3-only" id="sidebar-pane-timeline"><a href="#">Timeline (Preview)</a></li>
                     <li class="nav-header" id="sidebar-pane-compile"><a href="#">{% trans 'Compilation' %}</a></li>
-                    {% if project.project_type != 'pebblejs' %}
+                    {% if project.project_type == 'package' or project.project_type == 'native' %}
                         <li class="nav-header sdk3-only" id="sidebar-pane-dependencies"><a href="#">{% trans 'Dependencies' %}</a>
                             <span class="spinner spinner-dark hide"></span>
                         </li>
@@ -76,13 +76,15 @@
 
                         </ul>
                     </li>
-                    <li class="nav-section not-simplyjs">
+                    {% if project.project_type != 'simplyjs' and project.project_type != 'rocky' %}
+                    <li class="nav-section">
                         <span class="nav-header">{% trans 'Resources' %}</span>
                         <button class="btn btn-small" id="sidebar-pane-new-resource">{% trans 'Add new' %}</button>
                         <ul class="nav-list" id="sidebar-resources">
 
                         </ul>
                     </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
@@ -206,13 +208,37 @@
                     <div class="controls">
                         <input type="text" id="new-json-file-name" pattern="[a-zA-Z0-9_-]+\.json$">
                     </div>
+                    <div class="control-group rocky-only">
+                        <label class="control-label" for="new-json-target">{% trans 'Target' context "compilation target" %}</label>
+                        <div class="controls">
+                            <select id="new-json-target">
+                                <option value="app" selected>{% trans 'RockyJS' %}</option>
+                                <option value="pkjs">{% trans 'PebbleKit JS' %}</option>
+                                <option value="common">{% trans 'Shared JSON' %}</option>
+                            </select>
+                            <img src="{% static 'ide/img/help.png' %}" class="field-help">
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="js-file-options file-group hide">
                 <div class="control-group">
-                    <label class="control-label" for="new-js-file-name">{% trans 'Filename' %}</label>
-                    <div class="controls">
-                        <input type="text" id="new-js-file-name" pattern="[a-zA-Z0-9_-]+\.js$">
+                    <div id="js-file-name-option">
+                        <label class="control-label" for="new-js-file-name">{% trans 'Filename' %}</label>
+                        <div class="controls">
+                            <input type="text" id="new-js-file-name" pattern="[a-zA-Z0-9_-]+\.js$">
+                        </div>
+                    </div>
+                    <div class="control-group rocky-only">
+                        <label class="control-label" for="new-js-target">{% trans 'Target' context "compilation target" %}</label>
+                        <div class="controls">
+                            <select id="new-js-target">
+                                <option value="app" selected>{% trans 'RockyJS' %}</option>
+                                <option value="pkjs">{% trans 'PebbleKit JS' %}</option>
+                                <option value="common">{% trans 'Shared JS' %}</option>
+                            </select>
+                            <img src="{% static 'ide/img/help.png' %}" class="field-help">
+                        </div>
                     </div>
                 </div>
             </div>

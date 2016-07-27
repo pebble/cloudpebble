@@ -138,10 +138,6 @@ CloudPebble.YCM = new (function() {
         });
     }
 
-    this.pathForFilename = function(file_name, target) {
-        return ((target == 'worker') ? 'worker_src/' : 'src/') + file_name;
-    };
-
     this.initialise = function() {
         if(mInitialised || mIsInitialising || mFailed) {
             return mInitPromise;

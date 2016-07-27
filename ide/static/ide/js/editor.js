@@ -980,22 +980,49 @@ CloudPebble.Editor = (function() {
     function init_create_prompt() {
         var prompt = $('#editor-new-file-prompt');
         var file_type_picker = prompt.find('#new-file-type');
+        var js_target_picker = prompt.find('#new-js-target');
+
+        function get_default_js_name() {
+            // If js files don't exist for a certain target, set the name to the default
+            // and hide the name input.
+            var js_name_override = null;
+            var required_js = [
+                {target: 'pkjs', requires: 'app.js'},
+                {target: 'app', requires: 'index.js', project_type:'rocky'}
+            ];
+            _.some(required_js, function(spec) {
+                if (!spec.project_type || CloudPebble.ProjectInfo.type == spec.project_type) {
+                    if (js_target_picker.val() == spec.target && !_.some(project_source_files, function(x) {return x.target==spec.target && x.name.endsWith('.js')})) {
+                        js_name_override = spec.requires;
+                        return true
+                    }
+                }
+            });
+
+            return js_name_override;
+        }
+
+        function toggle_js_filename() {
+            var show_name = get_default_js_name() == null;
+            $('#js-file-name-option').toggle(show_name);
+        }
+
         file_type_picker.change(function() {
             prompt.find('.file-group').hide();
             prompt.find('.' + $(this).val() + '-file-options').show();
             if($(this).val() == 'js') {
-                if(!_.some(project_source_files, function(x) {return x.name.endsWith('.js')})) {
-                    $('#new-js-file-name').val('app.js');
-                    $('.js-file-options').hide();
-                }
+                toggle_js_filename();
             }
         });
+        js_target_picker.change(toggle_js_filename);
+
+
 
         // If this isn't a native project or package, only JS and JSON files should exist.
         if(CloudPebble.ProjectProperties.js_only) {
             file_type_picker.val('js').change();
             file_type_picker.find('option').filter(function() {
-                return !(this.value == 'js' || this.value == 'json');
+                return !(this.value == 'js' || this.value == 'json' || this.value == 'rocky');
             }).remove();
         }
 
@@ -1038,20 +1065,22 @@ CloudPebble.Editor = (function() {
                 })();
             } else if(kind == 'js') {
                 (function() {
-                    var name = prompt.find('#new-js-file-name').val();
+                    var default_name = get_default_js_name();
+                    var name = (default_name !== null ? default_name : prompt.find('#new-js-file-name').val());
                     if(!/.+\.js$/.test(name)) {
                         error.text(gettext("Source files must end in .js")).show();
                     } else {
-                        files = [{name: name, target: 'pkjs'}]
+                        files = [{name: name, target: js_target_picker.val()}]
                     }
                 })();
             } else if(kind == 'json') {
                 (function() {
+                    var target = prompt.find('#new-json-target').val();
                     var name = prompt.find('#new-json-file-name').val();
                     if(!/.+\.json?$/.test(name)) {
                         error.text(gettext("JSON files must end in .json")).show();
                     } else {
-                        files = [{name: name, target: 'pkjs'}]
+                        files = [{name: name, target: target}]
                     }
                 })();
             } else if(kind == 'layout') {
@@ -1107,10 +1136,19 @@ CloudPebble.Editor = (function() {
             }
         });
 
-        prompt.find('.field-help').popover({
+        prompt.find('.c-file-options .field-help').popover({
             trigger: 'hover',
             content: "<p>"+gettext("If you want to create a background worker, use this dropdown to create files pointing at that target.") + "</p>" +
                      "<p>"+gettext("Note that targets are independent and code will not be shared between them.") + "</p>",
+            html: true,
+            container: '#help-prompt-holder',
+            placement: 'bottom',
+            animation: false
+        });
+        prompt.find('.rocky-only .field-help').popover({
+            trigger: 'hover',
+            content: "<p>"+gettext("Use this dropdown to select whether the javascript code will be run on the watch or the phone.") + "</p>" +
+                     "<p>"+gettext("JS code is shared between both devices only when using the 'Shared' target.") + "</p>",
             html: true,
             container: '#help-prompt-holder',
             placement: 'bottom',

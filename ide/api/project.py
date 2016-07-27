@@ -192,6 +192,7 @@ def create_project(request):
             elif project_type == 'pebblejs':
                 f = SourceFile.objects.create(project=project, file_name="app.js")
                 f.save_text(open('{}/src/js/app.js'.format(settings.PEBBLEJS_ROOT)).read())
+            # TODO: Default file for Rocky?
             project.full_clean()
             project.save()
     except IntegrityError as e:

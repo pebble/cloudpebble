@@ -34,6 +34,7 @@ class Project(IdeModel):
         ('simplyjs', _('Simply.js')),
         ('pebblejs', _('Pebble.js (beta)')),
         ('package', _('Pebble Package')),
+        ('rocky', _('Rocky.js')),
     )
     project_type = models.CharField(max_length=10, choices=PROJECT_TYPES, default='native')
 
@@ -196,18 +197,24 @@ class Project(IdeModel):
 
     @property
     def is_standard_project_type(self):
-        return self.project_type in {'native', 'package'}
+        return self.project_type in {'native', 'package', 'rocky'}
 
     def clean(self):
         is_sdk_2 = self.sdk_version == "2"
-        is_package = self.project_type == 'package'
         if is_sdk_2 and self.uses_array_message_keys:
             raise ValidationError(_("SDK2 appKeys must be an object, not a list."))
-        if is_package:
+        if self.project_type == 'package':
             if is_sdk_2:
                 raise ValidationError(_("Packages are not available for SDK 2"))
             if not self.app_modern_multi_js:
                 raise ValidationError(_("Packages must use CommonJS-style JS Handling."))
+        elif self.project_type == 'rocky':
+            if is_sdk_2:
+                raise ValidationError(_("RockyJS is not available for SDK 2"))
+            if not self.uses_array_message_keys:
+                raise ValidationError(_("RockyJS projects must use array based appmessage keys"))
+            if not self.app_modern_multi_js:
+                raise ValidationError(_("RockyJS projects must use CommonJS-style JS Handling."))
 
     last_build = property(get_last_build)
     menu_icon = property(get_menu_icon)
