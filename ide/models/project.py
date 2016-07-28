@@ -38,8 +38,8 @@ class Project(IdeModel):
     project_type = models.CharField(max_length=10, choices=PROJECT_TYPES, default='native')
 
     SDK_VERSIONS = (
-        ('2', _('SDK 2 (Pebble, Pebble Steel)')),
-        ('3', _('SDK 3 beta (Pebble Time)')),
+        ('2', _('SDK 2 (obsolete)')),
+        ('3', _('SDK 4 beta')),
     )
     sdk_version = models.CharField(max_length=6, choices=SDK_VERSIONS, default='2')
 
@@ -177,9 +177,11 @@ class Project(IdeModel):
 
     @property
     def supported_platforms(self):
-        supported_platforms = ["aplite", "basalt"]
+        supported_platforms = ["aplite"]
         if self.sdk_version != '2':
-            supported_platforms.append("chalk")
+            supported_platforms.extend(["basalt", "chalk"])
+            if self.project_type != 'pebblejs':
+                supported_platforms.append("diorite")
         return supported_platforms
 
     @property

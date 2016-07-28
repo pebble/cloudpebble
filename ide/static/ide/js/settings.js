@@ -54,6 +54,7 @@ CloudPebble.Settings = (function() {
             var build_aplite = pane.find('#settings-build-aplite:visible').prop('checked');
             var build_basalt = pane.find('#settings-build-basalt:visible').prop('checked');
             var build_chalk = pane.find('#settings-build-chalk:visible').prop('checked');
+            var build_diorite = pane.find('#settings-build-diorite:visible').prop('checked');
 
             var app_keys = (app_key_array_style ? [] : {});
             var app_key_names = [];
@@ -112,7 +113,7 @@ CloudPebble.Settings = (function() {
             }
 
 
-            if(sdk_version == '3' && !(build_aplite || build_basalt || build_chalk)) {
+            if(sdk_version == '3' && !(build_aplite || build_basalt || build_chalk || build_diorite)) {
                 throw new Error(gettext("You must build your app for at least one platform."));
             }
 
@@ -125,6 +126,9 @@ CloudPebble.Settings = (function() {
             }
             if(build_chalk) {
                 target_platforms.push('chalk');
+            }
+            if(build_diorite){
+                target_platforms.push('diorite');
             }
             var app_platforms = target_platforms.join(',');
             
@@ -300,7 +304,7 @@ CloudPebble.Settings = (function() {
             if (CloudPebble.ProjectInfo.sdk_version == '2' && sdk != '2' && !sdk_version_change_confirmed) {
                 e.stopPropagation();
                 $(this).val('2');
-                var message = gettext("Are you sure you want to upgrade this project to SDK 3? THIS CANNOT BE UNDONE.");
+                var message = gettext("Are you sure you want to upgrade this project to SDK 4? THIS CANNOT BE UNDONE.");
                 CloudPebble.Prompts.Confirm(gettext("UPGRADE SDK"), message, function() {
                     sdk_version_change_confirmed = true;
                     if(sdk == '3') {

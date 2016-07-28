@@ -230,27 +230,25 @@ def run_compile(build_result):
                 # Try reading file sizes out of it first.
                 if project.project_type != 'package':
                     try:
+                        s = os.stat(temp_file)
+                        build_result.total_size = s.st_size
                         # Now peek into the zip to see the component parts
                         with zipfile.ZipFile(temp_file, 'r') as z:
-                            store_size_info(project, build_result, 'aplite', z)
-                            store_size_info(project, build_result, 'basalt', z)
-                            store_size_info(project, build_result, 'chalk', z)
+                            for platform in ['aplite', 'basalt', 'chalk', 'diorite']:
+                                store_size_info(project, build_result, platform, z)
 
                     except Exception as e:
                         logger.warning("Couldn't extract filesizes: %s", e)
 
                     # Try pulling out debug information.
-
                     if project.sdk_version == '2':
                         save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, 'aplite', os.path.join(base_dir, 'build', 'pebble-app.elf'))
                         save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, 'aplite', os.path.join(base_dir, 'build', 'pebble-worker.elf'))
                     else:
-                        save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, 'aplite', os.path.join(base_dir, 'build', 'aplite/pebble-app.elf'))
-                        save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, 'aplite', os.path.join(base_dir, 'build', 'aplite/pebble-worker.elf'))
-                        save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, 'basalt', os.path.join(base_dir, 'build', 'basalt/pebble-app.elf'))
-                        save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, 'basalt', os.path.join(base_dir, 'build', 'basalt/pebble-worker.elf'))
-                        save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, 'chalk', os.path.join(base_dir, 'build', 'chalk/pebble-app.elf'))
-                        save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, 'chalk', os.path.join(base_dir, 'build', 'chalk/pebble-worker.elf'))
+                        for platform in ['aplite', 'basalt', 'chalk', 'diorite']:
+                            save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, platform, os.path.join(base_dir, 'build', '%s/pebble-app.elf' % platform))
+                            save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, platform, os.path.join(base_dir, 'build', '%s/pebble-worker.elf' % platform))
+
                     build_result.save_pbw(temp_file)
                 else:
                     # tar.gz up the entire built project directory as the build result.

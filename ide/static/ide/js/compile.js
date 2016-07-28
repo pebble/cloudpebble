@@ -152,6 +152,11 @@ CloudPebble.Compile = (function() {
             e.preventDefault();
             install_on_watch(ConnectionType.QemuChalk);
         });
+        pane.find('#install-in-qemu-diorite-btn').click(function(e) {
+            e.preventDefault();
+            install_on_watch(ConnectionType.QemuDiorite);
+        });
+
 
         pane.find('#show-qemu-logs-btn').click(function(e) {
             e.preventDefault();
@@ -291,6 +296,12 @@ CloudPebble.Compile = (function() {
                         } else {
                             pane.find('#last-compilation-size-chalk').addClass('hide');
                         }
+                        if(build.sizes.diorite) {
+                            var diorite_size_text = format_build_size(build.sizes.diorite, 65536, 10240, 262144);
+                            pane.find('#last-compilation-size-diorite').removeClass('hide').find('.text').text(diorite_size_text);
+                        } else {
+                            pane.find('#last-compilation-size-diorite').addClass('hide');
+                        }
                     }
                     // Only enable emulator buttons for built platforms.
                     pane.find('#run-qemu .btn-primary').attr('disabled', function() {
@@ -304,6 +315,7 @@ CloudPebble.Compile = (function() {
                 pane.find('#last-compilation-size-aplite').addClass('hide');
                 pane.find('#last-compilation-size-basalt').addClass('hide');
                 pane.find('#last-compilation-size-chalk').addClass('hide');
+                pane.find('#last-compilation-size-diorite').addClass('hide');
                 pane.find('#last-compilation-app-memory').addClass('hide');
                 pane.find('#last-compilation-worker-memory').addClass('hide');
             }
@@ -542,7 +554,8 @@ CloudPebble.Compile = (function() {
                         var sizes = {
                             aplite: mLastBuild.sizes.aplite,
                             basalt: mLastBuild.sizes.basalt,
-                            chalk: mLastBuild.sizes.chalk
+                            chalk: mLastBuild.sizes.chalk,
+                            diorite: mLastBuild.sizes.diorite
                         };
                         var size = sizes[platform];
                         var install_timer = setTimeout(function() {
@@ -670,6 +683,10 @@ CloudPebble.Compile = (function() {
                         case 'chalk':
                             colour = 'spalding-14mm-rose-gold';
                             break;
+                        case 'diorite':
+                            // TODO: Diorite - update with new watch 'colour' images when they are available
+                            colour = 'tintin-red';
+                            break;
                     }
                 }
                 modal.find('.screenshot-holder').addClass('screenshot-holder-' + colour);
@@ -775,6 +792,9 @@ CloudPebble.Compile = (function() {
                         }
                         else if (CloudPebble.ProjectInfo.app_platforms.indexOf('aplite') > -1) {
                             return ConnectionType.QemuAplite;
+                        }
+                        else if (CloudPebble.ProjectInfo.app_platforms.indexOf('diorite') > -1) {
+                            return ConnectionType.QemuDiorite;
                         }
                     } else {
                         return ConnectionType.QemuAplite;
