@@ -12,7 +12,8 @@ from ide.models.project import Project
 from ide.tasks.git import hooked_commit
 from ide.utils import generate_half_uuid
 from utils.td_helper import send_td_event
-from ide.utils.version import SDK_VERSION_REGEX
+from ide.utils.regexes import regexes
+
 __author__ = 'katharine'
 
 
@@ -49,7 +50,8 @@ def view_project(request, project_id):
         'token': token,
         'phone_shorturl': settings.PHONE_SHORTURL,
         'supported_platforms': supported_platforms,
-        'version_regex': SDK_VERSION_REGEX,
+        'regexes': regexes,
+        'regexes_json': json.dumps(regexes.regex_dictionary),
         'npm_manifest_support_enabled': settings.NPM_MANIFEST_SUPPORT
     })
 

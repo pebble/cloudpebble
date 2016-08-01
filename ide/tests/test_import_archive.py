@@ -12,21 +12,23 @@ __author__ = 'joe'
 
 fake_s3 = FakeS3()
 
-RESOURCE_SPEC = {
-    'resources': {
-        'media': [{
-            'file': 'images/blah.png',
-            'name': 'IMAGE_BLAH',
-            'type': 'bitmap'
-        }]
-    }
-}
-
 
 @mock.patch('ide.models.s3file.s3', fake_s3)
 class TestImportProject(CloudpebbleTestCase):
     def setUp(self):
         self.login()
+
+    @staticmethod
+    def make_resource_spec(name='IMAGE_BLAH'):
+        return {
+            'resources': {
+                'media': [{
+                    'file': 'images/blah.png',
+                    'name': name,
+                    'type': 'bitmap'
+                }]
+            }
+        }
 
     def test_import_basic_bundle_with_appinfo(self):
         """ Check that a minimal bundle imports without error """
@@ -97,7 +99,7 @@ class TestImportProject(CloudpebbleTestCase):
         bundle = build_bundle({
             'src/main.c': '',
             'resources/images/blah.png': 'contents!',
-            'appinfo.json': make_appinfo(options=RESOURCE_SPEC)
+            'appinfo.json': make_appinfo(options=self.make_resource_spec())
         })
         do_import_archive(self.project_id, bundle)
         project = Project.objects.get(pk=self.project_id)
@@ -108,7 +110,7 @@ class TestImportProject(CloudpebbleTestCase):
         bundle = build_bundle({
             'src/main.c': '',
             'resources/images/blah.png': 'contents!',
-            'package.json': make_package(pebble_options=RESOURCE_SPEC)
+            'package.json': make_package(pebble_options=self.make_resource_spec())
         })
         do_import_archive(self.project_id, bundle)
         project = Project.objects.get(pk=self.project_id)
@@ -150,4 +152,14 @@ class TestImportProject(CloudpebbleTestCase):
             'package.json': make_package(pebble_options={'messageKeys': []})
         })
         with self.assertRaises(InvalidProjectArchiveException):
+            do_import_archive(self.project_id, bundle)
+
+    def test_invalid_resource_id(self):
+        bundle = build_bundle({
+            'src/main.c': '',
+            'resources/images/blah.png': 'contents!',
+            'package.json': make_package(pebble_options=self.make_resource_spec("<>"))
+        })
+
+        with self.assertRaises(ValidationError):
             do_import_archive(self.project_id, bundle)

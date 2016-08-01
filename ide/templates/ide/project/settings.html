@@ -120,7 +120,7 @@
                     <label class="control-label" for="settings-version-label">{% trans "Version label" %}</label>
                     <div class="controls">
                         <input type="text" id="settings-version-label" placeholder="0.1" value="{{project.app_version_label}}"
-                                pattern={{version_regex}}>
+                                pattern="{{ regexes.sdk_version }}">
                         <span class="help-block">
                             {% trans "App version. Takes the format major[.minor], where major and minor are between 0 and 255." %}
                         </span>
@@ -130,7 +130,7 @@
                     <label class="control-label" for="settings-uuid">{% trans "App UUID" %}</label>
                     <div class="controls">
                         <div class="settings-uuid-control">
-                            <input type="text" id="settings-uuid" pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}" placeholder="00000000-0000-0000-0000-000000000000" value="{{project.app_uuid}}">
+                            <input type="text" id="settings-uuid" pattern="{{ regexes.uuid }}" placeholder="00000000-0000-0000-0000-000000000000" value="{{project.app_uuid}}">
                             <button id="uuid-generate" class="btn btn-small">{% trans "Generate" %}</button>
                         </div>
                         <span class="help-block">
