@@ -38,8 +38,9 @@ CloudPebble.Editor = (function() {
     };
 
     var rename_file = function(file, new_name) {
+        var old_name = file.name;
         // Check no-change or duplicate filenames
-        if (new_name == file.name) {
+        if (new_name == old_name) {
             return Promise.resolve();
         }
         if (project_source_files[new_name]) {
@@ -50,6 +51,12 @@ CloudPebble.Editor = (function() {
             new_name: new_name,
             modified: file.lastModified
         }).then(function(response) {
+            _.each(open_codemirrors, function(cm) {
+                if (cm.file_path == CloudPebble.YCM.pathForFilename(old_name, file.target)) {
+                    cm.file_path = CloudPebble.YCM.pathForFilename(new_name, file.target);
+                }
+            });
+            CloudPebble.YCM.renameFile(file, new_name);
             delete project_source_files[file.name];
             file.name = new_name;
             file.lastModified = response.modified;
@@ -216,7 +223,7 @@ CloudPebble.Editor = (function() {
                 settings.gutters.unshift('gutter-errors');
             }
             var code_mirror = CodeMirror(pane[0], settings);
-            code_mirror.file_path = (file.target  == 'worker' ? 'worker_src/' : 'src/') + file.name;
+            code_mirror.file_path = CloudPebble.YCM.pathForFilename(file.name, file.target);
             code_mirror.file_target = file.target;
             code_mirror.parent_pane = pane;
             code_mirror.patch_list = [];
