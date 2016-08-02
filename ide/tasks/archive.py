@@ -267,7 +267,7 @@ def do_import_archive(project_id, archive, delete_project=False):
                                 file_exists_for_root[root_file_name] = True
 
                         elif filename.startswith(SRC_DIR):
-                            if (not filename.startswith('.')) and (filename.endswith('.c') or filename.endswith('.h') or filename.endswith('.js')):
+                            if not filename.startswith('.') and filename.endswith(('.c', '.h', '.js', '.json')):
                                 base_filename = filename[len(SRC_DIR):]
                                 if project.app_modern_multi_js and base_filename.endswith('.js') and base_filename.startswith('js/'):
                                     base_filename = base_filename[len('js/'):]
@@ -275,7 +275,7 @@ def do_import_archive(project_id, archive, delete_project=False):
                                 with z.open(entry.filename) as f:
                                     source.save_text(f.read().decode('utf-8'))
                         elif filename.startswith(WORKER_SRC_DIR):
-                            if (not filename.startswith('.')) and (filename.endswith('.c') or filename.endswith('.h') or filename.endswith('.js')):
+                            if not filename.startswith('.') and filename.endswith(('.c', '.h', '.js')):
                                 base_filename = filename[len(WORKER_SRC_DIR):]
                                 source = SourceFile.objects.create(project=project, file_name=base_filename, target='worker')
                                 with z.open(entry.filename) as f:
