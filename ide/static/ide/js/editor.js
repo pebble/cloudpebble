@@ -550,7 +550,9 @@ CloudPebble.Editor = (function() {
                             prompt.error(gettext(interpolate("Failed to rename file. %s", [error.message])));
                         });
                     },
-                    pattern)
+                    pattern);
+                // Pre-select the filename without the extension.
+                $('#modal-text-input-value')[0].setSelectionRange(0, file.name.lastIndexOf('.'));
             };
 
             var ib_pane = $('#ui-editor-pane-template').clone().removeClass('hide').appendTo(pane).hide();
