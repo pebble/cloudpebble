@@ -10,17 +10,18 @@ fake_s3 = FakeS3()
 
 
 class ExportTester(CloudpebbleTestCase):
-    def createProject(self, options=None):
+    def create_project(self, options=None, files=None):
         fake_s3.reset()
         self.login(options)
         self.project = Project.objects.get(pk=self.project_id)
-        SourceFile.objects.create(project=self.project, file_name="main.c", target="app").save_text('file_contents')
+        for name in (files if files else {'main.c'}):
+            SourceFile.objects.create(project=self.project, file_name=name, target="app").save_text('file_contents')
 
-    def run_test(self, expected_filenames, options=None):
-        self.createProject(options)
+    def run_test(self, expected_filenames):
         create_archive(self.project_id)
         data = read_bundle(fake_s3.read_last_file())
         filenames = set(data.keys())
+        expected_filenames = expected_filenames | {'test/src/main.c', 'test/wscript', 'test/jshintrc'}
         self.assertSetEqual(filenames, expected_filenames)
 
 
@@ -29,8 +30,15 @@ class ExportTester(CloudpebbleTestCase):
 class TestExport(ExportTester):
     def test_export_sdk_3_project(self):
         """ With package.json support off, check that SDK3 projects are exported with package.json files """
-        self.run_test({'test/src/main.c', 'test/package.json', 'test/wscript', 'test/jshintrc'})
+        self.create_project()
+        self.run_test({'test/package.json'})
 
     def test_export_sdk_2_project(self):
         """ Check that SDK2 projects are exported with appinfo.json files even with package.json support on """
-        self.run_test({'test/src/main.c', 'test/appinfo.json', 'test/wscript', 'test/jshintrc'}, {'sdk': '2'})
+        self.create_project({'sdk': '2'})
+        self.run_test({'test/appinfo.json'})
+
+    def test_export_json(self):
+        """ Check that json files are correctly exported """
+        self.create_project(files={'main.c', 'test.json'})
+        self.run_test({'test/package.json', 'test/src/test.json'})

@@ -22,7 +22,7 @@ class RegexHolder(object):
         'resource_file_name': r'^[/a-zA-Z0-9_(). -]+$',
 
         # Match a valid c/h/js file name
-        'source_file_name': r'^[/a-zA-Z0-9_.-]+\.(c|h|js)$'
+        'source_file_name': r'^[/a-zA-Z0-9_.-]+\.(c|h|js|json)$'
     }
 
     def validator(self, key, message):
