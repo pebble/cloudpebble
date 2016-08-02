@@ -14,7 +14,7 @@ fake_s3 = FakeS3()
 
 
 @mock.patch('ide.models.s3file.s3', fake_s3)
-class TestImportProject(CloudpebbleTestCase):
+class TestImportArchive(CloudpebbleTestCase):
     def setUp(self):
         self.login()
 
@@ -155,6 +155,7 @@ class TestImportProject(CloudpebbleTestCase):
             do_import_archive(self.project_id, bundle)
 
     def test_invalid_resource_id(self):
+        """ Check that invalid characters are banned from resource IDs """
         bundle = build_bundle({
             'src/main.c': '',
             'resources/images/blah.png': 'contents!',
@@ -163,3 +164,14 @@ class TestImportProject(CloudpebbleTestCase):
 
         with self.assertRaises(ValidationError):
             do_import_archive(self.project_id, bundle)
+
+    def test_import_json_file(self):
+        """ Check that json files are correctly imported """
+        bundle = build_bundle({
+            'src/test.json': '{}',
+            'src/main.c': '',
+            'package.json': make_package()
+        })
+        do_import_archive(self.project_id, bundle)
+        project = Project.objects.get(pk=self.project_id)
+        self.assertEqual(project.source_files.filter(file_name='test.json').count(), 1)
