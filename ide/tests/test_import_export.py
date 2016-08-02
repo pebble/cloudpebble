@@ -1,4 +1,4 @@
-""" These tests create project archives, import them, export them, and then check that the manifest files are identical. """
+""" These are integration tests. They create project archives, import them, export them, and then check that the manifest files are identical. """
 
 import mock
 import json
@@ -15,7 +15,7 @@ fake_s3 = FakeS3()
 
 
 @mock.patch('ide.tasks.archive.s3', fake_s3)
-@mock.patch('ide.models.files.s3', fake_s3)
+@mock.patch('ide.models.s3file.s3', fake_s3)
 class TestImportExport(CloudpebbleTestCase):
 
     def setUp(self):

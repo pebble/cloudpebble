@@ -6,9 +6,10 @@ import os.path
 from django.conf import settings
 from django.db import models
 from ide.models.project import Project
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
 
 from ide.models.meta import IdeModel
+from ide.utils.regexes import regexes
 
 import utils.s3 as s3
 __author__ = 'katharine'
@@ -35,7 +36,7 @@ class BuildResult(IdeModel):
     DEBUG_WORKER = 1
 
     project = models.ForeignKey(Project, related_name='builds')
-    uuid = models.CharField(max_length=36, default=lambda:str(uuid.uuid4()))
+    uuid = models.CharField(max_length=36, default=lambda: str(uuid.uuid4()), validators=regexes.validator('uuid', _('Invalid UUID.')))
     state = models.IntegerField(choices=STATE_CHOICES, default=STATE_WAITING)
     started = models.DateTimeField(auto_now_add=True, db_index=True)
     finished = models.DateTimeField(blank=True, null=True)

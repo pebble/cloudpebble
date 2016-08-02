@@ -24,7 +24,7 @@ class FakeGist(object):
             self.files[name] = FakeFile(content)
 
 
-@mock.patch('ide.models.files.s3', fake_s3)
+@mock.patch('ide.models.s3file.s3', fake_s3)
 class TestImportProject(CloudpebbleTestCase):
     def setUp(self):
         self.login()

@@ -4,13 +4,14 @@ import json
 
 from django.contrib.auth.models import User
 from django.db import models, transaction
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 
 from ide.models.files import ResourceFile, ResourceIdentifier, SourceFile, ResourceVariant
 from ide.models.dependency import Dependency
 from ide.models.meta import IdeModel
 from ide.utils import generate_half_uuid
+from ide.utils.regexes import regexes
 from ide.utils.version import version_to_semver, semver_to_version, parse_sdk_version
 
 __author__ = 'katharine'
@@ -42,7 +43,7 @@ class Project(IdeModel):
     sdk_version = models.CharField(max_length=6, choices=SDK_VERSIONS, default='2')
 
     # New settings for 2.0
-    app_uuid = models.CharField(max_length=36, blank=True, null=True, default=generate_half_uuid)
+    app_uuid = models.CharField(max_length=36, blank=True, null=True, default=generate_half_uuid, validators=regexes.validator('uuid', _('Invalid UUID.')))
     app_company_name = models.CharField(max_length=100, blank=True, null=True)
     app_short_name = models.CharField(max_length=100, blank=True, null=True)
     app_long_name = models.CharField(max_length=100, blank=True, null=True)
@@ -85,7 +86,6 @@ class Project(IdeModel):
             Dependency.objects.filter(project=self).delete()
             for name, version in dependencies.iteritems():
                 dep = Dependency.objects.create(project=self, name=name, version=version)
-                dep.full_clean()
                 dep.save()
 
     @property
@@ -118,7 +118,7 @@ class Project(IdeModel):
         else:
             parsed_keys = []
             for appkey in app_keys:
-                parsed = re.match(r'^([a-zA-Z_][_a-zA-Z\d]*)(?:\[(\d+)\])?$', appkey)
+                parsed = re.match(regexes.C_IDENTIFIER_WITH_INDEX, appkey)
                 if not parsed:
                     raise ValueError("Bad Appkey %s" % appkey)
                 parsed_keys.append((parsed.group(1), parsed.group(2) or 1))
@@ -203,7 +203,7 @@ class TemplateProject(Project):
 
         for source_file in self.source_files.all():
             new_file = SourceFile.objects.create(project=project, file_name=source_file.file_name)
-            new_file.save_file(source_file.get_contents().replace("__UUID_GOES_HERE__", uuid_string))
+            new_file.save_text(source_file.get_contents().replace("__UUID_GOES_HERE__", uuid_string))
 
         # Copy over relevant project properties.
         # NOTE: If new, relevant properties are added, they must be copied here.
