@@ -58,30 +58,21 @@ class TestCompile(CloudpebbleTestCase):
         self.assertEqual(self.build_result.state, BuildResult.STATE_SUCCEEDED)
         self.assertSequenceEqual([size.binary_size > 0 for size in self.build_result.sizes.all()], [True]*num_platforms)
 
-    def test_native_SDK2_project_with_appinfo(self):
+    def test_native_SDK2_project(self):
         """ Check that an SDK 3 project (with package.json support off) builds successfully """
         self.make_project({'sdk': '2'})
         self.add_file("main.c", SIMPLE_MAIN)
         self.compile()
         self.check_success(num_platforms=1)
 
-    @override_settings(NPM_MANIFEST_SUPPORT='')
-    def test_native_SDK3_project_with_appinfo(self):
-        """ Check that an SDK 3 project (with package.json support off) builds successfully """
-        self.make_project()
-        self.add_file("main.c", SIMPLE_MAIN)
-        self.compile()
-        self.check_success()
-
-    @override_settings(NPM_MANIFEST_SUPPORT='yes')
-    def test_native_SDK3_simple_project_with_NPM_manifest(self):
+    def test_native_SDK3_project(self):
         """ Check that an SDK 3 project (with package.json support on) builds successfully """
         self.make_project()
         self.add_file("main.c", SIMPLE_MAIN)
         self.compile()
         self.check_success()
 
-    @override_settings(NPM_MANIFEST_SUPPORT='yes', LOCAL_DEPENDENCY_OVERRIDE=True)
+    @override_settings(LOCAL_DEPENDENCY_OVERRIDE=True)
     def test_project_with_dependencies(self):
         """ Check that an SDK 3 project with dependencies builds successfully """
         self.make_project()

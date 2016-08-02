@@ -188,7 +188,7 @@ def create_project(request):
             elif project_type == 'pebblejs':
                 f = SourceFile.objects.create(project=project, file_name="app.js")
                 f.save_text(open('{}/src/js/app.js'.format(settings.PEBBLEJS_ROOT)).read())
-            if settings.NPM_MANIFEST_SUPPORT and sdk_version != '2':
+            if sdk_version != '2':
                 project.app_keys = '[]'
             project.save()
     except IntegrityError as e:
