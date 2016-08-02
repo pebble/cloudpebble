@@ -90,7 +90,7 @@ CloudPebble.Editor = (function() {
                 file_mode = CloudPebble.Editor.PebbleMode;
             }
             function file_kind_in(options) {
-                return _.contains(options.split(' '), file_kind);
+                return _.contains(options, file_kind);
             }
             var language_has_autocomplete = (file_kind == 'c');
             var is_autocompleting = false;
@@ -210,7 +210,7 @@ CloudPebble.Editor = (function() {
             };
 
             settings.gutters = ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'];
-            if(file_kind_in('js json')) {
+            if(file_kind_in(['js', 'json'])) {
                 settings.gutters.unshift('gutter-hint-warnings');
             } else if (file_kind == 'c') {
                 settings.gutters.unshift('gutter-errors');
@@ -266,7 +266,7 @@ CloudPebble.Editor = (function() {
                 });
             }
 
-            if(file_kind_in('json js')) {
+            if(file_kind_in(['json', 'js'])) {
                 var warning_lines = [];
                 var do_hint = function() {
                     var errors = [];

@@ -177,9 +177,9 @@ class Project(IdeModel):
 
     @property
     def supported_platforms(self):
-        supported_platforms = ["aplite", "basalt"]
+        supported_platforms = ["aplite"]
         if self.sdk_version != '2':
-            supported_platforms.append("chalk")
+            supported_platforms.extend(["basalt", "chalk"])
         return supported_platforms
 
     @property
