@@ -48,8 +48,7 @@ def view_project(request, project_id):
         'phone_shorturl': settings.PHONE_SHORTURL,
         'supported_platforms': project.supported_platforms,
         'regexes': regexes,
-        'regexes_json': json.dumps(regexes.regex_dictionary),
-        'npm_manifest_support_enabled': settings.NPM_MANIFEST_SUPPORT
+        'regexes_json': json.dumps(regexes.regex_dictionary)
     })
 
 

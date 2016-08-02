@@ -29,7 +29,6 @@ class ManifestTester(CloudpebbleTestCase):
         self.assertDictEqual(json.loads(manifest), json.loads(compare_to))
 
 
-@override_settings(NPM_MANIFEST_SUPPORT='yes')
 class TestNPMStyleManifestGeneration(ManifestTester):
     """ Test an SDK 3 project with package.json support ON"""
 
@@ -65,17 +64,3 @@ class TestNPMStyleManifestGeneration(ManifestTester):
         self.project.app_short_name = "_CAPITALS_and...dots-and  -  spaces ! "
         manifest = generate_manifest(self.project, [])
         self.check_package_manifest(manifest, package_options={'name': 'capitals_and...dots-and-spaces'})
-
-
-@override_settings(NPM_MANIFEST_SUPPORT='')
-class TestSDK3ManifestGeneration(ManifestTester):
-    """ Test an SDK 3 project with package.json support OFF"""
-
-    def setUp(self):
-        self.login()
-        self.project = Project.objects.get(pk=self.project_id)
-
-    def test_package_manifest(self):
-        """ Check that the appinfo.json file generated from a project is functionally identical to a generated sample manifest. """
-        manifest = generate_manifest(self.project, [])
-        self.check_appinfo_manifest(manifest)

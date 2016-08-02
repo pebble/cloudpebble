@@ -144,16 +144,6 @@ class TestImportProject(CloudpebbleTestCase):
         with self.assertRaises(ValidationError):
             do_import_archive(self.project_id, bundle)
 
-    @override_settings(NPM_MANIFEST_SUPPORT='')
-    def test_throws_if_importing_array_appkeys_without_npm_manifest_support(self):
-        """ Throw when trying to import a project with auto-assigned messageKeys before NPM manifest support is fully enabled """
-        bundle = build_bundle({
-            'src/main.c': '',
-            'package.json': make_package(pebble_options={'messageKeys': []})
-        })
-        with self.assertRaises(InvalidProjectArchiveException):
-            do_import_archive(self.project_id, bundle)
-
     def test_invalid_resource_id(self):
         bundle = build_bundle({
             'src/main.c': '',

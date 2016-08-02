@@ -64,8 +64,7 @@ def import_gist(user_id, gist_id):
         package['pebble'] = defaultdict(lambda: None)
         package['pebble'].update(content.get('pebble', {}))
         manifest_settings, media, dependencies = load_manifest_dict(package, PACKAGE_MANIFEST, default_project_type=None)
-        if settings.NPM_MANIFEST_SUPPORT:
-            default_settings['app_keys'] = '[]'
+        default_settings['app_keys'] = '[]'
     elif APPINFO_MANIFEST in files:
         content = json.loads(files['appinfo.json'].content)
         package = defaultdict(lambda: None)
