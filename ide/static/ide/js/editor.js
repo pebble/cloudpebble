@@ -123,25 +123,30 @@ CloudPebble.Editor = (function() {
         // Open it.
         return Ajax.Get('/ide/project/' + PROJECT_ID + '/' + url_kind + '/' + file.id + '/load').then(function(data) {
             var screenshot_pane;
-            var file_kind;
-            if (file.name.substr(-3) == '.js') {
-                file_kind = 'js';
-            }
-            else if (file.target == "test") {
-                file_kind = 'monkey';
-            }
-            else {
-                file_kind = 'c';
-            }
-            var mode_for_kind = {
-                monkey: 'MonkeyScript',
-                js: 'javascript',
-                c: CloudPebble.Editor.PebbleMode
-            };
-            var language_has_autocomplete = (file_kind == 'c' || file_kind == 'monkey');
             var source = data.source;
             file.lastModified = data.modified;
             var pane = $('<div>');
+            var file_kind, file_mode;
+            if (/\.js$/.test(file.name)) {
+                file_kind = 'js';
+                file_mode = 'javascript';
+            }
+            else if (file.target == "test") {
+                file_kind = 'monkey';
+                file_mode = 'MonkeyScript'
+            }
+            else if (/\.json$/.test(file.name)) {
+                file_kind = 'json';
+                file_mode = 'application/json';
+            }
+            else {
+                file_kind = 'c';
+                file_mode = CloudPebble.Editor.PebbleMode;
+            }
+            function file_kind_in(options) {
+                return _.contains(options, file_kind);
+            }
+            var language_has_autocomplete = file_kind_in(['c', 'monkey']);
             var is_autocompleting = false;
             var settings = {
                 indentUnit: USER_SETTINGS.tab_width,
@@ -154,7 +159,7 @@ CloudPebble.Editor = (function() {
                 //highlightSelectionMatches: true,
                 smartIndent: true,
                 indentWithTabs: !USER_SETTINGS.use_spaces,
-                mode: mode_for_kind[file_kind],
+                mode: file_mode,
                 styleActiveLine: true,
                 value: source,
                 theme: USER_SETTINGS.theme,
@@ -259,7 +264,7 @@ CloudPebble.Editor = (function() {
             };
 
             settings.gutters = ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'];
-            if(file_kind == 'js') {
+            if(file_kind_in(['js', 'json'])) {
                 settings.gutters.unshift('gutter-hint-warnings');
             } else if (file_kind == 'c') {
                 settings.gutters.unshift('gutter-errors');
@@ -314,9 +319,10 @@ CloudPebble.Editor = (function() {
                         CodeMirror.commands.autocomplete(code_mirror);
                 });
             }
-            if(file_kind == 'js') {
+            if(file_kind_in(['json', 'js'])) {
                 var warning_lines = [];
-                var throttled_hint = _.throttle(function() {
+                var do_hint = function() {
+                    var errors = [];
                     // Clear things out, even if jslint is off
                     // (the user might have just turned it off).
                     code_mirror.clearGutter('gutter-hint-warnings');
@@ -325,79 +331,100 @@ CloudPebble.Editor = (function() {
                     });
                     warning_lines = [];
 
-                    var jshint_globals = {
-                        Pebble: true,
-                        console: true,
-                        WebSocket: true,
-                        XMLHttpRequest: true,
-                        navigator: true, // For navigator.geolocation
-                        localStorage: true,
-                        setTimeout: true,
-                        setInterval: true,
-                        Int8Array: true,
-                        Uint8Array: true,
-                        Uint8ClampedArray: true,
-                        Int16Array: true,
-                        Uint16Array: true,
-                        Int32Array: true,
-                        Uint32Array: true,
-                        Float32Array: true,
-                        Float64Array: true
-                    };
-                    if(CloudPebble.ProjectInfo.type == 'simplyjs') {
-                        _.extend(jshint_globals, {
-                            simply: true,
-                            util2: true,
-                            ajax: true
-                        });
-                    } else if(CloudPebble.ProjectInfo.type == 'pebblejs') {
-                        _.extend(jshint_globals, {
-                            require: true,
-                            ajax: true
-                        });
-                    } else if (CloudPebble.ProjectInfo.app_modern_multi_js) {
-                        _.extend(jshint_globals, {
-                            require: true,
-                            exports: true,
-                            module: true
-                        });
+                    if (file_kind == 'js') {
+                        var jshint_globals = {
+                            Pebble: true,
+                            console: true,
+                            WebSocket: true,
+                            XMLHttpRequest: true,
+                            navigator: true, // For navigator.geolocation
+                            localStorage: true,
+                            setTimeout: true,
+                            setInterval: true,
+                            Int8Array: true,
+                            Uint8Array: true,
+                            Uint8ClampedArray: true,
+                            Int16Array: true,
+                            Uint16Array: true,
+                            Int32Array: true,
+                            Uint32Array: true,
+                            Float32Array: true,
+                            Float64Array: true
+                        };
+
+                        // Although you're not exactly supposed to parse JSON with jshint, it does
+                        // actually appear to go into a JSON mode when a file begins with {}.
+
+                        if (CloudPebble.ProjectInfo.type == 'simplyjs') {
+                            _.extend(jshint_globals, {
+                                simply: true,
+                                util2: true,
+                                ajax: true
+                            });
+                        } else if (CloudPebble.ProjectInfo.type == 'pebblejs') {
+                            _.extend(jshint_globals, {
+                                require: true,
+                                ajax: true
+                            });
+                        } else if (CloudPebble.ProjectInfo.app_modern_multi_js) {
+                            _.extend(jshint_globals, {
+                                require: true,
+                                exports: true,
+                                module: true
+                            });
+                        }
+
+                        var success = JSHINT(code_mirror.getValue(), {
+                            freeze: true,
+                            evil: false,
+                            immed: true,
+                            latedef: "nofunc",
+                            undef: true,
+                            unused: "vars"
+                        }, jshint_globals);
+                        if (!success) {
+                            errors = JSHINT.errors;
+                        }
+                    }
+                    else {
+                        var code = code_mirror.getValue();
+                        try {
+                            json_parse(code);
+                        }
+                        catch (e) {
+                            errors = [{
+                                reason: e.message,
+                                line: code.slice(0, e.at).split('\n').length
+                            }]
+                        }
                     }
 
-                    var success = JSHINT(code_mirror.getValue(), {
-                        freeze: true,
-                        evil: false,
-                        immed: true,
-                        latedef: "nofunc",
-                        undef: true,
-                        unused: "vars"
-                    }, jshint_globals);
-                    if(!success) {
-                        _.each(JSHINT.errors, function(error) {
-                            // It is apparently possible to get null errors; omit them.
-                            if(!error) return;
-                            // If there are multiple errors on one line, we'll have already placed a marker here.
-                            // Instead of replacing it with a new one, just update it.
-                            var markers = code_mirror.lineInfo(error.line - 1).gutterMarkers;
-                            if(markers && markers['gutter-hint-warnings']) {
-                                var marker = $(markers['gutter-hint-warnings']);
-                                marker.attr('title', marker.attr('title') + "\n" + error.reason);
-                            } else {
-                                var warning = $('<i class="icon-warning-sign icon-white"></span>');
-                                warning.attr('title', error.reason);
-                                code_mirror.setGutterMarker(error.line - 1, 'gutter-hint-warnings', warning[0]);
-                                warning_lines.push(code_mirror.addLineClass(error.line - 1, 'background', 'line-hint-warning'));
-                            }
-                        });
-                    }
-                }, 1000);
-
-                code_mirror.on('change', throttled_hint);
+                    _.each(errors, function(error) {
+                        // It is apparently possible to get null errors; omit them.
+                        if(!error) return;
+                        // If there are multiple errors on one line, we'll have already placed a marker here.
+                        // Instead of replacing it with a new one, just update it.
+                        var markers = code_mirror.lineInfo(error.line - 1).gutterMarkers;
+                        if(markers && markers['gutter-hint-warnings']) {
+                            var marker = $(markers['gutter-hint-warnings']);
+                            marker.attr('title', marker.attr('title') + "\n" + error.reason);
+                        } else {
+                            var warning = $('<i class="icon-warning-sign icon-white"></span>');
+                            warning.attr('title', error.reason);
+                            code_mirror.setGutterMarker(error.line - 1, 'gutter-hint-warnings', warning[0]);
+                            warning_lines.push(code_mirror.addLineClass(error.line - 1, 'background', 'line-hint-warning'));
+                        }
+                    });
+                };
+                code_mirror.on('change', _.debounce(do_hint, 1000));
                 // Make sure we're ready when we start.
-                throttled_hint();
-            } if (file_kind == 'c') {
+
+                do_hint();
+            }
+            if (file_kind == 'c') {
                 var clang_lines = [];
                 var sChecking = false;
-                var throttled_check = _.throttle(function() {
+                var debounced_check = _.debounce(function() {
                     if(sChecking) return;
                     sChecking = true;
                     CloudPebble.YCM.request('errors', code_mirror)
@@ -441,8 +468,8 @@ CloudPebble.Editor = (function() {
                             sChecking = false;
                         });
                 }, 2000);
-                code_mirror.on('change', throttled_check);
-                throttled_check();
+                code_mirror.on('change', debounced_check);
+                debounced_check();
 
                 code_mirror.on('mousedown', function(cm, e) {
                     if(e.ctrlKey || e.metaKey) {
@@ -1099,7 +1126,8 @@ CloudPebble.Editor = (function() {
 
     function init_create_prompt() {
         var prompt = $('#editor-new-file-prompt');
-        prompt.find('#new-file-type').change(function() {
+        var file_type_picker = prompt.find('#new-file-type');
+        file_type_picker.change(function() {
             prompt.find('.file-group').hide();
             prompt.find('.' + $(this).val() + '-file-options').show();
             if($(this).val() == 'js') {
@@ -1109,23 +1137,28 @@ CloudPebble.Editor = (function() {
                 }
             }
         });
-        // If this isn't a native project, only JS files should exist.
+        // If this isn't a native project, only JS and JSON files should exist.
         if(CloudPebble.ProjectInfo.type != 'native') {
-            prompt.find('#new-file-type').val('js').change().parents('.control-group').hide();
+            file_type_picker.val('js').change();
+            file_type_picker.find('option').filter(function() {
+                return !(this.value == 'js' || this.value == 'json');
+            }).remove();
         }
 
         prompt.find('#editor-create-file-button').click(function() {
-            var kind = prompt.find('#new-file-type').val();
+            var kind = file_type_picker.val();
             var error = prompt.find('.alert');
+            var files = [];
             // do stuff.
             if(kind == 'c') {
                 (function() { // for scoping reasons, mostly.
                     var name = prompt.find('#new-c-file-name').val();
-                    if (!(/.+\.h$/.test(name) || /.+\.c$/.test(name))) {
+                    if (!(/.+\.(c|h)$/.test(name))) {
                         error.text(gettext("Source files must end in .c or .h")).show();
                     } else if (project_source_files[name]) {
                         error.text(interpolate(gettext("A file called '%s' already exists."), [name])).show();
                     } else {
+                        var header_file;
                         var target = prompt.find('#new-c-target').val();
                         // Should we create a header?
                         var header = null;
@@ -1134,27 +1167,24 @@ CloudPebble.Editor = (function() {
                             var split_name = name.split('.');
                             if (split_name.pop() == 'c') {
                                 header = split_name.join('.') + '.h';
-                                create_remote_file({
-                                    name: header,
-                                    content: "#pragma once\n",
-                                    target: target
-                                });
+                                if (!project_source_files[header]) {
+                                    header_file = create_remote_file({
+                                        name: header,
+                                        content: "#pragma once\n",
+                                        target: target
+                                    });
+                                }
                             }
                         }
                         var content = "#include <pebble" + (target == 'worker' ? '_worker' : '') +".h>\n";
                         if(header) {
                             content += '#include "' + header + '"\n\n';
                         }
-                        create_remote_file({
+                        files = [create_remote_file({
                             name: name,
                             content: content,
                             target: target
-                        }).then(function (data) {
-                            prompt.modal('hide');
-                            return edit_source_file(data.file);
-                        }).catch(function(err) {
-                            error.text(err.toString()).show();
-                        });
+                        }), header_file];
                     }
                 })();
             } else if(kind == 'js') {
@@ -1165,12 +1195,18 @@ CloudPebble.Editor = (function() {
                     } else if(project_source_files[name]) {
                         error.text(interpolate(gettext("A file called '%s' already exists."), [name])).show();
                     } else {
-                        create_remote_file(name).then(function(data) {
-                            prompt.modal('hide');
-                            return edit_source_file(data.file);
-                        }).catch(function(err) {
-                            error.text(err.toString()).show();
-                        });
+                        files = [create_remote_file(name)]
+                    }
+                })();
+            } else if(kind == 'json') {
+                (function() {
+                    var name = prompt.find('#new-json-file-name').val();
+                    if(!/.+\.json?$/.test(name)) {
+                        error.text(gettext("JSON files must end in .json")).show();
+                    } else if(project_source_files[name]) {
+                        error.text(interpolate(gettext("A file called '%s' already exists."), [name])).show();
+                    } else {
+                        files = [create_remote_file(name)]
                     }
                 })();
             } else if(kind == 'layout') {
@@ -1206,15 +1242,18 @@ CloudPebble.Editor = (function() {
                                 "  window_stack_remove(s_window, true);\n" +
                                 "}\n"
                         });
-                        Promise.join(make_c_file, make_h_file).then(function(c_file, h_file) {
-                            prompt.modal('hide');
-                            return edit_source_file(c_file.file, true);
-                        }).catch(function(err) {
-                            error.text(err.toString()).show();
-                        });
+                        files = [make_c_file, make_h_file];
                         CloudPebble.Analytics.addEvent("cloudpebble_created_ui_layout", {name: name}, null, ['cloudpebble']);
                     }
                 })();
+            }
+            if (files) {
+                Promise.all(files).then(function(new_files) {
+                    prompt.modal('hide');
+                    return edit_source_file(new_files[0].file, kind == 'layout');
+                }).catch(function(err) {
+                    error.text(err.toString()).show();
+                });
             }
         });
 

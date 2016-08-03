@@ -179,7 +179,10 @@ CloudPebble.Resources = (function() {
             var identifier = resource.identifiers[0];
             resource.identifiers = [identifier + '_WHITE', identifier + '_BLACK'];
         }
-        CloudPebble.Sidebar.SetPopover('resource-' + resource.id, ngettext('Identifier', 'Identifiers', resource.identifiers.length), resource.identifiers.join('<br>'));
+        var popover_content = _.map(resource.identifiers, function(identifier) {
+            return $('<span>').text(identifier).html()
+        }).join('<br>');
+        CloudPebble.Sidebar.SetPopover('resource-' + resource.id, ngettext('Identifier', 'Identifiers', resource.identifiers.length), popover_content);
         // We need to update code completion so it can include these identifiers.
         // However, don't do this during initial setup; the server handle it for us.
         if(CloudPebble.Ready) {
@@ -297,7 +300,7 @@ CloudPebble.Resources = (function() {
         }
 
         // Validate the file name
-        if (!/^[a-zA-Z0-9_(). -]+$/.test(name)) {
+        if (!REGEXES.resource_file_name.test(name)) {
             throw new Error(gettext("You must provide a valid filename. Only alphanumerics and characters in the set \"_(). -\" are allowed."));
         }
 
@@ -890,7 +893,7 @@ CloudPebble.Resources = (function() {
     };
 
     var validate_resource_id = function(id) {
-        return !/[^a-zA-Z0-9_]/.test(id);
+        return REGEXES.c_identifier.test(id);
 
     };
 

@@ -1,7 +1,6 @@
 import json
 import re
 from django.utils.translation import ugettext as _
-from django.conf import settings
 from ide.utils.project import APPINFO_MANIFEST, PACKAGE_MANIFEST, InvalidProjectArchiveException
 
 __author__ = 'katharine'
@@ -171,12 +170,12 @@ def build(ctx):
         if build_worker:
             worker_elf = '{}/pebble-worker.elf'.format(ctx.env.BUILD_DIR)
             binaries.append({'platform': p, 'app_elf': app_elf, 'worker_elf': worker_elf})
-            ctx.pbl_worker(source=ctx.path.ant_glob('worker_src/**/*.c'), target=worker_elf)
+            ctx.pbl_worker(source=ctx.path.ant_glob(['worker_src/**/*.c', 'src/js/**/*.json']), target=worker_elf)
         else:
             binaries.append({'platform': p, 'app_elf': app_elf})
 
     ctx.set_group('bundle')
-    ctx.pbl_bundle(binaries=binaries, js=ctx.path.ant_glob('src/js/**/*.js'), js_entry_file='src/js/app.js')
+    ctx.pbl_bundle(binaries=binaries, js=ctx.path.ant_glob(['src/js/**/*.js', 'src/js/**/*.json']), js_entry_file='src/js/app.js')
 """
 
     return wscript.replace('{{jshint}}', 'True' if jshint and not for_export else 'False')
@@ -255,7 +254,7 @@ def generate_jshint_file(project):
 
 
 def manifest_name_for_project(project):
-    if settings.NPM_MANIFEST_SUPPORT and project.project_type == 'native' and project.sdk_version == '3':
+    if project.project_type == 'native' and project.sdk_version == '3':
         return PACKAGE_MANIFEST
     else:
         return APPINFO_MANIFEST
@@ -283,10 +282,6 @@ def generate_v3_manifest(project, resources):
     return dict_to_pretty_json(generate_v3_manifest_dict(project, resources))
 
 
-def generate_package_manifest(project, resources):
-    return dict_to_pretty_json(generate_package_manifest_dict(project, resources))
-
-
 def generate_v2_manifest_dict(project, resources):
     manifest = {
         'uuid': str(project.app_uuid),
@@ -309,22 +304,6 @@ def generate_v2_manifest_dict(project, resources):
     return manifest
 
 
-def generate_v3_manifest_dict(project, resources):
-    if settings.NPM_MANIFEST_SUPPORT:
-        return generate_package_manifest_dict(project, resources)
-    else:
-        # Just extend the v2 one.
-        manifest = generate_v2_manifest_dict(project, resources)
-        manifest['enableMultiJS'] = project.app_modern_multi_js
-        if project.app_platforms:
-            manifest['targetPlatforms'] = project.app_platform_list
-        if project.app_is_hidden:
-            manifest['watchapp']['hiddenApp'] = project.app_is_hidden
-        manifest['sdkVersion'] = "3"
-        del manifest['versionCode']
-        return manifest
-
-
 def make_valid_package_manifest_name(short_name):
     """ Turn an app_short_name into a valid NPM package name. """
     name = short_name.lower()
@@ -337,7 +316,7 @@ def make_valid_package_manifest_name(short_name):
     return name
 
 
-def generate_package_manifest_dict(project, resources):
+def generate_v3_manifest_dict(project, resources):
     manifest = {
         'name': make_valid_package_manifest_name(project.app_short_name),
         'author': project.app_company_name,
@@ -565,12 +544,7 @@ def load_manifest_dict(manifest, manifest_kind, default_project_type='native'):
         project['app_company_name'] = manifest['author']
         project['semver'] = manifest['version']
         project['app_long_name'] = manifest['pebble']['displayName']
-        if settings.NPM_MANIFEST_SUPPORT:
-            project['app_keys'] = dict_to_pretty_json(manifest['pebble'].get('messageKeys', []))
-        else:
-            project['app_keys'] = dict_to_pretty_json(manifest['pebble'].get('messageKeys', {}))
-            if isinstance(json.loads(project['app_keys']), list):
-                raise InvalidProjectArchiveException("Auto-assigned (array) messageKeys are not yet supported.")
+        project['app_keys'] = dict_to_pretty_json(manifest['pebble'].get('messageKeys', []))
         project['keywords'] = manifest.get('keywords', [])
         dependencies = manifest.get('dependencies', {})
         manifest = manifest['pebble']
