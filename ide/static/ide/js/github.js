@@ -206,7 +206,7 @@ CloudPebble.GitHub = (function() {
             ga('send', 'event', 'github', 'pull');
         });
 
-        CloudPebble.Sidebar.SetActivePane(pane, 'github');
+        CloudPebble.Sidebar.SetActivePane(pane, {id: 'github'});
     };
 
     return {

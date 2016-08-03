@@ -454,7 +454,6 @@ GITHUB_HOOK_TEMPLATE = _environ.get('GITHUB_HOOK', 'http://example.com/ide/proje
 SDK2_PEBBLE_WAF = _environ.get('SDK2_PEBBLE_WAF', '/sdk2/pebble/waf')
 SDK3_PEBBLE_WAF = _environ.get('SDK3_PEBBLE_WAF', '/sdk3/pebble/waf')
 
-NPM_MANIFEST_SUPPORT = _environ.get('NPM_MANIFEST_SUPPORT', '') != ''
 NPM_BINARY = _environ.get('NPM_BINARY', 'npm')
 
 ARM_CS_TOOLS = _environ.get('ARM_CS_TOOLS', '/arm-cs-tools/bin/')

@@ -64,8 +64,7 @@ def import_gist(user_id, gist_id):
         package['pebble'] = defaultdict(lambda: None)
         package['pebble'].update(content.get('pebble', {}))
         manifest_settings, media, dependencies = load_manifest_dict(package, PACKAGE_MANIFEST, default_project_type=None)
-        if settings.NPM_MANIFEST_SUPPORT:
-            default_settings['app_keys'] = '[]'
+        default_settings['app_keys'] = '[]'
     elif APPINFO_MANIFEST in files:
         content = json.loads(files['appinfo.json'].content)
         package = defaultdict(lambda: None)
@@ -91,7 +90,7 @@ def import_gist(user_id, gist_id):
 
         if project_type != 'simplyjs':
             for filename in gist.files:
-                if (project_type == 'native' and filename.endswith('.c') or filename.endswith('.h')) or filename.endswith('.js'):
+                if project_type == 'native' and filename.endswith(('.c', '.h', '.js', '.json')):
                     # Because gists can't have subdirectories.
                     if filename == 'pebble-js-app.js':
                         cp_filename = 'js/pebble-js-app.js'

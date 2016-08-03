@@ -51,20 +51,12 @@ class TestImportExport(CloudpebbleTestCase):
         exported_manifest = read_bundle(fake_s3.read_last_file())[expected_export_package_filename]
         self.assertDictEqual(json.loads(expected_manifest), json.loads(exported_manifest))
 
-    @override_settings(NPM_MANIFEST_SUPPORT='yes')
     def test_import_then_export_npm_style(self):
         """ An imported then exported project manifest should remain identical, preserving all important data. """
         manifest, _ = self.make_custom_manifests(messageKeys={'key': 1, 'keytars': 2})
         self.runTest(manifest, 'package.json', 'test/package.json')
 
-    @override_settings(NPM_MANIFEST_SUPPORT='yes')
     def test_import_then_export_npm_style_with_new_messageKeys(self):
         """ We should be able to import and export SDK 3 projects with arrays for messageKeys """
         manifest, _ = self.make_custom_manifests(messageKeys=['keyLimePie', 'donkey[123]'])
         self.runTest(manifest, 'package.json', 'test/package.json')
-
-    @override_settings(NPM_MANIFEST_SUPPORT='')
-    def test_import_npm_then_export_appifo(self):
-        """ With NPM export support off, an imported package.json project should export with an appinfo.json """
-        npm_manifest, appinfo_manifest = self.make_custom_manifests(messageKeys={'key': 1, 'keytars': 2})
-        self.runTest(npm_manifest, 'package.json', 'test/appinfo.json', expected_manifest=appinfo_manifest)
