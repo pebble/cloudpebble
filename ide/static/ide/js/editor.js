@@ -467,16 +467,26 @@ CloudPebble.Editor = (function() {
                 });
             };
 
-            CloudPebble.Sidebar.SetActivePane(pane, 'source-' + file.id, function() {
-                code_mirror.refresh();
-                _.defer(function() { code_mirror.focus(); });
-                check_safe();
-                refresh_ib();
-            }, function() {
-                if(!was_clean) {
-                    --unsaved_files;
+            CloudPebble.Sidebar.SetActivePane(pane, {
+                id: 'source-' + file.id,
+                onRestore: function() {
+                    code_mirror.refresh();
+                    _.defer(function() { code_mirror.focus(); });
+                    check_safe();
+                    refresh_ib();
+                },
+                onSuspend: function() {
+                    if (is_fullscreen) {
+                        fullscreen(code_mirror, false);
+                        resume_fullscreen = true;
+                    }
+                },
+                onDestroy: function() {
+                    if(!was_clean) {
+                        --unsaved_files;
+                    }
+                    delete open_codemirrors[file.id];
                 }
-                delete open_codemirrors[file.id];
             });
 
             var was_clean = true;
@@ -724,12 +734,6 @@ CloudPebble.Editor = (function() {
             },function() {
                 $('.fullscreen-icon-tooltip').fadeOut(300);
             });
-            $('#main-pane').data('pane-suspend-function', function() {
-                if (is_fullscreen) {
-                    fullscreen(code_mirror, false);
-                    resume_fullscreen = true;
-                }
-            });
 
             $(document).keyup(function(e) {
               if (e.keyCode == 27) { fullscreen(code_mirror, false); }   // Esc exits fullscreen mode
@@ -756,7 +760,7 @@ CloudPebble.Editor = (function() {
         }).catch(function(error) {
             var error_box = $('<div class="alert alert-error"></div>');
             error_box.text(interpolate(gettext("Something went wrong: %s"), [error.message]));
-            CloudPebble.Sidebar.SetActivePane(error_box, '');
+            CloudPebble.Sidebar.SetActivePane(error_box, {id: ''});
         }).finally(function() {
             CloudPebble.ProgressBar.Hide();
         });
