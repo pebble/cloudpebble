@@ -29,7 +29,7 @@ class TestSession(IdeModel):
     """ A TestSession is owned by a project contains a set of test runs. It represents a time that a set of N>=1 tests
     were run as one job."""
     date_added = models.DateTimeField(auto_now_add=True)
-    date_completed = models.DateTimeField(null=True)
+    date_completed = models.DateTimeField(null=True, blank=True)
     project = models.ForeignKey('Project', related_name='test_sessions')
     SESSION_KINDS = (
         ('batch', _('Batch Test')),
@@ -128,7 +128,7 @@ class TestRun(IdeModel):
     )
     platform = models.CharField(max_length=10, choices=PLATFORM_CHOICES)
 
-    date_completed = models.DateTimeField(null=True)
+    date_completed = models.DateTimeField(blank=True, null=True)
 
     original_name = models.CharField(max_length=100)
     code = models.IntegerField(default=TestCode.PENDING)

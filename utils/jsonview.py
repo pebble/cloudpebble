@@ -88,7 +88,11 @@ def json_view(*args, **kwargs):
                 # Validation errors are raised for errors such as invalid file names.
                 # We return HTTP 400s in these cases, and send back a comma separated string of errors.
                 # (although generally there will only be one error)
-                return http.HttpResponseBadRequest(json.dumps(_make_error(", ".join(e.messages))), content_type=JSON)
+                try:
+                    err = _make_error(", ".join("%s [%s]" % (", ".join(messages), key) for key, messages in e.message_dict.iteritems()))
+                except ValidationError:
+                    err = _make_error(", ".join(e.messages))
+                return http.HttpResponseBadRequest(json.dumps(err), content_type=JSON)
             except Exception as e:
                 data = _make_error(_('An error has occurred'))
                 if settings.DEBUG or isinstance(e, InternalServerError):

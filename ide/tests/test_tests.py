@@ -47,7 +47,9 @@ class TestsTests(CloudpebbleTestCase):
             data = {'tests': ",".join(str(t) for t in tests.keys())}
             result = self.client.post(url, data).content
             result = json.loads(result)
-
+        error = result.get('error', None)
+        if error:
+            raise Exception("Failed to start test session: %s" % error)
         result = result['session']
 
         # Check that the server returns a session containing all the tests we added
