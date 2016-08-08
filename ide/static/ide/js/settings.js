@@ -363,7 +363,7 @@ CloudPebble.Settings = (function() {
 
         live_form.init();
 
-        CloudPebble.Sidebar.SetActivePane(pane, 'settings');
+        CloudPebble.Sidebar.SetActivePane(pane, {id: 'settings'});
 
         configure_appkey_table(app_uses_array_appkeys());
     };

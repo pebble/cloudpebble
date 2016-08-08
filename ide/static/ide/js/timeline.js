@@ -92,7 +92,7 @@ CloudPebble.Timeline = new (function() {
             styleActiveLine: true,
             theme: USER_SETTINGS.theme
         });
-        CloudPebble.Sidebar.SetActivePane($('#timeline-pane').show(), 'timeline');
+        CloudPebble.Sidebar.SetActivePane($('#timeline-pane').show(), {id: 'timeline'});
         mEditor.refresh();
 
         $('#timeline-insert-btn').click(insertPin);
