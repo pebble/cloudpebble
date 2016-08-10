@@ -12,21 +12,23 @@ __author__ = 'joe'
 
 fake_s3 = FakeS3()
 
-RESOURCE_SPEC = {
-    'resources': {
-        'media': [{
-            'file': 'images/blah.png',
-            'name': 'IMAGE_BLAH',
-            'type': 'bitmap'
-        }]
-    }
-}
-
 
 @mock.patch('ide.models.s3file.s3', fake_s3)
-class TestImportProject(CloudpebbleTestCase):
+class TestImportArchive(CloudpebbleTestCase):
     def setUp(self):
         self.login()
+
+    @staticmethod
+    def make_resource_spec(name='IMAGE_BLAH'):
+        return {
+            'resources': {
+                'media': [{
+                    'file': 'images/blah.png',
+                    'name': name,
+                    'type': 'bitmap'
+                }]
+            }
+        }
 
     def test_import_basic_bundle_with_appinfo(self):
         """ Check that a minimal bundle imports without error """
@@ -97,7 +99,7 @@ class TestImportProject(CloudpebbleTestCase):
         bundle = build_bundle({
             'src/main.c': '',
             'resources/images/blah.png': 'contents!',
-            'appinfo.json': make_appinfo(options=RESOURCE_SPEC)
+            'appinfo.json': make_appinfo(options=self.make_resource_spec())
         })
         do_import_archive(self.project_id, bundle)
         project = Project.objects.get(pk=self.project_id)
@@ -108,7 +110,7 @@ class TestImportProject(CloudpebbleTestCase):
         bundle = build_bundle({
             'src/main.c': '',
             'resources/images/blah.png': 'contents!',
-            'package.json': make_package(pebble_options=RESOURCE_SPEC)
+            'package.json': make_package(pebble_options=self.make_resource_spec())
         })
         do_import_archive(self.project_id, bundle)
         project = Project.objects.get(pk=self.project_id)
@@ -142,6 +144,28 @@ class TestImportProject(CloudpebbleTestCase):
         with self.assertRaises(ValidationError):
             do_import_archive(self.project_id, bundle)
 
+    def test_invalid_resource_id(self):
+        """ Check that invalid characters are banned from resource IDs """
+        bundle = build_bundle({
+            'src/main.c': '',
+            'resources/images/blah.png': 'contents!',
+            'package.json': make_package(pebble_options=self.make_resource_spec("<>"))
+        })
+
+        with self.assertRaises(ValidationError):
+            do_import_archive(self.project_id, bundle)
+
+    def test_import_json_file(self):
+        """ Check that json files are correctly imported """
+        bundle = build_bundle({
+            'src/test.json': '{}',
+            'src/main.c': '',
+            'package.json': make_package()
+        })
+        do_import_archive(self.project_id, bundle)
+        project = Project.objects.get(pk=self.project_id)
+        self.assertEqual(project.source_files.filter(file_name='test.json').count(), 1)
+
 
 @mock.patch('ide.models.s3file.s3', fake_s3)
 class TestImportLibrary(CloudpebbleTestCase):
@@ -165,7 +189,7 @@ class TestImportLibrary(CloudpebbleTestCase):
         self.assertEqual(files['my-priv.h'].public, False)
 
     def test_import_library_with_resources(self):
-        """ Try importing a basic library """
+        """ Try importing a basic library with resources """
         bundle = build_bundle({
             'package.json': make_package(pebble_options={
                 'projectType': 'package',
@@ -181,8 +205,8 @@ class TestImportLibrary(CloudpebbleTestCase):
             }),
             'src/resources/res1.png': '',
             'src/resources/res2.png': '',
-
         })
         do_import_archive(self.project_id, bundle)
         project = Project.objects.get(pk=self.project_id)
         self.assertSetEqual({f.file_name for f in project.resources.all()}, {'res1.png', 'res2.png'})
+

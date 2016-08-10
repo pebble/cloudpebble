@@ -11,6 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 from ide.models.s3file import S3File
 from ide.models.textfile import TextFile
 from ide.models.meta import IdeModel
+from ide.utils.regexes import regexes
 
 __author__ = 'katharine'
 
@@ -28,7 +29,7 @@ class ResourceFile(IdeModel):
         ('pbi', _('1-bit Pebble image')),
     )
 
-    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_(). -]+$", message=_("Invalid filename."))])
+    file_name = models.CharField(max_length=100, validators=regexes.validator('resource_file_name', _("Invalid filename.")))
     kind = models.CharField(max_length=9, choices=RESOURCE_KINDS)
     is_menu_icon = models.BooleanField(default=False)
 
@@ -141,7 +142,6 @@ class ResourceVariant(S3File):
         return "".join(self.get_tag_names())
 
     def save(self, *args, **kwargs):
-        self.full_clean()
         self.resource_file.save()
         super(ResourceVariant, self).save(*args, **kwargs)
 
@@ -168,7 +168,7 @@ class ResourceVariant(S3File):
 
 class ResourceIdentifier(IdeModel):
     resource_file = models.ForeignKey(ResourceFile, related_name='identifiers')
-    resource_id = models.CharField(max_length=100)
+    resource_id = models.CharField(max_length=100, validators=regexes.validator('c_identifier', _("Invalid resource ID.")))
     character_regex = models.CharField(max_length=100, blank=True, null=True)
     tracking = models.IntegerField(blank=True, null=True)
     compatibility = models.CharField(max_length=10, blank=True, null=True)
@@ -225,8 +225,9 @@ class ResourceIdentifier(IdeModel):
 
 class SourceFile(TextFile):
     project = models.ForeignKey('Project', related_name='source_files')
-    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_.-]+\.(c|h|js)$", message=_("Invalid filename."))])
+    file_name = models.CharField(max_length=100, validators=regexes.validator('source_file_name', _('Invalid file name.')))
     public = models.BooleanField(default=False)
+
     folder = 'sources'
 
     TARGETS = (

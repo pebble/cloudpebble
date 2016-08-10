@@ -263,11 +263,11 @@ def do_import_archive(project_id, archive, delete_project=False):
                                 file_exists_for_root[root_file_name] = True
 
                         elif filename.startswith(SRC_DIR):
-                            if (not filename.startswith('.')) and (ends_with_any(filename, ['.c', '.h', '.js'])):
+                            if not filename.startswith('.') and filename.endswith(('.c', '.h', '.js', '.json')):
                                 base_filename = filename[len(SRC_DIR):]
                                 if project.app_modern_multi_js and base_filename.endswith('.js') and base_filename.startswith('js/'):
                                     base_filename = base_filename[len('js/'):]
-                                elif project.project_type == 'package' and ends_with_any(base_filename, ['.c', '.h']):
+                                elif project.project_type == 'package' and base_filename.endswith(('.c', '.h')):
                                     if not base_filename.startswith('c/'):
                                         raise InvalidProjectArchiveException("C Source files in project archives must be in 'c' folder")
                                     base_filename = base_filename[len('c/'):]
@@ -281,7 +281,7 @@ def do_import_archive(project_id, archive, delete_project=False):
                                 with z.open(entry.filename) as f:
                                     source.save_text(f.read().decode('utf-8'))
                         elif filename.startswith(WORKER_SRC_DIR):
-                            if (not filename.startswith('.')) and (ends_with_any(filename, ['.c', '.h', '.js'])):
+                            if not filename.startswith('.') and filename.endswith(('.c', '.h', '.js')):
                                 if project.project_type == 'package':
                                     raise InvalidProjectArchiveException("Packages cannot have workers")
                                 base_filename = filename[len(WORKER_SRC_DIR):]
@@ -311,7 +311,6 @@ def do_import_archive(project_id, archive, delete_project=False):
                     for root_file_name, loaded in file_exists_for_root.iteritems():
                         if not loaded:
                             raise KeyError("No file was found to satisfy the manifest filename: {}".format(root_file_name))
-                    project.full_clean()
                     project.save()
                     send_td_event('cloudpebble_zip_import_succeeded', project=project)
 

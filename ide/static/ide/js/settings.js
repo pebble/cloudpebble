@@ -107,10 +107,10 @@ CloudPebble.Settings = (function() {
             // This is not an appropriate use of a regex, but we have to have it for the HTML5 pattern attribute anyway,
             // so we may as well reuse the effort here.
             // It validates that the format matches x[.y] with x, y in [0, 255].
-            if(!version_label.match(VERSION_REGEX)) {
+            if(!version_label.match(REGEXES.sdk_version)) {
                 throw new Error(gettext("You must specify a valid version number."));
             }
-            if(!app_uuid.match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}/)) {
+            if(!app_uuid.match(REGEXES.uuid)) {
                 throw new Error(gettext("You must specify a valid UUID (of the form 00000000-0000-0000-0000-000000000000)"));
             }
 

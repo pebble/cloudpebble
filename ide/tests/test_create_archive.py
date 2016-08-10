@@ -56,3 +56,8 @@ class TestExport(ExportTester):
             'test/package.json',
             'test/src/resources/images/cat.png'
         })
+
+    def test_export_json(self):
+        """ Check that json files are correctly exported """
+        self.create_project(files={'main.c', 'test.json'})
+        self.run_test({'test/src/main.c', 'test/package.json', 'test/src/test.json'})
