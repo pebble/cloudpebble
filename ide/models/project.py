@@ -183,7 +183,11 @@ class Project(IdeModel):
         return supported_platforms
 
     @property
-    def is_native_or_package(self):
+    def resources_path(self):
+        return 'src/resources' if self.project_type == 'package' else 'resources'
+
+    @property
+    def is_standard_project_type(self):
         return self.project_type in {'native', 'package'}
 
     def clean(self):

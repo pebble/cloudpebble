@@ -10,17 +10,19 @@ fake_s3 = FakeS3()
 
 
 class ExportTester(CloudpebbleTestCase):
-    def create_project(self, options=None):
+    def create_project(self, files=None, **options):
         fake_s3.reset()
-        self.login(options)
+        self.login(**options)
         self.project = Project.objects.get(pk=self.project_id)
-        SourceFile.objects.create(project=self.project, file_name="main.c", target="app").save_text('file_contents')
+        for name in (files if files else {'main.c'}):
+            SourceFile.objects.create(project=self.project, file_name=name, target="app").save_text('file_contents')
 
     def run_test(self, expected_filenames):
         create_archive(self.project_id)
         data = read_bundle(fake_s3.read_last_file())
         filenames = set(data.keys())
-        self.assertSetEqual(filenames, expected_filenames | {'test/wscript', 'test/jshintrc'})
+        expected_filenames = expected_filenames | {'test/wscript', 'test/jshintrc'}
+        self.assertSetEqual(filenames, expected_filenames)
 
 
 @mock.patch('ide.tasks.archive.s3', fake_s3)
@@ -33,12 +35,12 @@ class TestExport(ExportTester):
 
     def test_export_sdk_2_project(self):
         """ Check that SDK2 projects are exported with appinfo.json """
-        self.create_project({'sdk': '2'})
+        self.create_project(sdk='2')
         self.run_test({'test/src/main.c', 'test/appinfo.json'})
 
     def test_export_package(self):
         """ Check that packages are exported with the correct file structure """
-        self.create_project({'type': 'package'})
+        self.create_project(type='package')
         SourceFile.objects.create(project=self.project, file_name="main.h", target="app").save_text('file_contents')
         SourceFile.objects.create(project=self.project, file_name="header.h", public=True).save_text('header_contents')
         SourceFile.objects.create(project=self.project, file_name="app.js").save_text('js_contents')

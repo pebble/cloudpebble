@@ -146,7 +146,7 @@ class TestImportProject(CloudpebbleTestCase):
 @mock.patch('ide.models.s3file.s3', fake_s3)
 class TestImportLibrary(CloudpebbleTestCase):
     def setUp(self):
-        self.login({'type': 'package'})
+        self.login(type='package')
 
     def test_import_basic_library(self):
         """ Try importing a basic library """

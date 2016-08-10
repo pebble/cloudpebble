@@ -9,13 +9,13 @@
                 <div class="controls">
                     <select id="edit-resource-type">
                         <option value="bitmap">{% trans 'Bitmap Image' %}</option>
-                        {% if project.project_type.is_native_or_package  %}
+                        {% if project.project_type.is_standard_project_type  %}
                             <option value="font">{% trans 'TrueType font' %}</option>
                             <option value="raw">{% trans 'Raw binary blob' %}</option>
                         {% endif %}
 
                         <option value="png">{% trans 'PNG image (deprecated)' %}</option>
-                        {% if project.project_type.is_native_or_package %}
+                        {% if project.project_type.is_standard_project_type %}
                             <option value="png-trans">{% trans 'PNG with transparency (deprecated)' %}</option>
                             {% if project.sdk_version == '3' %}
                                 <option value="pbi">{% trans '1-bit Pebble image (deprecated)' %}</option>

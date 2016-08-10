@@ -18,6 +18,7 @@ from ide.models.files import SourceFile, ResourceFile, ResourceIdentifier, Resou
 from ide.models.project import Project
 from ide.utils.project import find_project_root_and_manifest, InvalidProjectArchiveException, MANIFEST_KINDS, BaseProjectItem
 from ide.utils.sdk import generate_manifest, generate_wscript_file, generate_jshint_file, manifest_name_for_project, load_manifest_dict
+
 from utils.td_helper import send_td_event
 
 __author__ = 'katharine'
@@ -31,34 +32,17 @@ def add_project_to_archive(z, project, prefix=''):
     prefix += re.sub(r'[^\w]+', '_', project.name).strip('_').lower()
 
     for source in source_files:
-        src_dir = 'src'
-        if project.project_type == 'native':
-            if source.target == 'worker':
-                src_dir = 'worker_src'
-            elif project.app_modern_multi_js and source.file_name.endswith('.js'):
-                src_dir = 'src/js'
-        elif project.project_type == 'package':
-            if source.public:
-                src_dir = 'include'
-            elif source.file_name.endswith('.js'):
-                src_dir = 'src/js'
-            else:
-                src_dir = 'src/c'
-
-        z.writestr('%s/%s/%s' % (prefix, src_dir, source.file_name), source.get_contents())
+        path = os.path.join(prefix, source.project_path)
+        z.writestr(path, source.get_contents())
 
     for resource in resources:
-        if project.project_type == 'package':
-            res_path = 'src/resources'
-        else:
-            res_path = 'resources'
         for variant in resource.variants.all():
-            z.writestr('%s/%s/%s' % (prefix, res_path, variant.path), variant.get_contents())
+            z.writestr('%s/%s/%s' % (prefix, project.resources_path, variant.path), variant.get_contents())
 
     manifest = generate_manifest(project, resources)
     manifest_name = manifest_name_for_project(project)
     z.writestr('%s/%s' % (prefix, manifest_name), manifest)
-    if project.is_native_or_package:
+    if project.is_standard_project_type:
         # This file is always the same, but needed to build.
         z.writestr('%s/wscript' % prefix, generate_wscript_file(project, for_export=True))
         z.writestr('%s/jshintrc' % prefix, generate_jshint_file(project))

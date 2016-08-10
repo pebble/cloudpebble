@@ -19,18 +19,26 @@ CloudPebble.ProgressBar = (function() {
     };
 })();
 
-// TODO: Think of a better name for this
-CloudPebble.ProjectProperties = {};
-Object.defineProperty(CloudPebble.ProjectProperties, 'js_only', {
-    get: function() {
-        return !(CloudPebble.ProjectInfo.type == 'native' || CloudPebble.ProjectInfo.type == 'package');
-    }
-});
-Object.defineProperty(CloudPebble.ProjectProperties, 'is_runnable', {
-    get: function() {
-        return CloudPebble.ProjectInfo.type != 'package';
-    }
-});
+
+CloudPebble.ProjectProperties = (function() {
+    var spec = {
+        'js_only': ['simplyjs', 'pebblejs'],
+        'is_runnable': ['native', 'pebblejs', 'simplyjs'],
+        'supports_message_keys': ['native', 'package'],
+        'supports_jslint': ['native', 'package', 'pebblejs']
+    };
+    var obj = {
+        Init: function() {
+            _.each(spec, function(types, property) {
+                Object.defineProperty(obj, property, {
+                    value: _.contains(types, CloudPebble.ProjectInfo.type)
+                });
+            });
+        }
+    };
+    return obj;
+})();
+
 
 CloudPebble.ProjectInfo = {};
 
@@ -41,6 +49,7 @@ CloudPebble.Init = function() {
     Ajax.Get('/ide/project/' + PROJECT_ID + '/info').then(function(data) {
         CloudPebble.ProjectInfo = data;
 
+        CloudPebble.ProjectProperties.Init();
         CloudPebble.Compile.Init();
         CloudPebble.Editor.Init();
         CloudPebble.Resources.Init();

@@ -73,8 +73,6 @@ CloudPebble.Sidebar = (function() {
         $('#sidebar-pane-' + id).addClass('active');
     };
 
-    var init = function() {
-    };
 
     return {
         SuspendActive: function() {
@@ -159,7 +157,6 @@ CloudPebble.Sidebar = (function() {
             $('#sidebar-pane-github > a').click(CloudPebble.GitHub.Show);
             $('#sidebar-pane-timeline > a').click(CloudPebble.Timeline.show);
             $('#new-source-file').click(CloudPebble.Editor.Create);
-            init();
         },
         SetPopover: function(pane_id, title, content) {
             $('#sidebar-pane-' + pane_id).find('a').popover('destroy').popover({

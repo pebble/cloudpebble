@@ -39,7 +39,15 @@ def create_source_file(request, project_id):
         }
     }, request=request, project=project)
 
-    return {"file": {"id": f.id, "name": f.file_name, "target": f.target, "public": f.public}}
+    return {
+        'file': {
+            'id': f.id,
+            'name': f.file_name,
+            'target': f.target,
+            'public': f.public,
+            'file_path': f.project_path
+        }
+    }
 
 
 @require_safe
@@ -65,9 +73,9 @@ def load_source_file(request, project_id, file_id):
     }, request=request, project=project)
 
     return {
-        "source": content,
-        "modified": time.mktime(source_file.last_modified.utctimetuple()),
-        "folded_lines": folded_lines
+        'source': content,
+        'modified': time.mktime(source_file.last_modified.utctimetuple()),
+        'folded_lines': folded_lines
     }
 
 
@@ -119,7 +127,7 @@ def rename_source_file(request, project_id, file_id):
             'kind': 'source'
         }
     }, request=request, project=project)
-    return {"modified": time.mktime(source_file.last_modified.utctimetuple())}
+    return {'modified': time.mktime(source_file.last_modified.utctimetuple()), 'file_path': source_file.project_path}
 
 
 @require_POST
@@ -146,7 +154,7 @@ def save_source_file(request, project_id, file_id):
         }
     }, request=request, project=project)
 
-    return {"modified": time.mktime(source_file.last_modified.utctimetuple())}
+    return {'modified': time.mktime(source_file.last_modified.utctimetuple())}
 
 
 @require_POST

@@ -50,12 +50,17 @@ CloudPebble.Editor = (function() {
             new_name: new_name,
             modified: file.lastModified
         }).then(function(response) {
+            var new_file_path = response.file_path;
+            _.findWhere(open_codemirrors, {file_path: file.file_path}).file_path = new_file_path;
+            CloudPebble.YCM.renameFile(file.file_path, new_file_path);
             delete project_source_files[file.name];
             file.name = new_name;
+            file.file_path = new_file_path;
             file.lastModified = response.modified;
             CloudPebble.Sidebar.SetItemName('source', file.id, new_name);
             CloudPebble.FuzzyPrompt.SetCurrentItemName(new_name);
             project_source_files[file.name] = file;
+            return null;
         });
     };
 
@@ -198,7 +203,7 @@ CloudPebble.Editor = (function() {
                 settings.gutters = ['gutter-errors', 'CodeMirror-linenumbers', 'CodeMirror-foldgutter'];
             }
             var code_mirror = CodeMirror(pane[0], settings);
-            code_mirror.file_path = (file.target  == 'worker' ? 'worker_src/' : 'src/') + file.name;
+            code_mirror.file_path = file.file_path;
             code_mirror.file_target = file.target;
             code_mirror.parent_pane = pane;
             code_mirror.patch_list = [];
@@ -1107,9 +1112,6 @@ CloudPebble.Editor = (function() {
         },
         GetUnsavedFiles: function() {
             return unsaved_files;
-        },
-        Open: function(file) {
-            edit_source_file(file);
         },
         SaveAll: function() {
             return save_all();
