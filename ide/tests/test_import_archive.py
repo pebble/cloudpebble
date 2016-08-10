@@ -209,4 +209,3 @@ class TestImportLibrary(CloudpebbleTestCase):
         do_import_archive(self.project_id, bundle)
         project = Project.objects.get(pk=self.project_id)
         self.assertSetEqual({f.file_name for f in project.resources.all()}, {'res1.png', 'res2.png'})
-
