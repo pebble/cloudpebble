@@ -48,10 +48,10 @@ def _filter_dict(dictionary, spec, strict=False):
         raise ValueError('Second argument must be a collections.Mappable')
 
     out = {}
-    if spec.keys() == [True]:
+    if True in spec.keys():
         # Wildcard case
-        spec_value = spec[True]
         for key in dictionary:
+            spec_value = spec.get(key, spec[True])
             _transform_value(out, key, dictionary, spec_value, strict=False)
     else:
         # Non-wildcard case
@@ -63,7 +63,8 @@ def _filter_dict(dictionary, spec, strict=False):
 
 def _transform_value(out, key, dictionary, spec_value, strict):
     v = dictionary[key]
-
+    if spec_value is False:
+        return
     if spec_value is True:
         out[key] = v
     elif isinstance(spec_value, TransformValue):

@@ -277,7 +277,7 @@ def do_import_archive(project_id, archive, delete_project=False):
                         elif filename.startswith(INCLUDE_SRC_DIR) and project.project_type == 'package':
                             if not filename.startswith('.') and filename.endswith('.h'):
                                 base_filename = filename[len(INCLUDE_SRC_DIR):]
-                                source = SourceFile.objects.create(project=project, file_name=base_filename, public=True)
+                                source = SourceFile.objects.create(project=project, file_name=base_filename, target='public')
                                 with z.open(entry.filename) as f:
                                     source.save_text(f.read().decode('utf-8'))
                         elif filename.startswith(WORKER_SRC_DIR):

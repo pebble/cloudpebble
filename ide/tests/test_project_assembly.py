@@ -120,6 +120,6 @@ class TestAssemble(ProjectTester):
         """ Check that an pebblejs project looks right """
         with self.get_tree(type='package'):
             self.add_file('lib.c')
-            self.add_file('lib.h', public=True)
+            self.add_file('lib.h', target='public')
         expected = self.make_expected_sdk3_project(include=True, src={'c': True, 'resources': True}, resources=False)
         self.assertDictEqual(self.tree, expected)

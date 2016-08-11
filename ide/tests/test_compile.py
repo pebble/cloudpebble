@@ -104,7 +104,7 @@ class TestCompileLive(LiveServerTestCase, ProjectTester):
         """ Check that (a) we can build packages, (b) we can build projects which depend on them. """
         self.make_project()
         # Build the package
-        package = Project.objects.create(name='test', sdk_version='3', project_type='package', app_short_name='libname', owner_id=self.user_id, app_keys='[]')
+        package = Project.objects.create(name='test', sdk_version='3', project_type='package', app_short_name='libname', owner_id=self.user_id)
         self.add_file("whatever.c", LIBRARY_C, project=package)
         self.add_file("whatever.h", LIBRARY_H, project=package)
         package_build_result = BuildResult.objects.create(project=package)

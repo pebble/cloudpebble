@@ -23,8 +23,7 @@ def create_source_file(request, project_id):
     try:
         f = SourceFile.objects.create(project=project,
                                       file_name=request.POST['name'],
-                                      target=request.POST.get('target', 'app'),
-                                      public=request.POST.get('public', False) == 'true')
+                                      target=request.POST.get('target', 'app'))
         f.save_text(request.POST.get('content', ''))
 
     except IntegrityError as e:
@@ -34,8 +33,7 @@ def create_source_file(request, project_id):
         'data': {
             'filename': request.POST['name'],
             'kind': 'source',
-            'target': f.target,
-            'public': f.public
+            'target': f.target
         }
     }, request=request, project=project)
 
@@ -44,7 +42,6 @@ def create_source_file(request, project_id):
             'id': f.id,
             'name': f.file_name,
             'target': f.target,
-            'public': f.public,
             'file_path': f.project_path
         }
     }

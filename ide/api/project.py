@@ -54,7 +54,6 @@ def project_info(request, project_id):
                              'name': f.file_name,
                              'id': f.id,
                              'target': f.target,
-                             'public': f.public,
                              'file_path': f.project_path,
                              'lastModified': time.mktime(f.last_modified.utctimetuple())
                          } for f in source_files],
@@ -191,8 +190,6 @@ def create_project(request):
             elif project_type == 'pebblejs':
                 f = SourceFile.objects.create(project=project, file_name="app.js")
                 f.save_text(open('{}/src/js/app.js'.format(settings.PEBBLEJS_ROOT)).read())
-            if sdk_version != '2':
-                project.app_keys = '[]'
             project.full_clean()
             project.save()
     except IntegrityError as e:

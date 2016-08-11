@@ -81,6 +81,12 @@ class Project(IdeModel):
 
     project_dependencies = models.ManyToManyField("Project")
 
+    def __init__(self, *args, **kwargs):
+        super(IdeModel, self).__init__(*args, **kwargs)
+        # For SDK3+, default to array-based message keys.
+        if self.sdk_version != '2' and self.app_keys == '{}':
+            self.app_keys = '[]'
+
     def set_dependencies(self, dependencies):
         """ Set the project's dependencies from a dictionary.
         :param dependencies: A dictionary of dependency->version

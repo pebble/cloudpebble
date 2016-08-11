@@ -1012,7 +1012,7 @@ CloudPebble.Editor = (function() {
                                     header_file = create_remote_file({
                                         name: header,
                                         content: "#pragma once\n",
-                                        target: target
+                                        target: target,
                                     });
                                 }
                             }
@@ -1024,33 +1024,9 @@ CloudPebble.Editor = (function() {
                         files = [create_remote_file({
                             name: name,
                             content: content,
-                            target: target
+                            target: target,
                         }), header_file];
                     }
-                })();
-            } else if (kind == 'include') {
-                (function() {
-                    var name = prompt.find('#new-include-file-name').val();
-                    if (!(/.+\.h$/.test(name))) {
-                        error.text(gettext("Source files must end in .c or .h")).show();
-                    } else if(project_source_files[name]) {
-                        // TODO: Packages - in theory an include file should be able to share the same name as a source file.
-                        // TODO: The change wouldn't be huge, but still might not be worth it.
-                        error.text(interpolate(gettext("A file called '%s' already exists."), [name])).show();
-                    } else {
-                        create_remote_file({
-                            name: name,
-                            content: "#include <pebble.h>\n\n",
-                            target: 'app',
-                            public: true
-                        }).then(function(data) {
-                            prompt.modal('hide');
-                            return edit_source_file(data.file);
-                        }).catch(function(err) {
-                            error.text(err.toString()).show()
-                        })
-                    }
-
                 })();
             } else if(kind == 'js') {
                 (function() {
@@ -1060,7 +1036,7 @@ CloudPebble.Editor = (function() {
                     } else if(project_source_files[name]) {
                         error.text(interpolate(gettext("A file called '%s' already exists."), [name])).show();
                     } else {
-                        files = [create_remote_file(name)]
+                        files = [create_remote_file({name: name, target: 'pkjs'})]
                     }
                 })();
             } else if(kind == 'json') {
@@ -1071,7 +1047,7 @@ CloudPebble.Editor = (function() {
                     } else if(project_source_files[name]) {
                         error.text(interpolate(gettext("A file called '%s' already exists."), [name])).show();
                     } else {
-                        files = [create_remote_file(name)]
+                        files = [create_remote_file({name: name, target: 'pkjs'})]
                     }
                 })();
             } else if(kind == 'layout') {

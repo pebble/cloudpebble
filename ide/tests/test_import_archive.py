@@ -184,9 +184,9 @@ class TestImportLibrary(CloudpebbleTestCase):
         project = Project.objects.get(pk=self.project_id)
         files = {f.file_name: f for f in project.source_files.all()}
         self.assertSetEqual(set(files.keys()), {'my-lib.h', 'my-lib.c', 'my-priv.h'})
-        self.assertEqual(files['my-lib.h'].public, True)
-        self.assertEqual(files['my-lib.c'].public, False)
-        self.assertEqual(files['my-priv.h'].public, False)
+        self.assertEqual(files['my-lib.h'].target, 'public')
+        self.assertEqual(files['my-lib.c'].target, 'app')
+        self.assertEqual(files['my-priv.h'].target, 'app')
 
     def test_import_library_with_resources(self):
         """ Try importing a basic library with resources """

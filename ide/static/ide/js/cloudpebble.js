@@ -19,7 +19,7 @@ CloudPebble.ProgressBar = (function() {
     };
 })();
 
-
+/** Define calculated properties based on the project type. */
 CloudPebble.ProjectProperties = (function() {
     var spec = {
         'js_only': ['simplyjs', 'pebblejs'],

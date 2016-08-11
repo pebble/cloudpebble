@@ -45,8 +45,8 @@ class ProjectTester(CloudpebbleTestCase):
         self.project = Project.objects.get(pk=self.project_id)
         self.build_result = BuildResult.objects.create(project=self.project)
 
-    def add_file(self, name, contents="", project=None, target="app", public=False):
-        SourceFile.objects.create(project=self.project if not project else project, file_name=name, target=target, public=public).save_text(contents)
+    def add_file(self, name, contents="", project=None, target="app"):
+        SourceFile.objects.create(project=self.project if not project else project, file_name=name, target=target).save_text(contents)
 
     def compile(self):
         run_compile(self.build_result.id)
