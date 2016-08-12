@@ -74,20 +74,13 @@ CloudPebble.Sidebar = (function() {
     var set_active_menu_entry = function(id) {
         $('#sidebar-pane-' + id).addClass('active');
     };
-
-    var source_section_names = {
-        'app': gettext("App Source"),
-        'public': gettext("Public headers"),
-        'pkjs': gettext("PebbleKit JS"),
-        'worker': gettext("Worker source")
-    };
     
     var get_source_section = function(kind) {
         var id = 'sidebar-sources-' + kind;
         var container = $('#sidebar-sources');
         var section = container.find('#' + id);
         if (!section.length) {
-            var header = $('<span class="nav-header">').text(source_section_names[kind]);
+            var header = $('<span class="nav-header">').text(CloudPebble.TargetNames[kind]);
             section = $('<ul class="nav-list">').attr('id', id);
             container.append($('<li>').append([header, section]));
             var add_button = container.find('#new-source-file').click(CloudPebble.Editor.Create);

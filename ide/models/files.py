@@ -261,4 +261,4 @@ class SourceFile(TextFile):
         return 'src'
 
     class Meta(IdeModel.Meta):
-        unique_together = (('project', 'file_name'),)
+        unique_together = (('project', 'file_name', 'target'),)

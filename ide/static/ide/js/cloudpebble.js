@@ -39,6 +39,12 @@ CloudPebble.ProjectProperties = (function() {
     return obj;
 })();
 
+CloudPebble.TargetNames =   {
+    'app': gettext("App Source"),
+    'public': gettext("Public headers"),
+    'pkjs': gettext("PebbleKit JS"),
+    'worker': gettext("Worker source")
+};
 
 CloudPebble.ProjectInfo = {};
 
