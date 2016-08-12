@@ -81,6 +81,12 @@ class Project(IdeModel):
 
     project_dependencies = models.ManyToManyField("Project")
 
+    def __init__(self, *args, **kwargs):
+        super(IdeModel, self).__init__(*args, **kwargs)
+        # For SDK3+, default to array-based message keys.
+        if self.sdk_version != '2' and self.app_keys == '{}':
+            self.app_keys = '[]'
+
     def set_dependencies(self, dependencies):
         """ Set the project's dependencies from a dictionary.
         :param dependencies: A dictionary of dependency->version
@@ -185,7 +191,11 @@ class Project(IdeModel):
         return supported_platforms
 
     @property
-    def is_native_or_package(self):
+    def resources_path(self):
+        return 'src/resources' if self.project_type == 'package' else 'resources'
+
+    @property
+    def is_standard_project_type(self):
         return self.project_type in {'native', 'package'}
 
     def clean(self):

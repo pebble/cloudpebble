@@ -170,7 +170,7 @@ class TestImportArchive(CloudpebbleTestCase):
 @mock.patch('ide.models.s3file.s3', fake_s3)
 class TestImportLibrary(CloudpebbleTestCase):
     def setUp(self):
-        self.login({'type': 'package'})
+        self.login(type='package')
 
     def test_import_basic_library(self):
         """ Try importing a basic library """
@@ -184,9 +184,9 @@ class TestImportLibrary(CloudpebbleTestCase):
         project = Project.objects.get(pk=self.project_id)
         files = {f.file_name: f for f in project.source_files.all()}
         self.assertSetEqual(set(files.keys()), {'my-lib.h', 'my-lib.c', 'my-priv.h'})
-        self.assertEqual(files['my-lib.h'].public, True)
-        self.assertEqual(files['my-lib.c'].public, False)
-        self.assertEqual(files['my-priv.h'].public, False)
+        self.assertEqual(files['my-lib.h'].target, 'public')
+        self.assertEqual(files['my-lib.c'].target, 'app')
+        self.assertEqual(files['my-priv.h'].target, 'app')
 
     def test_import_library_with_resources(self):
         """ Try importing a basic library with resources """
@@ -209,4 +209,3 @@ class TestImportLibrary(CloudpebbleTestCase):
         do_import_archive(self.project_id, bundle)
         project = Project.objects.get(pk=self.project_id)
         self.assertSetEqual({f.file_name for f in project.resources.all()}, {'res1.png', 'res2.png'})
-

@@ -1,19 +1,27 @@
 # -*- coding: utf-8 -*-
 from south.utils import datetime_utils as datetime
 from south.db import db
-from south.v2 import DataMigration
+from south.v2 import SchemaMigration
 from django.db import models
 
-class Migration(DataMigration):
+
+class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Note: Don't use "from appname.models import ModelName". 
-        # Use orm.ModelName to refer to models in this application,
-        # and orm['appname.ModelName'] for models in other applications.
-        orm.Project.objects.filter(project_type='pebblejs').update(app_platforms='aplite,basalt')
+        # Adding M2M table for field project_dependencies on 'Project'
+        m2m_table_name = db.shorten_name(u'ide_project_project_dependencies')
+        db.create_table(m2m_table_name, (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('from_project', models.ForeignKey(orm['ide.project'], null=False)),
+            ('to_project', models.ForeignKey(orm['ide.project'], null=False))
+        ))
+        db.create_unique(m2m_table_name, ['from_project_id', 'to_project_id'])
+
 
     def backwards(self, orm):
-        orm.Project.objects.filter(project_type='pebblejs', app_platforms='aplite,basalt').update(app_platforms=None)
+        # Removing M2M table for field project_dependencies on 'Project'
+        db.delete_table(db.shorten_name(u'ide_project_project_dependencies'))
+
 
     models = {
         u'auth.group': {
@@ -59,7 +67,7 @@ class Migration(DataMigration):
             'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'builds'", 'to': "orm['ide.Project']"}),
             'started': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'db_index': 'True', 'blank': 'True'}),
             'state': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
-            'uuid': ('django.db.models.fields.CharField', [], {'default': "'f5385e28-83aa-4cf9-a0d6-dbf228f7151b'", 'max_length': '36'})
+            'uuid': ('django.db.models.fields.CharField', [], {'default': "'0ed8be9a-454e-4649-b7ff-b54e9bf534d4'", 'max_length': '36'})
         },
         'ide.buildsize': {
             'Meta': {'object_name': 'BuildSize'},
@@ -71,6 +79,13 @@ class Migration(DataMigration):
             'total_size': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'worker_size': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'})
         },
+        'ide.dependency': {
+            'Meta': {'unique_together': "(('project', 'name'),)", 'object_name': 'Dependency'},
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
+            'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'dependencies'", 'to': "orm['ide.Project']"}),
+            'version': ('django.db.models.fields.CharField', [], {'max_length': '2000'})
+        },
         'ide.project': {
             'Meta': {'object_name': 'Project'},
             'app_capabilities': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
@@ -80,11 +95,12 @@ class Migration(DataMigration):
             'app_is_watchface': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'app_jshint': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'app_keys': ('django.db.models.fields.TextField', [], {'default': "'{}'"}),
+            'app_keywords': ('django.db.models.fields.TextField', [], {'default': "'[]'"}),
             'app_long_name': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'app_modern_multi_js': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'app_platforms': ('django.db.models.fields.TextField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'app_short_name': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'app_uuid': ('django.db.models.fields.CharField', [], {'default': "'4e4e6976-e637-4298-bdf1-06878c2e1619'", 'max_length': '36', 'null': 'True', 'blank': 'True'}),
+            'app_uuid': ('django.db.models.fields.CharField', [], {'default': "'3261ed6e-a649-4683-8e9f-4dc75ed06139'", 'max_length': '36', 'null': 'True', 'blank': 'True'}),
             'app_version_label': ('django.db.models.fields.CharField', [], {'default': "'1.0'", 'max_length': '40', 'null': 'True', 'blank': 'True'}),
             'github_branch': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'github_hook_build': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
@@ -97,6 +113,7 @@ class Migration(DataMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
             'optimisation': ('django.db.models.fields.CharField', [], {'default': "'s'", 'max_length': '1'}),
             'owner': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"}),
+            'project_dependencies': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['ide.Project']", 'symmetrical': 'False'}),
             'project_type': ('django.db.models.fields.CharField', [], {'default': "'native'", 'max_length': '10'}),
             'sdk_version': ('django.db.models.fields.CharField', [], {'default': "'2'", 'max_length': '6'})
         },
@@ -159,9 +176,8 @@ class Migration(DataMigration):
             'theme': ('django.db.models.fields.CharField', [], {'default': "'cloudpebble'", 'max_length': '50'}),
             'use_spaces': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'user': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['auth.User']", 'unique': 'True', 'primary_key': 'True'}),
-            'whats_new': ('django.db.models.fields.PositiveIntegerField', [], {'default': '20'})
+            'whats_new': ('django.db.models.fields.PositiveIntegerField', [], {'default': '22'})
         }
     }
 
     complete_apps = ['ide']
-    symmetrical = True

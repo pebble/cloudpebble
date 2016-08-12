@@ -4,9 +4,11 @@ import json
 from zipfile import ZipFile
 from io import BytesIO
 
+from ide.models import Project, BuildResult, SourceFile
+from ide.tasks import run_compile
+
 from ide.utils.sdk import dict_to_pretty_json
 from django.test import TestCase
-from django.conf import settings
 from django.test.client import Client
 from django.test.utils import setup_test_environment
 from ide.models.user import User
@@ -22,7 +24,7 @@ setup_test_environment()
 # TODO: after moving to Django 1.9, use client.post().json() instead of json.loads(client.post().content)
 
 class CloudpebbleTestCase(TestCase):
-    def login(self, project_options=None):
+    def login(self, **project_options):
         """ Create a HTTP client, create a user account, log in to CloudPebble, create a new project. """
         self.client = Client()
         self.client.post('/accounts/register', {'username': 'test', 'email': 'test@test.test', 'password1': 'test', 'password2': 'test'})
@@ -35,6 +37,24 @@ class CloudpebbleTestCase(TestCase):
         new_project = json.loads(self.client.post('/ide/project/create', create_data).content)
         self.assertTrue(new_project['success'])
         self.project_id = new_project['id']
+
+
+class ProjectTester(CloudpebbleTestCase):
+    def make_project(self, **options):
+        self.login(**options)
+        self.project = Project.objects.get(pk=self.project_id)
+        self.build_result = BuildResult.objects.create(project=self.project)
+
+    def add_file(self, name, contents="", project=None, target="app"):
+        SourceFile.objects.create(project=self.project if not project else project, file_name=name, target=target).save_text(contents)
+
+    def compile(self):
+        run_compile(self.build_result.id)
+        self.build_result = BuildResult.objects.get(pk=self.build_result.id)
+
+    def check_compile_success(self, num_platforms=3):
+        self.assertEqual(self.build_result.state, BuildResult.STATE_SUCCEEDED)
+        self.assertSequenceEqual([size.binary_size > 0 for size in self.build_result.sizes.all()], [True] * num_platforms)
 
 
 def make_appinfo(options=None):

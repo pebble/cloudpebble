@@ -8,33 +8,19 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding field 'SourceFile.public'
-        db.add_column(u'ide_sourcefile', 'public',
-                      self.gf('django.db.models.fields.BooleanField')(default=False),
-                      keep_default=False)
+        # Removing unique constraint on 'SourceFile', fields ['project', 'file_name']
+        db.delete_unique(u'ide_sourcefile', ['project_id', 'file_name'])
 
-
-        # Changing field 'Dependency.version'
-        db.alter_column(u'ide_dependency', 'version', self.gf('django.db.models.fields.CharField')(max_length=2000))
-        # Adding M2M table for field project_dependencies on 'Project'
-        m2m_table_name = db.shorten_name(u'ide_project_project_dependencies')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('from_project', models.ForeignKey(orm['ide.project'], null=False)),
-            ('to_project', models.ForeignKey(orm['ide.project'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['from_project_id', 'to_project_id'])
+        # Adding unique constraint on 'SourceFile', fields ['project', 'file_name', 'target']
+        db.create_unique(u'ide_sourcefile', ['project_id', 'file_name', 'target'])
 
 
     def backwards(self, orm):
-        # Deleting field 'SourceFile.public'
-        db.delete_column(u'ide_sourcefile', 'public')
+        # Removing unique constraint on 'SourceFile', fields ['project', 'file_name', 'target']
+        db.delete_unique(u'ide_sourcefile', ['project_id', 'file_name', 'target'])
 
-
-        # Changing field 'Dependency.version'
-        db.alter_column(u'ide_dependency', 'version', self.gf('django.db.models.fields.CharField')(max_length=100))
-        # Removing M2M table for field project_dependencies on 'Project'
-        db.delete_table(db.shorten_name(u'ide_project_project_dependencies'))
+        # Adding unique constraint on 'SourceFile', fields ['project', 'file_name']
+        db.create_unique(u'ide_sourcefile', ['project_id', 'file_name'])
 
 
     models = {
@@ -81,7 +67,7 @@ class Migration(SchemaMigration):
             'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'builds'", 'to': "orm['ide.Project']"}),
             'started': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'db_index': 'True', 'blank': 'True'}),
             'state': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
-            'uuid': ('django.db.models.fields.CharField', [], {'default': "'5c50cc8e-096d-4c6d-8891-29b07ef4735b'", 'max_length': '36'})
+            'uuid': ('django.db.models.fields.CharField', [], {'default': "'236d8712-410b-4a77-8f3d-2c31f1cfc1e7'", 'max_length': '36'})
         },
         'ide.buildsize': {
             'Meta': {'object_name': 'BuildSize'},
@@ -114,7 +100,7 @@ class Migration(SchemaMigration):
             'app_modern_multi_js': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'app_platforms': ('django.db.models.fields.TextField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'app_short_name': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'app_uuid': ('django.db.models.fields.CharField', [], {'default': "'73d080ab-f967-4769-a2b8-566c5284faac'", 'max_length': '36', 'null': 'True', 'blank': 'True'}),
+            'app_uuid': ('django.db.models.fields.CharField', [], {'default': "'6db8e5fa-37b9-41ee-91f4-014fc59aa2e6'", 'max_length': '36', 'null': 'True', 'blank': 'True'}),
             'app_version_label': ('django.db.models.fields.CharField', [], {'default': "'1.0'", 'max_length': '40', 'null': 'True', 'blank': 'True'}),
             'github_branch': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'github_hook_build': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
@@ -160,13 +146,12 @@ class Migration(SchemaMigration):
             'tags': ('django.db.models.fields.CommaSeparatedIntegerField', [], {'max_length': '50', 'blank': 'True'})
         },
         'ide.sourcefile': {
-            'Meta': {'unique_together': "(('project', 'file_name'),)", 'object_name': 'SourceFile'},
+            'Meta': {'unique_together': "(('project', 'file_name', 'target'),)", 'object_name': 'SourceFile'},
             'file_name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'folded_lines': ('django.db.models.fields.TextField', [], {'default': "'[]'"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'last_modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'null': 'True', 'blank': 'True'}),
             'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'source_files'", 'to': "orm['ide.Project']"}),
-            'public': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'target': ('django.db.models.fields.CharField', [], {'default': "'app'", 'max_length': '10'})
         },
         'ide.templateproject': {

@@ -1,336 +1,22 @@
 import json
 import re
+
 from django.utils.translation import ugettext as _
+
 from ide.utils.project import APPINFO_MANIFEST, PACKAGE_MANIFEST, InvalidProjectArchiveException
 
 __author__ = 'katharine'
 
 
-def generate_wscript_file_sdk2(project, for_export=False):
-    jshint = project.app_jshint
-    wscript = """
-#
-# This file is the default set of rules to compile a Pebble project.
-#
-# Feel free to customize this to your needs.
-#
-
-import os.path
-try:
-    from sh import CommandNotFound, jshint, cat, ErrorReturnCode_2
-    hint = jshint
-except (ImportError, CommandNotFound):
-    hint = None
-
-top = '.'
-out = 'build'
-
-def options(ctx):
-    ctx.load('pebble_sdk')
-
-def configure(ctx):
-    ctx.load('pebble_sdk')
-    global hint
-    if hint is not None:
-        hint = hint.bake(['--config', 'pebble-jshintrc'])
-
-def build(ctx):
-    if {{jshint}} and hint is not None:
-        try:
-            hint([node.abspath() for node in ctx.path.ant_glob("src/**/*.js")], _tty_out=False) # no tty because there are none in the cloudpebble sandbox.
-        except ErrorReturnCode_2 as e:
-            ctx.fatal("\\nJavaScript linting failed (you can disable this in Project Settings):\\n" + e.stdout)
-
-    # Concatenate all our JS files (but not recursively), and only if any JS exists in the first place.
-    ctx.path.make_node('src/js/').mkdir()
-    js_paths = ctx.path.ant_glob(['src/*.js', 'src/**/*.js'])
-    if js_paths:
-        ctx(rule='cat ${SRC} > ${TGT}', source=js_paths, target='pebble-js-app.js')
-        has_js = True
-    else:
-        has_js = False
-
-    ctx.load('pebble_sdk')
-
-    ctx.pbl_program(source=ctx.path.ant_glob('src/**/*.c'),
-                    target='pebble-app.elf')
-
-    if os.path.exists('worker_src'):
-        ctx.pbl_worker(source=ctx.path.ant_glob('worker_src/**/*.c'),
-                        target='pebble-worker.elf')
-        ctx.pbl_bundle(elf='pebble-app.elf',
-                        worker_elf='pebble-worker.elf',
-                        js='pebble-js-app.js' if has_js else [])
-    else:
-        ctx.pbl_bundle(elf='pebble-app.elf',
-                       js='pebble-js-app.js' if has_js else [])
-
-"""
-    return wscript.replace('{{jshint}}', 'True' if jshint and not for_export else 'False')
-
-
-def generate_wscript_file_package(project, for_export):
-    jshint = project.app_jshint
-    wscript = """
-#
-# This file is the default set of rules to compile a Pebble project.
-#
-# Feel free to customize this to your needs.
-#
-import os
-import shutil
-import waflib
-
-try:
-    from sh import CommandNotFound, jshint, cat, ErrorReturnCode_2
-    hint = jshint
-except (ImportError, CommandNotFound):
-    hint = None
-
-top = '.'
-out = 'build'
-
-
-def distclean(ctx):
-    if os.path.exists('dist.zip'):
-        os.remove('dist.zip')
-    if os.path.exists('dist'):
-        shutil.rmtree('dist')
-    waflib.Scripting.distclean(ctx)
-
-
-def options(ctx):
-    ctx.load('pebble_sdk_lib')
-
-
-def configure(ctx):
-    ctx.load('pebble_sdk_lib')
-
-
-def build(ctx):
-    if {{jshint}} and hint is not None:
-        try:
-            hint([node.abspath() for node in ctx.path.ant_glob("src/**/*.js")], _tty_out=False) # no tty because there are none in the cloudpebble sandbox.
-        except ErrorReturnCode_2 as e:
-            ctx.fatal("\\nJavaScript linting failed (you can disable this in Project Settings):\\n" + e.stdout)
-
-    ctx.load('pebble_sdk_lib')
-
-    cached_env = ctx.env
-    for platform in ctx.env.TARGET_PLATFORMS:
-        ctx.env = ctx.all_envs[platform]
-        ctx.set_group(ctx.env.PLATFORM_NAME)
-        lib_name = '{}/{}'.format(ctx.env.BUILD_DIR, ctx.env.PROJECT_INFO['name'])
-        ctx.pbl_build(source=ctx.path.ant_glob('src/c/**/*.c'), target=lib_name, bin_type='lib')
-    ctx.env = cached_env
-
-    ctx.set_group('bundle')
-    ctx.pbl_bundle(includes=ctx.path.ant_glob('include/**/*.h'),
-                   js=ctx.path.ant_glob(['src/js/**/*.js', 'src/js/**/*.json']),
-                   bin_type='lib')
-
-    if ctx.cmd == 'clean':
-        for n in ctx.path.ant_glob(['dist/**/*', 'dist.zip'], quiet=True):
-            n.delete()
-"""
-    return wscript.replace('{{jshint}}', 'True' if jshint and not for_export else 'False')
-
-
-def generate_wscript_file_sdk3(project, for_export):
-    jshint = project.app_jshint
-    if not project.app_modern_multi_js:
-        wscript = """
-    #
-# This file is the default set of rules to compile a Pebble project.
-#
-# Feel free to customize this to your needs.
-#
-
-import os.path
-try:
-    from sh import CommandNotFound, jshint, cat, ErrorReturnCode_2
-    hint = jshint
-except (ImportError, CommandNotFound):
-    hint = None
-
-top = '.'
-out = 'build'
-
-def options(ctx):
-    ctx.load('pebble_sdk')
-
-def configure(ctx):
-    ctx.load('pebble_sdk')
-
-def build(ctx):
-    if {{jshint}} and hint is not None:
-        try:
-            hint([node.abspath() for node in ctx.path.ant_glob("src/**/*.js")], _tty_out=False) # no tty because there are none in the cloudpebble sandbox.
-        except ErrorReturnCode_2 as e:
-            ctx.fatal("\\nJavaScript linting failed (you can disable this in Project Settings):\\n" + e.stdout)
-
-    # Concatenate all our JS files (but not recursively), and only if any JS exists in the first place.
-    ctx.path.make_node('src/js/').mkdir()
-    js_paths = ctx.path.ant_glob(['src/*.js', 'src/**/*.js'])
-    if js_paths:
-        ctx(rule='cat ${SRC} > ${TGT}', source=js_paths, target='pebble-js-app.js')
-        has_js = True
-    else:
-        has_js = False
-
-    ctx.load('pebble_sdk')
-
-    build_worker = os.path.exists('worker_src')
-    binaries = []
-
-    for p in ctx.env.TARGET_PLATFORMS:
-        ctx.set_env(ctx.all_envs[p])
-        ctx.set_group(ctx.env.PLATFORM_NAME)
-        app_elf='{}/pebble-app.elf'.format(p)
-        ctx.pbl_program(source=ctx.path.ant_glob('src/**/*.c'),
-        target=app_elf)
-
-        if build_worker:
-            worker_elf='{}/pebble-worker.elf'.format(p)
-            binaries.append({'platform': p, 'app_elf': app_elf, 'worker_elf': worker_elf})
-            ctx.pbl_worker(source=ctx.path.ant_glob('worker_src/**/*.c'),
-            target=worker_elf)
-        else:
-            binaries.append({'platform': p, 'app_elf': app_elf})
-
-    ctx.set_group('bundle')
-    ctx.pbl_bundle(binaries=binaries, js='pebble-js-app.js' if has_js else [])
-    """
-    else:
-        wscript = """#
-# This file is the default set of rules to compile a Pebble project.
-#
-# Feel free to customize this to your needs.
-#
-
-import os.path
-
-top = '.'
-out = 'build'
-
-
-def options(ctx):
-    ctx.load('pebble_sdk')
-
-
-def configure(ctx):
-    ctx.load('pebble_sdk')
-
-
-def build(ctx):
-    ctx.load('pebble_sdk')
-
-    build_worker = os.path.exists('worker_src')
-    binaries = []
-
-    for p in ctx.env.TARGET_PLATFORMS:
-        ctx.set_env(ctx.all_envs[p])
-        ctx.set_group(ctx.env.PLATFORM_NAME)
-        app_elf = '{}/pebble-app.elf'.format(ctx.env.BUILD_DIR)
-        ctx.pbl_program(source=ctx.path.ant_glob('src/**/*.c'), target=app_elf)
-
-        if build_worker:
-            worker_elf = '{}/pebble-worker.elf'.format(ctx.env.BUILD_DIR)
-            binaries.append({'platform': p, 'app_elf': app_elf, 'worker_elf': worker_elf})
-            ctx.pbl_worker(source=ctx.path.ant_glob(['worker_src/**/*.c', 'src/js/**/*.json']), target=worker_elf)
-        else:
-            binaries.append({'platform': p, 'app_elf': app_elf})
-
-    ctx.set_group('bundle')
-    ctx.pbl_bundle(binaries=binaries, js=ctx.path.ant_glob(['src/js/**/*.js', 'src/js/**/*.json']), js_entry_file='src/js/app.js')
-"""
-
-    return wscript.replace('{{jshint}}', 'True' if jshint and not for_export else 'False')
-
-
-def generate_wscript_file(project, for_export=False):
-    if project.project_type == 'package':
-        return generate_wscript_file_package(project, for_export)
-    if project.sdk_version == '2':
-        return generate_wscript_file_sdk2(project, for_export)
-    elif project.sdk_version == '3':
-        return generate_wscript_file_sdk3(project, for_export)
-
-
-def generate_jshint_file(project):
-    return """
-/*
- * Example jshint configuration file for Pebble development.
- *
- * Check out the full documentation at http://www.jshint.com/docs/options/
- */
-{
-  // Declares the existence of the globals available in PebbleKit JS.
-  "globals": {
-    "Pebble": true,
-    "console": true,
-    "WebSocket": true,
-    "XMLHttpRequest": true,
-    "navigator": true, // For navigator.geolocation
-    "localStorage": true,
-    "setTimeout": true,
-    "setInterval": true,
-    "Int8Array": true,
-    "Uint8Array": true,
-    "Uint8ClampedArray": true,
-    "Int16Array": true,
-    "Uint16Array": true,
-    "Int32Array": true,
-    "Uint32Array": true,
-    "Float32Array": true,
-    "Float64Array": true
-  },
-
-  // Do not mess with standard JavaScript objects (Array, Date, etc)
-  "freeze": true,
-
-  // Do not use eval! Keep this warning turned on (ie: false)
-  "evil": false,
-
-  /*
-   * The options below are more style/developer dependent.
-   * Customize to your liking.
-   */
-
-  // All variables should be in camelcase - too specific for CloudPebble builds to fail
-  // "camelcase": true,
-
-  // Do not allow blocks without { } - too specific for CloudPebble builds to fail.
-  // "curly": true,
-
-  // Prohibits the use of immediate function invocations without wrapping them in parentheses
-  "immed": true,
-
-  // Don't enforce indentation, because it's not worth failing builds over
-  // (especially given our somewhat lacklustre support for it)
-  "indent": false,
-
-  // Do not use a variable before it's defined
-  "latedef": "nofunc",
-
-  // Spot undefined variables
-  "undef": "true",
-
-  // Spot unused variables
-  "unused": "true"
-}
-"""
-
-
 def manifest_name_for_project(project):
-    if project.is_native_or_package and project.sdk_version == '3':
+    if project.is_standard_project_type and project.sdk_version == '3':
         return PACKAGE_MANIFEST
     else:
         return APPINFO_MANIFEST
 
 
 def generate_manifest(project, resources):
-    if project.is_native_or_package:
+    if project.is_standard_project_type:
         if project.sdk_version == '2':
             return generate_v2_manifest(project, resources)
         else:
@@ -406,7 +92,7 @@ def generate_v3_manifest_dict(project, resources):
 
 
 def generate_manifest_dict(project, resources):
-    if project.is_native_or_package:
+    if project.is_standard_project_type:
         if project.sdk_version == '2':
             return generate_v2_manifest_dict(project, resources)
         else:
@@ -418,17 +104,12 @@ def generate_manifest_dict(project, resources):
     else:
         raise Exception(_("Unknown project type %s") % project.project_type)
 
-
-def generate_resource_map(project, resources):
-    return dict_to_pretty_json(generate_resource_dict(project, resources))
-
-
 def dict_to_pretty_json(d):
     return json.dumps(d, indent=4, separators=(',', ': '), sort_keys=True) + "\n"
 
 
 def generate_resource_dict(project, resources):
-    if project.is_native_or_package:
+    if project.is_standard_project_type:
         return generate_native_resource_dict(project, resources)
     elif project.project_type == 'simplyjs':
         return generate_simplyjs_resource_dict()

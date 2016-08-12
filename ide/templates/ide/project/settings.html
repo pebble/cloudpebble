@@ -183,7 +183,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="control-group">
+                <div class="control-group supports-message-keys">
                     <label class="control-label" for="settings-app-keys">{% trans "PebbleKit JS Message Keys" %}</label>
                     <div class="controls">
                         <table id="settings-app-keys">
@@ -195,7 +195,7 @@
                 </div>
             </div>
             <div class="well">
-                <div class="control-group native-or-package">
+                <div class="control-group supports-jslint">
                     <label class="control-label" for="settings-app-jshint">{% trans "Check Javascript" context "checkbox label" %}</label>
                     <div class="controls">
                         <input type="checkbox" id="settings-app-jshint" {%if project.app_jshint%}checked{%endif%}>

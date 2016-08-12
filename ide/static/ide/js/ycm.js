@@ -211,14 +211,14 @@ CloudPebble.YCM = new (function() {
             return Promise.resolve();
         }
         return ws_send('delete', {
-            filename: (this.pathForFilename(file.name, file.target))
+            filename: file.file_path
         });
     };
 
-    this.renameFile = function(file, new_name) {
+    this.renameFile = function(old_file_path, new_file_path) {
         return ws_send('rename', {
-            filename: this.pathForFilename(file.name, file.target),
-            new_filename: this.pathForFilename(new_name, file.target)
+            filename: old_file_path,
+            new_filename: new_file_path
         })
     };
 
@@ -227,7 +227,7 @@ CloudPebble.YCM = new (function() {
             return Promise.resolve();
         }
         return ws_send('create', {
-            filename: this.pathForFilename(file.name, file.target),
+            filename: file.file_path,
             content: content || ''
         });
     };

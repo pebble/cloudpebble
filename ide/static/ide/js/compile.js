@@ -67,9 +67,9 @@ CloudPebble.Compile = (function() {
             // Make the links do something.
             log.find('.filename-link').click(function() {
                 var thing = $(this);
-                var filename = thing.data('filename').replace(/^(\.\.)?\/?((worker_)?(src))?\/?/, '');
+                var filename = thing.data('filename').replace(/^\//, '');
                 var line = parseInt(thing.data('line'), 10);
-                CloudPebble.Editor.GoTo(filename, line - 1, 0);
+                CloudPebble.Editor.GoTo({file_path: filename}, line - 1, 0);
             });
 
             CloudPebble.Sidebar.SetActivePane(log);
@@ -374,7 +374,10 @@ CloudPebble.Compile = (function() {
                         return;
                     }
                     var line = parseInt(thing.data('line'), 10);
-                    CloudPebble.Editor.GoTo(filename, line - 1, 0);
+                    // This could pick the wrong file if two files share the same name! But this is unlikely, since
+                    // workers are rarely used anyway.
+                    // TODO: Consider a better solution e.g. a pop
+                    CloudPebble.Editor.GoTo({name: filename}, line - 1, 0);
                 });
                 append_log_html(span);
                 if(ignore_crashes !== true) {

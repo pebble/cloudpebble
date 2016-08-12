@@ -3,7 +3,6 @@ import shutil
 import subprocess
 import tempfile
 import zipfile
-import json
 import resource
 import logging
 
@@ -13,13 +12,10 @@ from django.conf import settings
 from django.utils.timezone import now
 
 import apptools.addr2lines
-from ide.utils.sdk import generate_wscript_file, generate_jshint_file, generate_manifest_dict, \
-    generate_simplyjs_manifest_dict, generate_pebblejs_manifest_dict, manifest_name_for_project
 from utils.td_helper import send_td_event
 from ide.models.build import BuildResult, BuildSize
-from ide.models.files import SourceFile, ResourceFile, ResourceVariant
-from ide.utils.prepreprocessor import process_file as check_preprocessor_directives
 from ide.models.dependency import validate_dependency_version
+from ide.utils.sdk import assemble_project
 
 __author__ = 'katharine'
 
@@ -31,53 +27,6 @@ def _set_resource_limits():
     resource.setrlimit(resource.RLIMIT_NOFILE, (500, 500))  # 500 open files
     resource.setrlimit(resource.RLIMIT_RSS, (30 * 1024 * 1024, 30 * 1024 * 1024))  # 30 MB of memory
     resource.setrlimit(resource.RLIMIT_FSIZE, (20 * 1024 * 1024, 20 * 1024 * 1024))  # 20 MB output files.
-
-
-def create_source_files(project, base_dir):
-    """
-    :param project: Project
-    """
-    source_files = project.source_files.all()
-    src_dir = os.path.join(base_dir, 'src')
-    if project.project_type == 'pebblejs':
-        src_dir = os.path.join(src_dir, 'js')
-    worker_dir = None
-    try:
-        os.mkdir(src_dir)
-    except OSError as e:
-        if e.errno == 17:  # file exists
-            pass
-        else:
-            raise
-    for f in source_files:
-        target_dir = src_dir
-        if project.project_type == 'native':
-            if f.target == 'worker':
-                if worker_dir is None:
-                    worker_dir = os.path.join(base_dir, 'worker_src')
-                    os.mkdir(worker_dir)
-                target_dir = worker_dir
-            elif f.file_name.endswith('.js'):
-                target_dir = os.path.join(target_dir, 'js')
-        elif project.project_type == 'package':
-            if f.public:
-                target_dir = os.path.join(base_dir, 'include')
-            elif f.file_name.endswith('.js'):
-                target_dir = os.path.join(target_dir, 'js')
-            else:
-                target_dir = os.path.join(target_dir, 'c')
-
-        abs_target = os.path.abspath(os.path.join(target_dir, f.file_name))
-        if not abs_target.startswith(target_dir):
-            raise Exception("Suspicious filename: %s" % f.file_name)
-        abs_target_dir = os.path.dirname(abs_target)
-        if not os.path.exists(abs_target_dir):
-            os.makedirs(abs_target_dir)
-        f.copy_to_path(abs_target)
-        # Make sure we don't duplicate downloading effort; just open the one we created.
-        with open(abs_target) as fh:
-            check_preprocessor_directives(abs_target_dir, abs_target, fh.read())
-
 
 def save_debug_info(base_dir, build_result, kind, platform, elf_file):
     path = os.path.join(base_dir, 'build', elf_file)
@@ -115,64 +64,12 @@ def store_size_info(project, build_result, platform, zip_file):
 def run_compile(build_result):
     build_result = BuildResult.objects.get(pk=build_result)
     project = build_result.project
-    source_files = SourceFile.objects.filter(project=project)
-    resources = ResourceFile.objects.filter(project=project)
 
     # Assemble the project somewhere
     base_dir = tempfile.mkdtemp(dir=os.path.join(settings.CHROOT_ROOT, 'tmp') if settings.CHROOT_ROOT else None)
 
-    manifest_filename = manifest_name_for_project(project)
     try:
-        # Resources
-        resource_root = 'src/resources' if project.project_type == 'package' else 'resources'
-
-        os.makedirs(os.path.join(base_dir, resource_root, 'images'))
-        os.makedirs(os.path.join(base_dir, resource_root, 'fonts'))
-        os.makedirs(os.path.join(base_dir, resource_root, 'data'))
-
-        if project.is_native_or_package:
-            # Source code
-            create_source_files(project, base_dir)
-
-            manifest_dict = generate_manifest_dict(project, resources)
-            open(os.path.join(base_dir, manifest_filename), 'w').write(json.dumps(manifest_dict))
-
-            for f in resources:
-                target_dir = os.path.abspath(os.path.join(base_dir, resource_root, ResourceFile.DIR_MAP[f.kind]))
-                f.copy_all_variants_to_dir(target_dir)
-
-            # Reconstitute the SDK
-            open(os.path.join(base_dir, 'wscript'), 'w').write(generate_wscript_file(project))
-            open(os.path.join(base_dir, 'pebble-jshintrc'), 'w').write(generate_jshint_file(project))
-        elif project.project_type == 'simplyjs':
-            shutil.rmtree(base_dir)
-            shutil.copytree(settings.SIMPLYJS_ROOT, base_dir)
-            manifest_dict = generate_simplyjs_manifest_dict(project)
-
-            js = '\n\n'.join(x.get_contents() for x in source_files if x.file_name.endswith('.js'))
-            escaped_js = json.dumps(js)
-            build_result.save_simplyjs(js)
-
-            open(os.path.join(base_dir, manifest_filename), 'w').write(json.dumps(manifest_dict))
-            open(os.path.join(base_dir, 'src', 'js', 'zzz_userscript.js'), 'w').write("""
-            (function() {
-                simply.mainScriptSource = %s;
-            })();
-            """ % escaped_js)
-        elif project.project_type == 'pebblejs':
-            shutil.rmtree(base_dir)
-            shutil.copytree(settings.PEBBLEJS_ROOT, base_dir)
-            manifest_dict = generate_pebblejs_manifest_dict(project, resources)
-            create_source_files(project, base_dir)
-
-            for f in resources:
-                if f.kind not in ('png', 'bitmap'):
-                    continue
-                target_dir = os.path.abspath(os.path.join(base_dir, resource_root, ResourceFile.DIR_MAP[f.kind]))
-                f.copy_all_variants_to_dir(target_dir)
-
-            open(os.path.join(base_dir, manifest_filename), 'w').write(json.dumps(manifest_dict))
-
+        assemble_project(project, base_dir, build_result)
         # Build the thing
         cwd = os.getcwd()
         success = False

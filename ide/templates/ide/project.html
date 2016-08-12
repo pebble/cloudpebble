@@ -70,16 +70,18 @@
                             <span class="spinner spinner-dark hide"></span>
                         </li>
                     {% endif %}
-                    <li id="sidebar-pane-github" class="nav-header {%if not project.owner.github%}disabled{%endif%}"><a href="#">GitHub</a></li>
-                    <li class="nav-header nav-section" id="source-files"><span>{% trans 'Source files' %}</span>
-                        <button class="btn btn-small" id="new-source-file">{% trans 'Add new' %}</button></li>
-                    <li class="not-simplyjs" id="end-source-files"></li>
-                    <li class="hide native-only nav-header nav-section" id="worker-files">{% trans 'Worker source' %}</li>
-                    <li class="hide nav-section" id="end-worker-files"></li>
-                    <li class="hide nav-header nav-section" id="public-header-files"><span>{% trans 'Public headers' %}</span>
-                    <li class="hide nav-section" id="end-public-header-files"></li>
-                    <li class="nav-header nav-section not-simplyjs">{% trans 'Resources' %} <button class="btn btn-small" id="sidebar-pane-new-resource">{% trans 'Add new' %}</button></li>
-                    <li class="hide not-simplyjs" id="end-resources"></li>
+                    <li class="nav-section">
+                        <ul class="nav-list" id="sidebar-sources">
+
+                        </ul>
+                    </li>
+                    <li class="nav-section not-simplyjs">
+                        <span class="nav-header">{% trans 'Resources' %}</span>
+                        <button class="btn btn-small" id="sidebar-pane-new-resource">{% trans 'Add new' %}</button>
+                        <ul class="nav-list" id="sidebar-resources">
+
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -152,7 +154,6 @@
                 <div class="controls">
                     <select id="new-file-type">
                         <option value="c" selected>{% trans 'C file' %}</option>
-                        <option value="include">{% trans 'Public header file' %}</option>
                         <option value="js">{% trans 'JavaScript file' %}</option>
                         <option value="json">{% trans 'JSON file' %}</option>
                         <option value="layout">{% trans 'Window Layout' %}</option>
@@ -174,12 +175,19 @@
                         <input type="text" id="new-c-file-name" pattern="[a-zA-Z0-9_-]+\.(c|h)$">
                     </div>
                 </div>
-                <div class="control-group native-only">
+                <div class="control-group not-simplyjs not-pebblejs">
                     <label class="control-label" for="new-c-target">{% trans 'Target' context "compilation target" %}</label>
                     <div class="controls">
                         <select id="new-c-target">
-                            <option value="app" selected>{% trans 'App / Watchface' %}</option>
-                            <option value="worker">{% trans 'Background worker' %}</option>
+                            <option value="app" selected>
+                                {% if project.project_type == 'package' %}
+                                    {% trans 'Private source' %}
+                                {% else %}
+                                    {% trans 'App / Watchface' %}
+                                {% endif %}
+                            </option>
+                            <option value="worker" class="native-only">{% trans 'Background worker' %}</option>
+                            <option value="public" class="package-only">{% trans 'Public header file' %}</option>
                         </select>
                         <img src="{% static 'ide/img/help.png' %}" class="field-help">
                     </div>

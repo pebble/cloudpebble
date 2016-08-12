@@ -228,22 +228,39 @@ class ResourceIdentifier(IdeModel):
 class SourceFile(TextFile):
     project = models.ForeignKey('Project', related_name='source_files')
     file_name = models.CharField(max_length=100, validators=regexes.validator('source_file_name', _('Invalid file name.')))
-    public = models.BooleanField(default=False)
 
     folder = 'sources'
 
     TARGETS = (
         ('app', _('App')),
+        ('pkjs', _('PebbleKit JS')),
         ('worker', _('Worker')),
+        ('public', _('Public Header File')),
     )
     target = models.CharField(max_length=10, choices=TARGETS, default='app')
 
     @property
     def project_path(self):
-        if self.target == 'app':
-            return 'src/%s' % self.file_name
-        else:
-            return 'worker_src/%s' % self.file_name
+        return os.path.join(self.project_dir, self.file_name)
+
+    @property
+    def project_dir(self):
+        project_type = self.project.project_type
+        if project_type == 'native':
+            if self.target == 'worker':
+                return 'worker_src'
+            elif self.target == 'pkjs':
+                return os.path.join('src', 'js')
+        elif project_type == 'pebblejs':
+            return os.path.join('src', 'js')
+        elif project_type == 'package':
+            if self.target == 'public':
+                return 'include'
+            elif self.target == 'pkjs':
+                return os.path.join('src', 'js')
+            else:
+                return os.path.join('src', 'c')
+        return 'src'
 
     class Meta(IdeModel.Meta):
-        unique_together = (('project', 'file_name'))
+        unique_together = (('project', 'file_name', 'target'),)

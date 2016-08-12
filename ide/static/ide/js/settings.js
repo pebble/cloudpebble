@@ -22,8 +22,11 @@ CloudPebble.Settings = (function() {
         if (CloudPebble.ProjectInfo.type == 'package') {
             pane.find('.not-package').hide();
         }
-        if(!(CloudPebble.ProjectInfo.type == 'native' || CloudPebble.ProjectInfo.type == 'package')) {
-            pane.find('.native-or-package').hide();
+        if(!(CloudPebble.ProjectProperties.supports_message_keys)) {
+            pane.find('.supports-message-keys').hide();
+        }
+        if(!(CloudPebble.ProjectProperties.supports_jslint)) {
+            pane.find('.supports-jslint').hide();
         }
         if(CloudPebble.ProjectInfo.sdk_version != '3') {
             pane.find('.sdk3-only').hide();
