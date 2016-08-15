@@ -83,9 +83,9 @@ CloudPebble.Sidebar = (function() {
             var header = $('<span class="nav-header">').text(CloudPebble.TargetNames[kind]);
             section = $('<ul class="nav-list">').attr('id', id);
             container.append($('<li>').append([header, section]));
-            var add_button = container.find('#new-source-file').click(CloudPebble.Editor.Create);
+            var add_button = container.find('#new-source-file');
             if (!add_button.length) {
-                header.after($('<button class="btn btn-small" id="new-source-file">').text(gettext('Add new'))).after(" ");
+                header.after($('<button class="btn btn-small" id="new-source-file">').click(CloudPebble.Editor.Create).text(gettext('Add new'))).after(" ");
             }
         }
         return section;
