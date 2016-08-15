@@ -74,6 +74,9 @@ class TestCompile(ProjectTester):
     def test_project_with_dependencies(self):
         """ Check that an SDK 3 project with dependencies builds successfully """
         self.make_project()
+        # 'test_library.zip' is not currently compiled for diorite.
+        self.project.app_platforms = "aplite,basalt,chalk"
+        self.project.save()
         tempdir = tempfile.mkdtemp()
         try:
             # Extract a premade library to a temporary directory
@@ -88,7 +91,7 @@ class TestCompile(ProjectTester):
 
             # Compile and check
             self.compile()
-            self.check_compile_success()
+            self.check_compile_success(num_platforms=3)
         finally:
             shutil.rmtree(tempdir)
 

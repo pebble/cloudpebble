@@ -100,8 +100,8 @@ class Project(IdeModel):
     def set_interdependencies(self, interdependences):
         with transaction.atomic():
             self.project_dependencies.clear()
-            for id in interdependences:
-                project = Project.objects.get(pk=int(id), owner=self.owner, project_type='package')
+            for project_id in interdependences:
+                project = Project.objects.get(pk=project_id, owner=self.owner, project_type='package')
                 self.project_dependencies.add(project)
 
     @property
@@ -128,7 +128,7 @@ class Project(IdeModel):
 
     def get_dependencies(self, include_interdependencies=True):
         """ Get the project's dependencies as a dictionary
-        :return: A dictinoary of dependency->version
+        :return: A dictionary of dependency->version
         """
         dependencies = {d.name: d.version for d in self.dependencies.all()}
         if include_interdependencies:
@@ -206,8 +206,6 @@ class Project(IdeModel):
         if is_package:
             if is_sdk_2:
                 raise ValidationError(_("Packages are not available for SDK 2"))
-            if not self.uses_array_message_keys:
-                raise ValidationError(_("Packages must use array based appmessage keys"))
             if not self.app_modern_multi_js:
                 raise ValidationError(_("Packages must use CommonJS-style JS Handling."))
 

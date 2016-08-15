@@ -255,7 +255,7 @@ def save_project_dependencies(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     try:
         project.set_dependencies(json.loads(request.POST['dependencies']))
-        project.set_interdependencies(json.loads(request.POST['interdependencies']))
+        project.set_interdependencies([int(x) for x in json.loads(request.POST['interdependencies'])])
         return {'dependencies': project.get_dependencies()}
     except (IntegrityError, ValueError) as e:
         raise BadRequest(str(e))
@@ -286,16 +286,24 @@ def begin_export(request, project_id):
 @require_safe
 @json_view
 def get_projects(request):
+    """ Gets a list of all projects owned by the user.
+
+    Accepts one possible filter: '?libraries=[id]'. If given, the list of projects
+    is limited to packages, and each returned package includes a 'depended_on' attribute
+    which is true if it is depended on by the project where pk=[id].
+    """
     filters = {
         'owner': request.user
     }
     exclusions = {}
     parent_project = None
-    if request.GET.get('libraries', None):
+
+    libraries_for_project = int(request.GET['libraries']) if 'libraries' in request.GET else None
+    if libraries_for_project:
         filters['project_type'] = 'package'
-        parent_project = get_object_or_404(Project, pk=request.GET['libraries'], owner=request.user)
+        parent_project = get_object_or_404(Project, pk=libraries_for_project, owner=request.user)
         parent_project_dependencies = parent_project.project_dependencies.all()
-        exclusions['pk'] = request.GET['libraries']
+        exclusions['pk'] = libraries_for_project
 
     projects = Project.objects.filter(**filters).exclude(**exclusions)
 

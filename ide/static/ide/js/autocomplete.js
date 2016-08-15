@@ -158,9 +158,10 @@ CloudPebble.Editor.Autocomplete = new (function() {
         }).concat({name: 'pebble.h', local: false});
     }
 
-    function search_header_files(command, editor) {
+    /** Return a list of possible includes that a user could be trying to type. */
+    function try_complete_header_files(editor) {
         var query = editor.getTokenAt(editor.getCursor()).string;
-        var completions = Promise.resolve({});
+        var completions = {};
         var match;
         if (match = query.match(/^\s*#include\s+(["<])?([^>"]*)$/i)) {
             var files = collect_header_files();
@@ -181,12 +182,22 @@ CloudPebble.Editor.Autocomplete = new (function() {
                     quotes: quotes
                 }
             });
-            completions = Promise.resolve({
+            completions = {
                 completions: header_completions,
                 start_column: 0
-            });
+            };
         }
         return completions;
+    }
+
+    /** Try to complete a macro, by searching header files if possible or otherwise using YCM. */
+    function try_complete_macro(command, editor) {
+        var includes = try_complete_header_files(editor);
+        if (!includes.completions)
+            return CloudPebble.YCM.request(command, editor);
+        else {
+            return Promise.resolve(includes);
+        }
     }
 
     this.complete = function(editor, finishCompletion, options) {
@@ -212,7 +223,7 @@ CloudPebble.Editor.Autocomplete = new (function() {
         mRunning = true;
         var request_function;
         if (token.type === 'meta') {
-            request_function = search_header_files
+            request_function = try_complete_macro
         }
         else {
             request_function = CloudPebble.YCM.request;

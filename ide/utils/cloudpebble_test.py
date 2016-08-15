@@ -52,7 +52,7 @@ class ProjectTester(CloudpebbleTestCase):
         run_compile(self.build_result.id)
         self.build_result = BuildResult.objects.get(pk=self.build_result.id)
 
-    def check_compile_success(self, num_platforms=3):
+    def check_compile_success(self, num_platforms=4):
         self.assertEqual(self.build_result.state, BuildResult.STATE_SUCCEEDED)
         self.assertSequenceEqual([size.binary_size > 0 for size in self.build_result.sizes.all()], [True] * num_platforms)
 
