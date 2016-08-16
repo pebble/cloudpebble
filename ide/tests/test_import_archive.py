@@ -158,7 +158,7 @@ class TestImportArchive(CloudpebbleTestCase):
     def test_import_json_file(self):
         """ Check that json files are correctly imported """
         bundle = build_bundle({
-            'src/test.json': '{}',
+            'src/js/test.json': '{}',
             'src/main.c': '',
             'package.json': make_package()
         })

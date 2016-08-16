@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+from collections import OrderedDict
 
 from django.db import models
 from django.utils.timezone import now
@@ -239,28 +240,55 @@ class SourceFile(TextFile):
     )
     target = models.CharField(max_length=10, choices=TARGETS, default='app')
 
+    DIR_MAP = {
+        # Using an OrderedDict here ensures that 'src/' is checked last in get_details_for_path().
+        'native': OrderedDict([
+            ('pkjs', os.path.join('src', 'js')),
+            ('worker', 'worker_src'),
+            ('app', 'src')
+        ]),
+        'pebblejs': {
+            'app': os.path.join('src', 'js')
+        },
+        'simplyjs': {
+            'app': 'src'
+        },
+        'package': {
+            'app': os.path.join('src', 'c'),
+            'public': 'include',
+            'pkjs': os.path.join('src', 'js')
+        }
+    }
+
+    @classmethod
+    def get_details_for_path(cls, project_type, path):
+        """ Given a project type and a path to a source file, determinate what the file's target should be and what it's name should be. """
+        targets = cls.DIR_MAP[project_type]
+        for target in targets:
+            base = targets[target] + '/'
+            if path.startswith(base):
+                file_target = target
+                break
+        else:
+            raise ValueError(_("Unacceptable file path for this project [%s]") % path)
+        if file_target in ('pkjs', 'common') or project_type in ('pebblejs', 'simplyjs'):
+            expected_exts = ('.js', '.json')
+        else:
+            expected_exts = ('.c', '.h')
+        if not path.endswith(expected_exts):
+            raise ValueError(_("Unacceptable file extension for %s file in [%s]. Expecting %s") % (file_target, path, " or ".join(expected_exts)))
+        return path[len(base):], file_target
+
     @property
     def project_path(self):
         return os.path.join(self.project_dir, self.file_name)
 
     @property
     def project_dir(self):
-        project_type = self.project.project_type
-        if project_type == 'native':
-            if self.target == 'worker':
-                return 'worker_src'
-            elif self.target == 'pkjs':
-                return os.path.join('src', 'js')
-        elif project_type == 'pebblejs':
-            return os.path.join('src', 'js')
-        elif project_type == 'package':
-            if self.target == 'public':
-                return 'include'
-            elif self.target == 'pkjs':
-                return os.path.join('src', 'js')
-            else:
-                return os.path.join('src', 'c')
-        return 'src'
+        try:
+            return SourceFile.DIR_MAP[self.project.project_type][self.target]
+        except KeyError:
+            Exception("Invalid file type in project")
 
     class Meta(IdeModel.Meta):
         unique_together = (('project', 'file_name', 'target'),)

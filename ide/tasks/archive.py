@@ -199,7 +199,7 @@ def do_import_archive(project_id, archive, delete_project=False):
                     project.full_clean()
                     project.set_dependencies(dependencies)
 
-                    RES_PATH = 'src/resources' if project.project_type == 'package' else 'resources'
+                    RES_PATH = project.resources_path
 
                     tag_map = {v: k for k, v in ResourceVariant.VARIANT_STRINGS.iteritems() if v}
 
@@ -262,32 +262,16 @@ def do_import_archive(project_id, archive, delete_project=False):
                                 resource_variants[actual_file_name].save_file(extracted)
                                 file_exists_for_root[root_file_name] = True
 
-                        elif filename.startswith(SRC_DIR):
-                            if not filename.startswith('.') and filename.endswith(('.c', '.h', '.js', '.json')):
-                                base_filename = filename[len(SRC_DIR):]
-                                if project.app_modern_multi_js and base_filename.endswith('.js') and base_filename.startswith('js/'):
-                                    base_filename = base_filename[len('js/'):]
-                                elif project.project_type == 'package' and base_filename.endswith(('.c', '.h')):
-                                    if not base_filename.startswith('c/'):
-                                        raise InvalidProjectArchiveException("C Source files in project archives must be in 'c' folder")
-                                    base_filename = base_filename[len('c/'):]
-                                source = SourceFile.objects.create(project=project, file_name=base_filename)
-                                with z.open(entry.filename) as f:
-                                    source.save_text(f.read().decode('utf-8'))
-                        elif filename.startswith(INCLUDE_SRC_DIR) and project.project_type == 'package':
-                            if not filename.startswith('.') and filename.endswith('.h'):
-                                base_filename = filename[len(INCLUDE_SRC_DIR):]
-                                source = SourceFile.objects.create(project=project, file_name=base_filename, target='public')
-                                with z.open(entry.filename) as f:
-                                    source.save_text(f.read().decode('utf-8'))
-                        elif filename.startswith(WORKER_SRC_DIR):
-                            if not filename.startswith('.') and filename.endswith(('.c', '.h', '.js')):
-                                if project.project_type == 'package':
-                                    raise InvalidProjectArchiveException("Packages cannot have workers")
-                                base_filename = filename[len(WORKER_SRC_DIR):]
-                                source = SourceFile.objects.create(project=project, file_name=base_filename, target='worker')
-                                with z.open(entry.filename) as f:
-                                    source.save_text(f.read().decode('utf-8'))
+                        else:
+                            try:
+                                base_filename, target = SourceFile.get_details_for_path(project.project_type, filename)
+                            except ValueError:
+                                # We'll just ignore any out of place files.
+                                continue
+                            source = SourceFile.objects.create(project=project, file_name=base_filename, target=target)
+
+                            with z.open(entry.filename) as f:
+                                source.save_text(f.read().decode('utf-8'))
 
                     # Now add all the resource identifiers
                     for root_file_name in desired_resources:
