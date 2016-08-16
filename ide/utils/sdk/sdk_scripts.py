@@ -204,6 +204,11 @@ def build(ctx):
 #
 
 import os.path
+try:
+    from sh import CommandNotFound, jshint, cat, ErrorReturnCode_2
+    hint = jshint
+except (ImportError, CommandNotFound):
+    hint = None
 
 top = '.'
 out = 'build'
@@ -218,6 +223,12 @@ def configure(ctx):
 
 
 def build(ctx):
+    if {{jshint}} and hint is not None:
+        try:
+            hint([node.abspath() for node in ctx.path.ant_glob("src/**/*.js")], _tty_out=False) # no tty because there are none in the cloudpebble sandbox.
+        except ErrorReturnCode_2 as e:
+            ctx.fatal("\\nJavaScript linting failed (you can disable this in Project Settings):\\n" + e.stdout)
+
     ctx.load('pebble_sdk')
 
     build_worker = os.path.exists('worker_src')
