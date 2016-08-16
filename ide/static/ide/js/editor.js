@@ -291,12 +291,7 @@ CloudPebble.Editor = (function() {
 
                     if (file_kind == 'js') {
                         var jshint_globals = {
-                            Pebble: true,
                             console: true,
-                            WebSocket: true,
-                            XMLHttpRequest: true,
-                            navigator: true, // For navigator.geolocation
-                            localStorage: true,
                             setTimeout: true,
                             setInterval: true,
                             Int8Array: true,
@@ -310,8 +305,15 @@ CloudPebble.Editor = (function() {
                             Float64Array: true
                         };
 
-                        // Although you're not exactly supposed to parse JSON with jshint, it does
-                        // actually appear to go into a JSON mode when a file begins with {}.
+                        if (CloudPebble.ProjectInfo.type != 'rocky') {
+                            _.extend(jshint_globals, {
+                                Pebble: true,
+                                WebSocket: true,
+                                XMLHttpRequest: true,
+                                navigator: true,
+                                localStorage: true
+                            });
+                        }
 
                         if (CloudPebble.ProjectInfo.type == 'simplyjs') {
                             _.extend(jshint_globals, {
@@ -331,7 +333,6 @@ CloudPebble.Editor = (function() {
                                 module: true
                             });
                         }
-
 
                         var success = JSHINT(code_mirror.getValue(), {
                             freeze: true,

@@ -314,12 +314,7 @@ def generate_wscript_file(project, for_export=False):
 
 def generate_jshint_file(project):
     jshint_globals = [
-        "Pebble",
         "console",
-        "WebSocket",
-        "XMLHttpRequest",
-        "navigator",
-        "localStorage",
         "setTimeout",
         "setInterval",
         "Int8Array",
@@ -330,14 +325,25 @@ def generate_jshint_file(project):
         "Int32Array",
         "Uint32Array",
         "Float32Array",
-        "Float64Array"]
+        "Float64Array"
+    ]
 
-    if project.project_type == 'simplyjs':
-        jshint_globals.extend(['simplyjs', 'util2', 'ajax'])
-    elif project.project_type == 'pebblejs':
-        jshint_globals.extend(['require', 'ajax'])
-    elif project.app_modern_multi_js:
-        jshint_globals.extend(['require', 'exports', 'module'])
+    if project.project_type == 'rocky':
+        jshint_globals.extend(['require'])
+    else:
+        jshint_globals.extend([
+            "Pebble",
+            "WebSocket",
+            "XMLHttpRequest",
+            "navigator",
+            "localStorage"
+        ])
+        if project.project_type == 'simplyjs':
+            jshint_globals.extend(['simplyjs', 'util2', 'ajax'])
+        elif project.project_type == 'pebblejs':
+            jshint_globals.extend(['require', 'ajax'])
+        elif project.app_modern_multi_js:
+            jshint_globals.extend(['require', 'exports', 'module'])
 
     return """
 /*
