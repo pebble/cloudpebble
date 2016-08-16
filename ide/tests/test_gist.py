@@ -128,3 +128,12 @@ class TestImportProject(CloudpebbleTestCase):
         self.assertEqual(project.source_files.get(file_name='app.js').target, 'pkjs')
         self.assertEqual(project.source_files.get(file_name='main.c').target, 'app')
         self.assertEqual(project.resources.get(file_name='img.png').kind, "bitmap")
+
+    def test_rocky(self):
+        project = self.runTest({
+            'index.js': '',
+            'app.js': ''
+        })
+        self.assertEqual(project.project_type, 'rocky')
+        self.assertEqual(project.source_files.get(file_name='index.js').target, 'app')
+        self.assertEqual(project.source_files.get(file_name='app.js').target, 'pkjs')

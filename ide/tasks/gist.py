@@ -50,6 +50,14 @@ def import_gist(user_id, gist_id):
             default_settings['project_type'] = 'simplyjs'
         elif 'app.js' in files:
             default_settings['project_type'] = 'pebblejs'
+        elif 'index.js' in files:
+            default_settings['project_type'] = 'rocky'
+
+    # If all files are .js or .json and there is an index.js, assume it's a rocky project.
+    if all(x.endswith(('.js', '.json')) for x in gist.files) and 'index.js' in files:
+        default_settings['project_type'] = 'rocky'
+        default_settings['sdk_version'] = '3'
+        default_settings['app_modern_multi_js'] = True
 
     media = []
 
@@ -63,6 +71,8 @@ def import_gist(user_id, gist_id):
         package['pebble'].update(content.get('pebble', {}))
         manifest_settings, media, dependencies = load_manifest_dict(package, PACKAGE_MANIFEST, default_project_type=None)
         default_settings['app_keys'] = '[]'
+        default_settings['sdk_version'] = '3'
+        default_settings['app_modern_multi_js'] = True
     elif APPINFO_MANIFEST in files:
         content = json.loads(files[APPINFO_MANIFEST].content)
         package = defaultdict(lambda: None)
@@ -99,6 +109,9 @@ def import_gist(user_id, gist_id):
                     continue
                 if project_type == 'native':
                     if filename.endswith(('.js', '.json')):
+                        target = 'pkjs'
+                elif project_type == 'rocky':
+                    if filename == 'app.js':
                         target = 'pkjs'
                 source_file = SourceFile.objects.create(project=project, file_name=filename, target=target)
                 source_file.save_text(gist.files[filename].content)
