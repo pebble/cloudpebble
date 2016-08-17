@@ -364,6 +364,8 @@ QEMU_LAUNCH_TIMEOUT = int(_environ.get('QEMU_LAUNCH_TIMEOUT', 15))
 
 PHONE_SHORTURL = _environ.get('PHONE_SHORTURL', 'cpbl.io')
 
+WAF_NODE_PATH = _environ.get('WAF_NODE_PATH', None)
+
 import djcelery
 djcelery.setup_loader()
 

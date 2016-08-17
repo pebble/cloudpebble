@@ -96,6 +96,8 @@ def run_compile(build_result):
             elif project.sdk_version == '3':
                 environ = os.environ.copy()
                 environ['PATH'] = '{}:{}'.format(settings.ARM_CS_TOOLS, environ['PATH'])
+                if settings.WAF_NODE_PATH:
+                    environ['NODE_PATH'] = settings.WAF_NODE_PATH
                 command = [settings.SDK3_PEBBLE_WAF, "configure", "build"]
             else:
                 raise Exception("invalid sdk version.")
