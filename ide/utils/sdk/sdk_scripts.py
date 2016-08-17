@@ -37,7 +37,7 @@ def configure(ctx):
 def build(ctx):
     if {{jshint}} and hint is not None:
         try:
-            hint([node.abspath() for node in ctx.path.ant_glob("src/**/*.js")], _tty_out=False) # no tty because there are none in the cloudpebble sandbox.
+            hint([node.abspath() for node in ctx.path.ant_glob("src/pkjs/**/*.js")], _tty_out=False) # no tty because there are none in the cloudpebble sandbox.
         except ErrorReturnCode_2 as e:
             ctx.fatal("\\nJavaScript linting failed (you can disable this in Project Settings):\\n" + e.stdout)
 
@@ -45,7 +45,7 @@ def build(ctx):
     ctx.pbl_bundle(js=ctx.path.ant_glob(['src/pkjs/**/*.js',
                                          'src/pkjs/**/*.json',
                                          'src/common/**/*.js']),
-                   js_entry_file='src/pkjs/app.js',
+                   js_entry_file='src/pkjs/index.js',
                    bin_type='rocky')'''
     return wscript.replace('{{jshint}}', 'True' if jshint and not for_export else 'False')
 
@@ -306,7 +306,9 @@ def build(ctx):
 def generate_wscript_file(project, for_export=False):
     if project.project_type == 'package':
         return generate_wscript_file_package(project, for_export)
-    if project.sdk_version == '2':
+    elif project.project_type == 'rocky':
+        return generate_wscript_file_rocky(project, for_export)
+    elif project.sdk_version == '2':
         return generate_wscript_file_sdk2(project, for_export)
     elif project.sdk_version == '3':
         return generate_wscript_file_sdk3(project, for_export)
