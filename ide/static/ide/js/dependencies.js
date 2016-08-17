@@ -551,7 +551,7 @@ CloudPebble.Dependencies = (function() {
     }
 
     /** This sets up the list of headers */
-    function setup_headers_pane(pane, alerts) {
+    function setup_headers_pane(pane) {
         // Select an entire header when it is clicked.
         pane.on('click', 'tbody a', function() {
             select_element(this);

@@ -61,6 +61,7 @@ CloudPebble.Init = function() {
         CloudPebble.Compile.Init();
         CloudPebble.Editor.Init();
         CloudPebble.Resources.Init();
+        CloudPebble.PublishedMedia.Init();
         CloudPebble.Sidebar.Init();
         CloudPebble.Settings.Init();
         CloudPebble.GitHub.Init();

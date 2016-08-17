@@ -11,7 +11,7 @@
                         <option value="bitmap">{% trans 'Bitmap Image' %}</option>
                         {% if project.is_standard_project_type  %}
                             <option value="font">{% trans 'TrueType font' %}</option>
-                            <option value="raw">{% trans 'Raw binary blob' %}</option>
+                            <option value="raw">{% trans 'Raw binary blob' %}</option>w
                         {% endif %}
 
                         <option value="png">{% trans 'PNG image (deprecated)' %}</option>
@@ -115,11 +115,11 @@
                 <div class="resource-targets-section sdk3-only native-only">
                     <div class="control-group controls">
                         <label style="width: 250px" class="control-label">{% trans 'Target platforms' %}
-                            <span class="text-icon" data-content="{% trans "Use the Target Platforms option when you want a specific resource ID to only be available for specific platforms. <br> If you want this resource to be available on multiple platforms but with different files, upload additional images and tag them." %}">?</span>
+                            <span class="text-icon" data-content="{% trans 'Use the Target Platforms option when you want a specific resource ID to only be available for specific platforms. <br> If you want this resource to be available on multiple platforms but with different files, upload additional images and tag them.' %}">?</span>
                         </label>
-                        <input type="checkbox" class="edit-resource-target-platforms-enabled"> <p></p>
+                        <input type="checkbox" class="form-section-toggle"> <p></p>
 
-                        <div class="edit-resource-targets">
+                        <div class="form-toggleable-section">
                             <div class="edit-resource-target-options">
                                 <br/>
                             {% for platform in  supported_platforms %}

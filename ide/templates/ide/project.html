@@ -65,6 +65,7 @@
                     <li class="nav-header" id="sidebar-pane-settings"><a href="#">{% trans 'Settings' %}</a></li>
                     <li class="nav-header sdk3-only" id="sidebar-pane-timeline"><a href="#">Timeline (Preview)</a></li>
                     <li class="nav-header" id="sidebar-pane-compile"><a href="#">{% trans 'Compilation' %}</a></li>
+                    <li class="nav-header" id="sidebar-pane-media"><a href="#">{% trans 'Published Media' %}</a></li>
                     {% if project.project_type == 'package' or project.project_type == 'native' %}
                         <li class="nav-header sdk3-only" id="sidebar-pane-dependencies"><a href="#">{% trans 'Dependencies' %}</a>
                             <span class="spinner spinner-dark hide"></span>
@@ -140,6 +141,7 @@
 {% include "ide/project/ui-editor.html" %}
 {% include "ide/project/timeline.html" %}
 {% include "ide/project/dependencies.html" %}
+{% include "ide/project/published_media.html" %}
 {% endblock %}
 
 {% block modals %}
@@ -587,6 +589,7 @@ var REGEXES = _.mapObject(JSON.parse('{{regexes_json|escapejs}}'), function(v) {
 <script src="{% static 'ide/js/compile.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/dependencies.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/resources.js' %}" type="text/javascript"></script>
+<script src="{% static 'ide/js/published_media.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/textext_tagger.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/KVtable.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/settings.js' %}" type="text/javascript"></script>

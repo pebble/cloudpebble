@@ -54,7 +54,7 @@ CloudPebble.Resources = (function() {
     function get_target_platforms(pane) {
         pane = $(pane);
         // Return null any IDs in the pane have no targetPlatforms enabled
-        if (pane.find('.edit-resource-target-platforms-enabled').is(":not(:checked)")) {
+        if (pane.find('.form-section-toggle').is(":not(:checked)")) {
             return null;
         }
         // Otherwise, return the union of all targetPlatforms set in the pane.
@@ -690,7 +690,7 @@ CloudPebble.Resources = (function() {
 
                 var has_target_platforms = _.isArray(value["target_platforms"]);
                 if (has_target_platforms) {
-                    var target_platforms_checkbox = group.find(".edit-resource-target-platforms-enabled");
+                    var target_platforms_checkbox = group.find(".form-section-toggle");
                     target_platforms_checkbox.prop('checked', true);
                     _.each(_.keys(PLATFORMS), function(platform) {
                         group.find(".edit-resource-target-"+platform).prop('checked', _.contains(value["target_platforms"], platform));
@@ -963,6 +963,9 @@ CloudPebble.Resources = (function() {
         },
         GetFonts: function() {
             return _.where(project_resources, {kind: 'font'});
+        },
+        GetResources: function() {
+            return project_resources;
         },
         GetResourceByID: function(id) {
             return _.find(project_resources, function(resource) { return _.contains(resource.identifiers, id); });

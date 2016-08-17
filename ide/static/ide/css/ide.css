@@ -647,7 +647,7 @@ table.build-results tr.pending .build-state {
     clear: both;
 }
 
-.resource-pane input:not([type=checkbox]):not([type=submit]) {
+.resource-pane input:not([type=checkbox]):not([type=submit]):not([type=number]) {
     width: 435px;
 }
 
@@ -682,6 +682,14 @@ table.build-results tr.pending .build-state {
     width: 188px;
 }
 
+/* Published media pane */
+
+/*.media-pane .well {*/
+    /*margin: 30px;*/
+    /*padding-left: 60px;*/
+    /*padding-right: 60px;*/
+    /*width: 590px;*/
+/*}*/
 
 /* Dependancies pane */
 
@@ -1194,7 +1202,7 @@ button#add-filter {
     display: table;
 }
 
-.edit-resource-target-platforms-enabled:not(:checked) ~ .edit-resource-targets {
+.form-section-toggle:not(:checked) ~ .form-toggleable-section {
     display: none;
 }
 
