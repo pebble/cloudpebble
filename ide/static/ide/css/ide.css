@@ -684,12 +684,9 @@ table.build-results tr.pending .build-state {
 
 /* Published media pane */
 
-/*.media-pane .well {*/
-    /*margin: 30px;*/
-    /*padding-left: 60px;*/
-    /*padding-right: 60px;*/
-    /*width: 590px;*/
-/*}*/
+.media-item:not(:first-child) .help-block {
+    display: none;
+}
 
 /* Dependancies pane */
 

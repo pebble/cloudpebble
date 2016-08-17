@@ -10,6 +10,7 @@ from django.core.exceptions import ValidationError
 from ide.models.files import ResourceFile, ResourceIdentifier, SourceFile, ResourceVariant
 from ide.models.dependency import Dependency
 from ide.models.meta import IdeModel
+from ide.models.published_media import PublishedMedia
 from ide.utils import generate_half_uuid
 from ide.utils.regexes import regexes
 from ide.utils.version import version_to_semver, semver_to_version, parse_sdk_version
@@ -90,12 +91,25 @@ class Project(IdeModel):
         if self.sdk_version == '2':
             self.app_modern_multi_js = False
 
+    def set_published_media(self, published_media):
+        """ Set the project's publishedMedia entry
+        :param published_media: A list of publishedMedia dictionaries.
+        """
+        with transaction.atomic():
+            self.published_media.all().delete()
+            for item in published_media:
+                media = PublishedMedia.from_dict(self, item)
+                media.save()
+
+    def get_published_media(self):
+        return [item.to_dict() for item in self.published_media.all()]
+
     def set_dependencies(self, dependencies):
         """ Set the project's dependencies from a dictionary.
         :param dependencies: A dictionary of dependency->version
         """
         with transaction.atomic():
-            Dependency.objects.filter(project=self).delete()
+            self.dependencies.all().delete()
             for name, version in dependencies.iteritems():
                 dep = Dependency.objects.create(project=self, name=name, version=version)
                 dep.save()

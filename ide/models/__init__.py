@@ -5,3 +5,4 @@ from ide.models.files import *
 from ide.models.project import *
 from ide.models.user import *
 from ide.models.dependency import *
+from ide.models.published_media import *

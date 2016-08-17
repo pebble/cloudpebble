@@ -118,12 +118,11 @@ CloudPebble.PublishedMedia = (function() {
         if (live_form) live_form.addElement(item, true);
     }
 
-    function save_forms(){
-        var data = get_form_data();
+    function save_pubished_media(data) {
         var names = _.pluck(data, 'name');
         // Check that all items have names
         if (!_.every(names)) {
-            return {incomplete: true};
+            throw new Error(gettext('Identifiers cannot be blank'));
         }
         // Check that all IDs are unique
         if (_.max(_.countBy(data, 'id')) > 1) {
@@ -135,19 +134,25 @@ CloudPebble.PublishedMedia = (function() {
                 throw new Error(interpolate(gettext('"%s" is not a valid C identifier. Identifiers must consists of numbers, letters and underscores only.'), [name]))
             }
         });
+        return Ajax.Post('/ide/project/' + PROJECT_ID + '/save_published_media', {
+            'published_media': JSON.stringify(data)
+        }).then(function(result) {
+            CloudPebble.ProjectInfo.published_media = data;
+            // return CloudPebble.YCM.updateDependencies(result.dependencies);
+        });
+    }
+
+    function save_forms(){
+        var data = get_form_data();
+        // If not all items have names, cancel saving without displaying an error
+        if (!_.every(_.pluck(data, 'name'))) {
+            return {incomplete: true};
+        }
+        return save_pubished_media(data);
     }
 
     function setup_media_pane() {
-        var initial_data = [{
-            name: 'BLAH',
-            id: 0,
-            glance: 'THING',
-            timeline: {
-                tiny: 'THING',
-                small: 'THING2',
-                large: 'THING2'
-            }
-        }];
+        var initial_data = CloudPebble.ProjectInfo.published_media;
         _.each(initial_data, function(data) {
             var item = new MediaItem();
             item.setData(data);

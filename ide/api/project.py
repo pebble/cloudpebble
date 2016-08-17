@@ -50,6 +50,7 @@ def project_info(request, project_id):
         'app_platforms': project.app_platforms,
         'app_modern_multi_js': project.app_modern_multi_js,
         'menu_icon': project.menu_icon.id if project.menu_icon else None,
+        'published_media': project.get_published_media(),
         'source_files': [{
                              'name': f.file_name,
                              'id': f.id,
@@ -257,11 +258,26 @@ def save_project_dependencies(request, project_id):
     try:
         project.set_dependencies(json.loads(request.POST['dependencies']))
         project.set_interdependencies([int(x) for x in json.loads(request.POST['interdependencies'])])
-        return {'dependencies': project.get_dependencies()}
     except (IntegrityError, ValueError) as e:
         raise BadRequest(str(e))
     else:
-        send_td_event('cloudpebble_save_project_settings', request=request, project=project)
+        send_td_event('cloudpebble_save_dependencies', request=request, project=project)
+        return {'dependencies': project.get_dependencies()}
+
+
+@require_POST
+@login_required
+@json_view
+def save_published_media(request, project_id):
+    project = get_object_or_404(Project, pk=project_id, owner=request.user)
+    try:
+        project.set_published_media(json.loads(request.POST['published_media']))
+    except (IntegrityError, ValueError) as e:
+        raise BadRequest(str(e))
+    else:
+        send_td_event('cloudpebble_save_published_media', request=request, project=project)
+        return {'published_media': project.get_published_media()}
+
 
 @require_POST
 @login_required
