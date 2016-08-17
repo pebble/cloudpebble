@@ -9,7 +9,7 @@ class RegexHolder(object):
         # Match major.minor.0, where major and minor are numbers between 0 and 255 with no leading 0s
         'semver': r'^(0|[1-9]\d?|1\d{2}|2[0-4]\d|25[0-5])\.(0|[1-9]\d?|1\d{2}|2[0-4]\d|25[0-5])\.0$',
 
-        # Match a string of letters and numbers separated with underscores but not starting with a digit
+        # Match a string of letters and numbers separated with underscores
         'c_identifier': r'^\w+$',
 
         # Match a C identifier optionally followed by an [array index]

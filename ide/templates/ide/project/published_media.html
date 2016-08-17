@@ -16,7 +16,7 @@
     <div class="control-group">
         <label class="control-label">{% trans 'Identifier' %}</label>
         <div class="controls">
-            <input type="text" class="edit-media-name" placeholder="EXAMPLE_ICON" pattern="[A-Za-z0-9_]+">
+            <input type="text" class="edit-media-name" placeholder="EXAMPLE_MEDIA_NAME" pattern="{{ regexes.c_identifier }}">
             <span class="help-block">{% trans 'This is used in your code and must be a valid C identifier.' %}</span>
         </div>
     </div>

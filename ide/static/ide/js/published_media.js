@@ -1,36 +1,11 @@
 CloudPebble.PublishedMedia = (function() {
     var media_template = null;
     var item_template = null;
-
-    function get_default_data() {
-            return {
-                name: '',
-                id: make_new_id()
-            }
-        }
-
-    function make_new_id() {
-        return _.max(media_template.find('.edit-media-id').map(function() {return parseInt(this.value, 10)})) + 1;
-    }
+    var live_form = null;
 
     function get_form_data() {
         return media_template.find('.media-item').map(function() {
-            var item = $(this);
-            var glance = item.find('.edit-media-glance').val();
-            var has_timeline = item.find('.edit-media-timeline').prop('checked');
-            var data = {
-                name: item.find('.edit-media-name').val(),
-                id: parseInt(item.find('.edit-media-id').val(), 10)
-            };
-            if (glance) data.glance = glance;
-            if (has_timeline) {
-                data.timeline = {
-                    tiny: item.find('.edit-media-timeline-tiny').val(),
-                    small: item.find('.edit-media-timeline-small').val(),
-                    large: item.find('.edit-media-timeline-large').val()
-                }
-            }
-            return data;
+            return $(this).data('item').getData();
         }).toArray();
     }
 
@@ -54,43 +29,112 @@ CloudPebble.PublishedMedia = (function() {
         }).pluck('identifiers').flatten().uniq().value();
     }
 
-    function make_new_media_item() {
+    function MediaItem() {
         var item_form = media_template.find('form');
-        var new_item = item_template.clone().appendTo(item_form);
-        set_form_options(new_item);
-        set_media_item_data(new_item, publishedMedia.get_default_data());
-        return new_item;
-    }
+        var item = item_template.clone().appendTo(item_form).data('item', this);
+        var name_input = item.find('.edit-media-name');
+        var id_input = item.find('.edit-media-id');
+        var glance_input = item.find('.edit-media-glance');
+        var timeline_checkbox = item.find('.edit-media-timeline');
+        var timeline_tiny_input = item.find('.edit-media-timeline-tiny');
+        var timeline_small_input = item.find('.edit-media-timeline-small');
+        var timeline_large_input = item.find('.edit-media-timeline-large');
 
-    function set_media_item_data(element, data) {
-        element.find('.edit-media-name').val(data.name);
-        element.find('.edit-media-id').val(data.id);
-        element.find('.edit-media-glance').val(data.glance || '');
-        element.find('.edit-media-timeline').prop('checked', !!data.timeline);
-        if (data.timeline) {
-            element.find('.edit-media-timeline-tiny').val(data.timeline.tiny);
-            element.find('.edit-media-timeline-small').val(data.timeline.small);
-            element.find('.edit-media-timeline-large').val(data.timeline.large);
-        }
-        else {
-            // Default to the first option if the there is no specified timeline data.
-            element.find('.edit-media-timeline-options option').prop('selected', false);
-            element.find('.edit-media-timeline-options select').find('option:first').prop('selected', true);
-        }
-    }
-
-    function set_form_options(parent) {
-        var identifiers = get_eligable_identifiers();
-        parent.find(".media-resource-selector").each(function() {
-            var select = $(this).empty();
-            var value = select.val();
-            if (select.hasClass('media-optional-selector')) {
-                select.append($('<option>').val('').text('-- None --'));
+        this.setData = function(data) {
+            name_input.val(data.name);
+            id_input.val(data.id);
+            glance_input.val(data.glance || '');
+            timeline_checkbox.prop('checked', !!data.timeline);
+            if (data.timeline) {
+                timeline_tiny_input.val(data.timeline.tiny);
+                timeline_small_input.val(data.timeline.small);
+                timeline_large_input.val(data.timeline.large);
             }
-            select.append(_.map(identifiers, function(identifier) {
-                return $('<option>').val(identifier).text(identifier);
-            })).val(value);
-        })
+            else {
+                // Default to the first option if the there is no specified timeline data.
+                item.find('.edit-media-timeline-options option').prop('selected', false);
+                item.find('.edit-media-timeline-options select').find('option:first').prop('selected', true);
+            }
+        };
+
+        this.setupOptions = function() {
+            var identifiers = get_eligable_identifiers();
+            item.find(".media-resource-selector").each(function() {
+                var select = $(this).empty();
+                var value = select.val();
+                if (select.hasClass('media-optional-selector')) {
+                    select.append($('<option>').val('').text('-- None --'));
+                }
+                select.append(_.map(identifiers, function(identifier) {
+                    return $('<option>').val(identifier).text(identifier);
+                })).val(value);
+            })
+        };
+
+        this.getData = function() {
+            var glance = glance_input.val();
+            var has_timeline = timeline_checkbox.prop('checked');
+            var data = {
+                name: name_input.val(),
+                id: parseInt(id_input.val(), 10)
+            };
+            if (glance) data.glance = glance;
+            if (has_timeline) {
+                data.timeline = {
+                    tiny: timeline_tiny_input.val(),
+                    small: timeline_small_input.val(),
+                    large: timeline_large_input.val()
+                }
+            }
+            return data;
+        };
+
+        // When the user enables timeline icons, set the tiny one to mirror the glance icon
+        timeline_checkbox.change(function() {
+            if (timeline_checkbox.is(':checked')) {
+                if (glance_input.val()) {
+                    timeline_tiny_input.val(glance_input.val());
+                }
+            }
+        });
+        // When the user changes the tiny icon, change the glance icon with it if necessary.
+        timeline_tiny_input.change(function() {
+            if (glance_input.val()) {
+                glance_input.val(timeline_tiny_input.val());
+            }
+        });
+        // When the user changes the glance icon, change the tiny icon with it if necessary.
+        glance_input.change(function() {
+            if (glance_input.val() && timeline_checkbox.is(':checked')) {
+                timeline_tiny_input.val(glance_input.val());
+            }
+        });
+
+        this.setupOptions();
+        this.setData({
+            name: '',
+            id: _.max(media_template.find('.edit-media-id').map(function() {return parseInt(this.value, 10)})) + 1
+        });
+        if (live_form) live_form.addElement(item, true);
+    }
+
+    function save_forms(){
+        var data = get_form_data();
+        var names = _.pluck(data, 'name');
+        // Check that all items have names
+        if (!_.every(names)) {
+            return {incomplete: true};
+        }
+        // Check that all IDs are unique
+        if (_.max(_.countBy(data, 'id')) > 1) {
+            throw new Error(gettext('Numeric IDs must be unique'));
+        }
+        // Check that all identifiers are valid
+        _.each(names, function(name) {
+            if (!REGEXES.c_identifier.test(name)) {
+                throw new Error(interpolate(gettext('"%s" is not a valid C identifier. Identifiers must consists of numbers, letters and underscores only.'), [name]))
+            }
+        });
     }
 
     function setup_media_pane() {
@@ -104,15 +148,26 @@ CloudPebble.PublishedMedia = (function() {
                 large: 'THING2'
             }
         }];
-        _.each(initial_data, function(item) {
-            var entry = make_new_media_item();
-            set_media_item_data(entry, item);
+        _.each(initial_data, function(data) {
+            var item = new MediaItem();
+            item.setData(data);
         });
 
         media_template.find('#add-published-media').click(function() {
-            make_new_media_item();
+            new MediaItem();
         });
+
+        live_form = make_live_settings_form({
+            save_function: save_forms,
+            on_save: alerts.hide_error,
+            error_function: alerts.show_error,
+            on_progress_started: alerts.show_progress,
+            on_progress_complete: alerts.hide_progress,
+            form: media_template.find('form')
+        });
+        live_form.init();
     }
+
     function show_media_pane() {
         CloudPebble.Sidebar.SuspendActive();
         if (CloudPebble.Sidebar.Restore("published-media")) {
@@ -130,7 +185,7 @@ CloudPebble.PublishedMedia = (function() {
             show_media_pane();
         },
         GetPublishedMedia: function() {
-            return publishedMedia.get_data();
+            return get_form_data();
         },
         Init: function() {
             var commands = {};
