@@ -61,7 +61,6 @@ CloudPebble.Init = function() {
         CloudPebble.Compile.Init();
         CloudPebble.Editor.Init();
         CloudPebble.Resources.Init();
-        CloudPebble.PublishedMedia.Init();
         CloudPebble.Sidebar.Init();
         CloudPebble.Settings.Init();
         CloudPebble.GitHub.Init();
@@ -78,6 +77,7 @@ CloudPebble.Init = function() {
         $.each(data.resources, function(index, value) {
             CloudPebble.Resources.Add(value);
         });
+        CloudPebble.PublishedMedia.Init();
         CloudPebble.Emulator.init();
         CloudPebble.YCM.initialise();
         CloudPebble.Sidebar.SetProjectType(data.type);

@@ -688,6 +688,30 @@ table.build-results tr.pending .build-state {
     display: none;
 }
 
+.media-tool-buttons button {
+    width: initial;
+    margin-right: 10px;
+}
+
+.sidebar-error::after {
+    content: "!";
+}
+
+.sidebar-error {
+    background: #e5171f;
+    display: inline-block;
+    color: white;
+    width: 22px;
+    text-align: center;
+    font-family: serif;
+    border-radius: 20px;
+    padding-right: 1px;
+    margin-top: -1px;
+}
+.sidebar-error.hide {
+    display: none;
+}
+
 /* Dependancies pane */
 
 .dependencies-pane .well {

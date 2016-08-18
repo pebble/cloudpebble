@@ -52,8 +52,7 @@ CloudPebble.PublishedMedia = (function() {
         var timeline_large_input = item.find('.edit-media-timeline-large');
         var delete_btn = item.find('.btn-danger');
 
-
-        function invalid_option(value) {
+        function make_invalid_option(value) {
             return $('<option>').val(value).addClass('media-item-invalid').text(interpolate('%s (INVALID)', [value])).prop('selected', true).prop('disabled', true);
         }
 
@@ -64,7 +63,7 @@ CloudPebble.PublishedMedia = (function() {
             var select_options = _.map($(element)[0].options, function(opt) {return opt.value});
             if (value) {
                 if (!_.contains(select_options, value)) {
-                    element.append(invalid_option(value));
+                    element.append(make_invalid_option(value));
                 }
             }
             element.val(value);
@@ -86,14 +85,33 @@ CloudPebble.PublishedMedia = (function() {
                 item.find('.edit-media-timeline-options option').prop('selected', false);
                 item.find('.edit-media-timeline-options select').find('option:first').prop('selected', true);
             }
+            if (!this.is_valid()) {
+                toggle_sidebar_error(true);
+            }
+        };
+
+        this.is_valid = function(identifiers) {
+            var data = this.getData();
+            if (identifiers === undefined) {
+                identifiers = get_eligible_identifiers();
+            }
+            if (data.glance && !_.contains(identifiers, data.glance)) return false;
+            if (data.timeline) {
+                if (!_.contains(identifiers, data.timeline.tiny)) return false;
+                if (!_.contains(identifiers, data.timeline.small)) return false;
+                if (!_.contains(identifiers, data.timeline.large)) return false;
+            }
+            return true;
         };
 
         /** Fill all select elements with options for all eligible ResourceIdentifiers. */
-        this.setupOptions = function() {
-            var identifiers = get_eligible_identifiers();
+        this.setupOptions = function(identifiers) {
+            if (identifiers === undefined) {
+                identifiers = get_eligible_identifiers();
+            }
             item.find(".media-resource-selector").each(function() {
                 var select = $(this);
-                var value = select.val();
+                var value = select.find('option:selected').val();
                 select.empty();
                 if (select.hasClass('media-optional-selector')) {
                     select.append($('<option>').val('').text('-- None --'));
@@ -103,14 +121,14 @@ CloudPebble.PublishedMedia = (function() {
                 })).val(value);
                 if (value && !_.contains(identifiers, value)) {
                     select.find('options').prop('selected', false);
-                    select.append(invalid_option(value))
+                    select.append(make_invalid_option(value));
                 }
             })
         };
 
         /** Get this MediaItem's data as a publishedMedia object */
         this.getData = function() {
-            var glance = glance_input.val();
+            var glance = glance_input.find('option:selected').val();
             var has_timeline = timeline_checkbox.prop('checked');
             var data = {
                 name: name_input.val(),
@@ -119,9 +137,9 @@ CloudPebble.PublishedMedia = (function() {
             if (glance) data.glance = glance;
             if (has_timeline) {
                 data.timeline = {
-                    tiny: timeline_tiny_input.val(),
-                    small: timeline_small_input.val(),
-                    large: timeline_large_input.val()
+                    tiny: timeline_tiny_input.find('option:selected').val(),
+                    small: timeline_small_input.find('option:selected').val(),
+                    large: timeline_large_input.find('option:selected').val()
                 }
             }
             return data;
@@ -201,23 +219,31 @@ CloudPebble.PublishedMedia = (function() {
         return Ajax.Post('/ide/project/' + PROJECT_ID + '/save_published_media', {
             'published_media': JSON.stringify(data)
         }).then(function(result) {
+            // TODO: use 'result' or not?
             CloudPebble.ProjectInfo.published_media = data;
             sync_with_ycm();
             return null;
         });
     }
 
-    function save_forms(){
+    function save_forms() {
+        var items = get_media_items();
         var data = get_form_data();
+        var identifiers = get_eligible_identifiers();
         // If not all items have names, cancel saving without displaying an error
         if (!_.every(_.pluck(data, 'name'))) {
             return {incomplete: true};
         }
         // Raise an error if there are any invalid selections
-        if ($('select:visible').find('option.media-item-invalid:selected').length > 0) {
-            throw new Error(gettext('Please select valid resource IDs for all fields.'));
+        var validity = _.map(items, function(item) {return item.is_valid(identifiers);});
+        if (!_.every(validity)) {
+            toggle_sidebar_error(true);
+            return {incomplete: true};
+            // throw new Error(gettext('Please select valid resource IDs for all fields.'));
         }
-        return save_pubished_media(data);
+        return save_pubished_media(data).then(function() {
+            toggle_sidebar_error(false);
+        });
     }
 
     function setup_media_pane() {
@@ -248,15 +274,22 @@ CloudPebble.PublishedMedia = (function() {
             return;
         }
         ga('send', 'event', 'project', 'load published-media');
-        setup_media_pane();
+
         CloudPebble.Sidebar.SetActivePane(media_template, {
             id: 'published-media',
-            onRestore: function() {
-                _.each(get_media_items(), function(item) {
-                    item.setupOptions();
-                });
-            }
+            // onRestore: function() {
+            //     // TODO: We could try to only do this if the list of identifiers has changed.
+            //     toggle_sidebar_error(false);
+            //     _.each(get_media_items(), function(item) {
+            //         item.setupOptions();
+            //         item.checkValidity();
+            //     });
+            // }
         });
+    }
+
+    function toggle_sidebar_error(state) {
+        $('#sidebar-pane-media').find('.sidebar-error').toggleClass('hide', !state);
     }
 
     return {
@@ -266,6 +299,52 @@ CloudPebble.PublishedMedia = (function() {
         GetPublishedMedia: function() {
             return get_form_data();
         },
+        RenameIdentifiers: function(list_of_renames) {
+            // We are given a list of Identifier rename tuples as [[old_name, new_name],...]
+            // However, there may be conflicts as identical identifiers are renamed to different things, 
+            // e.g. [{from: 'A', to: 'THING'}, {from: 'A', to: 'CONFLICT'}, {from: 'B', to: 'RENAME'}]
+            // We want to rename any publishedMedia references which are unconflicted, and then flag up conflicts.
+            
+            // Group by the identifier being renamed
+            var items = get_media_items();
+            var identifiers = get_eligible_identifiers();
+            var all_valid = true;
+            var grouped = _.chain(list_of_renames).groupBy('from').mapObject(function(renames) {
+                return _.uniq(_.pluck(renames, 'to'));
+            }).value();
+
+            toggle_sidebar_error(false);
+            _.each(items, function(item) {
+                var old_data = item.getData();
+                var new_data = item.getData();
+                item.setupOptions(identifiers);
+                _.each(grouped, function(renames, from) {
+                    if (renames.length > 1) {
+                        // If there is more than one rename, there is a conflict
+                    }
+                    else {
+                        var to = renames[0];
+                        // Otherwise, the rename can proceed.
+                        if (old_data.glance == from) {
+                            new_data.glance = to;
+                        }
+                        if (old_data.timeline) {
+                            _.each(['tiny', 'small', 'large'], function(size) {
+                                if (old_data.timeline[size] == from) {
+                                    new_data.timeline[size] = to;
+                                }
+                            });
+                        }
+                    }
+                });
+                item.setData(new_data);
+            });
+
+            save_forms();
+        },
+        ValidateIdentifiers: function() {
+            CloudPebble.PublishedMedia.RenameIdentifiers([]);
+        },
         Init: function() {
             var commands = {};
             commands[gettext("Published Media")] = CloudPebble.PublishedMedia.Show;
@@ -274,6 +353,7 @@ CloudPebble.PublishedMedia = (function() {
             item_template = $('#media-item-template').removeAttr('id').removeClass('hide').remove();
             alerts.init(media_template);
             sync_with_ycm();
+            setup_media_pane();
         }
     };
 })();

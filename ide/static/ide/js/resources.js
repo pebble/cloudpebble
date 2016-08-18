@@ -478,7 +478,7 @@ CloudPebble.Resources = (function() {
 
             var save = function(e) {
                 if (e) e.preventDefault();
-                process_resource_form(form, false, resource.file_name, "/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/update").then(function(data) {
+                return process_resource_form(form, false, resource.file_name, "/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/update").then(function(data) {
                     delete project_resources[resource.file_name];
                     // Update our information about the resource.
                     update_resource(data);
@@ -495,6 +495,16 @@ CloudPebble.Resources = (function() {
                         });
                     }
 
+                    // Attempt to rename any PublishedMedia which referenced these resource IDs.
+                    CloudPebble.PublishedMedia.RenameIdentifiers(pane.find('.edit-resource-id').map(function() {
+                        var old_id = $(this).data('old-value');
+                        var new_id = $(this).val();
+                        $(this).data('old-value', new_id);
+                        return [{from: old_id, to: new_id}];
+                    }).filter(function() {
+                        return !!this.from && this.from != this.to;
+                    }).toArray());
+
                     // Clear and disable the upload-file form
                     pane.find('#edit-resource-new-file input').val('');
                     pane.find('#edit-resource-new-file textarea').textext()[0].tags().empty().core().enabled(false);
@@ -503,7 +513,8 @@ CloudPebble.Resources = (function() {
 
                     // Only show the delete-identifiers button if there is more than one ID.
                     pane.find('.btn-delidentifier').toggle(resource.resource_ids.length > 1);
-                }).catch(function() {/* ignore failure */});;
+                    return null;
+                }).catch(function() {/* ignore failure */});
             };
 
             // Generate a preview.
@@ -589,6 +600,7 @@ CloudPebble.Resources = (function() {
                 group.find('.font-preview').remove();
                 var regex_str = group.find('.edit-resource-regex').val();
                 var id_str = group.find('.edit-resource-id').val();
+
                 var preview_regex = new RegExp('');
                 try {
                     preview_regex = new RegExp(regex_str ? regex_str : '.', 'g');
@@ -652,7 +664,7 @@ CloudPebble.Resources = (function() {
                     CloudPebble.Prompts.Confirm(gettext("Do you want to delete this resource identifier?"), gettext("This cannot be undone."), function () {
                         group.remove();
                         CloudPebble.Sidebar.SetIcon('resource-'+resource.id, 'edit');
-                        save_form();
+                        live_form.save();
                     });
                 });
             };
@@ -662,7 +674,9 @@ CloudPebble.Resources = (function() {
             $.each(resource.resource_ids, function(index, value) {
                 var group = template.clone();
                 group.removeClass('hide').attr('id','');
-                group.find('.edit-resource-id').val(value.id);
+                group.find('.edit-resource-id').val(value.id).data('old-value', value.id);
+                console.log("Set resource ID's value", value.id);
+
                 if (resource.kind == 'font') {
                     group.find('.edit-resource-regex').val(value.regex);
                     group.find('.edit-resource-tracking').val(value.tracking || '0');
@@ -739,6 +753,7 @@ CloudPebble.Resources = (function() {
                         delete project_resources[resource.file_name];
                         list_entry.remove();
                         CloudPebble.Settings.RemoveResource(resource);
+                        CloudPebble.PublishedMedia.ValidateIdentifiers();
                     }).catch(function(error) {
                         alert(error);
                     }).finally(function() {
@@ -761,13 +776,17 @@ CloudPebble.Resources = (function() {
                 }
             });
             live_form.init();
-            var save_form = function() {
+            form.submit(function() {
                 live_form.save();
                 return false;
-            };
-            form.submit(save_form);
+            });
             CloudPebble.GlobalShortcuts.SetShortcutHandlers({
-                save: save_form
+                save: function() {
+                    // Blur the active element to keep the form submission behaviour consistent
+                    // with pressing "enter".
+                    form.find('*:focus').blur();
+                    form.submit();
+                }
             });
 
             restore_pane(pane);
