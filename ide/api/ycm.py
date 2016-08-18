@@ -7,7 +7,9 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
+from django.utils.translation import ugettext as _
 from urlparse import urlparse
+
 
 from ide.models.project import Project
 from utils.jsonview import json_view
@@ -38,7 +40,8 @@ def init_autocomplete(request, project_id):
         'sdk': request.POST.get('sdk', '2'),
         'messagekeys': appkey_names,
         'resources': identifiers,
-        'dependencies': project.get_dependencies()
+        'dependencies': project.get_dependencies(),
+        'published_media': [x.name for x in project.published_media.all()]
     }
     # Let's go!
     return _spin_up_server(request)

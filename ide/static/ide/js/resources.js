@@ -439,11 +439,9 @@ CloudPebble.Resources = (function() {
         remove_error();
         disable_controls();
         ga('send', 'event', 'resource', 'save');
-        // TODO: CHECK THIS IS CORRECT!!!!!
         return Promise.resolve().then(function() {
             return get_resource_form_data(form, is_new, current_filename);
         }).then(function(resource_data) {
-            console.log(resource_data);
             return save_resource(url, resource_data);
         }).then(function(data) {
             return data.file;
@@ -502,7 +500,6 @@ CloudPebble.Resources = (function() {
                     pane.find('#edit-resource-new-file textarea').textext()[0].tags().empty().core().enabled(false);
                     pane.find('#edit-resource-new-file').toggleClass('file-present', false);
                     CloudPebble.Sidebar.ClearIcon('resource-'+resource.id);
-                    live_form.clearIcons();
 
                     // Only show the delete-identifiers button if there is more than one ID.
                     pane.find('.btn-delidentifier').toggle(resource.resource_ids.length > 1);
@@ -652,10 +649,10 @@ CloudPebble.Resources = (function() {
 
             var initialise_resource_id_group = function(group, resource) {
                 group.find('.btn-delidentifier').click(function() {
-                    CloudPebble.Prompts.Confirm(gettext("Do you want to this resource identifier?"), gettext("This cannot be undone."), function () {
+                    CloudPebble.Prompts.Confirm(gettext("Do you want to delete this resource identifier?"), gettext("This cannot be undone."), function () {
                         group.remove();
                         CloudPebble.Sidebar.SetIcon('resource-'+resource.id, 'edit');
-                        save();
+                        save_form();
                     });
                 });
             };
@@ -756,16 +753,21 @@ CloudPebble.Resources = (function() {
             var live_form = make_live_settings_form({
                 form: form,
                 save_function: function() {
-                    return null;
+                    save();
                 },
+                auto_save: false,
                 on_change: function() {
                     CloudPebble.Sidebar.SetIcon('resource-'+resource.id, 'edit');
                 }
-            }).init();
-
-            form.submit(save);
+            });
+            live_form.init();
+            var save_form = function() {
+                live_form.save();
+                return false;
+            };
+            form.submit(save_form);
             CloudPebble.GlobalShortcuts.SetShortcutHandlers({
-                save: save
+                save: save_form
             });
 
             restore_pane(pane);

@@ -75,3 +75,22 @@ class TestNPMStyleManifestGeneration(ManifestTester):
         }
         manifest = generate_manifest(self.project, [])
         self.check_package_manifest(manifest, package_options={'dependencies': deps})
+
+    def test_published_media(self):
+        """ Check that publishedMedia are represented in the manifest """
+        published_media = [{
+            'name': 'TEST',
+            'id': 0,
+            'glance': 'TINY',
+            'timeline': {
+                'tiny': 'TINY',
+                'small': 'SMALL',
+                'large': 'LARGE',
+            }
+        }]
+        self.project.set_published_media(published_media)
+        manifest = generate_manifest(self.project, [])
+        self.check_package_manifest(manifest, pebble_options={
+            'publishedMedia': published_media
+        })
+

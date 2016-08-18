@@ -3,10 +3,18 @@ CloudPebble.PublishedMedia = (function() {
     var item_template = null;
     var live_form = null;
 
-    function get_form_data() {
+    function get_media_items() {
         return media_template.find('.media-item').map(function() {
-            return $(this).data('item').getData();
-        }).toArray();
+            return $(this).data('item');
+        }).toArray().filter(function(item) {
+            return !item.is_deleting();
+        });
+    }
+
+    function get_form_data() {
+        return _.map(get_media_items(), function(x) {
+            return x.getData();
+        })
     }
 
     /** This singleton manages the error box and loading indicator. */
@@ -23,13 +31,16 @@ CloudPebble.PublishedMedia = (function() {
         }
     });
 
-    function get_eligable_identifiers() {
+    function get_eligible_identifiers() {
         return _.chain(CloudPebble.Resources.GetResources()).filter(function(item) {
             return /^(png|pbi|bitmap|raw)/.test(item.kind);
         }).pluck('identifiers').flatten().uniq().value();
     }
 
+    /** This class sets up and manages a single Published Media item panel. */
     function MediaItem() {
+        var self = this;
+        var deleting = false;
         var item_form = media_template.find('form');
         var item = item_template.clone().appendTo(item_form).data('item', this);
         var name_input = item.find('.edit-media-name');
@@ -39,16 +50,36 @@ CloudPebble.PublishedMedia = (function() {
         var timeline_tiny_input = item.find('.edit-media-timeline-tiny');
         var timeline_small_input = item.find('.edit-media-timeline-small');
         var timeline_large_input = item.find('.edit-media-timeline-large');
+        var delete_btn = item.find('.btn-danger');
 
+
+        function invalid_option(value) {
+            return $('<option>').val(value).addClass('media-item-invalid').text(interpolate('%s (INVALID)', [value])).prop('selected', true).prop('disabled', true);
+        }
+
+        /** Set the value of a select element. If for some reason the desired option doesn't actually
+         * exist, create it but add the text "(INVALID)"
+         */
+        this.setSelectValue = function(element, value) {
+            var select_options = _.map($(element)[0].options, function(opt) {return opt.value});
+            if (value) {
+                if (!_.contains(select_options, value)) {
+                    element.append(invalid_option(value));
+                }
+            }
+            element.val(value);
+        };
+
+        /** Configure the MediaItem with a publishedMedia object. */
         this.setData = function(data) {
             name_input.val(data.name);
             id_input.val(data.id);
-            glance_input.val(data.glance || '');
+            this.setSelectValue(glance_input, data.glance || '');
             timeline_checkbox.prop('checked', !!data.timeline);
             if (data.timeline) {
-                timeline_tiny_input.val(data.timeline.tiny);
-                timeline_small_input.val(data.timeline.small);
-                timeline_large_input.val(data.timeline.large);
+                this.setSelectValue(timeline_tiny_input, data.timeline.tiny);
+                this.setSelectValue(timeline_small_input, data.timeline.small);
+                this.setSelectValue(timeline_large_input, data.timeline.large);
             }
             else {
                 // Default to the first option if the there is no specified timeline data.
@@ -57,20 +88,27 @@ CloudPebble.PublishedMedia = (function() {
             }
         };
 
+        /** Fill all select elements with options for all eligible ResourceIdentifiers. */
         this.setupOptions = function() {
-            var identifiers = get_eligable_identifiers();
+            var identifiers = get_eligible_identifiers();
             item.find(".media-resource-selector").each(function() {
-                var select = $(this).empty();
+                var select = $(this);
                 var value = select.val();
+                select.empty();
                 if (select.hasClass('media-optional-selector')) {
                     select.append($('<option>').val('').text('-- None --'));
                 }
                 select.append(_.map(identifiers, function(identifier) {
                     return $('<option>').val(identifier).text(identifier);
                 })).val(value);
+                if (value && !_.contains(identifiers, value)) {
+                    select.find('options').prop('selected', false);
+                    select.append(invalid_option(value))
+                }
             })
         };
 
+        /** Get this MediaItem's data as a publishedMedia object */
         this.getData = function() {
             var glance = glance_input.val();
             var has_timeline = timeline_checkbox.prop('checked');
@@ -87,6 +125,22 @@ CloudPebble.PublishedMedia = (function() {
                 }
             }
             return data;
+        };
+
+        /** Try to delete the item, but don't hide it unless it has been successfully deleted server-side. */
+        this.delete = function() {
+            deleting = true;
+            return live_form.save().then(function() {
+                item.fadeOut('slow', function() {
+                    item.remove();
+                });
+            }).catch(function() {
+                deleting = false;
+            });
+        };
+
+        this.is_deleting = function() {
+            return deleting;
         };
 
         // When the user enables timeline icons, set the tiny one to mirror the glance icon
@@ -109,6 +163,10 @@ CloudPebble.PublishedMedia = (function() {
                 timeline_tiny_input.val(glance_input.val());
             }
         });
+        // Set up the delete button
+        delete_btn.click(function() {
+            self.delete();
+        });
 
         this.setupOptions();
         this.setData({
@@ -116,6 +174,12 @@ CloudPebble.PublishedMedia = (function() {
             id: _.max(media_template.find('.edit-media-id').map(function() {return parseInt(this.value, 10)})) + 1
         });
         if (live_form) live_form.addElement(item, true);
+    }
+
+    function sync_with_ycm() {
+        if(CloudPebble.Ready) {
+            CloudPebble.YCM.updatePublishedMedia(CloudPebble.ProjectInfo.published_media);
+        }
     }
 
     function save_pubished_media(data) {
@@ -138,7 +202,8 @@ CloudPebble.PublishedMedia = (function() {
             'published_media': JSON.stringify(data)
         }).then(function(result) {
             CloudPebble.ProjectInfo.published_media = data;
-            // return CloudPebble.YCM.updateDependencies(result.dependencies);
+            sync_with_ycm();
+            return null;
         });
     }
 
@@ -147,6 +212,10 @@ CloudPebble.PublishedMedia = (function() {
         // If not all items have names, cancel saving without displaying an error
         if (!_.every(_.pluck(data, 'name'))) {
             return {incomplete: true};
+        }
+        // Raise an error if there are any invalid selections
+        if ($('select:visible').find('option.media-item-invalid:selected').length > 0) {
+            throw new Error(gettext('Please select valid resource IDs for all fields.'));
         }
         return save_pubished_media(data);
     }
@@ -181,7 +250,12 @@ CloudPebble.PublishedMedia = (function() {
         ga('send', 'event', 'project', 'load published-media');
         setup_media_pane();
         CloudPebble.Sidebar.SetActivePane(media_template, {
-            id: 'published-media'
+            id: 'published-media',
+            onRestore: function() {
+                _.each(get_media_items(), function(item) {
+                    item.setupOptions();
+                });
+            }
         });
     }
 
@@ -199,14 +273,7 @@ CloudPebble.PublishedMedia = (function() {
             media_template = $('#media-pane-template').remove().removeClass('hide');
             item_template = $('#media-item-template').removeAttr('id').removeClass('hide').remove();
             alerts.init(media_template);
-
-            // CloudPebble.YCM.initialise().then(function(data) {
-            //     if (data.libraries) {
-            //         update_header_file_list(data.libraries)
-            //     }
-            // }).finally(function() {
-            //     alerts.hide_progress();
-            // });
+            sync_with_ycm();
         }
     };
 })();

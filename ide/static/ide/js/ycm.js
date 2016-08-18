@@ -263,6 +263,12 @@ CloudPebble.YCM = new (function() {
         })
     };
 
+    this.updatePublishedMedia = function(published_media) {
+        return ws_send('published_media', {
+            'published_media': _.pluck(published_media, 'name')
+        });
+    };
+
     this.request = function(endpoint, editor, cursor) {
         var init_step = Promise.resolve();
         if (mFailed) {

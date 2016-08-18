@@ -69,7 +69,7 @@ def import_gist(user_id, gist_id):
         package.update(content)
         package['pebble'] = defaultdict(lambda: None)
         package['pebble'].update(content.get('pebble', {}))
-        manifest_settings, media, dependencies = load_manifest_dict(package, PACKAGE_MANIFEST, default_project_type=None)
+        manifest_settings, media, dependencies, published_media = load_manifest_dict(package, PACKAGE_MANIFEST, default_project_type=None)
         default_settings['app_keys'] = '[]'
         default_settings['sdk_version'] = '3'
         default_settings['app_modern_multi_js'] = True
@@ -77,10 +77,11 @@ def import_gist(user_id, gist_id):
         content = json.loads(files[APPINFO_MANIFEST].content)
         package = defaultdict(lambda: None)
         package.update(content)
-        manifest_settings, media, dependencies = load_manifest_dict(package, APPINFO_MANIFEST, default_project_type=None)
+        manifest_settings, media, dependencies, published_media = load_manifest_dict(package, APPINFO_MANIFEST, default_project_type=None)
     else:
         manifest_settings = {}
         dependencies = {}
+        published_media = []
 
     fixed_settings = {
         'owner': user,
@@ -95,6 +96,7 @@ def import_gist(user_id, gist_id):
     with transaction.atomic():
         project = Project.objects.create(**project_settings)
         project.set_dependencies(dependencies)
+        project.set_published_media(published_media)
         project_type = project.project_type
 
         if project_type == 'package':

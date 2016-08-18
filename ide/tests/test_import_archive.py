@@ -180,6 +180,27 @@ class TestImportArchive(CloudpebbleTestCase):
         self.assertEqual(project.source_files.filter(file_name='lib.js', target='common').count(), 1)
         self.assertEqual(project.source_files.filter(file_name='app.js', target='pkjs').count(), 1)
 
+    def test_import_published_media(self):
+        published_media = [{
+            'name': 'TEST',
+            'id': 0,
+            'glance': 'TINY',
+            'timeline': {
+                'tiny': 'TINY',
+                'small': 'SMALL',
+                'large': 'LARGE',
+            }
+        }]
+        bundle = build_bundle({
+            'src/main.c': '',
+            'package.json': make_package(pebble_options={
+                'publishedMedia': published_media
+            })
+        })
+        do_import_archive(self.project_id, bundle)
+        project = Project.objects.get(pk=self.project_id)
+        self.assertEqual(project.get_published_media(), published_media)
+
 
 @mock.patch('ide.models.s3file.s3', fake_s3)
 class TestImportLibrary(CloudpebbleTestCase):

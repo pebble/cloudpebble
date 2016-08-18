@@ -5,9 +5,9 @@
     <form class="form-horizontal">
     </form>
 
-    <div class="well">
+    <div class="well media-tool-buttons">
         <button type="button" class="btn" id="add-published-media">
-            <span class="non-font-only">{% trans 'Add New' %}</span>
+            {% trans 'Add New Published Media' %}
         </button>
     </div>
 </div>
@@ -20,25 +20,24 @@
             <span class="help-block">{% trans 'This is used in your code and must be a valid C identifier.' %}</span>
         </div>
     </div>
-    <div class="control-group">
+    <div class="control-group edit-media-id-group">
         <label class="control-label">{% trans 'Numeric ID' %}</label>
         <div class="controls">
-            <input type="number" class="edit-media-id" min="0" value="0"/>
-            <span class="help-block">{% trans 'Insert explanation here' %}</span>
+            <input type="number" class="edit-media-id" min="1" value="1"/>
+            <span class="help-block">{% trans 'Each Published media item must have a unique ID.' %}</span>
         </div>
     </div>
-    <div class="control-group">
+    <div class="control-group edit-media-glance-group">
         <label class="control-label">{% trans 'Glance' %}</label>
         <div class="controls">
             <select class="edit-media-glance media-resource-selector media-optional-selector"></select>
-            <span class="help-block">{% trans 'Insert explanation here' %}</span>
+            <span class="help-block">{% trans 'This references the image which will be displayed if this Published Media is used as the icon of an AppGlanceSlice.' %}</span>
         </div>
     </div>
-    <div class="control-group controls">
-        <label style="width: 250px" class="control-label">{% trans 'Specify Timeline Icons' %}
-            <span class="text-icon" data-content="{% trans 'Insert explanation here' %}">?</span>
-        </label>
+    <div class="control-group controls edit-media-timeline-group">
+        <label style="width: 250px" class="control-label">{% trans 'Specify Timeline Icons' %}</label>
         <input type="checkbox" class="edit-media-timeline form-section-toggle"> <p></p>
+        <span class="help-block">{% trans 'This references the resource images which will be displayed if this Published Media is used for the various sizes of a timeline icon. Tiny, small and large must have sizes of 25x25, 50x50 and 80x80 respectively.' %}</span>
 
         <div class="form-toggleable-section">
             <div class="edit-media-timeline-options">
@@ -59,4 +58,5 @@
             </div>
         </div>
     </div>
+    <button type="button" class="btn btn-danger btn-small btn-delete-well">{% trans 'Delete' %}</button>
 </div>

@@ -87,6 +87,9 @@ def generate_v3_manifest_dict(project, resources):
         manifest['pebble']['displayName'] = project.app_long_name
         if project.app_is_hidden:
             manifest['pebble']['watchapp']['hiddenApp'] = project.app_is_hidden
+    published_media = project.get_published_media()
+    if published_media:
+        manifest['pebble']['publishedMedia'] = published_media
     if project.app_platforms:
         manifest['pebble']['targetPlatforms'] = project.app_platform_list
     return manifest
@@ -272,6 +275,7 @@ def load_manifest_dict(manifest, manifest_kind, default_project_type='native'):
     """
     project = {}
     dependencies = {}
+    published_media = []
     if manifest_kind == APPINFO_MANIFEST:
         project['app_short_name'] = manifest['shortName']
         project['app_long_name'] = manifest['longName']
@@ -290,8 +294,10 @@ def load_manifest_dict(manifest, manifest_kind, default_project_type='native'):
         project['keywords'] = manifest.get('keywords', [])
         dependencies = manifest.get('dependencies', {})
         manifest = manifest['pebble']
+        published_media = manifest.get('publishedMedia', [])
         project['app_modern_multi_js'] = manifest.get('enableMultiJS', True)
         project['sdk_version'] = manifest.get('sdkVersion', '3')
+
     else:
         raise InvalidProjectArchiveException(_('Invalid manifest kind: %s') % manifest_kind[-12:])
 
@@ -308,4 +314,4 @@ def load_manifest_dict(manifest, manifest_kind, default_project_type='native'):
     else:
         media_map = {}
     project['project_type'] = manifest.get('projectType', default_project_type)
-    return project, media_map, dependencies
+    return project, media_map, dependencies, published_media

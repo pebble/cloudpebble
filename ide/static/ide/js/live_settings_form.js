@@ -24,6 +24,7 @@ function make_live_settings_form(options) {
         on_save: null,
         on_change: null,
         on_progress_started: null,
+        auto_save: true,
         on_progress_complete: null,
         progress_timeout: 300,
         control_selector: 'input, select, textarea',
@@ -213,7 +214,9 @@ function make_live_settings_form(options) {
             if (_.isFunction(opts.on_change)) {
                 opts.on_change(this);
             }
-            save($(this), e);
+            if (opts.auto_save) {
+                save($(this), e);
+            }
         });
 
         // While typing in text forms, show the changed icon
@@ -225,9 +228,6 @@ function make_live_settings_form(options) {
     }
 
     return {
-        clearIcons: function() {
-            clear_changed_icons();
-        },
         addElement: function(elements, changed) {
             add_status_icons(elements, changed);
         },
@@ -235,7 +235,7 @@ function make_live_settings_form(options) {
             init();
         },
         save: function(element) {
-            save(element);
+            return save(element);
         }
     };
 }
