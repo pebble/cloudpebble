@@ -986,16 +986,19 @@ CloudPebble.Editor = (function() {
         function get_default_js_name() {
             // If js files don't exist for a certain target, set the name to the default
             // and hide the name input.
+            if (CloudPebble.ProjectInfo.sdk_version == '2') return null;
             var js_name_override = null;
             var required_js = [
+                // TODO: change 'app.js' to 'index.js' here after project restructuring changes come in.
                 {target: 'pkjs', requires: 'app.js'},
                 {target: 'app', requires: 'index.js', project_type:'rocky'}
             ];
+            var current_target = get_js_target();
             _.some(required_js, function(spec) {
                 if (!spec.project_type || CloudPebble.ProjectInfo.type == spec.project_type) {
-                    if (js_target_picker.val() == spec.target && !_.some(project_source_files, function(x) {return x.target==spec.target && x.name.endsWith('.js')})) {
+                    if (current_target == spec.target && !_.some(project_source_files, function(x) {return x.target==spec.target && x.name.endsWith('.js')})) {
                         js_name_override = spec.requires;
-                        return true
+                        return true;
                     }
                 }
             });
@@ -1006,6 +1009,14 @@ CloudPebble.Editor = (function() {
         function toggle_js_filename() {
             var show_name = get_default_js_name() == null;
             $('#js-file-name-option').toggle(show_name);
+        }
+
+        function get_js_target(selector) {
+            var target = !!selector ? prompt.find(selector + ':visible').val() : null;
+            if (!target) {
+                target = _.contains(['native', 'package'], CloudPebble.ProjectInfo.type) ? 'pkjs': 'app';
+            }
+            return target;
         }
 
         file_type_picker.change(function() {
@@ -1066,17 +1077,18 @@ CloudPebble.Editor = (function() {
                 })();
             } else if(kind == 'js') {
                 (function() {
+                    var target = get_js_target('#new-js-target');
                     var default_name = get_default_js_name();
                     var name = (default_name !== null ? default_name : prompt.find('#new-js-file-name').val());
                     if(!/.+\.js$/.test(name)) {
                         error.text(gettext("Source files must end in .js")).show();
                     } else {
-                        files = [{name: name, target: js_target_picker.val()}]
+                        files = [{name: name, target: target}]
                     }
                 })();
             } else if(kind == 'json') {
                 (function() {
-                    var target = prompt.find('#new-json-target').val();
+                    var target = get_js_target('#new-json-target');
                     var name = prompt.find('#new-json-file-name').val();
                     if(!/.+\.json?$/.test(name)) {
                         error.text(gettext("JSON files must end in .json")).show();

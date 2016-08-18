@@ -87,6 +87,8 @@ class Project(IdeModel):
         # For SDK3+, default to array-based message keys.
         if self.sdk_version != '2' and self.app_keys == '{}':
             self.app_keys = '[]'
+        if self.sdk_version == '2':
+            self.app_modern_multi_js = False
 
     def set_dependencies(self, dependencies):
         """ Set the project's dependencies from a dictionary.
