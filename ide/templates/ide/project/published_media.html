@@ -2,18 +2,23 @@
 <!-- Compilation pane -->
 <div id="media-pane-template" class="hide media-pane resource-pane">
     <div class="well alert alert-error hide"></div>
-    <form class="form-horizontal">
-    </form>
+    <form>
+    <div id="media-items" class="form-horizontal">
 
+    </div>
     <div class="well media-pane-loading">
         <h2>{% trans 'Loading...' %}</h2>
     </div>
 
     <div class="well hide media-tool-buttons">
+        <button type="submit" class="btn btn-affirmative" id="save-published-media">
+            {% trans 'Save' %}
+        </button>
         <button type="button" class="btn" id="add-published-media">
             {% trans 'Add New Published Media' %}
         </button>
     </div>
+    </form>
 </div>
 
 <div class="well hide media-item" id="media-item-template" >

@@ -234,8 +234,8 @@ function make_live_settings_form(options) {
         init: function() {
             init();
         },
-        save: function(element) {
-            return save(element);
+        save: function(element, event) {
+            return save(element, event);
         }
     };
 }

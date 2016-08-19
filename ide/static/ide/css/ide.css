@@ -690,6 +690,7 @@ table.build-results tr.pending .build-state {
 
 .media-tool-buttons button {
     width: initial;
+    min-width: 130px;
     margin-right: 10px;
 }
 

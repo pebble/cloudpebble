@@ -50,8 +50,10 @@ class PublishedMedia(IdeModel):
             raise ValidationError(_("If glance and timeline.tiny are both used, they must be identical."))
         if self.has_timeline and not (self.timeline_tiny and self.timeline_small and self.timeline_large):
             raise ValidationError(_("If timeline icons are enabled, they must all be set."))
+        if not self.glance and not self.has_timeline:
+            raise ValidationError(_("Glance and Timeline cannot both be unset."))
         if self.media_id < 0:
             raise ValidationError(_("Published Media IDs cannot be negative."))
 
     class Meta(IdeModel.Meta):
-        unique_together = (('project', 'name'),)
+        unique_together = (('project', 'name'), ('project', 'media_id'))

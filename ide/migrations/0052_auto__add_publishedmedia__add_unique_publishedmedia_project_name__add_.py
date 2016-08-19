@@ -25,8 +25,14 @@ class Migration(SchemaMigration):
         # Adding unique constraint on 'PublishedMedia', fields ['project', 'name']
         db.create_unique(u'ide_publishedmedia', ['project_id', 'name'])
 
+        # Adding unique constraint on 'PublishedMedia', fields ['project', 'media_id']
+        db.create_unique(u'ide_publishedmedia', ['project_id', 'media_id'])
+
 
     def backwards(self, orm):
+        # Removing unique constraint on 'PublishedMedia', fields ['project', 'media_id']
+        db.delete_unique(u'ide_publishedmedia', ['project_id', 'media_id'])
+
         # Removing unique constraint on 'PublishedMedia', fields ['project', 'name']
         db.delete_unique(u'ide_publishedmedia', ['project_id', 'name'])
 
@@ -78,7 +84,7 @@ class Migration(SchemaMigration):
             'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'builds'", 'to': "orm['ide.Project']"}),
             'started': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'db_index': 'True', 'blank': 'True'}),
             'state': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
-            'uuid': ('django.db.models.fields.CharField', [], {'default': "'8b836ddd-8bc8-4884-bdda-824481f7f05c'", 'max_length': '36'})
+            'uuid': ('django.db.models.fields.CharField', [], {'default': "'ff465b46-f0da-429e-85ac-6e3fa3ed20e5'", 'max_length': '36'})
         },
         'ide.buildsize': {
             'Meta': {'object_name': 'BuildSize'},
@@ -111,7 +117,7 @@ class Migration(SchemaMigration):
             'app_modern_multi_js': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'app_platforms': ('django.db.models.fields.TextField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'app_short_name': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'app_uuid': ('django.db.models.fields.CharField', [], {'default': "'488507d8-f7d8-449e-b2d9-36c05ba88d4c'", 'max_length': '36', 'null': 'True', 'blank': 'True'}),
+            'app_uuid': ('django.db.models.fields.CharField', [], {'default': "'0c6dc2fb-3305-4418-9bac-3661c4773ca9'", 'max_length': '36', 'null': 'True', 'blank': 'True'}),
             'app_version_label': ('django.db.models.fields.CharField', [], {'default': "'1.0'", 'max_length': '40', 'null': 'True', 'blank': 'True'}),
             'github_branch': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'github_hook_build': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
@@ -129,7 +135,7 @@ class Migration(SchemaMigration):
             'sdk_version': ('django.db.models.fields.CharField', [], {'default': "'2'", 'max_length': '6'})
         },
         'ide.publishedmedia': {
-            'Meta': {'unique_together': "(('project', 'name'),)", 'object_name': 'PublishedMedia'},
+            'Meta': {'unique_together': "(('project', 'name'), ('project', 'media_id'))", 'object_name': 'PublishedMedia'},
             'glance': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
             'has_timeline': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -158,7 +164,7 @@ class Migration(SchemaMigration):
             'resource_id': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'space_optimisation': ('django.db.models.fields.CharField', [], {'max_length': '7', 'null': 'True', 'blank': 'True'}),
             'storage_format': ('django.db.models.fields.CharField', [], {'max_length': '3', 'null': 'True', 'blank': 'True'}),
-            'target_platforms': ('django.db.models.fields.CharField', [], {'default': 'None', 'max_length': '30', 'null': 'True', 'blank': 'True'}),
+            'target_platforms': ('django.db.models.fields.CharField', [], {'default': 'None', 'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'tracking': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'})
         },
         'ide.resourcevariant': {
@@ -199,7 +205,7 @@ class Migration(SchemaMigration):
             'theme': ('django.db.models.fields.CharField', [], {'default': "'cloudpebble'", 'max_length': '50'}),
             'use_spaces': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'user': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['auth.User']", 'unique': 'True', 'primary_key': 'True'}),
-            'whats_new': ('django.db.models.fields.PositiveIntegerField', [], {'default': '23'})
+            'whats_new': ('django.db.models.fields.PositiveIntegerField', [], {'default': '24'})
         }
     }
 
