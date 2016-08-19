@@ -69,6 +69,7 @@ def _spin_up_server(request):
                         'server': ws_server,
                         'secure': secure,
                         'libraries': response.get('libraries', {}),
+                        'resources': response.get('resources', []),
                         'npm_error': response.get('npm_error', None)
                     }
 

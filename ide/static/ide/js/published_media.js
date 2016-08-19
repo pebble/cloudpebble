@@ -2,6 +2,8 @@ CloudPebble.PublishedMedia = (function() {
     var media_template = null;
     var item_template = null;
     var live_form = null;
+    var dependency_resources = [];
+    var media_pane_setup = false;
 
     function get_media_items() {
         return media_template.find('.media-item').map(function() {
@@ -31,10 +33,26 @@ CloudPebble.PublishedMedia = (function() {
         }
     });
 
+    /** Check whether a resource kind is allowed to be referenced in publishedMedia */
+    function is_permited_resource_kind(kind) {
+        return /^(png|pbi|bitmap|raw)/.test(kind);
+    }
+
+    /** Get a list of all Resource IDs which can be referenced by publishedMedia */
     function get_eligible_identifiers() {
-        return _.chain(CloudPebble.Resources.GetResources()).filter(function(item) {
-            return /^(png|pbi|bitmap|raw)/.test(item.kind);
-        }).pluck('identifiers').flatten().uniq().value();
+        // Grab local resources from CloudPebble.Resources
+        var local_identifiers = _.chain(CloudPebble.Resources.GetResources()).filter(function(item) {
+            return is_permited_resource_kind(item.kind);
+        }).pluck('identifiers').flatten().value();
+
+        // We already have a list of dependency's resources from YCM.
+        var dependency_identifiers = _.chain(dependency_resources).filter(function(tuple) {
+            // YCM gives a list of resources as a [kind, ID] tuple.
+            return is_permited_resource_kind(tuple[0]);
+        }).pluck(1).value();
+
+        var final_identifiers = _.uniq(local_identifiers.concat(dependency_identifiers));
+        return final_identifiers;
     }
 
     /** This class sets up and manages a single Published Media item panel. */
@@ -52,13 +70,12 @@ CloudPebble.PublishedMedia = (function() {
         var timeline_large_input = item.find('.edit-media-timeline-large');
         var delete_btn = item.find('.btn-danger');
 
+        /** Render an invalid option */
         function make_invalid_option(value) {
             return $('<option>').val(value).addClass('media-item-invalid').text(interpolate('%s (INVALID)', [value])).prop('selected', true).prop('disabled', true);
         }
 
-        /** Set the value of a select element. If for some reason the desired option doesn't actually
-         * exist, create it but add the text "(INVALID)"
-         */
+        /** Set the value of a select element. If for some reason the desired option doesn't actually exist, create it but add the text "(INVALID)" */
         this.setSelectValue = function(element, value) {
             var select_options = _.map($(element)[0].options, function(opt) {return opt.value});
             if (value) {
@@ -90,6 +107,7 @@ CloudPebble.PublishedMedia = (function() {
             }
         };
 
+        /** Check that all of this item's resource IDs are in the set of existing resource IDs */
         this.is_valid = function(identifiers) {
             var data = this.getData();
             if (identifiers === undefined) {
@@ -194,12 +212,14 @@ CloudPebble.PublishedMedia = (function() {
         if (live_form) live_form.addElement(item, true);
     }
 
+    /** Send the current publishedMedia to YCM so that they can be autocompleted. */
     function sync_with_ycm() {
         if(CloudPebble.Ready) {
             CloudPebble.YCM.updatePublishedMedia(CloudPebble.ProjectInfo.published_media);
         }
     }
 
+    /** Save an array of published media objects. This does not check that Resource ID references are valid. */
     function save_pubished_media(data) {
         var names = _.pluck(data, 'name');
         // Check that all items have names
@@ -226,6 +246,7 @@ CloudPebble.PublishedMedia = (function() {
         });
     }
 
+    /** Save the whole form. If any names are incomplete or resources are invalid, it simply refuses to save without error. */
     function save_forms() {
         var items = get_media_items();
         var data = get_form_data();
@@ -239,14 +260,20 @@ CloudPebble.PublishedMedia = (function() {
         if (!_.every(validity)) {
             toggle_sidebar_error(true);
             return {incomplete: true};
-            // throw new Error(gettext('Please select valid resource IDs for all fields.'));
         }
+
+        // If we successfully saved, it implies that there were no invalid references
+        // so we can get rid of the sidebar error notification.
         return save_pubished_media(data).then(function() {
             toggle_sidebar_error(false);
         });
     }
 
+    /** Create initial media item forms, and set up interface elements and the live-form mechanism. */
     function setup_media_pane() {
+        if (media_pane_setup) return false;
+        media_pane_setup = true;
+
         var initial_data = CloudPebble.ProjectInfo.published_media;
         _.each(initial_data, function(data) {
             var item = new MediaItem();
@@ -265,7 +292,10 @@ CloudPebble.PublishedMedia = (function() {
             on_progress_complete: alerts.hide_progress,
             form: media_template.find('form')
         });
+        media_template.find('.media-tool-buttons').removeClass('hide');
+        media_template.find('.media-pane-loading').remove();
         live_form.init();
+        return true;
     }
 
     function show_media_pane() {
@@ -276,15 +306,7 @@ CloudPebble.PublishedMedia = (function() {
         ga('send', 'event', 'project', 'load published-media');
 
         CloudPebble.Sidebar.SetActivePane(media_template, {
-            id: 'published-media',
-            // onRestore: function() {
-            //     // TODO: We could try to only do this if the list of identifiers has changed.
-            //     toggle_sidebar_error(false);
-            //     _.each(get_media_items(), function(item) {
-            //         item.setupOptions();
-            //         item.checkValidity();
-            //     });
-            // }
+            id: 'published-media'
         });
     }
 
@@ -308,7 +330,6 @@ CloudPebble.PublishedMedia = (function() {
             // Group by the identifier being renamed
             var items = get_media_items();
             var identifiers = get_eligible_identifiers();
-            var all_valid = true;
             var grouped = _.chain(list_of_renames).groupBy('from').mapObject(function(renames) {
                 return _.uniq(_.pluck(renames, 'to'));
             }).value();
@@ -345,6 +366,10 @@ CloudPebble.PublishedMedia = (function() {
         ValidateIdentifiers: function() {
             CloudPebble.PublishedMedia.RenameIdentifiers([]);
         },
+        SetDependencyResources: function(resources) {
+            dependency_resources = resources;
+            CloudPebble.PublishedMedia.ValidateIdentifiers();
+        },
         Init: function() {
             var commands = {};
             commands[gettext("Published Media")] = CloudPebble.PublishedMedia.Show;
@@ -352,8 +377,16 @@ CloudPebble.PublishedMedia = (function() {
             media_template = $('#media-pane-template').remove().removeClass('hide');
             item_template = $('#media-item-template').removeAttr('id').removeClass('hide').remove();
             alerts.init(media_template);
-            sync_with_ycm();
-            setup_media_pane();
+            // sync_with_ycm();
+            CloudPebble.YCM.initialise().then(function(data) {
+                if (data.resources) {
+                    dependency_resources = data.resources;
+                }
+            }).finally(function() {
+                if (!setup_media_pane()) {
+                    CloudPebble.PublishedMedia.ValidateIdentifiers();
+                }
+            });
         }
     };
 })();

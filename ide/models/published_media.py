@@ -18,14 +18,17 @@ class PublishedMedia(IdeModel):
 
     @classmethod
     def from_dict(cls, project, data):
-        obj = cls.objects.create(project=project, name=data['name'], media_id=data['id'])
-        if 'glance' in data:
-            obj.glance = data['glance']
-        if 'timeline' in data:
-            obj.timeline_tiny = data['timeline']['tiny']
-            obj.timeline_small = data['timeline']['small']
-            obj.timeline_large = data['timeline']['large']
-        return obj
+        return cls.objects.create(
+            project=project,
+            name=data['name'],
+            media_id=data.get('id', None),
+            glance=data.get('glance', ''),
+            has_timeline=('timeline' in data),
+            timeline_tiny=data.get('timeline', {}).get('tiny', ''),
+            timeline_small=data.get('timeline', {}).get('small', ''),
+            timeline_large=data.get('timeline', {}).get('large', '')
+        )
+
 
     def to_dict(self):
         obj = {

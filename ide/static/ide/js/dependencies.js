@@ -384,6 +384,7 @@ CloudPebble.Dependencies = (function() {
             return CloudPebble.YCM.updateDependencies(result.dependencies);
         }).then(function(result) {
             if (result) {
+                CloudPebble.PublishedMedia.SetDependencyResources(result.data.resources);
                 update_header_list(result.data.libraries)
             }
         });

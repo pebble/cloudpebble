@@ -65,7 +65,7 @@
                     <li class="nav-header" id="sidebar-pane-settings"><a href="#">{% trans 'Settings' %}</a></li>
                     <li class="nav-header sdk3-only" id="sidebar-pane-timeline"><a href="#">Timeline (Preview)</a></li>
                     <li class="nav-header" id="sidebar-pane-compile"><a href="#">{% trans 'Compilation' %}</a></li>
-                    <li class="nav-header" id="sidebar-pane-media"><a href="#">{% trans 'Published Media' %}</a>
+                    <li class="nav-header sdk3-only native-only" id="sidebar-pane-media"><a href="#">{% trans 'Published Media' %}</a>
                         <span class="sidebar-error hide"></span>
                     </li>
                     {% if project.project_type == 'package' or project.project_type == 'native' %}
