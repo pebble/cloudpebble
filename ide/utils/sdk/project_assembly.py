@@ -71,7 +71,7 @@ def assemble_project(project, base_dir, build_result=None):
         assemble_source_files(project, base_dir)
         if project.project_type != 'rocky':
             assemble_resource_directories(project, base_dir)
-            assemble_resources(project.resources_path, resources)
+            assemble_resources(os.path.join(base_dir, project.resources_path), resources)
         with open(os.path.join(base_dir, 'wscript'), 'w') as wscript:
             wscript.write(generate_wscript_file(project))
         with open(os.path.join(base_dir, 'pebble-jshintrc'), 'w') as jshint:

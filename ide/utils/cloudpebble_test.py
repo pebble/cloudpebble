@@ -4,7 +4,7 @@ import json
 from zipfile import ZipFile
 from io import BytesIO
 
-from ide.models import Project, BuildResult, SourceFile
+from ide.models import Project, BuildResult, SourceFile, ResourceFile, ResourceVariant, ResourceIdentifier
 from ide.tasks import run_compile
 
 from ide.utils.sdk import dict_to_pretty_json
@@ -47,6 +47,12 @@ class ProjectTester(CloudpebbleTestCase):
 
     def add_file(self, name, contents="", project=None, target="app"):
         SourceFile.objects.create(project=self.project if not project else project, file_name=name, target=target).save_text(contents)
+
+    def add_resource(self, file_name, id_name="RESOURCE", kind="bitmap", contents="", tags=""):
+        resource_file = ResourceFile.objects.create(project=self.project, kind=kind, file_name=file_name)
+        resource_file.save()
+        ResourceVariant.objects.create(resource_file=resource_file, tags="").save_text(contents)
+        ResourceIdentifier.objects.create(resource_file=resource_file, resource_id=id_name).save()
 
     def compile(self):
         run_compile(self.build_result.id)

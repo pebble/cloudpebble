@@ -50,7 +50,9 @@ class TestAssemble(ProjectTester):
                 'common': {'shared.js': True},
                 'resources': {
                     'fonts': {},
-                    'images': {},
+                    'images': {
+                        'package_image.png': True
+                    },
                     'data': {},
                 }
             },
@@ -63,7 +65,9 @@ class TestAssemble(ProjectTester):
             'wscript': True,
             'resources': {
                 'fonts': {},
-                'images': {},
+                'images': {
+                    'image.png': True
+                },
                 'data': {},
             }
         }
@@ -95,6 +99,7 @@ class TestAssemble(ProjectTester):
         """ Check that an SDK 3 project looks right """
         with self.get_tree():
             self.add_file('main.c')
+            self.add_resource('image.png')
         expected = self.make_expected_sdk3_project()
         self.assertDictEqual(self.tree, expected)
 
@@ -103,6 +108,7 @@ class TestAssemble(ProjectTester):
         with self.get_tree():
             self.add_file('main.c')
             self.add_file('worker.c', target='worker')
+            self.add_resource('image.png')
         expected = self.make_expected_sdk3_project(worker_src=True)
         self.assertDictEqual(self.tree, expected)
 
@@ -115,11 +121,13 @@ class TestAssemble(ProjectTester):
         self.assertTrue(self.tree['appinfo.json'])
         self.assertTrue(self.tree['doc.html'])
 
+
     def test_package(self):
         """ Check that an pebblejs project looks right """
         with self.get_tree(type='package'):
             self.add_file('lib.c')
             self.add_file('lib.h', target='public')
+            self.add_resource('package_image.png')
         expected = self.make_expected_sdk3_project(include=True, src={'c': True, 'resources': True}, resources=False)
         self.assertDictEqual(self.tree, expected)
 
@@ -131,3 +139,4 @@ class TestAssemble(ProjectTester):
             self.add_file('shared.js', target='common')
         expected = self.make_expected_sdk3_project(src={'pkjs': True, 'rocky': True, 'common': True}, resources=False)
         self.assertDictEqual(self.tree, expected)
+
