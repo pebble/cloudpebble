@@ -126,12 +126,12 @@ class TestAssemble(ProjectTester):
 
 
     def test_package(self):
-        """ Check that an pebblejs project looks right """
+        """ Check that a package project looks right """
         with self.get_tree(type='package'):
             self.add_file('lib.c')
             self.add_file('lib.h', target='public')
             self.add_resource('package_image.png')
-        expected = self.make_expected_sdk3_project(include=True, src={'c': True, 'resources': True}, resources=False)
+        expected = self.make_expected_sdk3_project(include=True, src={'c': {'lib.c': True}, 'resources': True}, resources=False)
         self.assertDictEqual(self.tree, expected)
 
     def test_rockyjs(self):
