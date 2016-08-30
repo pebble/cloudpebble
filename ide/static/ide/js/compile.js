@@ -553,15 +553,15 @@ CloudPebble.Compile = (function() {
                     // Make sure that we have the required version - but also assume that anyone who has the string 'test'
                     // in their firmware version number (e.g. me) knows what they're doing.
                     var min_version;
+                    var platform = Pebble.version_to_platform(version_info);
                     if (CloudPebble.ProjectInfo.sdk_version == '2') {
                         min_version = MINIMUM_SDK2_VERSION;
-                    } else if (SharedPebble.getPlatformName() == 'aplite') {
+                    } else if (platform == 'aplite') {
                         min_version = MINIMUM_APLITE_VERSION;
                     } else {
                         min_version = MINIMUM_INSTALL_VERSION;
                     }
                     if(/test/.test(version_string) || compare_version_strings(version_string, min_version) >= 0) {
-                        var platform = Pebble.version_to_platform(version_info);
                         var sizes = {
                             aplite: mLastBuild.sizes.aplite,
                             basalt: mLastBuild.sizes.basalt,
