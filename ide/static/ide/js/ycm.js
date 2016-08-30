@@ -110,7 +110,9 @@ CloudPebble.YCM = new (function() {
             'command': command,
             'data': data
         };
-        return mSocket.send(packet, timeout);
+        if (mSocket) {
+            return mSocket.send(packet, timeout);
+        }
     }
     function sendBuffers() {
         var editors = CloudPebble.Editor.GetAllEditors();
