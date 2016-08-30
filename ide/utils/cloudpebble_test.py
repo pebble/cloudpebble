@@ -35,7 +35,7 @@ class CloudpebbleTestCase(TestCase):
         if project_options:
             create_data.update(project_options)
         new_project = json.loads(self.client.post('/ide/project/create', create_data).content)
-        self.assertTrue(new_project['success'])
+        self.assertTrue(new_project['success'], msg=new_project.get('error', None))
         self.project_id = new_project['id']
 
 

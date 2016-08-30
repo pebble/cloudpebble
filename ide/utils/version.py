@@ -32,7 +32,7 @@ def parse_semver(semver):
     parsed = re.match(regexes.SEMVER, semver)
     if not parsed:
         raise ValueError("Invalid semver {}".format(semver))
-    return parsed.group(1), parsed.group(2)
+    return parsed.group(1), parsed.group(2), parsed.group(3)
 
 
 def semver_to_version(semver):
@@ -40,4 +40,5 @@ def semver_to_version(semver):
     :param semver: should be major.minor.0
     :return: "major.minor"
     """
-    return "{}.{}".format(*parse_semver(semver))
+    major, minor, patch = parse_semver(semver)
+    return "{}.{}".format(major, minor)
