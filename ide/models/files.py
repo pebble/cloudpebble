@@ -244,37 +244,44 @@ class SourceFile(TextFile):
     DIR_MAP = {
         # Using an OrderedDict here ensures that 'src/' is checked last in get_details_for_path().
         'native': OrderedDict([
-            ('pkjs', os.path.join('src', 'js')),
-            ('worker', 'worker_src'),
-            ('app', 'src')
+            ('pkjs', ['src/pkjs', 'src/js']),
+            ('worker', ['worker_src/c', 'worker_src']),
+            ('app', ['src/c', 'src']),
         ]),
         'pebblejs': {
-            'app': os.path.join('src', 'js')
+            'app': ['src/js'],
         },
         'simplyjs': {
-            'app': 'src'
+            'app': ['src'],
         },
         'rocky': {
-            'app': os.path.join('src', 'rocky'),
-            'pkjs': os.path.join('src', 'pkjs'),
-            'common': os.path.join('src', 'common')
+            'app': ['src/rocky'],
+            'pkjs': ['src/pkjs'],
+            'common': ['src/common'],
         },
         'package': {
-            'app': os.path.join('src', 'c'),
-            'public': 'include',
-            'pkjs': os.path.join('src', 'js')
+            'app': ['src/c'],
+            'public': ['include'],
+            'pkjs': ['src/js'],
         }
     }
 
     @classmethod
     def get_details_for_path(cls, project_type, path):
-        """ Given a project type and a path to a source file, determinate what the file's target should be and what it's name should be. """
+        """
+        Given a project type and a path to a source file, determine what the file's target should be and
+        what its name should be.
+        """
         targets = cls.DIR_MAP[project_type]
         for target in targets:
-            base = targets[target] + '/'
-            if path.startswith(base):
-                file_target = target
-                break
+            for base in targets[target]:
+                base += '/'
+                if path.startswith(base):
+                    file_target = target
+                    break
+            else:
+                continue
+            break
         else:
             raise ValueError(_("Unacceptable file path for this project [%s]") % path)
         if file_target in ('pkjs', 'common') or project_type in ('pebblejs', 'simplyjs', 'rocky'):
@@ -282,7 +289,8 @@ class SourceFile(TextFile):
         else:
             expected_exts = ('.c', '.h')
         if not path.endswith(expected_exts):
-            raise ValueError(_("Unacceptable file extension for %s file in [%s]. Expecting %s") % (file_target, path, " or ".join(expected_exts)))
+            raise ValueError(_("Unacceptable file extension for %s file in [%s]. Expecting %s") %
+                             (file_target, path, " or ".join(expected_exts)))
         return path[len(base):], file_target
 
     @property
@@ -292,7 +300,7 @@ class SourceFile(TextFile):
     @property
     def project_dir(self):
         try:
-            return SourceFile.DIR_MAP[self.project.project_type][self.target]
+            return SourceFile.DIR_MAP[self.project.project_type][self.target][0]
         except KeyError:
             Exception("Invalid file type in project")
 

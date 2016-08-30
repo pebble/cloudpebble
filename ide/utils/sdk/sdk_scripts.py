@@ -1,6 +1,5 @@
 import json
 
-
 def generate_wscript_file_rocky(project, for_export=False):
     jshint = project.app_jshint
     wscript = '''
@@ -246,6 +245,7 @@ def build(ctx):
     ctx.pbl_bundle(binaries=binaries, js='pebble-js-app.js' if has_js else [])
     """
     else:
+
         wscript = """#
 # This file is the default set of rules to compile a Pebble project.
 #
@@ -297,10 +297,10 @@ def build(ctx):
             binaries.append({'platform': p, 'app_elf': app_elf})
 
     ctx.set_group('bundle')
-    ctx.pbl_bundle(binaries=binaries, js=ctx.path.ant_glob(['src/js/**/*.js', 'src/js/**/*.json']), js_entry_file='src/js/app.js')
+    ctx.pbl_bundle(binaries=binaries, js=ctx.path.ant_glob(['src/js/**/*.js', 'src/js/**/*.json']), js_entry_file='src/pkjs/{{pkjs_entry}}')
 """
 
-    return wscript.replace('{{jshint}}', 'True' if jshint and not for_export else 'False')
+    return wscript.replace('{{jshint}}', 'True' if jshint and not for_export else 'False').replace('{{pkjs_entry}}', project.pkjs_entry_point)
 
 
 def generate_wscript_file(project, for_export=False):

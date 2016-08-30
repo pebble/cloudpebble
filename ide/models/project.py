@@ -201,6 +201,20 @@ class Project(IdeModel):
     def is_standard_project_type(self):
         return self.project_type in {'native', 'package', 'rocky'}
 
+    @property
+    def pkjs_entry_point(self):
+        if self.project_type in {'package', 'rocky'}:
+            return 'index.js'
+        elif self.project_type == 'native' and self.app_modern_multi_js:
+            if self.source_files.filter(target='pkjs', file_name='index.js').count() == 1:
+                return 'index.js'
+            elif self.source_files.filter(target='pkjs', file_name='app.js').count() == 1:
+                return 'app.js'
+            else:
+                return 'index.js'
+        else:
+            return None
+
     def clean(self):
         is_sdk_2 = self.sdk_version == "2"
         if is_sdk_2 and self.uses_array_message_keys:

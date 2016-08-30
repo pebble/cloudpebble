@@ -989,8 +989,7 @@ CloudPebble.Editor = (function() {
             if (CloudPebble.ProjectInfo.sdk_version == '2') return null;
             var js_name_override = null;
             var required_js = [
-                // TODO: change 'app.js' to 'index.js' here after project restructuring changes come in.
-                {target: 'pkjs', requires: 'app.js'},
+                {target: 'pkjs', requires: 'index.js'},
                 {target: 'app', requires: 'index.js', project_type:'rocky'}
             ];
             var current_target = get_js_target();
