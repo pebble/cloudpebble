@@ -95,7 +95,7 @@ CloudPebble.Emulator = new (function() {
 
     function setTimelinePeek(e) {
         self._timelinePeek = $('.emulator-config #peek-showing').prop('checked');
-        SharedPebble.getPebbleNow().emu_set_peek(self._quickView);
+        SharedPebble.getPebbleNow().emu_set_peek(self._timelinePeek);
     }
 
     function doSensors(e) {
