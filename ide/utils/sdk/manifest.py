@@ -1,5 +1,6 @@
 import json
 import re
+import uuid
 
 from django.utils.translation import ugettext as _
 
@@ -67,7 +68,6 @@ def generate_v3_manifest_dict(project, resources):
         'keywords': project.keywords,
         'dependencies': project.get_dependencies(),
         'pebble': {
-            'uuid': str(project.app_uuid),
             'sdkVersion': project.sdk_version,
             'watchapp': {
                 'watchface': project.app_is_watchface
@@ -82,6 +82,7 @@ def generate_v3_manifest_dict(project, resources):
     if project.project_type == 'package':
         manifest['files'] = ['dist.zip']
     else:
+        manifest['pebble']['uuid'] = str(project.app_uuid)
         manifest['pebble']['enableMultiJS'] = project.app_modern_multi_js
         manifest['pebble']['displayName'] = project.app_long_name
         if project.app_is_hidden:
@@ -294,7 +295,7 @@ def load_manifest_dict(manifest, manifest_kind, default_project_type='native'):
     else:
         raise InvalidProjectArchiveException(_('Invalid manifest kind: %s') % manifest_kind[-12:])
 
-    project['app_uuid'] = manifest['uuid']
+    project['app_uuid'] = manifest.get('uuid', uuid.uuid4())
     project['app_is_watchface'] = manifest.get('watchapp', {}).get('watchface', False)
     project['app_is_hidden'] = manifest.get('watchapp', {}).get('hiddenApp', False)
     project['app_is_shown_on_communication'] = manifest.get('watchapp', {}).get('onlyShownOnCommunication', False)
