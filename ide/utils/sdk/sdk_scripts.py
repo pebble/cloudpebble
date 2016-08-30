@@ -95,11 +95,11 @@ def build(ctx):
 
     ctx.load('pebble_sdk')
 
-    ctx.pbl_program(source=ctx.path.ant_glob('src/**/*.c'),
+    ctx.pbl_program(source=ctx.path.ant_glob('src/c/**/*.c'),
                     target='pebble-app.elf')
 
     if os.path.exists('worker_src'):
-        ctx.pbl_worker(source=ctx.path.ant_glob('worker_src/**/*.c'),
+        ctx.pbl_worker(source=ctx.path.ant_glob('worker_src/c/**/*.c'),
                         target='pebble-worker.elf')
         ctx.pbl_bundle(elf='pebble-app.elf',
                         worker_elf='pebble-worker.elf',
