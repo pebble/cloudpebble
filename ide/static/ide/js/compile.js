@@ -1,6 +1,7 @@
 CloudPebble.Compile = (function() {
     var MINIMUM_SDK2_VERSION = "v2.9";
     var MINIMUM_INSTALL_VERSION = "v4.0";
+    var MINIMUM_APLITE_VERSION = "v3.12.2";
 
     var COMPILE_SUCCESS_STATES = {
         1: {english: gettext("Pending"), cls: "info", label: 'info'},
@@ -551,7 +552,14 @@ CloudPebble.Compile = (function() {
                     console.log(version_string);
                     // Make sure that we have the required version - but also assume that anyone who has the string 'test'
                     // in their firmware version number (e.g. me) knows what they're doing.
-                    var min_version = CloudPebble.ProjectInfo.sdk_version == '2'? MINIMUM_SDK2_VERSION : MINIMUM_INSTALL_VERSION;
+                    var min_version;
+                    if (CloudPebble.ProjectInfo.sdk_version == '2') {
+                        min_version = MINIMUM_SDK2_VERSION;
+                    } else if (SharedPebble.getPlatformName() == 'aplite') {
+                        min_version = MINIMUM_APLITE_VERSION;
+                    } else {
+                        min_version = MINIMUM_INSTALL_VERSION;
+                    }
                     if(/test/.test(version_string) || compare_version_strings(version_string, min_version) >= 0) {
                         var platform = Pebble.version_to_platform(version_info);
                         var sizes = {
