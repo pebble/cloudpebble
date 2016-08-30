@@ -527,16 +527,22 @@ table.kv-table .kv-remove {
     margin-left: 110px;
 }
 
-.compilation-pane #run-on-phone .btn,
-.compilation-pane #run-on-qemu .btn,
-.compilation-pane .build-buttons .btn {
+.compilation-pane .compilation-buttons.two-buttons .btn {
+    width: 287px;
+    margin: 0 4px;
+}
+
+.compilation-pane .compilation-buttons.three-buttons .btn{
+    width: 188px;
+    margin-right: 9px;
+}
+
+.compilation-pane .compilation-buttons.four-buttons .btn{
     width: 137px;
     margin: 0 4px;
 }
 
-.compilation-pane #run-on-phone .btn:last-of-type,
-.compilation-pane #run-on-qemu .btn:last-of-type,
-.compilation-pane .build-buttons .btn:last-child {
+.compilation-pane .compilation-buttons .btn:last-child {
     margin-right: 0;
 }
 
