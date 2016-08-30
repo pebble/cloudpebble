@@ -298,9 +298,9 @@ def build(ctx):
 
     ctx.set_group('bundle')
     ctx.pbl_bundle(binaries=binaries, js=ctx.path.ant_glob(['src/pkjs/**/*.js', 'src/pkjs/**/*.json']), js_entry_file='src/pkjs/{{pkjs_entry}}')
-"""
+""".replace('{{pkjs_entry}}', project.pkjs_entry_point)
 
-    return wscript.replace('{{jshint}}', 'True' if jshint and not for_export else 'False').replace('{{pkjs_entry}}', project.pkjs_entry_point)
+    return wscript.replace('{{jshint}}', 'True' if jshint and not for_export else 'False')
 
 
 def generate_wscript_file(project, for_export=False):
