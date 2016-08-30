@@ -206,9 +206,9 @@ class Project(IdeModel):
         if self.project_type in {'package', 'rocky'}:
             return 'index.js'
         elif self.project_type == 'native' and self.app_modern_multi_js:
-            if self.source_files.filter(target='pkjs', file_name='index.js').count() == 1:
+            if self.source_files.filter(target='pkjs', file_name='index.js').exists():
                 return 'index.js'
-            elif self.source_files.filter(target='pkjs', file_name='app.js').count() == 1:
+            elif self.source_files.filter(target='pkjs', file_name='app.js').exists():
                 return 'app.js'
             else:
                 return 'index.js'
