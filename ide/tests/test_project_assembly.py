@@ -43,10 +43,9 @@ class TestAssemble(ProjectTester):
             'pebble-jshintrc': True,
             'package.json': True,
             'src': {
-                'main.c': True,
-                'c': {'lib.c': True},
+                'c': {'lib.c': True, 'main.c': True},
                 'rocky': {'index.js': True},
-                'pkjs': {'app.js': True},
+                'pkjs': {'index.js': True},
                 'common': {'shared.js': True},
                 'resources': {
                     'fonts': {},
@@ -60,7 +59,9 @@ class TestAssemble(ProjectTester):
                 'lib.h': True
             },
             'worker_src': {
-                'worker.c': True
+                'c': {
+                    'worker.c': True,
+                }
             },
             'wscript': True,
             'resources': {
@@ -77,7 +78,9 @@ class TestAssemble(ProjectTester):
             'worker_src': False,
             'include': False,
             'src': {
-                'main.c': True,
+                'c': {
+                    'main.c': True,
+                }
             },
             True: True
         }
@@ -135,7 +138,7 @@ class TestAssemble(ProjectTester):
         """ Check that an SDK 3 project with a worker looks correct """
         with self.get_tree(type='rocky'):
             self.add_file('index.js', target='app')
-            self.add_file('app.js', target='pkjs')
+            self.add_file('index.js', target='pkjs')
             self.add_file('shared.js', target='common')
         expected = self.make_expected_sdk3_project(src={'pkjs': True, 'rocky': True, 'common': True}, resources=False)
         self.assertDictEqual(self.tree, expected)

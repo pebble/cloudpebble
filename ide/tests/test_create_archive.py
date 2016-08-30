@@ -34,12 +34,12 @@ class TestExport(ExportTester):
     def test_export_sdk_3_project(self):
         """ Ceck that SDK3 projects are exported with package.json files """
         self.create_project()
-        self.run_test({'test/src/main.c', 'test/package.json'})
+        self.run_test({'test/src/c/main.c', 'test/package.json'})
 
     def test_export_sdk_2_project(self):
         """ Check that SDK2 projects are exported with appinfo.json """
         self.create_project(sdk='2')
-        self.run_test({'test/src/main.c', 'test/appinfo.json'})
+        self.run_test({'test/src/c/main.c', 'test/appinfo.json'})
 
     def test_export_package(self):
         """ Check that packages are exported with the correct file structure """
@@ -63,4 +63,5 @@ class TestExport(ExportTester):
     def test_export_json(self):
         """ Check that json files are correctly exported """
         self.create_project(files={'main.c', 'test.json'})
-        self.run_test({'test/src/main.c', 'test/package.json', 'test/src/test.json'})
+        # FIXME: this test shouldn't have a test.json in the app target.
+        self.run_test({'test/src/c/main.c', 'test/package.json', 'test/src/c/test.json'})
