@@ -543,6 +543,10 @@ Pebble = function(proxy, token) {
         send_qemu_command(QEmu.Compass, pack("Ib", [(65536 - heading * 182.044)|0, calibration]));
     };
 
+    this.emu_set_peek = function(showing) {
+        send_qemu_command(QEmu.TimelinePeek, pack("b", [showing]));
+    };
+
     function id_to_uuid(id) {
         return _.UUID.v5(id + ".pins.developer.getpebble.com", "6ba7b810-9dad-11d1-80b4-00c04fd430c8");
     }
@@ -798,7 +802,8 @@ Pebble = function(proxy, token) {
         Accel: 6,
         VibrationNotification: 7,
         Button: 8,
-        TimeFormat: 9
+        TimeFormat: 9,
+        TimelinePeek: 10
     };
 
     var send_message = function(endpoint, message) {
