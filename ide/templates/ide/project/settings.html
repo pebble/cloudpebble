@@ -159,7 +159,7 @@
                     <div class="controls">
                         <div class="settings-uuid-control">
                             <input type="text" id="settings-uuid" pattern="{{ regexes.uuid }}" placeholder="00000000-0000-0000-0000-000000000000" value="{{project.app_uuid}}">
-                            <button id="uuid-generate" class="btn btn-small">{% trans "Generate" %}</button>
+                            <button type="button" id="uuid-generate" class="btn btn-small">{% trans "Generate" %}</button>
                         </div>
                         <span class="help-block">
                             {% trans "A unique identifier for the app. Takes the format xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx, where x is any hexadecimal digit and y is one of 8, 9, A, or B" %}
@@ -228,8 +228,8 @@
             </div>
         </div>
         <div class="well form-actions">
-            <button id="project-export-zip" class="btn">{% trans "Download as zip" %}</button>
-            <button id="project-delete" class="btn btn-danger">{% trans "Delete Project" %}</button>
+            <button type="button" id="project-export-zip" class="btn">{% trans "Download as zip" %}</button>
+            <button type="button" id="project-delete" class="btn btn-danger">{% trans "Delete Project" %}</button>
         </div>
     </form>
 </div>
