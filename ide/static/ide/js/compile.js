@@ -1,6 +1,6 @@
 CloudPebble.Compile = (function() {
     var MINIMUM_SDK2_VERSION = "v2.9";
-    var MINIMUM_INSTALL_VERSION = "v3.10";
+    var MINIMUM_INSTALL_VERSION = "v4.0";
 
     var COMPILE_SUCCESS_STATES = {
         1: {english: gettext("Pending"), cls: "info", label: 'info'},
