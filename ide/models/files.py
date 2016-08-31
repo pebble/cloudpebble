@@ -175,7 +175,7 @@ class ResourceIdentifier(IdeModel):
     character_regex = models.CharField(max_length=100, blank=True, null=True)
     tracking = models.IntegerField(blank=True, null=True)
     compatibility = models.CharField(max_length=10, blank=True, null=True)
-    target_platforms = models.CharField(max_length=30, null=True, blank=True, default=None)
+    target_platforms = models.CharField(max_length=100, null=True, blank=True, default=None)
 
     MEMORY_FORMATS = (
         ('Smallest', _('Smallest')),
