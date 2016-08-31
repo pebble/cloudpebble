@@ -53,12 +53,12 @@ def assemble_resource_directories(project, base_dir):
     os.makedirs(os.path.join(resource_path, 'data'))
 
 
-def assemble_resources(resource_path, resources, type_restrictions=None):
+def assemble_resources(base_dir, resource_path, resources, type_restrictions=None):
     """ Copy all the project's resources to a path, optionally filtering by type. """
     for f in resources:
         if type_restrictions and f.kind not in type_restrictions:
             continue
-        target_dir = os.path.abspath(os.path.join(resource_path, ResourceFile.DIR_MAP[f.kind]))
+        target_dir = os.path.abspath(os.path.join(base_dir, resource_path, ResourceFile.DIR_MAP[f.kind]))
         f.copy_all_variants_to_dir(target_dir)
 
 
@@ -71,7 +71,7 @@ def assemble_project(project, base_dir, build_result=None):
         assemble_source_files(project, base_dir)
         if project.project_type != 'rocky':
             assemble_resource_directories(project, base_dir)
-            assemble_resources(os.path.join(base_dir, project.resources_path), resources)
+            assemble_resources(base_dir, project.resources_path, resources)
         with open(os.path.join(base_dir, 'wscript'), 'w') as wscript:
             wscript.write(generate_wscript_file(project))
         with open(os.path.join(base_dir, 'pebble-jshintrc'), 'w') as jshint:
@@ -84,7 +84,7 @@ def assemble_project(project, base_dir, build_result=None):
         assemble_resource_directories(project, base_dir)
         shutil.rmtree(base_dir)
         shutil.copytree(settings.PEBBLEJS_ROOT, base_dir)
-        assemble_resources(project.resources_path, resources, type_restrictions=('png', 'bitmap'))
+        assemble_resources(base_dir, project.resources_path, resources, type_restrictions=('png', 'bitmap'))
         assemble_source_files(project, base_dir)
 
     # All projects have a manifest
