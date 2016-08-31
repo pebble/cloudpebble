@@ -118,11 +118,15 @@ class TestAssemble(ProjectTester):
     def test_pebblejs(self):
         """ Check that an pebblejs project looks right """
         with self.get_tree(type='pebblejs'):
-            pass
-        # We can't really expect anything specific from pebblejs because, in theory, it can change under our feet.
-        # But we can check things which will always be there: a doc.html and an appinfo.js
+            self.add_resource('image.png')
+            self.add_file('blah.js')
+        # We can't really expect an exact tree layout from pebblejs because, in theory, it can change under our feet.
+        # But we can check things which will always be there
         self.assertTrue(self.tree['appinfo.json'])
         self.assertTrue(self.tree['doc.html'])
+        self.assertTrue(self.tree['resources']['images']['image.png'])
+        self.assertTrue(self.tree['src']['js']['app.js'])
+        self.assertTrue(self.tree['src']['js']['blah.js'])
 
 
     def test_package(self):
