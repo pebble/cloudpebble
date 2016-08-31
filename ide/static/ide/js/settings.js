@@ -22,8 +22,8 @@ CloudPebble.Settings = (function() {
         if (CloudPebble.ProjectInfo.type == 'package') {
             pane.find('.not-package').hide();
         }
-        if(!(CloudPebble.ProjectProperties.supports_sdk2)) {
-            pane.find('.supports-sdk2').hide();
+        if(!(CloudPebble.ProjectProperties.supports_aplite)) {
+            pane.find('.supports-aplite').hide();
         }
         if(!(CloudPebble.ProjectProperties.supports_message_keys)) {
             pane.find('.supports-message-keys').hide();
