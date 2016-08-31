@@ -187,11 +187,23 @@ def github_push(user, commit_message, repo_name, project):
         else:
             next_tree[remote_manifest_path] = InputGitTreeElement(path=remote_manifest_path, mode='100644', type='blob',
                                                                   content=generate_manifest(project, resources))
-
-    if project.project_type == 'native' and remote_wscript_path not in next_tree:
-        next_tree[remote_wscript_path] = InputGitTreeElement(path=remote_wscript_path, mode='100644', type='blob',
-                                                             content=generate_wscript_file(project, True))
-        has_changed = True
+    # Add or update the project's wscript
+    if project.project_type in ('native', 'package', 'rocky'):
+        if remote_wscript_path not in next_tree:
+            # Add the wscript if it does not exist
+            next_tree[remote_wscript_path] = InputGitTreeElement(path=remote_wscript_path, mode='100644', type='blob',
+                                                                 content=generate_wscript_file(project, True))
+            has_changed = True
+        else:
+            # Update the wscript if need be
+            current_wscript = generate_wscript_file(project, True)
+            sha = next_tree[remote_wscript_path]._InputGitTreeElement__sha
+            expected_sha = git_sha(current_wscript)
+            if sha != expected_sha:
+                logger.debug("Updated wscript")
+                next_tree[remote_wscript_path]._InputGitTreeElement__sha = NotSet
+                next_tree[remote_wscript_path]._InputGitTreeElement__content = current_wscript
+                has_changed = True
 
     # Commit the new tree.
     if has_changed:
