@@ -54,10 +54,10 @@ CloudPebble.KVTable = function(table_elm, options) {
                     .attr('placeholder', key ? null : opts.value_placeholder)),
             $('<td>').append(
                 $('<button>')
-                    .prop('disabled', !key))
+                    .prop('disabled', !key)
                     .text('-')
                     .addClass("btn kv-remove")
-                    .attr('type', 'button')
+                    .attr('type', 'button'))
         ]);
         self.trigger('rowRendered', row);
         return row;
