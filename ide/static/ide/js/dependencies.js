@@ -279,6 +279,7 @@ CloudPebble.Dependencies = (function() {
             if (!val) return;
             cache.lookup_module(val).then(function(data) {
                 on_submit(val, data.version ? version_prefix + data.version : null);
+                return null;
             }).catch(function() {
                 on_submit(val, null);
             });
