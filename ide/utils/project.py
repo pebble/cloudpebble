@@ -39,7 +39,11 @@ def rank_manifest_path(dirname, kind):
 
 
 def find_project_root_and_manifest(project_items):
-    """ Given the contents of an archive, find a valid Pebble project.
+    """ Given the contents of an archive, find a (potentially) valid Pebble project.
+    A potentially valid Pebble project is either:
+      - An appinfo.json file next to an 'src/' directory which contains app sources
+      - A package.json file which has a 'pebble' key.
+    The function chooses the most shallow possible project and prefers package.json to appinfo.json if both are present.
     :param project_items: A list of BaseProjectItems
     :return: A tuple of (path_to_project, manifest BaseProjectItem)
     """
@@ -62,9 +66,10 @@ def find_project_root_and_manifest(project_items):
     # Choose the most shallow manifest file which has a non-empty source directory.
     sorted_manifests = sorted(found_manifests, key=lambda x: rank_manifest_path(*x[0]))
     for (base, kind), item in sorted_manifests:
-        src_dir = os.path.join(base, SRC_DIR) + os.sep
+        if kind == "package.json":
+            return os.path.join(base, ''), item
+        src_dir = os.path.join(base, SRC_DIR, '')
         for src_path in found_src_files:
             if src_path.startswith(src_dir):
-                base = base + os.sep if base else ""
-                return base, item
+                return os.path.join(base, ''), item
     raise InvalidProjectArchiveException(_("No project root found."))
