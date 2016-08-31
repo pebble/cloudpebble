@@ -153,7 +153,7 @@
                                 {% trans "App version. Takes the format major[.minor], where major and minor are between 0 and 255." %}
                             </span>
                         {% else %}
-                            <input type="text" id="settings-version-label" placeholder="0.1.0" value="{{project.app_version_label}}" pattern="{{ regexes.semver }}">
+                            <input type="text" id="settings-version-label" placeholder="0.1.0" value="{{project.semver}}" pattern="{{ regexes.semver }}">
                             <span class="help-block">
                                 {% trans "Pacakge version. Takes the format major.minor.patch, where each is a number between 0 and 255." %}
                             </span>

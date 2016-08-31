@@ -171,16 +171,26 @@ class Project(IdeModel):
 
     @property
     def semver(self):
-        """ Get the app's version label formatted as a semver """
+        """ Get the app's version label formatted as a semver. """
         if self.project_type == 'package':
-            return self.app_version_label
-        else:
-            return version_to_semver(self.app_version_label)
+            try:
+                # Packages should have semver app_versions_labels...
+                parse_semver(self.app_version_label)
+                return self.app_version_label
+            except ValueError as e:
+                # but if they don't, we try to convert it from an app-style version label.
+                try:
+                    version_to_semver(self.app_version_label)
+                except:
+                    raise e
+        return version_to_semver(self.app_version_label)
 
     @semver.setter
     def semver(self, value):
-        """ Set the app's version label from a semver string"""
+        """ Set the app's version label from a semver string. """
         if self.project_type == 'package':
+            # This throws an error if the semver is invalid.
+            parse_semver(value)
             self.app_version_label = value
         else:
             self.app_version_label = semver_to_version(value)

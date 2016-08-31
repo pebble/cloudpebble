@@ -26,7 +26,7 @@ def version_to_semver(version):
 
 def parse_semver(semver):
     """ Parse a pebble/npm compatible semver
-    :param semver: should be "major.minor.0"
+    :param semver: should be "major.minor.patch"
     :return: (major, minor)
     """
     parsed = re.match(regexes.SEMVER, semver)
