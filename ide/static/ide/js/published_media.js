@@ -1,4 +1,5 @@
 CloudPebble.PublishedMedia = (function() {
+    var ENABLE_INHERETED_PUBLISHED_MEDIA = false;
     var media_template = null;
     var item_template = null;
     var live_form = null;
@@ -388,8 +389,10 @@ CloudPebble.PublishedMedia = (function() {
             CloudPebble.PublishedMedia.RenameIdentifiers([]);
         },
         SetDependencyResources: function(resources) {
-            dependency_resources = resources;
-            CloudPebble.PublishedMedia.ValidateIdentifiers();
+            if (ENABLE_INHERETED_PUBLISHED_MEDIA) {
+                dependency_resources = resources;
+                CloudPebble.PublishedMedia.ValidateIdentifiers();
+            }
         },
         Init: function() {
             var commands = {};
@@ -398,9 +401,8 @@ CloudPebble.PublishedMedia = (function() {
             media_template = $('#media-pane-template').remove().removeClass('hide');
             item_template = $('#media-item-template').removeAttr('id').removeClass('hide').remove();
             alerts.init(media_template);
-            // sync_with_ycm();
             CloudPebble.YCM.initialise().then(function(data) {
-                if (data.resources) {
+                if (ENABLE_INHERETED_PUBLISHED_MEDIA && data.resources) {
                     dependency_resources = data.resources;
                 }
             }).finally(function() {
