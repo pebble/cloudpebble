@@ -131,7 +131,11 @@
                             <option value="">{% if project.project_type == 'native' %}{% trans 'None' %}{% else %}{% trans 'Default' %}{% endif %}</option>
                         </select>
                         <span class="help-block">
-                            {% trans "Displayed on the Pebble's main menu. Must be a 28x28 file in PNG format." %}
+                            {% if project.sdk_version == '2' %}
+                                {% trans "Displayed on the Pebble's main menu. Must be a 28x28 file in PNG format." %}
+                            {% else %}
+                                {% trans "Displayed on the Pebble's main menu. Must be a 25x25 file in PNG format." %}
+                            {% endif %}
                         </span>
                     </div>
                 </div>
