@@ -61,7 +61,13 @@ def _spin_up_server(request):
                     secure = response['secure']
                     scheme = "wss" if secure else "ws"
                     ws_server = urlparse(server)._replace(scheme=scheme).geturl()
-                    return {'uuid': response['uuid'], 'server': ws_server, 'secure': secure}
+                    return {
+                        'uuid': response['uuid'],
+                        'server': ws_server,
+                        'secure': secure,
+                        'libraries': response.get('libraries', {}),
+                        'npm_error': response.get('npm_error', None)
+                    }
 
         except (requests.RequestException, ValueError):
             import traceback

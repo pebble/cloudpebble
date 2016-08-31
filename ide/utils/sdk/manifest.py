@@ -1,268 +1,23 @@
 import json
 import re
+import uuid
+
 from django.utils.translation import ugettext as _
-from django.conf import settings
+
 from ide.utils.project import APPINFO_MANIFEST, PACKAGE_MANIFEST, InvalidProjectArchiveException
 
 __author__ = 'katharine'
 
 
-def generate_wscript_file_sdk2(project, for_export=False):
-    jshint = project.app_jshint
-    wscript = """
-#
-# This file is the default set of rules to compile a Pebble project.
-#
-# Feel free to customize this to your needs.
-#
-
-import os.path
-try:
-    from sh import CommandNotFound, jshint, cat, ErrorReturnCode_2
-    hint = jshint
-except (ImportError, CommandNotFound):
-    hint = None
-
-top = '.'
-out = 'build'
-
-def options(ctx):
-    ctx.load('pebble_sdk')
-
-def configure(ctx):
-    ctx.load('pebble_sdk')
-    global hint
-    if hint is not None:
-        hint = hint.bake(['--config', 'pebble-jshintrc'])
-
-def build(ctx):
-    if {{jshint}} and hint is not None:
-        try:
-            hint([node.abspath() for node in ctx.path.ant_glob("src/**/*.js")], _tty_out=False) # no tty because there are none in the cloudpebble sandbox.
-        except ErrorReturnCode_2 as e:
-            ctx.fatal("\\nJavaScript linting failed (you can disable this in Project Settings):\\n" + e.stdout)
-
-    # Concatenate all our JS files (but not recursively), and only if any JS exists in the first place.
-    ctx.path.make_node('src/js/').mkdir()
-    js_paths = ctx.path.ant_glob(['src/*.js', 'src/**/*.js'])
-    if js_paths:
-        ctx(rule='cat ${SRC} > ${TGT}', source=js_paths, target='pebble-js-app.js')
-        has_js = True
-    else:
-        has_js = False
-
-    ctx.load('pebble_sdk')
-
-    ctx.pbl_program(source=ctx.path.ant_glob('src/**/*.c'),
-                    target='pebble-app.elf')
-
-    if os.path.exists('worker_src'):
-        ctx.pbl_worker(source=ctx.path.ant_glob('worker_src/**/*.c'),
-                        target='pebble-worker.elf')
-        ctx.pbl_bundle(elf='pebble-app.elf',
-                        worker_elf='pebble-worker.elf',
-                        js='pebble-js-app.js' if has_js else [])
-    else:
-        ctx.pbl_bundle(elf='pebble-app.elf',
-                       js='pebble-js-app.js' if has_js else [])
-
-"""
-    return wscript.replace('{{jshint}}', 'True' if jshint and not for_export else 'False')
-
-
-def generate_wscript_file_sdk3(project, for_export):
-    jshint = project.app_jshint
-    if not project.app_modern_multi_js:
-        wscript = """
-    #
-# This file is the default set of rules to compile a Pebble project.
-#
-# Feel free to customize this to your needs.
-#
-
-import os.path
-try:
-    from sh import CommandNotFound, jshint, cat, ErrorReturnCode_2
-    hint = jshint
-except (ImportError, CommandNotFound):
-    hint = None
-
-top = '.'
-out = 'build'
-
-def options(ctx):
-    ctx.load('pebble_sdk')
-
-def configure(ctx):
-    ctx.load('pebble_sdk')
-
-def build(ctx):
-    if {{jshint}} and hint is not None:
-        try:
-            hint([node.abspath() for node in ctx.path.ant_glob("src/**/*.js")], _tty_out=False) # no tty because there are none in the cloudpebble sandbox.
-        except ErrorReturnCode_2 as e:
-            ctx.fatal("\\nJavaScript linting failed (you can disable this in Project Settings):\\n" + e.stdout)
-
-    # Concatenate all our JS files (but not recursively), and only if any JS exists in the first place.
-    ctx.path.make_node('src/js/').mkdir()
-    js_paths = ctx.path.ant_glob(['src/*.js', 'src/**/*.js'])
-    if js_paths:
-        ctx(rule='cat ${SRC} > ${TGT}', source=js_paths, target='pebble-js-app.js')
-        has_js = True
-    else:
-        has_js = False
-
-    ctx.load('pebble_sdk')
-
-    build_worker = os.path.exists('worker_src')
-    binaries = []
-
-    for p in ctx.env.TARGET_PLATFORMS:
-        ctx.set_env(ctx.all_envs[p])
-        ctx.set_group(ctx.env.PLATFORM_NAME)
-        app_elf='{}/pebble-app.elf'.format(p)
-        ctx.pbl_program(source=ctx.path.ant_glob('src/**/*.c'),
-        target=app_elf)
-
-        if build_worker:
-            worker_elf='{}/pebble-worker.elf'.format(p)
-            binaries.append({'platform': p, 'app_elf': app_elf, 'worker_elf': worker_elf})
-            ctx.pbl_worker(source=ctx.path.ant_glob('worker_src/**/*.c'),
-            target=worker_elf)
-        else:
-            binaries.append({'platform': p, 'app_elf': app_elf})
-
-    ctx.set_group('bundle')
-    ctx.pbl_bundle(binaries=binaries, js='pebble-js-app.js' if has_js else [])
-    """
-    else:
-        wscript = """#
-# This file is the default set of rules to compile a Pebble project.
-#
-# Feel free to customize this to your needs.
-#
-
-import os.path
-
-top = '.'
-out = 'build'
-
-
-def options(ctx):
-    ctx.load('pebble_sdk')
-
-
-def configure(ctx):
-    ctx.load('pebble_sdk')
-
-
-def build(ctx):
-    ctx.load('pebble_sdk')
-
-    build_worker = os.path.exists('worker_src')
-    binaries = []
-
-    for p in ctx.env.TARGET_PLATFORMS:
-        ctx.set_env(ctx.all_envs[p])
-        ctx.set_group(ctx.env.PLATFORM_NAME)
-        app_elf = '{}/pebble-app.elf'.format(ctx.env.BUILD_DIR)
-        ctx.pbl_program(source=ctx.path.ant_glob('src/**/*.c'), target=app_elf)
-
-        if build_worker:
-            worker_elf = '{}/pebble-worker.elf'.format(ctx.env.BUILD_DIR)
-            binaries.append({'platform': p, 'app_elf': app_elf, 'worker_elf': worker_elf})
-            ctx.pbl_worker(source=ctx.path.ant_glob('worker_src/**/*.c'), target=worker_elf)
-        else:
-            binaries.append({'platform': p, 'app_elf': app_elf})
-
-    ctx.set_group('bundle')
-    ctx.pbl_bundle(binaries=binaries, js=ctx.path.ant_glob('src/js/**/*.js'), js_entry_file='src/js/app.js')
-"""
-
-    return wscript.replace('{{jshint}}', 'True' if jshint and not for_export else 'False')
-
-
-def generate_wscript_file(project, for_export=False):
-    if project.sdk_version == '2':
-        return generate_wscript_file_sdk2(project, for_export)
-    elif project.sdk_version == '3':
-        return generate_wscript_file_sdk3(project, for_export)
-
-
-def generate_jshint_file(project):
-    return """
-/*
- * Example jshint configuration file for Pebble development.
- *
- * Check out the full documentation at http://www.jshint.com/docs/options/
- */
-{
-  // Declares the existence of the globals available in PebbleKit JS.
-  "globals": {
-    "Pebble": true,
-    "console": true,
-    "WebSocket": true,
-    "XMLHttpRequest": true,
-    "navigator": true, // For navigator.geolocation
-    "localStorage": true,
-    "setTimeout": true,
-    "setInterval": true,
-    "Int8Array": true,
-    "Uint8Array": true,
-    "Uint8ClampedArray": true,
-    "Int16Array": true,
-    "Uint16Array": true,
-    "Int32Array": true,
-    "Uint32Array": true,
-    "Float32Array": true,
-    "Float64Array": true
-  },
-
-  // Do not mess with standard JavaScript objects (Array, Date, etc)
-  "freeze": true,
-
-  // Do not use eval! Keep this warning turned on (ie: false)
-  "evil": false,
-
-  /*
-   * The options below are more style/developer dependent.
-   * Customize to your liking.
-   */
-
-  // All variables should be in camelcase - too specific for CloudPebble builds to fail
-  // "camelcase": true,
-
-  // Do not allow blocks without { } - too specific for CloudPebble builds to fail.
-  // "curly": true,
-
-  // Prohibits the use of immediate function invocations without wrapping them in parentheses
-  "immed": true,
-
-  // Don't enforce indentation, because it's not worth failing builds over
-  // (especially given our somewhat lacklustre support for it)
-  "indent": false,
-
-  // Do not use a variable before it's defined
-  "latedef": "nofunc",
-
-  // Spot undefined variables
-  "undef": "true",
-
-  // Spot unused variables
-  "unused": "true"
-}
-"""
-
-
 def manifest_name_for_project(project):
-    if settings.NPM_MANIFEST_SUPPORT and project.project_type == 'native' and project.sdk_version == '3':
+    if project.is_standard_project_type and project.sdk_version == '3':
         return PACKAGE_MANIFEST
     else:
         return APPINFO_MANIFEST
 
 
 def generate_manifest(project, resources):
-    if project.project_type == 'native':
+    if project.is_standard_project_type:
         if project.sdk_version == '2':
             return generate_v2_manifest(project, resources)
         else:
@@ -281,10 +36,6 @@ def generate_v2_manifest(project, resources):
 
 def generate_v3_manifest(project, resources):
     return dict_to_pretty_json(generate_v3_manifest_dict(project, resources))
-
-
-def generate_package_manifest(project, resources):
-    return dict_to_pretty_json(generate_package_manifest_dict(project, resources))
 
 
 def generate_v2_manifest_dict(project, resources):
@@ -310,63 +61,39 @@ def generate_v2_manifest_dict(project, resources):
 
 
 def generate_v3_manifest_dict(project, resources):
-    if settings.NPM_MANIFEST_SUPPORT:
-        return generate_package_manifest_dict(project, resources)
-    else:
-        # Just extend the v2 one.
-        manifest = generate_v2_manifest_dict(project, resources)
-        manifest['enableMultiJS'] = project.app_modern_multi_js
-        if project.app_platforms:
-            manifest['targetPlatforms'] = project.app_platform_list
-        if project.app_is_hidden:
-            manifest['watchapp']['hiddenApp'] = project.app_is_hidden
-        manifest['sdkVersion'] = "3"
-        del manifest['versionCode']
-        return manifest
-
-
-def make_valid_package_manifest_name(short_name):
-    """ Turn an app_short_name into a valid NPM package name. """
-    name = short_name.lower()
-    # Remove any invalid characters from the end
-    name = re.sub(r'[^a-z0-9._]+$', '', name)
-    # Any strings of invalid characters in the middle are converted to dashes
-    name = re.sub(r'[^a-z0-9._]+', '-', name)
-    # The name cannot start with [ ._] or end with spaces.
-    name = name.lstrip(' ._').rstrip()
-    return name
-
-
-def generate_package_manifest_dict(project, resources):
     manifest = {
-        'name': make_valid_package_manifest_name(project.app_short_name),
+        'name': project.npm_name,
         'author': project.app_company_name,
         'version': project.semver,
         'keywords': project.keywords,
         'dependencies': project.get_dependencies(),
         'pebble': {
-            'displayName': project.app_long_name,
-            'uuid': str(project.app_uuid),
             'sdkVersion': project.sdk_version,
-            'enableMultiJS': project.app_modern_multi_js,
             'watchapp': {
                 'watchface': project.app_is_watchface
             },
             'messageKeys': json.loads(project.app_keys),
             'resources': generate_resource_dict(project, resources),
-            'capabilities': project.app_capabilities.split(','),
             'projectType': project.project_type
         }
     }
+    if project.app_capabilities:
+        manifest['pebble']['capabilities'] = project.app_capabilities.split(',')
+    if project.project_type == 'package':
+        manifest['files'] = ['dist.zip']
+    else:
+        manifest['pebble']['uuid'] = str(project.app_uuid)
+        manifest['pebble']['enableMultiJS'] = project.app_modern_multi_js
+        manifest['pebble']['displayName'] = project.app_long_name
+        if project.app_is_hidden:
+            manifest['pebble']['watchapp']['hiddenApp'] = project.app_is_hidden
     if project.app_platforms:
         manifest['pebble']['targetPlatforms'] = project.app_platform_list
-    if project.app_is_hidden:
-        manifest['pebble']['watchapp']['hiddenApp'] = project.app_is_hidden
     return manifest
 
 
 def generate_manifest_dict(project, resources):
-    if project.project_type == 'native':
+    if project.is_standard_project_type:
         if project.sdk_version == '2':
             return generate_v2_manifest_dict(project, resources)
         else:
@@ -378,17 +105,12 @@ def generate_manifest_dict(project, resources):
     else:
         raise Exception(_("Unknown project type %s") % project.project_type)
 
-
-def generate_resource_map(project, resources):
-    return dict_to_pretty_json(generate_resource_dict(project, resources))
-
-
 def dict_to_pretty_json(d):
     return json.dumps(d, indent=4, separators=(',', ': '), sort_keys=True) + "\n"
 
 
 def generate_resource_dict(project, resources):
-    if project.project_type == 'native':
+    if project.is_standard_project_type:
         return generate_native_resource_dict(project, resources)
     elif project.project_type == 'simplyjs':
         return generate_simplyjs_resource_dict()
@@ -400,7 +122,6 @@ def generate_resource_dict(project, resources):
 
 def generate_native_resource_dict(project, resources):
     resource_map = {'media': []}
-
     for resource in resources:
         for resource_id in resource.get_identifiers():
             d = {
@@ -564,13 +285,8 @@ def load_manifest_dict(manifest, manifest_kind, default_project_type='native'):
         project['app_short_name'] = manifest['name']
         project['app_company_name'] = manifest['author']
         project['semver'] = manifest['version']
-        project['app_long_name'] = manifest['pebble']['displayName']
-        if settings.NPM_MANIFEST_SUPPORT:
-            project['app_keys'] = dict_to_pretty_json(manifest['pebble'].get('messageKeys', []))
-        else:
-            project['app_keys'] = dict_to_pretty_json(manifest['pebble'].get('messageKeys', {}))
-            if isinstance(json.loads(project['app_keys']), list):
-                raise InvalidProjectArchiveException("Auto-assigned (array) messageKeys are not yet supported.")
+        project['app_long_name'] = manifest['pebble'].get('displayName', None)
+        project['app_keys'] = dict_to_pretty_json(manifest['pebble'].get('messageKeys', []))
         project['keywords'] = manifest.get('keywords', [])
         dependencies = manifest.get('dependencies', {})
         manifest = manifest['pebble']
@@ -579,7 +295,7 @@ def load_manifest_dict(manifest, manifest_kind, default_project_type='native'):
     else:
         raise InvalidProjectArchiveException(_('Invalid manifest kind: %s') % manifest_kind[-12:])
 
-    project['app_uuid'] = manifest['uuid']
+    project['app_uuid'] = manifest.get('uuid', uuid.uuid4())
     project['app_is_watchface'] = manifest.get('watchapp', {}).get('watchface', False)
     project['app_is_hidden'] = manifest.get('watchapp', {}).get('hiddenApp', False)
     project['app_is_shown_on_communication'] = manifest.get('watchapp', {}).get('onlyShownOnCommunication', False)

@@ -9,13 +9,13 @@
                 <div class="controls">
                     <select id="edit-resource-type">
                         <option value="bitmap">{% trans 'Bitmap Image' %}</option>
-                        {% if project.project_type == 'native' %}
+                        {% if project.is_standard_project_type  %}
                             <option value="font">{% trans 'TrueType font' %}</option>
                             <option value="raw">{% trans 'Raw binary blob' %}</option>
                         {% endif %}
 
                         <option value="png">{% trans 'PNG image (deprecated)' %}</option>
-                        {% if project.project_type == 'native' %}
+                        {% if project.is_standard_project_type %}
                             <option value="png-trans">{% trans 'PNG with transparency (deprecated)' %}</option>
                             {% if project.sdk_version == '3' %}
                                 <option value="pbi">{% trans '1-bit Pebble image (deprecated)' %}</option>
@@ -28,7 +28,7 @@
             <div class="control-group" id="edit-resource-file-name_section">
                 <label class="control-label" for="edit-resource-file-name">{% trans 'File name' %}</label>
                 <div class="controls">
-                    <input type="text" id="edit-resource-file-name" name="file_name">
+                    <input type="text" id="edit-resource-file-name" name="file_name" pattern="{{regexes.resource_file_name}}">
                 </div>
             </div>
         </div>
@@ -40,7 +40,7 @@
                     <div class="controls">
                         {# TODO: placeholder/pattern thingybobs #}
                         <input type="text" class="span6 edit-resource-id font-only" placeholder="FONT_EXAMPLE_BOLD_SUBSET_24" pattern="[A-Za-z0-9_]*[0-9]+">
-                        <input type="text" class="span6 edit-resource-id non-font-only" placeholder="IMAGE_EXAMPLE_IDENTIFIER" pattern="[A-Za-z0-9_]+">
+                        <input type="text" class="span6 edit-resource-id non-font-only" placeholder="IMAGE_EXAMPLE_IDENTIFIER" pattern="{{ regexes.c_identifier }}">
                         <span class="help-block">{% trans 'This is used in your code and must be a valid C identifier.' %}<br>
                             <span class="font-only">{% trans 'It must end with the desired font size.' %}</span>
                         </span>
@@ -121,6 +121,7 @@
 
                         <div class="edit-resource-targets">
                             <div class="edit-resource-target-options">
+                                <br/>
                             {% for platform in  supported_platforms %}
                                 <div class="control-group">
                                     <label class="control-label" for="edit-resource-target-{{ platform }}">{{ platform | capfirst }}</label>
@@ -137,6 +138,7 @@
 
         <div class="well image-platform-preview hide sdk3-only">
             <h4>{% trans 'Preview per platform' %}</h4>
+            <p class="help-block">{% trans "Given the tags for each variant, this shows the final version selected for each platform." %}</p>
             <div class="pane-boxes pane-3-boxes ">
                 {% for platform in supported_platforms %}
                 <div id="resource-image-preview-for-{{ platform }}">
@@ -146,7 +148,7 @@
                 </div>
                 {% endfor %}
             </div>
-            <p class="help-block">{% trans "Given the tags for each variant, this shows the final version selected for each platform." %}</p>
+            <div style="clear: both;"></div>
         </div>
 
         <div id="edit-resource-previews">

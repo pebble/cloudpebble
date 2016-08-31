@@ -13,7 +13,7 @@ __author__ = 'joe'
 
 fake_s3 = FakeS3()
 
-FakeFile = namedtuple('FakeFile', 'content')
+FakeFile = namedtuple('FakeFile', ['content', 'raw_url'])
 
 
 class FakeGist(object):
@@ -21,7 +21,7 @@ class FakeGist(object):
         self.description = description
         self.files = files or {}
         for name, content in files.iteritems():
-            self.files[name] = FakeFile(content)
+            self.files[name] = FakeFile(content, '')
 
 
 @mock.patch('ide.models.s3file.s3', fake_s3)
@@ -84,6 +84,7 @@ class TestImportProject(CloudpebbleTestCase):
         self.assertEqual(project.project_type, 'pebblejs')
         project = self.runTest({'app.js': 'content'})
         self.assertEqual(project.project_type, 'pebblejs')
+        self.assertEqual(project.source_files.get(file_name='app.js').target, 'app')
 
     def test_multiple_js_files_is_not_pebblejs(self):
         """ Check that a project with app.js and other source files does not get imported as a pebblejs project """
@@ -110,3 +111,29 @@ class TestImportProject(CloudpebbleTestCase):
         self.assertEqual(project.owner, User.objects.get(pk=self.user_id))
         self.assertEqual(project.app_company_name, 'test')
         self.assertEqual(project.app_is_watchface, False)
+
+    @mock.patch('ide.tasks.gist.urllib2')
+    def test_native_project_files(self, urllib2):
+        urllib2.urlopen.return_value.read.return_value = ''
+        project = self.runTest({
+            'main.c': '',
+            'package.json': json.dumps({"pebble": {"resources": {"media": [{
+                "type": "bitmap",
+                "name": "IMAGE_IMG",
+                "file": "img.png"
+            }]}}}),
+            'app.js': '',
+            'img.png': ''
+        })
+        self.assertEqual(project.source_files.get(file_name='app.js').target, 'pkjs')
+        self.assertEqual(project.source_files.get(file_name='main.c').target, 'app')
+        self.assertEqual(project.resources.get(file_name='img.png').kind, "bitmap")
+
+    def test_rocky(self):
+        project = self.runTest({
+            'index.js': '',
+            'app.js': ''
+        })
+        self.assertEqual(project.project_type, 'rocky')
+        self.assertEqual(project.source_files.get(file_name='index.js').target, 'app')
+        self.assertEqual(project.source_files.get(file_name='app.js').target, 'pkjs')

@@ -18,7 +18,7 @@
                         </div>
                         <hr>
 
-                        <div>
+                        <div class="compilation-buttons three-buttons">
                             <button class="btn btn-primary" id="install-on-phone-btn">{% trans 'Install and Run' %}</button>
                             <button class="btn" id="show-app-logs-btn">{% trans 'View app logs' %}</button>
                             <button class="btn" id="screenshot-btn">{% trans 'Screenshot' %}</button>
@@ -26,13 +26,14 @@
                     </div>
                     <div id="run-qemu" class="tab-pane active">
                         <hr>
-                        <div>
+                        <div class="compilation-buttons four-buttons">
                             <button class="btn btn-primary" id="install-in-qemu-aplite-btn" data-platform="aplite">Aplite</button>
                             <button class="btn btn-primary" id="install-in-qemu-basalt-btn" data-platform="basalt">Basalt</button>
                             <button class="btn btn-primary" id="install-in-qemu-chalk-btn" data-platform="chalk">Chalk</button>
+                            <button class="btn btn-primary" id="install-in-qemu-diorite-btn" data-platform="diorite">Diorite</button>
                         </div>
                         <hr>
-                        <div>
+                        <div class="compilation-buttons two-buttons">
                             <button class="btn" id="show-qemu-logs-btn">{% trans 'View app logs' %}</button>
                             <button class="btn" id="screenshot-qemu-btn">{% trans 'Screenshot' %}</button>
                         </div>
@@ -53,11 +54,18 @@
             <p id="last-compilation-size-aplite" class="hide"><label>{% trans 'Aplite Size:' %}</label> <span class="text"></span></p>
             <p id="last-compilation-size-basalt" class="hide"><label>{% trans 'Basalt Size:' %}</label> <span class="text"></span></p>
             <p id="last-compilation-size-chalk" class="hide"><label>{% trans 'Chalk Size:' %}</label> <span class="text"></span></p>
+            <p id="last-compilation-size-diorite" class="hide"><label>{% trans 'Diorite Size:' %}</label> <span class="text"></span></p>
         </div>
         <hr>
-        <div class="build-buttons">
+        <div class="compilation-buttons three-buttons">
             <button class="btn btn-affirmative" id="compilation-run-build-button">{% trans 'Run build' %}</button>
-            <a id="last-compilation-pbw" href="#" class="btn hide">{% trans 'Get PBW' %}</a>
+            <a id="last-compilation-pbw" href="#" class="btn hide">
+                {% if project.project_type == 'package'%}
+                    {% trans 'Get Package' %}
+                {% else %}
+                    {% trans 'Get PBW' %}
+                {% endif %}
+            </a>
             <a id="last-compilation-log" class="btn hide" href="#">{% trans 'Build log' %}</a>
         </div>
     </div>

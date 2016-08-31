@@ -65,17 +65,26 @@
                     <li class="nav-header" id="sidebar-pane-settings"><a href="#">{% trans 'Settings' %}</a></li>
                     <li class="nav-header sdk3-only" id="sidebar-pane-timeline"><a href="#">Timeline (Preview)</a></li>
                     <li class="nav-header" id="sidebar-pane-compile"><a href="#">{% trans 'Compilation' %}</a></li>
-                    {% if npm_manifest_support_enabled and project.project_type != 'pebblejs' %}
-                        <li class="nav-header sdk3-only" id="sidebar-pane-dependencies"><a href="#">{% trans 'Dependencies' %}</a></li>
+                    {% if project.project_type == 'package' or project.project_type == 'native' %}
+                        <li class="nav-header sdk3-only" id="sidebar-pane-dependencies"><a href="#">{% trans 'Dependencies' %}</a>
+                            <span class="spinner spinner-dark hide"></span>
+                        </li>
                     {% endif %}
                     <li id="sidebar-pane-github" class="nav-header {%if not project.owner.github%}disabled{%endif%}"><a href="#">GitHub</a></li>
-                    <li class="nav-header nav-section" id="source-files"><span>{% trans 'Source files' %}</span>
-                        <button class="btn btn-small" id="new-source-file">{% trans 'Add new' %}</button></li>
-                    <li class="not-simplyjs" id="end-source-files"></li>
-                    <li class="hide native-only nav-header nav-section" id="worker-files">{% trans 'Worker source' %}</li>
-                    <li class="hide nav-section" id="end-worker-files"></li>
-                    <li class="nav-header nav-section not-simplyjs">{% trans 'Resources' %} <button class="btn btn-small" id="sidebar-pane-new-resource">{% trans 'Add new' %}</button></li>
-                    <li class="hide not-simplyjs" id="end-resources"></li>
+                    <li class="nav-section">
+                        <ul class="nav-list" id="sidebar-sources">
+
+                        </ul>
+                    </li>
+                    {% if project.project_type != 'simplyjs' and project.project_type != 'rocky' %}
+                    <li class="nav-section">
+                        <span class="nav-header">{% trans 'Resources' %}</span>
+                        <button class="btn btn-small" id="sidebar-pane-new-resource">{% trans 'Add new' %}</button>
+                        <ul class="nav-list" id="sidebar-resources">
+
+                        </ul>
+                    </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
@@ -149,8 +158,17 @@
                     <select id="new-file-type">
                         <option value="c" selected>{% trans 'C file' %}</option>
                         <option value="js">{% trans 'JavaScript file' %}</option>
+                        <option value="json">{% trans 'JSON file' %}</option>
                         <option value="layout">{% trans 'Window Layout' %}</option>
                     </select>
+                </div>
+            </div>
+            <div class="include-file-options file-group hide">
+                <div class="control-group">
+                    <label class="control-label" for="new-include-file-name">{% trans 'Include Name' %}</label>
+                    <div class="controls">
+                        <input type="text" id="new-include-file-name" pattern="[a-zA-Z0-9_-]+\.h$">
+                    </div>
                 </div>
             </div>
             <div class="c-file-options file-group">
@@ -160,12 +178,19 @@
                         <input type="text" id="new-c-file-name" pattern="[a-zA-Z0-9_-]+\.(c|h)$">
                     </div>
                 </div>
-                <div class="control-group">
+                <div class="control-group not-simplyjs not-pebblejs">
                     <label class="control-label" for="new-c-target">{% trans 'Target' context "compilation target" %}</label>
                     <div class="controls">
                         <select id="new-c-target">
-                            <option value="app" selected>{% trans 'App / Watchface' %}</option>
-                            <option value="worker">{% trans 'Background worker' %}</option>
+                            <option value="app" selected>
+                                {% if project.project_type == 'package' %}
+                                    {% trans 'Private source' %}
+                                {% else %}
+                                    {% trans 'App / Watchface' %}
+                                {% endif %}
+                            </option>
+                            <option value="worker" class="native-only">{% trans 'Background worker' %}</option>
+                            <option value="public" class="package-only">{% trans 'Public header file' %}</option>
                         </select>
                         <img src="{% static 'ide/img/help.png' %}" class="field-help">
                     </div>
@@ -177,11 +202,43 @@
                     </div>
                 </div>
             </div>
+            <div class="json-file-options file-group hide">
+                <div class="control-group">
+                    <label class="control-label" for="new-json-file-name">{% trans 'Filename' %}</label>
+                    <div class="controls">
+                        <input type="text" id="new-json-file-name" pattern="[a-zA-Z0-9_-]+\.json$">
+                    </div>
+                    <div class="control-group rocky-only">
+                        <label class="control-label" for="new-json-target">{% trans 'Target' context "compilation target" %}</label>
+                        <div class="controls">
+                            <select id="new-json-target">
+                                <option value="app" selected>{% trans 'RockyJS' %}</option>
+                                <option value="pkjs">{% trans 'PebbleKit JS' %}</option>
+                                <option value="common">{% trans 'Shared JSON' %}</option>
+                            </select>
+                            <img src="{% static 'ide/img/help.png' %}" class="field-help">
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="js-file-options file-group hide">
                 <div class="control-group">
-                    <label class="control-label" for="new-js-file-name">{% trans 'Filename' %}</label>
-                    <div class="controls">
-                        <input type="text" id="new-js-file-name" pattern="[a-zA-Z0-9_-]+\.js$">
+                    <div id="js-file-name-option">
+                        <label class="control-label" for="new-js-file-name">{% trans 'Filename' %}</label>
+                        <div class="controls">
+                            <input type="text" id="new-js-file-name" pattern="[a-zA-Z0-9_-]+\.js$">
+                        </div>
+                    </div>
+                    <div class="control-group rocky-only">
+                        <label class="control-label" for="new-js-target">{% trans 'Target' context "compilation target" %}</label>
+                        <div class="controls">
+                            <select id="new-js-target">
+                                <option value="app" selected>{% trans 'RockyJS' %}</option>
+                                <option value="pkjs">{% trans 'PebbleKit JS' %}</option>
+                                <option value="common">{% trans 'Shared JS' %}</option>
+                            </select>
+                            <img src="{% static 'ide/img/help.png' %}" class="field-help">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -380,6 +437,19 @@
         <button class="btn btn-danger" id="modal-warning-prompt-button">{% trans 'Continue' %}</button>
     </div>
 </div>
+<!-- Modal link confirmation prompt -->
+<div id="modal-confirm-link-prompt" class="modal hide fade" tabindex="-1" role="dialog">
+    <div class="modal-header">
+        <h3 id="modal-confirm-link-prompt-title">Modal header</h3>
+    </div>
+    <div class="modal-body">
+        <p id="modal-confirm-link-prompt-warning">Modal warning</p>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">{% trans 'Cancel' %}</button>
+        <a class="btn btn-danger" id="modal-confirm-link-prompt-button">{% trans 'Continue' %}</a>
+    </div>
+</div>
 <div id="export-progress" class="modal hide fade" tabindex="-1" role="dialog">
     <div class="modal-header">
         <h3>Exporting…</h3>
@@ -480,7 +550,8 @@ var USER_SETTINGS = {
 };
 var DOC_JSON = "{% static 'ide/documentation.json' %}";
 var LIBPEBBLE_PROXY = {{ libpebble_proxy | safe }};
-var VERSION_REGEX = "{{version_regex|escapejs}}";
+var REGEXES = _.mapObject(JSON.parse('{{regexes_json|escapejs}}'), function(v) { return new RegExp(v)});
+
 </script>
 <script src="{% static 'CodeMirror/lib/codemirror.js' %}"></script>
 <script src="{% static 'CodeMirror/addon/dialog/dialog.js' %}"></script>
@@ -501,6 +572,7 @@ var VERSION_REGEX = "{{version_regex|escapejs}}";
 <script src="{% static 'CodeMirror/keymap/vim.js' %}"></script>
 <script src="{% static 'ide/external/uuid.js' %}"></script>
 <script src="/ide/jsi18n/"></script>
+<script src="{% static 'ide/js/json_parse.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/csrf.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/cloudpebble.js' %}" type="text/javascript"></script>
 <script src="{% static 'ide/js/sidebar.js' %}" type="text/javascript"></script>
@@ -567,8 +639,10 @@ var URL_VNC_INCLUDES = ["{% static 'noVNC/include/base64.js' %}",
 var URL_BOOT_IMG = {
     aplite: {url: "{% static 'ide/img/boot-aplite.png' %}", size: [144, 168]},
     basalt: {url: "{% static 'ide/img/boot-basalt.png' %}", size: [144, 168]},
-    chalk: {url: "{% static 'ide/img/boot-chalk.png' %}", size: [180, 180]}
+    chalk: {url: "{% static 'ide/img/boot-chalk.png' %}", size: [180, 180]},
+    diorite: {url: "{% static 'ide/img/boot-aplite.png' %}", size: [144, 168]}
 };
+// TODO: Diorite - update image if needed
 CloudPebble.Init();
 </script>
 
