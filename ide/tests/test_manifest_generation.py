@@ -3,7 +3,7 @@
 import json
 from ide.utils.sdk import generate_manifest
 from ide.utils.cloudpebble_test import CloudpebbleTestCase, make_package, make_appinfo, override_settings
-from ide.models import Project, Dependency
+from ide.models import Project, Dependency, BuildResult
 
 
 class ManifestTester(CloudpebbleTestCase):
@@ -29,7 +29,6 @@ class ManifestTester(CloudpebbleTestCase):
         self.assertDictEqual(json.loads(manifest), json.loads(compare_to))
 
 
-@override_settings(NPM_MANIFEST_SUPPORT='yes')
 class TestNPMStyleManifestGeneration(ManifestTester):
     """ Test an SDK 3 project with package.json support ON"""
 
@@ -66,16 +65,13 @@ class TestNPMStyleManifestGeneration(ManifestTester):
         manifest = generate_manifest(self.project, [])
         self.check_package_manifest(manifest, package_options={'name': 'capitals_and...dots-and-spaces'})
 
-
-@override_settings(NPM_MANIFEST_SUPPORT='')
-class TestSDK3ManifestGeneration(ManifestTester):
-    """ Test an SDK 3 project with package.json support OFF"""
-
-    def setUp(self):
-        self.login()
-        self.project = Project.objects.get(pk=self.project_id)
-
-    def test_package_manifest(self):
-        """ Check that the appinfo.json file generated from a project is functionally identical to a generated sample manifest. """
+    def test_inter_project_dependencies(self):
+        """ Check that inter-project dependencies are represented in the manifest """
+        package = Project.objects.create(project_type='package', name='test_package', app_short_name='mylib', sdk_version='3', owner_id=self.user_id)
+        build = BuildResult.objects.create(project=package, state=BuildResult.STATE_SUCCEEDED)
+        self.project.project_dependencies.add(package)
+        deps = {
+            'mylib': build.package_url
+        }
         manifest = generate_manifest(self.project, [])
-        self.check_appinfo_manifest(manifest)
+        self.check_package_manifest(manifest, package_options={'dependencies': deps})

@@ -24,7 +24,8 @@ def create_source_file(request, project_id):
         f = SourceFile.objects.create(project=project,
                                       file_name=request.POST['name'],
                                       target=request.POST.get('target', 'app'))
-        f.save_file(request.POST.get('content', ''))
+        f.save_text(request.POST.get('content', ''))
+
     except IntegrityError as e:
         raise BadRequest(str(e))
 
@@ -32,11 +33,18 @@ def create_source_file(request, project_id):
         'data': {
             'filename': request.POST['name'],
             'kind': 'source',
-            'target': f.target,
+            'target': f.target
         }
     }, request=request, project=project)
 
-    return {"file": {"id": f.id, "name": f.file_name, "target": f.target}}
+    return {
+        'file': {
+            'id': f.id,
+            'name': f.file_name,
+            'target': f.target,
+            'file_path': f.project_path
+        }
+    }
 
 
 @require_safe
@@ -62,9 +70,9 @@ def load_source_file(request, project_id, file_id):
     }, request=request, project=project)
 
     return {
-        "source": content,
-        "modified": time.mktime(source_file.last_modified.utctimetuple()),
-        "folded_lines": folded_lines
+        'source': content,
+        'modified': time.mktime(source_file.last_modified.utctimetuple()),
+        'folded_lines': folded_lines
     }
 
 
@@ -116,7 +124,7 @@ def rename_source_file(request, project_id, file_id):
             'kind': 'source'
         }
     }, request=request, project=project)
-    return {"modified": time.mktime(source_file.last_modified.utctimetuple())}
+    return {'modified': time.mktime(source_file.last_modified.utctimetuple()), 'file_path': source_file.project_path}
 
 
 @require_POST
@@ -125,7 +133,6 @@ def rename_source_file(request, project_id, file_id):
 def save_source_file(request, project_id, file_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     source_file = get_object_or_404(SourceFile, pk=file_id, project=project)
-
     if source_file.was_modified_since(int(request.POST['modified'])):
         send_td_event('cloudpebble_save_abort_unsafe', data={
             'data': {
@@ -134,7 +141,8 @@ def save_source_file(request, project_id, file_id):
             }
         }, request=request, project=project)
         raise Exception(_("Could not save: file has been modified since last save."))
-    source_file.save_file(request.POST['content'], folded_lines=request.POST['folded_lines'])
+    source_file.save_text(request.POST['content'])
+    source_file.save_lines(folded_lines=request.POST['folded_lines'])
 
     send_td_event('cloudpebble_save_file', data={
         'data': {
@@ -143,7 +151,7 @@ def save_source_file(request, project_id, file_id):
         }
     }, request=request, project=project)
 
-    return {"modified": time.mktime(source_file.last_modified.utctimetuple())}
+    return {'modified': time.mktime(source_file.last_modified.utctimetuple())}
 
 
 @require_POST

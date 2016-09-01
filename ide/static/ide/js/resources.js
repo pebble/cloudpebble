@@ -9,21 +9,24 @@ CloudPebble.Resources = (function() {
     var TAG_APLITE = 5;
     var TAG_BASALT = 6;
     var TAG_CHALK = 7;
+    var TAG_DIORITE = 8;
 
     var TAGS = {
-        color: {name: gettext("Colour"), id: TAG_COLOUR, excludes: [TAG_MONOCHROME, TAG_APLITE]},
+        color: {name: gettext("Colour"), id: TAG_COLOUR, excludes: [TAG_MONOCHROME, TAG_APLITE, TAG_DIORITE]},
         bw: {name: gettext("Monochrome"), id:TAG_MONOCHROME,  excludes: [TAG_COLOUR, TAG_BASALT, TAG_CHALK, TAG_ROUND]},
-        aplite: {name: "Aplite", id: TAG_APLITE, excludes: [TAG_BASALT, TAG_CHALK, TAG_ROUND, TAG_COLOUR]},
-        basalt: {name: "Basalt", id: TAG_BASALT, excludes: [TAG_APLITE, TAG_CHALK, TAG_ROUND, TAG_MONOCHROME]},
-        chalk: {name: "Chalk", id: TAG_CHALK, excludes: [TAG_APLITE, TAG_BASALT, TAG_MONOCHROME, TAG_RECT]},
-        round: {name: gettext("Round"), id: TAG_ROUND, excludes: [TAG_RECT, TAG_MONOCHROME, TAG_APLITE, TAG_BASALT]},
+        aplite: {name: "Aplite", id: TAG_APLITE, excludes: [TAG_BASALT, TAG_CHALK, TAG_DIORITE, TAG_ROUND, TAG_COLOUR]},
+        basalt: {name: "Basalt", id: TAG_BASALT, excludes: [TAG_APLITE, TAG_CHALK, TAG_DIORITE, TAG_ROUND, TAG_MONOCHROME]},
+        chalk: {name: "Chalk", id: TAG_CHALK, excludes: [TAG_APLITE, TAG_BASALT, TAG_DIORITE, TAG_MONOCHROME, TAG_RECT]},
+        diorite: {name: "Diorite", id: TAG_DIORITE, excludes: [TAG_APLITE, TAG_BASALT, TAG_CHALK, TAG_COLOUR, TAG_ROUND]},
+        round: {name: gettext("Round"), id: TAG_ROUND, excludes: [TAG_RECT, TAG_MONOCHROME, TAG_APLITE, TAG_BASALT, TAG_DIORITE]},
         rect: {name: gettext("Rectangular"), id: TAG_RECT, excludes: [TAG_ROUND, TAG_CHALK]}
     };
 
     var PLATFORMS = {
         aplite: [TAG_APLITE, TAG_MONOCHROME, TAG_RECT],
         basalt: [TAG_BASALT, TAG_COLOUR, TAG_RECT],
-        chalk: [TAG_CHALK, TAG_COLOUR, TAG_ROUND]
+        chalk: [TAG_CHALK, TAG_COLOUR, TAG_ROUND],
+        diorite: [TAG_DIORITE, TAG_MONOCHROME, TAG_RECT]
     };
 
     /**
@@ -179,7 +182,10 @@ CloudPebble.Resources = (function() {
             var identifier = resource.identifiers[0];
             resource.identifiers = [identifier + '_WHITE', identifier + '_BLACK'];
         }
-        CloudPebble.Sidebar.SetPopover('resource-' + resource.id, ngettext('Identifier', 'Identifiers', resource.identifiers.length), resource.identifiers.join('<br>'));
+        var popover_content = _.map(resource.identifiers, function(identifier) {
+            return $('<span>').text(identifier).html()
+        }).join('<br>');
+        CloudPebble.Sidebar.SetPopover('resource-' + resource.id, ngettext('Identifier', 'Identifiers', resource.identifiers.length), popover_content);
         // We need to update code completion so it can include these identifiers.
         // However, don't do this during initial setup; the server handle it for us.
         if(CloudPebble.Ready) {
@@ -297,7 +303,7 @@ CloudPebble.Resources = (function() {
         }
 
         // Validate the file name
-        if (!/^[a-zA-Z0-9_(). -]+$/.test(name)) {
+        if (!REGEXES.resource_file_name.test(name)) {
             throw new Error(gettext("You must provide a valid filename. Only alphanumerics and characters in the set \"_(). -\" are allowed."));
         }
 
@@ -465,7 +471,10 @@ CloudPebble.Resources = (function() {
                 list_entry.addClass('active');
             }
 
-            CloudPebble.Sidebar.SetActivePane(pane, 'resource-' + resource.id, _.partial(restore_pane, pane));
+            CloudPebble.Sidebar.SetActivePane(pane, {
+                id: 'resource-' + resource.id,
+                onRestore: _.partial(restore_pane, pane)
+            });
             pane.find('#edit-resource-type').val(resource.kind).attr('disabled', 'disabled');
             pane.find('#edit-resource-type').change();
 
@@ -671,7 +680,6 @@ CloudPebble.Resources = (function() {
                 }
 
                 if (resource.kind == 'bitmap') {
-                    console.log(value);
                     group.find('.bitmap-memory-format-option').val(value.memory_format|| "");
                     group.find('.bitmap-storage-format-option').val(value.storage_format || "");
                     group.find('.bitmap-space-optimisation-option').val(value.space_optimisation || "");
@@ -887,7 +895,7 @@ CloudPebble.Resources = (function() {
     };
 
     var validate_resource_id = function(id) {
-        return !/[^a-zA-Z0-9_]/.test(id);
+        return REGEXES.c_identifier.test(id);
 
     };
 
@@ -905,7 +913,10 @@ CloudPebble.Resources = (function() {
             }).catch(function() {/* ignore failure */});
         });
 
-        CloudPebble.Sidebar.SetActivePane(pane, 'new-resource', _.partial(restore_pane, pane));
+        CloudPebble.Sidebar.SetActivePane(pane, {
+            id: 'new-resource',
+            onRestore: _.partial(restore_pane, pane)
+        });
     };
 
     var resource_created = function(resource) {
@@ -921,9 +932,12 @@ CloudPebble.Resources = (function() {
         // Set up the resource editing template.
         resource_template = $('#resource-pane-template');
         resource_template.remove();
-        if (CloudPebble.ProjectInfo.type != 'native') {
-            delete PLATFORMS['chalk'];
-        }
+        _.each(_.keys(PLATFORMS), function(platform_name) {
+            if (!_.contains(CloudPebble.ProjectInfo.supported_platforms, platform_name)) {
+                delete PLATFORMS[platform_name];
+            }
+        });
+
         CloudPebble.FuzzyPrompt.AddDataSource('files', function() {
             return project_resources;
         }, function (resource, querystring) {

@@ -1,6 +1,8 @@
 CloudPebble.GlobalShortcuts = (function () {
     var global_shortcuts = {};
 
+    var keymap = _.extend({}, CodeMirror.keyMap.basic, CodeMirror.keyMap.default);
+
     $(document).keydown(function (e) {
         if (!e.isDefaultPrevented()) {
             var shortcut = global_shortcuts[CodeMirror.keyName(e)];
@@ -14,7 +16,7 @@ CloudPebble.GlobalShortcuts = (function () {
     function shortcut_for_command(command) {
         // If the command is a name like "save", get they key-combo from CodeMirror
         if (!(command.indexOf('-') > -1)) {
-            command = _.findKey(CodeMirror.keyMap.default, _.partial(_.isEqual, command));
+            command = _.findKey(keymap, _.partial(_.isEqual, command));
         }
 
         // If any of the shortcut items are "platformcmd", convert them to 'Ctrl' or 'Cmd' depending on the platform.
@@ -48,6 +50,9 @@ CloudPebble.GlobalShortcuts = (function () {
         },
         GetShortcuts: function() {
             return global_shortcuts;
+        },
+        GetShortcutForCommand: function(name) {
+            return shortcut_for_command(name);
         }
     }
 })();

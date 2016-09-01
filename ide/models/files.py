@@ -1,19 +1,18 @@
 import os
-import shutil
-import datetime
 import json
 import logging
+from collections import OrderedDict
 
-from django.conf import settings
 from django.db import models
-from django.db.models.signals import post_delete
-from django.dispatch import receiver
 from django.utils.timezone import now
+from django.utils.translation import ugettext as _
 from django.core.validators import RegexValidator, ValidationError
 from django.utils.translation import ugettext_lazy as _
 
-import utils.s3 as s3
+from ide.models.s3file import S3File
+from ide.models.textfile import TextFile
 from ide.models.meta import IdeModel
+from ide.utils.regexes import regexes
 
 __author__ = 'katharine'
 
@@ -31,7 +30,7 @@ class ResourceFile(IdeModel):
         ('pbi', _('1-bit Pebble image')),
     )
 
-    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_(). -]+$", message=_("Invalid filename."))])
+    file_name = models.CharField(max_length=100, validators=regexes.validator('resource_file_name', _("Invalid filename.")))
     kind = models.CharField(max_length=9, choices=RESOURCE_KINDS)
     is_menu_icon = models.BooleanField(default=False)
 
@@ -91,7 +90,7 @@ class ResourceFile(IdeModel):
         unique_together = (('project', 'file_name'),)
 
 
-class ResourceVariant(IdeModel):
+class ResourceVariant(S3File):
     resource_file = models.ForeignKey(ResourceFile, related_name='variants')
 
     VARIANT_DEFAULT = 0
@@ -102,6 +101,7 @@ class ResourceVariant(IdeModel):
     VARIANT_APLITE = 5
     VARIANT_BASALT = 6
     VARIANT_CHALK = 7
+    VARIANT_DIORITE = 8
 
     VARIANT_STRINGS = {
         VARIANT_MONOCHROME: '~bw',
@@ -110,13 +110,27 @@ class ResourceVariant(IdeModel):
         VARIANT_ROUND: '~round',
         VARIANT_APLITE: '~aplite',
         VARIANT_BASALT: '~basalt',
-        VARIANT_CHALK: '~chalk'
+        VARIANT_CHALK: '~chalk',
+        VARIANT_DIORITE: '~diorite'
     }
 
     TAGS_DEFAULT = ""
 
     tags = models.CommaSeparatedIntegerField(max_length=50, blank=True)
     is_legacy = models.BooleanField(default=False)  # True for anything migrated out of ResourceFile
+
+    # The following three properties are overridden to support is_legacy
+    @property
+    def padded_id(self):
+        return '%05d' % self.resource_file.id if self.is_legacy else '%09d' % self.id
+
+    @property
+    def s3_id(self):
+        return self.resource_file.id if self.is_legacy else self.id
+
+    @property
+    def folder(self):
+        return 'resources' if self.is_legacy else 'resources/variants'
 
     def get_tags(self):
         return [int(tag) for tag in self.tags.split(",") if tag]
@@ -130,67 +144,7 @@ class ResourceVariant(IdeModel):
     def get_tags_string(self):
         return "".join(self.get_tag_names())
 
-    def get_local_filename(self, create=False):
-        if self.is_legacy:
-            padded_id = '%05d' % self.resource_file.id
-            filename = '%sresources/%s/%s/%s' % (settings.FILE_STORAGE, padded_id[0], padded_id[1], padded_id)
-        else:
-            padded_id = '%09d' % self.id
-            filename = '%sresources/variants/%s/%s/%s' % (settings.FILE_STORAGE, padded_id[0], padded_id[1], padded_id)
-        if create:
-            if not os.path.exists(os.path.dirname(filename)):
-                os.makedirs(os.path.dirname(filename))
-        return filename
-
-    def get_s3_path(self):
-        if self.is_legacy:
-            return 'resources/%s' % self.resource_file.id
-        else:
-            return 'resources/variants/%s' % self.id
-
-    local_filename = property(get_local_filename)
-    s3_path = property(get_s3_path)
-
-    def save_file(self, stream, file_size=0):
-        if file_size > 5*1024*1024:
-            raise Exception(_("Uploaded file too big."))
-        if not settings.AWS_ENABLED:
-            if not os.path.exists(os.path.dirname(self.local_filename)):
-                os.makedirs(os.path.dirname(self.local_filename))
-            with open(self.local_filename, 'wb') as out:
-                out.write(stream.read())
-        else:
-            s3.save_file('source', self.s3_path, stream.read())
-
-        self.resource_file.project.last_modified = now()
-        self.resource_file.project.save()
-
-    def save_string(self, string):
-        if not settings.AWS_ENABLED:
-            if not os.path.exists(os.path.dirname(self.local_filename)):
-                os.makedirs(os.path.dirname(self.local_filename))
-            with open(self.local_filename, 'wb') as out:
-                out.write(string)
-        else:
-            s3.save_file('source', self.s3_path, string)
-
-        self.resource_file.project.last_modified = now()
-        self.resource_file.project.save()
-
-    def copy_to_path(self, path):
-        if not settings.AWS_ENABLED:
-            shutil.copy(self.local_filename, path)
-        else:
-            s3.read_file_to_filesystem('source', self.s3_path, path)
-
-    def get_contents(self):
-        if not settings.AWS_ENABLED:
-            return open(self.local_filename).read()
-        else:
-            return s3.read_file('source', self.s3_path)
-
     def save(self, *args, **kwargs):
-        self.full_clean()
         self.resource_file.save()
         super(ResourceVariant, self).save(*args, **kwargs)
 
@@ -203,7 +157,7 @@ class ResourceVariant(IdeModel):
         suffix = self.get_tags_string()
         if not name_parts[0].endswith(suffix):
             raise Exception(_("No root path found for resource variant %s") % self.path)
-        root_path = name_parts[0][:len(name_parts[0])-len(suffix)] + name_parts[1]
+        root_path = name_parts[0][:len(name_parts[0]) - len(suffix)] + name_parts[1]
         if "~" in root_path:
             raise ValueError(_("Filenames are not allowed to contain the tilde (~) character, except for specifying tags"))
         return root_path
@@ -211,18 +165,17 @@ class ResourceVariant(IdeModel):
     path = property(get_path)
     root_path = property(get_root_path)
 
-
-    class Meta(IdeModel.Meta):
+    class Meta(S3File.Meta):
         unique_together = (('resource_file', 'tags'),)
 
 
 class ResourceIdentifier(IdeModel):
     resource_file = models.ForeignKey(ResourceFile, related_name='identifiers')
-    resource_id = models.CharField(max_length=100)
+    resource_id = models.CharField(max_length=100, validators=regexes.validator('c_identifier', _("Invalid resource ID.")))
     character_regex = models.CharField(max_length=100, blank=True, null=True)
     tracking = models.IntegerField(blank=True, null=True)
     compatibility = models.CharField(max_length=10, blank=True, null=True)
-    target_platforms = models.CharField(max_length=30, null=True, blank=True, default=None)
+    target_platforms = models.CharField(max_length=100, null=True, blank=True, default=None)
 
     MEMORY_FORMATS = (
         ('Smallest', _('Smallest')),
@@ -273,93 +226,83 @@ class ResourceIdentifier(IdeModel):
         super(ResourceIdentifier, self).save(*args, **kwargs)
 
 
-class SourceFile(IdeModel):
+class SourceFile(TextFile):
     project = models.ForeignKey('Project', related_name='source_files')
-    file_name = models.CharField(max_length=100, validators=[RegexValidator(r"^[/a-zA-Z0-9_.-]+\.(c|h|js)$", message=_("Invalid filename."))])
-    last_modified = models.DateTimeField(blank=True, null=True, auto_now=True)
-    folded_lines = models.TextField(default="[]")
+    file_name = models.CharField(max_length=100, validators=regexes.validator('source_file_name', _('Invalid file name.')))
+
+    folder = 'sources'
 
     TARGETS = (
         ('app', _('App')),
+        ('pkjs', _('PebbleKit JS')),
         ('worker', _('Worker')),
+        ('public', _('Public Header File')),
+        ('common', _('Shared JS')),
     )
     target = models.CharField(max_length=10, choices=TARGETS, default='app')
 
-    def get_local_filename(self):
-        padded_id = '%05d' % self.id
-        return '%ssources/%s/%s/%s' % (settings.FILE_STORAGE, padded_id[0], padded_id[1], padded_id)
+    DIR_MAP = {
+        # Using an OrderedDict here ensures that 'src/' is checked last in get_details_for_path().
+        'native': OrderedDict([
+            ('pkjs', ['src/pkjs', 'src/js']),
+            ('worker', ['worker_src/c', 'worker_src']),
+            ('app', ['src/c', 'src']),
+        ]),
+        'pebblejs': {
+            'app': ['src/js'],
+        },
+        'simplyjs': {
+            'app': ['src'],
+        },
+        'rocky': {
+            'app': ['src/rocky'],
+            'pkjs': ['src/pkjs'],
+            'common': ['src/common'],
+        },
+        'package': {
+            'app': ['src/c'],
+            'public': ['include'],
+            'pkjs': ['src/js'],
+        }
+    }
 
-    def get_s3_path(self):
-        return 'sources/%d' % self.id
-
-    def get_contents(self):
-        if not settings.AWS_ENABLED:
-            try:
-                return open(self.local_filename).read()
-            except IOError:
-                return ''
+    @classmethod
+    def get_details_for_path(cls, project_type, path):
+        """
+        Given a project type and a path to a source file, determine what the file's target should be and
+        what its name should be.
+        """
+        targets = cls.DIR_MAP[project_type]
+        for target in targets:
+            for base in targets[target]:
+                base += '/'
+                if path.startswith(base):
+                    file_target = target
+                    break
+            else:
+                continue
+            break
         else:
-            return s3.read_file('source', self.s3_path)
-
-    def was_modified_since(self, expected_modification_time):
-        if isinstance(expected_modification_time, int):
-            expected_modification_time = datetime.datetime.fromtimestamp(expected_modification_time)
-        assert isinstance(expected_modification_time, datetime.datetime)
-        return self.last_modified.replace(tzinfo=None, microsecond=0) > expected_modification_time
-
-    def save_file(self, content, folded_lines=None):
-        if not settings.AWS_ENABLED:
-            if not os.path.exists(os.path.dirname(self.local_filename)):
-                os.makedirs(os.path.dirname(self.local_filename))
-            open(self.local_filename, 'w').write(content.encode('utf-8'))
+            raise ValueError(_("Unacceptable file path for this project [%s]") % path)
+        if file_target in ('pkjs', 'common') or project_type in ('pebblejs', 'simplyjs', 'rocky'):
+            expected_exts = ('.js', '.json')
         else:
-            s3.save_file('source', self.s3_path, content.encode('utf-8'))
-        if folded_lines:
-            self.folded_lines = folded_lines
-        self.save()
-
-    def copy_to_path(self, path):
-        if not settings.AWS_ENABLED:
-            try:
-                shutil.copy(self.local_filename, path)
-            except IOError as err:
-                if err.errno == 2:
-                    open(path, 'w').close()  # create the file if it's missing.
-                else:
-                    raise
-        else:
-            s3.read_file_to_filesystem('source', self.s3_path, path)
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        self.project.last_modified = now()
-        self.project.save()
-        super(SourceFile, self).save(*args, **kwargs)
+            expected_exts = ('.c', '.h')
+        if not path.endswith(expected_exts):
+            raise ValueError(_("Unacceptable file extension for %s file in [%s]. Expecting %s") %
+                             (file_target, path, " or ".join(expected_exts)))
+        return path[len(base):], file_target
 
     @property
     def project_path(self):
-        if self.target == 'app':
-            return 'src/%s' % self.file_name
-        else:
-            return 'worker_src/%s' % self.file_name
+        return os.path.join(self.project_dir, self.file_name)
 
-    local_filename = property(get_local_filename)
-    s3_path = property(get_s3_path)
+    @property
+    def project_dir(self):
+        try:
+            return SourceFile.DIR_MAP[self.project.project_type][self.target][0]
+        except KeyError:
+            Exception("Invalid file type in project")
 
     class Meta(IdeModel.Meta):
-        unique_together = (('project', 'file_name'))
-
-
-@receiver(post_delete)
-def delete_file(sender, instance, **kwargs):
-    if sender == SourceFile or sender == ResourceVariant:
-        if settings.AWS_ENABLED:
-            try:
-                s3.delete_file('source', instance.s3_path)
-            except:
-                logger.exception("Failed to delete S3 file")
-        else:
-            try:
-                os.unlink(instance.local_filename)
-            except OSError:
-                pass
+        unique_together = (('project', 'file_name', 'target'),)

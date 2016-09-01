@@ -155,7 +155,7 @@ BOWER_INSTALLED_APPS = (
     'alexgorbatchev/jquery-textext',
     'codemirror#4.2.0',
     'bluebird#3.3.4',
-    'kanaka/noVNC',
+    'kanaka/noVNC#v0.5',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -331,7 +331,6 @@ GITHUB_HOOK_TEMPLATE = _environ.get('GITHUB_HOOK', 'http://example.com/ide/proje
 SDK2_PEBBLE_WAF = _environ.get('SDK2_PEBBLE_WAF', '/sdk2/pebble/waf')
 SDK3_PEBBLE_WAF = _environ.get('SDK3_PEBBLE_WAF', '/sdk3/pebble/waf')
 
-NPM_MANIFEST_SUPPORT = _environ.get('NPM_MANIFEST_SUPPORT', '') != ''
 NPM_BINARY = _environ.get('NPM_BINARY', 'npm')
 
 ARM_CS_TOOLS = _environ.get('ARM_CS_TOOLS', '/arm-cs-tools/bin/')
@@ -364,6 +363,8 @@ QEMU_LAUNCH_AUTH_HEADER = _environ.get('QEMU_LAUNCH_AUTH_HEADER', 'secret')
 QEMU_LAUNCH_TIMEOUT = int(_environ.get('QEMU_LAUNCH_TIMEOUT', 15))
 
 PHONE_SHORTURL = _environ.get('PHONE_SHORTURL', 'cpbl.io')
+
+WAF_NODE_PATH = _environ.get('WAF_NODE_PATH', None)
 
 import djcelery
 djcelery.setup_loader()

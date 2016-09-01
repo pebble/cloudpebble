@@ -14,7 +14,6 @@ from django.core.exceptions import SuspiciousOperation
 from django.db import transaction
 
 import utils.s3 as s3
-from ide.models.dependency import Dependency
 from ide.models.files import SourceFile, ResourceFile, ResourceIdentifier, ResourceVariant
 from ide.models.project import Project
 from ide.utils.project import find_project_root_and_manifest, InvalidProjectArchiveException, MANIFEST_KINDS, BaseProjectItem
@@ -32,24 +31,17 @@ def add_project_to_archive(z, project, prefix=''):
     prefix += re.sub(r'[^\w]+', '_', project.name).strip('_').lower()
 
     for source in source_files:
-        src_dir = 'src'
-        if project.project_type == 'native':
-            if source.target == 'worker':
-                src_dir = 'worker_src'
-            elif project.app_modern_multi_js and source.file_name.endswith('.js'):
-                src_dir = 'src/js'
-
-        z.writestr('%s/%s/%s' % (prefix, src_dir, source.file_name), source.get_contents())
+        path = os.path.join(prefix, source.project_path)
+        z.writestr(path, source.get_contents())
 
     for resource in resources:
-        res_path = 'resources'
         for variant in resource.variants.all():
-            z.writestr('%s/%s/%s' % (prefix, res_path, variant.path), variant.get_contents())
+            z.writestr('%s/%s/%s' % (prefix, project.resources_path, variant.path), variant.get_contents())
 
     manifest = generate_manifest(project, resources)
     manifest_name = manifest_name_for_project(project)
     z.writestr('%s/%s' % (prefix, manifest_name), manifest)
-    if project.project_type == 'native':
+    if project.is_standard_project_type:
         # This file is always the same, but needed to build.
         z.writestr('%s/wscript' % prefix, generate_wscript_file(project, for_export=True))
         z.writestr('%s/jshintrc' % prefix, generate_jshint_file(project))
@@ -137,6 +129,10 @@ class ArchiveProjectItem(BaseProjectItem):
         return self.entry.filename
 
 
+def ends_with_any(s, options):
+    return any(s.endswith(end) for end in options)
+
+
 @task(acks_late=True)
 def do_import_archive(project_id, archive, delete_project=False):
     project = Project.objects.get(pk=project_id)
@@ -159,7 +155,7 @@ def do_import_archive(project_id, archive, delete_project=False):
                 # - Parse resource_map.json and import files it references
                 SRC_DIR = 'src/'
                 WORKER_SRC_DIR = 'worker_src/'
-                RES_PATH = 'resources'
+                INCLUDE_SRC_DIR = 'include/'
 
                 if len(contents) > 400:
                     raise InvalidProjectArchiveException("Too many files in zip file.")
@@ -202,6 +198,8 @@ def do_import_archive(project_id, archive, delete_project=False):
                     project.full_clean()
                     project.set_dependencies(dependencies)
 
+                    RES_PATH = project.resources_path
+
                     tag_map = {v: k for k, v in ResourceVariant.VARIANT_STRINGS.iteritems() if v}
 
                     desired_resources = {}
@@ -241,11 +239,8 @@ def do_import_archive(project_id, archive, delete_project=False):
                             tags, root_file_name = get_filename_variant(base_filename, tag_map)
                             tags_string = ",".join(str(int(t)) for t in tags)
 
-                            logger.debug("Importing file %s with root %s ", entry.filename, root_file_name)
-
                             if root_file_name in desired_resources:
                                 medias = desired_resources[root_file_name]
-                                logger.debug("Looking for variants of %s", root_file_name)
 
                                 # Because 'kind' and 'is_menu_icons' are properties of ResourceFile in the database,
                                 # we just use the first one.
@@ -261,26 +256,20 @@ def do_import_archive(project_id, archive, delete_project=False):
                                         is_menu_icon=is_menu_icon)
 
                                 # But add a resource variant for every file
-                                logger.debug("Adding variant %s with tags [%s]", root_file_name, tags_string)
                                 actual_file_name = resource['file']
                                 resource_variants[actual_file_name] = ResourceVariant.objects.create(resource_file=resources_files[root_file_name], tags=tags_string)
                                 resource_variants[actual_file_name].save_file(extracted)
                                 file_exists_for_root[root_file_name] = True
+                        else:
+                            try:
+                                base_filename, target = SourceFile.get_details_for_path(project.project_type, filename)
+                            except ValueError:
+                                # We'll just ignore any out of place files.
+                                continue
+                            source = SourceFile.objects.create(project=project, file_name=base_filename, target=target)
 
-                        elif filename.startswith(SRC_DIR):
-                            if (not filename.startswith('.')) and (filename.endswith('.c') or filename.endswith('.h') or filename.endswith('.js')):
-                                base_filename = filename[len(SRC_DIR):]
-                                if project.app_modern_multi_js and base_filename.endswith('.js') and base_filename.startswith('js/'):
-                                    base_filename = base_filename[len('js/'):]
-                                source = SourceFile.objects.create(project=project, file_name=base_filename)
-                                with z.open(entry.filename) as f:
-                                    source.save_file(f.read().decode('utf-8'))
-                        elif filename.startswith(WORKER_SRC_DIR):
-                            if (not filename.startswith('.')) and (filename.endswith('.c') or filename.endswith('.h') or filename.endswith('.js')):
-                                base_filename = filename[len(WORKER_SRC_DIR):]
-                                source = SourceFile.objects.create(project=project, file_name=base_filename, target='worker')
-                                with z.open(entry.filename) as f:
-                                    source.save_file(f.read().decode('utf-8'))
+                            with z.open(entry.filename) as f:
+                                source.save_text(f.read().decode('utf-8'))
 
                     # Now add all the resource identifiers
                     for root_file_name in desired_resources:
@@ -304,7 +293,6 @@ def do_import_archive(project_id, archive, delete_project=False):
                     for root_file_name, loaded in file_exists_for_root.iteritems():
                         if not loaded:
                             raise KeyError("No file was found to satisfy the manifest filename: {}".format(root_file_name))
-                    project.full_clean()
                     project.save()
                     send_td_event('cloudpebble_zip_import_succeeded', project=project)
 
