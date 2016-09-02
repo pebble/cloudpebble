@@ -1,7 +1,15 @@
 CloudPebble.GlobalShortcuts = (function () {
     var global_shortcuts = {};
 
-    var keymap = _.extend({}, CodeMirror.keyMap.basic, CodeMirror.keyMap.default);
+    // Build a full map of CodeMirror shortcuts by checking for the 'fallthrough' property
+    // and integrating any sub-keymaps of the main one.
+    var codemirror_full_keymap = _.clone(CodeMirror.keyMap[USER_SETTINGS.keybinds]);
+    if (codemirror_full_keymap.fallthrough) {
+        _.each(codemirror_full_keymap.fallthrough, function(sub_map) {
+            _.defaults(codemirror_full_keymap, CodeMirror.keyMap[sub_map]);
+        });
+        delete codemirror_full_keymap.fallthrough;
+    }
 
     $(document).keydown(function (e) {
         if (!e.isDefaultPrevented()) {
@@ -13,10 +21,11 @@ CloudPebble.GlobalShortcuts = (function () {
         }
     });
 
-    function shortcut_for_command(command) {
+    function shortcut_for_command(command, commands) {
+        var look_through =  _.isObject(commands) ? commands : codemirror_full_keymap;
         // If the command is a name like "save", get they key-combo from CodeMirror
         if (!(command.indexOf('-') > -1)) {
-            command = _.findKey(keymap, _.partial(_.isEqual, command));
+            command = _.findKey(look_through, _.partial(_.isEqual, command));
         }
 
         // If any of the shortcut items are "platformcmd", convert them to 'Ctrl' or 'Cmd' depending on the platform.
@@ -26,6 +35,9 @@ CloudPebble.GlobalShortcuts = (function () {
             } else return name;
         }
 
+        if (!command) {
+            return null;
+        }
         return command.split('-').map(key_for_platform).join('-');
     }
 
@@ -42,17 +54,22 @@ CloudPebble.GlobalShortcuts = (function () {
         SetShortcutHandlers: function (shortcuts) {
             _.each(shortcuts, function (descriptor, key) {
                 var shortcut = shortcut_for_command(key);
-                global_shortcuts[shortcut] = {
-                    name: descriptor.name ? descriptor.name : key,
-                    func: _.isFunction(descriptor) ? descriptor : descriptor.func
-                };
+                if (shortcut) {
+                    global_shortcuts[shortcut] = {
+                        name: descriptor.name ? descriptor.name : key,
+                        func: _.isFunction(descriptor) ? descriptor : descriptor.func
+                    };
+                }
             });
         },
         GetShortcuts: function() {
             return global_shortcuts;
         },
-        GetShortcutForCommand: function(name) {
-            return shortcut_for_command(name);
+        GetCodemirrorShortcuts: function() {
+            return codemirror_full_keymap;
+        },
+        GetShortcutForCommand: function(name, extras) {
+            return shortcut_for_command(name, extras);
         }
     }
 })();

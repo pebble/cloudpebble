@@ -4,6 +4,7 @@ CloudPebble.Editor = (function() {
     var unsaved_files = 0;
     var is_fullscreen = false;
     var resume_fullscreen = false;
+    var current_editor = null;
 
     var add_source_file = function(file) {
         CloudPebble.Sidebar.AddSourceFile(file, function() {
@@ -214,12 +215,8 @@ CloudPebble.Editor = (function() {
                     return CodeMirror.Pass;
                 };
             }
-            settings.extraKeys['Cmd-/'] = function toggleComment(cm) {
-                CodeMirror.commands.toggleComment(cm);
-            };
-            settings.extraKeys['Ctrl-/']  = function toggleComment(cm) {
-                CodeMirror.commands.toggleComment(cm);
-            };
+            settings.extraKeys['Ctrl-/'] = 'toggleComment';
+            settings.extraKeys['Cmd-/'] = 'toggleComment';
 
             settings.gutters = ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'];
             if(file_kind_in(['js', 'json'])) {
@@ -243,6 +240,7 @@ CloudPebble.Editor = (function() {
             code_mirror.on('shown', function() {
                 is_autocompleting = true;
             });
+            current_editor = code_mirror;
 
             // The browser should probably do this without our help. Sometimes Safari doesn't.
             $(document).click(function(e) {
@@ -580,16 +578,12 @@ CloudPebble.Editor = (function() {
                     },
                     pattern)
             };
+            code_mirror.show_rename_prompt = show_rename_prompt;
 
             var ib_pane = $('#ui-editor-pane-template').clone().removeClass('hide').appendTo(pane).hide();
             var ib_editor = new IB(ib_pane.find('.ui-canvas'), ib_pane.find('#ui-properties'), ib_pane.find('#ui-toolkit'), ib_pane.find('#ui-layer-list > div'));
             var ib_showing = false;
 
-            CloudPebble.GlobalShortcuts.SetShortcutHandlers({
-                save: function() {
-                    save().catch(alert);
-                }
-            });
 
             function toggle_ib() {
                 if(!ib_showing) {
@@ -765,13 +759,6 @@ CloudPebble.Editor = (function() {
                 fullscreen(code_mirror, true);
             }
 
-            var commands = {};
-            commands[gettext('Rename File')] = function() {
-                // We need to use a timeout because the rename prompt will conflict with the old prompt
-                setTimeout(show_rename_prompt, 0);
-            };
-            CloudPebble.FuzzyPrompt.ReplaceCommands(commands);
-
             // Tell Google
             ga('send', 'event', 'file', 'open');
             return code_mirror;
@@ -823,14 +810,66 @@ CloudPebble.Editor = (function() {
                 edit_source_file(item.file);
             }
         });
-        var commands = {};
+        var global_commands = {};
         if (CloudPebble.ProjectProperties.is_runnable) {
-            commands[gettext('Run')] = run;
+            global_commands[gettext('Run')] = run;
         } else {
-            commands[gettext('Build')] = run;
+            global_commands[gettext('Build')] = run;
         }
+        var local_commands = {};
+        local_commands[gettext('Rename Source File')] = function() {
+            // We need to defer because the rename prompt will conflict with the old prompt
+            _.defer(function() {
+                current_editor.show_rename_prompt();
+            });
+        };
+
+        function neaten_command_name(str) {
+            var result = str.replace(/(\S)([A-Z])/g, '$1 $2').replace(/^./, function(str){ return str.toUpperCase(); });
+            result = result.replace('Doc ', 'Document ');
+            result = result.replace('Go ', 'Go To ');
+            result = result.replace('Del ', 'Delete ');
+            return result;
+        }
+
+        var codemirror_commands = [
+            {command: 'indentAuto', refocus: true},
+            {command: 'toggleComment', hint: 'Cmd-/ or Ctrl-/', refocus: true},
+            'find', 'replace', 'indentMore', 'indentLess'
+        ];
+
+        _.each(codemirror_commands, function(entry) {
+            var command = !!entry.command ? entry.command : entry;
+            var name = (!!entry.name ? entry.name : neaten_command_name(command));
+            local_commands[name] = function() {
+                current_editor.execCommand(command);
+                if (!!entry.refocus) current_editor.focus();
+            };
+            local_commands[name].hint = !!entry.hint ? entry.hint : CloudPebble.GlobalShortcuts.GetShortcutForCommand(command);
+        });
+
+        // local_commands[gettext('Auto Indent')] = function() {
+        //     current_editor.execCommand('indentAuto');
+        //     current_editor.focus();
+        // };
+        // local_commands[gettext('Auto Indent')].hint =  CloudPebble.GlobalShortcuts.GetShortcutForCommand('indentAuto');
+        // local_commands[gettext('Find')] = function() {
+        //     current_editor.execCommand('find');
+        // };
+        // local_commands[gettext('Find')].hint =  CloudPebble.GlobalShortcuts.GetShortcutForCommand('find');
+
+
+        CloudPebble.FuzzyPrompt.AddCommands(gettext('File'), local_commands, function() {
+            return (!!current_editor);
+        });
+
+        CloudPebble.GlobalShortcuts.SetShortcutHandlers({
+            save: function() {
+                save().catch(alert);
+            }
+        });
         
-        CloudPebble.FuzzyPrompt.AddCommands(commands);
+        CloudPebble.FuzzyPrompt.AddCommands(gettext('Actions'), global_commands);
 
     }
 

@@ -23,9 +23,8 @@ CloudPebble.FuzzyPrompt = (function() {
         this.name = opts.name;
         this.callback = opts.callback;
         this.object = opts.object;
-        this.id = opts.id;
         this.menu_item = opts.menu_item;
-        this.rank = opts.rank
+        this.subsection = opts.subsection;
     };
 
     var init = function() {
@@ -33,12 +32,20 @@ CloudPebble.FuzzyPrompt = (function() {
             // Set up the fuzzy matcher
             var options = {
                 caseSensitive: false,
-                includeScore: false,
+                sortFn: function(a, b) {
+                    return (a.score === b.score) ? a.item.name.localeCompare(b) : a.score - b.score;
+                },
                 shouldSort: true,
-                threshold: 0.4,
+                threshold: 0.5,
                 location: 0,
-                distance: 20,
-                keys: ["name"]
+                distance: 40,
+                keys: [{
+                    name: 'name',
+                    weight: 0.8
+                }, {
+                    name: 'subsection',
+                    weight: 0.2
+                }]
             };
             fuse = new Fuse([], options);
 
@@ -51,14 +58,14 @@ CloudPebble.FuzzyPrompt = (function() {
             // Register ctrl-p and ctrl-shift-p
             CloudPebble.GlobalShortcuts.SetShortcutHandlers({
                 'PlatformCmd-P': {
-                    func: function () {
+                    func: function() {
                         input.attr('placeholder', gettext("Search Files"));
                         show_prompt('files');
                     },
                     name: gettext("Find File")
                 },
                 'Shift-PlatformCmd-P': {
-                    func: function () {
+                    func: function() {
                         input.attr('placeholder', gettext("Enter Command"));
                         show_prompt('commands');
                     },
@@ -66,7 +73,7 @@ CloudPebble.FuzzyPrompt = (function() {
                 }
             });
 
-            prompt.keydown(function (e) {
+            prompt.keydown(function(e) {
                 // Ctrl-P to hide
                 if (opened && e[modifier] && e.keyCode == 80) {
                     hide_prompt(true);
@@ -106,11 +113,7 @@ CloudPebble.FuzzyPrompt = (function() {
 
                 // Then build the new results list
                 if (matches.length > 0) {
-                    _.each(matches, function(match, rank) {
-                        match.menu_item.appendTo(results);
-                        // The item's rank is its current position in the suggestion list.
-                        match.rank = rank;
-                    });
+                    render_list(matches);
                     // Highlight the first item if the previously highlighted item disappears
                     // or the user has not been using the arrow keys
                     if (!manual || !(_.chain(matches).pluck('id')).contains(selected_id).value()) {
@@ -124,7 +127,7 @@ CloudPebble.FuzzyPrompt = (function() {
                 }
             });
 
-            prompt.on('shown.bs.modal', function () {
+            prompt.on('shown.bs.modal', function() {
                 input.focus();
                 input.val("");
             });
@@ -151,7 +154,7 @@ CloudPebble.FuzzyPrompt = (function() {
         var parts = input.val().split(":", 2);
         if (parts[0].length == 0) {
             if (_.isUndefined(parts[1]))
-                return item_list;
+                return item_list;//_.sortBy(item_list, 'name');
             else {
                 return _.where(item_list, {name: default_item});
             }
@@ -188,38 +191,89 @@ CloudPebble.FuzzyPrompt = (function() {
         opened = true;
         prompt_kind = kind;
         // Build up the list of files to search through
-        var id = 0;
         _.each(sources, function(source) {
             if (source.kind == kind) {
-                _.each(source.list_func(), function (object, name) {
-                    name = (!_.isFunction(object) && object.name ? object.name : name);
-                    var menu_item = $("<div></div>");
-                    menu_item.text(name).appendTo(results);
-                    // Set up the menu item handler
-                    (function () {
-                        var this_id = id;
-                        menu_item.on('click', function () {
-                            select_item(item_list[this_id]);
-                        });
-                    })();
+                if ((_.isFunction(source.should_show) && source.should_show()) || source.should_show === true) {
+                    _.each(source.list_func(), function(object, name) {
+                        name = (!_.isFunction(object) && object.name ? object.name : name);
+                        var menu_item = $("<div></div>").append('<span>').text(name);
+                        if (object.hint) {
+                            menu_item.append($('<span>').addClass('fuzzy-hint').text(object.hint));
+                        }
 
-                    item_list.push(new Item({
-                        name: name,
-                        callback: source.callback,
-                        object: object,
-                        id: id,
-                        menu_item: menu_item,
-                        rank: id
-                    }));
-                    id++;
-                });
+                        item_list.push(new Item({
+                            name: name,
+                            callback: source.callback,
+                            object: object,
+                            menu_item: menu_item,
+                            subsection: source.subsection
+                        }));
+                        id++;
+                    });
+                }
             }
         });
+        item_list = _.sortBy(item_list, 'name');
+        var id = 0;
+        _.each(item_list, function(item) {
+            // Set up the menu item handler
+            (function() {
+                var this_id = id;
+                item.id = id;
+                item.rank = id;
+                item.menu_item.on('click', function() {
+                    select_item(item_list[this_id]);
+                });
+                id += 1;
+            })();
+        });
+
         fuse.set(item_list);
+        item_list = _.sortBy(item_list, 'name');
+        render_list(item_list);
 
         // Select the current item by default, or the first item.
         highlight_item(_.findWhere(item_list, {name: default_item}) || item_list[0]);
     };
+
+    function render_list(item_list) {
+        var grouped = _.groupBy(item_list, 'subsection');
+        var sections = _.keys(grouped);
+        function add_items(current_rank, items) {
+            _.each(items, function(item) {
+                item.rank = current_rank;
+                results.append(item.menu_item);
+                current_rank +=1;
+            });
+            return current_rank;
+        }
+
+        if (sections.length === 1) {
+            if (sections[0] != 'undefined') {
+                results.append($('<div>').text(sections[0]).addClass('fuzzy-subheader'));
+            }
+            add_items(0, item_list);
+            // results.append(_.pluck(item_list, 'menu_item'));
+        }
+        else {
+            var found = {};
+            var ordered = [];
+            var i = 0;
+            _.some(item_list, function(item) {
+                if (!_.has(found, item.subsection)) {
+                    found[item.subsection] = true;
+                    ordered.push(item.subsection);
+                    i += 1;
+                }
+                if (i == sections.length) return true;
+            });
+            var rank = 0;
+            _.each(ordered, function(name) {
+                results.append($('<div>').text(name).addClass('fuzzy-subheader'));
+                rank = add_items(rank, grouped[name]);
+            });
+        }
+    }
 
     /** Highlight an item in the suggestions list. If enter is hit, the highlighted item gets selected.
      *
@@ -257,7 +311,7 @@ CloudPebble.FuzzyPrompt = (function() {
             opened = false;
             prompt.modal('hide');
             if (refocus) {
-                setTimeout(function () {
+                setTimeout(function() {
                     $(previously_active).focus();
                 }, 1);
             }
@@ -266,14 +320,6 @@ CloudPebble.FuzzyPrompt = (function() {
             }
             submit_analytics(selection);
         }
-    };
-
-    var add_commands = function(commands) {
-        sources.push({
-            list_func: function() {return commands;},
-            callback: function(func) {func();},
-            kind: 'commands'
-        });
     };
 
     return {
@@ -296,46 +342,36 @@ CloudPebble.FuzzyPrompt = (function() {
          * @param {string} kind 'files' or 'commands'
          * @param {Function} item_getter A function which should return a dict of items with string name keys
          * @param {Function} select_callback A function to call when one of these items is selected
+         * @param {Function|Boolean} should_show Whether to actually show the commands. Either true, or a function which returns a boolean.
          */
-        AddDataSource: function(kind, item_getter, select_callback) {
-            sources.push({list_func: item_getter, callback: select_callback, kind: kind});
+        AddDataSource: function(kind, item_getter, select_callback, should_show) {
+            if (_.isUndefined(should_show)) should_show = true;
+            sources.push({
+                list_func: item_getter,
+                callback: select_callback,
+                kind: kind,
+                should_show: should_show
+            });
         },
         /** Add a set of commands
          *
          * @param {Object.<string, Function>} commands A dictionary of names->functions
+         * @param {Function|Boolean} should_show Whether to actually show the commands.
          */
-        AddCommands: function(commands) {
-            add_commands(commands);
-        },
-        /** Add a new set of commands, replacing any identically named commands
-         *
-         * @param {Object.<string, Function>} commands A dictionary of names->functions
-         */
-        ReplaceCommands: function(commands) {
-            // For each new command, look through the data source for
-            // commands with the same name. If we find any, replace their functions
-            // with the new one.
-            var all_replaced = [];
-
-            _.each(commands, function(newfunc, compare_key) {
-                _.each(sources, function (source) {
-                    if (source.kind == 'commands') {
-                        var source_commands = source.list_func();
-                        _.each(source_commands, function (func, key) {
-                            if (compare_key == key) {
-                                source_commands[key] = newfunc;
-                                // Keep track of the fact that this command was replaced
-                                all_replaced.push(key);
-                            }
-                        });
-                        source.list_func = function() {return source_commands};
-                    }
-                });
+        AddCommands: function(subsection, commands, should_show) {
+            if (_.isUndefined(should_show)) should_show = true;
+            sources.push({
+                list_func: function() {
+                    return commands;
+                },
+                callback: function(func) {
+                    func();
+                },
+                kind: 'commands',
+                should_show: should_show,
+                subsection: subsection
             });
-
-            // At the end, we add any commands in the set which were new and note replacements.
-            var filtered = _.omit(commands, all_replaced);
-            add_commands(filtered);
+            // CloudPebble.FuzzyPrompt.AddDataSource('commands', , , should_show);
         },
         Init: function() {
             init();

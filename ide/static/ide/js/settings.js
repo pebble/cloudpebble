@@ -409,7 +409,8 @@ CloudPebble.Settings = (function() {
             commands["GitHub"] = CloudPebble.GitHub.Show;
             commands[gettext("Timeline")] = CloudPebble.Timeline.show;
             commands[gettext("Add New Source File")] = CloudPebble.Editor.Create;
-            CloudPebble.FuzzyPrompt.AddCommands(commands);
+            commands[gettext("Dependencies")] = CloudPebble.Dependencies.Show;
+            CloudPebble.FuzzyPrompt.AddCommands(gettext('Navigation'), commands);
             settings_template = $('#settings-pane-template').remove().removeClass('hide');
         },
         AddResource: function(resource) {

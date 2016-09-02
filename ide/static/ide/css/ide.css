@@ -1136,6 +1136,28 @@ span.cm-autofilled-end {
     text-align: left;
 }
 
+.fuzzy-subheader {
+    /*background-color: #222;*/
+    font-weight: bold;
+    color: #555;
+    font-variant: small-caps;
+    margin-left: 1em;
+
+}
+.fuzzy-subheader::before {
+    /*content: '-- ';*/
+}
+
+.fuzzy-hint {
+    opacity: 0.5;
+}
+.fuzzy-hint::before {
+    content: ' <';
+}
+.fuzzy-hint::after {
+    content: '>';
+}
+
 #fuzzy-results > div {
 
     line-height: 28px;
