@@ -62,7 +62,7 @@ CloudPebble.Compile = (function() {
             log = log.replace(/^(src\/js\/.*)$/gm, '<span class="log-error">$1</span>');
             log = log.replace(/^(JavaScript linting failed.*)$/gm, '<span class="log-note">$1</span>');
             // Link the thingies.
-            log = log.replace(/([\/a-zA-Z0-9_]+\.[ch]):([0-9+]+)/g, '<span class="filename-link" data-filename="$1" data-line="$2">$1:$2</span>');
+            log = log.replace(/([\/.]*)([\/a-zA-Z0-9_.-]+\.[ch]):([0-9+]+)/g, '<span class="filename-link" data-filename="$2" data-line="$3">$1$2:$3</span>');
             log = '<pre class="build-log">' + log + '</pre>';
             log = $(log).css({'height': '100%', 'overflow': 'auto'});
             // Make the links do something.
@@ -366,7 +366,7 @@ CloudPebble.Compile = (function() {
                 append_log_html($('<hr>'));
             } else {
                 var display = _.escape(get_log_label(log.priority) + ' ' + log.filename + ':' + log.line_number + ': ' + log.message);
-                display = display.replace(/([\/a-zA-Z0-9_]+\.[ch]):([0-9+]+)/, '<span class="filename-link" data-filename="$1" data-line="$2">$1:$2</span>');
+                display = display.replace(/([\/.]*)([\/a-zA-Z0-9_.-]+\.[ch]):([0-9+]+)/, '<span class="filename-link" data-filename="$2" data-line="$3">$1$2:$3</span>');
                 var span = $('<span>').addClass(get_log_class(log.priority)).addClass('log').html(display);
                 span.find('.filename-link').click(function() {
                     var thing = $(this);
