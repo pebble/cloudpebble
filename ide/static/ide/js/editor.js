@@ -240,7 +240,6 @@ CloudPebble.Editor = (function() {
             code_mirror.on('shown', function() {
                 is_autocompleting = true;
             });
-            current_editor = code_mirror;
 
             // The browser should probably do this without our help. Sometimes Safari doesn't.
             $(document).click(function(e) {
@@ -482,13 +481,22 @@ CloudPebble.Editor = (function() {
                     alert(gettext(interpolate("Failed to reload file. %s", [error])));
                 });
             };
+            
+            function set_save_shortcut() {
+                CloudPebble.GlobalShortcuts.SetShortcutHandlers({
+                    "PlatformCmd-S": save
+                });
+            }
+            set_save_shortcut();
 
             CloudPebble.Sidebar.SetActivePane(pane, {
                 id: 'source-' + file.id,
                 onRestore: function() {
+                    current_editor = code_mirror;
                     code_mirror.refresh();
                     _.defer(function() { code_mirror.focus(); });
                     check_safe();
+                    set_save_shortcut();
                     refresh_ib();
                 },
                 onSuspend: function() {
@@ -496,6 +504,7 @@ CloudPebble.Editor = (function() {
                         fullscreen(code_mirror, false);
                         resume_fullscreen = true;
                     }
+                    current_editor = null;
                 },
                 onDestroy: function() {
                     if(!was_clean) {
@@ -520,7 +529,7 @@ CloudPebble.Editor = (function() {
                 CloudPebble.Sidebar.ClearIcon('source-' + file.id);
             };
 
-            var save = function() {
+            function save() {
                 // Make sure we're up to date with whatever changed in IB.
                 if(ib_showing) {
                     var content = code_mirror.getValue();
@@ -766,6 +775,7 @@ CloudPebble.Editor = (function() {
             var error_box = $('<div class="alert alert-error"></div>');
             error_box.text(interpolate(gettext("Something went wrong: %s"), [error.message]));
             CloudPebble.Sidebar.SetActivePane(error_box, {id: ''});
+            throw error;
         }).finally(function() {
             CloudPebble.ProgressBar.Hide();
         });
@@ -835,7 +845,7 @@ CloudPebble.Editor = (function() {
         var codemirror_commands = [
             {command: 'indentAuto', refocus: true},
             {command: 'toggleComment', hint: 'Cmd-/ or Ctrl-/', refocus: true},
-            'find', 'replace', 'indentMore', 'indentLess'
+            'find', 'replace', 'indentMore', 'indentLess', 'save', 'saveAll'
         ];
 
         _.each(codemirror_commands, function(entry) {
@@ -848,26 +858,10 @@ CloudPebble.Editor = (function() {
             local_commands[name].hint = !!entry.hint ? entry.hint : CloudPebble.GlobalShortcuts.GetShortcutForCommand(command);
         });
 
-        // local_commands[gettext('Auto Indent')] = function() {
-        //     current_editor.execCommand('indentAuto');
-        //     current_editor.focus();
-        // };
-        // local_commands[gettext('Auto Indent')].hint =  CloudPebble.GlobalShortcuts.GetShortcutForCommand('indentAuto');
-        // local_commands[gettext('Find')] = function() {
-        //     current_editor.execCommand('find');
-        // };
-        // local_commands[gettext('Find')].hint =  CloudPebble.GlobalShortcuts.GetShortcutForCommand('find');
-
-
         CloudPebble.FuzzyPrompt.AddCommands(gettext('File'), local_commands, function() {
             return (!!current_editor);
         });
 
-        CloudPebble.GlobalShortcuts.SetShortcutHandlers({
-            save: function() {
-                save().catch(alert);
-            }
-        });
         
         CloudPebble.FuzzyPrompt.AddCommands(gettext('Actions'), global_commands);
 

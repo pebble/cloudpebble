@@ -1137,15 +1137,11 @@ span.cm-autofilled-end {
 }
 
 .fuzzy-subheader {
-    /*background-color: #222;*/
     font-weight: bold;
-    color: #555;
+    color: #666;
     font-variant: small-caps;
     margin-left: 1em;
 
-}
-.fuzzy-subheader::before {
-    /*content: '-- ';*/
 }
 
 .fuzzy-hint {
@@ -1159,7 +1155,6 @@ span.cm-autofilled-end {
 }
 
 #fuzzy-results > div {
-
     line-height: 28px;
     cursor: pointer;
     cursor: hand;

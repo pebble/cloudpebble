@@ -470,15 +470,28 @@ CloudPebble.Resources = (function() {
             if(list_entry) {
                 list_entry.addClass('active');
             }
-
+            function set_save_shortcut() {
+                CloudPebble.GlobalShortcuts.SetShortcutHandlers({
+                    "PlatformCmd-S": save
+                });
+            }
+            set_save_shortcut();
             CloudPebble.Sidebar.SetActivePane(pane, {
                 id: 'resource-' + resource.id,
-                onRestore: _.partial(restore_pane, pane)
+                onRestore: function() {
+                    restore_pane(pane);
+                    set_save_shortcut();
+                },
+                onSuspend: function() {
+                    CloudPebble.GlobalShortcuts.SetShortcutHandlers({
+                        "PlatformCmd-S": function() {return false;}
+                    });
+                }
             });
             pane.find('#edit-resource-type').val(resource.kind).attr('disabled', 'disabled');
             pane.find('#edit-resource-type').change();
 
-            var save = function(e) {
+            function save(e) {
                 if (e) e.preventDefault();
                 process_resource_form(form, false, resource.file_name, "/ide/project/" + PROJECT_ID + "/resource/" + resource.id + "/update").then(function(data) {
                     delete project_resources[resource.file_name];
@@ -764,9 +777,6 @@ CloudPebble.Resources = (function() {
             }).init();
 
             form.submit(save);
-            CloudPebble.GlobalShortcuts.SetShortcutHandlers({
-                save: save
-            });
 
             restore_pane(pane);
         }).finally(function() {

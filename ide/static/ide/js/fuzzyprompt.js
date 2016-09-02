@@ -33,7 +33,7 @@ CloudPebble.FuzzyPrompt = (function() {
             var options = {
                 caseSensitive: false,
                 sortFn: function(a, b) {
-                    return (a.score === b.score) ? a.item.name.localeCompare(b) : a.score - b.score;
+                    return (a.score === b.score) ? a.item.name.localeCompare(b.item.name) : a.score - b.score;
                 },
                 shouldSort: true,
                 threshold: 0.5,
