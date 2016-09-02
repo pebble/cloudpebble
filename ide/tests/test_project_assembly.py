@@ -43,7 +43,13 @@ class TestAssemble(ProjectTester):
             'pebble-jshintrc': True,
             'package.json': True,
             'src': {
-                'c': {'lib.c': True, 'main.c': True},
+                'c': {
+                    'lib.c': True,
+                    'main.c': True,
+                    'subdirectory': {
+                        'lib.c': True
+                    }
+                },
                 'rocky': {'index.js': True},
                 'pkjs': {'index.js': True},
                 'common': {'shared.js': True},
@@ -72,7 +78,7 @@ class TestAssemble(ProjectTester):
                 'data': {},
             }
         }
-        # The spec excludes items from modifies the 'expected' folder structure, determining
+        # The spec excludes items from the 'union' expected folder structure, determining
         # what will actually be expected when the test is run.
         spec = {
             'worker_src': False,
@@ -80,10 +86,14 @@ class TestAssemble(ProjectTester):
             'src': {
                 'c': {
                     'main.c': True,
-                }
+                    'subdirectory': False
+                },
             },
             True: True
         }
+
+        # By passing in arguments, the spec can be tweaked to create the desired
+        # expected folder structure.
         spec.update(kwargs)
         return filter_dict(expected, spec)
 
@@ -128,7 +138,6 @@ class TestAssemble(ProjectTester):
         self.assertTrue(self.tree['src']['js']['app.js'])
         self.assertTrue(self.tree['src']['js']['blah.js'])
 
-
     def test_package(self):
         """ Check that a package project looks right """
         with self.get_tree(type='package'):
@@ -139,7 +148,7 @@ class TestAssemble(ProjectTester):
         self.assertDictEqual(self.tree, expected)
 
     def test_rockyjs(self):
-        """ Check that an SDK 3 project with a worker looks correct """
+        """ Check that rockyjs project looks correct """
         with self.get_tree(type='rocky'):
             self.add_file('index.js', target='app')
             self.add_file('index.js', target='pkjs')
@@ -147,3 +156,11 @@ class TestAssemble(ProjectTester):
         expected = self.make_expected_sdk3_project(src={'pkjs': True, 'rocky': True, 'common': True}, resources=False)
         self.assertDictEqual(self.tree, expected)
 
+    def test_source_subdirectories(self):
+        """ Check that an SDK 3 project can export to subdirectories"""
+        with self.get_tree():
+            self.add_file('main.c')
+            self.add_file('subdirectory/lib.c')
+            self.add_resource('image.png')
+        expected = self.make_expected_sdk3_project(src={'c': {'main.c': True, 'subdirectory': True}})
+        self.assertDictEqual(self.tree, expected)
