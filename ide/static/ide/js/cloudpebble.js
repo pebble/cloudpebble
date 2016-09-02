@@ -15,6 +15,10 @@ CloudPebble.ProgressBar = (function() {
         },
         Hide: function() {
             hide();
+        },
+        Error: function(msg) {
+            $('#progress-pane').find('.progress').addClass('progress-danger').removeClass('progress-striped')
+                .after($('<div>').text(msg).css({margin: 'auto', width: '300px'}));
         }
     };
 })();
@@ -67,7 +71,6 @@ CloudPebble.Init = function() {
         CloudPebble.Dependencies.Init();
         CloudPebble.Documentation.Init();
         CloudPebble.FuzzyPrompt.Init();
-        CloudPebble.ProgressBar.Hide();
 
         // Add source files.
         $.each(data.source_files, function(index, value) {
@@ -86,8 +89,11 @@ CloudPebble.Init = function() {
             $('.sdk3-only').hide();
         }
         return null;
+    }).then(function() {
+        CloudPebble.ProgressBar.Hide();
     }).catch(function(err) {
-        alert("Something went wrong:\n" + err.message);
+        CloudPebble.ProgressBar.Error(err);
+        throw err;
     });
 
     window.addEventListener('beforeunload', function(e) {
