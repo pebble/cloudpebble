@@ -129,10 +129,6 @@ class ArchiveProjectItem(BaseProjectItem):
         return self.entry.filename
 
 
-def ends_with_any(s, options):
-    return any(s.endswith(end) for end in options)
-
-
 @task(acks_late=True)
 def do_import_archive(project_id, archive, delete_project=False):
     project = Project.objects.get(pk=project_id)
