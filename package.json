@@ -1,17 +1,17 @@
 {
     "private": true,
 	"name": "cloudpebble",
-	"version": "0.0.1",
+	"version": "1.0.0",
 	"author": "Katharine Berry <katharine@pebble.com>",
-	"description": "NPM/Node requirements for CloudPebble",
+	"description": "It clouds pebbles.",
 	"license": "MIT",
 	"dependencies": {
 		"bower": "1.7.9",
 		"uglify-js": "2.6.2",
 		"clean-css": "3.4.12",
-		"source-map-concat-cli": "^1.0.0"
+		"source-map-concat-cli": "^1.0.0",
+		"rocky-lint": "^1.0.2",
+		"utf8": "^2.1.1"
 	},
-	"engines": {
-		"node": "6.2.1"
-	}
+	"engines": {"node": "6.2.1"}
 }

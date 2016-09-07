@@ -313,6 +313,14 @@ h2.section-heading {
     padding: 5px 20px 15px 0;
 }
 
+.form-horizontal .control-group .static {
+    line-height: 30px;
+    color: white;
+    font-size: large;
+    padding: 5px 20px 15px 0;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
 .form-horizontal .controls {
     margin-bottom: 20px;
 }

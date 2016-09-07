@@ -33,12 +33,14 @@ class Project(IdeModel):
         ('native', _('Pebble C SDK')),
         ('simplyjs', _('Simply.js')),
         ('pebblejs', _('Pebble.js (beta)')),
+        ('package', _('Pebble Package')),
+        ('rocky', _('Rocky.js')),
     )
     project_type = models.CharField(max_length=10, choices=PROJECT_TYPES, default='native')
 
     SDK_VERSIONS = (
-        ('2', _('SDK 2 (Pebble, Pebble Steel)')),
-        ('3', _('SDK 3 beta (Pebble Time)')),
+        ('2', _('SDK 2 (obsolete)')),
+        ('3', _('SDK 4 beta')),
     )
     sdk_version = models.CharField(max_length=6, choices=SDK_VERSIONS, default='2')
 
@@ -78,6 +80,16 @@ class Project(IdeModel):
     github_hook_uuid = models.CharField(max_length=36, blank=True, null=True)
     github_hook_build = models.BooleanField(default=False)
 
+    project_dependencies = models.ManyToManyField("Project")
+
+    def __init__(self, *args, **kwargs):
+        super(IdeModel, self).__init__(*args, **kwargs)
+        # For SDK3+, default to array-based message keys.
+        if self.sdk_version != '2' and self.app_keys == '{}':
+            self.app_keys = '[]'
+        if self.sdk_version == '2':
+            self.app_modern_multi_js = False
+
     def set_dependencies(self, dependencies):
         """ Set the project's dependencies from a dictionary.
         :param dependencies: A dictionary of dependency->version
@@ -87,6 +99,25 @@ class Project(IdeModel):
             for name, version in dependencies.iteritems():
                 dep = Dependency.objects.create(project=self, name=name, version=version)
                 dep.save()
+
+    def set_interdependencies(self, interdependences):
+        with transaction.atomic():
+            self.project_dependencies.clear()
+            for project_id in interdependences:
+                project = Project.objects.get(pk=project_id, owner=self.owner, project_type='package')
+                self.project_dependencies.add(project)
+
+    @property
+    def npm_name(self):
+        """ Get the project's app_short_name as a valid NPM package name. """
+        name = self.app_short_name.lower()
+        # Remove any invalid characters from the end
+        name = re.sub(r'[^a-z0-9._]+$', '', name)
+        # Any strings of invalid characters in the middle are converted to dashes
+        name = re.sub(r'[^a-z0-9._]+', '-', name)
+        # The name cannot start with [ ._] or end with spaces.
+        name = name.lstrip(' ._').rstrip()
+        return name
 
     @property
     def keywords(self):
@@ -98,11 +129,15 @@ class Project(IdeModel):
         """ Set the project's keywords from a list of strings """
         self.app_keywords = json.dumps(value)
 
-    def get_dependencies(self):
+    def get_dependencies(self, include_interdependencies=True):
         """ Get the project's dependencies as a dictionary
-        :return: A dictinoary of dependency->version
+        :return: A dictionary of dependency->version
         """
-        return {d.name: d.version for d in self.dependencies.all()}
+        dependencies = {d.name: d.version for d in self.dependencies.all()}
+        if include_interdependencies:
+            for project in self.project_dependencies.all():
+                dependencies[project.npm_name] = project.last_build.package_url
+        return dependencies
 
     @property
     def uses_array_message_keys(self):
@@ -149,10 +184,53 @@ class Project(IdeModel):
         """ Set the app's version label from a semver string"""
         self.app_version_label = semver_to_version(value)
 
-    def clean(self):
-        if isinstance(json.loads(self.app_keys), list) and self.sdk_version == "2":
-            raise ValidationError(_("SDK2 appKeys must be an object, not a list."))
+    @property
+    def supported_platforms(self):
+        supported_platforms = ["aplite"]
+        if self.sdk_version != '2':
+            supported_platforms.extend(["basalt", "chalk"])
+            if self.project_type != 'pebblejs':
+                supported_platforms.append("diorite")
+        return supported_platforms
 
+    @property
+    def resources_path(self):
+        return 'src/resources' if self.project_type == 'package' else 'resources'
+
+    @property
+    def is_standard_project_type(self):
+        return self.project_type in {'native', 'package', 'rocky'}
+
+    @property
+    def pkjs_entry_point(self):
+        if self.project_type in {'package', 'rocky'}:
+            return 'index.js'
+        elif self.project_type == 'native' and self.app_modern_multi_js:
+            if self.source_files.filter(target='pkjs', file_name='index.js').exists():
+                return 'index.js'
+            elif self.source_files.filter(target='pkjs', file_name='app.js').exists():
+                return 'app.js'
+            else:
+                return 'index.js'
+        else:
+            return None
+
+    def clean(self):
+        is_sdk_2 = self.sdk_version == "2"
+        if is_sdk_2 and self.uses_array_message_keys:
+            raise ValidationError(_("SDK2 appKeys must be an object, not a list."))
+        if self.project_type == 'package':
+            if is_sdk_2:
+                raise ValidationError(_("Packages are not available for SDK 2"))
+            if not self.app_modern_multi_js:
+                raise ValidationError(_("Packages must use CommonJS-style JS Handling."))
+        elif self.project_type == 'rocky':
+            if is_sdk_2:
+                raise ValidationError(_("RockyJS is not available for SDK 2"))
+            if not self.uses_array_message_keys:
+                raise ValidationError(_("RockyJS projects must use array based appmessage keys"))
+            if not self.app_modern_multi_js:
+                raise ValidationError(_("RockyJS projects must use CommonJS-style JS Handling."))
 
     last_build = property(get_last_build)
     menu_icon = property(get_menu_icon)

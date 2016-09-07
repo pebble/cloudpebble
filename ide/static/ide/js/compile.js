@@ -1,6 +1,7 @@
 CloudPebble.Compile = (function() {
     var MINIMUM_SDK2_VERSION = "v2.9";
-    var MINIMUM_INSTALL_VERSION = "v3.10";
+    var MINIMUM_INSTALL_VERSION = "v4.0";
+    var MINIMUM_APLITE_VERSION = "v3.12.2";
 
     var COMPILE_SUCCESS_STATES = {
         1: {english: gettext("Pending"), cls: "info", label: 'info'},
@@ -8,7 +9,6 @@ CloudPebble.Compile = (function() {
         3: {english: gettext("Succeeded"), cls: "success", label: 'success'}
     };
 
-    var mPendingCallbacks = [];
     var mRunningBuild = false;
     var mLastScrollTop = 'bottom';
     var mLastBuild = null;
@@ -18,7 +18,13 @@ CloudPebble.Compile = (function() {
         tr.append($('<td class="build-id">' + (build.id === null ? '?' : build.id) + '</td>'));
         tr.append($('<td class="build-date">' + CloudPebble.Utils.FormatDatetime(build.started) + '</td>'));
         tr.append($('<td class="build-state">' + COMPILE_SUCCESS_STATES[build.state].english + '</td>'));
-        tr.append($('<td class="build-pbw">' + (build.state == 3 ? ('<a href="'+build.pbw+'" class="btn btn-small">' + gettext("pbw") + '</a>') : ' ') + '</td>'));
+        var pbw_badge = $('<td class="build-pbw">').appendTo(tr);
+        if (build.state == 3) {
+            pbw_badge.append($('<a class="btn btn-small">')
+                .attr('href', build.download)
+                .text(CloudPebble.ProjectProperties.is_runnable ? gettext("pbw") : gettext("tar.gz")));
+        }
+
         // Build log thingy.
         var td = $('<td class="build-log">');
         if(build.state > 1) {
@@ -62,9 +68,9 @@ CloudPebble.Compile = (function() {
             // Make the links do something.
             log.find('.filename-link').click(function() {
                 var thing = $(this);
-                var filename = thing.data('filename').replace(/^(\.\.)?\/?((worker_)?(src))?\/?/, '');
+                var filename = thing.data('filename').replace(/^\//, '');
                 var line = parseInt(thing.data('line'), 10);
-                CloudPebble.Editor.GoTo(filename, line - 1, 0);
+                CloudPebble.Editor.GoTo({file_path: filename}, line - 1, 0);
             });
 
             CloudPebble.Sidebar.SetActivePane(log);
@@ -147,6 +153,11 @@ CloudPebble.Compile = (function() {
             e.preventDefault();
             install_on_watch(ConnectionType.QemuChalk);
         });
+        pane.find('#install-in-qemu-diorite-btn').click(function(e) {
+            e.preventDefault();
+            install_on_watch(ConnectionType.QemuDiorite);
+        });
+
 
         pane.find('#show-qemu-logs-btn').click(function(e) {
             e.preventDefault();
@@ -183,6 +194,9 @@ CloudPebble.Compile = (function() {
         if(CloudPebble.Sidebar.Restore("compile")) {
             return;
         }
+        if (!CloudPebble.ProjectProperties.is_runnable) {
+            pane.find('#last-compilation').remove();
+        }
 
         update_build_history(pane);
         CloudPebble.Sidebar.SetActivePane(pane, {id: 'compile'});
@@ -193,6 +207,18 @@ CloudPebble.Compile = (function() {
             var target = localStorage['activeTarget'];
             targetTabs.find('a[data-run-target=' + target + ']').tab('show');
         }
+        pane.find('#last-compilation-pbw').click(function() {
+            if (CloudPebble.ProjectInfo.type == 'package' && CloudPebble.ProjectInfo.interdependencies.length > 0) {
+                var href = $(this).attr('href');
+                var warning_text = gettext("This package project depends on other CloudPebble packages. " +
+                    "Do not publish it until you have changed the dependencies to refer to publically available packages.");
+                CloudPebble.Prompts.ConfirmLink("EXPORT PACKAGE", warning_text, href);
+                return false;
+            }
+            else {
+                return true;
+            }
+        });
         if(CloudPebble.ProjectInfo.sdk_version != '3') {
             pane.find('#install-in-qemu-basalt-btn #install-in-qemu-chalk-btn').hide();
         } else {
@@ -250,7 +276,7 @@ CloudPebble.Compile = (function() {
                 });
                 pane.find('#compilation-run-build-button').removeAttr('disabled');
                 if(build.state == 3) {
-                    pane.find('#last-compilation-pbw').removeClass('hide').attr('href', build.pbw);
+                    pane.find('#last-compilation-pbw').removeClass('hide').attr('href', build.download);
                     pane.find("#run-on-phone").removeClass('hide');
                     if(build.sizes) {
                         if(build.sizes.aplite) {
@@ -271,6 +297,12 @@ CloudPebble.Compile = (function() {
                         } else {
                             pane.find('#last-compilation-size-chalk').addClass('hide');
                         }
+                        if(build.sizes.diorite) {
+                            var diorite_size_text = format_build_size(build.sizes.diorite, 65536, 10240, 262144);
+                            pane.find('#last-compilation-size-diorite').removeClass('hide').find('.text').text(diorite_size_text);
+                        } else {
+                            pane.find('#last-compilation-size-diorite').addClass('hide');
+                        }
                     }
                     // Only enable emulator buttons for built platforms.
                     pane.find('#run-qemu .btn-primary').attr('disabled', function() {
@@ -284,6 +316,7 @@ CloudPebble.Compile = (function() {
                 pane.find('#last-compilation-size-aplite').addClass('hide');
                 pane.find('#last-compilation-size-basalt').addClass('hide');
                 pane.find('#last-compilation-size-chalk').addClass('hide');
+                pane.find('#last-compilation-size-diorite').addClass('hide');
                 pane.find('#last-compilation-app-memory').addClass('hide');
                 pane.find('#last-compilation-worker-memory').addClass('hide');
             }
@@ -342,7 +375,10 @@ CloudPebble.Compile = (function() {
                         return;
                     }
                     var line = parseInt(thing.data('line'), 10);
-                    CloudPebble.Editor.GoTo(filename, line - 1, 0);
+                    // This could pick the wrong file if two files share the same name! But this is unlikely, since
+                    // workers are rarely used anyway.
+                    // TODO: Consider a better solution e.g. a pop
+                    CloudPebble.Editor.GoTo({name: filename}, line - 1, 0);
                 });
                 append_log_html(span);
                 if(ignore_crashes !== true) {
@@ -516,13 +552,21 @@ CloudPebble.Compile = (function() {
                     console.log(version_string);
                     // Make sure that we have the required version - but also assume that anyone who has the string 'test'
                     // in their firmware version number (e.g. me) knows what they're doing.
-                    var min_version = CloudPebble.ProjectInfo.sdk_version == '2'? MINIMUM_SDK2_VERSION : MINIMUM_INSTALL_VERSION;
+                    var min_version;
+                    var platform = Pebble.version_to_platform(version_info);
+                    if (CloudPebble.ProjectInfo.sdk_version == '2') {
+                        min_version = MINIMUM_SDK2_VERSION;
+                    } else if (platform == 'aplite') {
+                        min_version = MINIMUM_APLITE_VERSION;
+                    } else {
+                        min_version = MINIMUM_INSTALL_VERSION;
+                    }
                     if(/test/.test(version_string) || compare_version_strings(version_string, min_version) >= 0) {
-                        var platform = Pebble.version_to_platform(version_info);
                         var sizes = {
                             aplite: mLastBuild.sizes.aplite,
                             basalt: mLastBuild.sizes.basalt,
-                            chalk: mLastBuild.sizes.chalk
+                            chalk: mLastBuild.sizes.chalk,
+                            diorite: mLastBuild.sizes.diorite
                         };
                         var size = sizes[platform];
                         var install_timer = setTimeout(function() {
@@ -536,7 +580,7 @@ CloudPebble.Compile = (function() {
                                 virtual: SharedPebble.isVirtual()
                             });
                         }, 30000);
-                        pebble.install_app(mLastBuild.pbw);
+                        pebble.install_app(mLastBuild.download);
                         var expectedBytes = (size.binary + size.worker + size.resources);
                         pebble.on('install:progress', function(bytes) {
                             clearTimeout(install_timer);
@@ -650,6 +694,10 @@ CloudPebble.Compile = (function() {
                         case 'chalk':
                             colour = 'spalding-14mm-rose-gold';
                             break;
+                        case 'diorite':
+                            // TODO: Diorite - update with new watch 'colour' images when they are available
+                            colour = 'tintin-red';
+                            break;
                     }
                 }
                 modal.find('.screenshot-holder').addClass('screenshot-holder-' + colour);
@@ -755,6 +803,9 @@ CloudPebble.Compile = (function() {
                         }
                         else if (CloudPebble.ProjectInfo.app_platforms.indexOf('aplite') > -1) {
                             return ConnectionType.QemuAplite;
+                        }
+                        else if (CloudPebble.ProjectInfo.app_platforms.indexOf('diorite') > -1) {
+                            return ConnectionType.QemuDiorite;
                         }
                     } else {
                         return ConnectionType.QemuAplite;

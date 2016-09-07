@@ -17,6 +17,8 @@ class FakeProjectItem(BaseProjectItem):
             # For convenience, if the FakeProjectItem is named package.json
             # then return a valid package.json manifest unless otherwise specified.
             return json.dumps({'pebble': {}})
+        elif self.name.endswith('appinfo.json'):
+            return '{}'
         return ''
 
     @property
@@ -71,12 +73,17 @@ class TestFindProjectRoot(TestCase):
     def test_find_valid_project_alongside_invalid_project(self):
         """ Find a valid project which is later in the file list than an invalid project """
         self.run_test([
-            "invalid/package.json",
+            "invalid/appinfo.json",
             "valid/package.json",
             "invalid/src/",
             "valid/src/",
             "valid/src/app.js"
         ], "valid/", "valid/package.json")
+
+    def throws_if_appinfo_is_invalid(self):
+        """ Throw if appinfo.json doesn't contain a valid JSON object"""
+        with self.assertRaises(InvalidProjectArchiveException):
+            self.run_test([FakeProjectItem("appinfo.json", ""), "src/", "src/main.c"])
 
     def throws_if_npm_style_manifest_is_invalid(self):
         """ Throw if package.json doesn't contain a 'pebble' object"""

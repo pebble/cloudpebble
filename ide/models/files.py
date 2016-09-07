@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+from collections import OrderedDict
 
 from django.db import models
 from django.utils.timezone import now
@@ -100,6 +101,7 @@ class ResourceVariant(S3File):
     VARIANT_APLITE = 5
     VARIANT_BASALT = 6
     VARIANT_CHALK = 7
+    VARIANT_DIORITE = 8
 
     VARIANT_STRINGS = {
         VARIANT_MONOCHROME: '~bw',
@@ -108,7 +110,8 @@ class ResourceVariant(S3File):
         VARIANT_ROUND: '~round',
         VARIANT_APLITE: '~aplite',
         VARIANT_BASALT: '~basalt',
-        VARIANT_CHALK: '~chalk'
+        VARIANT_CHALK: '~chalk',
+        VARIANT_DIORITE: '~diorite'
     }
 
     TAGS_DEFAULT = ""
@@ -172,7 +175,7 @@ class ResourceIdentifier(IdeModel):
     character_regex = models.CharField(max_length=100, blank=True, null=True)
     tracking = models.IntegerField(blank=True, null=True)
     compatibility = models.CharField(max_length=10, blank=True, null=True)
-    target_platforms = models.CharField(max_length=30, null=True, blank=True, default=None)
+    target_platforms = models.CharField(max_length=100, null=True, blank=True, default=None)
 
     MEMORY_FORMATS = (
         ('Smallest', _('Smallest')),
@@ -226,20 +229,80 @@ class ResourceIdentifier(IdeModel):
 class SourceFile(TextFile):
     project = models.ForeignKey('Project', related_name='source_files')
     file_name = models.CharField(max_length=100, validators=regexes.validator('source_file_name', _('Invalid file name.')))
+
     folder = 'sources'
 
     TARGETS = (
         ('app', _('App')),
+        ('pkjs', _('PebbleKit JS')),
         ('worker', _('Worker')),
+        ('public', _('Public Header File')),
+        ('common', _('Shared JS')),
     )
     target = models.CharField(max_length=10, choices=TARGETS, default='app')
 
+    DIR_MAP = {
+        # Using an OrderedDict here ensures that 'src/' is checked last in get_details_for_path().
+        'native': OrderedDict([
+            ('pkjs', ['src/pkjs', 'src/js']),
+            ('worker', ['worker_src/c', 'worker_src']),
+            ('app', ['src/c', 'src']),
+        ]),
+        'pebblejs': {
+            'app': ['src/js'],
+        },
+        'simplyjs': {
+            'app': ['src'],
+        },
+        'rocky': {
+            'app': ['src/rocky'],
+            'pkjs': ['src/pkjs'],
+            'common': ['src/common'],
+        },
+        'package': {
+            'app': ['src/c'],
+            'public': ['include'],
+            'pkjs': ['src/js'],
+        }
+    }
+
+    @classmethod
+    def get_details_for_path(cls, project_type, path):
+        """
+        Given a project type and a path to a source file, determine what the file's target should be and
+        what its name should be.
+        """
+        targets = cls.DIR_MAP[project_type]
+        for target in targets:
+            for base in targets[target]:
+                base += '/'
+                if path.startswith(base):
+                    file_target = target
+                    break
+            else:
+                continue
+            break
+        else:
+            raise ValueError(_("Unacceptable file path for this project [%s]") % path)
+        if file_target in ('pkjs', 'common') or project_type in ('pebblejs', 'simplyjs', 'rocky'):
+            expected_exts = ('.js', '.json')
+        else:
+            expected_exts = ('.c', '.h')
+        if not path.endswith(expected_exts):
+            raise ValueError(_("Unacceptable file extension for %s file in [%s]. Expecting %s") %
+                             (file_target, path, " or ".join(expected_exts)))
+        return path[len(base):], file_target
+
     @property
     def project_path(self):
-        if self.target == 'app':
-            return 'src/%s' % self.file_name
-        else:
-            return 'worker_src/%s' % self.file_name
+        return os.path.join(self.project_dir, self.file_name)
+
+    @property
+    def project_dir(self):
+        try:
+            return SourceFile.DIR_MAP[self.project.project_type][self.target][0]
+        except KeyError:
+            Exception("Invalid file type in project")
 
     class Meta(IdeModel.Meta):
-        unique_together = (('project', 'file_name'))
+        unique_together = (('project', 'file_name', 'target'),)

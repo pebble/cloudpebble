@@ -88,6 +88,7 @@ class TestFilterDict(TestCase):
         self.assertDictEqual(filter_dict(before, spec), after)
 
     def test_transform_key_and_value(self):
+        """ Test that TransformKeyAndValue can rename a key and its value """
         before = {
             'a': 'change_me',
             'b': 'filter_me',
@@ -104,7 +105,55 @@ class TestFilterDict(TestCase):
         self.assertDictEqual(filter_dict(before, spec), after)
 
     def test_rename(self):
+        """ Check that string values in the spec can rename a key. """
         before = {'a': 'thing'}
         after = {'b': 'thing'}
         spec = {'a': 'b'}
+        self.assertDictEqual(filter_dict(before, spec), after)
+
+    def test_wildcard_with_siblings(self):
+        before = {
+            'a': 'value',
+            'b': {
+                'key': 'value',
+                'another': 'filterme'
+            },
+            'c': {
+                'another': 'dontfilter'
+            }
+        }
+        after = {
+            'a': 'value',
+            'b': {
+                'key': 'value'
+            },
+            'c': {
+                'another': 'dontfilter'
+            }
+        }
+        spec = {
+            True: True,
+            'b': {
+                'key': True
+            }
+        }
+        self.assertDictEqual(filter_dict(before, spec), after)
+
+    def test_wildcard_omission_with_false_value(self):
+        """ Test that a False value can be used to exclude something from a wildcard. """
+        before = {
+            'a': 'value',
+            'b': 'value',
+            'c': 'filter_me',
+            'd': 'filter_me'
+        }
+        after = {
+            'a': 'value',
+            'b': 'value',
+        }
+        spec = {
+            True: True,
+            'c': False,
+            'd': False
+        }
         self.assertDictEqual(filter_dict(before, spec), after)
