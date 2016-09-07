@@ -39,7 +39,14 @@ def create_source_file(request, project_id):
             }
         }, request=request, project=project)
 
-    return {"file": {"id": f.id, "name": f.file_name, "target": f.target}}
+    return {
+        'file': {
+            'id': f.id,
+            'name': f.file_name,
+            'target': f.target,
+            'file_path': f.project_path
+        }
+    }
 
 
 @require_POST
@@ -51,7 +58,7 @@ def create_test_file(request, project_id):
         f = TestFile.objects.create(project=project,
                                     file_name=request.POST['name'])
         f.save_text(request.POST.get('content', ''))
-    except (IntegrityError, ValidationError) as e:
+    except IntegrityError as e:
         raise BadRequest(str(e))
     else:
         send_td_event('cloudpebble_create_file', data={
@@ -61,7 +68,14 @@ def create_test_file(request, project_id):
             }
         }, project=project, request=request)
 
-        return {"file": {"id": f.id, "name": f.file_name, "target": f.target}}
+        return {
+            'file': {
+                'id': f.id,
+                'name': f.file_name,
+                'target': f.target,
+                'file_path': f.project_path
+            }
+        }
 
 
 def get_source_file(kind, pk, project):
@@ -71,6 +85,7 @@ def get_source_file(kind, pk, project):
         return get_object_or_404(TestFile, pk=pk, project=project)
     else:
         raise ValueError('Invalid source kind %s' % kind)
+
 
 @require_safe
 @csrf_protect
@@ -95,10 +110,11 @@ def load_source_file(request, project_id, kind, file_id):
     }, request=request, project=project)
 
     return {
-        "source": content,
-        "modified": time.mktime(source_file.last_modified.utctimetuple()),
-        "folded_lines": folded_lines
+        'source': content,
+        'modified': time.mktime(source_file.last_modified.utctimetuple()),
+        'folded_lines': folded_lines
     }
+
 
 @require_safe
 @login_required
@@ -115,12 +131,13 @@ def get_test_list(request, project_id):
 
     return {
         "tests": [{
-            "modified": time.mktime(test.last_modified.utctimetuple()),
-            "id": test.id,
-            "name": test.file_name,
-            "last_code": test.latest_code
-        } for test in objects]
+                      "modified": time.mktime(test.last_modified.utctimetuple()),
+                      "id": test.id,
+                      "name": test.file_name,
+                      "last_code": test.latest_code
+                  } for test in objects]
     }
+
 
 @require_safe
 @csrf_protect
@@ -170,7 +187,7 @@ def rename_source_file(request, project_id, kind, file_id):
             'kind': kind
         }
     }, request=request, project=project)
-    return {"modified": time.mktime(source_file.last_modified.utctimetuple())}
+    return {'modified': time.mktime(source_file.last_modified.utctimetuple()), 'file_path': source_file.project_path}
 
 
 @require_POST
@@ -198,7 +215,7 @@ def save_source_file(request, project_id, kind, file_id):
         }
     }, request=request, project=project)
 
-    return {"modified": time.mktime(source_file.last_modified.utctimetuple())}
+    return {'modified': time.mktime(source_file.last_modified.utctimetuple())}
 
 
 @require_POST

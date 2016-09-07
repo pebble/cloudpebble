@@ -11,19 +11,25 @@
                     <input type="text" id="settings-name">
                 </div>
             </div>
+            <div class="control-group">
+                <label class="control-label">{% trans 'Project type' %}</label>
+                <div class="static">
+                    {{project.get_project_type_display}}
+                </div>
+            </div>
             <div class="sdk-version native-only control-group">
                 <label class="control-label" for="settings-sdk-version">{% trans "SDK Version" %}</label>
                 <div class="controls">
                     <select id="settings-sdk-version">
-                        <option value="2" {% if project.sdk_version == '2' %}selected{% else %}disabled{% endif %}>{% trans 'SDK 2 (Pebble, Pebble Steel)' %}</option>
-                        <option value="3" {% if project.sdk_version == '3' %}selected{% endif %}>{% trans 'SDK 3 (Pebble Time)' %}</option>
+                        <option value="2" {% if project.sdk_version == '2' %}selected{% else %}disabled{% endif %}>{% trans 'SDK 2 (obsolete)' %}</option>
+                        <option value="3" {% if project.sdk_version == '3' %}selected{% endif %}>{% trans 'SDK 4' %}</option>
                     </select>
                     <span class="help-block">You should reload the page after changing and saving this setting.</span>
                 </div>
             </div>
         </div>
         <div class="well sdk3-only">
-            <div class="control-group">
+            <div class="control-group supports-aplite">
                 {# Translators: "Aplite" is a platform name and should be left untranslated. #}
                 <label class="control-label" for="settings-build-aplite">{% trans 'Build Aplite' %}</label>
                 <div class="controls">
@@ -54,10 +60,20 @@
                     </span>
                 </div>
             </div>
+            <div class="control-group sdk3-only not-pebblejs">
+                {# Translators: "Diorite" is a platform name and should be left untranslated. #}
+                <label class="control-label" for="settings-build-diorite">{% trans 'Build Diorite' %}</label>
+                <div class="controls">
+                    <input type="checkbox" id="settings-build-diorite" {% if project.app_platforms and 'diorite' in project.app_platform_list %}checked{% endif %}>
+                    <span class="help-block">
+                        {% trans "If enabled, your app will be built to run on Pebble 2 watches." %}
+                    </span>
+                </div>
+            </div>
         </div>
         <div>
             <div class="well">
-                <div class="control-group not-simplyjs">
+                <div class="control-group not-simplyjs not-package">
                     <label class="control-label" for="settings-app-is-watchface">{% trans 'App kind' %}</label>
                     <div class="controls">
                         <select id="settings-app-is-watchface">
@@ -66,7 +82,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="control-group not-simplyjs">
+                <div class="control-group not-simplyjs not-package">
                     <label class="control-label" for="settings-app-visibility">{% trans 'App Visibility' %}</label>
                     <div class="controls">
                         <select id="settings-app-visibility">
@@ -79,6 +95,17 @@
                         </span>
                     </div>
                 </div>
+                {% if project.project_type == 'package' %}
+                <div class="control-group">
+                    <label class="control-label" for="settings-short-name">{% trans 'Package Name' %}</label>
+                    <div class="controls">
+                        <input type="text" id="settings-short-name" placeholder="{% trans 'Demo Package' context "sample package name" %}" value="{{project.app_short_name}}">
+                        <span class="help-block">
+                            {% trans "Package name. This will be the name of the package when published in NPM." %}
+                        </span>
+                    </div>
+                </div>
+                {% else %}
                 <div class="control-group">
                     <label class="control-label" for="settings-short-name">{% trans 'Short App Name' %}</label>
                     <div class="controls">
@@ -88,7 +115,8 @@
                         </span>
                     </div>
                 </div>
-                <div class="control-group">
+                {% endif %}
+                <div class="control-group not-package">
                     <label class="control-label" for="settings-long-name">{% trans 'Long App Name' %}</label>
                     <div class="controls">
                         <input type="text" id="settings-long-name" placeholder="{% trans 'Demo App' context "sample app name" %}" value="{{project.app_long_name}}">
@@ -97,7 +125,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="control-group not-simplyjs">
+                <div class="control-group not-simplyjs not-package">
                     <label class="control-label" for="settings-menu-image">{% trans 'Menu image' %}</label>
                     <div class="controls">
                         <select id="settings-menu-image">
@@ -132,14 +160,14 @@
                     <div class="controls">
                         <div class="settings-uuid-control">
                             <input type="text" id="settings-uuid" pattern="{{ regexes.uuid }}" placeholder="00000000-0000-0000-0000-000000000000" value="{{project.app_uuid}}">
-                            <button id="uuid-generate" class="btn btn-small">{% trans "Generate" %}</button>
+                            <button type="button" id="uuid-generate" class="btn btn-small">{% trans "Generate" %}</button>
                         </div>
                         <span class="help-block">
                             {% trans "A unique identifier for the app. Takes the format xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx, where x is any hexadecimal digit and y is one of 8, 9, A, or B" %}
                         </span>
                     </div>
                 </div>
-                <div class="control-group native-only">
+                <div class="control-group native-only sdk3-only">
                     <label class="control-label" for="settings-modern-multi-js">{% trans 'JS Handling' %}</label>
                     <div class="controls">
                         <select id="settings-modern-multi-js">
@@ -152,8 +180,8 @@
                         </span>
                 </div>
             </div>
-            <div class="well">
-                <div class="control-group native-only sdk3-only">
+            <div class="well supports-message-keys">
+                <div class="control-group not-rocky sdk3-only">
                     <label class="control-label" for="settings-message-key-kind">{% trans 'Message key assignment kind' %}</label>
                     <div class="controls">
                         <select id="settings-message-key-kind">
@@ -162,7 +190,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="control-group native-only">
+                <div class="control-group supports-message-keys">
                     <label class="control-label" for="settings-app-keys">{% trans "PebbleKit JS Message Keys" %}</label>
                     <div class="controls">
                         <table id="settings-app-keys">
@@ -174,7 +202,7 @@
                 </div>
             </div>
             <div class="well">
-                <div class="control-group native-only">
+                <div class="control-group supports-jslint">
                     <label class="control-label" for="settings-app-jshint">{% trans "Check Javascript" context "checkbox label" %}</label>
                     <div class="controls">
                         <input type="checkbox" id="settings-app-jshint" {%if project.app_jshint%}checked{%endif%}>
@@ -201,8 +229,8 @@
             </div>
         </div>
         <div class="well form-actions">
-            <button id="project-export-zip" class="btn">{% trans "Download as zip" %}</button>
-            <button id="project-delete" class="btn btn-danger">{% trans "Delete Project" %}</button>
+            <button type="button" id="project-export-zip" class="btn">{% trans "Download as zip" %}</button>
+            <button type="button" id="project-delete" class="btn btn-danger">{% trans "Delete Project" %}</button>
         </div>
     </form>
 </div>

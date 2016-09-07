@@ -8,7 +8,8 @@ var ConnectionType = {
     Qemu: 2,
     QemuAplite: 6,
     QemuBasalt: 10,
-    QemuChalk: 18
+    QemuChalk: 18,
+    QemuDiorite: 34
 };
 
 var QEMUConnectionTypes = {
@@ -21,7 +22,8 @@ var ConnectionPlatformNames = {
     2: 'aplite',
     6: 'aplite',
     10: 'basalt',
-    18: 'chalk'
+    18: 'chalk',
+    34: 'diorite'
 };
 
 var SharedPebble = new (function() {

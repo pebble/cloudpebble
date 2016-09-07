@@ -556,16 +556,22 @@ table.kv-table .kv-remove {
     margin-left: 110px;
 }
 
-.compilation-pane #run-on-phone .btn,
-.compilation-pane #run-on-qemu .btn,
-.compilation-pane .build-buttons .btn {
+.compilation-pane .compilation-buttons.two-buttons .btn {
+    width: 287px;
+    margin: 0 4px;
+}
+
+.compilation-pane .compilation-buttons.three-buttons .btn{
     width: 188px;
     margin-right: 9px;
 }
 
-.compilation-pane #run-on-phone .btn:last-of-type,
-.compilation-pane #run-on-qemu .btn:last-of-type,
-.compilation-pane .build-buttons .btn:last-child {
+.compilation-pane .compilation-buttons.four-buttons .btn{
+    width: 137px;
+    margin: 0 4px;
+}
+
+.compilation-pane .compilation-buttons .btn:last-child {
     margin-right: 0;
 }
 
@@ -715,6 +721,24 @@ table.build-results tr.pending .build-state {
     width: 590px;
 }
 
+.dependencies-pane .help-block {
+    width: initial;
+    margin: initial;
+}
+
+.dependencies-header-name {
+    color: #d0d0d0;
+}
+.dependencies-header a:hover .dependencies-header-name {
+    color: inherit;
+}
+
+#dependencies-headers th.dependencies-headers-version {
+    /* version column of headers table */
+    min-width: 5em;
+}
+
+
 .package-suggestion {
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -742,6 +766,11 @@ table.build-results tr.pending .build-state {
     text-align: center;
     font-size: large;
     color: white;
+}
+
+.checkbox-table td:last-child {
+    width: 30px;
+    padding-bottom: 20px;
 }
 
 
@@ -1185,9 +1214,8 @@ button#add-filter {
     width: 450px;
     height: 37px;
 }
-
-.edit-resource-target-options > div {
-    float: left;
+.pane-boxes.pane-3-boxes div:nth-child(3n+1) {
+    clear: both;
 }
 .edit-resource-target-options:after {
     clear: both;
@@ -1210,7 +1238,15 @@ button#add-filter {
 }
 .image-platform-preview h4 {
     text-align: center;
-    margin-bottom: 1em;
+}
+
+.image-platform-preview > .help-block {
+    margin: auto;
+    text-align: center;
+}
+
+.image-platform-preview .pane-boxes h4 {
+    margin-top: 0.5em;
 }
 
 .pane-boxes img {
@@ -1225,7 +1261,6 @@ button#add-filter {
     min-height: 36px;
 }
 
-/*TODO: decide on some colours*/
 .label-aplite {
     background-color: #00B293;
 }
@@ -1235,6 +1270,10 @@ button#add-filter {
 .label-chalk {
     background-color: #3a87ad;
 }
+.label-diorite {
+    background-color: #c49d4f;
+}
+
 .font-preview .font-tag-preview {
     line-height: 40px;
     color: white;
@@ -1750,4 +1789,18 @@ label .text-icon {
 
 .text-core .text-wrap .text-tags .text-tag .text-button .text-label {
   line-height: 30px;
+}
+
+.spinner {
+    position: absolute;
+    right: 20px;
+    width: 16px;
+    height: 16px;
+}
+
+.spinner-dark {
+    background-image: url("/static/ide/img/darkspinner.gif");
+}
+.spinner-light {
+    background-image: url("/static/ide/img/spinner.gif");
 }

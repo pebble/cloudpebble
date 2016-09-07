@@ -25,7 +25,7 @@ RUN curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-
   && tar -xzf "node-v$NODE_VERSION-linux-x64.tar.gz" -C /usr/local --strip-components=1 \
   && rm "node-v$NODE_VERSION-linux-x64.tar.gz" SHASUMS256.txt.asc
 
-RUN npm install npm -g
+RUN npm install -g npm jshint
 
 # Django stuff
 
@@ -67,7 +67,7 @@ RUN mkdir /sdk2 && \
   tar --strip-components=1 -xj -C /sdk2
 
 ENV SDK_THREE_CHANNEL=release
-ENV SDK_THREE_VERSION=3.13
+ENV SDK_THREE_VERSION=4.0.1
 
 # Install SDK 3
 RUN mkdir /sdk3 && \

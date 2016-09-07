@@ -109,6 +109,9 @@
                         case 'chalk':
                             mRFB.get_display().resize(180, 180);
                             break;
+                        case 'diorite':
+                            mRFB.get_display().resize(144, 168);
+                            break;
                     }
                 }
                 if (mConnected && state == 'disconnected') {

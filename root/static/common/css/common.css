@@ -313,9 +313,14 @@ h2.section-heading {
     padding: 5px 20px 15px 0;
 }
 
-.form-horizontal .control-group label.long-form-label {
+
+.form-horizontal .control-group .static label.long-form-label {
     /* This should be applied to labels which are too long for one line */
     line-height: 33px;
+    color: white;
+    font-size: large;
+    padding: 5px 20px 15px 0;
+    font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .form-horizontal .controls {

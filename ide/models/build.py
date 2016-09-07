@@ -34,6 +34,7 @@ class BuildResult(IdeModel):
         'aplite': ('debug_info.json', 'worker_debug_info.json'),
         'basalt': ('basalt_debug_info.json', 'basalt_worker_debug_info.json'),
         'chalk': ('chalk_debug_info.json', 'chalk_worker_debug_info.json'),
+        'diorite': ('diorite_debug_info.json', 'diorite_worker_debug_info.json'),
     }
     DEBUG_APP = 0
     DEBUG_WORKER = 1
@@ -59,29 +60,36 @@ class BuildResult(IdeModel):
         else:
             return '%s%s/%s/%s/' % (settings.MEDIA_URL, self.uuid[0], self.uuid[1], self.uuid)
 
-    def get_pbw_filename(self):
+    @property
+    def pbw(self):
         return '%swatchface.pbw' % self._get_dir()
 
-    def get_build_log(self):
+    @property
+    def package(self):
+        return '%spackage.tar.gz' % self._get_dir()
+
+    @property
+    def package_url(self):
+        return '%spackage.tar.gz' % self.get_url()
+
+    @property
+    def build_log(self):
         return '%sbuild_log.txt' % self._get_dir()
 
-    def get_pbw_url(self):
+    @property
+    def pbw_url(self):
         return '%swatchface.pbw' % self.get_url()
 
-    def get_build_log_url(self):
+    @property
+    def build_log_url(self):
         return '%sbuild_log.txt' % self.get_url()
+
+    @property
+    def simplyjs(self):
+        return '%ssimply.js' % self._get_dir()
 
     def get_debug_info_filename(self, platform, kind):
         return self._get_dir() + self.DEBUG_INFO_MAP[platform][kind]
-
-    def get_debug_info_url(self, platform, kind):
-        return self.get_url() + self.DEBUG_INFO_MAP[platform][kind]
-
-    def get_simplyjs(self):
-        return '%ssimply.js' % self._get_dir()
-
-    def get_simplyjs_url(self):
-        return '%ssimply.js' % self.get_url()
 
     def save_build_log(self, text):
         if not settings.AWS_ENABLED:
@@ -111,6 +119,13 @@ class BuildResult(IdeModel):
         else:
             s3.save_file('builds', self.get_debug_info_filename(platform, kind), text, public=True, content_type='application/json')
 
+    def save_package(self, package_path):
+        if not settings.AWS_ENABLED:
+            shutil.move(package_path, self.package)
+        else:
+            filename = '%s.tar.gz' % self.project.app_short_name.replace('/', '-')
+            s3.upload_file('builds', self.package, package_path, public=True, download_filename=filename, content_type='application/gzip')
+
     def save_pbw(self, pbw_path):
         if not settings.AWS_ENABLED:
             shutil.move(pbw_path, self.pbw)
@@ -123,15 +138,6 @@ class BuildResult(IdeModel):
                 f.write(javascript)
         else:
             s3.save_file('builds', self.simplyjs, javascript, public=True, content_type='text/javascript')
-
-    pbw = property(get_pbw_filename)
-    build_log = property(get_build_log)
-
-    pbw_url = property(get_pbw_url)
-    build_log_url = property(get_build_log_url)
-
-    simplyjs = property(get_simplyjs)
-    simplyjs_url = property(get_simplyjs_url)
 
     def get_sizes(self):
         sizes = {}

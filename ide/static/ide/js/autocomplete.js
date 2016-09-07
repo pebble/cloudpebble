@@ -9,9 +9,9 @@ CloudPebble.Editor.Autocomplete = new (function() {
         cm.off('beforeSelectionChange', mSelectionCallback);
         var text = cm.getRange(selection.anchor, selection.head);
         var old_text = cm.getRange(old_selection.from, old_selection.to);
-        if(old_text == expected_text) {
+        if (old_text == expected_text) {
             createMark(cm, old_selection.from, old_selection.to);
-        } else if((text[0] == "'" && text[text.length-1] == "'") || (text[0] == '"' && text[text.length-1] == '"')) {
+        } else if ((text[0] == "'" && text[text.length - 1] == "'") || (text[0] == '"' && text[text.length - 1] == '"')) {
             selection.anchor.ch += 1;
             selection.head.ch -= 1;
         }
@@ -54,13 +54,13 @@ CloudPebble.Editor.Autocomplete = new (function() {
         var first_pos = null;
         var first_mark = null;
         $.each(completion.params, function(index, value) {
-            var p = [{line: data.from.line, ch:start}, {line: data.from.line, ch:start + value.length}];
+            var p = [{line: data.from.line, ch: start}, {line: data.from.line, ch: start + value.length}];
             var mark = createMark(cm, p[0], p[1]);
-            if(first_pos === null) first_pos = p;
-            if(first_mark === null) first_mark = mark;
+            if (first_pos === null) first_pos = p;
+            if (first_mark === null) first_mark = mark;
             start += value.length + 2;
         });
-        if(first_pos === null) {
+        if (first_pos === null) {
             cm.setSelection({ch: orig_start, line: data.from.line});
         } else {
             first_mark.clear();
@@ -71,29 +71,37 @@ CloudPebble.Editor.Autocomplete = new (function() {
     var renderCompletion = function(elt, data, completion) {
         var type = completion.ret;
         var elem = $('<span>');
-        if(type) {
+        if (type) {
             elem.append($('<span class="muted">').append(document.createTextNode(type + ' ')));
         }
         elem.append(document.createTextNode(completion.name));
-        if(completion.params) {
+        if (completion.params) {
             elem.append($('<span class="muted">').append('(' + completion.params.join(', ') + ')'));
         }
         elt.appendChild(elem[0]);
     };
 
+    function renderHeaderCompletion(elt, data, completion) {
+        $(elt).append([
+            $('<span class="muted">').text('#include ' + completion.quotes[0]),
+            $('<span>').text(completion.name),
+            $('<span class="muted">').text(completion.quotes[1])
+        ])
+    }
+
     var mCurrentSummaryElement = null;
     var mWaiting = null;
     var renderSummary = function(completion, element) {
-        if(!mCurrentSummaryElement) return;
+        if (!mCurrentSummaryElement) return;
         var docs = CloudPebble.Documentation.Lookup(completion.name || completion.text);
-        if(docs && docs.description) {
+        if (docs && docs.description) {
             mCurrentSummaryElement.html(docs.description.replace(/[.;](\s)[\s\S]*/, '.')).show();
         } else {
             mCurrentSummaryElement.empty().hide();
         }
     };
     var showSummary = function(hints) {
-        if(mCurrentSummaryElement) {
+        if (mCurrentSummaryElement) {
             mCurrentSummaryElement.remove();
         }
         var summary = $('<div>');
@@ -108,7 +116,7 @@ CloudPebble.Editor.Autocomplete = new (function() {
         clearTimeout(mWaiting);
     };
     var hideSummary = function() {
-        if(!mCurrentSummaryElement) {
+        if (!mCurrentSummaryElement) {
             return;
         }
         mCurrentSummaryElement.remove();
@@ -126,14 +134,74 @@ CloudPebble.Editor.Autocomplete = new (function() {
     var mLastAutocompleteToken = null;
     var mLastAutocompletePos = null;
     var run_last = _.debounce(function() {
-        if(mLastInvocation) {
+        if (mLastInvocation) {
             console.log("running trailing completion.");
             self.complete.apply(self, mLastInvocation);
         }
     }, 50);
 
+    function collect_header_files() {
+        var local = _.map(_.keys(CloudPebble.Editor.GetAllFiles()).sort(), function(name) {
+            return {
+                name: name,
+                local: true
+            }
+        });
+        var lib = _.map(CloudPebble.Dependencies.GetHeaderFileNames().sort(), function(name) {
+            return {
+                name: name,
+                local: false
+            }
+        });
+        return _.filter(local.concat(lib), function(item) {
+            return item.name.indexOf('.h', item.length - 2) !== -1;
+        }).concat({name: 'pebble.h', local: false});
+    }
+
+    /** Return a list of possible includes that a user could be trying to type. */
+    function try_complete_header_files(editor) {
+        var query = editor.getTokenAt(editor.getCursor()).string;
+        var completions = {};
+        var match;
+        if (match = query.match(/^\s*#include\s+(["<])?([^>"]*)$/i)) {
+            var files = collect_header_files();
+            if (match[2].trim()) {
+                var fuse = new Fuse(files, {
+                    keys: ["name"]
+                });
+                files = fuse.search(match[2]);
+            }
+
+            var header_completions = _.map(files, function(file) {
+                var quotes = file.local ? '""' : '<>';
+                var include_text = interpolate('#include %s%s%s', [quotes[0], file.name, quotes[1]]);
+                return {
+                    kind: 'INCLUDE',
+                    insertion_text: include_text,
+                    name: file.name,
+                    quotes: quotes
+                }
+            });
+            completions = {
+                completions: header_completions,
+                start_column: 0
+            };
+        }
+        return completions;
+    }
+
+    /** Try to complete a macro, by searching header files if possible or otherwise using YCM. */
+    function try_complete_macro(command, editor) {
+        var includes = try_complete_header_files(editor);
+        if (!includes.completions)
+            return CloudPebble.YCM.request(command, editor);
+        else {
+            return Promise.resolve(includes);
+        }
+    }
+
     this.complete = function(editor, finishCompletion, options) {
-        if(mRunning) {
+        if (mRunning) {
             mLastInvocation = [editor, finishCompletion, options];
             return;
         }
@@ -141,61 +209,74 @@ CloudPebble.Editor.Autocomplete = new (function() {
         var cursor = editor.getCursor();
         try {
             var token = editor.getTokenAt(cursor);
-            if(token.string == mLastAutocompleteToken
+            if (token.string == mLastAutocompleteToken
                 && token.start == mLastAutocompletePos.ch
                 && cursor.line == mLastAutocompletePos.line) {
                 return;
             }
-            if(!token || (token.string.replace(/[^a-z0-9_]/gi, '').length < 1 && token.string != '.' && token.string != '->')) {
+            if (!token || (token.string.replace(/[^a-z0-9_]/gi, '').length < 1 && token.string != '.' && token.string != '->')) {
                 return;
             }
-        } catch(e) {
+        } catch (e) {
             return;
         }
         mRunning = true;
+        var request_function;
+        if (token.type === 'meta') {
+            request_function = try_complete_macro;
+        }
+        else if (editor.options.mode == 'MonkeyScript') {
+            request_function = CloudPebble.MonkeyScript.request;
+        }
+        else {
+            request_function = CloudPebble.YCM.request;
+        }
 
-        // TODO: perhaps there is a nicer way of doing this, but this will suffice for now.
-        var request_function = (editor.options.mode == "MonkeyScript" ? CloudPebble.MonkeyScript.request : CloudPebble.YCM.request);
-
-        request_function('completions', editor)
-            .then(function(data) {
-                var completions = _.map(data.completions, function(item) {
-                    if(item.kind == 'FUNCTION' || (item.kind == 'MACRO' && item.detailed_info.indexOf('(') > 0)) {
-                        var params = item.detailed_info.substr(item.detailed_info.indexOf('(') + 1);
-                        if (params[0] == ')') {
-                            params = [];
-                        } else {
-                            params = params.substring(1, params.length - 2).split(', ');
-                        }
-                        return {
-                            text: item.insertion_text + '(' + params.join(', ') + ')',
-                            params: params,
-                            ret: item.extra_menu_info,
-                            name: item.insertion_text,
-                            hint: expandCompletion,
-                            render: renderCompletion
-                        }
+        request_function('completions', editor).then(function(data) {
+            var completions = _.map(data.completions, function(item) {
+                if (item.kind == 'FUNCTION' || (item.kind == 'MACRO' && item.detailed_info.indexOf('(') > 0)) {
+                    var params = item.detailed_info.substr(item.detailed_info.indexOf('(') + 1);
+                    if (params[0] == ')') {
+                        params = [];
                     } else {
-                        return {text: item.insertion_text};
+                        params = params.substring(1, params.length - 2).split(', ');
                     }
-                });
-                var result = {
-                    list: completions,
-                    from: Pos(cursor.line, data.start_column - 1),
-                    to: Pos(cursor.line, cursor.ch)
-                };
-                CodeMirror.on(result, 'shown', showSummary);
-                CodeMirror.on(result, 'select', renderSummary);
-                CodeMirror.on(result, 'close', hideSummary);
-                CodeMirror.on(result, 'pick', _.partial(didPick, result));
-                finishCompletion(result);
-            }).catch(function(e) {
-                // Discard "ycm is generally broken" errors
-                if (!e.noYCM) throw e;
-            }).finally(function() {
-                mRunning = false;
-                run_last();
+                    return {
+                        text: item.insertion_text + '(' + params.join(', ') + ')',
+                        params: params,
+                        ret: item.extra_menu_info,
+                        name: item.insertion_text,
+                        hint: expandCompletion,
+                        render: renderCompletion
+                    }
+                } else if (item.kind == 'INCLUDE') {
+                    return {
+                        text: item.insertion_text,
+                        name: item.name,
+                        quotes: item.quotes,
+                        render: renderHeaderCompletion
+                    }
+                } else {
+                    return {text: item.insertion_text};
+                }
             });
+            var result = {
+                list: completions,
+                from: Pos(cursor.line, data.start_column - 1),
+                to: Pos(cursor.line, cursor.ch)
+            };
+            CodeMirror.on(result, 'shown', showSummary);
+            CodeMirror.on(result, 'select', renderSummary);
+            CodeMirror.on(result, 'close', hideSummary);
+            CodeMirror.on(result, 'pick', _.partial(didPick, result));
+            finishCompletion(result);
+        }).catch(function(e) {
+            // Discard "ycm is generally broken" errors
+            if (!e.noYCM) throw e;
+        }).finally(function() {
+            mRunning = false;
+            run_last();
+        });
     };
     this.complete.async = true;
 

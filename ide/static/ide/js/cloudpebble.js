@@ -19,8 +19,37 @@ CloudPebble.ProgressBar = (function() {
     };
 })();
 
-CloudPebble.ProjectInfo = {};
+/** Define calculated properties based on the project type. */
+CloudPebble.ProjectProperties = (function() {
+    var spec = {
+        'js_only': ['simplyjs', 'pebblejs', 'rocky'],
+        'is_runnable': ['native', 'pebblejs', 'simplyjs', 'rocky'],
+        'supports_message_keys': ['native', 'package'],
+        'supports_aplite': ['native', 'package', 'simplyjs', 'pebblejs'],
+        'supports_jslint': ['native', 'package', 'pebblejs', 'rocky']
+    };
+    var obj = {
+        Init: function() {
+            _.each(spec, function(types, property) {
+                Object.defineProperty(obj, property, {
+                    value: _.contains(types, CloudPebble.ProjectInfo.type)
+                });
+            });
+        }
+    };
+    return obj;
+})();
 
+CloudPebble.TargetNames =   {
+    'app': gettext("App Source"),
+    'public': gettext("Public headers"),
+    'pkjs': gettext("PebbleKit JS"),
+    'worker': gettext("Worker source"),
+    'common': gettext("Shared JavaScript")
+};
+
+
+CloudPebble.ProjectInfo = {};
 
 CloudPebble.Init = function() {
     jquery_csrf_setup();
@@ -30,6 +59,7 @@ CloudPebble.Init = function() {
     Ajax.Get('/ide/project/' + PROJECT_ID + '/info').then(function(data) {
         CloudPebble.ProjectInfo = data;
 
+        CloudPebble.ProjectProperties.Init();
         CloudPebble.Compile.Init();
         CloudPebble.Editor.Init();
         CloudPebble.Resources.Init();
@@ -119,19 +149,36 @@ CloudPebble.Prompts = {
         $('#modal-text-confirm-button').unbind('click').click(submit);
         $('#modal-text-input form').unbind('submit').submit(submit);
     },
-    Confirm: function(title, prompt, callback) {
+    Confirm: function(title, prompt, callback, hide_callback) {
         $('#modal-warning-prompt-title').text(title);
         $('#modal-warning-prompt-warning').text(prompt);
-        $('#modal-warning-prompt').modal();
+        var modal = $('#modal-warning-prompt').modal();
         $('#modal-warning-prompt-button').unbind('click').click(function() {
             $('#modal-warning-prompt').modal('hide');
             callback();
+        });
+        if(hide_callback) {
+            modal.on('hide', function() {
+                modal.off('hide');
+                hide_callback();
+            });
+        }
+    },
+    ConfirmLink: function(title, prompt, url) {
+        $('#modal-confirm-link-prompt-title').text(title);
+        $('#modal-confirm-link-prompt-warning').text(prompt);
+        var modal = $('#modal-confirm-link-prompt').modal();
+        $('#modal-confirm-link-prompt-button').attr('href', url).unbind('click').click(function() {
+            modal.modal('hide');
+        });
+        modal.on('hide', function() {
+            modal.off('hide');
         });
     },
     Progress: {
         Show: function(title, text, hide_callback) {
             var modal = $('#generic-progress').modal('show');
-            modal.find('.progress').removeClass('progress-danger').addClass('progress-striped');
+            modal.find('.progress').removeClass('progress-danger progress-success').addClass('progress-striped');
             modal.find('h3').text(title);
             modal.find('p').text(text || '');
             if(hide_callback) {
@@ -140,6 +187,10 @@ CloudPebble.Prompts = {
                     hide_callback();
                 });
             }
+        },
+        Success: function() {
+            var modal = $('#generic-progress').modal('show');
+            modal.find('.progress').addClass('progress-success').removeClass('progress-striped');
         },
         Fail: function() {
             var modal = $('#generic-progress').modal('show');

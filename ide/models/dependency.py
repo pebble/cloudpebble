@@ -19,7 +19,8 @@ def validate_dependency_version(value):
 class Dependency(IdeModel):
     project = models.ForeignKey('Project', related_name='dependencies')
     name = models.CharField(max_length=100)
-    version = models.CharField(max_length=100, validators=[validate_dependency_version])
+    version = models.CharField(max_length=2000, validators=[validate_dependency_version])
 
     class Meta(IdeModel.Meta):
         unique_together = (('project', 'name'),)
+

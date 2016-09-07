@@ -525,6 +525,7 @@ QEMU_LAUNCH_TIMEOUT = int(_environ.get('QEMU_LAUNCH_TIMEOUT', 20))
 PHONE_SHORTURL = _environ.get('PHONE_SHORTURL', 'cpbl.io')
 
 ORCHESTRATOR_URL = _environ.get('ORCHESTRATOR_URL', 'https://pbltest.io')
+WAF_NODE_PATH = _environ.get('WAF_NODE_PATH', None)
 
 # import local settings
 try:

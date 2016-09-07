@@ -96,17 +96,10 @@ def github_push(user, commit_message, repo_name, project):
         split_path = new_path.split('/')
         expected_paths.update('/'.join(split_path[:p]) for p in range(2, len(split_path) + 1))
 
-    src_root = root + 'src/'
-    worker_src_root = root + 'worker_src/'
     project_sources = project.source_files.all()
     has_changed = False
     for source in project_sources:
-        repo_path = src_root + source.file_name
-        if project.project_type == 'native':
-            if source.target == 'worker':
-                repo_path = worker_src_root + source.file_name
-            elif project.app_modern_multi_js and source.file_name.endswith('.js'):
-                repo_path = src_root + 'js/' + source.file_name
+        repo_path = os.path.join(root, source.project_path)
 
         update_expected_paths(repo_path)
         if repo_path not in next_tree:
@@ -126,10 +119,10 @@ def github_push(user, commit_message, repo_name, project):
 
     # Now try handling resource files.
     resources = project.resources.all()
-    resource_root = root + 'resources/'
+    resource_root = project.resources_path
     for res in resources:
         for variant in res.variants.all():
-            repo_path = resource_root + variant.path
+            repo_path = os.path.join(resource_root, variant.path)
             update_expected_paths(repo_path)
             if repo_path in next_tree:
                 content = variant.get_contents()
@@ -147,8 +140,10 @@ def github_push(user, commit_message, repo_name, project):
                 next_tree[repo_path] = InputGitTreeElement(path=repo_path, mode='100644', type='blob', sha=blob.sha)
 
     # Manage deleted files
+    src_root = os.path.join(root, 'src')
+    worker_src_root = os.path.join(root, 'worker_src')
     for path in next_tree.keys():
-        if not (any(path.startswith(root) for root in (src_root, resource_root, worker_src_root))):
+        if not (any(path.startswith(root+'/') for root in (src_root, resource_root, worker_src_root))):
             continue
         if path not in expected_paths:
             del next_tree[path]
@@ -277,7 +272,7 @@ def github_pull(user, project):
         root, manifest_item = find_project_root_and_manifest([GitProjectItem(repo, x) for x in tree.tree])
     except ValueError as e:
         raise ValueError("In manifest file: %s" % str(e))
-    resource_root = root + 'resources/'
+    resource_root = root + project.resources_path + '/'
     manifest = json.loads(manifest_item.read())
 
     media = manifest.get('resources', {}).get('media', [])

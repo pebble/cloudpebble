@@ -32,7 +32,6 @@ def project_info(request, project_id):
     test_files = TestFile.objects.filter(project=project).order_by('file_name')
     return {
         'type': project.project_type,
-        'success': True,
         'name': project.name,
         'last_modified': str(project.last_modified),
         'app_uuid': project.app_uuid or '',
@@ -47,7 +46,8 @@ def project_info(request, project_id):
         'app_is_shown_on_communication': project.app_is_shown_on_communication,
         'app_capabilities': project.app_capabilities,
         'app_jshint': project.app_jshint,
-        'app_dependencies': project.get_dependencies(),
+        'app_dependencies': project.get_dependencies(include_interdependencies=False),
+        'interdependencies': [p.id for p in project.project_dependencies.all()],
         'sdk_version': project.sdk_version,
         'app_platforms': project.app_platforms,
         'app_modern_multi_js': project.app_modern_multi_js,
@@ -62,6 +62,7 @@ def project_info(request, project_id):
                              'name': f.file_name,
                              'id': f.id,
                              'target': f.target,
+                             'file_path': f.project_path,
                              'lastModified': time.mktime(f.last_modified.utctimetuple())
                          } for f in source_files],
         'resources': [{
@@ -79,7 +80,8 @@ def project_info(request, project_id):
             'last_commit': project.github_last_commit,
             'auto_build': project.github_hook_build,
             'auto_pull': project.github_hook_uuid is not None
-        }
+        },
+        'supported_platforms': project.supported_platforms
     }
 
 
@@ -109,7 +111,7 @@ def last_build(request, project_id):
             'started': str(build.started),
             'finished': str(build.finished) if build.finished else None,
             'id': build.id,
-            'pbw': build.pbw_url,
+            'download': build.package_url if project.project_type == 'package' else build.pbw_url,
             'log': build.build_log_url,
             'build_dir': build.get_url(),
             'sizes': build.get_sizes(),
@@ -135,7 +137,7 @@ def build_history(request, project_id):
             'started': str(build.started),
             'finished': str(build.finished) if build.finished else None,
             'id': build.id,
-            'pbw': build.pbw_url,
+            'download': build.package_url if project.project_type == 'package' else build.pbw_url,
             'log': build.build_log_url,
             'build_dir': build.get_url(),
             'sizes': build.get_sizes()
@@ -171,9 +173,10 @@ def create_project(request):
         template_id = int(template_id)
     project_type = request.POST.get('type', 'native')
     template_name = None
-    sdk_version = request.POST.get('sdk', 2)
+    sdk_version = str(request.POST.get('sdk', '2'))
     try:
         with transaction.atomic():
+            app_keys = '{}' if sdk_version == '2' else '[]'
             project = Project.objects.create(
                 name=name,
                 owner=request.user,
@@ -185,6 +188,7 @@ def create_project(request):
                 app_capabilities='',
                 project_type=project_type,
                 sdk_version=sdk_version,
+                app_keys=app_keys
             )
             if template_id is not None and template_id != 0:
                 template = TemplateProject.objects.get(pk=template_id)
@@ -196,8 +200,8 @@ def create_project(request):
             elif project_type == 'pebblejs':
                 f = SourceFile.objects.create(project=project, file_name="app.js")
                 f.save_text(open('{}/src/js/app.js'.format(settings.PEBBLEJS_ROOT)).read())
-            if sdk_version != '2':
-                project.app_keys = '[]'
+            # TODO: Default file for Rocky?
+            project.full_clean()
             project.save()
     except IntegrityError as e:
         raise BadRequest(str(e))
@@ -260,11 +264,12 @@ def save_project_dependencies(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     try:
         project.set_dependencies(json.loads(request.POST['dependencies']))
+        project.set_interdependencies([int(x) for x in json.loads(request.POST['interdependencies'])])
+        return {'dependencies': project.get_dependencies()}
     except (IntegrityError, ValueError) as e:
         raise BadRequest(str(e))
     else:
         send_td_event('cloudpebble_save_project_settings', request=request, project=project)
-
 
 @require_POST
 @login_required
@@ -284,6 +289,52 @@ def begin_export(request, project_id):
     project = get_object_or_404(Project, pk=project_id, owner=request.user)
     result = create_archive.delay(project.id)
     return {'task_id': result.task_id}
+
+
+@login_required
+@require_safe
+@json_view
+def get_projects(request):
+    """ Gets a list of all projects owned by the user.
+
+    Accepts one possible filter: '?libraries=[id]'. If given, the list of projects
+    is limited to packages, and each returned package includes a 'depended_on' attribute
+    which is true if it is depended on by the project where pk=[id].
+    """
+    filters = {
+        'owner': request.user
+    }
+    exclusions = {}
+    parent_project = None
+
+    libraries_for_project = int(request.GET['libraries']) if 'libraries' in request.GET else None
+    if libraries_for_project:
+        filters['project_type'] = 'package'
+        parent_project = get_object_or_404(Project, pk=libraries_for_project, owner=request.user)
+        parent_project_dependencies = parent_project.project_dependencies.all()
+        exclusions['pk'] = libraries_for_project
+
+    projects = Project.objects.filter(**filters).exclude(**exclusions)
+
+    def process_project(project):
+        data = {
+            'name': project.name,
+            'package_name': project.npm_name,
+            'id': project.id,
+            'app_version_label': project.app_version_label,
+            'latest_successful_build': None
+        }
+        try:
+            data['latest_successful_build'] = str(BuildResult.objects.filter(project=project, state=BuildResult.STATE_SUCCEEDED).latest('id').finished)
+        except BuildResult.DoesNotExist:
+            pass
+        if parent_project:
+            data['depended_on'] = project in parent_project_dependencies
+        return data
+
+    return {
+        'projects': [process_project(project) for project in projects]
+    }
 
 
 @login_required
