@@ -43,7 +43,7 @@ var SharedPebble = new (function() {
         gettext("Firing missiles…"),
         gettext("Never giving you up…"),
         gettext("Never letting you down…"),
-        gettext("Getting twenty percent cooler…")
+        gettext("Here comes Tom!")
     ];
 
     function isRound(kind) {
