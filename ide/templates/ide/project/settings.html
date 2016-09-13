@@ -147,11 +147,17 @@
                 <div class="control-group">
                     <label class="control-label" for="settings-version-label">{% trans "Version label" %}</label>
                     <div class="controls">
-                        <input type="text" id="settings-version-label" placeholder="0.1" value="{{project.app_version_label}}"
-                                pattern="{{ regexes.sdk_version }}">
-                        <span class="help-block">
-                            {% trans "App version. Takes the format major[.minor], where major and minor are between 0 and 255." %}
-                        </span>
+                        {% if project.project_type != 'package' %}
+                            <input type="text" id="settings-version-label" placeholder="0.1" value="{{project.app_version_label}}" pattern="{{ regexes.sdk_version }}">
+                            <span class="help-block">
+                                {% trans "App version. Takes the format major[.minor], where major and minor are between 0 and 255." %}
+                            </span>
+                        {% else %}
+                            <input type="text" id="settings-version-label" placeholder="0.1.0" value="{{project.semver}}" pattern="{{ regexes.semver }}">
+                            <span class="help-block">
+                                {% trans "Pacakge version. Takes the format major.minor.patch, where each is a number between 0 and 255." %}
+                            </span>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="control-group">

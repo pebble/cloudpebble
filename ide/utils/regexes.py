@@ -6,8 +6,8 @@ class RegexHolder(object):
         # Match major[.minor], where major and minor are numbers between 0 and 255 with no leading 0s
         'sdk_version': r'^(0|[1-9]\d?|1\d{2}|2[0-4]\d|25[0-5])(\.(0|[1-9]\d?|1\d{2}|2[0-4]\d|25[0-5]))?$',
 
-        # Match major.minor.0, where major and minor are numbers between 0 and 255 with no leading 0s
-        'semver': r'^(0|[1-9]\d?|1\d{2}|2[0-4]\d|25[0-5])\.(0|[1-9]\d?|1\d{2}|2[0-4]\d|25[0-5])\.0$',
+        # Match x.y.z, each a number between 0 and 255 with no leading 0s
+        'semver': r'^(0|[1-9]\d?|1\d{2}|2[0-4]\d|25[0-5])\.(0|[1-9]\d?|1\d{2}|2[0-4]\d|25[0-5])\.(0|[1-9]\d?|1\d{2}|2[0-4]\d|25[0-5])$',
 
         # Match a string of letters and numbers separated with underscores but not starting with a digit
         'c_identifier': r'^\w+$',
