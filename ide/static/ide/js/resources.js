@@ -10,15 +10,17 @@ CloudPebble.Resources = (function() {
     var TAG_BASALT = 6;
     var TAG_CHALK = 7;
     var TAG_DIORITE = 8;
+    var TAG_EMERY = 9;
 
     var TAGS = {
         color: {name: gettext("Colour"), id: TAG_COLOUR, excludes: [TAG_MONOCHROME, TAG_APLITE, TAG_DIORITE]},
-        bw: {name: gettext("Monochrome"), id:TAG_MONOCHROME,  excludes: [TAG_COLOUR, TAG_BASALT, TAG_CHALK, TAG_ROUND]},
-        aplite: {name: "Aplite", id: TAG_APLITE, excludes: [TAG_BASALT, TAG_CHALK, TAG_DIORITE, TAG_ROUND, TAG_COLOUR]},
-        basalt: {name: "Basalt", id: TAG_BASALT, excludes: [TAG_APLITE, TAG_CHALK, TAG_DIORITE, TAG_ROUND, TAG_MONOCHROME]},
-        chalk: {name: "Chalk", id: TAG_CHALK, excludes: [TAG_APLITE, TAG_BASALT, TAG_DIORITE, TAG_MONOCHROME, TAG_RECT]},
-        diorite: {name: "Diorite", id: TAG_DIORITE, excludes: [TAG_APLITE, TAG_BASALT, TAG_CHALK, TAG_COLOUR, TAG_ROUND]},
-        round: {name: gettext("Round"), id: TAG_ROUND, excludes: [TAG_RECT, TAG_MONOCHROME, TAG_APLITE, TAG_BASALT, TAG_DIORITE]},
+        bw: {name: gettext("Monochrome"), id:TAG_MONOCHROME,  excludes: [TAG_COLOUR, TAG_BASALT, TAG_CHALK, TAG_EMERY, TAG_ROUND]},
+        aplite: {name: "Aplite", id: TAG_APLITE, excludes: [TAG_BASALT, TAG_CHALK, TAG_DIORITE, TAG_EMERY, TAG_ROUND, TAG_COLOUR]},
+        basalt: {name: "Basalt", id: TAG_BASALT, excludes: [TAG_APLITE, TAG_CHALK, TAG_DIORITE, TAG_EMERY, TAG_ROUND, TAG_MONOCHROME]},
+        chalk: {name: "Chalk", id: TAG_CHALK, excludes: [TAG_APLITE, TAG_BASALT, TAG_DIORITE, TAG_EMERY, TAG_MONOCHROME, TAG_RECT]},
+        diorite: {name: "Diorite", id: TAG_DIORITE, excludes: [TAG_APLITE, TAG_BASALT, TAG_CHALK, TAG_EMERY, TAG_COLOUR, TAG_ROUND]},
+        emery: {name: "Emery", id: TAG_EMERY, excludes: [TAG_APLITE, TAG_BASALT, TAG_CHALK, TAG_DIORITE, TAG_ROUND, TAG_MONOCHROME]},
+        round: {name: gettext("Round"), id: TAG_ROUND, excludes: [TAG_RECT, TAG_MONOCHROME, TAG_APLITE, TAG_BASALT, TAG_DIORITE, TAG_EMERY]},
         rect: {name: gettext("Rectangular"), id: TAG_RECT, excludes: [TAG_ROUND, TAG_CHALK]}
     };
 
@@ -26,7 +28,8 @@ CloudPebble.Resources = (function() {
         aplite: [TAG_APLITE, TAG_MONOCHROME, TAG_RECT],
         basalt: [TAG_BASALT, TAG_COLOUR, TAG_RECT],
         chalk: [TAG_CHALK, TAG_COLOUR, TAG_ROUND],
-        diorite: [TAG_DIORITE, TAG_MONOCHROME, TAG_RECT]
+        diorite: [TAG_DIORITE, TAG_MONOCHROME, TAG_RECT],
+        emery: [TAG_EMERY, TAG_COLOUR, TAG_RECT]
     };
 
     /**

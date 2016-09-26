@@ -102,6 +102,7 @@ class ResourceVariant(S3File):
     VARIANT_BASALT = 6
     VARIANT_CHALK = 7
     VARIANT_DIORITE = 8
+    VARIANT_EMERY = 9
 
     VARIANT_STRINGS = {
         VARIANT_MONOCHROME: '~bw',
@@ -111,7 +112,8 @@ class ResourceVariant(S3File):
         VARIANT_APLITE: '~aplite',
         VARIANT_BASALT: '~basalt',
         VARIANT_CHALK: '~chalk',
-        VARIANT_DIORITE: '~diorite'
+        VARIANT_DIORITE: '~diorite',
+        VARIANT_EMERY: '~emery',
     }
 
     TAGS_DEFAULT = ""

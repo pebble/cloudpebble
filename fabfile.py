@@ -142,6 +142,7 @@ def update_qemu_images(sdk_version):
     build_qemu_image("snowy_bb2", "basalt")
     build_qemu_image("spalding_bb2", "chalk")
     build_qemu_image("silk_bb", "diorite")
+    build_qemu_image("robert_bb", "emery")
 
     with lcd(get_project_path("qemu-tintin-images")):
         local("git commit -a -m 'Update to v%s'" % sdk_version)

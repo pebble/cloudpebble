@@ -53,14 +53,16 @@ CloudPebble.CrashChecker = function(app_uuid) {
             aplite: ['debug_info.json'],
             basalt: ['basalt_debug_info.json', 'debug_info.json'],
             chalk: ['chalk_debug_info.json', 'debug_info.json'],
-            diorite: ['diorite_debug_info.json', 'debug_info.json']
+            diorite: ['diorite_debug_info.json', 'debug_info.json'],
+            emery: ['emery_debug_info.json', 'debug_info.json']
         },
         worker: {
             unknown: ['worker_debug_info.json'],
             aplite: ['worker_debug_info.json'],
             basalt: ['basalt_worker_debug_info.json', 'worker_debug_info.json'],
             chalk: ['chalk_worker_debug_info.json', 'worker_debug_info.json'],
-            diorite: ['diorite_worker_debug_info.json', 'worker_debug_info.json']
+            diorite: ['diorite_worker_debug_info.json', 'worker_debug_info.json'],
+            emery:['emery_worker_debug_info.json', 'worker_debug_info.json']
         }
     };
 

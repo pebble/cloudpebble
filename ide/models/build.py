@@ -31,6 +31,7 @@ class BuildResult(IdeModel):
         'basalt': ('basalt_debug_info.json', 'basalt_worker_debug_info.json'),
         'chalk': ('chalk_debug_info.json', 'chalk_worker_debug_info.json'),
         'diorite': ('diorite_debug_info.json', 'diorite_worker_debug_info.json'),
+        'emery': ('emery_debug_info.json', 'emery_worker_debug_info.json'),
     }
     DEBUG_APP = 0
     DEBUG_WORKER = 1
