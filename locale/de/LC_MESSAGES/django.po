@@ -685,6 +685,9 @@ msgstr "Standard"
 msgid "Displayed on the Pebble's main menu. Must be a 28x28 file in PNG format."
 msgstr "Wird im Hauptmenü der Pebble angezeigt. Dies muss ein PNG-Bild (28x28) sein."
 
+msgid "Displayed on the Pebble's main menu. Must be a 25x25 file in PNG format."
+msgstr "Wird im Hauptmenü der Pebble angezeigt. Dies muss ein PNG-Bild (25x25) sein."
+
 #: ide/templates/ide/project/settings.html:55
 msgid "Company Name"
 msgstr "Name der Firma"

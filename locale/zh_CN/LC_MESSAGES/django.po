@@ -680,6 +680,9 @@ msgstr "默认"
 msgid "Displayed on the Pebble's main menu. Must be a 28x28 file in PNG format."
 msgstr "在 Pebble 的主菜单上显示，必须为 PNG 格式的 28x28 文件。"
 
+msgid "Displayed on the Pebble's main menu. Must be a 25x25 file in PNG format."
+msgstr "在 Pebble 的主菜单上显示，必须为 PNG 格式的 25x25 文件。"
+
 #: ide/templates/ide/project/settings.html:55
 msgid "Company Name"
 msgstr "公司名称"
