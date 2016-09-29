@@ -138,7 +138,7 @@ def update_qemu_images(sdk_version):
     with lcd(get_project_path("tintin")):
         local("git checkout v%s" % sdk_version)
 
-    build_qemu_image("bb2", "aplite")
+    # build_qemu_image("bb2", "aplite")
     build_qemu_image("snowy_bb2", "basalt")
     build_qemu_image("spalding_bb2", "chalk")
     build_qemu_image("silk_bb", "diorite")
