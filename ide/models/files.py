@@ -103,6 +103,17 @@ class ResourceVariant(S3File):
     VARIANT_CHALK = 7
     VARIANT_DIORITE = 8
     VARIANT_EMERY = 9
+    VARIANT_MIC = 10
+    VARIANT_STRAP = 11
+    VARIANT_STRAPPOWER = 12
+    VARIANT_COMPASS = 13
+    VARIANT_HEALTH = 14
+    VARIANT_144W = 15
+    VARIANT_168H = 16
+    VARIANT_180W = 17
+    VARIANT_180H = 18
+    VARIANT_200W = 19
+    VARIANT_228H = 20
 
     VARIANT_STRINGS = {
         VARIANT_MONOCHROME: '~bw',
@@ -114,6 +125,17 @@ class ResourceVariant(S3File):
         VARIANT_CHALK: '~chalk',
         VARIANT_DIORITE: '~diorite',
         VARIANT_EMERY: '~emery',
+        VARIANT_MIC: '~mic',
+        VARIANT_STRAP: '~strap',
+        VARIANT_STRAPPOWER: '~strappower',
+        VARIANT_COMPASS: '~compass',
+        VARIANT_HEALTH: '~health',
+        VARIANT_144W: '~144w',
+        VARIANT_168H: '~168h',
+        VARIANT_180W: '~180w',
+        VARIANT_180H: '~180h',
+        VARIANT_200W: '~200w',
+        VARIANT_228H: '~228h',
     }
 
     TAGS_DEFAULT = ""
