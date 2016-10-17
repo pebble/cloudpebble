@@ -69,6 +69,16 @@
                     </span>
                 </div>
             </div>
+            <div class="control-group sdk3-only not-pebblejs">
+                {# Translators: "Diorite" is a platform name and should be left untranslated. #}
+                <label class="control-label" for="settings-build-emery">{% trans 'Build Emery' %}</label>
+                <div class="controls">
+                    <input type="checkbox" id="settings-build-emery" {% if project.app_platforms and 'emery' in project.app_platform_list %}checked{% endif %}>
+                    <span class="help-block">
+                        {% trans "If enabled, your app will be built to run on Pebble Time 2 watches." %}
+                    </span>
+                </div>
+            </div>
         </div>
         <div>
             <div class="well">

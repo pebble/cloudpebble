@@ -360,7 +360,7 @@ COMPLETION_CERTS = _environ.get('COMPLETION_CERTS', os.getcwd() + '/completion-c
 
 QEMU_URLS = _environ.get('QEMU_URLS', 'http://qemu/').split(',')
 QEMU_LAUNCH_AUTH_HEADER = _environ.get('QEMU_LAUNCH_AUTH_HEADER', 'secret')
-QEMU_LAUNCH_TIMEOUT = int(_environ.get('QEMU_LAUNCH_TIMEOUT', 15))
+QEMU_LAUNCH_TIMEOUT = int(_environ.get('QEMU_LAUNCH_TIMEOUT', 25))
 
 PHONE_SHORTURL = _environ.get('PHONE_SHORTURL', 'cpbl.io')
 
