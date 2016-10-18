@@ -214,8 +214,8 @@ ul.nav-pills {
 	        transform: rotate(330deg);
 }
 .emulator-round .back.qemu-button {
-    top: 97px;
-    left: 0;
+    top: 80px;
+    left: 16px;
 }
 
 #emulator-container.emulator-robert canvas {
@@ -237,6 +237,10 @@ ul.nav-pills {
 .emulator-robert .up.qemu-button,
 .emulator-robert .down.qemu-button {
     left: 248px;
+}
+
+.emulator-robert .back.qemu-button {
+    left: 11px;
 }
 
 .qemu-button {
