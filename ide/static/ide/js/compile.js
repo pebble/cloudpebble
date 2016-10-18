@@ -308,10 +308,10 @@ CloudPebble.Compile = (function() {
                             pane.find('#last-compilation-size-diorite').addClass('hide');
                         }
                         if(build.sizes.emery) {
-                            var emery_size_text = format_build_size(build.sizes.emery, 65536, 10240, 262144);
+                            var emery_size_text = format_build_size(build.sizes.emery, 131072, 10240, 262144);
                             pane.find('#last-compilation-size-emery').removeClass('hide').find('.text').text(emery_size_text);
                         } else {
-                            pane.find('#last-compilation-size-emery').addClass('hide', 131072, 10240, 262144);
+                            pane.find('#last-compilation-size-emery').addClass('hide');
                         }
 
                     }
