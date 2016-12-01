@@ -51,10 +51,11 @@ def generate_v2_manifest_dict(project, resources):
         },
         'appKeys': json.loads(project.app_keys),
         'resources': generate_resource_dict(project, resources),
-        'capabilities': project.app_capabilities.split(','),
         'projectType': 'native',
         'sdkVersion': "2",
     }
+    if project.app_capabilities:
+        manifest['capabilities'] = project.app_capabilities.split(',')
     if project.app_is_shown_on_communication:
         manifest['watchapp']['onlyShownOnCommunication'] = project.app_is_shown_on_communication
     return manifest
