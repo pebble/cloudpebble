@@ -85,7 +85,7 @@ def run_compile(build_result):
                 # it here but we will do it anyway just to be extra safe.
                 for version in dependencies.values():
                     validate_dependency_version(version)
-                npm_command = [settings.NPM_BINARY, "install", "--ignore-scripts"]
+                npm_command = [settings.NPM_BINARY, "install", "--ignore-scripts", "--no-bin-links"]
                 output = subprocess.check_output(npm_command, stderr=subprocess.STDOUT, preexec_fn=_set_resource_limits)
                 subprocess.check_output([settings.NPM_BINARY, "dedupe"], stderr=subprocess.STDOUT, preexec_fn=_set_resource_limits)
 
