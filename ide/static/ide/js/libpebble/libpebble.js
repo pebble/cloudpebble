@@ -938,6 +938,7 @@ Pebble.version_to_platform = function(version) {
         10: 'basalt',
         11: 'chalk',
         12: 'diorite',
+        13: 'emery',
         14: 'diorite',
         0xFF: 'aplite',
         0xFE: 'aplite',
@@ -945,6 +946,7 @@ Pebble.version_to_platform = function(version) {
         0xFC: 'basalt',
         0xFB: 'chalk',
         0xFA: 'diorite',
+        0xF9: 'emery',
         0xF8: 'diorite'
     };
     return mapping[version.running.platform_version];

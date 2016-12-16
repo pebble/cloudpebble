@@ -33,6 +33,7 @@ def launch_emulator(request):
         'basalt': '3.0',
         'chalk': '3.0',
         'diorite': '3.0',
+        'emery': '3.0',
     }
     version = versions[platform]
     redis_key = 'qemu-user-%s-%s' % (user_id, platform)
@@ -81,7 +82,7 @@ def launch_emulator(request):
             logger.warning("Got HTTP error from QEMU launch. Content:\n%s", e.response.text)
         except (requests.RequestException, ValueError) as e:
             logger.error("Error launching qemu: %s", e)
-        raise InternalServerError(_("Unable to create emulator instance."))
+    raise InternalServerError(_("Unable to create emulator instance."))
 
 
 @login_required

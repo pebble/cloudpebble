@@ -10,23 +10,48 @@ CloudPebble.Resources = (function() {
     var TAG_BASALT = 6;
     var TAG_CHALK = 7;
     var TAG_DIORITE = 8;
+    var TAG_EMERY = 9;
+    var TAG_MIC = 10;
+    var TAG_STRAP = 11;
+    var TAG_STRAPPOWER = 12;
+    var TAG_COMPASS = 13;
+    var TAG_HEALTH = 14;
+    var TAG_144W = 15;
+    var TAG_168H = 16;
+    var TAG_180W = 17;
+    var TAG_180H = 18;
+    var TAG_200W = 19;
+    var TAG_228H = 20;
 
     var TAGS = {
         color: {name: gettext("Colour"), id: TAG_COLOUR, excludes: [TAG_MONOCHROME, TAG_APLITE, TAG_DIORITE]},
-        bw: {name: gettext("Monochrome"), id:TAG_MONOCHROME,  excludes: [TAG_COLOUR, TAG_BASALT, TAG_CHALK, TAG_ROUND]},
-        aplite: {name: "Aplite", id: TAG_APLITE, excludes: [TAG_BASALT, TAG_CHALK, TAG_DIORITE, TAG_ROUND, TAG_COLOUR]},
-        basalt: {name: "Basalt", id: TAG_BASALT, excludes: [TAG_APLITE, TAG_CHALK, TAG_DIORITE, TAG_ROUND, TAG_MONOCHROME]},
-        chalk: {name: "Chalk", id: TAG_CHALK, excludes: [TAG_APLITE, TAG_BASALT, TAG_DIORITE, TAG_MONOCHROME, TAG_RECT]},
-        diorite: {name: "Diorite", id: TAG_DIORITE, excludes: [TAG_APLITE, TAG_BASALT, TAG_CHALK, TAG_COLOUR, TAG_ROUND]},
-        round: {name: gettext("Round"), id: TAG_ROUND, excludes: [TAG_RECT, TAG_MONOCHROME, TAG_APLITE, TAG_BASALT, TAG_DIORITE]},
-        rect: {name: gettext("Rectangular"), id: TAG_RECT, excludes: [TAG_ROUND, TAG_CHALK]}
+        bw: {name: gettext("Monochrome"), id:TAG_MONOCHROME,  excludes: [TAG_COLOUR, TAG_BASALT, TAG_CHALK, TAG_EMERY, TAG_ROUND]},
+        aplite: {name: "Aplite", id: TAG_APLITE, excludes: [TAG_BASALT, TAG_CHALK, TAG_DIORITE, TAG_EMERY, TAG_ROUND, TAG_COLOUR]},
+        basalt: {name: "Basalt", id: TAG_BASALT, excludes: [TAG_APLITE, TAG_CHALK, TAG_DIORITE, TAG_EMERY, TAG_ROUND, TAG_MONOCHROME]},
+        chalk: {name: "Chalk", id: TAG_CHALK, excludes: [TAG_APLITE, TAG_BASALT, TAG_DIORITE, TAG_EMERY, TAG_MONOCHROME, TAG_RECT]},
+        diorite: {name: "Diorite", id: TAG_DIORITE, excludes: [TAG_APLITE, TAG_BASALT, TAG_CHALK, TAG_EMERY, TAG_COLOUR, TAG_ROUND]},
+        emery: {name: "Emery", id: TAG_EMERY, excludes: [TAG_APLITE, TAG_BASALT, TAG_CHALK, TAG_DIORITE, TAG_ROUND, TAG_MONOCHROME]},
+        round: {name: gettext("Round"), id: TAG_ROUND, excludes: [TAG_RECT, TAG_MONOCHROME, TAG_APLITE, TAG_BASALT, TAG_DIORITE, TAG_EMERY]},
+        rect: {name: gettext("Rectangular"), id: TAG_RECT, excludes: [TAG_ROUND, TAG_CHALK]},
+        mic: {name: gettext("Microphone"), id: TAG_MIC, excludes: [TAG_APLITE]},
+        strap: {name: gettext("Smartstrap"), id: TAG_STRAP, excludes: [TAG_APLITE]},
+        strappower: {name: gettext("Smartstrap Power"), id: TAG_STRAPPOWER, excludes: [TAG_APLITE, TAG_DIORITE, TAG_MONOCHROME]},
+        compass: {name: gettext("Compass"), id: TAG_COMPASS, excludes: [TAG_DIORITE]},
+        health: {name: gettext("Health"), id: TAG_HEALTH, excludes: [TAG_APLITE]},
+        '144w': {name: gettext("Width: 144 pixels"), id: TAG_144W, excludes: [TAG_180W, TAG_200W, TAG_180H, TAG_228H, TAG_CHALK, TAG_EMERY, TAG_ROUND]},
+        '168h': {name: gettext("Height: 168 pixels"), id: TAG_168H, excludes: [TAG_180W, TAG_200W, TAG_180H, TAG_228H, TAG_CHALK, TAG_EMERY, TAG_ROUND]},
+        '180w': {name: gettext("Width: 180 pixels"), id: TAG_180W, excludes: [TAG_144W, TAG_168H, TAG_200W, TAG_228H, TAG_APLITE, TAG_BASALT, TAG_DIORITE, TAG_EMERY, TAG_RECT, TAG_MONOCHROME]},
+        '180h': {name: gettext("Height: 180 pixels"), id: TAG_180H, excludes: [TAG_144W, TAG_168H, TAG_200W, TAG_228H, TAG_APLITE, TAG_BASALT, TAG_DIORITE, TAG_EMERY, TAG_RECT, TAG_MONOCHROME]},
+        '200w': {name: gettext("Width: 200 pixels"), id: TAG_200W, excludes: [TAG_144W, TAG_168H, TAG_180W, TAG_180H, TAG_APLITE, TAG_BASALT, TAG_CHALK, TAG_DIORITE, TAG_ROUND, TAG_MONOCHROME]},
+        '228h': {name: gettext("Height: 228 pixels"), id: TAG_228H, excludes: [TAG_144W, TAG_168H, TAG_180W, TAG_180H, TAG_APLITE, TAG_BASALT, TAG_CHALK, TAG_DIORITE, TAG_ROUND, TAG_MONOCHROME]}
     };
 
     var PLATFORMS = {
-        aplite: [TAG_APLITE, TAG_MONOCHROME, TAG_RECT],
-        basalt: [TAG_BASALT, TAG_COLOUR, TAG_RECT],
-        chalk: [TAG_CHALK, TAG_COLOUR, TAG_ROUND],
-        diorite: [TAG_DIORITE, TAG_MONOCHROME, TAG_RECT]
+        aplite: [TAG_APLITE, TAG_MONOCHROME, TAG_RECT, TAG_COMPASS, TAG_144W, TAG_168H],
+        basalt: [TAG_BASALT, TAG_COLOUR, TAG_RECT, TAG_STRAP, TAG_STRAPPOWER, TAG_COMPASS, TAG_HEALTH, TAG_MIC, TAG_144W, TAG_168H],
+        chalk: [TAG_CHALK, TAG_COLOUR, TAG_ROUND, TAG_STRAP, TAG_STRAPPOWER, TAG_COMPASS, TAG_HEALTH, TAG_MIC, TAG_180W, TAG_180H],
+        diorite: [TAG_DIORITE, TAG_MONOCHROME, TAG_RECT, TAG_STRAP, TAG_HEALTH, TAG_MIC, TAG_144W, TAG_168H],
+        emery: [TAG_EMERY, TAG_COLOUR, TAG_RECT, TAG_STRAP, TAG_STRAPPOWER, TAG_COMPASS, TAG_HEALTH, TAG_200W, TAG_228H]
     };
 
     /**

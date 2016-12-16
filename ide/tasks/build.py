@@ -86,7 +86,7 @@ def run_compile(build_result):
                 # it here but we will do it anyway just to be extra safe.
                 for version in dependencies.values():
                     validate_dependency_version(version)
-                npm_command = [settings.NPM_BINARY, "install", "--ignore-scripts"]
+                npm_command = [settings.NPM_BINARY, "install", "--ignore-scripts", "--no-bin-links"]
                 output = subprocess.check_output(npm_command, stderr=subprocess.STDOUT, preexec_fn=_set_resource_limits)
                 subprocess.check_output([settings.NPM_BINARY, "dedupe"], stderr=subprocess.STDOUT, preexec_fn=_set_resource_limits)
 
@@ -133,7 +133,7 @@ def run_compile(build_result):
                         build_result.total_size = s.st_size
                         # Now peek into the zip to see the component parts
                         with zipfile.ZipFile(temp_file, 'r') as z:
-                            for platform in ['aplite', 'basalt', 'chalk', 'diorite']:
+                            for platform in ['aplite', 'basalt', 'chalk', 'diorite', 'emery']:
                                 store_size_info(project, build_result, platform, z)
 
                     except Exception as e:
@@ -144,7 +144,7 @@ def run_compile(build_result):
                         save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, 'aplite', os.path.join(base_dir, 'build', 'pebble-app.elf'))
                         save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, 'aplite', os.path.join(base_dir, 'build', 'pebble-worker.elf'))
                     else:
-                        for platform in ['aplite', 'basalt', 'chalk', 'diorite']:
+                        for platform in ['aplite', 'basalt', 'chalk', 'diorite', 'emery']:
                             save_debug_info(base_dir, build_result, BuildResult.DEBUG_APP, platform, os.path.join(base_dir, 'build', '%s/pebble-app.elf' % platform))
                             save_debug_info(base_dir, build_result, BuildResult.DEBUG_WORKER, platform, os.path.join(base_dir, 'build', '%s/pebble-worker.elf' % platform))
 

@@ -61,6 +61,7 @@ CloudPebble.Settings = (function() {
             var build_basalt = pane.find('#settings-build-basalt:visible').prop('checked');
             var build_chalk = pane.find('#settings-build-chalk:visible').prop('checked');
             var build_diorite = pane.find('#settings-build-diorite:visible').prop('checked');
+            var build_emery = pane.find('#settings-build-emery:visible').prop('checked');
 
             var app_keys = (app_key_array_style ? [] : {});
             var app_key_names = [];
@@ -111,15 +112,18 @@ CloudPebble.Settings = (function() {
             // This is not an appropriate use of a regex, but we have to have it for the HTML5 pattern attribute anyway,
             // so we may as well reuse the effort here.
             // It validates that the format matches x[.y] with x, y in [0, 255].
-            if(!version_label.match(REGEXES.sdk_version)) {
+            if(CloudPebble.ProjectInfo.type != 'package' && !version_label.match(REGEXES.sdk_version)) {
                 throw new Error(gettext("You must specify a valid version number."));
+            }
+            if(CloudPebble.ProjectInfo.type == 'package' && !version_label.match(REGEXES.semver)) {
+                throw new Error(gettext("You must specify a valid version semver."));
             }
             if(!app_uuid.match(REGEXES.uuid)) {
                 throw new Error(gettext("You must specify a valid UUID (of the form 00000000-0000-0000-0000-000000000000)"));
             }
 
 
-            if(sdk_version == '3' && !(build_aplite || build_basalt || build_chalk || build_diorite)) {
+            if(sdk_version == '3' && !(build_aplite || build_basalt || build_chalk || build_diorite || build_emery)) {
                 throw new Error(gettext("You must build your app for at least one platform."));
             }
 
@@ -133,8 +137,11 @@ CloudPebble.Settings = (function() {
             if(build_chalk) {
                 target_platforms.push('chalk');
             }
-            if(build_diorite){
+            if(build_diorite) {
                 target_platforms.push('diorite');
+            }
+            if(build_emery) {
+                target_platforms.push('emery');
             }
             var app_platforms = target_platforms.join(',');
             

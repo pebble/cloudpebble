@@ -25,10 +25,11 @@ __author__ = 'katharine'
 logger = logging.getLogger(__name__)
 
 
-def add_project_to_archive(z, project, prefix=''):
+def add_project_to_archive(z, project, prefix='', suffix=''):
     source_files = SourceFile.objects.filter(project=project)
     resources = ResourceFile.objects.filter(project=project)
     prefix += re.sub(r'[^\w]+', '_', project.name).strip('_').lower()
+    prefix += suffix
 
     for source in source_files:
         path = os.path.join(prefix, source.project_path)
@@ -81,17 +82,22 @@ def export_user_projects(user_id):
         filename = temp.name
         with zipfile.ZipFile(filename, 'w', compression=zipfile.ZIP_DEFLATED) as z:
             for project in projects:
-                add_project_to_archive(z, project, prefix='cloudpebble-export/')
+                add_project_to_archive(z, project, prefix='cloudpebble-export/', suffix='-%d' % project.id)
+
+        send_td_event('cloudpebble_export_all_projects', user=user)
 
         # Generate a URL
         u = uuid.uuid4().hex
-        outfile = '%s%s/%s.zip' % (settings.EXPORT_DIRECTORY, u, 'cloudpebble-export')
-        os.makedirs(os.path.dirname(outfile), 0755)
-        shutil.copy(filename, outfile)
-        os.chmod(outfile, 0644)
-
-        send_td_event('cloudpebble_export_all_projects', user=user)
-        return '%s%s/%s.zip' % (settings.EXPORT_ROOT, u, 'cloudpebble-export')
+        if not settings.AWS_ENABLED:
+            outfile = '%s%s/%s.zip' % (settings.EXPORT_DIRECTORY, u, 'cloudpebble-export')
+            os.makedirs(os.path.dirname(outfile), 0755)
+            shutil.copy(filename, outfile)
+            os.chmod(outfile, 0644)
+            return '%s%s/%s.zip' % (settings.EXPORT_ROOT, u, 'cloudpebble-export')
+        else:
+            outfile = '%s/%s.zip' % (u, 'cloudpebble-export')
+            s3.upload_file('export', outfile, filename, public=True, content_type='application/zip')
+            return '%s%s' % (settings.EXPORT_ROOT, outfile)
 
 
 def get_filename_variant(file_name, resource_suffix_map):

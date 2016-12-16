@@ -112,6 +112,9 @@
                         case 'diorite':
                             mRFB.get_display().resize(144, 168);
                             break;
+                        case 'emery':
+                            mRFB.get_display().resize(200, 228);
+                            break;
                     }
                 }
                 if (mConnected && state == 'disconnected') {

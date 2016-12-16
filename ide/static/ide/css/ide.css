@@ -31,7 +31,7 @@ strong {
     top: 0;
     bottom: 0;
     overflow: auto;
-    width: 210px;
+    width: 250px;
     font-family: PFD-Regular, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: large;
     padding-left: 40px;
@@ -91,7 +91,7 @@ ul.nav-pills {
     background: #333333 url('../img/background-logo.png') no-repeat center;
     position: absolute;
     top: 0;
-    left: 250px;
+    left: 285px;
     bottom: 0;
     right: 0;
 }
@@ -162,6 +162,8 @@ ul.nav-pills {
     -o-transition: height 0.5s;
     transition: height 0.5s;
     width: 250px;
+    padding-left: 18px;
+    padding-right: 17px;
     height: 230px;
     margin-bottom: 20px;
     text-align: center;
@@ -178,12 +180,12 @@ ul.nav-pills {
 #emulator-container canvas {
     position: absolute;
     top: 28px;
-    left: 53px;
+    left: 71px;
     background-color: #aaa;
 }
 
 #emulator-container.emulator-round canvas {
-    left: 35px;
+    left: 53px;
     border-radius: 100px;
 }
 #emulator-container.emulator-round {
@@ -194,26 +196,51 @@ ul.nav-pills {
     right: 10px;
 }
 .emulator-round .select.qemu-button {
-    left: 221px;
+    left: 239px;
     top: 100px;
 }
 .emulator-round .down.qemu-button {
 	-webkit-transform: rotate(30deg);
 	    -ms-transform: rotate(30deg);
 	        transform: rotate(30deg);
-    left: 207px;
+    left: 225px;
     top: 134px;
 }
 .emulator-round .up.qemu-button {
-    left: 207px;
+    left: 225px;
     top: 29px;
 	-webkit-transform: rotate(330deg);
 	    -ms-transform: rotate(330deg);
 	        transform: rotate(330deg);
 }
 .emulator-round .back.qemu-button {
-    top: 79px;
-    left: 0;
+    top: 80px;
+    left: 16px;
+}
+
+#emulator-container.emulator-robert canvas {
+    top: 0;
+    left: 45px;
+}
+
+#emulator-container.emulator-robert {
+    width: 285px;
+    padding: 0;
+}
+
+#emulator-container.emulator-robert .configure {
+    right: inherit;
+    left: 7px;
+}
+
+.emulator-robert .select.qemu-button,
+.emulator-robert .up.qemu-button,
+.emulator-robert .down.qemu-button {
+    left: 248px;
+}
+
+.emulator-robert .back.qemu-button {
+    left: 11px;
 }
 
 .qemu-button {
@@ -232,24 +259,24 @@ ul.nav-pills {
 
 .qemu-button.up {
     top: 5px;
-    left: 208px;
+    left: 226px;
 }
 
 .qemu-button.select {
     width: 35px;
     height: 37px;
-    left: 208px;
+    left: 226px;
     top: 93px;
 }
 
 .qemu-button.down {
     top: 147px;
-    left: 208px;
+    left: 226px;
 }
 
 .qemu-button.back {
     top: 37px;
-    left: 8px;
+    left: 26px;
 }
 
 #emulator-container .power {
@@ -263,7 +290,7 @@ ul.nav-pills {
     position: absolute;
     cursor: pointer;
     top: 200px;
-    right: 53px;
+    right: 71px;
 }
 
 /* Emulator sensor prompt */
@@ -540,6 +567,11 @@ table.kv-table .kv-remove {
 .compilation-pane .compilation-buttons.four-buttons .btn{
     width: 137px;
     margin: 0 4px;
+}
+
+.compilation-pane .compilation-buttons.five-buttons .btn {
+    width: 111px;
+    margin: 0 2px;
 }
 
 .compilation-pane .compilation-buttons .btn:last-child {
@@ -1243,6 +1275,10 @@ button#add-filter {
 }
 .label-diorite {
     background-color: #c49d4f;
+}
+
+.label-emory: {
+    background-color: orangered;
 }
 
 .font-preview .font-tag-preview {

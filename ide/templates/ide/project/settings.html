@@ -69,6 +69,16 @@
                     </span>
                 </div>
             </div>
+            <div class="control-group sdk3-only not-pebblejs">
+                {# Translators: "Diorite" is a platform name and should be left untranslated. #}
+                <label class="control-label" for="settings-build-emery">{% trans 'Build Emery' %}</label>
+                <div class="controls">
+                    <input type="checkbox" id="settings-build-emery" {% if project.app_platforms and 'emery' in project.app_platform_list %}checked{% endif %}>
+                    <span class="help-block">
+                        {% trans "If enabled, your app will be built to run on Pebble Time 2 watches." %}
+                    </span>
+                </div>
+            </div>
         </div>
         <div>
             <div class="well">
@@ -131,7 +141,11 @@
                             <option value="">{% if project.project_type == 'native' %}{% trans 'None' %}{% else %}{% trans 'Default' %}{% endif %}</option>
                         </select>
                         <span class="help-block">
-                            {% trans "Displayed on the Pebble's main menu. Must be a 28x28 file in PNG format." %}
+                            {% if project.sdk_version == '2' %}
+                                {% trans "Displayed on the Pebble's main menu. Must be a 28x28 file in PNG format." %}
+                            {% else %}
+                                {% trans "Displayed on the Pebble's main menu. Must be a 25x25 file in PNG format." %}
+                            {% endif %}
                         </span>
                     </div>
                 </div>
@@ -147,11 +161,17 @@
                 <div class="control-group">
                     <label class="control-label" for="settings-version-label">{% trans "Version label" %}</label>
                     <div class="controls">
-                        <input type="text" id="settings-version-label" placeholder="0.1" value="{{project.app_version_label}}"
-                                pattern="{{ regexes.sdk_version }}">
-                        <span class="help-block">
-                            {% trans "App version. Takes the format major[.minor], where major and minor are between 0 and 255." %}
-                        </span>
+                        {% if project.project_type != 'package' %}
+                            <input type="text" id="settings-version-label" placeholder="0.1" value="{{project.app_version_label}}" pattern="{{ regexes.sdk_version }}">
+                            <span class="help-block">
+                                {% trans "App version. Takes the format major[.minor], where major and minor are between 0 and 255." %}
+                            </span>
+                        {% else %}
+                            <input type="text" id="settings-version-label" placeholder="0.1.0" value="{{project.semver}}" pattern="{{ regexes.semver }}">
+                            <span class="help-block">
+                                {% trans "Pacakge version. Takes the format major.minor.patch, where each is a number between 0 and 255." %}
+                            </span>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="control-group">

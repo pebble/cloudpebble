@@ -22,11 +22,15 @@ class TestSemverConversion(TestCase):
             for y in range(256):
                 self.assertEqual(version.version_to_semver("{}.{}".format(x, y)), "{}.{}.0".format(x, y))
 
-    def test_all_semvers_to_version(self):
-        """ Check that all valid semvers validate and are converted to major.minor versions correctly """
+    def test_semvers_to_version(self):
+        """ Check that valid x.y.0 semvers validate and are converted to major.minor versions correctly """
         for x in range(256):
             for y in range(256):
                 self.assertEqual(version.semver_to_version("{}.{}.0".format(x, y)), "{}.{}".format(x, y))
+
+    def test_semvers_discard_patch(self):
+        """ Check that semver_to_version() discards the patch number. """
+        self.assertEqual(version.semver_to_version("1.2.3"), "1.2")
 
     def test_invalid_versions(self):
         """ Throw errors for a variety of invalid SDK version strings """
@@ -41,7 +45,6 @@ class TestSemverConversion(TestCase):
 
     def test_invalid_semvers(self):
         """ Throw errors for a variety of invalid pebble-compatible semver strings """
-        self.run_invalid_semver_test("1.0.1")
         self.run_invalid_semver_test("01.1.4")
         self.run_invalid_semver_test("300.0.1")
         self.run_invalid_semver_test("6.9")
