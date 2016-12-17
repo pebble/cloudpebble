@@ -288,7 +288,7 @@ msgstr "Compilation"
 msgid "Source files"
 msgstr "Fichiers sources"
 
-#: ide/templates/ide/project.html:50
+#: ide/templates/ide/project.html:50 ide/templates/ide/project.html.py:54
 msgid "Add new"
 msgstr "Ajouter"
 
