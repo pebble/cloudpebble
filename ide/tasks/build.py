@@ -80,7 +80,7 @@ def run_compile(build_result):
 
             environ = os.environ.copy()
             environ.update({
-                'LD_PRELOAD': '/code/c-preload/libpreload.so',
+                'LD_PRELOAD': settings.C_PRELOAD_ROOT + 'libpreload.so',
                 'ALLOWED_FOR_CREATE': '/tmp',
                 'ALLOWED_FOR_READ': '/usr/local/include:/usr/include:/usr/lib:/lib:/lib64:/arm-cs-tools:/tmp' \
                                     ':/dev/urandom:/proc/self:/proc/self/maps:/proc/mounts:/sdk2:/sdk3',

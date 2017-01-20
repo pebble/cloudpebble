@@ -114,6 +114,7 @@ MEDIA_ROOT = os.getcwd() + '/user_data/build_results/'
 
 SIMPLYJS_ROOT = os.getcwd() + '/ext/simplyjs/'
 PEBBLEJS_ROOT = os.getcwd() + '/ext/pebblejs/'
+C_PRELOAD_ROOT = os.getcwd() + '/c-preload/'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
