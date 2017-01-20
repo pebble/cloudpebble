@@ -71,4 +71,6 @@ RUN rm -rf bower_components && cd /tmp && python /code/manage.py bower install &
 
 RUN python manage.py compilemessages
 
+RUN make -C /code/c-preload
+
 CMD ["sh", "docker_start.sh"]

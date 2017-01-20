@@ -5,7 +5,6 @@ import shutil
 from django.conf import settings
 
 from ide.models import ResourceFile
-from ide.utils.prepreprocessor import process_file as check_preprocessor_directives
 from manifest import manifest_name_for_project, generate_manifest_dict
 from ide.utils.sdk import generate_wscript_file, generate_jshint_file
 
@@ -22,9 +21,6 @@ def assemble_source_files(project, base_dir):
         if not os.path.exists(abs_target_dir):
             os.makedirs(abs_target_dir)
         f.copy_to_path(abs_target)
-        # Make sure we don't duplicate downloading effort; just open the one we created.
-        with open(abs_target) as fh:
-            check_preprocessor_directives(abs_target_dir, abs_target, fh.read())
 
 
 def assemble_simplyjs_sources(project, base_dir, build_result):

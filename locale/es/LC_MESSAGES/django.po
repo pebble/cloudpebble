@@ -778,10 +778,6 @@ msgstr "Propiedades"
 msgid "Toolkit"
 msgstr "Herramientas"
 
-#: ide/utils/prepreprocessor.py:28
-msgid "Illegal include '%(include)s' -> '%(path)s'"
-msgstr "Include ilegal '%(include)s' -> '%(path)s' "
-
 #: ide/utils/project.py:34
 msgid "No project root found."
 msgstr "No se ha encontrado el proyecto raíz."
