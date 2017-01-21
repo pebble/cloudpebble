@@ -772,10 +772,6 @@ msgstr "Einstellungen"
 msgid "Toolkit"
 msgstr "Toolkit"
 
-#: ide/utils/prepreprocessor.py:28
-msgid "Illegal include '%(include)s' -> '%(path)s'"
-msgstr "Ungültiges include '%(include)s' -> '%(path)s'"
-
 #: ide/utils/project.py:34
 msgid "No project root found."
 msgstr "Keine Projektwurzel gefunden."

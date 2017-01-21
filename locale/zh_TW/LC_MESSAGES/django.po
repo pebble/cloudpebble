@@ -768,10 +768,6 @@ msgstr "屬性"
 msgid "Toolkit"
 msgstr "工具組"
 
-#: ide/utils/prepreprocessor.py:28
-msgid "Illegal include '%(include)s' -> '%(path)s'"
-msgstr "不合法包括 '%(include)s' -> '%(path)s'"
-
 #: ide/utils/project.py:34
 msgid "No project root found."
 msgstr "未找到項目根目錄。"

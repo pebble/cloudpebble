@@ -41,4 +41,7 @@ python manage.py migrate
 echo "Compiling gettext files"
 python manage.py compilemessages
 
+echo "Building LD_PRELOAD sandbox"
+make -C c-preload
+
 echo "Post-compile complete."
