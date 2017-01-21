@@ -82,9 +82,11 @@ def run_compile(build_result):
             environ.update({
                 'LD_PRELOAD': settings.C_PRELOAD_ROOT + 'libpreload.so',
                 'ALLOWED_FOR_CREATE': '/tmp',
-                'ALLOWED_FOR_READ': '/usr/local/include:/usr/include:/usr/lib:/lib:/lib64:/arm-cs-tools:/tmp' \
-                                    ':/dev/urandom:/proc/self:/proc/self/maps:/proc/mounts:/sdk2:/sdk3',
-                'PATH': '{}:{}'.format(settings.ARM_CS_TOOLS, environ['PATH'])
+                'ALLOWED_FOR_READ': '/usr/local/include:/usr/include:/usr/lib:/lib:/lib64:/tmp' \
+                                    ':/dev/urandom:/proc/self:/proc/self/maps:/proc/mounts' \
+                                    ':/app/.heroku:/app/sdk2:/app/sdk3:/app/arm-cs-tools',
+                'PATH': '{}:{}'.format(settings.ARM_CS_TOOLS, environ['PATH']),
+                'HOME': '/app'
             })
 
             # Install dependencies if there are any
