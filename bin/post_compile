@@ -42,6 +42,6 @@ echo "Compiling gettext files"
 python manage.py compilemessages
 
 echo "Building LD_PRELOAD sandbox"
-make -f c-preload
+make -C c-preload
 
 echo "Post-compile complete."
