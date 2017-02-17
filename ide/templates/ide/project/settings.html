@@ -59,21 +59,21 @@
                     </span>
                 </div>
             </div>
-            <div class="control-group sdk3-only not-pebblejs">
+            <div class="control-group not-pebblejs">
                 {# Translators: "Diorite" is a platform name and should be left untranslated. #}
                 <label class="control-label" for="settings-build-diorite">{% trans 'Build Diorite' %}</label>
                 <div class="controls">
-                    <input type="checkbox" id="settings-build-diorite" {% if project.app_platforms and 'diorite' in project.app_platform_list %}checked{% endif %}>
+                    <input type="checkbox" id="settings-build-diorite" {% if not project.app_platforms or 'diorite' in project.app_platform_list %}checked{% endif %}>
                     <span class="help-block">
                         {% trans "If enabled, your app will be built to run on Pebble 2 watches." %}
                     </span>
                 </div>
             </div>
-            <div class="control-group sdk3-only not-pebblejs">
-                {# Translators: "Diorite" is a platform name and should be left untranslated. #}
+            <div class="control-group not-pebblejs">
+                {# Translators: "Emery" is a platform name and should be left untranslated. #}
                 <label class="control-label" for="settings-build-emery">{% trans 'Build Emery' %}</label>
                 <div class="controls">
-                    <input type="checkbox" id="settings-build-emery" {% if project.app_platforms and 'emery' in project.app_platform_list %}checked{% endif %}>
+                    <input type="checkbox" id="settings-build-emery" {% if not project.app_platforms or 'emery' in project.app_platform_list %}checked{% endif %}>
                     <span class="help-block">
                         {% trans "If enabled, your app will be built to run on Pebble Time 2 watches." %}
                     </span>
