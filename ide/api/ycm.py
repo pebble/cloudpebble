@@ -54,7 +54,7 @@ def _spin_up_server(request):
         server = random.choice(list(servers))
         servers.remove(server)
         try:
-            result = requests.post('%sspinup' % server, json.dumps(request), headers={'Content-Type': 'application/json'}, verify=settings.COMPLETION_CERTS)
+            result = requests.post('%sspinup' % server, json.dumps(request), headers={'Content-Type': 'application/json'})
             if result.ok:
                 response = result.json()
                 if response['success']:
