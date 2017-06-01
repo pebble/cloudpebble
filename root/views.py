@@ -5,6 +5,9 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 
 @ensure_csrf_cookie
 def index(request):
+    # passing beta.cloudpebble.net to cloudpebble.net
+    return redirect('https://cloudpebble.net')
+
     next_url = request.GET.get('next', '/ide/')
     if not next_url.startswith('/'):
         next_url = '/ide/'

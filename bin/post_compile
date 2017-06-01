@@ -35,11 +35,11 @@ rm /tmp/*.tar.*
 
 # Make sure the database is up to date.
 echo "Performing database migration."
-python manage.py syncdb --noinput
-python manage.py migrate
+#python manage.py syncdb --noinput
+#python manage.py migrate
 
-echo "Compiling gettext files"
-python manage.py compilemessages
+#echo "Compiling gettext files"
+#python manage.py compilemessages
 
 echo "Building LD_PRELOAD sandbox"
 make -C c-preload
